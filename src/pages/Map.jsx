@@ -9,7 +9,7 @@ function Map(props) {
 
   //Get the value of a State variable, and store it to a const, to use it later
   const vehicles = useSelector(state => {
-    return state.vehicles ? state.vehicles.data : []
+    return state.vehicles ? state.vehicles.data : null;
   });
 
   const mapContainer = useRef(null);
@@ -33,21 +33,33 @@ function Map(props) {
       });
       // Add controls
       map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      map.current.on('load', function() {
+        addDataSources();
+        addLayers();
+      })
     }
     initMap();
 
     const addDataSources = () => {
-      if (! map.current.isStyleLoaded()) return;
-      map.current.addSource('vehicles', {
-        'type': 'geojson',
-        'data': vehicles
-      });
+      if (! map.current || ! map.current.isStyleLoaded()) return;
+      // Check if source exists
+      const doesSourceExist = map.current.getSource('vehicles');
+
+      if(doesSourceExist) {
+        map.current.getSource('vehicles').setData(vehicles);
+      } else {
+        map.current.addSource('vehicles', {
+          'type': 'geojson',
+          'data': vehicles
+        });
+      }
       console.log('addsource vehicles', vehicles)
     }
     addDataSources();
      
     const addLayers = () => {
-      if (! map.current.isStyleLoaded()) return;
+      if (! map.current || ! map.current.isStyleLoaded()) return;
       map.current.addLayer(
         {
           'id': 'vehicles-heatmap',
@@ -121,20 +133,19 @@ function Map(props) {
         'waterway'
       );
     }
-    addLayers();
+    // addLayers();
 
-  }, [vehicles, lng, lat, zoom]);
+    // if(vehicles!==null) {
+    //   vehicles.features.filter((x,i)=>(true||i<14000)).forEach(x => {
+    //     new maplibregl.Marker({color: "#FF0000"})
+    //       .setLngLat([x.geometry.coordinates[0], x.geometry.coordinates[1]])
+    //       .addTo(map.current);
+    //   })
+    // }
+
+  }, [vehicles]);
 
   return <div className="Map">
-    <div onClick={() => {
-      dispatch({
-        type: 'SET_VEHICLES',
-        payload: [{
-          lng: 5.102406,
-          lat: 52.0729252
-        }]
-      })
-    }}>LOAD VEHICLES</div>
     <div ref={mapContainer} className="map" />
   </div>
 }

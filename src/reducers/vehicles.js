@@ -1,5 +1,5 @@
 const initialState = {
-  data: []
+  data: null
 }
 
 export default function vehicles(state = initialState, action) {
@@ -17,7 +17,7 @@ export default function vehicles(state = initialState, action) {
         return {}
       }
       // Remove changed vehicle
-      const filtered = state.data.filter(function(x) { 
+      const filtered = state.data.filter(function(x) {
         return x.uuid !== vehicle.uuid;
       });
       // Add vehicle to vehicles set
