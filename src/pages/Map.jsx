@@ -17,13 +17,11 @@ function Map(props) {
   const [lng] = useState(5.102406);
   const [lat] = useState(52.0729252);
   const [zoom] = useState(14);
-  
-  console.log('vehicles', vehicles)
 
-  // Init MapLibre map
-  
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
+  
+    // Init MapLibre map
     const initMap = () => {
       if (map.current) return;
       map.current = new maplibregl.Map({
