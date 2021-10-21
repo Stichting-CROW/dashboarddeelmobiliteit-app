@@ -21,42 +21,76 @@ function App() {
   
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
-  
-  useInterval(() => {
-      // Your custom logic here
-      fetch(url).then(function(response) {
-        response.json().then(function(json) {
-          let vehicles = [];
-          json.forEach(v=>{
-            if(v.location) {
-              vehicles.push({lat: v.location.latitude, lng: v.location.longitude});
-            }
-          })
-          
-          console.log("got %s vehicles", vehicles.length)
-          
-          // [{
-          //   lng: 5.102406,
-          //   lat: 52.0729252
-          // }]
+
+  const doSomething = () => {
+    fetch(url).then(function(response) {
+      response.json().then(function(vehicles) {
+        let geoJson = {
+           "type":"FeatureCollection",
+           "crs":{
+              "type":"name",
+              "properties":{
+                 "name":"urn:ogc:def:crs:OGC:1.3:CRS84"
+              }
+           },
+           "features":[]
+        }
+        
+        const md5 = require('md5');
+        vehicles.slice(0, 100).forEach(v => {
+          let feature = {
+             "type":"Feature",
+             "properties":{
+                "id":md5(v.location.latitude+v.location.longitude),
+                "systemid": v.systemid,
+                "in_public_space_since": v.in_public_space_since
+             },
+             "geometry":{
+                "type":"Point",
+                "coordinates":[
+                   v.location.longitude,
+                   v.location.latitude,
+                   0.0
+                ]
+             }
+          }
+
+          geoJson.features.push(feature);
+          // new maplibregl.Marker({color: "#FF0000"})
+          //   .setLngLat([x.location.longitude, x.location.latitude])
+          //   .addTo(map.current);
           //
-          dispatch({
-            type: 'SET_VEHICLES',
-            payload: json
-          })
-          
-          // setJson(json);
-          // setTimestamp(new Date());
-        }).catch(ex=>{
-          console.error("unable to decode JSON");
-          // setJson(false);
-        });
+          // return;
+        })
+        
+        // [{
+        //   lng: 5.102406,
+        //   lat: 52.0729252
+        // }]
+        //
+        dispatch({
+          type: 'SET_VEHICLES',
+          payload: geoJson
+        })
+        
+        // setJson(json);
+        // setTimestamp(new Date());
       }).catch(ex=>{
-        console.error("fetch error - unable to fetch JSON from %s", url);
+        console.error("unable to decode JSON");
         // setJson(false);
       });
-    }, 5000);
+    }).catch(ex=>{
+      console.error("fetch error - unable to fetch JSON from %s", url);
+      // setJson(false);
+    });
+  }
   
+  useInterval(() => {
+    doSomething();
+  }, 30 * 1000);// every 30 seconds
+  
+  doSomething();
+  setTimeout(() => {doSomething()}, 5000);
   
   return (
     <Router>
