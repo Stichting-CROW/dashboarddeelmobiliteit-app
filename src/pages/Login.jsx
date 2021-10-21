@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const Login = () => {
   const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
-  const [recoverPassword, setRecoverPassword] = useState(true);
+  const [recoverPassword, setRecoverPassword] = useState(false);
 
   const login = e => {
     e.preventDefault();
