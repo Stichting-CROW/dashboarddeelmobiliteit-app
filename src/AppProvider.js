@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
-import { render } from 'react-dom';
+// import { bindActionCreators } from 'redux';
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware, compose } from 'redux';
 import { connect } from 'react-redux';

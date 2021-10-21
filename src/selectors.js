@@ -1,3 +1,3 @@
-import R from 'ramda';
+// import R from 'ramda';
 
 export const getVehicles = store => store.vehicles;
