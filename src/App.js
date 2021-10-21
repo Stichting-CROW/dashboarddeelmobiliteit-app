@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import {
  BrowserRouter as Router,
  Switch,
@@ -37,7 +37,7 @@ function App() {
         }
         
         const md5 = require('md5');
-        vehicles.slice(0, 100).forEach(v => {
+        vehicles.forEach(v => {
           let feature = {
              "type":"Feature",
              "properties":{

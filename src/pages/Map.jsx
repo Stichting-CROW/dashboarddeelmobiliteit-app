@@ -48,7 +48,7 @@ function Map(props) {
       const doesSourceExist = map.current.getSource('vehicles');
       if(doesSourceExist) {
         console.log('source does exist. setting vehicles', vehicles)
-        map.current.getSource('vehicles').setData(vehicles);
+        // map.current.getSource('vehicles').setData(vehicles);
 
       } else {
         console.log('source does not exist. setting vehicles', vehicles)
@@ -135,7 +135,6 @@ function Map(props) {
             ]
           }
         },
-        'waterway'
       );
       map.current.addLayer(
         {
@@ -175,18 +174,17 @@ function Map(props) {
           // 'circle-stroke-color': 'white',
           // 'circle-stroke-width': 1,
           // Transition from heatmap to circle layer by zoom level
-          'circle-opacity': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            7,
-            0,
-            8,
-            1
-          ]
+            'circle-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              7,
+              0,
+              8,
+              1
+            ]
           }
         },
-        'waterway'
       );
     }
     addLayers();

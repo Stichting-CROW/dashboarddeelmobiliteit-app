@@ -15,3 +15,9 @@ code {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#vehicles-heatmap,
+#vehicles-point {
+  position: relative;
+  z-index:  100;
+}
