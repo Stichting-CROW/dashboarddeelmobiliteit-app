@@ -26,14 +26,15 @@ function Map(props) {
   const [lng] = useState(5.102406);
   const [lat] = useState(52.0729252);
   const [zoom] = useState(14);
-
+  
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
     if (map.current) return; //stops map from intializing more than once
     // Init MapLibre map
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://api.maptiler.com/maps/streets/style.json?key=oYg5wHevXnoE2PBNr3iN',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
       center: [lng, lat],
       zoom: zoom
     });
