@@ -90,6 +90,7 @@ function App() {
   }, 30 * 1000);// every 30 seconds
   
   doSomething();
+
   setTimeout(() => {doSomething()}, 5000);
   
   return (
