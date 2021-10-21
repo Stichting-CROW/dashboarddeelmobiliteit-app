@@ -1,0 +1,4 @@
+export const SET_VEHICLES = 'SET_VEHICLES';
+export const SET_VEHICLE = 'SET_VEHICLE';
+export const CLEAR_VEHICLES = 'CLEAR_VEHICLES';
+
