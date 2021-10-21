@@ -25,15 +25,46 @@ function App() {
   useInterval(() => {
       // Your custom logic here
       fetch(url).then(function(response) {
-        response.json().then(function(json) {
-          let vehicles = [];
-          json.forEach(v=>{
-            if(v.location) {
-              vehicles.push({lat: v.location.latitude, lng: v.location.longitude});
+        response.json().then(function(vehicles) {
+          let geoJson = {
+             "type":"FeatureCollection",
+             "crs":{
+                "type":"name",
+                "properties":{
+                   "name":"urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+             },
+             "features":[]
+          }
+          
+          const md5 = require('md5');
+          vehicles.forEach(v => {
+            let feature = {
+               "type":"Feature",
+               "properties":{
+                  "id":md5(v.location.latitude+v.location.longitude),
+                  "systemid": v.systemid,
+                  "in_public_space_since": v.in_public_space_since
+               },
+               "geometry":{
+                  "type":"Point",
+                  "coordinates":[
+                     v.location.longitude,
+                     v.location.latitude,
+                     0.0
+                  ]
+               }
             }
+
+            geoJson.features.push(feature);
+            // new maplibregl.Marker({color: "#FF0000"})
+            //   .setLngLat([x.location.longitude, x.location.latitude])
+            //   .addTo(map.current);
+            //
+            // return;
           })
           
-          console.log("got %s vehicles", vehicles.length)
+          console.log("got geojson %o", geoJson)
           
           // [{
           //   lng: 5.102406,
@@ -42,7 +73,7 @@ function App() {
           //
           dispatch({
             type: 'SET_VEHICLES',
-            payload: json
+            payload: geoJson
           })
           
           // setJson(json);
