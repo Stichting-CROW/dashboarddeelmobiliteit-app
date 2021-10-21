@@ -47,14 +47,15 @@ function Map(props) {
       const doesSourceExist = map.current.getSource('vehicles');
 
       if(doesSourceExist) {
+        console.log('source does exist. setting vehicles', vehicles)
         map.current.getSource('vehicles').setData(vehicles);
       } else {
+        console.log('source does not exist. setting vehicles', vehicles)
         map.current.addSource('vehicles', {
           'type': 'geojson',
           'data': vehicles
         });
       }
-      console.log('addsource vehicles', vehicles)
     }
     addDataSources();
      
@@ -132,8 +133,59 @@ function Map(props) {
         },
         'waterway'
       );
+      map.current.addLayer(
+        {
+          'id': 'vehicles-point',
+          'type': 'circle',
+          'source': 'vehicles',
+          'minzoom': 7,
+          'paint': {
+          // Size circle radius by earthquake magnitude and zoom level
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            7,
+            ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 6, 4],
+            16,
+            ['interpolate', ['linear'], ['get', 'mag'], 1, 5, 6, 50]
+          ],
+          // Color circle by earthquake magnitude
+          'circle-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'mag'],
+            1,
+            'rgba(33,102,172,0)',
+            2,
+            'rgb(103,169,207)',
+            3,
+            'rgb(209,229,240)',
+            4,
+            'rgb(253,219,199)',
+            5,
+            'rgb(239,138,98)',
+            6,
+            'rgb(178,24,43)'
+          ],
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1,
+          // Transition from heatmap to circle layer by zoom level
+          'circle-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7,
+          0,
+          8,
+          1
+          ]
+          }
+        },
+        'waterway'
+      );
     }
-    // addLayers();
+    addLayers();
 
     // if(vehicles!==null) {
     //   vehicles.features.filter((x,i)=>(true||i<14000)).forEach(x => {

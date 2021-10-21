@@ -37,7 +37,7 @@ function App() {
         }
         
         const md5 = require('md5');
-        vehicles.forEach(v => {
+        vehicles.slice(0, 100).forEach(v => {
           let feature = {
              "type":"Feature",
              "properties":{
@@ -62,8 +62,6 @@ function App() {
           //
           // return;
         })
-        
-        console.log("got geojson %o", geoJson)
         
         // [{
         //   lng: 5.102406,
@@ -92,6 +90,7 @@ function App() {
   }, 30 * 1000);// every 30 seconds
   
   doSomething();
+  setTimeout(() => {doSomething()}, 5000);
   
   return (
     <Router>
