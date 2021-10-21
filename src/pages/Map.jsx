@@ -40,7 +40,7 @@ function Map(props) {
 
     vehicles.map(x => {
       new maplibregl.Marker({color: "#FF0000"})
-        .setLngLat([x.lng, x.lat])
+        .setLngLat([x.location.longitude, x.location.latitude])
         .addTo(map.current);
 
       return;
