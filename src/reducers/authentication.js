@@ -1,5 +1,5 @@
 const initialState = {
-    user_data: null
+  user_data: null
 }
   
 export default function vehicles(state = initialState, action) {

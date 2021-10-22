@@ -13,7 +13,8 @@ function Map(props) {
   const mapContainer = useRef(null);
   const [lng] = useState(5.102406);
   const [lat] = useState(52.0729252);
-  const [zoom] = useState(14);
+  const [zoom, setZoom] = useState(14);
+  const [counter, setCounter] = useState(0);
   let map = useRef(null);
 
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
@@ -33,6 +34,7 @@ function Map(props) {
 
       map.current.on('load', function() {
         // console.log('MAP loaded');
+        setCounter(counter + 1)
       })
     }
     initMap();
@@ -41,8 +43,11 @@ function Map(props) {
 
   useEffect(() => {
     const addDataSources = (vehicles) => {
-      if (! map.current) {
-        // console.warn('addDataSources :: Map not loaded', map)
+      if (! map.current || ! map.current.isStyleLoaded()) {
+        // Refresh state, so that addDataSources runs again
+        setTimeout(() => {
+          setCounter(counter + 1)
+        }, 250)
         return;
       }
       if (! vehicles) {
@@ -63,11 +68,16 @@ function Map(props) {
       }
     }
     addDataSources(vehicles);
-  }, [vehicles])
+  }, [vehicles, counter])
 
   useEffect(() => {
     const addLayers = (vehicles) => {
-      if (! map.current) return;
+      if (! map.current || ! map.current.isStyleLoaded()) {
+        setTimeout(() => {
+          setCounter(counter + 1)
+        }, 250)
+        return;
+      }
       if (! vehicles) return;
 
       const doesLayerExist = map.current.getLayer('vehicles-heatmap');
@@ -194,7 +204,7 @@ function Map(props) {
       console.log('MAP layers added')
     }
     addLayers(vehicles);
-  }, [vehicles]);
+  }, [vehicles, counter]);
 
   return <div className="Map">
     <div ref={mapContainer} className="map" />

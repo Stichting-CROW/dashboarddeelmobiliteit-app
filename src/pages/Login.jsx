@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { setUser } from '../actions/authentication';
 import { useDispatch } from 'react-redux';
 import {
-  Redirect,
-  Route
+  Redirect
  } from "react-router-dom";
 
 const Login = () => {

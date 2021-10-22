@@ -2,6 +2,20 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## How to deploy?
+
+If you run
+
+    npm run deploy
+
+the updated app will be deployed to GitHub pages. You can then view the app at https://dashboarddeelmobiliteit.nl
+
+## Problems solved
+
+### GitHub pages sais: y is not defined
+
+Solved problem like this: https://github.com/alex3165/react-mapbox-gl/issues/931#issuecomment-826135957
+
 ## Available Scripts
 
 In the project directory, you can run:
