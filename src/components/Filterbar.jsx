@@ -14,8 +14,8 @@ function Filterbar() {
   });
   
   let [showSelectGebied, setShowSelectGebied] = useState(false);
-  let [showSelectZone, setShowSelectZone] = useState(false);
-  let [showSelectDatum, setShowSelectDatum] = useState(false);
+  // let [showSelectZone, setShowSelectZone] = useState(false);
+  // let [showSelectDatum, setShowSelectDatum] = useState(false);
   let [showSelectAanbieder, setShowSelectAanbieder] = useState(false);
   
   const setFilterGebied = (gebied) => {
@@ -84,129 +84,129 @@ function Filterbar() {
       }
   }
   
-  const renderSelectZone = () => {
-    let content = (
-      <>
-        <br />
-        <span className="filter-selected">Alle zones</span>
-        <form className="filter-options" id="filter-zone">
-           <span className="hint">Selecteer eerst een gemeente</span>
-        </form>
-      </>
-    )
-    return renderModal(content,setShowSelectZone)
-  }
-  
-  const renderSelectDatum = () => {
-    let hours = [];
-    for(let h=0;h<24;h++) { hours.push(h.toString())};
-    let minutes = ["0", "15", "30", "45"];
-    let months = ["Jan","Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    let dates = [];
-    for(let d=1;d<31;d++) { dates.push(d.toString())};
-    let years = [];
-    for(let y=2000;y<2031;y++) { years.push(y.toString())};
-    
-    let content = (
-      <>
-      <span className="filter-selected"><span>22-10-2021 11:15</span></span>
-      <div className="filter-options">
-         <div id="date" className=" mtr-datepicker">
-            <div className="mtr-row">
-               <div className="mtr-input-slider" id="date-input-hours">
-                  <div className="mtr-arrow up"><span></span></div>
-                  <div className="mtr-content">
-                     <input type="text" className="mtr-input hours" data-old-value="11" />
-                     <div className="mtr-values">
-                     { hours.map(h=>{
-                          return (
-                            <div className="mtr-default-value-holder" data-value={h}>
-                               <div className="mtr-default-value" data-value={h}>{h}</div>
-                            </div>
-                          )
-                     })}
-                  </div>
-                  <div className="mtr-arrow down"><span></span></div>
-               </div>
-               <div className="mtr-input-slider" id="date-input-minutes">
-                  <div className="mtr-arrow up"><span></span></div>
-                  <div className="mtr-content">
-                    <input type="text" className="mtr-input minutes" data-old-value="15" />
-                    <div className="mtr-values">
-                    { minutes.map((m,i)=>{
-                         return (
-                           <div className="mtr-default-value-holder" data-value={i}>
-                              <div className="mtr-default-value" data-value={i}>{m}</div>
-                           </div>
-                         )
-                    })}
-                    </div>
-                  <div className="mtr-arrow down"><span></span></div>
-               </div>
-            </div>
-            <div className="mtr-clearfix"></div>
-            <div className="mtr-row">
-               <div className="mtr-input-slider" id="date-input-months">
-                  <div className="mtr-arrow up"><span></span></div>
-                  <div className="mtr-content">
-                     <input type="text" className="mtr-input months" data-old-value="9" />
-                     <div className="mtr-values">
-                     { months.map((m,i)=>{
-                          return (
-                            <div className="mtr-default-value-holder" data-value={i}>
-                              <div className="mtr-default-value has-name" data-value={i}>{i+1}</div>
-                               <div className="mtr-default-value-name" data-value={i}>{m}</div>
-                            </div>
-                          )
-                     })}
-                     </div>
-                  </div>
-                  <div className="mtr-arrow down"><span></span></div>
-               </div>
-               <div className="mtr-input-slider" id="date-input-dates">
-                  <div className="mtr-arrow up"><span></span></div>
-                  <div className="mtr-content">
-                     <input type="text" className="mtr-input dates" data-old-value="22" />
-                     <div className="mtr-values">
-                     { dates.map((d,i)=>{
-                          return (
-                            <div className="mtr-default-value-holder" data-value={i}>
-                              <div className="mtr-default-value has-name" data-value={i}>{i+1}</div>
-                               <div className="mtr-default-value-name" data-value={i}>{d}</div>
-                            </div>
-                          )
-                     })}
-                     </div>
-                  </div>
-                  <div className="mtr-arrow down"><span></span></div>
-               </div>
-               <div className="mtr-input-slider" id="date-input-years">
-                  <div className="mtr-arrow up"><span></span></div>
-                  <div className="mtr-content">
-                     <input type="text" className="mtr-input years" data-old-value="2021" />
-                     <div className="mtr-values">
-                         { dates.map((d,i)=>{
-                              return (
-                                <div className="mtr-default-value-holder" data-value={d}>
-                                  <div className="mtr-default-value" data-value={d}>{d}</div>
-                                </div>
-                              )
-                         })}
-                     </div>
-                  </div>
-                  <div className="mtr-arrow down"><span></span></div>
-               </div>
-            </div>
-            <div className="mtr-clearfix"></div>
-          </div>
-        </div>
-        </div>
-        </div>
-      </>
-    )
-    
-    return renderModal(content,setShowSelectDatum)
-  }
+  // const renderSelectZone = () => {
+  //   let content = (
+  //     <>
+  //       <br />
+  //       <span className="filter-selected">Alle zones</span>
+  //       <form className="filter-options" id="filter-zone">
+  //          <span className="hint">Selecteer eerst een gemeente</span>
+  //       </form>
+  //     </>
+  //   )
+  //   return renderModal(content,setShowSelectZone)
+  // }
+  //
+  // const renderSelectDatum = () => {
+  //   let hours = [];
+  //   for(let h=0;h<24;h++) { hours.push(h.toString())};
+  //   let minutes = ["0", "15", "30", "45"];
+  //   let months = ["Jan","Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  //   let dates = [];
+  //   for(let d=1;d<31;d++) { dates.push(d.toString())};
+  //   let years = [];
+  //   for(let y=2000;y<2031;y++) { years.push(y.toString())};
+  //
+  //   let content = (
+  //     <>
+  //     <span className="filter-selected"><span>22-10-2021 11:15</span></span>
+  //     <div className="filter-options">
+  //        <div id="date" className=" mtr-datepicker">
+  //           <div className="mtr-row">
+  //              <div className="mtr-input-slider" id="date-input-hours">
+  //                 <div className="mtr-arrow up"><span></span></div>
+  //                 <div className="mtr-content">
+  //                    <input type="text" className="mtr-input hours" data-old-value="11" />
+  //                    <div className="mtr-values">
+  //                    { hours.map(h=>{
+  //                         return (
+  //                           <div className="mtr-default-value-holder" data-value={h}>
+  //                              <div className="mtr-default-value" data-value={h}>{h}</div>
+  //                           </div>
+  //                         )
+  //                    })}
+  //                 </div>
+  //                 <div className="mtr-arrow down"><span></span></div>
+  //              </div>
+  //              <div className="mtr-input-slider" id="date-input-minutes">
+  //                 <div className="mtr-arrow up"><span></span></div>
+  //                 <div className="mtr-content">
+  //                   <input type="text" className="mtr-input minutes" data-old-value="15" />
+  //                   <div className="mtr-values">
+  //                   { minutes.map((m,i)=>{
+  //                        return (
+  //                          <div className="mtr-default-value-holder" data-value={i}>
+  //                             <div className="mtr-default-value" data-value={i}>{m}</div>
+  //                          </div>
+  //                        )
+  //                   })}
+  //                   </div>
+  //                 <div className="mtr-arrow down"><span></span></div>
+  //              </div>
+  //           </div>
+  //           <div className="mtr-clearfix"></div>
+  //           <div className="mtr-row">
+  //              <div className="mtr-input-slider" id="date-input-months">
+  //                 <div className="mtr-arrow up"><span></span></div>
+  //                 <div className="mtr-content">
+  //                    <input type="text" className="mtr-input months" data-old-value="9" />
+  //                    <div className="mtr-values">
+  //                    { months.map((m,i)=>{
+  //                         return (
+  //                           <div className="mtr-default-value-holder" data-value={i}>
+  //                             <div className="mtr-default-value has-name" data-value={i}>{i+1}</div>
+  //                              <div className="mtr-default-value-name" data-value={i}>{m}</div>
+  //                           </div>
+  //                         )
+  //                    })}
+  //                    </div>
+  //                 </div>
+  //                 <div className="mtr-arrow down"><span></span></div>
+  //              </div>
+  //              <div className="mtr-input-slider" id="date-input-dates">
+  //                 <div className="mtr-arrow up"><span></span></div>
+  //                 <div className="mtr-content">
+  //                    <input type="text" className="mtr-input dates" data-old-value="22" />
+  //                    <div className="mtr-values">
+  //                    { dates.map((d,i)=>{
+  //                         return (
+  //                           <div className="mtr-default-value-holder" data-value={i}>
+  //                             <div className="mtr-default-value has-name" data-value={i}>{i+1}</div>
+  //                              <div className="mtr-default-value-name" data-value={i}>{d}</div>
+  //                           </div>
+  //                         )
+  //                    })}
+  //                    </div>
+  //                 </div>
+  //                 <div className="mtr-arrow down"><span></span></div>
+  //              </div>
+  //              <div className="mtr-input-slider" id="date-input-years">
+  //                 <div className="mtr-arrow up"><span></span></div>
+  //                 <div className="mtr-content">
+  //                    <input type="text" className="mtr-input years" data-old-value="2021" />
+  //                    <div className="mtr-values">
+  //                        { dates.map((d,i)=>{
+  //                             return (
+  //                               <div className="mtr-default-value-holder" data-value={d}>
+  //                                 <div className="mtr-default-value" data-value={d}>{d}</div>
+  //                               </div>
+  //                             )
+  //                        })}
+  //                    </div>
+  //                 </div>
+  //                 <div className="mtr-arrow down"><span></span></div>
+  //              </div>
+  //           </div>
+  //           <div className="mtr-clearfix"></div>
+  //         </div>
+  //       </div>
+  //       </div>
+  //       </div>
+  //     </>
+  //   )
+  //
+  //   return renderModal(content,setShowSelectDatum)
+  // }
   
   const renderSelectAanbieders = () => {
     let aanbieders = [
@@ -249,25 +249,6 @@ function Filterbar() {
             }
         </div>, setShowSelectAanbieder)
     }
-    
-    
-    // <select class="w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline" placeholder="Selecteer Gebied" name="area"
-    //   value={filterGebied}
-    //   onChange={e=>{setShowSelectGebied(false);setFilterGebied(e.target.value);}}>
-    //   { aanbieders.map(a=><option value={a.value} id={a.value}>{g.name}</option>) }
-    // </select>
-    // <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-    //   <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
-    // </div>
-    
-    
-        
-    let content = (
-      <>
-      </>
-    );
-    
-    return renderModal(content,setShowSelectAanbieder)
   }
   
   // <div className="filter select-box multiple filter-zone">
@@ -293,7 +274,7 @@ function Filterbar() {
        </div>
        <div className="filter select-box multiple filter-operator">
           <div className="filter-name"  onClick={e=>{setShowSelectAanbieder(!showSelectAanbieder)}}>
-            <span>Aanbieders</span>
+            <span>Aanbieders</span><br />
             { renderSelectAanbieders() }
           </div>
        </div>

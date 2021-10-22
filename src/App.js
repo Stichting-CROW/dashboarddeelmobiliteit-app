@@ -23,6 +23,9 @@ function App() {
   
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
+  });
 
   const showfilter = useSelector(state => {
     return state.filter ? state.filter.visible : false;
@@ -111,12 +114,13 @@ function App() {
   useEffect(x => {
     fetchVehiclesInPublicSpace();
   })
+  
 
   return (
     <Router>
        <div className="App">
         <Menu />
-        { showfilter ? <Filterbar /> : null }
+        { isLoggedIn && showfilter ? <Filterbar /> : null }
 
          <Switch>
            <Route path="/demo">
