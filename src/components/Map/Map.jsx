@@ -82,10 +82,12 @@ function Map(props) {
       const doesLayerExist = map.current.getLayer('vehicles-heatmap');
       if(doesLayerExist) return;
 
-      map.current.addLayer(layers.heatmap);
-      map.current.addLayer(layers.point);
-
-      console.log('MAP layers added')
+      // Add layers to the map
+      props.layers.map(x => {
+        if(props.layers.indexOf(x) >= -1) {
+          map.current.addLayer(layers[x]);
+        }
+      })
     }
     addLayers(vehicles);
   }, [vehicles, counter]);

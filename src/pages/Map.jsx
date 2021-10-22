@@ -2,7 +2,10 @@ import React, {useState} from 'react';
 import {Map as MapComponent} from '../components/Map/Map.jsx';
 
 function Map(props) {
-  const [layers, setLayers] = useState([]);
+  const [layers, setLayers] = useState([
+    'vehicles-heatmap',
+    'vehicles-point'
+  ]);
   const [sources, setSources] = useState([]);
 
   return <div>
@@ -15,7 +18,7 @@ function Map(props) {
     <button>
       Heatmap
     </button>
-    <MapComponent />
+    <MapComponent layers={layers} />
   </div>
 }
 

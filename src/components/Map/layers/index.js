@@ -1,7 +1,7 @@
-import vehicles_point from './vehicles-heatmap.js';
-import vehicles_heatmap from './vehicles-point.js';
+import vehiclesPoint from './vehicles-point.js';
+import vehiclesHeatmap from './vehicles-heatmap.js';
 
 export const layers = {
-  'heatmap': vehicles_heatmap,
-  'point': vehicles_point
+  'vehicles-heatmap': vehiclesHeatmap,
+  'vehicles-point': vehiclesPoint
 }
