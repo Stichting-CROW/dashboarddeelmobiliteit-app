@@ -1,0 +1,9 @@
+.toggleactive: {
+  color: black;
+  background-color:white;
+}
+
+.togglenotactive: {
+  color: white;
+  background-color:transparent;
+}

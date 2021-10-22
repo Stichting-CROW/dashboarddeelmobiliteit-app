@@ -9,9 +9,10 @@ import Menu from './components/Menu.jsx';
 import Map from './pages/Map.jsx';
 import Demo from './pages/Demo.jsx';
 import Login from './pages/Login.jsx';
+import Filterbar from './components/Filterbar.jsx';
 import moment from 'moment';
 
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import useInterval from './customHooks/useInterval.js';
 
 import './App.css';
@@ -23,13 +24,17 @@ function App() {
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
 
+  const showfilter = useSelector(state => {
+    return state.filter ? state.filter.visible : false;
+  });
+
   const convertDurationToColor = (duration) => {
     if (duration <= 60) {
       return "#38ff71";
-    } 
+    }
     if (duration <= 24 * 60) {
       return "#008c28";
-    } 
+    }
     if (duration <= 24 * 60 * 4) {
       return "#fff700";
     }
@@ -111,6 +116,7 @@ function App() {
     <Router>
        <div className="App">
         <Menu />
+        { showfilter ? <Filterbar /> : null }
 
          <Switch>
            <Route path="/demo">
