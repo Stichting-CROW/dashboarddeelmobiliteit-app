@@ -35,6 +35,7 @@ const Login = () => {
         dispatch( setUser(response) );
         setLoggedIn(true);
       }).catch(error => {
+        console.error("Login failed! (%s)", error.message);
         setLoggedIn(false);
     });
   };
@@ -48,7 +49,7 @@ const Login = () => {
     };
 
     return fetch(url, {
-      method: 'POST', 
+      method: 'POST',
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'
@@ -66,9 +67,9 @@ const Login = () => {
 
   const renderLogin = () => {
     return (
-      <div class="flex items-center justify-center min-h-screen bg-gray-100">
-        <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg">
-          <h3 class="text-2xl font-bold text-center">Login</h3>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg">
+          <h3 className="text-2xl font-bold text-center">Login</h3>
           <form>
             <label className="block" htmlFor="emailaddress">Email</label>
             <input
@@ -80,7 +81,7 @@ const Login = () => {
               onChange={e => setEmailaddress(e.target.value)}
             />
 
-            <label class="block" htmlFor="password">Wachtwoord</label>
+            <label className="block" htmlFor="password">Wachtwoord</label>
             <input
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
               type="password"
@@ -90,9 +91,9 @@ const Login = () => {
               onChange={e => setPassword(e.target.value)}
             />
           
-            <div class="flex items-baseline justify-between">
-                <button class="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={login}>Login</button>
-                <button class="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(true)}>Wachtwoord vergeten</button>
+            <div className="flex items-baseline justify-between">
+                <button className="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={login}>Login</button>
+                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(true)}>Wachtwoord vergeten</button>
             </div>
           </form>
         </div>
@@ -101,9 +102,9 @@ const Login = () => {
   
   const renderRecoverPassword = () => {
     return (
-      <div class="flex items-center justify-center min-h-screen bg-gray-100">
-        <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg">
-          <h3 class="text-2xl font-bold text-center">Wachtwoord herstellen</h3>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg">
+          <h3 className="text-2xl font-bold text-center">Wachtwoord herstellen</h3>
           <form>
             <label className="block" htmlFor="emailaddress">Email</label>
             <input
@@ -115,9 +116,9 @@ const Login = () => {
               onChange={e => setEmailaddress(e.target.value)}
             />
           
-            <div class="flex items-baseline justify-between">
-                <button class="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={recover}>Herstel</button>
-                <button class="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(false)}>Annuleer</button>
+            <div className="flex items-baseline justify-between">
+                <button className="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={recover}>Herstel</button>
+                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(false)}>Annuleer</button>
             </div>
           </form>
         </div>
