@@ -28,9 +28,7 @@ store.subscribe(() => {
   const storeState = store.getState();
   const storeStateToSaveInLocalStorage = {
     lastUpdate: moment().unix(),
-    videos: storeState.videos,
-    videosFilter: storeState.videosFilter,
-    settings: storeState.settings
+    authentication: storeState.authentication
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })

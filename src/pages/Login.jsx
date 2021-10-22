@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
+import { setUser } from '../actions/authentication';
+import { useDispatch } from 'react-redux';
+import {
+  Redirect,
+  Route
+ } from "react-router-dom";
 
 const Login = () => {
   const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
   const [recoverPassword, setRecoverPassword] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const dispatch = useDispatch();
 
   const login = e => {
+    
     e.preventDefault();
 
     const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/login";
@@ -23,12 +32,10 @@ const Login = () => {
       }
     }).then(res => res.json())
       .then(response => {
-        console.log(response);
-        // setCookie("authToken", response.token, 30);
-        // setCookie("authUserName", response.user.username, 30);
-        return true;
+        dispatch( setUser(response) );
+        setLoggedIn(true);
       }).catch(error => {
-        return false;
+        setLoggedIn(false);
     });
   };
   
@@ -116,7 +123,16 @@ const Login = () => {
         </div>
       </div>)
   }
-  
+  const renderRedirect = () => {
+    return (
+        <Redirect to="/" />
+    );
+  }
+ 
+  if (loggedIn) {
+    return renderRedirect();
+  }
+
   return recoverPassword ? renderRecoverPassword() : renderLogin();
 };
 
