@@ -17,8 +17,6 @@ function Menu() {
     }
   }
 
-
-
   return (
       <ul className="flex">
         <li className="mr-6"><Link className="text-blue-500 hover:text-blue-800" to="/">Home</Link></li>

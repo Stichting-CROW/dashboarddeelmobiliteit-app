@@ -144,15 +144,11 @@ function Map(props) {
           'minzoom': 7,
           'paint': {
           // Size circle radius by earthquake magnitude and zoom level
-          // 'circle-radius': [
-          //   'interpolate',
-          //   ['linear'],
-          //   ['zoom'],
-          //   7,
-          //   ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 6, 4],
-          //   16,
-          //   ['interpolate', ['linear'], ['get', 'mag'], 1, 5, 6, 50]
-          // ],
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            12, 1,
+            16, ['*', 2, ['get', 'amount']]
+          ],
           // Color circle by earthquake magnitude
           // 'circle-color': [
           //   'interpolate',
@@ -182,7 +178,8 @@ function Map(props) {
               0,
               8,
               1
-            ]
+            ],
+            'circle-color': ['get', 'color']
           }
         },
       );
