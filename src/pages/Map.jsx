@@ -1,26 +1,23 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 
 import './Map.css';
 
 function Map(props) {
-  const dispatch = useDispatch()
-
   //Get the value of a State variable, and store it to a const, to use it later
   const vehicles = useSelector(state => {
     return state.vehicles ? state.vehicles.data : null;
   });
 
   const mapContainer = useRef(null);
-  const map = useRef(null);
   const [lng] = useState(5.102406);
   const [lat] = useState(52.0729252);
   const [zoom] = useState(14);
+  let map = useRef(null);
 
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
-  
     // Init MapLibre map
     const initMap = () => {
       if (map.current) return;
@@ -35,35 +32,46 @@ function Map(props) {
       map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
 
       map.current.on('load', function() {
-        addDataSources();
-        addLayers();
+        // console.log('MAP loaded');
       })
     }
     initMap();
 
-    const addDataSources = () => {
-      if (! map.current || ! map.current.isStyleLoaded()) return;
-      if (! vehicles) return;
+  }, [vehicles, lng, lat, zoom])
+
+  useEffect(() => {
+    const addDataSources = (vehicles) => {
+      if (! map.current) {
+        // console.warn('addDataSources :: Map not loaded', map)
+        return;
+      }
+      if (! vehicles) {
+        // console.warn('addDataSources :: No vehicles known')
+        return;
+      }
       // Check if source exists
       const doesSourceExist = map.current.getSource('vehicles');
       if(doesSourceExist) {
-        console.log('source does exist. setting vehicles', vehicles)
+        // console.log('source does exist. setting vehicles', vehicles)
         // map.current.getSource('vehicles').setData(vehicles);
-
       } else {
-        console.log('source does not exist. setting vehicles', vehicles)
+        // console.log('source does not exist. setting vehicles', vehicles)
         map.current.addSource('vehicles', {
           'type': 'geojson',
           'data': vehicles
         });
       }
     }
-    addDataSources();
-     
-    const addLayers = () => {
-      if (! map.current || ! map.current.isStyleLoaded()) return;
-      const doesSourceExist = map.current.getSource('vehicles');
-      if(! doesSourceExist) return;
+    addDataSources(vehicles);
+  }, [vehicles])
+
+  useEffect(() => {
+    const addLayers = (vehicles) => {
+      if (! map.current) return;
+      if (! vehicles) return;
+
+      const doesLayerExist = map.current.getLayer('vehicles-heatmap');
+      if(doesLayerExist) return;
 
       map.current.addLayer(
         {
@@ -183,17 +191,9 @@ function Map(props) {
           }
         },
       );
+      console.log('MAP layers added')
     }
-    addLayers();
-
-    // if(vehicles!==null) {
-    //   vehicles.features.filter((x,i)=>(true||i<14000)).forEach(x => {
-    //     new maplibregl.Marker({color: "#FF0000"})
-    //       .setLngLat([x.geometry.coordinates[0], x.geometry.coordinates[1]])
-    //       .addTo(map.current);
-    //   })
-    // }
-
+    addLayers(vehicles);
   }, [vehicles]);
 
   return <div className="Map">

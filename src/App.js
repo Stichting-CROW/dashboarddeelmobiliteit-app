@@ -1,4 +1,4 @@
-// import { useState } from 'react';
+import { useEffect } from 'react';
 import {
  BrowserRouter as Router,
  Switch,
@@ -36,7 +36,7 @@ function App() {
     return "#cc0000";
   }
 
-  const doSomething = () => {
+  const fetchVehiclesInPublicSpace = () => {
     fetch(url).then(function(response) {
       response.json().then(function(vehicles) {
         let geoJson = {
@@ -82,11 +82,6 @@ function App() {
           // return;
         })
         
-        // [{
-        //   lng: 5.102406,
-        //   lat: 52.0729252
-        // }]
-        //
         dispatch({
           type: 'SET_VEHICLES',
           payload: geoJson
@@ -105,13 +100,13 @@ function App() {
   }
   
   useInterval(() => {
-    doSomething();
+    fetchVehiclesInPublicSpace();
   }, 30 * 1000);// every 30 seconds
-  
-  doSomething();
 
-  setTimeout(() => {doSomething()}, 5000);
-  
+  useEffect(x => {
+    fetchVehiclesInPublicSpace();
+  })
+
   return (
     <Router>
        <div className="App">
