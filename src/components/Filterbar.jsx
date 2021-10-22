@@ -67,14 +67,14 @@ function Filterbar() {
       
       if(!showSelectGebied) {
         let item = gebieden.find(item=>item.value===filterGebied) || "";
-        return item ? <span>{item.name}</span>: null
+        return item ? <span key={'gebied-'+item.value}>{item.name}</span>: null
       } else {
         return  (
           <div class="relative inline-block w-full text-gray-700">
             <select class="w-full h-10 pl-3 pr-6 text-base placeholder-gray-600 border rounded-lg appearance-none focus:shadow-outline" placeholder="Selecteer Gebied" name="area"
               value={filterGebied}
               onChange={e=>{setShowSelectGebied(false);setFilterGebied(e.target.value);}}>
-              { gebieden.map(g=><option value={g.value} id={g.value}>{g.name}</option>) }
+              { gebieden.map(g=><option key={'go-'+g.value} value={g.value} id={g.value}>{g.name}</option>) }
             </select>
             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
@@ -230,7 +230,7 @@ function Filterbar() {
     if(!showSelectAanbieder) {
       let all = aanbieders
                   .filter(a=>filterAanbieders.includes(a.value))
-                  .map(a=><span>{a.name}</span>)
+                  .map(a=><span key={'sa-'+a.value}>{a.name}</span>)
       if(all.length===0) {
         all.push("Alle aanbieders");
       }
@@ -238,12 +238,12 @@ function Filterbar() {
     } else {
       return  renderModal(
         <div className="filter-options" id="filter-operator">
-            { aanbieders.map(a=>{
+            { aanbieders.map((a,i)=>{
                 let isSelected = filterAanbieders.includes(a.value);
                 if(isSelected) {
-                  return (<div className="checkbox" onClick={e=>{ e.stopPropagation(); removeFromFilterAanbieders(a.value)}}>{a.name} (Selected)</div>)
+                  return (<div key={'item-'+a.value} className="checkbox" onClick={e=>{ e.stopPropagation(); removeFromFilterAanbieders(a.value)}}>{a.name} (Selected)</div>)
                 } else {
-                  return (<div className="checkbox" onClick={e=>{ e.stopPropagation(); addToFilterAanbieders(a.value)}}>{a.name}</div>)
+                  return (<div key={'item-'+a.value} className="checkbox" onClick={e=>{ e.stopPropagation(); addToFilterAanbieders(a.value)}}>{a.name}</div>)
                 }
               })
             }

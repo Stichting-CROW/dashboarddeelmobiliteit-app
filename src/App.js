@@ -18,13 +18,25 @@ import useInterval from './customHooks/useInterval.js';
 import './App.css';
 
 function App() {
-  const url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
   const dispatch = useDispatch()
+  
   
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
+  });
+  
+  const userdata = useSelector(state => {
+    return state.authentication.user_data ;
+  });
+
+  const filter = useSelector(state => {
+    if(!isLoggedIn||!state.filter)  {
+      return null;
+    }
+    
+    return state.filter;
   });
 
   const showfilter = useSelector(state => {
@@ -44,9 +56,28 @@ function App() {
     return "#cc0000";
   }
 
+  let url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
+  let options = {};
+  if(null!==filter) {
+    let aanbiedersfilter = filter.aanbieders!==""?"&operators=" + filter.aanbieders:"";
+    
+    let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    // url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events?timestamp=2021-10-22T15:46:20Z"+aanbiedersfilter; // + "&zone_ids=34234";
+    url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events?timestamp="+ts+aanbiedersfilter; // + "&zone_ids=34234";
+    options = { headers : { "authorization": "Bearer " + userdata.token }}
+  }
+
   const fetchVehiclesInPublicSpace = () => {
-    fetch(url).then(function(response) {
+    fetch(url, options).then(function(response) {
+      if(!response.ok) {
+        console.error("unable to fetch: %o", response);
+        return false
+      }
+
       response.json().then(function(vehicles) {
+        if(isLoggedIn) {
+          vehicles = vehicles.park_events
+        }
         let geoJson = {
            "type":"FeatureCollection",
            "crs":{
@@ -61,15 +92,17 @@ function App() {
         const md5 = require('md5');
         var current_time = moment();
         vehicles.forEach(v => {
-          var minutes = current_time.diff(moment(v.in_public_space_since), 'minutes');
-          const color = convertDurationToColor(minutes);
+          let in_public_space_since = isLoggedIn ? v.start_time : v.in_public_space_since;
 
+          var minutes = current_time.diff(moment(in_public_space_since), 'minutes');
+          const color = convertDurationToColor(minutes);
+          
           let feature = {
              "type":"Feature",
              "properties":{
                 "id":md5(v.location.latitude+v.location.longitude),
-                "systemid": v.systemid,
-                "in_public_space_since": v.in_public_space_since,
+                "system_id": v.system_id,
+                "in_public_space_since": in_public_space_since,
                 "color": color
              },
              "geometry":{

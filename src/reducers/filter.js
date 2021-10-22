@@ -3,7 +3,7 @@ const initialState = {
   gebied: "",
   zones: [],
   datum: null,
-  aanbieders: []
+  aanbieders: ""
 }
 
 export default function filter(state = initialState, action) {
@@ -52,25 +52,31 @@ export default function filter(state = initialState, action) {
     //   };
     // }
     case 'ADD_TO_FILTER_AANBIEDERS': {
-      console.log('add item %s to aanbieders filter %o', action.payload, state.filter)
-      let aanbieders = state.filter.aanbieders || [];
+      console.log('add item %s to aanbieders filter %o', action.payload, state)
+      let aanbieders = [];
+      if(state.aanbieders) {
+        console.log("filter exists %o", state.aanbieders)
+        aanbieders = state.aanbieders.split(",") || []
+      }
+      console.log("aanbieders before %o", aanbieders)
       if(!aanbieders.includes(action.payload)) {
         aanbieders.push(action.payload);
       }
+      console.log("aanbieders after %o", aanbieders)
     
       return {
           ...state,
-          aanbieders: state.filter.aanbieders
+          aanbieders: aanbieders.join(",")
       };
     }
     case 'REMOVE_FROM_FILTER_AANBIEDERS': {
       console.log('remove item %s to aanbieders filter', action.payload)
-      let aanbieders = state.filter.aanbieders || [];
+      let aanbieders = state.aanbieders.split(",") || [];
       aanbieders = aanbieders.filter((item) => { return item !== action.payload });
     
       return {
           ...state,
-          aanbieders
+          aanbieders: aanbieders.join(",")
       };
     }
     case 'CLEAR_FILTER_AANBIEDERS': {

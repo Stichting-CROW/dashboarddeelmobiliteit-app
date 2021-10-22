@@ -28,7 +28,8 @@ store.subscribe(() => {
   const storeState = store.getState();
   const storeStateToSaveInLocalStorage = {
     lastUpdate: moment().unix(),
-    authentication: storeState.authentication
+    authentication: storeState.authentication,
+    filter: storeState.filter
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })
