@@ -17,19 +17,38 @@ function Menu() {
     }
   }
 
+  return <ul className="flex">
+    <li className="mr-6">
+      <Link className="text-blue-500 hover:text-blue-800" to="/">
+        Home
+      </Link>
+    </li>
+    <li className="mr-6">
+      <Link className="text-blue-500 hover:text-blue-800" to="/demo">
+        Demo
+      </Link>
+    </li>
+    <li className="mr-6">
+      <Link className="text-blue-500 hover:text-blue-800" to="/map/park">
+        Parkeerdata
+      </Link>
+    </li>
+    {isLoggedIn
+      ?
+      <li className="mr-6">
+        <Link className="text-blue-500 hover:text-blue-800" onClick={logOut} to="/">
+          Log uit
+        </Link>
+      </li>
+      :
+      <li className="mr-6">
+        <Link className="text-blue-500 hover:text-blue-800" to="/login">
+          Log in
+        </Link>
+      </li>
+    }
+  </ul>
 
-
-  return (
-      <ul className="flex">
-        <li className="mr-6"><Link className="text-blue-500 hover:text-blue-800" to="/">Home</Link></li>
-        <li className="mr-6"><Link className="text-blue-500 hover:text-blue-800" to="/demo">Demo</Link></li>
-        {(isLoggedIn) ?
-          <li className="mr-6"><Link className="text-blue-500 hover:text-blue-800" onClick={logOut} to="/">Log uit</Link></li>
-          :
-          <li className="mr-6"><Link className="text-blue-500 hover:text-blue-800" to="/login">Log in</Link></li>
-        }
-      </ul>
-  )
   // <nav class="flex items-center justify-around flex-wrap bg-teal-500 p-6">
   // </nav>
 }
