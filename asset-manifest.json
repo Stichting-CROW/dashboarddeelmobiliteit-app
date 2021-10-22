@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/dashboarddeelmobiliteit-app/static/css/main.cfa2c815.chunk.css",
+    "main.js": "/dashboarddeelmobiliteit-app/static/js/main.cd09f9f1.chunk.js",
+    "main.js.map": "/dashboarddeelmobiliteit-app/static/js/main.cd09f9f1.chunk.js.map",
+    "runtime-main.js": "/dashboarddeelmobiliteit-app/static/js/runtime-main.0bf029b4.js",
+    "runtime-main.js.map": "/dashboarddeelmobiliteit-app/static/js/runtime-main.0bf029b4.js.map",
+    "static/js/2.c0404646.chunk.js": "/dashboarddeelmobiliteit-app/static/js/2.c0404646.chunk.js",
+    "static/js/2.c0404646.chunk.js.map": "/dashboarddeelmobiliteit-app/static/js/2.c0404646.chunk.js.map",
+    "static/js/3.f44047fc.chunk.js": "/dashboarddeelmobiliteit-app/static/js/3.f44047fc.chunk.js",
+    "static/js/3.f44047fc.chunk.js.map": "/dashboarddeelmobiliteit-app/static/js/3.f44047fc.chunk.js.map",
+    "index.html": "/dashboarddeelmobiliteit-app/index.html",
+    "static/css/main.cfa2c815.chunk.css.map": "/dashboarddeelmobiliteit-app/static/css/main.cfa2c815.chunk.css.map",
+    "static/js/2.c0404646.chunk.js.LICENSE.txt": "/dashboarddeelmobiliteit-app/static/js/2.c0404646.chunk.js.LICENSE.txt",
+    "static/media/logo.6ce24c58.svg": "/dashboarddeelmobiliteit-app/static/media/logo.6ce24c58.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0bf029b4.js",
+    "static/js/2.c0404646.chunk.js",
+    "static/css/main.cfa2c815.chunk.css",
+    "static/js/main.cd09f9f1.chunk.js"
+  ]
+}
