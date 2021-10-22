@@ -17,6 +17,18 @@ function Menu() {
     }
   }
 
+  //Get the value of a State variable, and store it to a const, to use it later
+  const showfilter = useSelector(state => {
+    return state.filter ? state.filter.visible : false;
+  });
+
+  const toggleFilter = e => {
+    dispatch({
+      type: 'SET_FILTER_VISIBLE',
+      payload: !showfilter
+    })
+  }
+
   return <ul className="flex">
     <li className="mr-6">
       <Link className="text-blue-500 hover:text-blue-800" to="/">
@@ -33,6 +45,12 @@ function Menu() {
         Parkeerdata
       </Link>
     </li>
+    {isLoggedIn ?
+        <li className={showfilter?"mr-6 toggleactive":"mr-6 togglenotactive"} onClick={toggleFilter}>
+          {showfilter?"Hide":"Show"} Filter
+        </li>
+        :
+        null }
     {isLoggedIn
       ?
       <li className="mr-6">
