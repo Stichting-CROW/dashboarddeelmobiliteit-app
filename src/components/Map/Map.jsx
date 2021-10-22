@@ -4,7 +4,7 @@ import maplibregl from 'maplibre-gl';
 
 import './Map.css';
 
-import {layers} from './layers.js';
+import {layers} from './layers';
 
 function Map(props) {
   //Get the value of a State variable, and store it to a const, to use it later
@@ -84,6 +84,7 @@ function Map(props) {
 
       map.current.addLayer(layers.heatmap);
       map.current.addLayer(layers.point);
+
       console.log('MAP layers added')
     }
     addLayers(vehicles);
