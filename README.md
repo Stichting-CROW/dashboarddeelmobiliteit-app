@@ -16,6 +16,12 @@ the updated app will be deployed to GitHub pages. You can then view the app at h
 
 Solved problem like this: https://github.com/alex3165/react-mapbox-gl/issues/931#issuecomment-826135957
 
+### Github forgets custom domain gh-pages
+
+The custom domain name in GitHub settings did reset on every deploy to gh-pages.
+
+Adding a file named `CNAME` into the build folder fixed this: https://github.com/gitname/react-gh-pages/issues/19#issuecomment-436148409
+
 ## Available Scripts
 
 In the project directory, you can run:
