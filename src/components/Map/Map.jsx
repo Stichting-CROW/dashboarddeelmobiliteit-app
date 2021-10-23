@@ -5,7 +5,7 @@ import maplibregl from 'maplibre-gl';
 import './Map.css';
 
 import {layers} from './layers';
-import {sources} from './sources.js';
+// import {sources} from './sources.js';
 
 function Map(props) {
   //Get the value of a State variable, and store it to a const, to use it later
@@ -79,18 +79,25 @@ function Map(props) {
       }
       if (! vehicles) return;
 
-      const doesLayerExist = map.current.getLayer('vehicles-heatmap');
-      if(doesLayerExist) return;
-
-      // Add layers to the map
+      // Remove 'old' layers
+      const allLayers = map.current.getStyle().layers;
+      allLayers.map(x => {
+        // Check if this is one of our layers
+        if(x.id.indexOf('vehicles-') > -1) {
+          // If so, remove
+          map.current.removeLayer(x.id)
+        }
+      })
+      // Add selected layers to the map
       props.layers.map(x => {
         if(props.layers.indexOf(x) >= -1) {
-          map.current.addLayer(layers[x]);
+          const doesLayerExist = map.current.getLayer(x);
+          if(! doesLayerExist) map.current.addLayer(layers[x]);
         }
       })
     }
     addLayers(vehicles);
-  }, [vehicles, counter]);
+  }, [vehicles, counter, props.layers]);
 
   return <div className="Map">
     <div ref={mapContainer} className="map" />
