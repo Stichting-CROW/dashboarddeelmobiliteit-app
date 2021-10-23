@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl';
 import './Map.css';
 
 import {layers} from './layers';
+import {sources} from './sources.js';
 
 function Map(props) {
   //Get the value of a State variable, and store it to a const, to use it later
@@ -13,9 +14,9 @@ function Map(props) {
   });
 
   const mapContainer = useRef(null);
-  const [lng] = useState(5.102406);
-  const [lat] = useState(52.0729252);
-  const [zoom] = useState(14);
+  const [lng] = useState(4.4671854);
+  const [lat] = useState(51.9250836);
+  const [zoom] = useState(15);
   const [counter, setCounter] = useState(0);
   let map = useRef(null);
 
@@ -59,7 +60,6 @@ function Map(props) {
         // console.log('source does exist. setting vehicles', vehicles)
         // map.current.getSource('vehicles').setData(vehicles);
       } else {
-        // console.log('source does not exist. setting vehicles', vehicles)
         map.current.addSource('vehicles', {
           'type': 'geojson',
           'data': vehicles

@@ -3,22 +3,27 @@ import {Map as MapComponent} from '../components/Map/Map.jsx';
 
 function Map(props) {
   const [layers, setLayers] = useState([
-    'vehicles-heatmap',
-    'vehicles-point'
+    // 'vehicles-heatmap',
+    // 'vehicles-point',
+    'vehicles-heatmap-city-level',
   ]);
-  const [sources, setSources] = useState([]);
+  const [sources, setSources] = useState([
+    'vehicles'
+  ]);
 
   return <div>
     Map type:
     <button onClick={() => {
 
     }}>
-      Default
-    </button>
+      Vehicles
+    </button> | 
     <button>
       Heatmap
-    </button>
-    <MapComponent layers={layers} />
+    </button><br />
+    <MapComponent
+      layers={layers}
+    />
   </div>
 }
 
