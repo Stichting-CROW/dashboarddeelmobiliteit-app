@@ -1,11 +1,23 @@
 module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  mode: 'jit',
+  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html', './src/components/*.{js,jsx}'],
   darkMode: false, // or 'media' or 'class'
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "blue",
+        secondary: "purple",
+        "text-base": "white",
+        "text-menu": "text-blue-500"
+      }
+    },
   },
   variants: {
-    extend: {},
+    extend: {
+      minWidth: {
+        '48': '12rem',
+      }
+    },
   },
   plugins: [],
 }

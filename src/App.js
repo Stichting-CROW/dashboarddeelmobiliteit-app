@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
  BrowserRouter as Router,
  Switch,
@@ -9,17 +9,22 @@ import Menu from './components/Menu.jsx';
 import Map from './pages/Map.jsx';
 import Demo from './pages/Demo.jsx';
 import Login from './pages/Login.jsx';
-import Filterbar from './components/Filterbar.jsx';
+import Filterbar from './components/Filterbar/Filterbar.jsx';
 import moment from 'moment';
+import { store } from './AppProvider.js';
 
 import { useSelector, useDispatch } from 'react-redux';
 import useInterval from './customHooks/useInterval.js';
 
+import { initUpdateGebiedenAanbieders, forceUpdateGebiedenAanbieders } from './poll-api/pollMetadataGebiedenAanbieders.js';
+import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.js';
+
 import './App.css';
 
 function App() {
+  const mapContainer = useRef(null);
+
   const dispatch = useDispatch()
-  
   
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
@@ -140,6 +145,16 @@ function App() {
     });
   }
   
+  useEffect(()=>{
+    initUpdateGebiedenAanbieders(store);
+    forceUpdateGebiedenAanbieders();
+  });
+  
+  useEffect(()=>{
+    initUpdateZones(store);
+    forceUpdateZones();
+  });
+
   useInterval(() => {
     fetchVehiclesInPublicSpace();
   }, 30 * 1000);// every 30 seconds
@@ -148,25 +163,26 @@ function App() {
     fetchVehiclesInPublicSpace();
   })
   
-
   return (
     <Router>
-       <div className="App">
-        <Menu />
-        { isLoggedIn && showfilter ? <Filterbar /> : null }
-
-         <Switch>
-           <Route path="/demo">
-            <Demo />
-           </Route>
-           <Route path="/login">
-              <Login />
-           </Route>
-           <Route path="/">
-            <Map />
-           </Route>
-         </Switch>
-       </div>
+       <div className="app">
+          <div className="gui-layer">
+            <Menu />
+            { isLoggedIn && showfilter ? <Filterbar /> : null }
+            <Switch>
+              <Route path="/demo">
+               <Demo />
+              </Route>
+              <Route path="/login">
+                 <Login />
+              </Route>
+              <Route path="/">
+               <Map mapContainer={mapContainer}/>
+              </Route>
+            </Switch>
+          </div>
+          <div ref={mapContainer} className="map-layer"></div>
+        </div>
      </Router>
   );
 }

@@ -1,4 +1,12 @@
-.App {
-  text-align: center;
+.app {
+  @apply absolute w-screen h-screen z-0 bg-green-400 flex flex-col min-h-screen box-border;
+}
+/*  */
+
+.gui-layer {
+  @apply absolute w-screen h-auto z-10 bg-transparent;
 }
 
+.map-layer {
+  @apply fixed w-screen h-screen z-0 bg-green-400;
+}

@@ -1,12 +1,3 @@
-
-.Map {
-  position: relative;
-  width: 100%;
-  height: 100%; /* calculate height of the screen minus the heading */
-}
-
 .map {
-  position: absolute;
-  width: 100%;
-  height: calc(100vh - 48px);
+  @apply absolute h-screen w-screen inset-0 box-border border-2 border-white bg-blue-500
 }

@@ -6,31 +6,38 @@ function Map(props) {
     'vehicles-heatmap',
     'vehicles-point'
   ]);
-  const [sources, setSources] = useState([
-    'vehicles'
-  ]);
-
-  return <div>
-    Map type:
-    <button onClick={() => {
-      setLayers([
-        'vehicles-heatmap',
-        'vehicles-point',
-      ])
-    }}>
-      Vehicles
-    </button> | 
-    <button onClick={() => {
-      setLayers([
-        'vehicles-heatmap-city-level'
-      ])
-    }}>
-      Heatmap
-    </button><br />
-    <MapComponent
-      layers={layers}
-    />
-  </div>
+  // const [sources, setSources] = useState([
+  //   'vehicles'
+  // ]);
+  
+  return (
+    <div className="flex flex-col">
+      <div className="flex-none">
+        Map type:
+        <button onClick={() => {
+          setLayers([
+            'vehicles-heatmap',
+            'vehicles-point',
+          ])
+        }}>
+          Vehicles
+        </button> |
+        <button className="" onClick={() => {
+          setLayers([
+            'vehicles-heatmap-city-level'
+          ])
+        }}>
+          Heatmap
+        </button><br />
+      </div>
+      <div className="flex-1 bg-red-400">
+        <MapComponent mapContainer={props.mapContainer}
+          layers={layers}
+        />
+      </div>
+  </div>);
+  
+  
 }
 
 export default Map;

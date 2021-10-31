@@ -17,7 +17,8 @@ const persistedState = localStorage.getItem('CROWDD_reduxState')
   ? JSON.parse(localStorage.getItem('CROWDD_reduxState'))
   : {}
 
-const store = createStore(
+
+export const store = createStore(
   appReducer,
   persistedState,
   composeEnhancers(applyMiddleware(thunk)),

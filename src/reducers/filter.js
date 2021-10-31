@@ -1,8 +1,8 @@
 const initialState = {
   visible: false,
   gebied: "",
-  zones: [],
-  datum: null,
+  zones: "",
+  datum: (new Date()).toISOString(),
   aanbieders: ""
 }
 
@@ -20,49 +20,63 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           gebied: action.payload,
+          zones: ""
+      };
+    }
+
+    case 'SET_FILTER_DATUM': {
+      console.log('reducer filter set datum to %s', action.payload)
+      return {
+          ...state,
+          datum: action.payload
+      };
+    }
+    case 'ADD_TO_FILTER_ZONES': {
+      console.log('add item %s to zones filter %o', action.payload, state)
+      let zones = [];
+      if(state.zones) {
+        try {
+          zones = state.zones.split(",") || []
+        } catch(ex) {
+          zones = [];
+        }
+      }
+      if(!zones.includes(action.payload)) {
+        zones.push(action.payload);
+      }
+
+      return {
+          ...state,
+          zones: zones.join(",")
+      };
+    }
+    case 'REMOVE_FROM_FILTER_ZONES': {
+      console.log('remove item %s to zones filter', action.payload)
+      let zones = state.zones.split(",") || [];
+      zones = zones.filter((item) => { return item !== action.payload });
+
+      return {
+          ...state,
+          zones: zones.join(",")
+      };
+    }
+    case 'CLEAR_FILTER_ZONES': {
+      console.log('clear zones filter')
+
+      return {
+          ...state,
           zones: []
       };
     }
-    // case 'ADD_TO_FILTER_ZONES': {
-    //   console.log('add item %s to zones filter', action.payload)
-    //   if(!state.filter.zones.includes(action.payload)) {
-    //     state.filter.zones.push(action.payload);
-    //   }
-    //
-    //   return {
-    //       ...state,
-    //       zones: state.filter.zones
-    //   };
-    // }
-    // case 'REMOVE_FROM_FILTER_ZONES': {
-    //   console.log('remove item %s to zones filter', action.payload)
-    //   let zones = state.filter.zones.filter((item) => { return item !== action.payload });
-    //
-    //   return {
-    //       ...state,
-    //       zones
-    //   };
-    // }
-    // case 'CLEAR_FILTER_ZONES': {
-    //   console.log('clear zones filter')
-    //
-    //   return {
-    //       ...state,
-    //       zones: []
-    //   };
-    // }
     case 'ADD_TO_FILTER_AANBIEDERS': {
       console.log('add item %s to aanbieders filter %o', action.payload, state)
       let aanbieders = [];
       if(state.aanbieders) {
-        console.log("filter exists %o", state.aanbieders)
         aanbieders = state.aanbieders.split(",") || []
       }
-      console.log("aanbieders before %o", aanbieders)
       if(!aanbieders.includes(action.payload)) {
         aanbieders.push(action.payload);
       }
-      console.log("aanbieders after %o", aanbieders)
     
       return {
           ...state,

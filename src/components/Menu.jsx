@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { clearUser } from '../actions/authentication';
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
+import { IconButtonFilter } from './IconButtons.jsx';
 
 function Menu() {
   const dispatch = useDispatch();
@@ -29,43 +30,37 @@ function Menu() {
     })
   }
 
-  return <ul className="flex">
-    <li className="mr-6">
-      <Link className="text-blue-500 hover:text-blue-800" to="/">
-        Home
-      </Link>
-    </li>
-    <li className="mr-6">
-      <Link className="text-blue-500 hover:text-blue-800" to="/demo">
-        Demo
-      </Link>
-    </li>
-    <li className="mr-6">
-      <Link className="text-blue-500 hover:text-blue-800" to="/map/park">
-        Parkeerdata
-      </Link>
-    </li>
-    {isLoggedIn ?
-        <li className={showfilter?"mr-6 toggleactive":"mr-6 togglenotactive"} onClick={toggleFilter}>
-          {showfilter?"Hide":"Show"} Filter
-        </li>
-        :
-        null }
-    {isLoggedIn
-      ?
-      <li className="mr-6">
-        <Link className="text-blue-500 hover:text-blue-800" onClick={logOut} to="/">
-          Log uit
+  return (
+    <div className="box-border p-2 pb-0">
+      <div className="flex bg-white rounded-lg w-full p-4">
+        <Link className="text-menu" to="/">
+          Home
         </Link>
-      </li>
-      :
-      <li className="mr-6">
-        <Link className="text-blue-500 hover:text-blue-800" to="/login">
-          Log in
+        <Link className="text-menu" to="/demo">
+          Demo
         </Link>
-      </li>
-    }
-  </ul>
+        <Link className="text-menu" to="/map/park">
+          Parkeerdata
+        </Link>
+        {isLoggedIn ?
+            <div className="text-menu">
+              <IconButtonFilter  onClick={toggleFilter} />
+            </div>
+            :
+            null }
+        {isLoggedIn
+          ?
+          <Link className="text-menu flex-grow text-right" onClick={logOut} to="/">
+            Log uit
+          </Link>
+          :
+          <Link className="text-menu flex-grow text-right" to="/login">
+            Log in
+          </Link>
+        }
+      </div>
+    </div>
+  )
 
   // <nav class="flex items-center justify-around flex-wrap bg-teal-500 p-6">
   // </nav>

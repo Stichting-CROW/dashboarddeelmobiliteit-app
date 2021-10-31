@@ -1,0 +1,59 @@
+.filter-item {
+  @apply bg-white p-1 border-solid border-2 border-black rounded-xl gap-4 text-center
+}
+
+.filter-title {
+  @apply text-xs
+}
+
+.filter-value {
+  @apply grid grid-cols-1
+}
+
+.filter-form-title {
+  @apply text-xl font-bold pb-4 text-center
+}
+
+.filter-form-values {
+  @apply text-sm grid grid-cols-3 auto-rows-auto gap-4
+}
+
+.form-item {
+  @apply p-2 bg-white w-40 h-8 text-xs rounded-md text-center
+}
+
+.form-item-selected {
+  @apply bg-green-300
+}
+
+.filter-form-selectie {
+  @apply flex flex-col
+}
+
+.modalbox-bg {
+  @apply fixed inset-0 w-screen h-screen flex justify-center align-middle bg-gray-100 bg-opacity-40 box-border z-20
+}
+
+.modalbox {
+  @apply absolute z-30 w-auto bg-white h-auto overflow-auto mx-auto top-20 bg-gray-300 text-left fixed p-4  rounded-xl;
+  /* width: 100vw;
+  height: 50vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  top: 0; */
+}
+
+.modal-close {
+  position: relative;
+  right:0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  colr: black;
+  background: url('../../images/211651_close_round_icon.svg') no-repeat fixed center;
+}
+
+.closebutton {
+  @apply w-48 h-10 bg-green-500 p-4 rounded-xl text-black
+}

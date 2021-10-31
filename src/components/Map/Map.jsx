@@ -13,7 +13,7 @@ function Map(props) {
     return state.vehicles ? state.vehicles.data : null;
   });
 
-  const mapContainer = useRef(null);
+  const mapContainer = props.mapContainer;
   const [lng] = useState(4.4671854);
   const [lat] = useState(51.9250836);
   const [zoom] = useState(15);
@@ -33,14 +33,14 @@ function Map(props) {
         zoom: zoom
       });
       // Add controls
-      map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
-
+      map.current.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+  
       map.current.on('load', function() {
         setCounter(counter + 1)
       })
     }
     initMap();
-  }, [vehicles, lng, lat, zoom, counter])
+  }, [vehicles, lng, lat, zoom, counter, mapContainer])
 
   useEffect(() => {
     const addDataSources = (vehicles) => {
@@ -81,7 +81,7 @@ function Map(props) {
 
       // Remove 'old' layers
       const allLayers = map.current.getStyle().layers;
-      allLayers.map(x => {
+      allLayers.forEach(x => {
         // Check if this is one of our layers
         if(x.id.indexOf('vehicles-') > -1) {
           // If so, remove
@@ -89,7 +89,7 @@ function Map(props) {
         }
       })
       // Add selected layers to the map
-      props.layers.map(x => {
+      props.layers.forEach(x => {
         if(props.layers.indexOf(x) >= -1) {
           const doesLayerExist = map.current.getLayer(x);
           if(! doesLayerExist) map.current.addLayer(layers[x]);
@@ -99,9 +99,7 @@ function Map(props) {
     addLayers(vehicles);
   }, [vehicles, counter, props.layers]);
 
-  return <div className="Map">
-    <div ref={mapContainer} className="map" />
-  </div>
+  return (null)
 }
 
 export {Map};
