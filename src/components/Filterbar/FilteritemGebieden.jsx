@@ -29,9 +29,14 @@ function FilteritemGebieden() {
         <div className="filter-form-selectie">
           <div className="filter-form-title">Selecteer Gebied</div>
             <div className="filter-form-values">
+              { filterGebied === ""?
+                  <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
+                  :
+                  <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
+              }
               { gebieden.map(a=>{
                   if(filterGebied === a.gm_code) {
-                    return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code)}}>{a.name}</div>)
+                    return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
                   } else {
                     return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
                   }
@@ -47,7 +52,7 @@ function FilteritemGebieden() {
   return (
       <div className="filter-item" onClick={e=>{setShowSelect(!showSelect)}}>
         <div className="filter-title">Gebieden</div>
-        <div className="filter-value">{value.name}</div>
+        <div className="filter-value">{value===""?"Alle Gebieden":value.name}</div>
         { showSelect ? renderSelectGebieden(gebieden) : null }
       </div>
     )

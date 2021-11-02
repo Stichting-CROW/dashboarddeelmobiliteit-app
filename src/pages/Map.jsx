@@ -3,8 +3,8 @@ import {Map as MapComponent} from '../components/Map/Map.jsx';
 
 function Map(props) {
   const [layers, setLayers] = useState([
-    // 'vehicles-heatmap',
-    // 'vehicles-point',
+    'vehicles-heatmap',
+    'vehicles-point',
     'zones-geodata'
   ]);
   // const [sources, setSources] = useState([
@@ -19,13 +19,15 @@ function Map(props) {
           setLayers([
             'vehicles-heatmap',
             'vehicles-point',
+            'zones-geodata',
           ])
         }}>
           Vehicles
         </button> |
         <button className="" onClick={() => {
           setLayers([
-            'vehicles-heatmap-city-level'
+            'vehicles-heatmap-city-level',
+            'zones-geodata',
           ])
         }}>
           Heatmap
