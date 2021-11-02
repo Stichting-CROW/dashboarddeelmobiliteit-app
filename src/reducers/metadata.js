@@ -4,7 +4,6 @@ const initialState = {
   aanbieders: [],
   gebieden: [],
   zones: [],
-  zones_geodata: [],
 }
 
 export default function filter(state = initialState, action) {
@@ -34,22 +33,10 @@ export default function filter(state = initialState, action) {
       let current = state.zones ? state.zones: [];
     
       if(md5(current)===md5(action.payload)) { return state; }
-      console.log("ACTION: set zones", action.payload)
 
       return {
           ...state,
           zones: action.payload,
-      };
-    }
-
-    case 'SET_ZONES_GEODATA': {
-      let current = state.zones_geodata ? state.zones_geodata: [];
-    
-      if(md5(current)===md5(action.payload)) { return state; }
-
-      return {
-          ...state,
-          zones_geodata: action.payload,
       };
     }
 

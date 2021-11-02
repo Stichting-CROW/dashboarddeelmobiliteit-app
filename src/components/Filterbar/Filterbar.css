@@ -27,7 +27,7 @@
 }
 
 .filter-form-selectie {
-  @apply flex flex-col
+  @apply flex flex-col overflow-auto
 }
 
 .modalbox-bg {
@@ -35,7 +35,7 @@
 }
 
 .modalbox {
-  @apply absolute z-30 w-auto bg-white h-auto overflow-auto mx-auto top-20 bg-gray-300 text-left fixed p-4  rounded-xl;
+  @apply absolute z-30 w-5/6 bg-white h-3/4 overflow-auto mx-auto top-20 bg-gray-300 text-left fixed p-4 rounded-xl;
   /* width: 100vw;
   height: 50vh;
   position: absolute;

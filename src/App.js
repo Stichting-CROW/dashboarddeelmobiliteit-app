@@ -18,6 +18,7 @@ import useInterval from './customHooks/useInterval.js';
 
 import { initUpdateGebiedenAanbieders, forceUpdateGebiedenAanbieders } from './poll-api/pollMetadataGebiedenAanbieders.js';
 import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.js';
+import { initUpdateZonesgeodata, forceUpdateZonesgeodata } from './poll-api/pollMetadataZonesgeodata.js';
 
 import './App.css';
 
@@ -85,12 +86,6 @@ function App() {
         }
         let geoJson = {
            "type":"FeatureCollection",
-           "crs":{
-              "type":"name",
-              "properties":{
-                 "name":"urn:ogc:def:crs:OGC:1.3:CRS84"
-              }
-           },
            "features":[]
         }
         
@@ -152,7 +147,9 @@ function App() {
   
   useEffect(()=>{
     initUpdateZones(store);
-    forceUpdateZones();
+    initUpdateZonesgeodata(store);
+    forceUpdateZones(store);
+    forceUpdateZonesgeodata(store);
   });
 
   useInterval(() => {

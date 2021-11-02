@@ -1,3 +1,4 @@
+import { getEmptyZonesGeodataPayload } from './pollMetadataZonesgeodata';
 var store_zones = undefined;
 
 const isLoggedIn = (state) => {
@@ -10,14 +11,14 @@ const updateZones = ()  => {
   let delay = 5 * 1000;
   try {
     if(undefined===store_zones) {
-      console.log("no redux state available yet - skipping metadata update");
+      // console.log("no redux state available yet - skipping zones update");
       return false;
     }
     
     const state = store_zones.getState();
-    if(!isLoggedIn(state)||state.filter.gebied==="") {
+    if(!isLoggedIn(state)||!state||state.filter.gebied==="") {
       store_zones.dispatch({ type: 'SET_ZONES_LIST', payload: []});
-      store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: []});
+      store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
     } else {
       // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
       let url_zones="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+state.filter.gebied;
@@ -54,9 +55,7 @@ export const forceUpdateZones = () => {
 }
 
 export const initUpdateZones = (_store) => {
-  console.log("initUpdateZones")
+  // console.log("initUpdateZones")
   store_zones = _store;
+  forceUpdateZones();
 }
-
-forceUpdateZones();
-

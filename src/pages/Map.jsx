@@ -3,8 +3,9 @@ import {Map as MapComponent} from '../components/Map/Map.jsx';
 
 function Map(props) {
   const [layers, setLayers] = useState([
-    'vehicles-heatmap',
-    'vehicles-point'
+    // 'vehicles-heatmap',
+    // 'vehicles-point',
+    'zones-geodata'
   ]);
   // const [sources, setSources] = useState([
   //   'vehicles'

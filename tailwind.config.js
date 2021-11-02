@@ -14,9 +14,6 @@ module.exports = {
   },
   variants: {
     extend: {
-      minWidth: {
-        '48': '12rem',
-      }
     },
   },
   plugins: [],

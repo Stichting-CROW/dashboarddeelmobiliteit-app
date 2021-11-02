@@ -51,9 +51,9 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_ZONES': {
-      console.log('remove item %s to zones filter', action.payload)
+      console.log('remove item %o from zones filter', action.payload)
       let zones = state.zones.split(",") || [];
-      zones = zones.filter((item) => { return item !== action.payload });
+      zones = zones.filter((item) => {return item.toString() !== action.payload.toString() });
 
       return {
           ...state,
@@ -84,7 +84,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_AANBIEDERS': {
-      console.log('remove item %s to aanbieders filter', action.payload)
+      console.log('remove item %s from aanbieders filter', action.payload)
       let aanbieders = state.aanbieders.split(",") || [];
       aanbieders = aanbieders.filter((item) => { return item !== action.payload });
     
