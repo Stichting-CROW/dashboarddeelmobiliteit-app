@@ -4,6 +4,7 @@ import {
  Switch,
  Route
 } from "react-router-dom";
+import $ from 'jquery';
 
 import Menu from './components/Menu.jsx';
 import Map from './pages/Map.jsx';
@@ -27,6 +28,12 @@ function App() {
 
   const dispatch = useDispatch()
   
+  useEffect(x => {
+    $('body').on('updateVehicleData', () => {
+      fetchVehiclesInPublicSpace();
+    });
+  }, [])
+
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
   const isLoggedIn = useSelector(state => {
@@ -140,12 +147,12 @@ function App() {
     });
   }
   
-  useEffect(()=>{
+  useEffect(() => {
     initUpdateGebiedenAanbieders(store);
     forceUpdateGebiedenAanbieders();
   });
   
-  useEffect(()=>{
+  useEffect(() => {
     initUpdateZones(store);
     initUpdateZonesgeodata(store);
     forceUpdateZones(store);

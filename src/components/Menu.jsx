@@ -1,12 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import moment from 'moment';
 import { Link } from "react-router-dom";
 import { clearUser } from '../actions/authentication';
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
+import $ from 'jquery';
 
 function Menu() {
   const dispatch = useDispatch();
+  let TO_interval, dateToShow = moment();
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
@@ -41,6 +44,24 @@ function Menu() {
         </Link>
         <Link className="text-menu" to="/map/park">
           Parkeerdata
+        </Link>
+        <Link className="text-menu" onClick={(e) => {
+          e.preventDefault();
+          dispatch({
+            type: 'SET_FILTER_DATUM',
+            payload: dateToShow.toISOString()
+          })
+          clearInterval(TO_interval);
+          TO_interval = setInterval(x => {
+            dateToShow.subtract(1, 'hour');
+            dispatch({
+              type: 'SET_FILTER_DATUM',
+              payload: dateToShow.toISOString()
+            })
+            $('body').trigger('updateVehicleData');
+          }, 3000)
+        }} hidden>
+          Back in time
         </Link>
         {isLoggedIn ?
             <div className="text-menu">

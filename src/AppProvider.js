@@ -17,7 +17,6 @@ const persistedState = localStorage.getItem('CROWDD_reduxState')
   ? JSON.parse(localStorage.getItem('CROWDD_reduxState'))
   : {}
 
-
 export const store = createStore(
   appReducer,
   persistedState,
