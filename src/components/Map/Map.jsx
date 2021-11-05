@@ -5,10 +5,9 @@ import maplibregl from 'maplibre-gl';
 import './Map.css';
 
 import {layers} from './layers';
+import {sources} from './sources.js';
 
 const md5 = require('md5');
-
-// import {sources} from './sources.js';
 
 function Map(props) {
   //Get the value of a State variable, and store it to a const, to use it later
@@ -68,16 +67,17 @@ function Map(props) {
       }
 
       // Check if source exists
-      const doesSourceExistVehicles = map.current.getSource('vehicles');
-      if(doesSourceExistVehicles) {
-        // console.log('source does exist. setting vehicles', vehicles)
-        // map.current.getSource('vehicles').setData(vehicles);
+      const doesSourceExist = map.current.getSource(props.activeSource);
+
+      if(doesSourceExist) {
+        // Source does exist. Do nothing
       } else {
-        console.log("Add source vehicles", vehicles)
-        map.current.addSource('vehicles', {
+        console.log('Add source', props.activeSource)
+        let source = Object.assign({}, {
           'type': 'geojson',
-          'data': vehicles
-        });
+          'data': vehicles,
+        }, sources[props.activeSource] ? sources[props.activeSource] : {});
+        map.current.addSource(props.activeSource, source);
       }
 
       // Check if source exists
@@ -104,7 +104,13 @@ function Map(props) {
     }
     addDataSources(vehicles, zones_geodata);
     
-  }, [vehicles, zones_geodata, zonesGeodataHash, counter])
+  }, [
+    vehicles,
+    zones_geodata,
+    zonesGeodataHash,
+    counter,
+    props.activeSource
+  ])
 
   useEffect(() => {
     const addLayers = (vehicles, zones_geodata) => {
@@ -144,4 +150,6 @@ function Map(props) {
   return (null)
 }
 
-export {Map};
+export {
+  Map
+};
