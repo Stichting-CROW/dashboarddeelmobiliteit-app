@@ -29,7 +29,7 @@ function FilteritemAanbieders() {
         <div className="filter-form-selectie">
             <div className="filter-form-title">Selecteer Aanbieders</div>
             <div className="filter-form-values">
-            { aanbieders.map((a,i)=>{
+            { aanbieders.map((a,i) => {
                 let isSelected = filterAanbieders.includes(a.system_id);
                 if(isSelected) {
                   return (<div key={'item-'+a.system_id} className="form-item-selected form-item" onClick={e=>{ e.stopPropagation(); removeFromFilterAanbieders(a.system_id)}}>{a.name}</div>)

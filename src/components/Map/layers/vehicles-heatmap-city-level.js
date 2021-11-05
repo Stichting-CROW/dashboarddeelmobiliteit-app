@@ -8,21 +8,21 @@ export default {
       'interpolate',
       ['linear'],
       ['get', 'mag'],
-      0,
-      0,
-      6,
-      1
+      0, 0.0001,
+      10, 1
     ],
-    // Increase the heatmap color weight weight by zoom level
-    // heatmap-intensity is a multiplier on top of heatmap-weight
+
     'heatmap-intensity': [
       'interpolate',
       ['linear'],
       ['zoom'],
-      0,
-      1,
-      9,
-      3
+      0, 0.0025,
+      5, 0.005,
+      7.5, 0.01,
+      10, 0.05,
+      12, 0.075,/* city level */
+      15, 0.1,
+      20, 1,
     ],
 
     // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
@@ -32,38 +32,33 @@ export default {
       'interpolate',
       ['linear'],
       ['heatmap-density'],
-      0,
-      'rgba(0, 0, 255, 0)',
-      0.1,
-      'royalblue',
-      0.3,
-      'cyan',
-      0.5,
-      'lime',
-      0.7,
-      'yellow',
-      1,
-      'red'
+      0, 'rgba(0, 0, 255, 0)',
+      0.25, '#ffd837',
+      0.5, '#fe862e',
+      0.75, '#fd3e48',
+      1, '#9a231f'
     ],
 
     // Adjust the heatmap radius by zoom level
+    // Groter = grotere radius = duidelijker waar het druk is
     'heatmap-radius': [
       'interpolate',
       ['linear'],
       ['zoom'],
-      0,
-      2,
-      9,
-      20
+      0, 10,
+      10, 12,
+      12, 20,
+      15, 40,
+      20, 60,
+      30, 100,
+      40, 100
     ],
-    // 'heatmap-opacity': [
-    //   'interpolate',
-    //   ['linear'],
-    //   ['zoom'],
-    //   7,
-    //   1,
-    //   9,
-    //   4
-    // ]
+    'heatmap-opacity': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      7, 1,
+      9, 0.8
+    ]
   }
 }
