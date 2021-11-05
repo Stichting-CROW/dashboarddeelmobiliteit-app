@@ -7,7 +7,7 @@ export default {
   // Size circle radius by earthquake magnitude and zoom level
   'circle-radius': [
     'interpolate', ['linear'], ['zoom'],
-    12, 1,
+    12, 2,
     16, ['*', 2, ['get', 'amount']]
   ],
   // Color circle by earthquake magnitude
