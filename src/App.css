@@ -1,10 +1,11 @@
 .app {
+  font-family: Inter, sans-serif;
   @apply absolute w-screen h-screen z-0 bg-green-400 flex flex-col min-h-screen box-border;
 }
 /*  */
 
 .gui-layer {
-  @apply absolute w-screen h-auto z-10 bg-transparent;
+  @apply absolute w-full h-auto z-10 bg-transparent;
 }
 
 .map-layer {
