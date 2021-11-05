@@ -11,7 +11,7 @@ function Map(props) {
   
   return (
     <div className="flex flex-col">
-      <div className="flex-none">
+      <div className="flex-none text-center">
         Map type:
         <button onClick={() => {
           setLayers([
