@@ -4,6 +4,7 @@ const initialState = {
   aanbieders: [],
   gebieden: [],
   zones: [],
+  vehicle_types: [],
 }
 
 export default function filter(state = initialState, action) {
@@ -37,6 +38,17 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           zones: action.payload,
+      };
+    }
+
+    case 'SET_VEHICLE_TYPES': {
+      let current = state.vehicle_types ? state.vehicle_types: [];
+    
+      if(md5(current)===md5(action.payload)) { return state; }
+
+      return {
+          ...state,
+          vehicle_types: action.payload,
       };
     }
 

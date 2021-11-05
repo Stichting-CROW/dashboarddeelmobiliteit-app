@@ -3,7 +3,7 @@ import './Filterbar.css';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalBox from './ModalBox.jsx';
 
-function Filterbar() {
+function FilterItemDatum() {
   const dispatch = useDispatch()
   
   const filterDatum = useSelector(state => {
@@ -70,4 +70,4 @@ function Filterbar() {
   )
 }
 
-export default Filterbar;
+export default FilterItemDatum;

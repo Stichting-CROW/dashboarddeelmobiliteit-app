@@ -17,7 +17,7 @@ const updateZones = ()  => {
     
     const state = store_zones.getState();
     if(!isLoggedIn(state)||!state||state.filter.gebied==="") {
-      store_zones.dispatch({ type: 'SET_ZONES_LIST', payload: []});
+      store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
     } else {
       // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
