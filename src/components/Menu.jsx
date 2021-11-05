@@ -36,11 +36,11 @@ function Menu() {
         <Link className="text-menu" to="/">
           Home
         </Link>
-        <Link className="text-menu" to="/demo">
-          Demo
-        </Link>
         <Link className="text-menu" to="/map/park">
           Parkeerdata
+        </Link>
+        <Link className="text-menu" to="/map/trip">
+          Tripdata
         </Link>
         {isLoggedIn ?
             <div className="text-menu">

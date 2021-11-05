@@ -3,6 +3,8 @@ const initialState = {
   gebied: "",
   zones: "",
   datum: (new Date()).toISOString(),
+  intervalstart: (new Date()).toISOString(),
+  intervalend: (new Date()).toISOString(),
   aanbieders: ""
 }
 
@@ -23,12 +25,25 @@ export default function filter(state = initialState, action) {
           zones: ""
       };
     }
-
     case 'SET_FILTER_DATUM': {
       console.log('reducer filter set datum to %s', action.payload)
       return {
           ...state,
           datum: action.payload
+      };
+    }
+    case 'SET_FILTER_INTERVAL_START': {
+      console.log('reducer filter set interval start to %s', action.payload)
+      return {
+          ...state,
+          intervalstart: action.payload
+      };
+    }
+    case 'SET_FILTER_INTERVAL_END': {
+      console.log('reducer filter set interval end to %s', action.payload)
+      return {
+          ...state,
+          intervalend: action.payload
       };
     }
     case 'ADD_TO_FILTER_ZONES': {

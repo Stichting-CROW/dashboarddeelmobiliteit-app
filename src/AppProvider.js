@@ -28,7 +28,7 @@ export const store = createStore(
 store.subscribe(() => {
   const storeState = store.getState();
   const storeStateToSaveInLocalStorage = {
-    lastUpdate: moment().unix(),
+    last_update: moment().unix(),
     authentication: storeState.authentication,
     filter: storeState.filter
   }
