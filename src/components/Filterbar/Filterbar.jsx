@@ -12,10 +12,10 @@ function Filterbar({showinterval=false}) {
       <div className="flex bg-gray-400 rounded-lg p-2 w-full grid grid-cols-4 gap-4">
         <FilteritemGebieden />
         <FilteritemZones />
-        { showinterval ?
-            <FilteritemInterval />
-            :
-            <FilteritemDatum /> }
+        { showinterval
+          ? <FilteritemInterval />
+          : <FilteritemDatum />
+        }
         <FilteritemAanbieders />
       </div>
     </div>

@@ -1,13 +1,14 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import moment from 'moment';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+
 import { clearUser } from '../actions/authentication';
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
-import $ from 'jquery';
 
 function Menu() {
+  const [pathName, setPathName] = useState(document.location.pathname);
   const dispatch = useDispatch();
   let TO_interval, dateToShow = moment();
 
@@ -33,16 +34,23 @@ function Menu() {
     })
   }
 
+  // Log pathname on navigate
+  // https://v5.reactrouter.com/web/api/Hooks
+  let location = useLocation();
+  React.useEffect(() => {
+    setPathName(document.location.pathname);
+  }, [location]);
+
   return (
-    <div className="box-border p-2 pb-0">
-      <div className="flex bg-white rounded-lg w-full p-4">
-        <Link className="text-menu" to="/">
+    <div className="Menu bg-white box-border p-2 pb-0 rounded-3xl">
+      <div className="flex p-4">
+        <Link className={`text-menu ${pathName == '/' ? 'is-active' : ''}`} to="/">
           Home
         </Link>
-        <Link className="text-menu" to="/map/park">
+        <Link className={`text-menu ${pathName == '/map/park' ? 'is-active' : ''}`} to="/map/park">
           Parkeerdata
         </Link>
-        <Link className="text-menu" onClick={(e) => {
+        <Link className={`text-menu ${pathName == '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();
           dispatch({
             type: 'SET_FILTER_DATUM',
@@ -55,12 +63,11 @@ function Menu() {
               type: 'SET_FILTER_DATUM',
               payload: dateToShow.toISOString()
             })
-            $('body').trigger('updateVehicleData');
           }, 3000)
         }} hidden>
           Back in time
         </Link>
-        <Link className="text-menu" to="/map/trip">
+        <Link className={`text-menu ${pathName == '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
           Tripdata
         </Link>
         {isLoggedIn ?

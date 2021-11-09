@@ -24,6 +24,11 @@ The custom domain name in GitHub settings did reset on every deploy to gh-pages.
 
 Adding a file named `CNAME` into the build folder fixed this: https://github.com/gitname/react-gh-pages/issues/19#issuecomment-436148409
 
+### Github doesn't support Single Page App routing
+
+I.e. /route/route-name gives an 404.
+
+I solved this by implementing this hack: https://create-react-app.dev/docs/deployment/#notes-on-client-side-routing
 
 ## Available Scripts
 
