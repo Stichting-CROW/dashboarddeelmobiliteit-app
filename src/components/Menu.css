@@ -9,13 +9,22 @@
 }
 
 .text-menu {
-  @apply text-black hover:text-blue-800 mr-6;
+  @apply flex flex-col justify-center text-black hover:text-blue-800 px-6 border-r border-black;
 }
 .text-menu.is-active {
   color: #15AEEF;
 }
+.text-menu:last-child {
+  @apply border-r-0
+}
 
 .Menu {
-  box-shadow: 0px 3px 6px #00000029;
   opacity: 1;
+  bottom: 0;
+}
+
+.Menu-inner {
+  overflow-x: auto;
+  max-width: 100%;
+  width: 600px;
 }

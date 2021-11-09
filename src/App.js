@@ -35,7 +35,7 @@ function App() {
     return state.filter ? state.filter.visible : false;
   });
   
-  useEffect(()=>{
+  useEffect(() => {
     initUpdateZones(store);
     initUpdateZonesgeodata(store);
     initUpdateAccessControlList(store);
@@ -53,8 +53,9 @@ function App() {
        <Redirect from="/" exact to="/map/park" />
        <div className="app">
           <div className="gui-layer">
-            <Menu />
+
             { isLoggedIn && showfilter ? <Filterbar showinterval={false}/> : null }
+
             <Switch>
               <Route path="/login">
                  <Login />
@@ -66,6 +67,9 @@ function App() {
                <Map mapContainer={mapContainer} showParkingData={true}/>
               </Route>
             </Switch>
+
+            <Menu />
+
           </div>
           <div ref={mapContainer} className="map-layer"></div>
         </div>
