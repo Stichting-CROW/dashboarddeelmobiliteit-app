@@ -5,7 +5,7 @@ const initialState = {
 export default function vehicles(state = initialState, action) {
   switch(action.type) {
     case 'SET_VEHICLES': {
-      console.log("Set Vehicles %o", action.payload);
+      // console.log("Set Vehicles %o", action.payload);
       const vehicles = action.payload
       return {
         data: vehicles

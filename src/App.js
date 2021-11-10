@@ -34,7 +34,8 @@ function App() {
   const showfilter = useSelector(state => {
     return state.filter ? state.filter.visible : false;
   });
-  
+
+  // Init polling scripts
   useEffect(() => {
     initUpdateZones(store);
     initUpdateZonesgeodata(store);

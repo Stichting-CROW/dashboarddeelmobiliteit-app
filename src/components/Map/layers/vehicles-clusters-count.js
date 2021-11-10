@@ -1,5 +1,5 @@
 // Example code: https://maplibre.org/maplibre-gl-js-docs/example/cluster/
-export default {
+const layer = {
   'id': 'vehicles-clusters-count',
   'type': 'symbol',
   'source': 'vehicles-clusters',
@@ -10,3 +10,5 @@ export default {
     'text-size': 12
   }
 }
+
+export default layer;

@@ -1,4 +1,4 @@
-export default {
+const layer = {
   'id': 'vehicles-point',
   'type': 'circle',
   'source': 'vehicles',
@@ -43,3 +43,5 @@ export default {
     'circle-color': ['get', 'color']
   }
 }
+
+export default layer;

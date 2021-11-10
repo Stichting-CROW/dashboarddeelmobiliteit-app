@@ -1,4 +1,4 @@
-export default {
+const layer = {
   'id': 'vehicles-heatmap',
   'type': 'heatmap',
   'source': 'vehicles',
@@ -67,3 +67,5 @@ export default {
     ]
   }
 }
+
+export default layer;

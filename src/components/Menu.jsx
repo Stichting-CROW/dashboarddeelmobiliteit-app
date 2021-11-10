@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { Link, useLocation } from "react-router-dom";
 
@@ -44,10 +44,13 @@ function Menu() {
   return (
     <div className="Menu w-full fixed b-0">
       <div className="Menu-inner px-4 py-3 flex m-4 mb-1 mx-auto bg-white box-border rounded-3xl w-full shadow-lg">
-        <Link className={`text-menu ${pathName == '/' || pathName == '/map/park' ? 'is-active' : ''}`} to="/map/park">
+        <Link className={`text-menu ${pathName === '/' || pathName === '/map/park' ? 'is-active' : ''}`} to="/map/park">
           Parkeerdata
         </Link>
-        {/*<Link className={`text-menu ${pathName == '' ? 'is-active' : ''}`} onClick={(e) => {
+        <Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
+          Tripdata
+        </Link>
+        <Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();
           dispatch({
             type: 'SET_FILTER_DATUM',
@@ -61,11 +64,8 @@ function Menu() {
               payload: dateToShow.toISOString()
             })
           }, 3000)
-        }} hidden>
-          Back in time
-        </Link>*/}
-        <Link className={`text-menu ${pathName == '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
-          Tripdata
+        }}>
+          ▶️
         </Link>
         {isLoggedIn ?
             <div className="text-menu">

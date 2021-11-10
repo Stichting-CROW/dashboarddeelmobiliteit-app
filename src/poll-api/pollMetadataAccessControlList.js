@@ -38,7 +38,7 @@ const updateAccessControlList = ()  => {
   let delay = 5 * 1000;
   try {
     if(undefined===store_accesscontrollist) {
-      console.log("no redux state available yet - skipping metadata update");
+      // console.log("no redux state available yet - skipping metadata update");
       return false;
     }
     

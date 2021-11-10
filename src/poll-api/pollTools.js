@@ -29,10 +29,18 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
       ts = new Date(filter.datum).toISOString().replace(/.\d+Z$/g, "Z");
     }
     filterparams.push("timestamp="+ts)
-  } else {
+  }
+  else {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
-    if(filter.intervalstart!==""&&filter.intervalend!=="") {
+    const isInvalid = () => {
+      return ! filter
+          || filter.intervalstart === ""
+          || filter.intervalend === ""
+          || filter.intervalstart === undefined
+          || filter.intervalend === undefined;
+    }
+    if(! isInvalid()) {
       ts1 = new Date(filter.intervalstart).toISOString().replace(/.\d+Z$/g, "Z");
       ts2 = new Date(filter.intervalend).toISOString().replace(/.\d+Z$/g, "Z");
     }

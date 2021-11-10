@@ -61,8 +61,8 @@ export default function filter(state = initialState, action) {
       }
 
       return {
-          ...state,
-          zones: zones.join(",")
+        ...state,
+        zones: zones.join(",")
       };
     }
     case 'REMOVE_FROM_FILTER_ZONES': {

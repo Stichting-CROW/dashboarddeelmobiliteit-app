@@ -72,7 +72,7 @@ function Map(props) {
       if(doesSourceExist) {
         // Source does exist. Do nothing
       } else {
-        console.log('Add source', props.activeSource)
+        // console.log('Add source', props.activeSource)
         let source = Object.assign({}, {
           'type': 'geojson',
           'data': vehicles,

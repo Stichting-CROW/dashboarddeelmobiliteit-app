@@ -1,5 +1,5 @@
 // Example code: https://maplibre.org/maplibre-gl-js-docs/example/cluster/
-export default {
+const layer = {
   'id': 'vehicles-clusters-point',
   'type': 'circle',
   'source': 'vehicles-clusters',
@@ -11,3 +11,5 @@ export default {
     'circle-stroke-color': '#fff'
   }
 }
+
+export default layer;
