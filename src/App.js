@@ -35,6 +35,10 @@ function App() {
     return state.filter ? state.filter.visible : false;
   });
 
+  const filter = useSelector(state => {
+    return state.filter;
+  });
+
   // Init polling scripts
   useEffect(() => {
     initUpdateZones(store);
@@ -45,9 +49,13 @@ function App() {
     forceUpdateZones();
     forceUpdateZonesgeodata();
     forceUpdateAccessControlList();
+  });
+
+  // update scripts
+  useEffect(() => {
     forceUpdateTripData();
     forceUpdateParkingData();
-  });
+  }, [filter]);
 
   return (
     <Router>

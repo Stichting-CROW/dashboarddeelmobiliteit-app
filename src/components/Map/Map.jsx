@@ -72,8 +72,7 @@ function Map(props) {
     // Check if source exists
     const doesSourceExist = map.current.getSource(sourceName);
     // Get md5 hash of the data
-    let hash = md5(sourceData.data.features)
-    console.log(sourceName, sourceData.data.features, hash);
+    let hash = sourceData.data && sourceData.data.features ? md5(sourceData.data.features) : md5('No data yet');
     // If source does exist: update data
     if(doesSourceExist) {
       if(! sourceHash || sourceHash[sourceName] !== hash) {
@@ -107,7 +106,7 @@ function Map(props) {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
   }, [
-    vehicles,
+    vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
     zones_geodata,
     zonesGeodataHash,
     counter,
@@ -150,14 +149,7 @@ function Map(props) {
     addLayers(vehicles, zones_geodata);
   }, [vehicles, zones_geodata, counter, props.layers]);
 
-  return <div>
-    <button>
-      Add layers
-    </button>
-    <button>
-      Remove layers
-    </button>
-  </div>
+  return null;
 }
 
 export {

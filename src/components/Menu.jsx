@@ -10,7 +10,7 @@ import { IconButtonFilter } from './IconButtons.jsx';
 function Menu() {
   const [pathName, setPathName] = useState(document.location.pathname);
   const dispatch = useDispatch();
-  let TO_interval, dateToShow = moment();
+  let TO_interval, dateToShow = moment(moment().format('2021-11-06 06:00'));
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
@@ -58,12 +58,16 @@ function Menu() {
           })
           clearInterval(TO_interval);
           TO_interval = setInterval(x => {
-            dateToShow.subtract(1, 'hour');
+            dateToShow.add(30, 'minutes');
             dispatch({
               type: 'SET_FILTER_DATUM',
               payload: dateToShow.toISOString()
             })
-          }, 3000)
+          }, 1200);
+          // Stop after 10 minutes
+          setTimeout(x => {
+            clearInterval(TO_interval);
+          }, 60 * 1000 * 10);
         }}>
           ▶️
         </Link>

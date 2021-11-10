@@ -35,7 +35,7 @@ const updateParkingData = ()  => {
           return false
         }
         
-      response.json().then(function(vehicles) {
+        response.json().then(function(vehicles) {
           if(isLoggedIn) {
             vehicles = vehicles.park_events
           }
