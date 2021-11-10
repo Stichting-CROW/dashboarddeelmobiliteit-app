@@ -10,9 +10,10 @@ import {sources} from './sources.js';
 const md5 = require('md5');
 
 function Map(props) {
-  //Get the value of a State variable, and store it to a const, to use it later
+
+  // Get vehicles from store
   const vehicles = useSelector(state => {
-    return state.vehicles ? state.vehicles.data : null;
+    return state.vehicles || null;
   });
 
   const zones_geodata = useSelector(state => {
@@ -29,11 +30,12 @@ function Map(props) {
   const [zoom] = useState(15);
   const [counter, setCounter] = useState(0);
   const [zonesGeodataHash, setZonesGeodataHash] = useState("");
+  const [sourceHash, setSourceHash] = useState([]);
   let map = useRef(null);
 
+  // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
-    // Init MapLibre map
     const initMap = () => {
       if (map.current) return;
       map.current = new maplibregl.Map({
@@ -53,57 +55,57 @@ function Map(props) {
     initMap();
   }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer])
 
-  useEffect(() => {
-    const addDataSources = (vehicles, zones_geodata) => {
-      if (! map.current || ! map.current.isStyleLoaded()) {
-        // Refresh state, so that addDataSources runs again
-        setTimeout(() => {
-          setCounter(counter + 1)
-        }, 250)
-        return;
-      }
-      if (! vehicles) {
-        return;
-      }
+  const addOrUpdateSource = (sourceName, sourceData) => {
 
-      // Check if source exists
-      const doesSourceExist = map.current.getSource(props.activeSource);
+    // If map is not loaded: refresh state after .25 seconds
+    if (! map.current || ! map.current.isStyleLoaded()) {
+      setTimeout(() => {
+        setCounter(counter + 1)
+      }, 250)
+      return;
+    }
+    // If no source data is given -> stop
+    if (! sourceData) {
+      return;
+    }
 
-      if(doesSourceExist) {
-        // Source does exist. Do nothing
+    // Check if source exists
+    const doesSourceExist = map.current.getSource(sourceName);
+    // Get md5 hash of the data
+    let hash = md5(sourceData.data.features)
+    console.log(sourceName, sourceData.data.features, hash);
+    // If source does exist: update data
+    if(doesSourceExist) {
+      if(! sourceHash || sourceHash[sourceName] !== hash) {
+        // Set hash
+        let newSourceHashArray = sourceHash;
+        newSourceHashArray[sourceName] = hash;
+        setSourceHash(newSourceHashArray);
+        // Update data
+        map.current.getSource(sourceName).setData(sourceData.data);
+        // console.log("Update source zones-geodata %o", zones_geodata)
       } else {
-        // console.log('Add source', props.activeSource)
-        let source = Object.assign({}, {
+        // console.log("Skip update source zones-geodata %o", zonesGeodataHash, hash)
+      }
+    } else {
+      // console.log("Add source zones-geodata %o", zones_geodata)
+      if(sourceData) {
+        // Set hash
+        let newSourceHashArray = sourceHash;
+        newSourceHashArray[sourceName] = hash;
+        setSourceHash(newSourceHashArray);
+        // Set data
+        map.current.addSource(sourceName, {
           'type': 'geojson',
-          'data': vehicles,
-        }, sources[props.activeSource] ? sources[props.activeSource] : {});
-        map.current.addSource(props.activeSource, source);
-      }
-
-      // Check if source exists
-      const doesSourceExistGeodata = map.current.getSource('zones-geodata');
-      let hash = md5(zones_geodata)
-      if(doesSourceExistGeodata) {
-        if(zonesGeodataHash!==hash) {
-          // console.log("Update source zones-geodata %o", zones_geodata)
-          setZonesGeodataHash(hash);
-          map.current.getSource('zones-geodata').setData(zones_geodata.data);
-        } else {
-          // console.log("Skip update source zones-geodata %o", zonesGeodataHash, hash)
-        }
-      } else {
-        // console.log("Add source zones-geodata %o", zones_geodata)
-        if(zones_geodata.data) {
-          setZonesGeodataHash(md5(zones_geodata));
-          map.current.addSource('zones-geodata', {
-            'type': 'geojson',
-            'data': zones_geodata.data
-          });
-        }
+          'data': sourceData.data
+        });
       }
     }
-    addDataSources(vehicles, zones_geodata);
-    
+  }
+
+  useEffect(() => {
+    addOrUpdateSource('vehicles', vehicles);
+    addOrUpdateSource('zones-geodata', zones_geodata);
   }, [
     vehicles,
     zones_geodata,
@@ -112,6 +114,7 @@ function Map(props) {
     props.activeSource
   ])
 
+  // Add layers
   useEffect(() => {
     const addLayers = (vehicles, zones_geodata) => {
       if (! map.current || ! map.current.isStyleLoaded()) {
@@ -147,7 +150,14 @@ function Map(props) {
     addLayers(vehicles, zones_geodata);
   }, [vehicles, zones_geodata, counter, props.layers]);
 
-  return (null)
+  return <div>
+    <button>
+      Add layers
+    </button>
+    <button>
+      Remove layers
+    </button>
+  </div>
 }
 
 export {
