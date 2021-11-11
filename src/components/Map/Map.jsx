@@ -93,11 +93,13 @@ function Map(props) {
         let newSourceHashArray = sourceHash;
         newSourceHashArray[sourceName] = hash;
         setSourceHash(newSourceHashArray);
+
         // Set data
-        map.current.addSource(sourceName, {
+        let source = Object.assign({}, {
           'type': 'geojson',
-          'data': sourceData.data
-        });
+          'data': sourceData.data,
+        }, sources[sourceName] ? sources[sourceName] : {});
+        map.current.addSource(sourceName, source);
       }
     }
   }
@@ -105,6 +107,7 @@ function Map(props) {
   useEffect(() => {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
+    addOrUpdateSource('vehicles-clusters', vehicles);
   }, [
     vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
     zones_geodata,
