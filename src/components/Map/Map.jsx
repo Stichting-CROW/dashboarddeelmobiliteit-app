@@ -40,7 +40,8 @@ function Map(props) {
       if (map.current) return;
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
+        // style: 'mapbox://styles/mapbox/streets-v11',
+        style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom
