@@ -9,6 +9,7 @@ const Login = () => {
   const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
   const [recoverPassword, setRecoverPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const dispatch = useDispatch();
 
@@ -16,11 +17,14 @@ const Login = () => {
     
     e.preventDefault();
 
+    // Clear error message
+    setErrorMessage(null);
+
     const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/login";
     var data = {
-        loginId: emailaddress,
-        password: password,
-        applicationId: process.env.REACT_APP_FUSIONAUTH_APPLICATION_ID
+      loginId: emailaddress,
+      password: password,
+      applicationId: process.env.REACT_APP_FUSIONAUTH_APPLICATION_ID
     };
     
     fetch(url, {
@@ -35,13 +39,17 @@ const Login = () => {
         setLoggedIn(true);
       }).catch(error => {
         console.error("Login failed! (%s)", error.message);
+        setErrorMessage('Login mislukt. Heb je het juiste e-mailadres en wachtwoord ingevuld?');
         setLoggedIn(false);
     });
   };
   
   const recover = e => {
     e.preventDefault();
-    
+
+    // Clear error message
+    setErrorMessage(null);
+
     const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/user/forgot-password"
     var data = {
       loginId: emailaddress,
@@ -58,6 +66,9 @@ const Login = () => {
         console.log(response);
         return true;
       }).catch(error => {
+        console.log(error)
+        // setErrorMessage('Controleer of je e-mailadres klopt. Mocht het daarna nog steeds niet lukken, neem dan contact op met info@deelfietsdashboard.nl');
+        setErrorMessage('Dank voor je verzoek voor een wachtwoord-resetmail. Het opvragen van je wachtwoord werkt nog niet in dit nieuwe Dashboard. Stuur alsjeblieft een mail aan info@deelfietsdashboard.nl met je e-mailadres, dan zorgen wij dat je een wachtwoord-herstel-link ontvangt. Dank!');
         return false;
       });
 
@@ -80,7 +91,7 @@ const Login = () => {
               onChange={e => setEmailaddress(e.target.value)}
             />
 
-            <label className="block" htmlFor="password">Wachtwoord</label>
+            <label className="mt-4 block" htmlFor="password">Wachtwoord</label>
             <input
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
               type="password"
@@ -90,9 +101,13 @@ const Login = () => {
               onChange={e => setPassword(e.target.value)}
             />
           
+            {errorMessage && <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{errorMessage}</span>
+            </div>}
+
             <div className="flex items-baseline justify-between">
                 <button className="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={login}>Login</button>
-                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(true)}>Wachtwoord vergeten</button>
+                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={() => setRecoverPassword(true)}>Wachtwoord vergeten</button>
             </div>
           </form>
         </div>
@@ -114,10 +129,17 @@ const Login = () => {
               required
               onChange={e => setEmailaddress(e.target.value)}
             />
-          
+     
+            {errorMessage && <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{errorMessage}</span>
+            </div>}
+
             <div className="flex items-baseline justify-between">
                 <button className="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={recover}>Herstel</button>
-                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={()=>setRecoverPassword(false)}>Annuleer</button>
+                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={() => {
+                  setErrorMessage(null);
+                  setRecoverPassword(false);
+                }}>Annuleer</button>
             </div>
           </form>
         </div>
