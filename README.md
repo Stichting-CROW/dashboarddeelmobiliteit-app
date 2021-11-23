@@ -1,7 +1,14 @@
-# Getting Started with Create React App
+# Dashboard Deelmobiliteit: frontend app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the frontend app of [dashboarddeelmobiliteit.nl](https://dashboarddeelmobiliteit.nl/), bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+The goal of this app is to give insightful information on the use of shared mobility in The Netherlands.
+- Not logged in uers can see where shared vehicles are at the current moment
+- Logged in users (municipalities) can see more indepth insights
+
+The app uses the [API](https://gitlab.com/bikedashboard/dashboard-api) to get its data. The API gets its data from the postgresql database. The postgresql database is filled with data from the [go-import-vehicles](https://gitlab.com/bikedashboard/go-import-vehicles) script, that sources the data from all the different shared mobility providers.
+
+Dashboard Deelmobiliteit is a project by non profit organisation [CROW](https://crow.nl/). Tips, comments or questions? Contact the team at info@deelfietsdashboard.nl!
 
 ## How to deploy?
 
@@ -10,25 +17,6 @@ If you run
     npm run deploy
 
 the updated app will be deployed to GitHub pages. You can then view the app at https://dashboarddeelmobiliteit.nl
-
-
-## Problems solved
-
-### GitHub pages sais: y is not defined
-
-Solved problem like this: https://github.com/alex3165/react-mapbox-gl/issues/931#issuecomment-826135957
-
-### Github forgets custom domain gh-pages
-
-The custom domain name in GitHub settings did reset on every deploy to gh-pages.
-
-Adding a file named `CNAME` into the build folder fixed this: https://github.com/gitname/react-gh-pages/issues/19#issuecomment-436148409
-
-### Github doesn't support Single Page App routing
-
-I.e. /route/route-name gives an 404.
-
-I solved this by implementing this hack: https://create-react-app.dev/docs/deployment/#notes-on-client-side-routing
 
 ## Available Scripts
 
@@ -67,6 +55,23 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
+## Problems solved
+
+### GitHub pages sais: y is not defined
+
+Solved problem like this: https://github.com/alex3165/react-mapbox-gl/issues/931#issuecomment-826135957
+
+### Github forgets custom domain gh-pages
+
+The custom domain name in GitHub settings did reset on every deploy to gh-pages.
+
+Adding a file named `CNAME` into the build folder fixed this: https://github.com/gitname/react-gh-pages/issues/19#issuecomment-436148409
+
+### Github doesn't support Single Page App routing
+
+I.e. /route/route-name gives an 404.
+
+I solved this by implementing this hack: https://create-react-app.dev/docs/deployment/#notes-on-client-side-routing
 
 ## Learn More
 
