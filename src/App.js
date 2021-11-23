@@ -5,13 +5,14 @@ import {
  Route,
  Redirect
 } from "react-router-dom";
+import { store } from './AppProvider.js';
 
 import Menu from './components/Menu.jsx';
 import Map from './pages/Map.jsx';
 import Login from './pages/Login.jsx';
+import Monitoring from './pages/Monitoring.jsx';
 import Filterbar from './components/Filterbar/Filterbar.jsx';
 import Topbar from './components/Topbar/Topbar.jsx';
-import { store } from './AppProvider.js';
 
 import { useSelector } from 'react-redux';
 
@@ -58,28 +59,42 @@ function App() {
     forceUpdateParkingData();
   }, [filter]);
 
+  const renderMapElements = () => {
+    return <>
+      <div ref={mapContainer} className="map-layer"></div>
+      <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
+    </>
+  }
+
   return (
     <Router>
+
        <Redirect from="/" exact to="/map/park" />
+
        <div className="app">
           <div className="gui-layer">
+
             <Switch>
               <Route path="/login">
-                 <Login />
+                <Login />
               </Route>
               <Route path="/map/trip">
-               <Map mapContainer={mapContainer} showParkingData={false}/>
+                <Map mapContainer={mapContainer} showParkingData={false}/>
+                {renderMapElements()}
               </Route>
               <Route path="/map/park">
-               <Map mapContainer={mapContainer} showParkingData={true}/>
+                <Map mapContainer={mapContainer} showParkingData={true}/>
+                {renderMapElements()}
+              </Route>
+              <Route path="/monitoring">
+                <Monitoring />
               </Route>
             </Switch>
 
+            <Topbar />
             <Menu />
+
           </div>
-          <div ref={mapContainer} className="map-layer"></div>
-          <Topbar />
-          <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
         </div>
      </Router>
   );
