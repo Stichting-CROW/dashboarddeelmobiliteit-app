@@ -131,7 +131,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'ADD_TO_FILTER_AANBIEDERS_EXCLUDE': {
-      console.log('add item %s to aanbiedersexclude filter %o', action.payload, state)
+      // console.log('add item %s to aanbiedersexclude filter %o', action.payload, state)
       let aanbiedersexclude = [];
       try {
         if(state.aanbiedersexclude) {

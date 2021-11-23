@@ -30,6 +30,25 @@ function FilteritemAanbieders() {
     dispatch({ type: 'CLEAR_FILTER_AANBIEDERS_EXCLUDE', payload: '' })
   }
 
+  // Function that gets executed if user clicks a provider filter
+  const clickFilter = provider => {
+    // If no filters were set, only show this provider and hide all others
+    if(filterAanbiedersExclude==="") {
+      // Disable all but the selected provider
+      aanbieders.map(x => {
+        if(x.system_id != provider.system_id) {
+          addTofilterAanbiedersExclude(x)
+        }
+      })
+    }
+
+    // If provider was disabled, re-enable provider
+    else {
+      addTofilterAanbiedersExclude(provider)
+    }
+    
+  }
+
   return (
     <div className="filter-aanbieders-container">
       <div className="filter-aanbieders-title-row">
@@ -47,7 +66,7 @@ function FilteritemAanbieders() {
             let handler = excluded ?
                 e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
               :
-                e=>{ e.stopPropagation(); addTofilterAanbiedersExclude(aanbieder)};
+                e=>{ e.stopPropagation(); clickFilter(aanbieder); };
             
             return (
               <div
