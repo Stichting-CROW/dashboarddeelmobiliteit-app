@@ -42,15 +42,19 @@ function FilteritemAanbieders() {
       </div>
       <div className="filter-aanbieders-box-row">
         {
-          aanbieders.map((aanbieder, idx)=>{
-            let excluded = filterAanbiedersExclude.includes(aanbieder.system_id);
+          aanbieders.map((aanbieder, idx) => {
+            let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : '';
             let handler = excluded ?
                 e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
               :
                 e=>{ e.stopPropagation(); addTofilterAanbiedersExclude(aanbieder)};
             
             return (
-              <div className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`} onClick={handler}>
+              <div
+                className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`}
+                onClick={handler}
+                key={aanbieder.system_id}
+                >
                 <div className="filter-aanbieders-marker">
                   <svg viewBox='0 0 30 30' >
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={"#000000"} />

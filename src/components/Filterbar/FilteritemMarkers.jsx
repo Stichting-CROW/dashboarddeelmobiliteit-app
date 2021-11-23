@@ -16,8 +16,8 @@ function FilteritemMarkers() {
   });
   
   const filterMarkersExclude = useSelector(state => {
-    return state.filter ? state.filter.markersexclude : [];
-  });
+    return state.filter ? state.filter.markersexclude : '';
+  }) || '';
   
   const addToFilterMarkersExclude = (marker) => {
     dispatch({ type: 'ADD_TO_FILTER_MARKERS_EXCLUDE', payload: marker })
@@ -35,7 +35,7 @@ function FilteritemMarkers() {
     <div className="filter-markers-container">
       <div className="filter-markers-box-row">
         {
-          markers.map(marker=>{
+          markers.map(marker => {
             let excluded = filterMarkersExclude.split(",").includes(marker.id.toString());
             
             let className = excluded ? "filter-markers-item-excluded": "filter-markers-item";
@@ -46,7 +46,7 @@ function FilteritemMarkers() {
                 e=>{ e.stopPropagation(); addToFilterMarkersExclude(marker.id)};
                 
             return (
-              <div className={className}>
+              <div className={className} key={marker.id}>
                 <div className="filter-markers-marker" onClick={handler}>
                   <svg viewBox='0 0 30 30' >
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={marker.color} />

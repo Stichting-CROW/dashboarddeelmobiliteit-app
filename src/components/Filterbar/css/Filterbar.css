@@ -13,7 +13,7 @@
   border-radius: 20px;
   opacity: 1;
   overflow-x: visible;
-  /* transition: all 1000ms ease; */
+  transition: all 1000ms ease; 
 }
 
 /* Generic items ------------------------------------------------------------*/
