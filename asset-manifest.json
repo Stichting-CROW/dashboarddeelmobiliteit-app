@@ -1,23 +1,27 @@
 {
   "files": {
-    "main.css": "/static/css/main.402e73a2.chunk.css",
-    "main.js": "/static/js/main.fc86d967.chunk.js",
-    "main.js.map": "/static/js/main.fc86d967.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.218ec5a6.js",
-    "runtime-main.js.map": "/static/js/runtime-main.218ec5a6.js.map",
-    "static/js/2.3fccf88a.chunk.js": "/static/js/2.3fccf88a.chunk.js",
-    "static/js/2.3fccf88a.chunk.js.map": "/static/js/2.3fccf88a.chunk.js.map",
-    "static/js/3.f75f8313.chunk.js": "/static/js/3.f75f8313.chunk.js",
-    "static/js/3.f75f8313.chunk.js.map": "/static/js/3.f75f8313.chunk.js.map",
+    "main.css": "/static/css/main.4dd9187d.chunk.css",
+    "main.js": "/static/js/main.3b6398e7.chunk.js",
+    "main.js.map": "/static/js/main.3b6398e7.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.a1ecc6e2.js",
+    "runtime-main.js.map": "/static/js/runtime-main.a1ecc6e2.js.map",
+    "static/js/2.3e6a1c1d.chunk.js": "/static/js/2.3e6a1c1d.chunk.js",
+    "static/js/2.3e6a1c1d.chunk.js.map": "/static/js/2.3e6a1c1d.chunk.js.map",
+    "static/js/3.9aa446cc.chunk.js": "/static/js/3.9aa446cc.chunk.js",
+    "static/js/3.9aa446cc.chunk.js.map": "/static/js/3.9aa446cc.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/main.402e73a2.chunk.css.map": "/static/css/main.402e73a2.chunk.css.map",
-    "static/js/2.3fccf88a.chunk.js.LICENSE.txt": "/static/js/2.3fccf88a.chunk.js.LICENSE.txt",
-    "static/media/Filterbar.css": "/static/media/211651_close_round_icon.3721b02e.svg"
+    "static/css/main.4dd9187d.chunk.css.map": "/static/css/main.4dd9187d.chunk.css.map",
+    "static/js/2.3e6a1c1d.chunk.js.LICENSE.txt": "/static/js/2.3e6a1c1d.chunk.js.LICENSE.txt",
+    "static/media/Filterbar.css": "/static/media/211651_close_round_icon.3721b02e.svg",
+    "static/media/calendar.0fe3dc2a.svg": "/static/media/calendar.0fe3dc2a.svg",
+    "static/media/Topbar.css": "/static/media/logo-fietsberaad-crow.c661f460.jpg",
+    "static/media/FilteritemDatum.css": "/static/media/play.e16be07a.svg",
+    "static/media/FilteritemZones.css": "/static/media/times-circle.d3585a7d.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.218ec5a6.js",
-    "static/js/2.3fccf88a.chunk.js",
-    "static/css/main.402e73a2.chunk.css",
-    "static/js/main.fc86d967.chunk.js"
+    "static/js/runtime-main.a1ecc6e2.js",
+    "static/js/2.3e6a1c1d.chunk.js",
+    "static/css/main.4dd9187d.chunk.css",
+    "static/js/main.3b6398e7.chunk.js"
   ]
 }
