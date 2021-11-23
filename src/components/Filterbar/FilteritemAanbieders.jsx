@@ -13,7 +13,7 @@ function FilteritemAanbieders() {
   });
   
   const addTofilterAanbiedersExclude = (aanbieder) => {
-    const nexcluded = filterAanbiedersExclude.split(",").length;
+    const nexcluded = (filterAanbiedersExclude || '').split(",").length;
     if(nexcluded===aanbieders.length-1) {
       // console.log("needs at least one provider")
       return;
