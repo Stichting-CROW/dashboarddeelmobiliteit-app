@@ -20,7 +20,9 @@
 
 .Menu {
   opacity: 1;
-  bottom: 0;
+  bottom: 10px;
+  left: 50px;
+  right: 50px;
 }
 
 .Menu-inner {

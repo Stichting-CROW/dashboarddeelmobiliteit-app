@@ -44,7 +44,7 @@ function FilteritemGebieden() {
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
-          <div className="filter-form-search-container">
+          <div className="filter-form-search-container mb-3">
             <div className="filter-form-title">Selecteer Plaats</div>
             <div className="filter-form-search-container-2">
             <input type="text"
@@ -52,11 +52,13 @@ function FilteritemGebieden() {
               onChange={changeSearchText}
               value={filterSearch}
               placeholder={"zoek"}/>
-            {  filterSearch!=="" ?
-                  <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
-                :
-                  <div className="filter-plaats-img-search" />
-            }
+            <div className="ml-3 flex flex-col justify-center h-full">
+              {  filterSearch!=="" ?
+                    <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
+                  :
+                    <div className="filter-plaats-img-search" />
+              }
+            </div>
             </div>
             <div>&nbsp;</div>
           </div>
@@ -93,7 +95,9 @@ function FilteritemGebieden() {
             :
               null
         }
-        <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+        <div className="flex flex-col justify-center h-full">
+          <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+        </div>
       </div>
     </div>
   )

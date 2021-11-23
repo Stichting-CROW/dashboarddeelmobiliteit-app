@@ -15,32 +15,6 @@ function SelectLayer(props) {
       z-10
     `}>
       <SlideBox direction="right">
-        <div data-type="vehicles" className="
-          layer
-          relative inline-block my-3 mx-1" onClick={() => {
-          setLayers([
-            'vehicles-point',
-            'zones-geodata',
-          ]);
-          setActiveSource(
-            'vehicles'
-          );
-        }}>
-          <span className="
-            layer-title
-            block
-            absolute
-            bottom-0
-            left-0
-            w-full
-            h-6
-            flex
-            flex-col
-            justify-center
-          ">
-            Voertuigen
-          </span>
-        </div>
         <div data-type="heat-map" className="
           layer
           relative inline-block my-3 mx-1" onClick={() => {
@@ -67,6 +41,7 @@ function SelectLayer(props) {
             Heat map
           </span>
         </div>
+
         <div data-type="pointers" className="layer
           relative inline-block my-3 mx-1" onClick={() => {
           setLayers([
@@ -92,6 +67,33 @@ function SelectLayer(props) {
             justify-center
           ">
             Clusters
+          </span>
+        </div>
+
+        <div data-type="vehicles" className="
+          layer
+          relative inline-block my-3 mx-1" onClick={() => {
+          setLayers([
+            'vehicles-point',
+            'zones-geodata',
+          ]);
+          setActiveSource(
+            'vehicles'
+          );
+        }}>
+          <span className="
+            layer-title
+            block
+            absolute
+            bottom-0
+            left-0
+            w-full
+            h-6
+            flex
+            flex-col
+            justify-center
+          ">
+            Voertuigen
           </span>
         </div>
     </SlideBox>

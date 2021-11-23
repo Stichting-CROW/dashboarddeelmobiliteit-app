@@ -21,7 +21,7 @@
   justify-content: space-around;
   width: 100%;
   height: auto;
-  padding: 5px;
+  padding: 10px 8px;
 
   flex-grow: 0 1;
   align-items: center;
@@ -38,6 +38,7 @@
   align-items: center;
   width: 60px;
   user-select: none;
+  cursor: pointer;
 }
 
 .filter-markers-item-excluded {
@@ -49,6 +50,7 @@
   opacity: 0.6;
   filter: grayscale(100%);
   user-select: none;
+  cursor: pointer;
 }
 
 .filter-markers-marker {
@@ -57,6 +59,7 @@
 }
 
 .filter-markers-itemlabel {
+  margin-top: 5px;
   text-align: center;
   font: normal normal normal 10px/12px Inter;
   letter-spacing: 0px;

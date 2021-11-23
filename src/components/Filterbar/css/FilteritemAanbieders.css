@@ -54,7 +54,7 @@
   justify-content: space-around;
   width: 100%;
   height: auto;
-  padding: 5px;
+  padding: 10px 8px;
 
   flex-grow: 0 1;
   justify-content: flex-start;
@@ -66,13 +66,13 @@
 }
 
 .filter-aanbieders-item {
+  cursor: pointer;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   width: auto;
   height: 40px;
-  /* border: 1px solid #CCCCCC; */
 }
 
 .filter-aanbieders-marker {

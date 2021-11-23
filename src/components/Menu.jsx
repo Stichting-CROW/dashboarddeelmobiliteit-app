@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 // import moment from 'moment';
 import { Link, useLocation } from "react-router-dom";
 
-import { clearUser } from '../actions/authentication';
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
@@ -15,12 +14,6 @@ function Menu() {
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-
-  const logOut = () => {
-    if (isLoggedIn) {
-      dispatch( clearUser() );
-    }
-  }
 
   //Get the value of a State variable, and store it to a const, to use it later
   const showfilter = useSelector(state => {
@@ -42,14 +35,15 @@ function Menu() {
   }, [location]);
 
   return (
-    <div className="Menu w-full fixed b-0">
+    <div className="Menu fixed b-0">
       <div className="Menu-inner px-4 py-3 flex m-4 mb-1 mx-auto bg-white box-border rounded-3xl w-full shadow-lg">
         <Link className={`text-menu ${pathName === '/' || pathName === '/map/park' ? 'is-active' : ''}`} to="/map/park">
           Parkeerdata
         </Link>
-        <Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
+
+        {/*<Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
           Tripdata
-        </Link>
+        </Link>*/}
 
         {isLoggedIn ?
             <div className="text-menu">
@@ -57,18 +51,8 @@ function Menu() {
             </div>
             :
             null }
-        {isLoggedIn
-          ?
-          <Link className="text-menu flex-grow text-right" onClick={logOut} to="/">
-            Log uit
-          </Link>
-          :
-          <Link className="text-menu flex-grow text-right" to="/login">
-            Log in
-          </Link>
-        }
 
-        {isLoggedIn && <Link className={`text-menu ${pathName === '/monitoring' ? 'is-active' : ''}`} to="/monitoring">
+        {isLoggedIn && false && <Link className={`text-menu ${pathName === '/monitoring' ? 'is-active' : ''}`} to="/monitoring">
           Monitor
         </Link>}
 

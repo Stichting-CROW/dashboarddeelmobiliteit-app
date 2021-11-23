@@ -20,13 +20,13 @@
   cursor: pointer;
 }
 .SelectLayer .layer[data-type="vehicles"] {
-  background-image: url('https://i.imgur.com/AaqWjwK.png')
+  background-image: url('https://i.imgur.com/ksCt3TQ.png')
 }
 .SelectLayer .layer[data-type="heat-map"] {
-  background-image: url('https://i.imgur.com/NeqZoh7.png')
+  background-image: url('https://i.imgur.com/AaqWjwK.png')
 }
 .SelectLayer .layer[data-type="pointers"] {
-  background-image: url('https://i.imgur.com/ksCt3TQ.png')
+  background-image: url('https://i.imgur.com/NeqZoh7.png')
 }
 .SelectLayer .layer-title {
   text-align: center;

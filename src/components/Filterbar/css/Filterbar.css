@@ -45,7 +45,7 @@
 }
 
 .filter-form-title {
-  @apply text-xl font-bold pb-4 text-center
+  @apply text-xl font-bold text-center flex flex-col justify-center
 }
 
 .filter-form-values {
@@ -67,12 +67,12 @@
   flex-direction: row;
   border-radius: 0.25em;
   margin-right: 40px;
-  height: 2.2em;
   padding: 3px;
   padding-left: 8px;
 }
 
 .filter-form-search {
+  padding: 15px 10px;
   width:300px;
   border: 1px solid #CCCCCC;
 }

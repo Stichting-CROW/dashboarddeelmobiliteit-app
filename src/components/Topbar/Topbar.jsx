@@ -1,13 +1,37 @@
 import './Topbar.css';
+import { Link, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { clearUser } from '../../actions/authentication';
 
 function Topbar() {
-  // console.log("show interval %s", showinterval)
+  const dispatch = useDispatch();
+
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
+  });
+
+  const logOut = () => {
+    if (isLoggedIn) {
+      dispatch( clearUser() );
+    }
+  }
+
   return (
-    <div className="topbar">
+    <div className="topbar flex justify-between">
       <div className="topbar-logo" />
-      <a href="#this">menu</a>
+      {isLoggedIn
+        ? <Link className="text-right" onClick={logOut} to="/">
+            Log uit
+          </Link>
+        : <Link className="text-right" to="/login">
+            Log in
+          </Link>
+      }
     </div>
-    )
+  )
 }
+
+        
+
 
 export default Topbar;
