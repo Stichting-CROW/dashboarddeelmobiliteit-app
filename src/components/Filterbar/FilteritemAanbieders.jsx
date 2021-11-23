@@ -36,9 +36,10 @@ function FilteritemAanbieders() {
     if(filterAanbiedersExclude==="") {
       // Disable all but the selected provider
       aanbieders.map(x => {
-        if(x.system_id != provider.system_id) {
+        if(x.system_id !== provider.system_id) {
           addTofilterAanbiedersExclude(x)
         }
+        return x;
       })
     }
 
@@ -54,7 +55,9 @@ function FilteritemAanbieders() {
       <div className="filter-aanbieders-title-row">
         <div className="filter-aanbieders-title">Aanbieders</div>
         { filterAanbiedersExclude!==''?
-            <div className="filter-aanbieders-reset" onClick={clearFilterAanbiedersExclude}>reset</div>
+            <div className="filter-aanbieders-reset cursor-pointer" onClick={clearFilterAanbiedersExclude}>
+              reset
+            </div>
             :
             null
         }

@@ -1,11 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
-// import {Monitoring as MonitoringComponent} from '../components/Monitoring/Monitoring.jsx';
 
 import {fetchParkEvents} from '../helpers/parkEvents.js';
-
-// import './Monitoring.css';
 
 const numberOfSnapshots = 4*5;//4*5
 const provider = 'htm';//4*5
@@ -17,13 +14,12 @@ const getUniqueVehicleIds = (dataset) => {
     if(uniqueVehicleIds.indexOf(x.bike_id) <= -1) {
       uniqueVehicleIds.push(x.bike_id);
     }
+    return x;
   });
   return uniqueVehicleIds;
 }
 
 function Monitoring(props) {
-
-  const [allParkEvents, setAllParkEvents] = useState([])
 
   // Get state.authentication
   const authentication = useSelector(state => {
@@ -42,6 +38,7 @@ function Monitoring(props) {
       // Add park events to existing allParkEvents array
       parkEvents.map(x => {
         collectedParkEvents.push(x);
+        return x;
       });
       // Get cumulative unique vehicle IDs
       numberOfUniqueVehiclesAfterXIterations[i] = getUniqueVehicleIds(collectedParkEvents);
@@ -51,8 +48,7 @@ function Monitoring(props) {
 
   // On load, get parking data of different moments in time
   useEffect(async (x) => {
-    const collectedParkEvents = await fetchMultipleMomentsInTime();
-    setAllParkEvents(collectedParkEvents);
+    fetchMultipleMomentsInTime();
   }, [authentication]);
 
   return (

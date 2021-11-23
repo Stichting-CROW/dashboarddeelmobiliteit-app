@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import moment from 'moment';
+// import moment from 'moment';
 import { Link, useLocation } from "react-router-dom";
 
 import { clearUser } from '../actions/authentication';
@@ -10,7 +10,7 @@ import { IconButtonFilter } from './IconButtons.jsx';
 function Menu() {
   const [pathName, setPathName] = useState(document.location.pathname);
   const dispatch = useDispatch();
-  let TO_interval, dateToShow = moment(moment().format('2021-11-06 06:00'));
+  // let dateToShow = moment(moment().format('2021-11-06 06:00'));
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
