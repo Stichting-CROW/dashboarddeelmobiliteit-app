@@ -1,9 +1,11 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemMarkers.css';
 
 function FilteritemMarkers() {
-  const filterMarkers = useSelector(state => {
+  const dispatch = useDispatch()
+
+  const markers = useSelector(state => {
     return [
       { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 24 uur'},
       { id: 1, color: '#48E248', fillcolor: '#FFFFFF', name: '< 48 uur'},
@@ -13,14 +15,39 @@ function FilteritemMarkers() {
     ];
   });
   
+  const filterMarkersExclude = useSelector(state => {
+    return state.filter ? state.filter.markersexclude : [];
+  });
+  
+  const addToFilterMarkersExclude = (marker) => {
+    dispatch({ type: 'ADD_TO_FILTER_MARKERS_EXCLUDE', payload: marker })
+  }
+  
+  const removeFromFilterMarkersExclude = (marker) => {
+    dispatch({ type: 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE', payload: marker })
+  }
+  
+  // const clearFilterMarkersExclude = () => {
+  //   dispatch({ type: 'CLEAR_FILTER_MARKERS_EXCLUDE', payload: null })
+  // }
+  
   return (
     <div className="filter-markers-container">
       <div className="filter-markers-box-row">
         {
-          filterMarkers.map(marker=>{
+          markers.map(marker=>{
+            let excluded = filterMarkersExclude.split(",").includes(marker.id.toString());
+            
+            let className = excluded ? "filter-markers-item-excluded": "filter-markers-item";
+            
+            let handler = excluded ?
+                e=>{ e.stopPropagation(); removeFromFilterMarkersExclude(marker.id)}
+              :
+                e=>{ e.stopPropagation(); addToFilterMarkersExclude(marker.id)};
+                
             return (
-              <div className="filter-markers-item">
-                <div className="filter-markers-marker">
+              <div className={className}>
+                <div className="filter-markers-marker" onClick={handler}>
                   <svg viewBox='0 0 30 30' >
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={marker.color} />
                     <circle cx={'50%'} cy={'50%'} r={'34%'} fill={marker.fillcolor} />
@@ -29,8 +56,7 @@ function FilteritemMarkers() {
                 <div className="filter-markers-itemlabel">
                   { marker.name }
                 </div>
-              </div>
-            )
+              </div>)
           })
         }
       </div>

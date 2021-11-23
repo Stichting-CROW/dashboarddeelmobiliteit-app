@@ -5,7 +5,16 @@ var store_parkingdata = undefined;
 
 var timerid_parkingdata = undefined;
 
+var recursive = 0;
+
 const updateParkingData = ()  => {
+  recursive += 1;
+  if(recursive>1) {
+    console.log("recursive updateparkingdata call (level %s)", recursive);
+    return false;
+  }
+
+  console.log("updateParkingData")
   let delay = 5 * 1000;
   try {
     if(undefined===store_parkingdata) {
@@ -98,6 +107,7 @@ const updateParkingData = ()  => {
     console.error("Unable to update zones", ex)
     delay = 5 * 1000;
   } finally {
+    recursive -= 1;
     timerid_parkingdata = setTimeout(updateParkingData, delay);
   }
 }

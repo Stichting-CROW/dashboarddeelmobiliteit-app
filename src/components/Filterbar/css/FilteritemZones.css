@@ -13,6 +13,11 @@
   color: #000000;
 }
 
+.not-active {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
 .filter-zones-title {
   /* @apply text-xs text-left pl-4 font-normal */
   text-align: left;

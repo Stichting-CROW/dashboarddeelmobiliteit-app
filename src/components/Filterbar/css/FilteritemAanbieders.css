@@ -1,0 +1,90 @@
+.filter-aanbieders-container {
+  width: 100%;
+  height: auto;
+  
+  background-color: transparent;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 25px;
+  
+  padding: 0 12px 0 12px;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+
+  user-select: none;
+}
+
+.filter-aanbieders-title {
+  /* @apply text-xs text-left pl-4 font-normal */
+  text-align: left;
+  opacity: 1;
+  background-color: transparent;
+  width: auto;
+  height: 1.4em;
+}
+
+.not-selected {
+  opacity: 0.6;
+  filter: grayscale(100%);
+  user-select: none;
+}
+
+.filter-aanbieders-title-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+  padding: 5px;
+  padding-right: 15px;
+}
+
+.filter-aanbieders-reset {
+  color: #444;
+}
+
+.filter-aanbieders-box-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 100%;
+  height: auto;
+  padding: 5px;
+
+  flex-grow: 0 1;
+  justify-content: flex-start;
+  align-items: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+}
+
+.filter-aanbieders-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: auto;
+  height: 40px;
+  /* border: 1px solid #CCCCCC; */
+}
+
+.filter-aanbieders-marker {
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+}
+
+.filter-aanbieders-itemlabel {
+  text-align: center;
+  font: normal normal normal 10px/12px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}

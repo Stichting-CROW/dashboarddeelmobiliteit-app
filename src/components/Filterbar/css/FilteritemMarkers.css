@@ -37,7 +37,18 @@
   justify-content: flex-start;
   align-items: center;
   width: 60px;
-  /* border: 1px solid #CCCCCC; */
+  user-select: none;
+}
+
+.filter-markers-item-excluded {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 60px;
+  opacity: 0.6;
+  filter: grayscale(100%);
+  user-select: none;
 }
 
 .filter-markers-marker {

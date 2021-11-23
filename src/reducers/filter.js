@@ -5,7 +5,8 @@ const initialState = {
   datum: (new Date()).toISOString(),
   intervalstart: (new Date()).toISOString(),
   intervalend: (new Date()).toISOString(),
-  aanbieders: ""
+  aanbiedersexclude: "",
+  markersexclude: "",
 }
 
 export default function filter(state = initialState, action) {
@@ -83,37 +84,74 @@ export default function filter(state = initialState, action) {
           zones: []
       };
     }
-    case 'ADD_TO_FILTER_AANBIEDERS': {
-      console.log('add item %s to aanbieders filter %o', action.payload, state)
-      let aanbieders = [];
-      if(state.aanbieders) {
-        aanbieders = state.aanbieders.split(",") || []
+    case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
+      console.log('add item %s to markersexclude filter %o', action.payload, state)
+      let markersexclude = [];
+      if(state.markersexclude) {
+        try {
+          markersexclude = state.markersexclude.split(",") || []
+        } catch(ex) {
+          markersexclude = [];
+        }
       }
-      if(!aanbieders.includes(action.payload)) {
-        aanbieders.push(action.payload);
+      if(!markersexclude.includes(action.payload)) {
+        markersexclude.push(action.payload);
       }
-    
+
       return {
-          ...state,
-          aanbieders: aanbieders.join(",")
+        ...state,
+        markersexclude: markersexclude.join(",")
       };
     }
-    case 'REMOVE_FROM_FILTER_AANBIEDERS': {
-      console.log('remove item %s from aanbieders filter', action.payload)
-      let aanbieders = state.aanbieders.split(",") || [];
-      aanbieders = aanbieders.filter((item) => { return item !== action.payload });
-    
+    case 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE': {
+      console.log('remove item %o from markersexclude filter', action.payload)
+      let markersexclude = state.markersexclude.split(",") || [];
+      markersexclude = markersexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+
       return {
           ...state,
-          aanbieders: aanbieders.join(",")
+          markersexclude: markersexclude.join(",")
       };
     }
-    case 'CLEAR_FILTER_AANBIEDERS': {
-      console.log('clear aanbieders filter')
+    case 'CLEAR_FILTER_MARKERS_EXCLUDE': {
+      console.log('clear markersexclude filter')
+
+      return {
+          ...state,
+          markersexclude: []
+      };
+    }
+    case 'ADD_TO_FILTER_AANBIEDERS_EXCLUDE': {
+      console.log('add item %s to aanbiedersexclude filter %o', action.payload, state)
+      let aanbiedersexclude = [];
+      if(state.aanbiedersexclude) {
+        aanbiedersexclude = state.aanbiedersexclude.split(",") || []
+      }
+      if(!aanbiedersexclude.includes(action.payload)) {
+        aanbiedersexclude.push(action.payload);
+      }
     
       return {
           ...state,
-          aanbieders: []
+          aanbiedersexclude: aanbiedersexclude.join(",")
+      };
+    }
+    case 'REMOVE_FROM_FILTER_AANBIEDERS_EXCLUDE': {
+      console.log('remove item %s from aanbiedersexclude filter', action.payload)
+      let aanbiedersexclude = state.aanbiedersexclude.split(",") || [];
+      aanbiedersexclude = aanbiedersexclude.filter((item) => { return item !== action.payload });
+    
+      return {
+          ...state,
+          aanbiedersexclude: aanbiedersexclude.join(",")
+      };
+    }
+    case 'CLEAR_FILTER_AANBIEDERS_EXCLUDE': {
+      console.log('clear aanbiedersexclude filter')
+    
+      return {
+          ...state,
+          aanbiedersexclude: ''
       };
     }
     default:

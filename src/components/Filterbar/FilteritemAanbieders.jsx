@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ModalBox from './ModalBox.jsx';
-import './css/Filterbar.css';
+import './css/FilteritemAanbieders.css';
 
 function FilteritemAanbieders() {
   const dispatch = useDispatch()
@@ -10,61 +8,66 @@ function FilteritemAanbieders() {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
   
-  const filterAanbieders = useSelector(state => {
-    return state.filter ? state.filter.aanbieders : "";
+  const filterAanbiedersExclude = useSelector(state => {
+    return state.filter ? state.filter.aanbiedersexclude : [];
   });
   
-  let [showSelect, setShowSelect] = useState(false);
-  
-  const addToFilterAanbieders = (aanbieder) => {
-    dispatch({ type: 'ADD_TO_FILTER_AANBIEDERS', payload: aanbieder })
-  }
-  const removeFromFilterAanbieders = (aanbieder) => {
-    dispatch({ type: 'REMOVE_FROM_FILTER_AANBIEDERS', payload: aanbieder })
-  }
-  
-  const renderSelectAanbieders = (aanbieders) => {
-    return (
-      <ModalBox closeFunction={setShowSelect}>
-        <div className="filter-form-selectie">
-            <div className="filter-form-title">Selecteer Aanbieders</div>
-            <div className="filter-form-values">
-            { aanbieders.map((a,i) => {
-                let isSelected = filterAanbieders.includes(a.system_id);
-                if(isSelected) {
-                  return (<div key={'item-'+a.system_id} className="form-item-selected form-item" onClick={e=>{ e.stopPropagation(); removeFromFilterAanbieders(a.system_id)}}>{a.name}</div>)
-                } else {
-                  return (<div key={'item-'+a.system_id} className="form-item" onClick={e=>{ e.stopPropagation(); addToFilterAanbieders(a.system_id)}}>{a.name}</div>)
-                }
-              })
-            }
-            </div>
-        </div>
-      </ModalBox>
-    );
-  }
-  
-  let aanbiedertxt = ""
-  try {
-    let aantal = filterAanbieders.split(',').length
-    if(aantal>1 && aantal<aanbieders.length ) {
-      aanbiedertxt = filterAanbieders.split(",").length + " aanbieders";
-    } else if( aantal === 1) {
-      aanbiedertxt = filterAanbieders;
+  const addTofilterAanbiedersExclude = (aanbieder) => {
+    const nexcluded = filterAanbiedersExclude.split(",").length;
+    if(nexcluded===aanbieders.length-1) {
+      // console.log("needs at least one provider")
+      return;
     }
-  } catch(ex) {
-    aanbiedertxt = "";
+
+    dispatch({ type: 'ADD_TO_FILTER_AANBIEDERS_EXCLUDE', payload: aanbieder.system_id })
   }
   
-  if(aanbiedertxt==="") { aanbiedertxt = "Alle Aanbieders" }
+  const removeFromfilterAanbiedersExclude = (aanbieder) => {
+    dispatch({ type: 'REMOVE_FROM_FILTER_AANBIEDERS_EXCLUDE', payload: aanbieder.system_id })
+  }
   
+  const clearFilterAanbiedersExclude = e => {
+    dispatch({ type: 'CLEAR_FILTER_AANBIEDERS_EXCLUDE', payload: '' })
+  }
+
   return (
-      <div className="filter-item" onClick={e=>{setShowSelect(!showSelect)}}>
-        <div className="filter-title">Aanbieders</div>
-        <div className="filter-value">{aanbiedertxt}</div>
-        { showSelect ? renderSelectAanbieders(aanbieders) : null }
+    <div className="filter-aanbieders-container">
+      <div className="filter-aanbieders-title-row">
+        <div className="filter-aanbieders-title">Aanbieders</div>
+        { filterAanbiedersExclude!==''?
+            <div className="filter-aanbieders-reset" onClick={clearFilterAanbiedersExclude}>reset</div>
+            :
+            null
+        }
       </div>
-    )
+      <div className="filter-aanbieders-box-row">
+        {
+          aanbieders.map((aanbieder, idx)=>{
+            let excluded = filterAanbiedersExclude.includes(aanbieder.system_id);
+            let handler = excluded ?
+                e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
+              :
+                e=>{ e.stopPropagation(); addTofilterAanbiedersExclude(aanbieder)};
+            
+            return (
+              <div className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`} onClick={handler}>
+                <div className="filter-aanbieders-marker">
+                  <svg viewBox='0 0 30 30' >
+                    <circle cx={'50%'} cy={'50%'} r={'40%'} fill={"#000000"} />
+                    <circle cx={'50%'} cy={'50%'} r={'35%'} fill={"#FFFFFF"} />
+                    <circle cx={'70%'} cy={'25%'} r={'25%'} fill={aanbieder.color.toString()} />
+                  </svg>
+                </div>
+                <div className="filter-aanbieders-itemlabel">
+                  { aanbieder.name }
+                </div>
+              </div>
+            )
+          })
+        }
+      </div>
+    </div>
+  )
 }
 
 export default FilteritemAanbieders;

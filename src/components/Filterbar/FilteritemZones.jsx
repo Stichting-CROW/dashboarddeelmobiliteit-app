@@ -10,9 +10,12 @@ function FilteritemZones() {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
   
-
   const filterZones = useSelector(state => {
     return state.filter ? state.filter.zones : 0;
+  });
+  
+  const filterGebied = useSelector(state => {
+    return state.filter ? state.filter.gebied : 0;
   });
   
   let [showSelect, setShowSelect] = useState(false);
@@ -38,6 +41,7 @@ function FilteritemZones() {
     const filteredZones = zones.filter(zone=>{
       return filterSearch===''|| zone.name.toLowerCase().includes(filterSearch.toLowerCase())
     })
+    
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
@@ -89,15 +93,17 @@ function FilteritemZones() {
   
   if(zonetxt==="") { zonetxt = "Alle Zones" }
   
+  let isActive = filterGebied!=='' && zones.length > 0;
+  
   const filteredZones = zones.filter(zone=>{
     return selectedzones.includes(zone.zone_id.toString())
   })
   
   return (
-    <div className="filter-zones-container">
-      <div className="filter-zones-title" onClick={e=>{setShowSelect(!showSelect)}}>Zones</div>
+    <div className={`filter-zones-container ${isActive===true ? '':'not-active'}`}>
+      <div className="filter-zones-title" onClick={e=>{isActive && setShowSelect(!showSelect)}}>Zones</div>
       <div className="filter-zones-box-row">
-        <div className="filter-zones-value" onClick={e=>{setShowSelect(!showSelect)}}>{zonetxt}</div>
+        <div className="filter-zones-value" onClick={e=>{isActive && setShowSelect(!showSelect)}}>{zonetxt}</div>
         {  filterZones!=="" ?
               <div className="filter-zones-img-cancel" onClick={clearFilterZones} />
             :
