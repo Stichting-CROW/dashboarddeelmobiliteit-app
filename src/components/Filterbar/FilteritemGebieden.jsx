@@ -85,7 +85,7 @@ function FilteritemGebieden() {
   return (
     <div className="filter-plaats-container">
       <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
-      <div className="filter-plaats-box-row">
+      <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
         <div className="filter-plaats-value" onClick={e=>{setShowSelect(!showSelect)}}>{value===""?"Alle Gebieden":value.name}</div>
         { showSelect ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?

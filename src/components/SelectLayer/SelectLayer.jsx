@@ -1,20 +1,20 @@
 import React from 'react';
 
-import {SlideBox} from '../SlideBox/SlideBox.jsx';
+import SlideBox from '../SlideBox/SlideBox.jsx';
 
 import './SelectLayer.css';
 
 function SelectLayer(props) {
   const {setLayers, setActiveSource} = props;
 
-  return <div className="
+  return <div className={`
       SelectLayer
       absolute
       mt-3
       right-0
       z-10
-    ">
-      <SlideBox>
+    `}>
+      <SlideBox direction="right">
         <div data-type="vehicles" className="
           layer
           relative inline-block my-3 mx-1" onClick={() => {

@@ -9,11 +9,15 @@ function SlideBox(props) {
 
   // Show/hide slidebox on toggle click
   const toggleSlideBox = () => {
-    console.log('toggleSlideBox', isHidden)
     setIsHidden(! isHidden);
   };
 
-  return <div className={`SlideBox relative ${isHidden ? 'is-hidden' : ''}`} ref={containerRef}>
+  return <div className={`
+      SlideBox
+      direction-${props.direction}
+      relative
+      ${isHidden ? 'is-hidden' : ''}
+    `} ref={containerRef}>
     <div className="
       SlideBox-inner
       relative
@@ -29,6 +33,4 @@ function SlideBox(props) {
   </div>
 }
 
-export {
-  SlideBox
-}
+export default SlideBox;

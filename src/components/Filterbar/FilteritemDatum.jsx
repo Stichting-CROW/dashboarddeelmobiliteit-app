@@ -41,7 +41,7 @@ function FilterItemDatum() {
         </div>
         <div className="filter-datum-box-2" onClick={() => {
           setFilterDatum(new Date())
-        }}>
+        }} title="Laad huidige datum en tijd">
           <div className="filter-datum-img-play" />
         </div>
       </div>

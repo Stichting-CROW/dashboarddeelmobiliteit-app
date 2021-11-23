@@ -33,7 +33,7 @@
   min-width: 0.54em;
   height: calc(100% - 2px);
   position: relative;
-  padding: 1px;
+  padding: 1px 4px;
   border: 0;
   background: none;
   font: inherit;

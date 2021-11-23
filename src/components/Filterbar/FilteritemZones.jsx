@@ -65,9 +65,16 @@ function FilteritemZones() {
               { filteredZones.map(a=>{
                   let isSelected = filterZones.includes(a.zone_id);
                   if(isSelected) {
-                    return (<div key={'item-'+a.zone_id} className="form-item-selected form-item" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
+                    return (<div key={'item-'+a.zone_id} className="
+                      form-item-selected
+                      form-item
+                      cursor-pointer
+                    " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
                   } else {
-                    return (<div key={'item-'+a.zone_id} className="form-item" onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
+                    return (<div key={'item-'+a.zone_id} className="
+                      form-item
+                      cursor-pointer
+                    " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
                   }
                 })
               }
@@ -103,9 +110,14 @@ function FilteritemZones() {
     <div className={`filter-zones-container ${isActive===true ? '':'not-active'}`}>
       <div className="filter-zones-title" onClick={e=>{isActive && setShowSelect(!showSelect)}}>Zones</div>
       <div className="filter-zones-box-row">
-        <div className="filter-zones-value" onClick={e=>{isActive && setShowSelect(!showSelect)}}>{zonetxt}</div>
+        <div
+          className="filter-zones-value flex flex-col justify-center cursor-pointer h-full"
+          onClick={e=>{isActive && setShowSelect(!showSelect)}}
+          >
+          {zonetxt}
+        </div>
         {  filterZones!=="" ?
-              <div className="filter-zones-img-cancel" onClick={clearFilterZones} />
+              <div className="filter-zones-img-cancel" onClick={clearFilterZones}></div>
             :
               null
         }
@@ -118,7 +130,7 @@ function FilteritemZones() {
           return (
             <div className="filter-zones-zoneitem">
               { zone.name}
-              <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}} />
+              <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}}>×</div>
             </div>
           )
         })

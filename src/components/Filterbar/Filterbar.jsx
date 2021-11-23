@@ -1,4 +1,5 @@
 import './css/Filterbar.css';
+import SlideBox from '../SlideBox/SlideBox.jsx';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemInterval from './FilteritemInterval.jsx';
@@ -8,6 +9,7 @@ import FilteritemMarkers from './FilteritemMarkers.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
   // console.log("show interval %s", showinterval)
+    {/*<div className="filter-bar" style={{left: visible ? '0':'-324px'}}>*/}
   return (
     <div className="filter-bar" style={{left: visible ? '0':'-324px'}}>
       { showinterval
@@ -19,7 +21,7 @@ function Filterbar({showinterval=false, visible=false}) {
       <FilteritemMarkers />
       <FilteritemAanbieders />
     </div>
-    )
+  )
 }
 
 export default Filterbar;
