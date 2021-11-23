@@ -50,7 +50,29 @@ function Menu() {
         <Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
           Tripdata
         </Link>
-        <Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
+
+        {isLoggedIn ?
+            <div className="text-menu">
+              <IconButtonFilter  onClick={toggleFilter} />
+            </div>
+            :
+            null }
+        {isLoggedIn
+          ?
+          <Link className="text-menu flex-grow text-right" onClick={logOut} to="/">
+            Log uit
+          </Link>
+          :
+          <Link className="text-menu flex-grow text-right" to="/login">
+            Log in
+          </Link>
+        }
+
+        {isLoggedIn && <Link className={`text-menu ${pathName === '/monitoring' ? 'is-active' : ''}`} to="/monitoring">
+          Monitor
+        </Link>}
+
+        {/*<Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();
           dispatch({
             type: 'SET_FILTER_DATUM',
@@ -70,23 +92,8 @@ function Menu() {
           }, 60 * 1000 * 10);
         }}>
           ▶️
-        </Link>
-        {isLoggedIn ?
-            <div className="text-menu">
-              <IconButtonFilter  onClick={toggleFilter} />
-            </div>
-            :
-            null }
-        {isLoggedIn
-          ?
-          <Link className="text-menu flex-grow text-right" onClick={logOut} to="/">
-            Log uit
-          </Link>
-          :
-          <Link className="text-menu flex-grow text-right" to="/login">
-            Log in
-          </Link>
-        }
+        </Link>*/}
+
       </div>
     </div>
   )
