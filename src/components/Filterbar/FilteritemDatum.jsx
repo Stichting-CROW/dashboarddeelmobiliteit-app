@@ -39,7 +39,9 @@ function FilterItemDatum() {
               </div>
             <div className="filter-datum-caret">&rsaquo;</div>
         </div>
-        <div className="filter-datum-box-2">
+        <div className="filter-datum-box-2" onClick={() => {
+          setFilterDatum(new Date())
+        }}>
           <div className="filter-datum-img-play" />
         </div>
       </div>

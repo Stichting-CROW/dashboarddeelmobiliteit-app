@@ -44,39 +44,40 @@ function FilteritemGebieden() {
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
-            <div className="filter-form-search-container">
-              <div className="filter-form-title">Selecteer Plaats</div>
-              <div className="filter-form-search-container-2">
-              <input type="text"
-                className="filter-form-search"
-                onChange={changeSearchText}
-                value={filterSearch}
-                placeholder={"zoek"}/>
-              {  filterSearch!=="" ?
-                    <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
-                  :
-                    <div className="filter-plaats-img-search" />
-              }
-              </div>
-              <div>&nbsp;</div>
+          <div className="filter-form-search-container">
+            <div className="filter-form-title">Selecteer Plaats</div>
+            <div className="filter-form-search-container-2">
+            <input type="text"
+              className="filter-form-search"
+              onChange={changeSearchText}
+              value={filterSearch}
+              placeholder={"zoek"}/>
+            {  filterSearch!=="" ?
+                  <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
+                :
+                  <div className="filter-plaats-img-search" />
+            }
             </div>
-            <div className="filter-form-values">
-              { filterGebied === ""?
-                  <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
-                  :
-                  <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
-              }
-              { filteredGebieden.map(a=>{
-                  if(filterGebied === a.gm_code) {
-                    return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
-                  } else {
-                    return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
-                  }
-                })
-              }
+            <div>&nbsp;</div>
+          </div>
+          <div className="filter-form-values">
+            { filterGebied === ""?
+                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
+                :
+                <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
+            }
+            { filteredGebieden.map(a=>{
+                if(filterGebied === a.gm_code) {
+                  return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
+                } else {
+                  return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
+                }
+              })
+            }
           </div>
         </div>
-      </ModalBox>)
+      </ModalBox>
+    )
   }
   
   let value = gebieden.find(item=>item.gm_code===filterGebied) || "";
