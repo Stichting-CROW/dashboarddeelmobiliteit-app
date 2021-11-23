@@ -47,7 +47,9 @@ function Map(props) {
         zoom: zoom
       });
       // Add controls
-      map.current.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+      map.current.addControl(new maplibregl.NavigationControl({
+        showCompass: false
+      }), 'bottom-right');
   
       map.current.on('load', function() {
         setCounter(counter + 1)
