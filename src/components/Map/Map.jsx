@@ -50,6 +50,14 @@ function Map(props) {
       map.current.addControl(new maplibregl.NavigationControl({
         showCompass: false
       }), 'bottom-right');
+
+      map.current.addControl(
+        new maplibregl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: true
+          },
+          trackUserLocation: true
+      }), 'bottom-right');
   
       map.current.on('load', function() {
         setCounter(counter + 1)
