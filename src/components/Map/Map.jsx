@@ -51,7 +51,10 @@ function Map(props) {
   
       map.current.on('load', function() {
         setCounter(counter + 1)
-      })
+      });
+      
+      map.current.dragRotate.disable();
+      map.current.touchZoomRotate.disableRotation();
     }
     initMap();
   }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer])
