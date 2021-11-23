@@ -85,17 +85,21 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
-      console.log('add item %s to markersexclude filter %o', action.payload, state)
       let markersexclude = [];
-      if(state.markersexclude) {
-        try {
-          markersexclude = state.markersexclude.split(",") || []
-        } catch(ex) {
-          markersexclude = [];
+      try {
+        console.log('add item %s to markersexclude filter %o', action.payload, state)
+        if(state.markersexclude) {
+          try {
+            markersexclude = state.markersexclude.split(",") || []
+          } catch(ex) {
+            markersexclude = [];
+          }
         }
-      }
-      if(!markersexclude.includes(action.payload)) {
-        markersexclude.push(action.payload);
+        if(!markersexclude.includes(action.payload)) {
+          markersexclude.push(action.payload);
+        }
+      } catch(ex) {
+        markersexclude = [];
       }
 
       return {
@@ -105,8 +109,13 @@ export default function filter(state = initialState, action) {
     }
     case 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE': {
       console.log('remove item %o from markersexclude filter', action.payload)
-      let markersexclude = state.markersexclude.split(",") || [];
-      markersexclude = markersexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+      let markersexclude = [];
+      try {
+        markersexclude = state.markersexclude.split(",") || [];
+        markersexclude = markersexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+      } catch(ex) {
+        markersexclude = [];
+      }
 
       return {
           ...state,
@@ -124,11 +133,15 @@ export default function filter(state = initialState, action) {
     case 'ADD_TO_FILTER_AANBIEDERS_EXCLUDE': {
       console.log('add item %s to aanbiedersexclude filter %o', action.payload, state)
       let aanbiedersexclude = [];
-      if(state.aanbiedersexclude) {
-        aanbiedersexclude = state.aanbiedersexclude.split(",") || []
-      }
-      if(!aanbiedersexclude.includes(action.payload)) {
-        aanbiedersexclude.push(action.payload);
+      try {
+        if(state.aanbiedersexclude) {
+          aanbiedersexclude = state.aanbiedersexclude.split(",") || []
+        }
+        if(!aanbiedersexclude.includes(action.payload)) {
+          aanbiedersexclude.push(action.payload);
+        }
+      } catch(ex) {
+        aanbiedersexclude = [];
       }
     
       return {
@@ -138,8 +151,13 @@ export default function filter(state = initialState, action) {
     }
     case 'REMOVE_FROM_FILTER_AANBIEDERS_EXCLUDE': {
       console.log('remove item %s from aanbiedersexclude filter', action.payload)
-      let aanbiedersexclude = state.aanbiedersexclude.split(",") || [];
-      aanbiedersexclude = aanbiedersexclude.filter((item) => { return item !== action.payload });
+      let aanbiedersexclude = [];
+      try {
+        aanbiedersexclude = state.aanbiedersexclude.split(",") || [];
+        aanbiedersexclude = aanbiedersexclude.filter((item) => { return item !== action.payload });
+      } catch(ex) {
+        aanbiedersexclude = [];
+      }
     
       return {
           ...state,
