@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalBox from './ModalBox.jsx';
-import './Filterbar.css';
+import './css/FilteritemGebieden.css';
 
 function FilteritemGebieden() {
   const dispatch = useDispatch()
@@ -15,6 +15,16 @@ function FilteritemGebieden() {
   });
   
   let [showSelect, setShowSelect] = useState(false);
+  let [filterSearch, setFilterSearch] = useState("");
+  
+  const unselectGebied = e => {
+    e.preventDefault();
+    
+    dispatch({
+      type: 'SET_FILTER_GEBIED',
+      payload: ""
+    })
+  }
   
   const setFilterGebied = (gebied) => {
     dispatch({
@@ -23,18 +33,40 @@ function FilteritemGebieden() {
     })
   }
   
+  const changeSearchText = e => { setFilterSearch(e.target.value) }
+
+  const clearSearchText = e => { setFilterSearch("") }
+  
   const renderSelectGebieden = (gebieden) => {
+    const filteredGebieden = gebieden.filter(gebied=>{
+      return filterSearch===''|| gebied.name.toLowerCase().includes(filterSearch.toLowerCase())
+    })
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
-          <div className="filter-form-title">Selecteer Gebied</div>
+            <div className="filter-form-search-container">
+              <div className="filter-form-title">Selecteer Plaats</div>
+              <div className="filter-form-search-container-2">
+              <input type="text"
+                className="filter-form-search"
+                onChange={changeSearchText}
+                value={filterSearch}
+                placeholder={"zoek"}/>
+              {  filterSearch!=="" ?
+                    <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
+                  :
+                    <div className="filter-plaats-img-search" />
+              }
+              </div>
+              <div>&nbsp;</div>
+            </div>
             <div className="filter-form-values">
               { filterGebied === ""?
                   <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
                   :
                   <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
               }
-              { gebieden.map(a=>{
+              { filteredGebieden.map(a=>{
                   if(filterGebied === a.gm_code) {
                     return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
                   } else {
@@ -48,14 +80,22 @@ function FilteritemGebieden() {
   }
   
   let value = gebieden.find(item=>item.gm_code===filterGebied) || "";
-
+  
   return (
-      <div className="filter-item" onClick={e=>{setShowSelect(!showSelect)}}>
-        <div className="filter-title">Gebieden</div>
-        <div className="filter-value">{value===""?"Alle Gebieden":value.name}</div>
+    <div className="filter-plaats-container">
+      <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
+      <div className="filter-plaats-box-row">
+        <div className="filter-plaats-value" onClick={e=>{setShowSelect(!showSelect)}}>{value===""?"Alle Gebieden":value.name}</div>
         { showSelect ? renderSelectGebieden(gebieden) : null }
+        {  filterGebied!=="" ?
+              <div className="filter-plaats-img-cancel" onClick={unselectGebied} />
+            :
+              null
+        }
+        <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
       </div>
-    )
+    </div>
+  )
 }
 
 export default FilteritemGebieden;

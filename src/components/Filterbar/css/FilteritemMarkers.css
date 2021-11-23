@@ -1,0 +1,54 @@
+.filter-markers-container {
+  width: 100%;
+  height: auto;
+  
+  background-color: transparent;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 25px;
+  
+  padding: 0 12px 0 12px;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.filter-markers-box-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  height: auto;
+  padding: 5px;
+
+  flex-grow: 0 1;
+  align-items: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+}
+
+.filter-markers-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 60px;
+  /* border: 1px solid #CCCCCC; */
+}
+
+.filter-markers-marker {
+  width: 30px;
+  height: 30px;
+}
+
+.filter-markers-itemlabel {
+  text-align: center;
+  font: normal normal normal 10px/12px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}

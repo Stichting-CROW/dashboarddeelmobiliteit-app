@@ -9,5 +9,5 @@
 }
 
 .map-layer {
-  @apply fixed w-screen h-screen z-0 bg-green-400;
+  @apply fixed w-screen h-screen z-0 bg-white;
 }

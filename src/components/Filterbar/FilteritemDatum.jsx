@@ -1,7 +1,13 @@
-import { useState } from 'react';
-import './Filterbar.css';
+// import { useState } from 'react';
+import './css/FilteritemDatum.css';
 import { useDispatch, useSelector } from 'react-redux';
-import ModalBox from './ModalBox.jsx';
+import './css/FilteritemDatum-Timepicker.css';
+import './css/FilteritemDatum-Calendar.css';
+import './css/FilteritemDatum-Clock.css';
+
+// using https://github.com/wojtekmaj/react-datetime-picker with custom styling
+import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle'; //
+import calendarIcon from '../../images/calendar.svg';
 
 function FilterItemDatum() {
   const dispatch = useDispatch()
@@ -10,63 +16,34 @@ function FilterItemDatum() {
     return state.filter ? state.filter.datum : new Date().toISOString();
   });
   
-  let [showSelectDatum, setShowSelectDatum] = useState(false);
-  
-  const setFilterDatum = e => {
-    e.preventDefault();
-    
-    if (!e.target['validity'].valid) return;
-    
-    datum = (new Date(e.target.value)).toISOString();
+  const setFilterDatum = newdt => {
     dispatch({
       type: 'SET_FILTER_DATUM',
-      payload: datum
+      payload: newdt.toISOString()
     })
   }
-  
-  // https://webreflection.medium.com/using-the-input-datetime-local-9503e7efdce
-  function toDatetimeLocal(ISOString) {
-    const date = new Date(ISOString)
-    const
-      ten = function (i) {
-        return (i < 10 ? '0' : '') + i;
-      },
-      YYYY = date.getFullYear(),
-      MM = ten(date.getMonth() + 1),
-      DD = ten(date.getDate()),
-      HH = ten(date.getHours()),
-      II = ten(date.getMinutes()),
-      SS = ten(date.getSeconds())
-    ;
-    return YYYY + '-' + MM + '-' + DD + 'T' +
-             HH + ':' + II + ':' + SS;
-  };
-  
-  const renderSelectDatum = () => {
-    const value = toDatetimeLocal(filterDatum);
-    return (
-       <ModalBox className="min-width-48" closeFunction={setShowSelectDatum}>
-       <div className="filter-form-selectie">
-         <div className="filter-form-title">Selecteer Datum</div>
-         <form className="h-12 w-auto flex flex-row border-solid border-4 border-light-blue-500 box-border">
-           <input className="bg-transparent flex-2 flex-grow" type="datetime-local" value={value} onChange={setFilterDatum} />
-           <div className="flex-2"/>
-         </form>
-         <div className="flex-none closebutton text-center mt-4" onClick={e=>setShowSelectDatum(false)}>OK</div>
-       </div>
-      </ModalBox>);
-  }
 
-  let datum = new Date(filterDatum).toLocaleString();
-  
   return (
-    <>
-      <div className="filter-item" onClick={e=>{setShowSelectDatum(!showSelectDatum)}}>
-        <div className="filter-title">Datum</div>
-        <div className="filter-value">{datum}</div>
+    <div className="filter-datum-container">
+      <div className="filter-datum-title">Datum</div>
+      <div className="filter-datum-box-row">
+        <div className="filter-datum-box-1">
+            <div className="filter-datum-caret">&lsaquo;</div>
+              <div className="filter-datum-dtpicker">
+                <DateTimePicker
+                  onChange={setFilterDatum}
+                  value={new Date(filterDatum)}
+                  clearIcon={null}
+                  calendarIcon={<img src={calendarIcon} alt="Logo" />}
+                  format={"y-MM-dd H:mm"}/>
+              </div>
+            <div className="filter-datum-caret">&rsaquo;</div>
+        </div>
+        <div className="filter-datum-box-2">
+          <div className="filter-datum-img-play" />
+        </div>
       </div>
-      { showSelectDatum ? renderSelectDatum() : null }
-    </>
+    </div>
   )
 }
 

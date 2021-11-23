@@ -10,6 +10,7 @@ import Menu from './components/Menu.jsx';
 import Map from './pages/Map.jsx';
 import Login from './pages/Login.jsx';
 import Filterbar from './components/Filterbar/Filterbar.jsx';
+import Topbar from './components/Topbar/Topbar.jsx';
 import { store } from './AppProvider.js';
 
 import { useSelector } from 'react-redux';
@@ -62,9 +63,6 @@ function App() {
        <Redirect from="/" exact to="/map/park" />
        <div className="app">
           <div className="gui-layer">
-
-            { isLoggedIn && showfilter ? <Filterbar showinterval={false}/> : null }
-
             <Switch>
               <Route path="/login">
                  <Login />
@@ -78,9 +76,10 @@ function App() {
             </Switch>
 
             <Menu />
-
           </div>
           <div ref={mapContainer} className="map-layer"></div>
+          <Topbar />
+          <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
         </div>
      </Router>
   );

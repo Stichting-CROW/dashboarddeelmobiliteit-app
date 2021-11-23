@@ -1,0 +1,48 @@
+/* Add a black background color to the top navigation */
+.topbar {
+  display: flex;
+  width: 100%;
+  height: auto;
+  top: 0;
+  left: 0;
+  position: fixed;
+  z-index: 100;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 1px 2px #00000029;
+  opacity: 1;
+  overflow-y: hidden;
+  padding-left:0.5em;
+  padding-right:0.5em;
+}
+
+.topbar-logo {
+  height: 25px;
+  width: 82.14px;
+  background-image: url('../../images/logo-fietsberaad-crow.jpg');
+  background-size: contain;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  margin: 13px 22px 13px 22px;
+}
+
+/* Style the links inside the navigation bar */
+.topbar a {
+  float: left;
+  color: #101010;
+  font-size: 12px;
+}
+
+/* Change the color of links on hover */
+.topbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topbar a.active {
+  background-color: #04AA6D;
+  color: white;
+}

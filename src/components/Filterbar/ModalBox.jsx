@@ -1,4 +1,4 @@
-import './Filterbar.css';
+import './css/Filterbar.css';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 function ModalBox({closeFunction, children}) {

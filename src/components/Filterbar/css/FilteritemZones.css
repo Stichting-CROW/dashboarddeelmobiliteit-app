@@ -1,0 +1,91 @@
+.filter-zones-container {
+  width: 100%;
+  height: auto;
+  
+  background-color: transparent;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0 12px 0 12px;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.filter-zones-title {
+  /* @apply text-xs text-left pl-4 font-normal */
+  text-align: left;
+  opacity: 1;
+  background-color: transparent;
+  width: auto;
+  height: 1.4em;
+}
+
+.filter-zones-value {
+  width: 100%;
+  color: #15AEEF;
+  text-align: left;
+  padding-left: 12px;
+}
+
+.filter-zones-box-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: auto;
+  height: 46px;
+
+  flex-grow: 0 1;
+  justify-content: flex-start;
+  align-items: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+}
+
+.filter-zones-img-search {
+  width: 18px;
+  height: 18px;
+  background: url('../../../images/search-solid.svg') no-repeat center border-box;
+  margin-right: 12px;
+}
+
+.filter-zones-img-cancel {
+  width: 18px;
+  height: 18px;
+  background: url('../../../images/times-circle.svg') no-repeat center border-box;
+  margin-right: 12px;
+}
+
+.filter-zones-zonelist {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  padding-top: 5px;
+}
+
+.filter-zones-zoneitem {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: auto;
+  height: auto;
+  background: #15AEEF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 2px;
+  padding:3px;
+  margin: 1px;
+}
+
+.filter-zones-img-zoneitem-cancel {
+  width: 18px;
+  height: 18px;
+  background: url('../../../images/times-circle.svg') no-repeat center border-box;
+  margin-right: 0.25em;
+}

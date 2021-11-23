@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './Filterbar.css';
+import './css/Filterbar.css';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalBox from './ModalBox.jsx';
 
@@ -64,7 +64,7 @@ function FilterItemInterval() {
 
   let intervalStart = new Date(filterIntervalStart).toLocaleString();
   let intervalEnd = new Date(filterIntervalEnd).toLocaleString();
-  console.log("got interval %s - %s", intervalStart, intervalEnd);
+  // console.log("got interval %s - %s", intervalStart, intervalEnd);
 
     //  onClick={e=>{setShowSelectInterval(!showSelectInterval)}}
   return (

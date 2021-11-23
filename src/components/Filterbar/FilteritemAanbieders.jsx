@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalBox from './ModalBox.jsx';
-import './Filterbar.css';
+import './css/Filterbar.css';
 
 function FilteritemAanbieders() {
   const dispatch = useDispatch()
