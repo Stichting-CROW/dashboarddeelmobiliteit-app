@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
+import { cPollDelayParkingData, cPollDelayErrorMultiplyer } from '../constants.js';
 
 var store_parkingdata = undefined;
 
@@ -15,7 +16,7 @@ const updateParkingData = ()  => {
   }
 
   // console.log("updateParkingData")
-  let delay = 5 * 1000;
+  let delay = cPollDelayParkingData;
   try {
     if(undefined===store_parkingdata) {
       // console.log("no redux state available yet - skipping zones update");
@@ -109,7 +110,7 @@ const updateParkingData = ()  => {
     }
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = 5 * 1000;
+    delay = cPollDelayParkingData * cPollDelayErrorMultiplyer;
   } finally {
     recursive -= 1;
     timerid_parkingdata = setTimeout(updateParkingData, delay);

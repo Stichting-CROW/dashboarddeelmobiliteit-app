@@ -1,4 +1,5 @@
 import { getEmptyZonesGeodataPayload } from './pollMetadataZonesgeodata';
+import { cPollDelayMetadataZones, cPollDelayErrorMultiplyer } from '../constants.js';
 
 var store_zones = undefined;
 
@@ -9,7 +10,7 @@ const isLoggedIn = (state) => {
 var timerid_zones = undefined;
 
 const updateZones = ()  => {
-  let delay = 5 * 1000;
+  let delay = cPollDelayMetadataZones;
   try {
     if(undefined===store_zones) {
       // console.log("no redux state available yet - skipping zones update");
@@ -54,7 +55,7 @@ const updateZones = ()  => {
       });
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = 5 * 1000;
+    delay = cPollDelayMetadataZones * cPollDelayErrorMultiplyer;
   } finally {
     timerid_zones = setTimeout(updateZones, delay);
   }

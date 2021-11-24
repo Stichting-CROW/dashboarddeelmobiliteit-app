@@ -1,12 +1,13 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn } from './pollTools.js';
+import { cPollDelayTripData, cPollDelayErrorMultiplyer } from '../constants.js';
 
 var store_tripdata = undefined;
 var timerid_tripdata = undefined;
 
 // Function that gets trip data and saves it into store
 const updateTripData = ()  => {
-  let delay = 5 * 1000;
+  let delay = cPollDelayTripData;
   try {
     if(undefined===store_tripdata) {
       console.log("no redux state available yet - skipping zones update");
@@ -135,7 +136,7 @@ const updateTripData = ()  => {
     }
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = 5 * 1000;
+    delay = cPollDelayTripData * cPollDelayErrorMultiplyer;
   } finally {
     timerid_tripdata = setTimeout(updateTripData, delay);
   }

@@ -1,3 +1,5 @@
+import { cPollDelayAccessControlList, cPollDelayErrorMultiplyer } from '../constants.js';
+
 const cPublicAanbieders = [
     { value:"cykl", name:"Cykl" },
     { value:"flickbike", name:"Flickbike" },
@@ -38,7 +40,7 @@ const isLoggedIn = (state) => {
 var timerid_gebiedenaanbieders = undefined;
 
 const updateAccessControlList = ()  => {
-  let delay = 5 * 1000;
+  let delay = cPollDelayAccessControlList;
   try {
     if(undefined===store_accesscontrollist) {
       // console.log("no redux state available yet - skipping metadata update");
@@ -81,8 +83,8 @@ const updateAccessControlList = ()  => {
         return true;
       }
   } catch(ex) {
-    console.error("Unable to update gebieden", ex)
-    delay = 5 * 1000;
+    console.error("Unable to update ACL", ex)
+    delay = cPollDelayAccessControlList * cPollDelayErrorMultiplyer;
     
     return false;
   } finally {
@@ -100,4 +102,3 @@ export const initUpdateAccessControlList = (_store) => {
 }
 
 forceUpdateAccessControlList();
-
