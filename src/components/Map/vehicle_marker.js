@@ -1,32 +1,32 @@
-const initialMarker = `<svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" width="200" height=200" viewBox="0 0 24 24">
-    <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
-    <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
-        <circle cx="10" cy="10" r="10" stroke="none"/>
-        <circle cx="10" cy="10" r="9.5" fill="none"/>
-    </g>
-    <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0"/>
-</svg>
-`;
+// const initialMarker = `<svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" width="200" height=200" viewBox="0 0 24 24">
+//     <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
+//     <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
+//         <circle cx="10" cy="10" r="10" stroke="none"/>
+//         <circle cx="10" cy="10" r="9.5" fill="none"/>
+//     </g>
+//     <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0"/>
+// </svg>
+// `;
 
-const testMarker = `
-<svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" width="200" height="932" viewBox="0 0 24 24">
-        <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
-            <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
-                <circle cx="10" cy="10" r="10" stroke="none"/>
-                <circle cx="10" cy="10" r="9.5" fill="none"/>
-            </g>
-        <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#44ff33"/>
-        </svg>`;
+// const testMarker = `
+// <svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" width="200" height="932" viewBox="0 0 24 24">
+//         <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
+//             <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
+//                 <circle cx="10" cy="10" r="10" stroke="none"/>
+//                 <circle cx="10" cy="10" r="9.5" fill="none"/>
+//             </g>
+//         <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#44ff33"/>
+//         </svg>`;
 
-const testMarker2 = `
-<svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="200" height="200">
-    <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
-    <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
-        <circle cx="10" cy="10" r="10" stroke="none"/>
-        <circle cx="10" cy="10" r="9.5" fill="none"/>
-    </g>
-    <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0"/>
-</svg>`;
+// const testMarker2 = `
+// <svg id="Pointer_Green_met_Aanbieder" data-name="Pointer Green met Aanbieder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="200" height="200">
+//     <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"/>
+//     <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
+//         <circle cx="10" cy="10" r="10" stroke="none"/>
+//         <circle cx="10" cy="10" r="9.5" fill="none"/>
+//     </g>
+//     <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0"/>
+// </svg>`;
 
 const compare = `<svg xmlns="http://www.w3.org/1999/xhtml" viewbox="0 0 24 24" width="200" height="200">
 <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304">
@@ -102,6 +102,3 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
 }
 
 export default getVehicleMarkers;
-
-
-    

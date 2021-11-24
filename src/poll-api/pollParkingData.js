@@ -55,7 +55,10 @@ const updateParkingData = ()  => {
           }
           
           let operatorcolors = {};
-          state.metadata.aanbieders.forEach(o=>{console.log(o.system_id); operatorcolors[o.system_id]=o.color});
+          state.metadata.aanbieders.forEach(o => {
+            // console.log(o.system_id);
+            operatorcolors[o.system_id]=o.color;
+          });
       
           const md5 = require('md5');
           var start_time = moment(state.filter.datum);

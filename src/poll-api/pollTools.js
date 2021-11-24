@@ -28,7 +28,7 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     filterparams.push("operators=" + selectedaanbieders);
   }
   
-  if(filter.voertuigtypesexclude!=='') {
+  if(filter.voertuigtypesexclude!=='' && filter.voertuigtypesexclude!==undefined) {
     // form_factors=cargo_bicycle,moped,bicycle,car,other
     let filteritems = filter.voertuigtypesexclude.split(",");
     let selectedtypes = metadata.vehicle_types
