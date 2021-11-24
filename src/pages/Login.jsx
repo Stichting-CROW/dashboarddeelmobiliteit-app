@@ -37,6 +37,7 @@ const Login = () => {
       .then(response => {
         dispatch( setUser(response) );
         setLoggedIn(true);
+        document.location = '/map/park';
       }).catch(error => {
         console.error("Login failed! (%s)", error.message);
         setErrorMessage('Login mislukt. Heb je het juiste e-mailadres en wachtwoord ingevuld?');

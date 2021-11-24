@@ -8,7 +8,9 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     let candidates = [];
     let municipality = metadata.gebieden.find(gebied=>gebied.gm_code===filter.gebied);
     if(undefined!==municipality) {
-      candidates = metadata.zones.filter(zone=>(zone.municipality===municipality.gm_code&&zone.name===municipality.name));
+      candidates = metadata.zones.filter(zone => {
+        return zone.municipality===municipality.gm_code&&zone.name===municipality.name
+      });
     } else {
     }
     if(candidates.length===1) {

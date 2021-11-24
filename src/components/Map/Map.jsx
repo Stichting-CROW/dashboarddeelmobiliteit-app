@@ -41,10 +41,10 @@ const initPopupLogic = (currentMap) => {
         <h1 class="mb-2">
           <span
             class="rounded-full inline-block w-4 h-4"
-            style="background-color: ${vehicleProperties.color}">
+            style="background-color: #666;position: relative;top: 2px">
           </span>
           <span class="Map-popup-title ml-2">
-            ${vehicleProperties.system_id} VEHICLE TYPE
+            ${vehicleProperties.system_id}
           </span>
         </h1>
         <div class="Map-popup-body">
@@ -68,15 +68,16 @@ const initPopupLogic = (currentMap) => {
 
 function Map(props) {
 
+  console.log('Map component')
   // Get vehicles from store
   const vehicles = useSelector(state => {
     return state.vehicles || null;
   });
 
   // Get extend (map boundaries) from store
-  const layersFromStore = useSelector(state => {
-    return state.layers;
-  });
+  const extent = useSelector(state => {
+    return state.layers ? state.layers.extent : null;
+  }) || [];
 
   const aanbieders = useSelector(state => {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
@@ -212,10 +213,11 @@ function Map(props) {
 
   // If area selection (place/zone) changes, navigate to area
   useEffect(() => {
-    if(! layersFromStore || ! layersFromStore.extent) return;
-    map.current.fitBounds(layersFromStore.extent);
+    if(! map.current) return;
+    if(! extent || extent.length === 0) return;
+    map.current.fitBounds(extent);
   }, [
-    layersFromStore
+    extent
   ])
 
   // Add layers
@@ -258,7 +260,7 @@ function Map(props) {
   useEffect(() => {
     var test = async(aanbieder) => {
       if (map.current.hasImage(aanbieder.system_id + ':0')) {
-        console.log("image already exits");
+        // console.log("image already exits");
         return;
       }
       var value = await getVehicleMarkers(aanbieder.color);
@@ -273,8 +275,6 @@ function Map(props) {
 
   return null;
 }
-
-
 
 export {
   Map
