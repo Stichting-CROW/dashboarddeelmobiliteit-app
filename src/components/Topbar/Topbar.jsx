@@ -1,28 +1,37 @@
 import './Topbar.css';
-import getVehicleMarkers from './../Map/vehicle_marker.js';
-import { useEffect } from 'react';
-
-
+import { Link, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { clearUser } from '../../actions/authentication';
 
 function Topbar() {
-  useEffect(() => {
-    var test = async() => {
-      var value = await getVehicleMarkers("#000000");
-      console.log(value);
-    };
-    test(); 
-  }, [])
+  const dispatch = useDispatch();
 
-  // console.log("show interval %s", showinterval)
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
+  });
+
+  const logOut = () => {
+    if (isLoggedIn) {
+      dispatch( clearUser() );
+    }
+  }
+
   return (
-    <div className="topbar">
+    <div className="topbar flex justify-between">
       <div className="topbar-logo" />
-      test
-      <a href="#this">menu</a>
+      {isLoggedIn
+        ? <Link className="text-right" onClick={logOut} to="/">
+            Log uit
+          </Link>
+        : <Link className="text-right" to="/login">
+            Log in
+          </Link>
+      }
     </div>
-    )
+  )
 }
 
+        
 
 
 export default Topbar;

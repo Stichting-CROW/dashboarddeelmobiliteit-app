@@ -14,7 +14,7 @@ const updateParkingData = ()  => {
     return false;
   }
 
-  console.log("updateParkingData")
+  // console.log("updateParkingData")
   let delay = 5 * 1000;
   try {
     if(undefined===store_parkingdata) {

@@ -19,7 +19,7 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     
   }
 
-  if(filter.aanbiedersexclude!=="") {
+  if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
     let filteritems = filter.aanbiedersexclude.split(",");
     let selectedaanbieders = metadata.aanbieders
       .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))

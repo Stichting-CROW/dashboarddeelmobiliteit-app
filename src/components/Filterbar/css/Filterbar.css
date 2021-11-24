@@ -6,14 +6,14 @@
   position: fixed;
   z-index: 99;
   top: 0;
-  left: -324px;
+  /* left: -324px; */
   padding-top: 60px;
   background: #F6F5F4 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000029;
   border-radius: 20px;
   opacity: 1;
   overflow-x: visible;
-  /* transition: all 1000ms ease; */
+  transition: all 1000ms ease;
 }
 
 /* Generic items ------------------------------------------------------------*/
@@ -45,7 +45,7 @@
 }
 
 .filter-form-title {
-  @apply text-xl font-bold pb-4 text-center
+  @apply text-xl font-bold text-center flex flex-col justify-center
 }
 
 .filter-form-values {
@@ -67,12 +67,12 @@
   flex-direction: row;
   border-radius: 0.25em;
   margin-right: 40px;
-  height: 2.2em;
   padding: 3px;
   padding-left: 8px;
 }
 
 .filter-form-search {
+  padding: 15px 10px;
   width:300px;
   border: 1px solid #CCCCCC;
 }

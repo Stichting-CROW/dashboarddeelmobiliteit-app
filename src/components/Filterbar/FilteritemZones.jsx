@@ -45,7 +45,7 @@ function FilteritemZones() {
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
-            <div className="filter-form-search-container">
+            <div className="filter-form-search-container mb-3">
               <div className="filter-form-title">Selecteer Zones</div>
               <div className="filter-form-search-container-2">
               <input type="text"
@@ -53,11 +53,13 @@ function FilteritemZones() {
                 onChange={changeSearchText}
                 value={filterSearch}
                 placeholder={"zoek"}/>
-              {  filterSearch!=="" ?
-                    <div className="filter-zones-img-cancel" onClick={clearSearchText} />
-                  :
-                    <div className="filter-zones-img-search" />
-              }
+              <div className="ml-3 flex flex-col justify-center h-full">
+                {  filterSearch!=="" ?
+                      <div className="filter-zones-img-cancel cursor-pointer" onClick={clearSearchText} />
+                    :
+                      <div className="filter-zones-img-search cursor-pointer" />
+                }
+              </div>
               </div>
               <div>&nbsp;</div>
             </div>
@@ -65,9 +67,16 @@ function FilteritemZones() {
               { filteredZones.map(a=>{
                   let isSelected = filterZones.includes(a.zone_id);
                   if(isSelected) {
-                    return (<div key={'item-'+a.zone_id} className="form-item-selected form-item" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
+                    return (<div key={'item-'+a.zone_id} className="
+                      form-item-selected
+                      form-item
+                      cursor-pointer
+                    " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
                   } else {
-                    return (<div key={'item-'+a.zone_id} className="form-item" onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
+                    return (<div key={'item-'+a.zone_id} className="
+                      form-item
+                      cursor-pointer
+                    " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
                   }
                 })
               }
@@ -99,26 +108,37 @@ function FilteritemZones() {
     return selectedzones.includes(zone.zone_id.toString())
   })
   
+  if(! isActive) {
+    return <></>
+  }
+
   return (
     <div className={`filter-zones-container ${isActive===true ? '':'not-active'}`}>
       <div className="filter-zones-title" onClick={e=>{isActive && setShowSelect(!showSelect)}}>Zones</div>
       <div className="filter-zones-box-row">
-        <div className="filter-zones-value" onClick={e=>{isActive && setShowSelect(!showSelect)}}>{zonetxt}</div>
+        <div
+          className="filter-zones-value flex flex-col justify-center cursor-pointer h-full"
+          onClick={e=>{isActive && setShowSelect(!showSelect)}}
+          >
+          {zonetxt}
+        </div>
         {  filterZones!=="" ?
-              <div className="filter-zones-img-cancel" onClick={clearFilterZones} />
+              <div className="filter-zones-img-cancel" onClick={clearFilterZones}></div>
             :
               null
         }
         { showSelect ? renderSelectZones(zones) : null }
-        <div className="filter-zones-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+        <div className="ml-3 flex flex-col justify-center h-full">
+          <div className="filter-zones-img-search cursor-pointer" onClick={e=>{setShowSelect(!showSelect)}} />
+        </div>
       </div>
       <div className="filter-zones-zonelist">
       {
-        filteredZones.map(zone=>{
+        filteredZones.map(zone => {
           return (
-            <div className="filter-zones-zoneitem">
+            <div className="filter-zones-zoneitem" key={zone.zone_id}>
               { zone.name}
-              <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}} />
+              <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}}>×</div>
             </div>
           )
         })

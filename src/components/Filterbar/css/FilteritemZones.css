@@ -24,7 +24,7 @@
   opacity: 1;
   background-color: transparent;
   width: auto;
-  height: 1.4em;
+  margin-bottom: 10px;
 }
 
 .filter-zones-value {
@@ -71,7 +71,7 @@
   justify-content: flex-start;
   width: 100%;
   height: auto;
-  padding-top: 5px;
+  margin-top: 10px;
 }
 
 .filter-zones-zoneitem {
@@ -82,15 +82,25 @@
   width: auto;
   height: auto;
   background: #15AEEF 0% 0% no-repeat padding-box;
-  border: 1px solid #CCCCCC;
-  border-radius: 2px;
-  padding:3px;
+  border-radius: 3px;
+  padding:6px 10px;
   margin: 1px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  color: #fff;
 }
 
 .filter-zones-img-zoneitem-cancel {
-  width: 18px;
+  color: #fff;
   height: 18px;
-  background: url('../../../images/times-circle.svg') no-repeat center border-box;
-  margin-right: 0.25em;
+  content: '×';
+  font-weight: bold;
+  display: inline-block;
+  /*background: url('../../../images/times-circle.svg') no-repeat center border-box;*/
+  margin-left: 5px;
+  margin-right: -5px;
+  padding: 0 5px;
+  cursor: pointer;
+  font-size: 18px;
+  display:  inline-block;
 }

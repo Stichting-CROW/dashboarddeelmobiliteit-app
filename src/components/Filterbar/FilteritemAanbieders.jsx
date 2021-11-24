@@ -13,7 +13,7 @@ function FilteritemAanbieders() {
   });
   
   const addTofilterAanbiedersExclude = (aanbieder) => {
-    const nexcluded = filterAanbiedersExclude.split(",").length;
+    const nexcluded = (filterAanbiedersExclude || '').split(",").length;
     if(nexcluded===aanbieders.length-1) {
       // console.log("needs at least one provider")
       return;
@@ -30,27 +30,53 @@ function FilteritemAanbieders() {
     dispatch({ type: 'CLEAR_FILTER_AANBIEDERS_EXCLUDE', payload: '' })
   }
 
+  // Function that gets executed if user clicks a provider filter
+  const clickFilter = provider => {
+    // If no filters were set, only show this provider and hide all others
+    if(filterAanbiedersExclude==="") {
+      // Disable all but the selected provider
+      aanbieders.map(x => {
+        if(x.system_id !== provider.system_id) {
+          addTofilterAanbiedersExclude(x)
+        }
+        return x;
+      })
+    }
+
+    // If provider was disabled, re-enable provider
+    else {
+      addTofilterAanbiedersExclude(provider)
+    }
+    
+  }
+
   return (
     <div className="filter-aanbieders-container">
       <div className="filter-aanbieders-title-row">
         <div className="filter-aanbieders-title">Aanbieders</div>
         { filterAanbiedersExclude!==''?
-            <div className="filter-aanbieders-reset" onClick={clearFilterAanbiedersExclude}>reset</div>
+            <div className="filter-aanbieders-reset cursor-pointer" onClick={clearFilterAanbiedersExclude}>
+              reset
+            </div>
             :
             null
         }
       </div>
       <div className="filter-aanbieders-box-row">
         {
-          aanbieders.map((aanbieder, idx)=>{
-            let excluded = filterAanbiedersExclude.includes(aanbieder.system_id);
+          aanbieders.map((aanbieder, idx) => {
+            let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : '';
             let handler = excluded ?
                 e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
               :
-                e=>{ e.stopPropagation(); addTofilterAanbiedersExclude(aanbieder)};
+                e=>{ e.stopPropagation(); clickFilter(aanbieder); };
             
             return (
-              <div className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`} onClick={handler}>
+              <div
+                className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`}
+                onClick={handler}
+                key={aanbieder.system_id}
+                >
                 <div className="filter-aanbieders-marker">
                   <svg viewBox='0 0 30 30' >
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={"#000000"} />

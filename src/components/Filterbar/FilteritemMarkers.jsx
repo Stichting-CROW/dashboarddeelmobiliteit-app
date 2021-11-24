@@ -16,8 +16,8 @@ function FilteritemMarkers() {
   });
   
   const filterMarkersExclude = useSelector(state => {
-    return state.filter ? state.filter.markersexclude : [];
-  });
+    return state.filter ? state.filter.markersexclude : '';
+  }) || '';
   
   const addToFilterMarkersExclude = (marker) => {
     dispatch({ type: 'ADD_TO_FILTER_MARKERS_EXCLUDE', payload: marker })
@@ -27,15 +27,46 @@ function FilteritemMarkers() {
     dispatch({ type: 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE', payload: marker })
   }
   
-  // const clearFilterMarkersExclude = () => {
-  //   dispatch({ type: 'CLEAR_FILTER_MARKERS_EXCLUDE', payload: null })
-  // }
+  const clearFilterMarkersExclude = () => {
+    dispatch({ type: 'CLEAR_FILTER_MARKERS_EXCLUDE', payload: null })
+  }
+  
+  // Function that gets executed if user clicks a provider filter
+  const clickFilter = id => {
+    console.log("clickfilter [%s]<", filterMarkersExclude);
+    // If no filters were set, only show this provider and hide all others
+    if(filterMarkersExclude==="") {
+      // Disable all but the selected provider
+      markers.map(x => {
+        if(x.id !== id) {
+          addToFilterMarkersExclude(x.id)
+        }
+        return x;
+      })
+    }
+
+    // If provider was disabled, re-enable provider
+    else {
+      addToFilterMarkersExclude(id)
+    }
+  }
+  
   
   return (
     <div className="filter-markers-container">
+    <div className="filter-markers-title-row">
+      <div className="filter-markers-title">Parkeerduur</div>
+      { filterMarkersExclude!==''?
+          <div className="filter-markers-reset cursor-pointer" onClick={clearFilterMarkersExclude}>
+            reset
+          </div>
+          :
+          null
+      }
+    </div>
       <div className="filter-markers-box-row">
         {
-          markers.map(marker=>{
+          markers.map(marker => {
             let excluded = filterMarkersExclude.split(",").includes(marker.id.toString());
             
             let className = excluded ? "filter-markers-item-excluded": "filter-markers-item";
@@ -43,10 +74,10 @@ function FilteritemMarkers() {
             let handler = excluded ?
                 e=>{ e.stopPropagation(); removeFromFilterMarkersExclude(marker.id)}
               :
-                e=>{ e.stopPropagation(); addToFilterMarkersExclude(marker.id)};
+                e=>{ e.stopPropagation(); clickFilter(marker.id)};
                 
             return (
-              <div className={className}>
+              <div className={className} key={marker.id}>
                 <div className="filter-markers-marker" onClick={handler}>
                   <svg viewBox='0 0 30 30' >
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={marker.color} />

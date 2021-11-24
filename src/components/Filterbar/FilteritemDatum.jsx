@@ -1,6 +1,7 @@
 // import { useState } from 'react';
 import './css/FilteritemDatum.css';
 import { useDispatch, useSelector } from 'react-redux';
+import moment from 'moment';
 import './css/FilteritemDatum-Timepicker.css';
 import './css/FilteritemDatum-Calendar.css';
 import './css/FilteritemDatum-Clock.css';
@@ -28,7 +29,15 @@ function FilterItemDatum() {
       <div className="filter-datum-title">Datum</div>
       <div className="filter-datum-box-row">
         <div className="filter-datum-box-1">
-            <div className="filter-datum-caret">&lsaquo;</div>
+            <div
+              className="filter-datum-caret"
+              onClick={() => {
+                setFilterDatum(
+                  moment(filterDatum).subtract(1, 'hours')
+                )
+              }}>
+              &lsaquo;
+            </div>
               <div className="filter-datum-dtpicker">
                 <DateTimePicker
                   onChange={setFilterDatum}
@@ -37,9 +46,18 @@ function FilterItemDatum() {
                   calendarIcon={<img src={calendarIcon} alt="Logo" />}
                   format={"y-MM-dd H:mm"}/>
               </div>
-            <div className="filter-datum-caret">&rsaquo;</div>
+            <div
+              className="filter-datum-caret"
+              onClick={() => {
+                setFilterDatum(
+                  moment(filterDatum).add(1, 'hours')
+                )
+              }}
+              >&rsaquo;</div>
         </div>
-        <div className="filter-datum-box-2">
+        <div className="filter-datum-box-2" onClick={() => {
+          setFilterDatum(new Date())
+        }} title="Laad huidige datum en tijd">
           <div className="filter-datum-img-play" />
         </div>
       </div>

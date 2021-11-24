@@ -43,11 +43,12 @@ function Map(props) {
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         // style: 'mapbox://styles/mapbox/streets-v11',
-        style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',
+        style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom
       });
+
       // Add controls
       map.current.addControl(new maplibregl.NavigationControl({
         showCompass: false
@@ -90,6 +91,7 @@ function Map(props) {
       }, 250)
       return;
     }
+
     // If no source data is given -> stop
     if (! sourceData) {
       return;
@@ -112,7 +114,9 @@ function Map(props) {
       } else {
         // console.log("Skip update source zones-geodata %o", zonesGeodataHash, hash)
       }
-    } else {
+    }
+
+    else {
       // console.log("Add source zones-geodata %o", zones_geodata)
       if(sourceData) {
         // Set hash

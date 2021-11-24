@@ -44,39 +44,42 @@ function FilteritemGebieden() {
     return (
       <ModalBox closeFunction={setShowSelect}>
         <div className="filter-form-selectie">
-            <div className="filter-form-search-container">
-              <div className="filter-form-title">Selecteer Plaats</div>
-              <div className="filter-form-search-container-2">
-              <input type="text"
-                className="filter-form-search"
-                onChange={changeSearchText}
-                value={filterSearch}
-                placeholder={"zoek"}/>
+          <div className="filter-form-search-container mb-3">
+            <div className="filter-form-title">Selecteer Plaats</div>
+            <div className="filter-form-search-container-2">
+            <input type="text"
+              className="filter-form-search"
+              onChange={changeSearchText}
+              value={filterSearch}
+              placeholder={"zoek"}/>
+            <div className="ml-3 flex flex-col justify-center h-full">
               {  filterSearch!=="" ?
                     <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
                   :
                     <div className="filter-plaats-img-search" />
               }
-              </div>
-              <div>&nbsp;</div>
             </div>
-            <div className="filter-form-values">
-              { filterGebied === ""?
-                  <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
-                  :
-                  <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
-              }
-              { filteredGebieden.map(a=>{
-                  if(filterGebied === a.gm_code) {
-                    return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
-                  } else {
-                    return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
-                  }
-                })
-              }
+            </div>
+            <div>&nbsp;</div>
+          </div>
+          <div className="filter-form-values">
+            { filterGebied === ""?
+                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
+                :
+                <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
+            }
+            { filteredGebieden.map(a=>{
+                if(filterGebied === a.gm_code) {
+                  return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
+                } else {
+                  return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
+                }
+              })
+            }
           </div>
         </div>
-      </ModalBox>)
+      </ModalBox>
+    )
   }
   
   let value = gebieden.find(item=>item.gm_code===filterGebied) || "";
@@ -84,7 +87,7 @@ function FilteritemGebieden() {
   return (
     <div className="filter-plaats-container">
       <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
-      <div className="filter-plaats-box-row">
+      <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
         <div className="filter-plaats-value" onClick={e=>{setShowSelect(!showSelect)}}>{value===""?"Alle Gebieden":value.name}</div>
         { showSelect ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?
@@ -92,7 +95,9 @@ function FilteritemGebieden() {
             :
               null
         }
-        <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+        <div className="flex flex-col justify-center h-full">
+          <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+        </div>
       </div>
     </div>
   )
