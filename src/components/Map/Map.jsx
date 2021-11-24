@@ -15,7 +15,7 @@ const md5 = require('md5');
 
 // Set language for momentJS
 moment.locale('nl', localization);
-console.log(moment().locale('nl').subtract(1, 'day').fromNow());
+// console.log(moment().locale('nl').subtract(1, 'day').fromNow());
 
 const initPopupLogic = (currentMap) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
@@ -132,7 +132,7 @@ function Map(props) {
       var test = async() => {
         var value = await getVehicleMarkers("#000000");
         map.current.addImage('gradient', { width: 25, height: 25, data: value[0]});
-        console.log(value[0]);
+        // console.log(value[0]);
       };
       test();
 

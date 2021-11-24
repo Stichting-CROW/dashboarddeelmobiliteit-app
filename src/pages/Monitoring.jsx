@@ -26,28 +26,28 @@ function Monitoring(props) {
     return state.authentication ? state.authentication : false;
   });
 
-  // Function that gets parking data for a specific provider, for a specific date/time
-  const fetchMultipleMomentsInTime = async () => {
-    let dateTime = moment().toISOString(), parkEvents = [];
-    // Get 4*5=20 snapshots (= 5 days) of parking data
-    let collectedParkEvents = [];
-    for(let i = 0; i <= numberOfSnapshots; i++) {
-      dateTime = moment(dateTime).subtract(6, 'hours').toISOString();
-      // Get park events for date time
-      parkEvents = await fetchParkEvents(authentication, provider, dateTime);
-      // Add park events to existing allParkEvents array
-      parkEvents.map(x => {
-        collectedParkEvents.push(x);
-        return x;
-      });
-      // Get cumulative unique vehicle IDs
-      numberOfUniqueVehiclesAfterXIterations[i] = getUniqueVehicleIds(collectedParkEvents);
-    }
-    return collectedParkEvents;
-  }
-
   // On load, get parking data of different moments in time
-  useEffect(async (x) => {
+  useEffect((x) => {
+    // Function that gets parking data for a specific provider, for a specific date/time
+    const fetchMultipleMomentsInTime = async () => {
+      let dateTime = moment().toISOString(), parkEvents = [];
+      // Get 4*5=20 snapshots (= 5 days) of parking data
+      let collectedParkEvents = [];
+      for(let i = 0; i <= numberOfSnapshots; i++) {
+        dateTime = moment(dateTime).subtract(6, 'hours').toISOString();
+        // Get park events for date time
+        parkEvents = await fetchParkEvents(authentication, provider, dateTime);
+        // Add park events to existing allParkEvents array
+        parkEvents.map(x => {
+          collectedParkEvents.push(x);
+          return x;
+        });
+        // Get cumulative unique vehicle IDs
+        numberOfUniqueVehiclesAfterXIterations[i] = getUniqueVehicleIds(collectedParkEvents);
+      }
+      return collectedParkEvents;
+    }
+
     fetchMultipleMomentsInTime();
   }, [authentication]);
 

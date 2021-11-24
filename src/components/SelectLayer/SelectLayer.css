@@ -1,5 +1,6 @@
 .SelectLayer {
   top: 51px;
+  user-select: none;
 }
 .SelectLayer-inner {
   /*min-height: 100px;*/
@@ -18,6 +19,8 @@
   background: #fff center center no-repeat;
   background-size: cover;
   cursor: pointer;
+  
+  @apply relative inline-block my-3 mx-1;
 }
 .SelectLayer .layer[data-type="vehicles"] {
   background-image: url('https://i.imgur.com/ksCt3TQ.png')
@@ -28,6 +31,11 @@
 .SelectLayer .layer[data-type="pointers"] {
   background-image: url('https://i.imgur.com/NeqZoh7.png')
 }
+
+.SelectLayer .layer[data-type='zones'] {
+  background-image: url('../../images/layer-zones.png')
+}
+
 .SelectLayer .layer-title {
   text-align: center;
   font: normal normal normal 12px/15px Inter;
@@ -37,4 +45,12 @@
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
   background: rgba(255, 255, 255, 0.8);
+  
+  @apply block absolute bottom-0 left-0 w-full h-6 flex flex-col justify-center;
 }
+
+.layer-inactive {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+

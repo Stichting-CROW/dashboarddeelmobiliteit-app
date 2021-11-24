@@ -5559,6 +5559,11 @@
   "resolved" "https://registry.npmjs.org/gensync/-/gensync-1.0.0-beta.2.tgz"
   "version" "1.0.0-beta.2"
 
+"geojson-bounds@^1.0.2":
+  "integrity" "sha512-VTVisOF00DPgIl5xodFx5xyt2XPMXsz2CIAAxFMAtXbrOJjz2gwgzkGQtLEQuuSztn4plIy3Cgravc3QTu9S/A=="
+  "resolved" "https://registry.npmjs.org/geojson-bounds/-/geojson-bounds-1.0.2.tgz"
+  "version" "1.0.2"
+
 "geojson-vt@^3.2.1":
   "integrity" "sha512-EvGQQi/zPrDA6zr6BnJD/YhwAkBP8nnJ9emh3EnHQKVMfg/MRVtPbMYdgVy/IaEmn4UfagD2a6fafPDL5hbtwg=="
   "resolved" "https://registry.npmjs.org/geojson-vt/-/geojson-vt-3.2.1.tgz"

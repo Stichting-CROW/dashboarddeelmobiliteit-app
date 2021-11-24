@@ -5,6 +5,7 @@ import vehicles from './vehicles';
 import filter from './filter';
 import authentication from './authentication';
 import zones_geodata from './zones_geodata';
+import layers from './layers';
 
 export default combineReducers({
   last_update,
@@ -12,5 +13,6 @@ export default combineReducers({
   vehicles,
   filter,
   authentication,
-  zones_geodata
+  zones_geodata,
+  layers
 })

@@ -9,8 +9,6 @@ import FilteritemMarkers from './FilteritemMarkers.jsx';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
-  // console.log("show interval %s", showinterval)
-    {/*<div className="filter-bar" style={{left: visible ? '0':'-324px'}}>*/}
   return (
     <div className="filter-bar" style={{left: visible ? '0':'-324px'}}>
       { showinterval
