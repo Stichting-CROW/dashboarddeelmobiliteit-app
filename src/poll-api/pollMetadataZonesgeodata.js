@@ -55,7 +55,7 @@ const updateZonesGeodata = ()  => {
     }
     
     if(zone_ids==="") {
-      store_zonesgeodata.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+      // store_zonesgeodata.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       return;
     }
     
@@ -103,7 +103,7 @@ const updateZonesGeodata = ()  => {
                 }
                 console.log("zonedata %s - extent %o", idx, fullextent);
 
-                dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
+                // dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
                 
                 break;
               default:
