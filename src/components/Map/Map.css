@@ -1,3 +1,46 @@
 .map {
   @apply absolute h-screen w-screen inset-0 box-border border-2 border-white bg-blue-500
 }
+
+.Map-popup-title {
+  font: normal normal 600 20px/24px Inter, sans-serif;
+  color: #0B3D20;
+}
+
+.Map-popup-body {
+  font: normal normal normal 14px/20px Inter, sans-serif;
+  color: #333333;
+}
+
+.maplibregl-popup {
+  max-width: 306px !important;
+}
+
+.mapboxgl-popup-content,
+.maplibregl-popup-content {
+  box-shadow: none;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+/* Hide close button */
+/* Clicking somewhere else on the map has closed the popup as well */
+.mapboxgl-popup-close-button,
+.maplibregl-popup-close-button {
+  margin-right: 5px;
+  margin-top: 5px;
+  font-size: 20px;
+  display: none;
+}
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  position: relative;
+  top: -1px;
+}
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip,
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  position: relative;
+  left: -1px;
+}

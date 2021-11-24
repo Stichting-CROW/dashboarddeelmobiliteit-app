@@ -25,7 +25,7 @@ const updateParkingData = ()  => {
     const state = store_parkingdata.getState();
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
     if(!canfetchdata) {
-      store_parkingdata.dispatch({ type: 'SET_PARKINGDATA', payload: []});
+      store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
     } else {
       let url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
       let options = {};
