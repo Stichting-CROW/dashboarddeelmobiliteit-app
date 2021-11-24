@@ -15,7 +15,6 @@ const md5 = require('md5');
 
 // Set language for momentJS
 moment.locale('nl', localization);
-// console.log(moment().locale('nl').subtract(1, 'day').fromNow());
 
 const initPopupLogic = (currentMap) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
@@ -63,7 +62,7 @@ const initPopupLogic = (currentMap) => {
    
   // Change it back to a pointer when it leaves.
   currentMap.on('mouseleave', layerName, function () {
-  currentMap.getCanvas().style.cursor = '';
+    currentMap.getCanvas().style.cursor = '';
   });
 }
 
@@ -72,6 +71,11 @@ function Map(props) {
   // Get vehicles from store
   const vehicles = useSelector(state => {
     return state.vehicles || null;
+  });
+
+  // Get extend (map boundaries) from store
+  const layersFromStore = useSelector(state => {
+    return state.layers;
   });
 
   const aanbieders = useSelector(state => {
@@ -195,7 +199,7 @@ function Map(props) {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
     addOrUpdateSource('vehicles-clusters', vehicles);
-    console.log(vehicles);
+    // console.log(vehicles);
     // eslint-disable-next-line
   }, [
     // eslint-disable-next-line
@@ -204,6 +208,14 @@ function Map(props) {
     zonesGeodataHash,
     counter,
     props.activeSource
+  ])
+
+  // If area selection (place/zone) changes, navigate to area
+  useEffect(() => {
+    if(! layersFromStore || ! layersFromStore.extent) return;
+    map.current.fitBounds(layersFromStore.extent);
+  }, [
+    layersFromStore
   ])
 
   // Add layers
