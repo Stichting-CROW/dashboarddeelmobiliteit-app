@@ -1,15 +1,20 @@
 const layer = {
   'id': 'vehicles-point',
-  'type': 'circle',
+  'type': 'symbol',
   'source': 'vehicles',
+  'layout': {
+    'icon-image': 'gradient',
+    'icon-size': 1,
+    'icon-allow-overlap': true,
+  },
   'minzoom': 7,
-  'paint': {
-  // Size circle radius by earthquake magnitude and zoom level
-  'circle-radius': [
-    'interpolate', ['linear'], ['zoom'],
-    12, 2,
-    16, ['*', 2, ['get', 'amount']]
-  ],
+  // 'paint': {
+  // // Size circle radius by earthquake magnitude and zoom level
+  // 'circle-radius': [
+  //   'interpolate', ['linear'], ['zoom'],
+  //   12, 2,
+  //   16, ['*', 2, ['get', 'amount']]
+  // ],
   // Color circle by earthquake magnitude
   // 'circle-color': [
   //   'interpolate',
@@ -31,17 +36,17 @@ const layer = {
   // 'circle-stroke-color': 'white',
   // 'circle-stroke-width': 1,
   // Transition from heatmap to circle layer by zoom level
-    'circle-opacity': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      7,
-      0,
-      8,
-      1
-    ],
-    'circle-color': ['get', 'color']
-  }
+    // 'circle-opacity': [
+    //   'interpolate',
+    //   ['linear'],
+    //   ['zoom'],
+    //   7,
+    //   0,
+    //   8,
+    //   1
+    // ],
+    // 'circle-color': ['get', 'color']
+  //}
 }
 
 export default layer;

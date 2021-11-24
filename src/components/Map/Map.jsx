@@ -6,6 +6,7 @@ import './Map.css';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
+import getVehicleMarkers from './../Map/vehicle_marker.js';
 
 const md5 = require('md5');
 
@@ -37,6 +38,7 @@ function Map(props) {
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
     const initMap = () => {
+      
       if (map.current) return;
       map.current = new maplibregl.Map({
         container: mapContainer.current,
@@ -65,6 +67,16 @@ function Map(props) {
       
       map.current.dragRotate.disable();
       map.current.touchZoomRotate.disableRotation();
+
+      var test = async() => {
+        var value = await getVehicleMarkers("#000000");
+        map.current.addImage('gradient', { width: 25, height: 25, data: value[0]});
+        console.log(value[0]);
+      };
+      test();
+
+
+
     }
     initMap();
   }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer])
