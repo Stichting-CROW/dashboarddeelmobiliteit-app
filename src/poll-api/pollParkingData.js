@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { createFilterparameters, isLoggedIn, convertDurationToColor } from './pollTools.js';
+import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
 
 var store_parkingdata = undefined;
 
@@ -59,7 +59,7 @@ const updateParkingData = ()  => {
             let in_public_space_since = isLoggedIn ? v.start_time : v.in_public_space_since;
       
             var minutes = current_time.diff(moment(in_public_space_since), 'minutes');
-            const color = convertDurationToColor(minutes);
+            const duration_bin = convertDurationToBin(minutes);
       
             let feature = {
                "type":"Feature",
@@ -67,7 +67,7 @@ const updateParkingData = ()  => {
                   "id":md5(v.location.latitude+v.location.longitude),
                   "system_id": v.system_id,
                   "in_public_space_since": in_public_space_since,
-                  "color": color
+                  "duration_bin": duration_bin,
                },
                "geometry":{
                   "type":"Point",

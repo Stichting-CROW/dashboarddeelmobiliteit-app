@@ -3,7 +3,7 @@ const layer = {
   'type': 'symbol',
   'source': 'vehicles',
   'layout': {
-    'icon-image': 'gradient',
+    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'duration_bin']],
     'icon-size': 1,
     'icon-allow-overlap': true,
   },

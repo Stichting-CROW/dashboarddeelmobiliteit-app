@@ -49,7 +49,7 @@ const initialMarker2 = `
 `;
 
 async function getVehicleMarkers(operatorColor) {
-    var gradients = ['#000000'];
+    var gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48'];
     var markers = [];
     for (const durationIndicationColor of gradients) {
         var marker = await styleVehicleMarker(operatorColor,  durationIndicationColor);
@@ -65,11 +65,18 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     var svg = svgElement;
     var width = {};
     var height = {};
-    // var test = svg.getElementById("Ellipse_192");
-    // test.setAttribute("fill", "#44ff33");
+ 
     // console.log(svg.firstChild.tagName);
     svg.setAttribute("viewBox", "0 0 24 24");
-    
+    var test = svg.getElementById("Ellipse_192");
+    test.setAttribute("fill", operatorColor);
+
+    var test = svg.getElementById("Ellipse_129");
+    test.setAttribute("fill", durationIndicationColor);
+
+    var test = svg.getElementById("Ellipse_130");
+    test.setAttribute("fill", durationIndicationColor);
+
     console.log(svg);
     // svg = svg.querySelector('svg');
     width.value = 25;
@@ -88,7 +95,6 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     var url = win.createObjectURL(blob);
     img.src = url;
     await img.decode();
-    console.log("test2");
     var context = canvas.getContext('2d');
     context.drawImage(img, 0, 0);
     win.revokeObjectURL(url);

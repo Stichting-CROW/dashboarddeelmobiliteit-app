@@ -74,6 +74,10 @@ function Map(props) {
     return state.vehicles || null;
   });
 
+  const aanbieders = useSelector(state => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
+
   const zones_geodata = useSelector(state => {
     if(!state||!state.zones_geodata) {
       return null;
@@ -129,13 +133,6 @@ function Map(props) {
       // Disable rotating
       map.current.dragRotate.disable();
       map.current.touchZoomRotate.disableRotation();
-
-      var test = async() => {
-        var value = await getVehicleMarkers("#000000");
-        map.current.addImage('gradient', { width: 25, height: 25, data: value[0]});
-        // console.log(value[0]);
-      };
-      test();
 
     }
     initMap();
@@ -198,6 +195,7 @@ function Map(props) {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
     addOrUpdateSource('vehicles-clusters', vehicles);
+    console.log(vehicles);
     // eslint-disable-next-line
   }, [
     // eslint-disable-next-line
@@ -245,8 +243,27 @@ function Map(props) {
     initPopupLogic(map.current)
   }, [vehicles, zones_geodata, counter, props.layers]);
 
+  useEffect(() => {
+    var test = async(aanbieder) => {
+      console.log(aanbieder);
+      if (map.current.hasImage(aanbieder.system_id + ':0')) {
+        console.log("image already exits");
+        return;
+      }
+      var value = await getVehicleMarkers(aanbieder.color);
+      value.forEach((img, idx) => {
+        map.current.addImage(aanbieder.system_id + ":" + idx, { width: 25, height: 25, data: img});
+      });
+    };
+    aanbieders.forEach(aanbieder => {
+      test(aanbieder);
+    });
+  }, [aanbieders]);
+
   return null;
 }
+
+
 
 export {
   Map

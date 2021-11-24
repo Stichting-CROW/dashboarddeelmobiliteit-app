@@ -7,11 +7,10 @@ function FilteritemMarkers() {
 
   const markers = useSelector(state => {
     return [
-      { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 24 uur'},
-      { id: 1, color: '#48E248', fillcolor: '#FFFFFF', name: '< 48 uur'},
-      { id: 2, color: '#FFD837', fillcolor: '#FFFFFF', name: '< 72 uur'},
-      { id: 3, color: '#FE862E', fillcolor: '#FE862E', name: '< 5 d'},
-      { id: 4, color: '#FD3E48', fillcolor: '#FD3E48', name: '> 7 d'},
+      { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 uur'},
+      { id: 1, color: '#48E248', fillcolor: '#48E248', name: '< 24 uur'},
+      { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '< 4 d'},
+      { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '> 4 d'}
     ];
   });
   

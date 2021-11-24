@@ -71,16 +71,16 @@ export const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
-export const convertDurationToColor = (duration) => {
+export const convertDurationToBin = (duration) => {
   if (duration <= 60) {
-    return "#38ff71";
+    return 0;
   }
   if (duration <= 24 * 60) {
-    return "#008c28";
+    return 1;
   }
   if (duration <= 24 * 60 * 4) {
-    return "#fff700";
+    return 2;
   }
-  return "#cc0000";
+  return 3;
 }
 
