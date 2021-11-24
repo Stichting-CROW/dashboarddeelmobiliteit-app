@@ -57,30 +57,21 @@ const updateParkingData = ()  => {
           state.metadata.aanbieders.forEach(o=>{console.log(o.system_id); operatorcolors[o.system_id]=o.color});
       
           const md5 = require('md5');
-          var current_time = moment();
+          var start_time = moment(state.filter.datum);
+          
           vehicles.forEach(v => {
             let in_public_space_since = isLoggedIn ? v.start_time : v.in_public_space_since;
       
-            var minutes = current_time.diff(moment(in_public_space_since), 'minutes');
-<<<<<<< HEAD
+            var minutes = start_time.diff(moment(in_public_space_since), 'minutes');
             const duration_bin = convertDurationToBin(minutes);
       
-=======
-            const color = convertDurationToColor(minutes);
-            
->>>>>>> 6af4065035f6919490a8202ea8fd44190e0e6e57
             let feature = {
                "type":"Feature",
                "properties":{
                   "id":md5(v.location.latitude+v.location.longitude),
                   "system_id": v.system_id,
                   "in_public_space_since": in_public_space_since,
-<<<<<<< HEAD
                   "duration_bin": duration_bin,
-=======
-                  "color": color,
-                  "operatorcolor": operatorcolors[v.system_id]
->>>>>>> 6af4065035f6919490a8202ea8fd44190e0e6e57
                },
                "geometry":{
                   "type":"Point",

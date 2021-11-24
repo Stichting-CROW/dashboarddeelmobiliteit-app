@@ -77,7 +77,6 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     var test = svg.getElementById("Ellipse_130");
     test.setAttribute("fill", durationIndicationColor);
 
-    console.log(svg);
     // svg = svg.querySelector('svg');
     width.value = 25;
     height.value = 25;
