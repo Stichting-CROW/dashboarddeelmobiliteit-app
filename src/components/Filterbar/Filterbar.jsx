@@ -1,11 +1,12 @@
 import './css/Filterbar.css';
-import SlideBox from '../SlideBox/SlideBox.jsx';
+// import SlideBox from '../SlideBox/SlideBox.jsx';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemInterval from './FilteritemInterval.jsx';
 import FilteritemAanbieders from './FilteritemAanbieders.jsx';
 import FilteritemZones from './FilteritemZones.jsx';
 import FilteritemMarkers from './FilteritemMarkers.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
   // console.log("show interval %s", showinterval)
@@ -19,6 +20,7 @@ function Filterbar({showinterval=false, visible=false}) {
       <FilteritemGebieden />
       <FilteritemZones />
       <FilteritemMarkers />
+      <FilteritemVoertuigTypes />
       <FilteritemAanbieders />
     </div>
   )

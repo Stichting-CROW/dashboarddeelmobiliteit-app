@@ -26,12 +26,6 @@
   height: 1.4em;
 }
 
-.not-selected {
-  opacity: 0.6;
-  filter: grayscale(100%);
-  user-select: none;
-}
-
 .filter-aanbieders-title-row {
   display: flex;
   flex-direction: row;

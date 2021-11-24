@@ -6,14 +6,14 @@
   position: fixed;
   z-index: 99;
   top: 0;
-  left: -324px;
+  /* left: -324px; */
   padding-top: 60px;
   background: #F6F5F4 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000029;
   border-radius: 20px;
   opacity: 1;
   overflow-x: visible;
-  transition: all 1000ms ease; 
+  transition: all 1000ms ease;
 }
 
 /* Generic items ------------------------------------------------------------*/

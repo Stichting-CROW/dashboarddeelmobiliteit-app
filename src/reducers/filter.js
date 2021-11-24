@@ -7,6 +7,7 @@ const initialState = {
   intervalend: (new Date()).toISOString(),
   aanbiedersexclude: "",
   markersexclude: "",
+  voertuigtypesexclude: "",
 }
 
 export default function filter(state = initialState, action) {
@@ -81,7 +82,7 @@ export default function filter(state = initialState, action) {
 
       return {
           ...state,
-          zones: []
+          zones: ''
       };
     }
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
@@ -127,7 +128,53 @@ export default function filter(state = initialState, action) {
 
       return {
           ...state,
-          markersexclude: []
+          markersexclude: ''
+      };
+    }
+    case 'ADD_TO_FILTER_VOERTUIGTYPES_EXCLUDE': {
+      let voertuigtypesexclude = [];
+      try {
+        console.log('add item %s to voertuigtypesexclude filter %o', action.payload, state)
+        if(state.voertuigtypesexclude) {
+          try {
+            voertuigtypesexclude = state.voertuigtypesexclude.split(",") || []
+          } catch(ex) {
+            voertuigtypesexclude = [];
+          }
+        }
+        if(!voertuigtypesexclude.includes(action.payload)) {
+          voertuigtypesexclude.push(action.payload);
+        }
+      } catch(ex) {
+        voertuigtypesexclude = [];
+      }
+
+      return {
+        ...state,
+        voertuigtypesexclude: voertuigtypesexclude.join(",")
+      };
+    }
+    case 'REMOVE_FROM_FILTER_VOERTUIGTYPES_EXCLUDE': {
+      console.log('remove item %o from voertuigtypesexclude filter', action.payload)
+      let voertuigtypesexclude = [];
+      try {
+        voertuigtypesexclude = state.voertuigtypesexclude.split(",") || [];
+        voertuigtypesexclude = voertuigtypesexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+      } catch(ex) {
+        voertuigtypesexclude = [];
+      }
+
+      return {
+          ...state,
+          voertuigtypesexclude: voertuigtypesexclude.join(",")
+      };
+    }
+    case 'CLEAR_FILTER_VOERTUIGTYPES_EXCLUDE': {
+      console.log('clear voertuigtypesexclude filter')
+
+      return {
+          ...state,
+          voertuigtypesexclude: ''
       };
     }
     case 'ADD_TO_FILTER_AANBIEDERS_EXCLUDE': {
