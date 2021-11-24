@@ -27,7 +27,7 @@ const initPopupLogic = (currentMap) => {
     const vehicleProperties = e.features[0].properties;
 
     var coordinates = e.features[0].geometry.coordinates.slice();
-    var description = e.features[0].properties.description;
+    // var description = e.features[0].properties.description;
      
     // Ensure that if the map is zoomed out such that multiple
     // copies of the feature are visible, the popup appears
@@ -158,7 +158,7 @@ function Map(props) {
     // Check if source exists
     const doesSourceExist = map.current.getSource(sourceName);
     // Get md5 hash of the data
-    let hash = sourceData.data && sourceData.data.features ? md5(sourceData.data.features) : md5('No data yet');
+    let hash = sourceData.data && sourceData.data.features ? md5(JSON.stringify(sourceData.data.features)) : md5('No data yet');
     // If source does exist: update data
     if(doesSourceExist) {
       if(! sourceHash || sourceHash[sourceName] !== hash) {
@@ -197,7 +197,9 @@ function Map(props) {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
     addOrUpdateSource('vehicles-clusters', vehicles);
+    // eslint-disable-next-line
   }, [
+    // eslint-disable-next-line
     vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
     zones_geodata,
     zonesGeodataHash,

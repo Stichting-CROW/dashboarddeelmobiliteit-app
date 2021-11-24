@@ -6,13 +6,7 @@ function FilteritemVoertuigTypes() {
   const dispatch = useDispatch()
 
   const voertuigtypes = useSelector(state => {
-    return [
-      { id: 'bicycle', name: 'Fiets'},
-      { id: 'cargo-bicycle', name: 'Bakfiets'},
-      { id: 'scooter', name: 'Scooter'},
-      { id: 'car', name: 'Auto'},
-      { id: 'other', name: 'Onbekend'},
-    ];
+    return state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : [];
   });
   
   const filterVoertuigTypesExclude = useSelector(state => {
@@ -87,8 +81,8 @@ function FilteritemVoertuigTypes() {
             let extraclass = "";
             switch(voertuigtype.id) {
               case "bicycle": extraclass = "filter-voertuigtypes-icon-bicycle"; break;
-              case "cargo-bicycle": extraclass = "filter-voertuigtypes-icon-cargo-bicycle"; break;
-              case "scooter": extraclass = "filter-voertuigtypes-icon-scooter"; break;
+              case "cargo_bicycle": extraclass = "filter-voertuigtypes-icon-cargo-bicycle"; break;
+              case "moped": extraclass = "filter-voertuigtypes-icon-scooter"; break;
               case "car": extraclass = "filter-voertuigtypes-icon-car"; break;
               case "other" : extraclass = "filter-voertuigtypes-icon-other"; break;
               default:

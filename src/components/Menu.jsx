@@ -60,7 +60,7 @@ function Menu() {
           Monitor
         </Link>}
         
-        {isLoggedIn &&  <span>{JSON.stringify(extent)}</span>}
+        {isLoggedIn && false && <span>{JSON.stringify(extent)}</span>}
 
         {/*<Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();

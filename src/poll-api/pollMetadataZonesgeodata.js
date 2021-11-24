@@ -52,7 +52,7 @@ const updateZonesGeodata = ()  => {
       // get bounds of all selected zones
       zone_ids = state.filter.zones; // use selected zones
     }
-    
+
     if(zone_ids==="") {
       store.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       return;
@@ -101,18 +101,17 @@ const updateZonesGeodata = ()  => {
                   fullextent[3]=Math.max(extent[3],fullextent[3]);
                 }
 
-                console.log("****** DISPATCH EXTENT ********")
-                store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
-                
                 break;
               default:
-                console.log("pollMetadataZonesgeodata - don't know how to handle %s", zonedata.type, zonedata);
+                console.warn("pollMetadataZonesgeodata - don't know how to handle %s", zonedata.type, zonedata);
                 break
             }
           })
           
           let payload = { data: geojson, filter: state.filter.zones, bounds: fullextent};
           store.dispatch({ type: 'SET_ZONES_GEODATA', payload});
+          store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
+          
         }).catch(ex=>{ console.error("unable to decode JSON", ex); });
       }).catch(ex=>{ console.error("unable to fetch zone geodata"); });
   } catch(ex) {

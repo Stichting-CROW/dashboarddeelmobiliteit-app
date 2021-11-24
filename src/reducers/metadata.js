@@ -36,7 +36,7 @@ export default function filter(state = initialState, action) {
         return Object.assign(aanbieder, {color: colors[idx]});
       })
       
-      if(md5(current)===md5(aanbieders)) { return state; }
+      if(md5(JSON.stringify(current))===md5(JSON.stringify(aanbieders))) { return state; }
       
       return {
         ...state,
@@ -46,7 +46,7 @@ export default function filter(state = initialState, action) {
     case 'SET_GEBIEDEN': {
       let current = state.gebieden ? state.gebieden: [];
     
-      if(md5(current)===md5(action.payload)) { return state; }
+      if(md5(JSON.stringify(current))===md5(JSON.stringify(action.payload))) { return state; }
     
       return {
         ...state,
@@ -57,7 +57,7 @@ export default function filter(state = initialState, action) {
     case 'SET_ZONES': {
       let current = state.zones ? state.zones: [];
     
-      if(md5(current)===md5(action.payload)) { return state; }
+      if(md5(JSON.stringify(current))===md5(JSON.stringify(action.payload))) { return state; }
 
       return {
           ...state,
@@ -68,7 +68,7 @@ export default function filter(state = initialState, action) {
     case 'SET_VEHICLE_TYPES': {
       let current = state.vehicle_types ? state.vehicle_types: [];
     
-      if(md5(current)===md5(action.payload)) { return state; }
+      if(JSON.stringify(md5(current))===JSON.stringify(md5(action.payload))) { return state; }
 
       return {
           ...state,

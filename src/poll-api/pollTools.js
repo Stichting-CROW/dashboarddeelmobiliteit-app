@@ -14,7 +14,7 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     if(candidates.length===1) {
       filterparams.push("zone_ids="+candidates[0].zone_id);
     } else {
-      console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied);
+      console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
     
   }
@@ -27,6 +27,18 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
 
     filterparams.push("operators=" + selectedaanbieders);
   }
+  
+  if(filter.voertuigtypesexclude!=='') {
+    // form_factors=cargo_bicycle,moped,bicycle,car,other
+    let filteritems = filter.voertuigtypesexclude.split(",");
+    let selectedtypes = metadata.vehicle_types
+      .filter(vtype=>(filteritems.includes(vtype.id)===false))
+      .map(vtype=>vtype.id).join(",");
+
+    filterparams.push("form_factors=" + selectedtypes);
+  }
+  
+  
 
   if(isParkingData) {
     let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals

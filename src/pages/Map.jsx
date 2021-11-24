@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import {Map as MapComponent} from '../components/Map/Map.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';

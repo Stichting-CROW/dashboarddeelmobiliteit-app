@@ -14,7 +14,7 @@ function SelectLayer(props) {
   const dispatch = useDispatch()
   
   const showZoneOnOff = useSelector(state => {
-    return state.layers ? state.filter.zones!=='' : false;
+    return state.filter ? state.filter.gebied!=='' : false;
   });
 
   const zonesVisible = useSelector(state => {
