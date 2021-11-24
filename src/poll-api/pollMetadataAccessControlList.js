@@ -26,7 +26,7 @@ const cPublicVoertuigTypes = [
     { id: 'cargo_bicycle', name: 'Bakfiets'},
     { id: 'moped', name: 'Scooter'},
     { id: 'car', name: 'Auto'},
-    { id: 'other', name: 'Onbekend'},
+    { id: 'unknown', name: 'Onbekend'},
 ]
 
 var store_accesscontrollist = undefined;

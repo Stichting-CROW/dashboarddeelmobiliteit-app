@@ -84,7 +84,7 @@ function FilteritemVoertuigTypes() {
               case "cargo_bicycle": extraclass = "filter-voertuigtypes-icon-cargo-bicycle"; break;
               case "moped": extraclass = "filter-voertuigtypes-icon-scooter"; break;
               case "car": extraclass = "filter-voertuigtypes-icon-car"; break;
-              case "other" : extraclass = "filter-voertuigtypes-icon-other"; break;
+              case "unknown" : extraclass = "filter-voertuigtypes-icon-other"; break;
               default:
                 break;
             }
