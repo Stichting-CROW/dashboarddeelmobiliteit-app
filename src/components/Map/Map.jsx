@@ -103,7 +103,8 @@ function Map(props) {
         style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
-        zoom: zoom
+        zoom: zoom,
+        maxZoom: 19
       });
 
       // Add controls
