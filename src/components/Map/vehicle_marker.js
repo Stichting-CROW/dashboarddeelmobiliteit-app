@@ -28,16 +28,16 @@
 //     <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0"/>
 // </svg>`;
 
-const compare = `<svg xmlns="http://www.w3.org/1999/xhtml" viewbox="0 0 24 24" width="200" height="200">
-<circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304">
-<g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
-    <circle cx="10" cy="10" r="10" stroke="none">
-    <circle cx="10" cy="10" r="9.5" fill="none">
-</circle></circle></g>
-<circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0">
-</circle></circle></svg>
-
-`
+// const compare = `<svg xmlns="http://www.w3.org/1999/xhtml" viewbox="0 0 24 24" width="200" height="200">
+// <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304">
+// <g id="Ellipse_130" data-name="Ellipse 130" transform="translate(2 2)" fill="#1fa024" stroke="#fff" stroke-width="1">
+//     <circle cx="10" cy="10" r="10" stroke="none">
+//     <circle cx="10" cy="10" r="9.5" fill="none">
+// </circle></circle></g>
+// <circle id="Ellipse_192" data-name="Ellipse 192" cx="4.5" cy="4.5" r="4.5" transform="translate(14 1)" fill="#1f3ff0">
+// </circle></circle></svg>
+//
+// `
 
 const initialMarker2 = `
     <circle id="Ellipse_129" data-name="Ellipse 129" cx="12" cy="12" r="12" fill="#1fa024" opacity="0.304"></circle>
@@ -54,7 +54,7 @@ async function getVehicleMarkers(operatorColor) {
     for (const durationIndicationColor of gradients) {
         var marker = await styleVehicleMarker(operatorColor,  durationIndicationColor);
         markers.push(marker);
-    }   
+    }
     return markers;
 }
 
@@ -71,10 +71,10 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     var test = svg.getElementById("Ellipse_192");
     test.setAttribute("fill", operatorColor);
 
-    var test = svg.getElementById("Ellipse_129");
+    test = svg.getElementById("Ellipse_129");
     test.setAttribute("fill", durationIndicationColor);
 
-    var test = svg.getElementById("Ellipse_130");
+    test = svg.getElementById("Ellipse_130");
     test.setAttribute("fill", durationIndicationColor);
 
     // svg = svg.querySelector('svg');

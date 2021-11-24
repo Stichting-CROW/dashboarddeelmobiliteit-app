@@ -1,20 +1,12 @@
 import moment from 'moment';
 import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
-import { cPollDelayParkingData, cPollDelayErrorMultiplyer } from '../constants.js';
+import { cPollDelayParkingData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 
 var store_parkingdata = undefined;
 
 var timerid_parkingdata = undefined;
 
-var recursive = 0;
-
 const updateParkingData = ()  => {
-  recursive += 1;
-  if(recursive>1) {
-    console.log("recursive updateparkingdata call (level %s)", recursive);
-    return false;
-  }
-
   // console.log("updateParkingData")
   let delay = cPollDelayParkingData;
   try {
@@ -24,6 +16,12 @@ const updateParkingData = ()  => {
     }
     
     const state = store_parkingdata.getState();
+    if(state.metadata.zones_loaded===false) {
+      delay = cPollDelayLoading;
+      console.log("no zone metadata available yet - skipping parking data update");
+      return false;
+    }
+
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
     if(!canfetchdata) {
       store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
@@ -120,7 +118,6 @@ const updateParkingData = ()  => {
     console.error("Unable to update zones", ex)
     delay = cPollDelayParkingData * cPollDelayErrorMultiplyer;
   } finally {
-    recursive -= 1;
     timerid_parkingdata = setTimeout(updateParkingData, delay);
   }
 }

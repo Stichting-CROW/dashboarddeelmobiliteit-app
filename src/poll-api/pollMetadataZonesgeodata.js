@@ -1,4 +1,4 @@
-import { cPollDelayMetadataZonesGeodata, cPollDelayErrorMultiplyer } from '../constants.js';
+import { cPollDelayMetadataZonesGeodata, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 
 var store = undefined;
 
@@ -33,11 +33,17 @@ const updateZonesGeodata = ()  => {
   let delay = cPollDelayMetadataZonesGeodata;
   try {
     if(undefined===store) {
-      console.log("no redux state available yet - skipping zones geodata update");
+      // console.log("no redux state available yet - skipping zones geodata update");
       return false;
     }
     
     const state = store.getState();
+    if(state.metadata.zones_loaded===false) {
+      delay = cPollDelayLoading;
+      // console.log("no zone metadata available yet - skipping zones geodata update");
+      return false;
+    }
+
     let zone_ids="";
     if(!isLoggedIn(state)||!state) {
       // no filter data available

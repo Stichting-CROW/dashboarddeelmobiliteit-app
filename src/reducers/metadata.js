@@ -5,6 +5,8 @@ const initialState = {
   gebieden: [],
   zones: [],
   vehicle_types: [],
+  metadata_loaded: false,
+  zones_loaded: false
 }
 
 // utility function that creates a color palette
@@ -64,6 +66,14 @@ export default function filter(state = initialState, action) {
           zones: action.payload,
       };
     }
+    
+    case 'CLEAR_ZONES': {
+      return {
+          ...state,
+          zones: [],
+          zones_loaded: false,
+      };
+    }
 
     case 'SET_VEHICLE_TYPES': {
       let current = state.vehicle_types ? state.vehicle_types: [];
@@ -76,6 +86,20 @@ export default function filter(state = initialState, action) {
       };
     }
 
+    case 'SET_METADATA_LOADED': {
+      return {
+          ...state,
+          metadata_loaded: action.payload,
+      };
+    }
+
+    case 'SET_ZONES_LOADED': {
+      return {
+          ...state,
+          zones_loaded: action.payload,
+      };
+    }
+    
     default:
       return state;
   }

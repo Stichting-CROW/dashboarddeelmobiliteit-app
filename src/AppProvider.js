@@ -12,10 +12,11 @@ import App from './App';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
+const md5 = require('md5');
+
 // Get persistentState from localStorage
-const persistedState = localStorage.getItem('CROWDD_reduxState')
-  ? JSON.parse(localStorage.getItem('CROWDD_reduxState'))
-  : {}
+const theState = localStorage.getItem('CROWDD_reduxState')
+const persistedState = theState ? JSON.parse(theState) : {};
 
 export const store = createStore(
   appReducer,
@@ -26,6 +27,17 @@ export const store = createStore(
 // Store Redux state into localStorage
 store.subscribe(() => {
   const storeState = store.getState();
+
+  const oldFilterHash = localStorage.getItem('CROWDD_filterhash') || false;
+  const newFilterHash = md5(JSON.stringify(storeState.filter))
+  if(newFilterHash!==oldFilterHash) {
+    // console.log("filter changed - invalidate data and zones here!");
+    localStorage.setItem('CROWDD_filterhash', newFilterHash)
+    
+    store.dispatch({ type: 'CLEAR_ZONES', payload: null});
+    store.dispatch({ type: 'CLEAR_VEHICLES', payload: null});
+  }
+  
   const storeStateToSaveInLocalStorage = {
     last_update: moment().unix(),
     authentication: storeState.authentication,

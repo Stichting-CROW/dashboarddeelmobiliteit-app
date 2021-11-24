@@ -5,3 +5,4 @@ export const cPollDelayParkingData = 60 * 1000;
 export const cPollDelayTripData = 60 * 1000;
 
 export const cPollDelayErrorMultiplyer = 2; // wait X times as long after error
+export const cPollDelayLoading = 500; // short delay while loading

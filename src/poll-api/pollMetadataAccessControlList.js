@@ -76,6 +76,8 @@ const updateAccessControlList = ()  => {
             // items -> {"id": 1, "name": "asdfasdfadfa" }
             let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented
             store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: types});
+            
+            store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
           })
         }).catch(ex=>{
           console.error("unable to decode JSON");

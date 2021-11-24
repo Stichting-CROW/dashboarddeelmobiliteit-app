@@ -1,5 +1,5 @@
+import { cPollDelayMetadataZones, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 import { getEmptyZonesGeodataPayload } from './pollMetadataZonesgeodata';
-import { cPollDelayMetadataZones, cPollDelayErrorMultiplyer } from '../constants.js';
 
 var store_zones = undefined;
 
@@ -18,14 +18,23 @@ const updateZones = ()  => {
     }
     
     const state = store_zones.getState();
+    if(state.metadata.metadata_loaded===false) {
+      delay = cPollDelayLoading;
+      console.log("no metadata available yet - skipping zones update");
+      return false;
+    }
+    
     let url_zones="";
     if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+      
       return;
     } if(state.filter.gebied==="") {
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
       return;
       
       // later: show outlines for all municipalities
@@ -49,6 +58,7 @@ const updateZones = ()  => {
         .then((metadata) => {
           // items: { "municipality": "GM0785", "name": "Goirle", "owner": null, "zone_id": 34278, "zone_type": "municipality"}
           store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones});
+          store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
         })
       }).catch(ex=>{
         console.error("unable to decode JSON");
