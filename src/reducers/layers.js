@@ -28,13 +28,16 @@ export default function filter(state = initialState, action) {
     }
     case 'LAYER_SET_ZONES_EXTENT': {
       const md5 = require('md5');
+      console.log(action.payload, )
 
-      if(md5(action.payload)!==md5(state.extent||[])) {
+      if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.extent||[]))) {
+        console.log("set extent to %o", action.payload)
         return {
             ...state,
             extent: action.payload
         };
       } else {
+        console.log("set extent - not changed")
         return state;
       }
     }

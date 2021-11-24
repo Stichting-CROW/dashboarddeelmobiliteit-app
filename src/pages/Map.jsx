@@ -19,32 +19,26 @@ function Map(props) {
   });
   
   let layers = [];
+  if(showZones) { layers.push('zones-geodata') }
+  
   let activesource = '';
   switch(displayMode) {
     case DISPLAYMODE_PARKEERDATA_HEATMAP:
-      layers = [
-        'vehicles-heatmap-city-level',
-      ];
+      layers.push('vehicles-heatmap-city-level');
       activesource = 'vehicles';
       break;
     case DISPLAYMODE_PARKEERDATA_CLUSTERS:
-      layers = [
-        'vehicles-clusters',
-        'vehicles-clusters-count',
-        'vehicles-clusters-point',
-      ];
-      activesource = 'vehicles';
+      layers.push('vehicles-clusters');
+      layers.push('vehicles-clusters-count');
+      layers.push('vehicles-clusters-point');
+      activesource = 'vehicles-clusters';
       break;
     case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
-      layers = [
-        'vehicles-point',
-      ];
+      layers.push('vehicles-point');
       activesource = 'vehicles';
       break;
     default:
   }
-  
-  if(showZones) { layers.push('zones-geodata') }
   
   return (
     <div className="flex flex-col">

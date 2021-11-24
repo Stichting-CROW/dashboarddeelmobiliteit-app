@@ -13,12 +13,15 @@ function SelectLayer(props) {
   // const {setLayers, setActiveSource} = props;
   const dispatch = useDispatch()
   
-  const showZones = useSelector(state => {
+  const showZoneOnOff = useSelector(state => {
+    return state.layers ? state.filter.zones!=='' : false;
+  });
+
+  const zonesVisible = useSelector(state => {
     return state.layers ? state.layers.zones_visible : false;
   });
   
   const displayMode = useSelector(state => {
-    console.log('got displaymode', state.layers);
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
   
@@ -30,34 +33,35 @@ function SelectLayer(props) {
       z-10
     `}>
       <SlideBox direction="right">
-        <div data-type="heat-map" className={`layer${!displayMode===DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
+        <div data-type="heat-map" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
           <span className="layer-title">
             Heat map
           </span>
         </div>
 
-        <div data-type="pointers" className={`layer${!displayMode===DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
+        <div data-type="pointers" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
           <span className="layer-title">
             Clusters
           </span>
         </div>
 
-        <div data-type="vehicles"  className={`layer${!displayMode===DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
+        <div data-type="vehicles"  className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
           <span className="layer-title">
             Voertuigen
           </span>
         </div>
 
-        <div data-type="zones" className={`layer${!showZones ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
-        }}>
-          <span className="layer-title">
-            Zones
-          </span>
-        </div>
+        { showZoneOnOff ?
+          <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
+              dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
+          }}>
+            <span className="layer-title">
+              Zones
+            </span>
+          </div> : null }
     </SlideBox>
   </div>
 }

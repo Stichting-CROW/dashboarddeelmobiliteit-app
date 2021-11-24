@@ -20,25 +20,14 @@ function Menu() {
     return state.filter ? state.filter.visible : false;
   });
 
-  const gebieden = useSelector(state => {
-    return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
-  });
-
-  const zones = useSelector(state => {
-    return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
+  const extent = useSelector(state => {
+    return state.layers ? state.layers.extent : [];
   });
 
   const toggleFilter = e => {
     dispatch({
       type: 'SET_FILTER_VISIBLE',
       payload: !showfilter
-    })
-  }
-
-  const calculateBounds = e => {
-    dispatch({
-      type: 'CALCULATE_BOUNDS',
-      payload: { gebieden, zones }
     })
   }
 
@@ -71,13 +60,7 @@ function Menu() {
           Monitor
         </Link>}
         
-        {isLoggedIn ?
-            <div className="text-menu">
-              <IconButtonFilter  onClick={calculateBounds} />
-            </div>
-            :
-            null }
-        
+        {isLoggedIn &&  <span>{JSON.stringify(extent)}</span>}
 
         {/*<Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();

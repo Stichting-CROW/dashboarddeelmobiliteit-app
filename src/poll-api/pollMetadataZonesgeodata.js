@@ -1,5 +1,4 @@
-var store_zonesgeodata = undefined;
-var store_layers = undefined;
+var store = undefined;
 
 const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
@@ -31,12 +30,12 @@ export const getEmptyZonesGeodataPayload = () => {
 const updateZonesGeodata = ()  => {
   let delay = 5 * 1000;
   try {
-    if(undefined===store_zonesgeodata) {
+    if(undefined===store) {
       console.log("no redux state available yet - skipping zones geodata update");
       return false;
     }
     
-    const state = store_zonesgeodata.getState();
+    const state = store.getState();
     let zone_ids="";
     if(!isLoggedIn(state)||!state) {
       // no filter data available
@@ -55,7 +54,7 @@ const updateZonesGeodata = ()  => {
     }
     
     if(zone_ids==="") {
-      // store_zonesgeodata.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+      store.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       return;
     }
     
@@ -101,9 +100,9 @@ const updateZonesGeodata = ()  => {
                   fullextent[2]=Math.max(extent[2],fullextent[2]);
                   fullextent[3]=Math.max(extent[3],fullextent[3]);
                 }
-                console.log("zonedata %s - extent %o", idx, fullextent);
 
-                // dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
+                console.log("****** DISPATCH EXTENT ********")
+                store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
                 
                 break;
               default:
@@ -113,7 +112,7 @@ const updateZonesGeodata = ()  => {
           })
           
           let payload = { data: geojson, filter: state.filter.zones, bounds: fullextent};
-          store_zonesgeodata.dispatch({ type: 'SET_ZONES_GEODATA', payload});
+          store.dispatch({ type: 'SET_ZONES_GEODATA', payload});
         }).catch(ex=>{ console.error("unable to decode JSON", ex); });
       }).catch(ex=>{ console.error("unable to fetch zone geodata"); });
   } catch(ex) {
@@ -129,7 +128,6 @@ export const forceUpdateZonesgeodata = () => {
   updateZonesGeodata();
 }
 
-export const initUpdateZonesgeodata = (_store_zonesgeodata, _store_layers) => {
-  store_zonesgeodata = _store_zonesgeodata;
-  store_layers = _store_layers;
+export const initUpdateZonesgeodata = (_store) => {
+  store = _store;
 }
