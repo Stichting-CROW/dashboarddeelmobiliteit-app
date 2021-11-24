@@ -63,12 +63,14 @@ const updateParkingData = ()  => {
           const md5 = require('md5');
           var start_time = moment(state.filter.datum);
           
+          let markersexclude = state.filter.markersexclude.split(",");
+
           vehicles.forEach(v => {
             let in_public_space_since = isLoggedIn ? v.start_time : v.in_public_space_since;
       
             var minutes = start_time.diff(moment(in_public_space_since), 'minutes');
             const duration_bin = convertDurationToBin(minutes);
-      
+            
             let feature = {
                "type":"Feature",
                "properties":{
@@ -86,8 +88,11 @@ const updateParkingData = ()  => {
                   ]
                }
             }
-      
-            geoJson.features.push(feature);
+            
+            let markerVisible = !markersexclude.includes(duration_bin.toString());
+            if(markerVisible) {
+              geoJson.features.push(feature);
+            }
             // new maplibregl.Marker({color: "#FF0000"})
             //   .setLngLat([x.location.longitude, x.location.latitude])
             //   .addTo(map.current);
