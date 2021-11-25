@@ -1,7 +1,7 @@
 .app {
   overflow-x: hidden;
   font-family: Inter, sans-serif;
-  @apply absolute w-screen h-screen z-0 bg-green-400 flex flex-col min-h-screen box-border;
+  @apply absolute w-screen h-screen z-0 bg-white flex flex-col min-h-screen box-border;
 }
 /*  */
 

@@ -1,5 +1,5 @@
 const initialState = {
-  visible: false,
+  visible: true,
   gebied: "",
   zones: "",
   datum: (new Date()).toISOString(),
@@ -20,6 +20,10 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'SET_FILTER_GEBIED': {
+      if(state.gebied===action.payload) {
+        return state;
+      }
+      
       console.log('reducer filter set gebied to %s', action.payload)
       return {
           ...state,
@@ -218,6 +222,11 @@ export default function filter(state = initialState, action) {
           ...state,
           aanbiedersexclude: ''
       };
+    }
+    case 'RESET_FILTER': {
+      console.log('reset filter')
+      
+      return initialState;
     }
     default:
       return state;

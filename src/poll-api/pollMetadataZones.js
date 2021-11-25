@@ -20,7 +20,7 @@ const updateZones = ()  => {
     const state = store_zones.getState();
     if(state.metadata.metadata_loaded===false) {
       delay = cPollDelayLoading;
-      console.log("no metadata available yet - skipping zones update");
+      // console.log("no metadata available yet - skipping zones update");
       return false;
     }
     

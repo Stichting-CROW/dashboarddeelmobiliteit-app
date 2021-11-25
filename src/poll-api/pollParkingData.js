@@ -21,7 +21,7 @@ const updateParkingData = ()  => {
       console.log("no zone metadata available yet - skipping parking data update");
       return false;
     }
-
+    
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
     if(!canfetchdata) {
       store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
@@ -54,7 +54,6 @@ const updateParkingData = ()  => {
           
           let operatorcolors = {};
           state.metadata.aanbieders.forEach(o => {
-            // console.log(o.system_id);
             operatorcolors[o.system_id]=o.color;
           });
       
@@ -128,7 +127,6 @@ export const forceUpdateParkingData = () => {
 }
 
 export const initUpdateParkingData = (_store) => {
-  // console.log("initUpdateParkingData")
   store_parkingdata = _store;
   forceUpdateParkingData();
 }

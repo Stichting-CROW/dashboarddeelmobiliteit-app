@@ -28,6 +28,12 @@
   padding-left: 12px;
 }
 
+.filter-plaats-not-active {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
+
 .filter-plaats-box-row {
   display: flex;
   flex-direction: row;

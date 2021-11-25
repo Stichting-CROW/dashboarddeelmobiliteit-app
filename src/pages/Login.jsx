@@ -35,6 +35,7 @@ const Login = () => {
       }
     }).then(res => res.json())
       .then(response => {
+        dispatch( { type: 'RESET_FILTER', payload: null } );
         dispatch( setUser(response) );
         setLoggedIn(true);
         document.location = '/map/park';

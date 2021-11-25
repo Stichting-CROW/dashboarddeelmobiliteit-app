@@ -83,6 +83,16 @@ function FilteritemGebieden() {
   }
   
   let value = gebieden.find(item=>item.gm_code===filterGebied) || "";
+  if(gebieden.length===1) {
+    return (
+      <div className="filter-plaats-container filter-plaats-not-active">
+        <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
+        <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
+          <div className="filter-plaats-value " >{value===""?"Alle Gebieden":value.name}</div>
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div className="filter-plaats-container">
