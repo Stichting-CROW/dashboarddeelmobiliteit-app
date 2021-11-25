@@ -28,6 +28,8 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
       .map(aanbieder=>aanbieder.system_id).join(",");
 
     filterparams.push("operators=" + selectedaanbieders);
+  } else if (metadata.aanbieders.length===1) {
+    filterparams.push("operators=" + metadata.aanbieders[0].system_id);
   }
   
   if(filter.voertuigtypesexclude!=='' && filter.voertuigtypesexclude!==undefined) {
