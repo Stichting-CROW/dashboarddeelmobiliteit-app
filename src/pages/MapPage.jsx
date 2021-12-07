@@ -1,13 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {Map as MapComponent} from '../components/Map/Map.jsx';
+import {MapComponent} from '../components/Map/MapComponent.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN } from '../reducers/layers.js';
 
-import './Map.css';
+import './MapPage.css';
 
 function Map(props) {
   const showZones = useSelector(state => {

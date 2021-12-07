@@ -5,7 +5,7 @@ import moment from 'moment';
 // import 'moment/min/moment-with-locales'
 import localization from 'moment/locale/nl'
 
-import './Map.css';
+import './MapComponent.css';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
@@ -66,7 +66,7 @@ const initPopupLogic = (currentMap) => {
   });
 }
 
-function Map(props) {
+function MapComponent(props) {
 
   console.log('Map component')
   // Get vehicles from store
@@ -277,5 +277,5 @@ function Map(props) {
 }
 
 export {
-  Map
+  MapComponent
 };

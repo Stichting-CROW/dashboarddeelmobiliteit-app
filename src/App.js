@@ -8,7 +8,7 @@ import {
 import { store } from './AppProvider.js';
 
 import Menu from './components/Menu.jsx';
-import Map from './pages/Map.jsx';
+import MapPage from './pages/MapPage.jsx';
 import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import Filterbar from './components/Filterbar/Filterbar.jsx';
@@ -21,6 +21,7 @@ import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.
 import { initUpdateParkingData, forceUpdateParkingData } from './poll-api/pollParkingData.js';
 import { initUpdateTripData, forceUpdateTripData } from './poll-api/pollTripData.js';
 import { initUpdateZonesgeodata, forceUpdateZonesgeodata } from './poll-api/pollMetadataZonesgeodata.js';
+import { initUpdateVerhuringenData, forceUpdateVerhuringenData } from './poll-api/pollVerhuringenData.js';
 
 import './App.css';
 
@@ -48,6 +49,7 @@ function App() {
     initUpdateAccessControlList(store);
     initUpdateParkingData(store);
     initUpdateTripData(store);
+    initUpdateVerhuringenData(store);
     forceUpdateZones();
     forceUpdateZonesgeodata();
     forceUpdateAccessControlList();
@@ -57,6 +59,7 @@ function App() {
   useEffect(() => {
     forceUpdateTripData();
     forceUpdateParkingData();
+    forceUpdateVerhuringenData();
   }, [filter]);
 
   const renderMapElements = () => {
@@ -79,11 +82,15 @@ function App() {
                 <Login />
               </Route>
               <Route path="/map/trip">
-                <Map mapContainer={mapContainer} showParkingData={false}/>
+                <MapPage mapContainer={mapContainer} showParkingData={false}/>
                 {renderMapElements()}
               </Route>
               <Route path="/map/park">
-                <Map mapContainer={mapContainer} showParkingData={true}/>
+                <MapPage mapContainer={mapContainer} showParkingData={true}/>
+                {renderMapElements()}
+              </Route>
+              <Route path="/map/rental">
+                <MapPage mapContainer={mapContainer} showParkingData={false}/>
                 {renderMapElements()}
               </Route>
               <Route path="/monitoring">
