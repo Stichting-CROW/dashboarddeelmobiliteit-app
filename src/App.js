@@ -72,7 +72,7 @@ function App() {
   return (
     <Router>
 
-       <Redirect from="/" exact to="/map/park" />
+        <Redirect from="/" exact to="/map/park" />
 
        <div className="app">
           <div className="gui-layer">
@@ -82,15 +82,15 @@ function App() {
                 <Login />
               </Route>
               <Route path="/map/trip">
-                <MapPage mapContainer={mapContainer} showParkingData={false}/>
+                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
               <Route path="/map/park">
-                <MapPage mapContainer={mapContainer} showParkingData={true}/>
+                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
-              <Route path="/map/rental">
-                <MapPage mapContainer={mapContainer} showParkingData={false}/>
+              <Route path="/map/rentals">
+                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
               <Route path="/monitoring">

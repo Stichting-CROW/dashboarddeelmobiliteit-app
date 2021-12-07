@@ -74,6 +74,10 @@ function MapComponent(props) {
     return state.vehicles || null;
   });
 
+  const rentals = useSelector(state => {
+    return state.rentals || null;
+  });
+
   // Get extend (map boundaries) from store
   const extent = useSelector(state => {
     return state.layers ? state.layers.extent : null;
@@ -200,6 +204,7 @@ function MapComponent(props) {
     addOrUpdateSource('vehicles', vehicles);
     addOrUpdateSource('zones-geodata', zones_geodata);
     addOrUpdateSource('vehicles-clusters', vehicles);
+    addOrUpdateSource('rentals', rentals);
     // console.log(vehicles);
     // eslint-disable-next-line
   }, [

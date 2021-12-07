@@ -4,6 +4,7 @@ import vehiclesHeatmapCityLevel from './vehicles-heatmap-city-level.js';
 import vehiclesClusters from './vehicles-clusters.js';
 import vehiclesClustersCount from './vehicles-clusters-count.js';
 import vehiclesClustersPoint from './vehicles-clusters-point.js';
+import rentalsPoint from './rentals-point.js';
 import zonesGeodata from './zones-geodata.js';
 
 export const layers = {
@@ -13,5 +14,6 @@ export const layers = {
   'vehicles-clusters-count': vehiclesClustersCount,
   'vehicles-clusters-point': vehiclesClustersPoint,
   'vehicles-heatmap-city-level': vehiclesHeatmapCityLevel,// Only one used
+  'rentals-point': rentalsPoint,
   'zones-geodata': zonesGeodata
 }

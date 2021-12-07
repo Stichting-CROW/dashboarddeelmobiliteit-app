@@ -1,8 +1,10 @@
 export const DISPLAYMODE_PARKEERDATA_HEATMAP = 'parkeerdata-heatmap';
 export const DISPLAYMODE_PARKEERDATA_CLUSTERS = 'parkeerdata-clusters';
 export const DISPLAYMODE_PARKEERDATA_VOERTUIGEN = 'parkeerdata-voertuigen';
+export const DISPLAYMODE_VERHUURDATA = 'verhuurdata';
 
 export const DATASOURCE_VOERTUIGEN = 'vehicles';
+export const DATASOURCE_VERHUUR = 'rentals';
 
 const initialState = {
   zones_visible: false,

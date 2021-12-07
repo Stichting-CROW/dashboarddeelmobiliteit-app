@@ -2,7 +2,7 @@ const initialState = {
   data: null
 }
 
-export default function verhuur(state = initialState, action) {
+export default function rentals(state = initialState, action) {
   switch(action.type) {
     case 'SET_VERHUURDATA': {
       const vehicles = action.payload

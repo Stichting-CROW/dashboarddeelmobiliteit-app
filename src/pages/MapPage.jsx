@@ -5,7 +5,8 @@ import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
-  DISPLAYMODE_PARKEERDATA_VOERTUIGEN } from '../reducers/layers.js';
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA } from '../reducers/layers.js';
 
 import './MapPage.css';
 
@@ -36,6 +37,10 @@ function Map(props) {
     case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
       layers.push('vehicles-point');
       activesource = 'vehicles';
+      break;
+    case DISPLAYMODE_VERHUURDATA:
+      layers.push('rentals-point');
+      activesource = 'rentals';
       break;
     default:
   }
