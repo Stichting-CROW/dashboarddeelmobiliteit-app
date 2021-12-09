@@ -54,7 +54,8 @@ function FilteritemAanbieders() {
     <div className="filter-aanbieders-container">
       <div className="filter-aanbieders-title-row">
         <div className="filter-aanbieders-title">Aanbieders</div>
-        { filterAanbiedersExclude!==''?
+        { filterAanbiedersExclude!==''
+            ?
             <div className="filter-aanbieders-reset cursor-pointer" onClick={clearFilterAanbiedersExclude}>
               reset
             </div>
@@ -75,7 +76,7 @@ function FilteritemAanbieders() {
               <div
                 className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`}
                 onClick={handler}
-                key={aanbieder.system_id}
+                key={aanbieder.name}
                 >
                 <div className="filter-aanbieders-marker">
                   <svg viewBox='0 0 30 30' >

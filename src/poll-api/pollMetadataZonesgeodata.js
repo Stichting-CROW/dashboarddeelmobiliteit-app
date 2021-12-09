@@ -67,7 +67,7 @@ const updateZonesGeodata = ()  => {
     }
     
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
-    let url_zonesgeodata="https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&&include_geojson=true";
+    let url_zonesgeodata = "https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&&include_geojson=true";
     // let url_geodata="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl"
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids=34217&include_geojson=true
     let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}

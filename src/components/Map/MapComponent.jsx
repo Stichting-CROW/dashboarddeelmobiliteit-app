@@ -263,7 +263,7 @@ function MapComponent(props) {
   }, [vehicles, zones_geodata, counter, props.layers]);
 
   useEffect(() => {
-    var test = async(aanbieder) => {
+    var addProviderImage = async(aanbieder) => {
       if (map.current.hasImage(aanbieder.system_id + ':0')) {
         // console.log("image already exits");
         return;
@@ -274,7 +274,7 @@ function MapComponent(props) {
       });
     };
     aanbieders.forEach(aanbieder => {
-      test(aanbieder);
+      addProviderImage(aanbieder);
     });
   }, [aanbieders]);
 

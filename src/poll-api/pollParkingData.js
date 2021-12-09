@@ -18,7 +18,7 @@ const updateParkingData = ()  => {
     const state = store_parkingdata.getState();
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
-      console.log("no zone metadata available yet - skipping parking data update");
+      // console.log("no zone metadata available yet - skipping parking data update");
       return false;
     }
     

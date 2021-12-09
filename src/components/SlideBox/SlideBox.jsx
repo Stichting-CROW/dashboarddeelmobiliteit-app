@@ -12,6 +12,8 @@ function SlideBox(props) {
     setIsHidden(! isHidden);
   };
 
+  const {backgroundColor} = props.options || {};
+
   return <div className={`
       SlideBox
       direction-${props.direction}
@@ -20,15 +22,23 @@ function SlideBox(props) {
     `} ref={containerRef}>
     <div className="
       SlideBox-inner
-      relative
       px-1
-    ">
+      h-full
+    " style={{backgroundColor: backgroundColor}}>
       {props.children}
     </div>
-    <div className={`SlideBox-toggle`} onClick={() => toggleSlideBox()}>
-      <span>
-        Lagen
-      </span>
+    <div
+      className="SlideBox-toggle-wrapper"
+      onClick={() => toggleSlideBox()}
+      >
+      <div
+        className="Slidebox-toggle"
+        style={{backgroundColor: backgroundColor}}
+        >
+        <span>
+          {props.options.title || 'Lagen'}
+        </span>
+      </div>
     </div>
   </div>
 }

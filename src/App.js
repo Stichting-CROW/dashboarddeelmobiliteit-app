@@ -72,37 +72,38 @@ function App() {
   return (
     <Router>
 
-        <Redirect from="/" exact to="/map/park" />
+      {/*<Redirect from="/" to="/map/park" exact />*/}
 
-       <div className="app">
-          <div className="gui-layer">
+      <div className="app">
+        <div className="gui-layer">
 
-            <Switch>
-              <Route path="/login">
-                <Login />
-              </Route>
-              <Route path="/map/trip">
-                <MapPage mapContainer={mapContainer} />
-                {renderMapElements()}
-              </Route>
-              <Route path="/map/park">
-                <MapPage mapContainer={mapContainer} />
-                {renderMapElements()}
-              </Route>
-              <Route path="/map/rentals">
-                <MapPage mapContainer={mapContainer} />
-                {renderMapElements()}
-              </Route>
-              <Route path="/monitoring">
-                <Monitoring />
-              </Route>
-            </Switch>
+          <Switch>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/">
+              <MapPage mapContainer={mapContainer} />
+              {renderMapElements()}
+            </Route>
+            <Route path="/map/park">
+              <MapPage mapContainer={mapContainer} />
+              {renderMapElements()}
+            </Route>
+            <Route path="/map/rentals">
+              <MapPage mapContainer={mapContainer} />
+              {renderMapElements()}
+            </Route>
+            <Route path="/monitoring">
+              <Monitoring />
+            </Route>
+          </Switch>
 
-            <Topbar />
-            <Menu />
+          <Topbar />
+          <Menu />
 
-          </div>
-        </div>
+         </div>
+       </div>
+
      </Router>
   );
 }

@@ -6,7 +6,8 @@ import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  DISPLAYMODE_VERHUURDATA } from '../reducers/layers.js';
+  DISPLAYMODE_VERHUURDATA
+} from '../reducers/layers.js';
 
 import './MapPage.css';
 

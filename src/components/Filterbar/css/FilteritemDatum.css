@@ -2,12 +2,11 @@
   width: 100%;
   
   background-color: transparent;
-  margin-top:10px;
   
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 0 12px 24px 12px;
+  padding: 24px 12px 24px 12px;
 }
 
 .filter-datum-title {
