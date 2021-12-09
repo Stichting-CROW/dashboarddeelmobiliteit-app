@@ -11,24 +11,24 @@ import SlideBox from '../SlideBox/SlideBox.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
   return (
-    <div className="filter-bar">
-      <SlideBox direction="left" options={{
-        title: 'Filters',
-        backgroundColor: '#F6F5F4',
-      }}>
-        <div className="filter-bar-inner">
-          { showinterval
-            ? <FilteritemInterval />
-            : <FilteritemDatum />
-          }
-          <FilteritemGebieden />
-          <FilteritemZones />
-          <FilteritemMarkers />
-          <FilteritemVoertuigTypes />
-          <FilteritemAanbieders />
-        </div>
-      </SlideBox>
-    </div>
+    <SlideBox direction="left" options={{
+      title: 'Filters',
+      backgroundColor: '#F6F5F4',
+    }} style={{
+      width: '324px'
+    }}>
+      <div className="filter-bar-inner">
+        { showinterval
+          ? <FilteritemInterval />
+          : <FilteritemDatum />
+        }
+        <FilteritemGebieden />
+        <FilteritemZones />
+        <FilteritemMarkers />
+        <FilteritemVoertuigTypes />
+        <FilteritemAanbieders />
+      </div>
+    </SlideBox>
   )
 }
 

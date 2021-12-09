@@ -6,7 +6,7 @@
 /*  */
 
 .gui-layer {
-  @apply absolute w-full h-auto z-10 bg-transparent;
+  @apply absolute w-full h-full z-10 bg-transparent;
 }
 
 .map-layer {

@@ -51,7 +51,7 @@
   left: -32px;
 }
 .SlideBox.direction-left .SlideBox-toggle-wrapper {
-  right:-24px;
+  right:-28px;
 }
 .SlideBox.is-hidden .SlideBox-toggle-wrapper {
   cursor: w-resize;

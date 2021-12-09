@@ -19,10 +19,9 @@ function SlideBox(props) {
       direction-${props.direction}
       relative
       ${isHidden ? 'is-hidden' : ''}
-    `} ref={containerRef}>
+    `} ref={containerRef} style={props.style || {}}>
     <div className="
       SlideBox-inner
-      px-1
       h-full
     " style={{backgroundColor: backgroundColor}}>
       {props.children}

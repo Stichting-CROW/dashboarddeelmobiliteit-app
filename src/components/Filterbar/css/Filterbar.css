@@ -1,19 +1,16 @@
-.filter-bar {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  height: 100%;
-  position: fixed;
+.filter-bar-inner {
+  height: 100vh;
   z-index: 99;
   padding-top: 51px;
   border-radius: 20px;
   opacity: 1;
   overflow-x: visible;
-}
-
-.filter-bar-inner {
-  opacity: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  position: fixed;
   width: 324px;
+  opacity: 1;
   z-index: 99;
   box-shadow: 0px 3px 6px #00000029;
   background: #F6F5F4 0% 0% no-repeat padding-box;
