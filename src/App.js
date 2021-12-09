@@ -9,6 +9,8 @@ import { store } from './AppProvider.js';
 
 import Menu from './components/Menu.jsx';
 import MapPage from './pages/MapPage.jsx';
+import ContentPage from './pages/ContentPage.jsx';
+import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import Filterbar from './components/Filterbar/Filterbar.jsx';
@@ -72,28 +74,34 @@ function App() {
   return (
     <Router>
 
-      {/*<Redirect from="/" to="/map/park" exact />*/}
+      {/*<Redirect exact from="/" to="/map/park" />*/}
 
       <div className="app">
         <div className="gui-layer">
 
           <Switch>
-            <Route path="/login">
+            <Route exact path="/">
+              <MapPage mapContainer={mapContainer} />
+              {renderMapElements()}
+            </Route>
+            <Route exact path="/login">
               <Login />
             </Route>
-            <Route path="/">
+            <Route exact path="/map/park">
               <MapPage mapContainer={mapContainer} />
               {renderMapElements()}
             </Route>
-            <Route path="/map/park">
+            <Route exact path="/map/rentals">
               <MapPage mapContainer={mapContainer} />
               {renderMapElements()}
             </Route>
-            <Route path="/map/rentals">
-              <MapPage mapContainer={mapContainer} />
-              {renderMapElements()}
+            <Route exact path="/stats/overview">
+              <ContentPage>
+                <StatsPage />
+              </ContentPage>
+              {/*<Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>*/}
             </Route>
-            <Route path="/monitoring">
+            <Route exact path="/monitoring">
               <Monitoring />
             </Route>
           </Switch>

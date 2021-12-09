@@ -41,15 +41,24 @@ function Menu() {
   return (
     <div className="Menu fixed b-0">
       <div className="Menu-inner px-4 py-3 flex m-4 mb-1 mx-auto bg-white box-border rounded-3xl w-full shadow-lg">
-        {/*<Link className={`text-menu ${pathName === '/' || pathName === '/map/park' ? 'is-active' : ''}`} to="/map/park">
-          Parkeerdata
-        </Link>*/}
 
-        {/*<Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
-          Tripdata
-        </Link>*/}
+        {isLoggedIn && <>
+          <Link className={`text-menu ${pathName === '/' || pathName === '/map/park' ? 'is-active' : ''}`} to="/map/park">
+            Aanbod
+          </Link>
 
-        {isLoggedIn ?
+          {/*
+          <Link className={`text-menu ${pathName === '/map/trip' ? 'is-active' : ''}`} to="/map/trip">
+            Verhuringen
+          </Link>
+          */}
+
+          <Link className={`text-menu ${pathName === '/stats/overview' ? 'is-active' : ''}`} to="/stats/overview">
+            Ontwikkeling
+          </Link>
+        </>}
+
+        {isLoggedIn && false ?
             <div className="text-menu">
               <IconButtonFilter  onClick={toggleFilter} />
             </div>
@@ -62,7 +71,8 @@ function Menu() {
         
         {isLoggedIn && false && <span>{JSON.stringify(extent)}</span>}
 
-        {/*<Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
+        {/*
+        <Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
           e.preventDefault();
           dispatch({
             type: 'SET_FILTER_DATUM',
@@ -82,7 +92,8 @@ function Menu() {
           }, 60 * 1000 * 10);
         }}>
           ▶️
-        </Link>*/}
+        </Link>
+        */}
 
       </div>
     </div>
