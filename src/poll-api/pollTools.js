@@ -42,8 +42,6 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     filterparams.push("form_factors=" + selectedtypes);
   }
   
-  
-
   if(isParkingData) {
     let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     if(filter.datum!=="") {
