@@ -102,7 +102,7 @@ function FilteritemZones() {
   
   if(zonetxt==="") { zonetxt = "Alle Zones" }
   
-  let isActive = filterGebied!=='' && zones.length > 0;
+  let isActive = filterGebied !== '';
   
   const filteredZones = zones.filter(zone=>{
     return selectedzones.includes(zone.zone_id.toString())

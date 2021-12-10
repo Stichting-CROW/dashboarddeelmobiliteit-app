@@ -1,4 +1,4 @@
-import { createFilterparameters, isLoggedIn } from '../poll-api/pollTools.js';
+import { createFilterparameters } from '../poll-api/pollTools.js';
 
 export const getAggregatedStats = async (token, key, options) => {
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;

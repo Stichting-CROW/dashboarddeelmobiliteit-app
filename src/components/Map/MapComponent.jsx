@@ -7,6 +7,8 @@ import localization from 'moment/locale/nl'
 
 import './MapComponent.css';
 
+import {getProviderColor} from '../../helpers/providers.js';
+
 import {layers} from './layers';
 import {sources} from './sources.js';
 import getVehicleMarkers from './../Map/vehicle_marker.js';
@@ -16,7 +18,7 @@ const md5 = require('md5');
 // Set language for momentJS
 moment.locale('nl', localization);
 
-const initPopupLogic = (currentMap) => {
+const initPopupLogic = (currentMap, providers) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerName = 'vehicles-point';
 
@@ -24,6 +26,7 @@ const initPopupLogic = (currentMap) => {
   // location of the feature, with description HTML from its properties.
   currentMap.on('click', layerName, function (e) {
     const vehicleProperties = e.features[0].properties;
+    const providerColor = getProviderColor(providers, vehicleProperties.system_id)
 
     var coordinates = e.features[0].geometry.coordinates.slice();
     // var description = e.features[0].properties.description;
@@ -41,7 +44,7 @@ const initPopupLogic = (currentMap) => {
         <h1 class="mb-2">
           <span
             class="rounded-full inline-block w-4 h-4"
-            style="background-color: #666;position: relative;top: 2px">
+            style="background-color: ${providerColor};position: relative;top: 2px">
           </span>
           <span class="Map-popup-title ml-2">
             ${vehicleProperties.system_id}
@@ -78,12 +81,12 @@ function MapComponent(props) {
     return state.rentals || null;
   });
 
-  // Get extend (map boundaries) from store
+  // Get extent (map boundaries) from store
   const extent = useSelector(state => {
     return state.layers ? state.layers.extent : null;
   }) || [];
 
-  const aanbieders = useSelector(state => {
+  const providers = useSelector(state => {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
 
@@ -259,7 +262,7 @@ function MapComponent(props) {
       })
     }
     addLayers(vehicles, zones_geodata);
-    initPopupLogic(map.current)
+    initPopupLogic(map.current, providers)
   }, [vehicles, zones_geodata, counter, props.layers]);
 
   useEffect(() => {
@@ -273,10 +276,10 @@ function MapComponent(props) {
         map.current.addImage(aanbieder.system_id + ":" + idx, { width: 25, height: 25, data: img});
       });
     };
-    aanbieders.forEach(aanbieder => {
+    providers.forEach(aanbieder => {
       addProviderImage(aanbieder);
     });
-  }, [aanbieders]);
+  }, [providers]);
 
   return null;
 }

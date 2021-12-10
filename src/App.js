@@ -99,7 +99,7 @@ function App() {
               <ContentPage>
                 <StatsPage />
               </ContentPage>
-              {/*<Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>*/}
+              <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
             </Route>
             <Route exact path="/monitoring">
               <Monitoring />

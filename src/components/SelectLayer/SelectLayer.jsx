@@ -26,15 +26,15 @@ function SelectLayer(props) {
   });
   
   return (
-    <SlideBox direction="right" options={{
+    <SlideBox name="SelectLayer" direction="right" options={{
       title: 'Lagen',
       backgroundColor: '#fff',
     }} style={{
       position: 'absolute',
-      top: '51px',
+      top: '59px',
       right: 0
     }}>
-      <div className="SelectLayer">
+      <div className="SelectLayer pr-1">
         <div data-type="heat-map" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
           <span className="layer-title">

@@ -36,7 +36,7 @@
 }
 
 .filter-voertuigtypes-reset {
-  color: #444;
+  color: #B2B2B2;
 }
 
 .filter-voertuigtypes-box-row {
@@ -64,10 +64,7 @@
   user-select: none;
   border-right: 1px solid black;
   cursor: pointer;
-}
-
-.filter-voertuigtypes-item-last {
-  border-right: 0;
+  color: #15AEEF;
 }
 
 .filter-voertuigtypes-item-excluded {
@@ -77,10 +74,14 @@
   align-items: center;
   width: 60px;
   border-right: 1px solid black;
-  opacity: 0.6;
+  /*opacity: 0.8;*/
   filter: grayscale(100%);
   user-select: none;
   cursor: pointer;
+}
+.filter-voertuigtypes-item:last-child,
+.filter-voertuigtypes-item-excluded:last-child {
+  border-right: 0;
 }
 
 .filter-voertuigtypes-itemlabel {
@@ -88,17 +89,26 @@
   text-align: center;
   font: normal normal normal 10px/12px Inter;
   letter-spacing: 0px;
-  color: #000000;
+  /*color: #000000;*/
   opacity: 1;
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-itemlabel {
+  color: #343E47;
 }
 
 .filter-voertuigtypes-icon {
   width: 40px;
   height: 28px;
-  color: black;
+  /*color: black;*/
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom;
+  /*https://stackoverflow.com/a/53336754*/
+  filter: invert(68%) sepia(99%) saturate(3058%) hue-rotate(164deg) brightness(94%) contrast(99%);
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon {
+  filter: none;
+  opacity: 0.6;
 }
 
 .filter-voertuigtypes-icon-bicycle {

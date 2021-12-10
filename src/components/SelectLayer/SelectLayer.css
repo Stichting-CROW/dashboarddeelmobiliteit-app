@@ -1,6 +1,6 @@
 .SelectLayer {
-  top: 51px;
   user-select: none;
+  display: flex;
 }
 .SelectLayer-inner {
   /*min-height: 100px;*/

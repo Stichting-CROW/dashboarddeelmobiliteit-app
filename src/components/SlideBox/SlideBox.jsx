@@ -1,15 +1,26 @@
 import React, { useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import './SlideBox.css';
 
 function SlideBox(props) {
+  const dispatch = useDispatch();
   const containerRef = useRef(null);
+  const NAME = props.name.toUpperCase();
 
-  const [isHidden, setIsHidden] = useState(false)
+  const isVisible = useSelector(state => {
+    return state.ui ? state.ui[NAME] : false;
+  });
 
   // Show/hide slidebox on toggle click
   const toggleSlideBox = () => {
-    setIsHidden(! isHidden);
+    dispatch({
+      type: `SET_VISIBILITY`,
+      payload: {
+        name: NAME,
+        visibility: ! isVisible
+      }
+    })
   };
 
   const {backgroundColor} = props.options || {};
@@ -18,7 +29,7 @@ function SlideBox(props) {
       SlideBox
       direction-${props.direction}
       relative
-      ${isHidden ? 'is-hidden' : ''}
+      ${isVisible ? '' : 'is-hidden'}
       z-10
     `} ref={containerRef} style={props.style || {}}>
     <div className="
@@ -28,10 +39,10 @@ function SlideBox(props) {
     </div>
     <div
       className="SlideBox-toggle-wrapper z-10 overflow-hidden"
-      onClick={() => toggleSlideBox()}
       >
       <div
         className="SlideBox-toggle"
+        onClick={() => toggleSlideBox()}
         style={{backgroundColor: backgroundColor}}
         >
         <span>

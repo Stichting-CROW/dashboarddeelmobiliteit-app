@@ -11,12 +11,14 @@ import SlideBox from '../SlideBox/SlideBox.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
   return (
-    <SlideBox direction="left" options={{
+    <SlideBox name="FilterBar" direction="left" options={{
       title: 'Filters',
       backgroundColor: '#F6F5F4',
     }} style={{
       width: '324px',
-      height: '100%'
+      height: '100%',
+      top: 0,
+      position: 'fixed'
     }}>
       <div className="filter-bar-inner">
         { showinterval

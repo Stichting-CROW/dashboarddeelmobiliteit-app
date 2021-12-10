@@ -7,6 +7,7 @@ import filter from './filter';
 import authentication from './authentication';
 import zones_geodata from './zones_geodata';
 import layers from './layers';
+import ui from './ui';
 
 export default combineReducers({
   last_update,
@@ -16,5 +17,6 @@ export default combineReducers({
   filter,
   authentication,
   zones_geodata,
-  layers
+  layers,
+  ui
 })
