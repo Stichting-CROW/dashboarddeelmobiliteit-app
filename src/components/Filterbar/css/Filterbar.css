@@ -3,6 +3,7 @@
   z-index: 99;
   padding-top: 51px;
   border-radius: 20px;
+  border-bottom-right-radius: 0;
   opacity: 1;
   overflow-x: visible;
   top: 0;

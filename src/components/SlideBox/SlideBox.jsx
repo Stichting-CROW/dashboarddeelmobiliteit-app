@@ -19,19 +19,19 @@ function SlideBox(props) {
       direction-${props.direction}
       relative
       ${isHidden ? 'is-hidden' : ''}
+      z-10
     `} ref={containerRef} style={props.style || {}}>
     <div className="
       SlideBox-inner
-      h-full
     " style={{backgroundColor: backgroundColor}}>
       {props.children}
     </div>
     <div
-      className="SlideBox-toggle-wrapper"
+      className="SlideBox-toggle-wrapper z-10 overflow-hidden"
       onClick={() => toggleSlideBox()}
       >
       <div
-        className="Slidebox-toggle"
+        className="SlideBox-toggle"
         style={{backgroundColor: backgroundColor}}
         >
         <span>

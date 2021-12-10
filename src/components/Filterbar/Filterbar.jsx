@@ -15,7 +15,8 @@ function Filterbar({showinterval=false, visible=false}) {
       title: 'Filters',
       backgroundColor: '#F6F5F4',
     }} style={{
-      width: '324px'
+      width: '324px',
+      height: '100%'
     }}>
       <div className="filter-bar-inner">
         { showinterval

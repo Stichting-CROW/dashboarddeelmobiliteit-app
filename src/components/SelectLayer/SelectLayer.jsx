@@ -25,17 +25,16 @@ function SelectLayer(props) {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
   
-  return <div className={`
-      SelectLayer
-      absolute
-      mt-3
-      right-0
-      z-10
-    `}>
-      <SlideBox direction="right" options={{
-        title: 'Lagen',
-        backgroundColor: '#fff'
-      }}>
+  return (
+    <SlideBox direction="right" options={{
+      title: 'Lagen',
+      backgroundColor: '#fff',
+    }} style={{
+      position: 'absolute',
+      top: '51px',
+      right: 0
+    }}>
+      <div className="SelectLayer">
         <div data-type="heat-map" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
           <span className="layer-title">
@@ -64,9 +63,11 @@ function SelectLayer(props) {
             <span className="layer-title">
               Zones
             </span>
-          </div> : null }
+          </div> : null
+        }
+      </div>
     </SlideBox>
-  </div>
+  )
 }
 
 export {
