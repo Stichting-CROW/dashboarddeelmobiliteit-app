@@ -42,7 +42,8 @@ store.subscribe(() => {
     last_update: moment().unix(),
     authentication: storeState.authentication,
     filter: storeState.filter,
-    layers: storeState.layers
+    layers: storeState.layers,
+    ui: storeState.ui
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })

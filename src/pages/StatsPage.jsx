@@ -22,8 +22,6 @@ import {
 import {getAggregatedStats} from '../api/aggregatedStats';
 import {getProviderColor} from '../helpers/providers.js';
 
-// import './StatsPagePage.css';
-
 const prepareData = (key, data, aggregationLevel) => {
   if(! data || ! data[`${key}_aggregated_stats`] || ! data[`${key}_aggregated_stats`].values) {
     return [];
@@ -68,10 +66,9 @@ class CustomizedAxisTick extends PureComponent {
 
 const renderStackedAreaChart = (data, providers) => {
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '100%', height: '400px', overflowX: 'auto' }}>
       <ResponsiveContainer>
         <AreaChart
-          width={800}
           height={400}
           data={data}
           margin={{
