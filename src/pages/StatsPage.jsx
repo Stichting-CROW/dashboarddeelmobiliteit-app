@@ -66,7 +66,7 @@ class CustomizedAxisTick extends PureComponent {
 
 const renderStackedAreaChart = (data, providers) => {
   return (
-    <div style={{ width: '100%', height: '400px', overflowX: 'auto' }}>
+    <div style={{ width: '100%', height: '400px', overflowX: 'auto', overflowY: 'hidden' }}>
       <ResponsiveContainer>
         <AreaChart
           height={400}
