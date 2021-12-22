@@ -1,15 +1,14 @@
-// Example code: https://maplibre.org/maplibre-gl-js-docs/example/cluster/
 const layer = {
   'id': 'vehicles-clusters-point',
-  'type': 'circle',
-  'source': 'vehicles-clusters',
+  'type': 'symbol',
+  'source': 'vehicles',
   filter: ['!', ['has', 'point_count']],
-  paint: {
-    'circle-color': '#11b4da',
-    'circle-radius': 4,
-    'circle-stroke-width': 1,
-    'circle-stroke-color': '#fff'
-  }
+  'layout': {
+    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'duration_bin']],
+    'icon-size': 1,
+    'icon-allow-overlap': true,
+  },
+  'minzoom': 18
 }
 
 export default layer;
