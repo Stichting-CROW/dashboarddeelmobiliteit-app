@@ -54,6 +54,8 @@ const updateAccessControlList = ()  => {
       
       // items -> {"name": "Cykl","system_id": "cykl"}
       store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+
+      store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     } else {
       let url="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}

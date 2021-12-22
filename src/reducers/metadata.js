@@ -34,8 +34,24 @@ export default function filter(state = initialState, action) {
       
       // add colors (will be supplied by the API later)
       const colors = generateHslaColors(action.payload.length)
+      const providerColors = {
+        'cykl': '#a5e067',
+        'flickbike': '#fe431d',
+        'mobike': '#ed5144',
+        'donkey': '#ed5144',
+        'htm': '#db291e',
+        'jump': '#fd3e48',
+        'gosharing': '#77b136',
+        'check': '#8f3af8',
+        'felyx': '#064627',
+        'lime': '#1bd831',
+        'baqme': '#4bdfbb',
+        'cargoroo': '#ffcb34',
+        'hely': '#fd645c'
+      }
       const aanbieders = action.payload.map((aanbieder,idx)=>{
-        return Object.assign(aanbieder, {color: colors[idx]});
+        const color = providerColors[aanbieder.system_id] ? providerColors[aanbieder.system_id] : colors[idx];
+        return Object.assign(aanbieder, {color: color});
       })
       
       if(md5(JSON.stringify(current))===md5(JSON.stringify(aanbieders))) { return state; }

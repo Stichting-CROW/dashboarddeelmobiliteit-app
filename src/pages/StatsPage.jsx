@@ -27,13 +27,13 @@ const prepareData = (key, data, aggregationLevel) => {
     return [];
   }
   const getDateFormat = (aggregationLevel) => {
-    if(aggregationLevel == 'day') {
+    if(aggregationLevel === 'day') {
       return 'YYYY-MM-DD';
     }
-    else if(aggregationLevel == 'week') {
+    else if(aggregationLevel === 'week') {
       return 'YYYY-[w]W';
     }
-    else if(aggregationLevel == 'month') {
+    else if(aggregationLevel === 'month') {
       return 'YYYY-MM';
     }
   }
