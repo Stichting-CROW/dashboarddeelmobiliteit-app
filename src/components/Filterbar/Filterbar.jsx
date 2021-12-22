@@ -8,6 +8,7 @@ import FilteritemZones from './FilteritemZones.jsx';
 import FilteritemMarkers from './FilteritemMarkers.jsx';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import SlideBox from '../SlideBox/SlideBox.jsx';
+import Logo from '../Logo.jsx';
 
 function Filterbar({showinterval=false, visible=false}) {
   return (
@@ -20,7 +21,8 @@ function Filterbar({showinterval=false, visible=false}) {
       top: 0,
       position: 'fixed'
     }}>
-      <div className="filter-bar-inner">
+      <div className="filter-bar-inner py-2">
+        <Logo />
         { showinterval
           ? <FilteritemInterval />
           : <FilteritemDatum />

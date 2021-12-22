@@ -14,7 +14,6 @@ import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import Filterbar from './components/Filterbar/Filterbar.jsx';
-import Topbar from './components/Topbar/Topbar.jsx';
 
 import { useSelector } from 'react-redux';
 
@@ -106,7 +105,6 @@ function App() {
             </Route>
           </Switch>
 
-          <Topbar />
           <Menu />
 
          </div>

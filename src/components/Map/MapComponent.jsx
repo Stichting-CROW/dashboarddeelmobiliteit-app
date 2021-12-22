@@ -46,7 +46,7 @@ const initPopupLogic = (currentMap, providers) => {
             class="rounded-full inline-block w-4 h-4"
             style="background-color: ${providerColor};position: relative;top: 2px">
           </span>
-          <span class="Map-popup-title ml-2">
+          <span class="Map-popup-title ml-1" style="color: ${providerColor};">
             ${vehicleProperties.system_id}
           </span>
         </h1>

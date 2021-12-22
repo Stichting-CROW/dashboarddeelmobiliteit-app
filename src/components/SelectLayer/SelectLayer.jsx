@@ -31,7 +31,7 @@ function SelectLayer(props) {
       backgroundColor: '#fff',
     }} style={{
       position: 'absolute',
-      top: '59px',
+      top: '8px',
       right: 0
     }}>
       <div className="SelectLayer pr-1">

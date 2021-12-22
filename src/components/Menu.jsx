@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
+import { clearUser } from '../actions/authentication';
 
 function Menu() {
   const [pathName, setPathName] = useState(document.location.pathname);
@@ -29,6 +30,12 @@ function Menu() {
       type: 'SET_FILTER_VISIBLE',
       payload: !showfilter
     })
+  }
+
+  const logOut = () => {
+    if (isLoggedIn) {
+      dispatch( clearUser() );
+    }
   }
 
   // Log pathname on navigate
@@ -70,6 +77,20 @@ function Menu() {
         </Link>}
         
         {isLoggedIn && false && <span>{JSON.stringify(extent)}</span>}
+
+        {isLoggedIn
+          ? <Link className="text-menu" onClick={logOut} to="/">
+              Log uit
+            </Link>
+          : <Link className="text-menu" to="/login">
+              Log in
+            </Link>
+        }
+
+        {isLoggedIn
+          && <a className="text-menu cursor-pointer" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
+              Feedback 📨
+            </a>}
 
         {/*
         <Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {
