@@ -9,7 +9,10 @@
 }
 
 .text-menu {
-  @apply flex flex-col justify-center text-black hover:text-blue-800 px-6 border-r border-black;
+  @apply flex flex-col justify-center text-black hover:text-blue-800 px-4 border-r border-black;
+  font-size: 14px;
+  line-height: 28px;
+  height: 28px;
 }
 .text-menu.is-active {
   color: #15AEEF;
@@ -17,6 +20,17 @@
 .text-menu:last-child {
   @apply border-r-0
 }
+.text-menu.has-icon {
+  padding-left: 40px;
+  background-size: contain;
+  background-position: center left;
+}
+.text-menu.has-icon.icon-aanbod { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-aanbod.png") }
+.text-menu.has-icon.is-active.icon-aanbod { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-aanbod.png") }
+.text-menu.has-icon.icon-verhuringen { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-verhuringen.png") }
+.text-menu.has-icon.is-active.icon-verhuringen { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-verhuringen.png") }
+.text-menu.has-icon.icon-ontwikkeling { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-ontwikkeling.png") }
+.text-menu.has-icon.is-active.icon-ontwikkeling { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-ontwikkeling.png") }
 
 .Menu {
   opacity: 1;
@@ -28,5 +42,6 @@
 .Menu-inner {
   overflow-x: auto;
   max-width: 100%;
+  min-height: 60px;
   width: 550px;
 }
