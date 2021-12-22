@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.3f17f5d4.chunk.css",
-    "main.js": "/static/js/main.cdf1b841.chunk.js",
-    "main.js.map": "/static/js/main.cdf1b841.chunk.js.map",
+    "main.css": "/static/css/main.2057b7e3.chunk.css",
+    "main.js": "/static/js/main.0765a145.chunk.js",
+    "main.js.map": "/static/js/main.0765a145.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.6730f0c2.js",
     "runtime-main.js.map": "/static/js/runtime-main.6730f0c2.js.map",
     "static/js/2.9a3823ca.chunk.js": "/static/js/2.9a3823ca.chunk.js",
@@ -10,7 +10,7 @@
     "static/js/3.485092e0.chunk.js": "/static/js/3.485092e0.chunk.js",
     "static/js/3.485092e0.chunk.js.map": "/static/js/3.485092e0.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/main.3f17f5d4.chunk.css.map": "/static/css/main.3f17f5d4.chunk.css.map",
+    "static/css/main.2057b7e3.chunk.css.map": "/static/css/main.2057b7e3.chunk.css.map",
     "static/js/2.9a3823ca.chunk.js.LICENSE.txt": "/static/js/2.9a3823ca.chunk.js.LICENSE.txt",
     "static/media/FilteritemVoertuigTypes.css": "/static/media/172591_dinghy_icon.fcabc26f.svg",
     "static/media/Filterbar.css": "/static/media/211651_close_round_icon.3721b02e.svg",
@@ -21,7 +21,7 @@
   "entrypoints": [
     "static/js/runtime-main.6730f0c2.js",
     "static/js/2.9a3823ca.chunk.js",
-    "static/css/main.3f17f5d4.chunk.css",
-    "static/js/main.cdf1b841.chunk.js"
+    "static/css/main.2057b7e3.chunk.css",
+    "static/js/main.0765a145.chunk.js"
   ]
 }
