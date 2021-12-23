@@ -1,4 +1,5 @@
 import './css/Filterbar.css';
+import {useSelector} from 'react-redux';
 // import SlideBox from '../SlideBox/SlideBox.jsx';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
@@ -10,7 +11,11 @@ import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 import Logo from '../Logo.jsx';
 
-function Filterbar({showinterval=false, visible=false}) {
+function Filterbar({showinterval=false, visible}) {
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
+  });
+  
   return (
     <SlideBox name="FilterBar" direction="left" options={{
       title: 'Filters',
@@ -20,18 +25,22 @@ function Filterbar({showinterval=false, visible=false}) {
       height: '100%',
       top: 0,
       position: 'fixed'
-    }}>
+    }}
+    isVisible={visible}
+    >
       <div className="filter-bar-inner py-2">
         <Logo />
-        { showinterval
-          ? <FilteritemInterval />
-          : <FilteritemDatum />
-        }
-        <FilteritemGebieden />
-        <FilteritemZones />
-        <FilteritemMarkers />
-        <FilteritemVoertuigTypes />
-        <FilteritemAanbieders />
+        {isLoggedIn && <div>
+          { showinterval
+            ? <FilteritemInterval />
+            : <FilteritemDatum />
+          }
+        </div>}
+        {isLoggedIn && <FilteritemGebieden />}
+        {isLoggedIn && <FilteritemZones />}
+        {isLoggedIn && <FilteritemMarkers />}
+        {isLoggedIn && <FilteritemVoertuigTypes />}
+        {isLoggedIn && <FilteritemAanbieders />}
       </div>
     </SlideBox>
   )

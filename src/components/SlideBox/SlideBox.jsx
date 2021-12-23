@@ -9,7 +9,7 @@ function SlideBox(props) {
   const NAME = props.name.toUpperCase();
 
   const isVisible = useSelector(state => {
-    return state.ui ? state.ui[NAME] : false;
+    return state.ui ? state.ui[NAME] : props.isVisible;
   });
 
   // Show/hide slidebox on toggle click

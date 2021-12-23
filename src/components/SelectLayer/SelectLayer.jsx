@@ -24,6 +24,10 @@ function SelectLayer(props) {
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
+
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
+  });
   
   return (
     <SlideBox name="SelectLayer" direction="right" options={{
@@ -56,7 +60,7 @@ function SelectLayer(props) {
           </span>
         </div>
 
-        { showZoneOnOff ?
+        { isLoggedIn && showZoneOnOff ?
           <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
               dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
           }}>

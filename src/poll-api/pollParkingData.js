@@ -26,7 +26,7 @@ const updateParkingData = ()  => {
     let url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
     let options = {};
     if(!canfetchdata) {
-      store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
+      // store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
       let filterparams = createFilterparameters(true, state.filter, state.metadata);
       if(filterparams.length>0) {
         url += "?" + filterparams.join("&");
@@ -49,7 +49,7 @@ const updateParkingData = ()  => {
       }
       
       response.json().then(function(vehicles) {
-        if(isLoggedIn) {
+        if(isLoggedIn(state)) {
           vehicles = vehicles.park_events
         }
         let geoJson = {
@@ -59,7 +59,7 @@ const updateParkingData = ()  => {
         
         let operatorcolors = {};
         state.metadata.aanbieders.forEach(o => {
-          operatorcolors[o.system_id]=o.color;
+          operatorcolors[o.system_id || o.value]=o.color;
         });
     
         const md5 = require('md5');
@@ -68,7 +68,7 @@ const updateParkingData = ()  => {
         let markersexclude = state.filter.markersexclude.split(",");
 
         vehicles.forEach(v => {
-          let in_public_space_since = isLoggedIn ? v.start_time : v.in_public_space_since;
+          let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
     
           var minutes = start_time.diff(moment(in_public_space_since), 'minutes');
           const duration_bin = convertDurationToBin(minutes);
@@ -77,7 +77,7 @@ const updateParkingData = ()  => {
              "type":"Feature",
              "properties":{
                 "id":md5(v.location.latitude+v.location.longitude),
-                "system_id": v.system_id,
+                "system_id": v.system_id || v.value,// v.value is used in the public map
                 "in_public_space_since": in_public_space_since,
                 "duration_bin": duration_bin,
              },
@@ -101,6 +101,8 @@ const updateParkingData = ()  => {
           //
           // return;
         })
+
+        console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',

@@ -25,8 +25,7 @@ const updateZones = ()  => {
     }
     
     let url_zones="";
-    // if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
-    if(!state) { // ||state.filter.gebied===""
+    if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});

@@ -1,5 +1,5 @@
 const initialState = {
-  FILTERBAR: true,
+  // FILTERBAR: true,
   SELECTLAYER: true
 }
 

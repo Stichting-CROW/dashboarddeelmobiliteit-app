@@ -21,9 +21,10 @@
   @apply border-r-0
 }
 .text-menu.has-icon {
-  padding-left: 40px;
+  padding-left: 60px;
   background-size: contain;
-  background-position: center left;
+  background-repeat: no-repeat;
+  background-position: 15px center;
 }
 .text-menu.has-icon.icon-aanbod { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-aanbod.png") }
 .text-menu.has-icon.is-active.icon-aanbod { background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-aanbod.png") }

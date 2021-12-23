@@ -47,7 +47,8 @@ export default function filter(state = initialState, action) {
         'lime': '#1bd831',
         'baqme': '#4bdfbb',
         'cargoroo': '#ffcb34',
-        'hely': '#fd645c'
+        'hely': '#fd645c',
+        'tier': '#0d123f'
       }
       const aanbieders = action.payload.map((aanbieder,idx)=>{
         const color = providerColors[aanbieder.system_id] ? providerColors[aanbieder.system_id] : colors[idx];

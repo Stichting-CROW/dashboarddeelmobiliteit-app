@@ -1,21 +1,21 @@
 import { cPollDelayAccessControlList, cPollDelayErrorMultiplyer } from '../constants.js';
 
 const cPublicAanbieders = [
-    { value:"cykl", name:"Cykl" },
-    { value:"flickbike", name:"Flickbike" },
-    { value:"donkey", name:"Donkey" },
-    { value:"mobike", name:"Mobike" },
-    { value:"htm", name:"HTM" },
-    { value:"gosharing", name:"GO" },
-    { value:"check", name:"CHECK" },
-    { value:"felyx", name:"Felyx" },
-    { value:"deelfietsnederland", name:"Deelfiets" },
-    { value:"keobike", name:"Keobike" },
-    { value:"lime", name:"Lime" },
-    { value:"baqme", name:"BAQME" },
-    { value:"cargoroo", name:"Cargoroo" },
-    { value:"uwdeelfiets", name:"uwdeelfiets" },
-    { value:"hely", name:"Hely" }
+    { value:"cykl", system_id:"cykl", name:"Cykl" },
+    { value:"flickbike", system_id:"flickbike", name:"Flickbike" },
+    { value:"donkey", system_id:"donkey", name:"Donkey" },
+    { value:"mobike", system_id:"mobike", name:"Mobike" },
+    { value:"htm", system_id:"htm", name:"HTM" },
+    { value:"gosharing", system_id:"gosharing", name:"GO" },
+    { value:"check", system_id:"check", name:"CHECK" },
+    { value:"felyx", system_id:"felyx", name:"Felyx" },
+    { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
+    { value:"keobike", system_id:"keobike", name:"Keobike" },
+    { value:"lime", system_id:"lime", name:"Lime" },
+    { value:"baqme", system_id:"baqme", name:"BAQME" },
+    { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
+    { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
+    { value:"hely", system_id:"hely", name:"Hely" }
   ];
   
 const cPublicGebieden = [

@@ -18,7 +18,7 @@ const md5 = require('md5');
 // Set language for momentJS
 moment.locale('nl', localization);
 
-const initPopupLogic = (currentMap, providers) => {
+const initPopupLogic = (currentMap, providers, isLoggedIn) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
     'vehicles-point',
@@ -54,7 +54,7 @@ const initPopupLogic = (currentMap, providers) => {
               ${vehicleProperties.system_id}
             </span>
           </h1>
-          <div class="Map-popup-body">
+          <div class="Map-popup-body" hidden=${! isLoggedIn}>
             Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
             Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
           </div>
@@ -84,6 +84,10 @@ function MapComponent(props) {
 
   const rentals = useSelector(state => {
     return state.rentals || null;
+  });
+
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
   });
 
   // Get extent (map boundaries) from store
@@ -268,13 +272,13 @@ function MapComponent(props) {
       })
     }
     addLayers(vehicles, zones_geodata);
-    initPopupLogic(map.current, providers)
+    initPopupLogic(map.current, providers, isLoggedIn)
   }, [vehicles, zones_geodata, counter, props.layers]);
 
   useEffect(() => {
     var addProviderImage = async(aanbieder) => {
       if (map.current.hasImage(aanbieder.system_id + ':0')) {
-        // console.log("image already exits");
+        // console.log("image already exists");
         return;
       }
       var value = await getVehicleMarkers(aanbieder.color);
