@@ -54,7 +54,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
               ${vehicleProperties.system_id}
             </span>
           </h1>
-          <div class="Map-popup-body" hidden=${! isLoggedIn}>
+          <div class="Map-popup-body">
             Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
             Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
           </div>
