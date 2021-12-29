@@ -1,6 +1,7 @@
 .MenuSecondary {
   bottom: 90px;
   left: 24px;
+  width: calc(100% - 100px);
 }
 
 .MenuSecondaryItem {

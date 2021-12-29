@@ -1,0 +1,39 @@
+.SelectLayerMobile {
+  user-select: none;
+  padding-bottom: 15px;
+}
+
+.SelectLayerMobile .layer {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #343E47;
+  border-radius: 10px;
+  opacity: 1;
+  background: #fff center center no-repeat;
+  background-size: cover;
+  cursor: pointer;
+  
+  @apply relative inline-block my-3 mx-1;
+}
+.SelectLayerMobile .layer[data-type="vehicles"] {
+  background-image: url('https://i.imgur.com/ksCt3TQ.png')
+}
+.SelectLayerMobile .layer[data-type="heat-map"] {
+  background-image: url('https://i.imgur.com/AaqWjwK.png')
+}
+.SelectLayerMobile .layer[data-type="pointers"] {
+  background-image: url('https://i.imgur.com/NeqZoh7.png')
+}
+.SelectLayerMobile .layer[data-type='zones'] {
+  background-image: url('../../images/layer-zones.png')
+}
+
+.SelectLayerMobile .layer-title {
+  display: block;
+  position: absolute;
+  bottom: -28px;
+  text-align: center;
+  white-space: nowrap;
+  width: 100%;
+  font: normal normal normal 12px/15px Inter;
+}

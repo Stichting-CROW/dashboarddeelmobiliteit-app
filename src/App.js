@@ -14,7 +14,9 @@ import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
-import Filterbar from './components/Filterbar/Filterbar.jsx';
+import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
+import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
+import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
 import { useSelector } from 'react-redux';
 
@@ -38,6 +40,10 @@ function App() {
   
   const showfilter = useSelector(state => {
     return state.filter ? state.filter.visible : false;
+  });
+
+  const isFilterBarVisible = useSelector(state => {
+    return state.ui ? state.ui['FilterBar'] : false;
   });
 
   const filter = useSelector(state => {
@@ -64,10 +70,24 @@ function App() {
     forceUpdateVerhuringenData();
   }, [filter]);
 
+  // Mobile menu: Filters / Layers
+  const renderMobileMenus = () => {
+    return <>
+      <div className="hidden sm:block">
+        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} showinterval={false} />
+      </div>
+      <div className="block sm:hidden">
+        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} showinterval={false} />
+      </div>
+      <SelectLayerMobile />
+    </>
+  }
+
   const renderMapElements = () => {
     return <>
       <div ref={mapContainer} className="map-layer"></div>
-      <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
+      <MenuSecondary />
+      {renderMobileMenus()}
     </>
   }
 
@@ -99,7 +119,7 @@ function App() {
               <ContentPage>
                 <StatsPage />
               </ContentPage>
-              <Filterbar visible={isLoggedIn && showfilter} showinterval={false}/>
+              {renderMobileMenus()}
             </Route>
             <Route exact path="/monitoring">
               <Monitoring />
@@ -107,8 +127,7 @@ function App() {
           </Switch>
 
           <Menu />
-          <MenuSecondary />
-          
+
          </div>
        </div>
 

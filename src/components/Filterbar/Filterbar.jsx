@@ -17,32 +17,20 @@ function Filterbar({showinterval=false, visible}) {
   });
   
   return (
-    <SlideBox name="FilterBar" direction="left" options={{
-      title: 'Filters',
-      backgroundColor: '#F6F5F4',
-    }} style={{
-      width: '324px',
-      height: '100%',
-      top: 0,
-      position: 'fixed'
-    }}
-    isVisible={visible}
-    >
-      <div className="filter-bar-inner py-2">
-        <Logo />
-        {isLoggedIn && <div>
-          { showinterval
-            ? <FilteritemInterval />
-            : <FilteritemDatum />
-          }
-        </div>}
-        {isLoggedIn && <FilteritemGebieden />}
-        {isLoggedIn && <FilteritemZones />}
-        {isLoggedIn && <FilteritemMarkers />}
-        {isLoggedIn && <FilteritemVoertuigTypes />}
-        {isLoggedIn && <FilteritemAanbieders />}
-      </div>
-    </SlideBox>
+    <div className="filter-bar-inner py-2">
+      <Logo />
+      {isLoggedIn && <div>
+        { showinterval
+          ? <FilteritemInterval />
+          : <FilteritemDatum />
+        }
+      </div>}
+      {isLoggedIn && <FilteritemGebieden />}
+      {isLoggedIn && <FilteritemZones />}
+      {isLoggedIn && <FilteritemMarkers />}
+      {isLoggedIn && <FilteritemVoertuigTypes />}
+      {isLoggedIn && <FilteritemAanbieders />}
+    </div>
   )
 }
 

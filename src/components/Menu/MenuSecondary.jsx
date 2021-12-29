@@ -1,25 +1,48 @@
-import React, { useState } from 'react';
-// import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from "react-router-dom";
 
 import './MenuSecondaryItem.css';
-import { useDispatch, useSelector } from 'react-redux';
 // import { IconButtonFilter } from './IconButtons.jsx';
 // import { clearUser } from '../actions/authentication';
 
 function MenuSecondaryItem(props) {
   return (
-    <a className="MenuSecondaryItem mx-2">
+    <a
+      className="MenuSecondaryItem mx-2"
+      onClick={props.onClick}
+    >
       {props.text}
     </a>
   )
 }
 
 function MenuSecondary() {
+  const dispatch = useDispatch()
+
+  const setVisibility = (name, visibility) => {
+    dispatch({
+      type: `SET_VISIBILITY`,
+      payload: {
+        name: name,
+        visibility: visibility
+      }
+    })
+  }
+
   return (
-    <div className="MenuSecondary w-full block sm:hidden absolute left-0">
-      <MenuSecondaryItem text="Filters" />
-      <MenuSecondaryItem text="Lagen" />
+    <div className="MenuSecondary block sm:hidden absolute left-0">
+      <MenuSecondaryItem
+        text="Filters"
+        onClick={() => {
+          setVisibility('MenuSecondary.filters', true)
+        }}
+      />
+      <MenuSecondaryItem
+        text="Lagen"
+        onClick={() => {
+          setVisibility('MenuSecondary.layers', true)
+        }}
+      />
     </div>
   )
 }
