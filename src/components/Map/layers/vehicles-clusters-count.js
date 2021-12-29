@@ -7,7 +7,19 @@ const layer = {
   layout: {
     'text-field': '{point_count_abbreviated}',
     'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-    'text-size': 12
+    'text-size': [
+      'step',
+      ['get', 'point_count'],
+      16, 100,
+      20, 750,
+      40
+    ]
+
+  },
+  paint: {
+    'text-color': '#fff',
+    // 'text-halo-color': '#fff',
+    // 'text-halo-width': 2
   },
   'maxzoom': 18
 }
