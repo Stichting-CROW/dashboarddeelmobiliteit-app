@@ -40,6 +40,7 @@
   top: 16px;
   @apply border-r border-black absolute right-0;
 }
+.text-menu:hover,
 .text-menu.is-active {
   color: #15AEEF;
 }
@@ -51,6 +52,30 @@
 .text-menu:last-child::after {
   @apply border-r-0;
 }
+
+.Menu-subMenu {
+  bottom: 68px;
+  background: white;
+  right: 0;
+  @apply py-1;
+}
+@media (min-width: 640px) {
+  .Menu-subMenu {
+    bottom: 78px;
+  }
+}
+
+.text-link {
+  @apply relative text-black hover:text-blue-800 px-4 py-2 block;
+  font-size: 14px;
+  border-radius: 17px;
+  white-space: nowrap;
+}
+.text-link:hover,
+.text-link.is-active {
+  color: #15AEEF;
+}
+
 
 /*
 .text-menu.has-icon.icon-aanbod { padding-left: 21px;background-image: url("https://www.dashboarddeelmobiliteit.nl/images/components/Menu/icon-aanbod.png") }

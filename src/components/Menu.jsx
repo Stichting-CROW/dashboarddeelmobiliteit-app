@@ -28,8 +28,20 @@ function MenuItem(props) {
     href={props.href}
     onClick={props.onClick}
     >
-    {icon ? <img src={icon} /> : '.'}
-    <span className={`${isActive ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+    {icon ? <img src={icon} /> : ''}
+    <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+      {props.text}
+    </span>
+  </Link>
+}
+
+function SubMenuItem(props) {
+  return <Link className={`text-link`}
+    to={props.path}
+    href={props.href}
+    onClick={props.onClick}
+    >
+    <span className={`block`}>
       {props.text}
     </span>
   </Link>
@@ -37,6 +49,7 @@ function MenuItem(props) {
 
 function Menu() {
   const [pathName, setPathName] = useState(document.location.pathname);
+  const [subMenuIsActive, setSubMenuIsActive] = useState(false);
 
   const dispatch = useDispatch();
   // let dateToShow = moment(moment().format('2021-11-06 06:00'));
@@ -120,14 +133,13 @@ function Menu() {
             />
 
             <MenuItem
-              text={'Feedback 📨'}
-              href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "
+              text={'...'}
+              onClick={(e) => {
+                e.preventDefault();
+                setSubMenuIsActive(! subMenuIsActive)
+              }}
             />
 
-            <MenuItem
-              text={'Log uit'}
-              onClick={logOut}
-            />
           </>}
           
           {! isLoggedIn && <>
@@ -168,6 +180,22 @@ function Menu() {
           */}
 
         </div>
+
+        {subMenuIsActive && <>
+          <div className="
+            Menu-subMenu
+            absolute
+          ">
+            <SubMenuItem
+              text={'Log uit'}
+              onClick={logOut}
+            />
+            <SubMenuItem
+              text={'Feedback 📨'}
+              href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "
+            />
+          </div>
+        </>}
 
       </div>
     </div>
