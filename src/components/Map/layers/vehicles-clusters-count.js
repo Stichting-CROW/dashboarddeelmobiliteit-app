@@ -12,7 +12,7 @@ const layer = {
       ['get', 'point_count'],
       16, 100,
       20, 750,
-      40
+      30
     ]
 
   },

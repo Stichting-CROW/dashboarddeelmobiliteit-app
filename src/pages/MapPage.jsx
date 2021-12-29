@@ -48,9 +48,11 @@ function Map(props) {
   
   return (
     <div className="flex flex-col">
-      <SelectLayer
-        layers={layers}
-      />
+      <div className="hidden sm:block">
+        <SelectLayer
+          layers={layers}
+        />
+      </div>
       <div className="flex-1 bg-red-400">
         <MapComponent
           mapContainer={props.mapContainer}

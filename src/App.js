@@ -8,6 +8,7 @@ import {
 import { store } from './AppProvider.js';
 
 import Menu from './components/Menu.jsx';
+import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import MapPage from './pages/MapPage.jsx';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
@@ -106,7 +107,8 @@ function App() {
           </Switch>
 
           <Menu />
-
+          <MenuSecondary />
+          
          </div>
        </div>
 

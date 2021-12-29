@@ -5,7 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
-import { clearUser } from '../actions/authentication';
+import { clearUser } from '../actions/authentication.js';
 
 function MenuItem(props) {
   const [pathName, setPathName] = useState(document.location.pathname);
