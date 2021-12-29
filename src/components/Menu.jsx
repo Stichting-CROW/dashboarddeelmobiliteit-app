@@ -7,8 +7,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IconButtonFilter } from './IconButtons.jsx';
 import { clearUser } from '../actions/authentication';
 
+function MenuItem(props) {
+  const [pathName, setPathName] = useState(document.location.pathname);
+
+  const isActive = pathName === props.path;
+  const icon = (isActive ? props.icon.replace('.png', '-active.png') : props.icon);
+
+  // Log pathname on navigate
+  // https://v5.reactrouter.com/web/api/Hooks
+  let location = useLocation();
+  React.useEffect(() => {
+    setPathName(document.location.pathname);
+  }, [location]);
+
+  return <Link className={`
+      text-menu
+      ${isActive ? 'is-active' : ''}
+    `}
+    to={props.path}
+    href={props.href}
+    onClick={props.onClick}
+    >
+    {icon ? <img src={icon} /> : '.'}
+    <span className={`${isActive ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+      {props.text}
+    </span>
+  </Link>
+}
+
 function Menu() {
   const [pathName, setPathName] = useState(document.location.pathname);
+
   const dispatch = useDispatch();
   // let dateToShow = moment(moment().format('2021-11-06 06:00'));
 
@@ -38,93 +67,81 @@ function Menu() {
     }
   }
 
-  // Log pathname on navigate
-  // https://v5.reactrouter.com/web/api/Hooks
-  let location = useLocation();
-  React.useEffect(() => {
-    setPathName(document.location.pathname);
-  }, [location]);
-
   return (
-    <div className="Menu fixed b-0">
+    <div className="
+      Menu
+      fixed
+      w-full
+      mx-0
+      bottom-0
+      bg-white
+      sm:bg-transparent
+      sm:bottom-0.5
+      sm:mx-8
+      sm:w-auto
+    ">
       <div className="
         Menu-inner
         px-4
-        py-3
-        m-4
-        mb-1
         mx-auto
         bg-white
         box-border
-        rounded-3xl
-        shadow-lg
         w-full
         flex
         flex-col
         justify-center
+        sm:shadow-lg
+        sm:m-4
+        sm:mb-1
+        sm:rounded-3xl
       ">
 
-        <div className="flex">
+        <div className="
+          whitespace-nowrap
+        ">
 
           {isLoggedIn && <>
-            <Link className={`
-              text-menu
-              has-icon
-              icon-aanbod
-              ${pathName === '/' || pathName === '/map/park' ? 'is-active' : ''}
-            `} to="/map/park">
-              Aanbod
-            </Link>
+            <MenuItem
+              text={'Aanbod'}
+              path={'/map/park'}
+              icon={'/images/components/Menu/icon-aanbod.png'}
+            />
 
-            {/*
-            <Link className={`
-              text-menu
-              has-icon
-              icon-ontwikkeling
-              ${pathName === '/map/trip' ? 'is-active' : ''}
-            `} to="/map/trip">
-              Verhuringen
-            </Link>
-            */}
+            <MenuItem
+              text={'Verhuringen'}
+              path={'/map/rentals'}
+              icon={'/images/components/Menu/icon-verhuringen.png'}
+            />
 
-            <Link className={`
-                text-menu
-                has-icon
-                icon-ontwikkeling
-                ${pathName === '/stats/overview' ? 'is-active' : ''}
-              `} to="/stats/overview">
-              Ontwikkeling
+            <MenuItem
+              text={'Ontwikkeling'}
+              path={'/stats/overview'}
+              icon={'/images/components/Menu/icon-ontwikkeling.png'}
+            />
+
+            <MenuItem
+              text={'Feedback 📨'}
+              href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "
+            />
+
+            <MenuItem
+              text={'Log uit'}
+              onClick={logOut}
+            />
+          </>}
+          
+          {! isLoggedIn && <>
+            <Link className="text-menu" to="/login">
+              Log in
             </Link>
           </>}
 
-          {isLoggedIn && false ?
-              <div className="text-menu">
-                <IconButtonFilter  onClick={toggleFilter} />
-              </div>
-              :
-              null }
-
-          {isLoggedIn && false && <Link className={`text-menu
-              ${pathName === '/monitoring' ? 'is-active' : ''}`} to="/monitoring">
+          {isLoggedIn && false && <Link className={`
+            text-menu
+            ${pathName === '/monitoring' ? 'is-active' : ''}
+          `} to="/monitoring">
             Monitor
           </Link>}
-          
-          {isLoggedIn && false && <span>{JSON.stringify(extent)}</span>}
-
-          {isLoggedIn
-            ? <Link className="text-menu" onClick={logOut} to="/">
-                Log uit
-              </Link>
-            : <Link className="text-menu" to="/login">
-                Log in
-              </Link>
-          }
-
-          {isLoggedIn
-            && <a className="text-menu
-              cursor-pointer" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
-                Feedback 📨
-              </a>}
 
           {/*
           <Link to="/" className={`text-menu ${pathName === '' ? 'is-active' : ''}`} onClick={(e) => {

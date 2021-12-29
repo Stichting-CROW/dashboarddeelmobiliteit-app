@@ -41,7 +41,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
-       
+
       new maplibregl.Popup()
         .setLngLat(coordinates)
         .setHTML(`
@@ -129,7 +129,8 @@ function MapComponent(props) {
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom,
-        maxZoom: 19
+        maxZoom: 19,
+        attributionControl: false// Hide info icon
       });
 
       // Add controls
