@@ -9,7 +9,7 @@ function MobileSlideBox(props) {
   return (
     <div className={`
       MobileSlideBox w-full sm:hidden absolute left-0
-      ${props.isVisible ? 'block' : 'hidden'}
+      ${props.isVisible ? 'is-visible' : ''}
       ${props.classes}
     `} style={props.style}>
 

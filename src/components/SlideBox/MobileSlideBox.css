@@ -1,5 +1,13 @@
 .MobileSlideBox {
+  visibility: hidden;/*position: absolute; visibility: hidden; is same as display: none;*/
+  transform: translateY(100%);
   padding: 15px 20px;
   background-color: #F6F5F4;
   bottom: 60px;
+  transition: transform 0.4s ease-in, visibility 0s 0.4s, display 0s 0.4s;
+}
+.MobileSlideBox.is-visible {
+  visibility: visible;
+  transform: translateY(0%);
+  transition: transform 0.4s ease-out, visibility 0s;
 }

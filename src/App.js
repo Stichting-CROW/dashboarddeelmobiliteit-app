@@ -42,6 +42,10 @@ function App() {
     return state.filter ? state.filter.visible : false;
   });
 
+  const isLayersMobileVisible = useSelector(state => {
+    return state.ui ? state.ui['MenuSecondary.layers'] : false;
+  });
+
   const isFilterBarVisible = useSelector(state => {
     return state.ui ? state.ui['FILTERBAR'] : false;
   });
@@ -96,7 +100,7 @@ function App() {
 
       {/*<Redirect exact from="/" to="/map/park" />*/}
 
-      <div className="app">
+      <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
         <div className="gui-layer">
 
           <Switch>

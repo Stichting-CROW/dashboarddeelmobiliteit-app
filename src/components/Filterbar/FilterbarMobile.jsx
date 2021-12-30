@@ -27,7 +27,7 @@ function FilterbarMobile(props) {
 
   return (
     <MobileSlideBox
-      title="Lagen"
+      title="Filters"
       isVisible={props.isVisible}
       closeHandler={() => {
         setVisibility();
