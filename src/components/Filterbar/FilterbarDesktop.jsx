@@ -22,9 +22,10 @@ function FilterbarDesktop({isVisible}) {
       top: 0,
       position: 'fixed'
     }}
-    isVisible={isVisible}
     >
-      <Filterbar />
+      <div className="py-2 mx-3 h-full">
+        <Filterbar />
+      </div>
     </SlideBox>
   )
 }

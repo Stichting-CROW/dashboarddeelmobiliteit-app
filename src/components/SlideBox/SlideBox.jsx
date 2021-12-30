@@ -9,7 +9,7 @@ function SlideBox(props) {
   const NAME = props.name.toUpperCase();
 
   const isVisible = useSelector(state => {
-    return state.ui ? state.ui[NAME] : props.isVisible;
+    return state.ui ? state.ui[NAME] : false;
   });
 
   // Show/hide slidebox on toggle click
@@ -34,6 +34,7 @@ function SlideBox(props) {
     `} ref={containerRef} style={props.style || {}}>
     <div className="
       SlideBox-inner
+      h-full
     " style={{backgroundColor: backgroundColor}}>
       {props.children}
     </div>

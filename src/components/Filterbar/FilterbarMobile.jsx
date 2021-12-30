@@ -19,7 +19,7 @@ function FilterbarMobile(props) {
     dispatch({
       type: `SET_VISIBILITY`,
       payload: {
-        name: 'FilterBar',
+        name: 'FILTERBAR',
         visibility: false
       }
     })
@@ -32,8 +32,11 @@ function FilterbarMobile(props) {
       closeHandler={() => {
         setVisibility();
       }}
+      classes="
+        top-0 overflow-auto
+      "
     >
-      <Filterbar />
+      <Filterbar hideLogo={true} />
     </MobileSlideBox>
   )
 }

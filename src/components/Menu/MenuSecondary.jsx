@@ -8,7 +8,7 @@ import './MenuSecondaryItem.css';
 function MenuSecondaryItem(props) {
   return (
     <a
-      className="MenuSecondaryItem mx-2"
+      className="MenuSecondaryItem cursor-pointer mx-2"
       onClick={props.onClick}
     >
       {props.text}
@@ -34,7 +34,7 @@ function MenuSecondary() {
       <MenuSecondaryItem
         text="Filters"
         onClick={() => {
-          setVisibility('MenuSecondary.filters', true)
+          setVisibility('FILTERBAR', true)
         }}
       />
       <MenuSecondaryItem

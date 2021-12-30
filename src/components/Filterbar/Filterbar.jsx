@@ -11,14 +11,14 @@ import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 import Logo from '../Logo.jsx';
 
-function Filterbar({showinterval=false, visible}) {
+function Filterbar({showinterval=false, visible, hideLogo}) {
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
   
   return (
     <div className="filter-bar-inner py-2">
-      <Logo />
+      {! hideLogo && <Logo />}
       {isLoggedIn && <div>
         { showinterval
           ? <FilteritemInterval />

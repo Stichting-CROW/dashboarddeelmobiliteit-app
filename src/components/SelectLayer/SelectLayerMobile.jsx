@@ -51,6 +51,9 @@ function SelectLayerMobile(props) {
       closeHandler={() => {
         setVisibility('MenuSecondary.layers', false);
       }}
+      classes="
+        top-auto
+      "
     >
       <div className={`
         SelectLayerMobile

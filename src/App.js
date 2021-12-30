@@ -43,7 +43,7 @@ function App() {
   });
 
   const isFilterBarVisible = useSelector(state => {
-    return state.ui ? state.ui['FilterBar'] : false;
+    return state.ui ? state.ui['FILTERBAR'] : false;
   });
 
   const filter = useSelector(state => {
@@ -73,7 +73,7 @@ function App() {
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
     return <>
-      <div className="hidden sm:block">
+      <div className="hidden sm:block h-full">
         <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} showinterval={false} />
       </div>
       <div className="block sm:hidden">

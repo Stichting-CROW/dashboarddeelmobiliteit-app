@@ -10,11 +10,12 @@ function MobileSlideBox(props) {
     <div className={`
       MobileSlideBox w-full sm:hidden absolute left-0
       ${props.isVisible ? 'block' : 'hidden'}
-    `}>
+      ${props.classes}
+    `} style={props.style}>
 
       <header className="flex justify-between">
         <h1 className="">{props.title}</h1>
-        <div className="text-2xl font-bold" onClick={props.closeHandler}>×</div>
+        <div className="text-2xl font-bold cursor-pointer" onClick={props.closeHandler}>×</div>
       </header>
 
       <div className="w-full">
@@ -26,4 +27,3 @@ function MobileSlideBox(props) {
 }
 
 export default MobileSlideBox;
-
