@@ -11,10 +11,10 @@
 
 .map-layer {
   @apply fixed w-screen z-0 bg-white;
-  height: calc(100vh - 60px);
+  height: calc(100% - 60px);
 }
 @media(min-width: 640px) {
   .map-layer {
-    height: 100vh;
+    height: 100%;
   }
 }

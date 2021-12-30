@@ -17,34 +17,63 @@ function MenuItem(props) {
   // https://v5.reactrouter.com/web/api/Hooks
   let location = useLocation();
   React.useEffect(() => {
-    setPathName(document.location.pathname);
+    setPathName(document.location ? document.location.pathname : null);
   }, [location]);
 
-  return <Link className={`
-      text-menu
-      ${isActive ? 'is-active' : ''}
-    `}
-    to={props.path}
-    href={props.href}
-    onClick={props.onClick}
-    >
-    {icon ? <img src={icon} /> : ''}
-    <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
-      {props.text}
-    </span>
-  </Link>
+  return (
+    <>
+      {props.path && <Link className={`
+          text-menu
+          ${isActive ? 'is-active' : ''}
+        `}
+        to={props.path}
+        href={props.href}
+        onClick={props.onClick}
+        >
+        {icon ? <img src={icon} /> : ''}
+        <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+          {props.text}
+        </span>
+      </Link>}
+
+      {! props.path && <a className={`
+          text-menu
+          inline-block cursor-pointer
+          ${isActive ? 'is-active' : ''}
+        `}
+        href={props.href}
+        onClick={props.onClick}
+        >
+        {icon ? <img src={icon} /> : ''}
+        <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+          {props.text}
+        </span>
+      </a>}
+    </>
+  )
 }
 
 function SubMenuItem(props) {
-  return <Link className={`text-link`}
-    to={props.path}
-    href={props.href}
-    onClick={props.onClick}
-    >
-    <span className={`block`}>
-      {props.text}
-    </span>
-  </Link>
+  return <>
+    {props.path && <Link className={`text-link`}
+      to={props.path}
+      href={props.href}
+      onClick={props.onClick}
+      >
+      <span className={`block`}>
+        {props.text}
+      </span>
+    </Link>}
+
+    {! props.path && <a className={`text-link inline-block cursor-pointer`}
+      href={props.href}
+      onClick={props.onClick}
+      >
+      <span className={`block`}>
+        {props.text}
+      </span>
+    </a>}
+  </>
 }
 
 function Menu() {
@@ -128,7 +157,7 @@ function Menu() {
 
             <MenuItem
               text={'Ontwikkeling'}
-              path={'/stats/overview'}
+              href={'/stats/overview'}
               icon={'/images/components/Menu/icon-ontwikkeling.png'}
             />
 
@@ -188,11 +217,18 @@ function Menu() {
           ">
             <SubMenuItem
               text={'Log uit'}
-              onClick={logOut}
+              onClick={(e) => {
+                e.preventDefault();
+                setSubMenuIsActive(! subMenuIsActive)
+                logOut();
+              }}
             />
             <SubMenuItem
               text={'Feedback 📨'}
               href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "
+              onClick={(e) => {
+                setSubMenuIsActive(! subMenuIsActive);
+              }}
             />
           </div>
         </>}

@@ -1,5 +1,7 @@
-.ContentPage {
-  padding-left: 324px;
+@media(min-width:  640px) {
+  .ContentPage {
+    padding-left: 324px;
+  }
 }
 .ContentPage-inner {
 }
