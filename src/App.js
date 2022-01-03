@@ -16,6 +16,7 @@ import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
+import About from './components/About/About.tsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
 import { useSelector } from 'react-redux';
@@ -127,6 +128,11 @@ function App() {
             </Route>
             <Route exact path="/monitoring">
               <Monitoring />
+            </Route>
+            <Route exact path="/over">
+              <ContentPage>
+                <About />
+              </ContentPage>
             </Route>
           </Switch>
 

@@ -25,11 +25,11 @@ function Filterbar({showinterval=false, visible, hideLogo}) {
           : <FilteritemDatum />
         }
       </div>}
-      {isLoggedIn && <FilteritemGebieden />}
-      {isLoggedIn && <FilteritemZones />}
+      {<FilteritemGebieden />}
+      {<FilteritemZones />}
       {isLoggedIn && <FilteritemMarkers />}
-      {isLoggedIn && <FilteritemVoertuigTypes />}
-      {isLoggedIn && <FilteritemAanbieders />}
+      {<FilteritemVoertuigTypes />}
+      {<FilteritemAanbieders />}
     </div>
   )
 }
