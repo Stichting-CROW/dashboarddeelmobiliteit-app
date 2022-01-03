@@ -162,7 +162,8 @@ function Menu() {
             />
 
             <MenuItem
-              text={'...'}
+              text={''}
+              icon={'/images/components/Menu/settings.svg'}
               onClick={(e) => {
                 e.preventDefault();
                 setSubMenuIsActive(! subMenuIsActive)
