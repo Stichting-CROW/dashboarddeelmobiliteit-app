@@ -5,7 +5,9 @@ import {
  Route,
  Redirect
 } from "react-router-dom";
+import moment from 'moment';
 import { store } from './AppProvider.js';
+import { useSelector, useDispatch } from 'react-redux';
 
 import Menu from './components/Menu.jsx';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
@@ -19,8 +21,6 @@ import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
-import { useSelector } from 'react-redux';
-
 import { initUpdateAccessControlList, forceUpdateAccessControlList } from './poll-api/pollMetadataAccessControlList.js';
 import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.js';
 import { initUpdateParkingData, forceUpdateParkingData } from './poll-api/pollParkingData.js';
@@ -31,6 +31,8 @@ import { initUpdateVerhuringenData, forceUpdateVerhuringenData } from './poll-ap
 import './App.css';
 
 function App() {
+  const dispatch = useDispatch()
+  
   const mapContainer = useRef(null);
 
   // let [json, setJson] = useState(false);
@@ -41,6 +43,10 @@ function App() {
   
   const showfilter = useSelector(state => {
     return state.filter ? state.filter.visible : false;
+  });
+  
+  const filterDate = useSelector(state => {
+    return state.filter ? state.filter.datum : false;
   });
 
   const isLayersMobileVisible = useSelector(state => {
@@ -55,6 +61,13 @@ function App() {
     return state.filter;
   });
 
+  const setFilterDatum = newdt => {
+    dispatch({
+      type: 'SET_FILTER_DATUM',
+      payload: newdt.toISOString()
+    })
+  }
+
   // Init polling scripts
   useEffect(() => {
     initUpdateZones(store);
@@ -67,6 +80,13 @@ function App() {
     forceUpdateZonesgeodata();
     forceUpdateAccessControlList();
   });
+
+  // Set date to current date/time on load 
+  useEffect(() => {
+    if(moment(filterDate).diff(moment(), 'minutes') < -10) {
+      setFilterDatum(moment().toDate())
+    }
+  }, []);
 
   // update scripts
   useEffect(() => {
