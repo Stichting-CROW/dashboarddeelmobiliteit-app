@@ -18,6 +18,12 @@ const md5 = require('md5');
 // Set language for momentJS
 moment.locale('nl', localization);
 
+const providerWebsiteUrls = {
+  'check': 'https://ridecheck.app/',
+  'felyx': 'https://felyx.com/',
+  'gosharing': 'https://go-sharing.com/'
+}
+
 const initPopupLogic = (currentMap, providers, isLoggedIn) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
@@ -55,8 +61,16 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
             </span>
           </h1>
           <div class="Map-popup-body">
-            Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
-            Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
+            ${vehicleProperties.in_public_space_since ? `<div>
+              Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
+              Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
+            </div>` : ''}
+
+            ${providerWebsiteUrls && providerWebsiteUrls[vehicleProperties.system_id] ? `<div>
+              <a href="${providerWebsiteUrls[vehicleProperties.system_id]}" rel="external" target="_blank">
+                ${providerWebsiteUrls[vehicleProperties.system_id]}
+              </a>
+            </div>` : ''}
           </div>
         `)
         .addTo(currentMap);
