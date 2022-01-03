@@ -64,18 +64,17 @@
   user-select: none;
   border-right: 1px solid black;
   cursor: pointer;
-  color: #15AEEF;
+  color: #343E47;
 }
 
 .filter-voertuigtypes-item-excluded {
+  color: #AFAFAF;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   width: 60px;
   border-right: 1px solid black;
-  /*opacity: 0.8;*/
-  filter: grayscale(100%);
   user-select: none;
   cursor: pointer;
 }
@@ -89,44 +88,63 @@
   text-align: center;
   font: normal normal normal 10px/12px Inter;
   letter-spacing: 0px;
-  /*color: #000000;*/
   opacity: 1;
+  color: #343E47;
 }
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-itemlabel {
-  color: #343E47;
+  color: #AFAFAF;
 }
 
 .filter-voertuigtypes-icon {
   width: 40px;
   height: 28px;
-  /*color: black;*/
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom;
-  /*https://stackoverflow.com/a/53336754*/
-  filter: invert(68%) sepia(99%) saturate(3058%) hue-rotate(164deg) brightness(94%) contrast(99%);
+
+  color: #AFAFAF;
+  background-size: 26px;
 }
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon {
   filter: none;
-  opacity: 0.6;
+  color: #343E47;
 }
 
 .filter-voertuigtypes-icon-bicycle {
-  background-image: url('../../../images/filterbar/172573_bicycle_icon.svg');
+  background-image: url('../../../images/filterbar/fiets-active.svg');
+  background-size: 28px;
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-bicycle {
+  background-image: url('../../../images/filterbar/fiets.svg');
 }
 
 .filter-voertuigtypes-icon-cargo-bicycle {
-  background-image: url('../../../images/filterbar/172573_bicycle_icon.svg');
+  background-image: url('../../../images/filterbar/bakfiets-active.svg');
+  background-size: 34px;
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-cargo-bicycle {
+  background-image: url('../../../images/filterbar/bakfiets.svg');
 }
 
 .filter-voertuigtypes-icon-scooter {
-  background-image: url('../../../images/filterbar/172545_scooter_icon.svg');
+  background-image: url('../../../images/filterbar/scooter-active.svg');
+  background-size: 24px;
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-scooter {
+  background-image: url('../../../images/filterbar/scooter.svg');
 }
 
 .filter-voertuigtypes-icon-car {
-  background-image: url('../../../images/filterbar/172580_cars_icon.svg');
+  background-image: url('../../../images/filterbar/auto-active.svg');
+  background-size: 30px;
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-car {
+  background-image: url('../../../images/filterbar/auto.svg');
 }
 
 .filter-voertuigtypes-icon-other {
+  background-image: url('../../../images/filterbar/172591_dinghy_icon-active.svg');
+}
+.filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-other {
   background-image: url('../../../images/filterbar/172591_dinghy_icon.svg');
 }

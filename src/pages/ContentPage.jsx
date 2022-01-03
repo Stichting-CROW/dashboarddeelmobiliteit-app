@@ -8,7 +8,7 @@ export default function ContentPage(props) {
 
   return (
     <div
-      className={`ContentPage ${isFilterBarVisible ? '' : 'full-page'}`}
+      className={`ContentPage h-full pb-20 ${isFilterBarVisible ? '' : 'full-page'}`}
       style={{
         overflowY: 'auto',
       }}

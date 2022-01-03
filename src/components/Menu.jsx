@@ -10,8 +10,8 @@ import { clearUser } from '../actions/authentication.js';
 function MenuItem(props) {
   const [pathName, setPathName] = useState(document.location.pathname);
 
-  const isActive = pathName === props.path;
-  const icon = (isActive ? props.icon.replace('.png', '-active.png') : props.icon);
+  const isActive = pathName === props.path || pathName === props.href;
+  const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
 
   // Log pathname on navigate
   // https://v5.reactrouter.com/web/api/Hooks
@@ -146,19 +146,19 @@ function Menu() {
             <MenuItem
               text={'Aanbod'}
               path={'/map/park'}
-              icon={'/images/components/Menu/icon-aanbod.png'}
+              icon={'/images/components/Menu/aanbod.svg'}
             />
 
             <MenuItem
               text={'Verhuringen'}
               path={'/map/rentals'}
-              icon={'/images/components/Menu/icon-verhuringen.png'}
+              icon={'/images/components/Menu/verhuringen.svg'}
             />
 
             <MenuItem
               text={'Ontwikkeling'}
               href={'/stats/overview'}
-              icon={'/images/components/Menu/icon-ontwikkeling.png'}
+              icon={'/images/components/Menu/ontwikkeling.svg'}
             />
 
             <MenuItem

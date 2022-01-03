@@ -16,7 +16,7 @@ import Login from './pages/Login.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
-import About from './components/About/About.tsx';
+import About from './components/About/About.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
 import { useSelector } from 'react-redux';
