@@ -59,9 +59,6 @@ function FilteritemGebieden() {
       <FilterbarExtended closeFunction={setVisibility}>
         <div className="filter-form-selectie">
           <div className="filter-form-search-container mb-3">
-            <div className="filter-form-title">
-              Selecteer Plaats
-            </div>
             <div className="filter-form-search-container-2">
             <input type="text"
               className="filter-form-search"

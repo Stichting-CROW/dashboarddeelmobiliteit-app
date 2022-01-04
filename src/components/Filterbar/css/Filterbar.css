@@ -1,29 +1,5 @@
 .filter-bar-inner {
   width: 300px;
-  /*
-  height: 100vh;
-  z-index: 99;
-  border-radius: 20px;
-  border-bottom-right-radius: 0;
-  opacity: 1;
-  overflow-x: visible;
-  opacity: 1;
-  width: 100%;
-  box-shadow: 0px 3px 6px #00000029;
-  background: #F6F5F4 0% 0% no-repeat padding-box;
-  */
-}
-@media (min-width: 640px) { 
-  .filter-bar-inner {
-    /*
-    width: 324px;
-    z-index: 99;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    position: fixed;
-    */
-  }
 }
 
 /* Generic items ------------------------------------------------------------*/
@@ -77,30 +53,37 @@
   flex-direction: row;
   border-radius: 0.25em;
   margin-right: 40px;
-  padding: 3px;
-  padding-left: 8px;
+  /*padding: 3px;*/
+  /*padding-left: 8px;*/
 }
 
 .filter-form-search {
   padding: 15px 10px;
-  width:300px;
   border: 1px solid #CCCCCC;
 }
 
 .form-item {
-  display:inline-block;
+/*
   width: auto;
   height: auto;
   overflow:hidden;
   font: normal normal normal 14px/17px Inter;
-  white-space: nowrap;
-  text-overflow:clip;
   border: 1px solid #CCCCCC;
   margin: 0.3em;
   padding: 1em;
   background: white;
   text-align: center;
-  border-radius: 0.5em;
+  border-radius: 0.5em;*/
+
+  @apply inline-block py-1 px-2 mr-2 mb-2 text-xs;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #343E47;
+  opacity: 1;
+  text-overflow:clip;
+  white-space: nowrap;
+  overflow:hidden;
 }
 
 .form-item-selected {
