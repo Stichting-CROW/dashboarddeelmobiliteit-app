@@ -26,6 +26,11 @@
   color: #15AEEF;
   text-align: left;
   padding-left: 12px;
+  height: 100%;
+  cursor: pointer;
+  justify-content: center;
+  flex-direction: column;
+  display: flex;
 }
 .filter-plaats-value.text-black {
   color: #000000;

@@ -7,6 +7,7 @@ import './MenuSecondaryItem.css';
 function MenuSecondaryItem(props) {
   return (
     <a
+      href="#"
       className="MenuSecondaryItem cursor-pointer mx-2"
       onClick={props.onClick}
     >

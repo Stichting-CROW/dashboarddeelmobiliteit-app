@@ -56,7 +56,7 @@ function FilteritemGebieden() {
       return filterSearch===''|| gebied.name.toLowerCase().includes(filterSearch.toLowerCase())
     })
     return (
-      <FilterbarExtended closeFunction={setVisibility}>
+      <FilterbarExtended closeFunction={(val) => setVisibility('FILTERBAR_EXTENDED', val)}>
         <div className="filter-form-selectie">
           <div className="filter-form-search-container mb-3">
             <div className="filter-form-search-container-2">
@@ -64,6 +64,7 @@ function FilteritemGebieden() {
               className="filter-form-search"
               onChange={changeSearchText}
               value={filterSearch}
+              autoFocus="true"
               placeholder={"zoek"}/>
             <div className="ml-3 flex flex-col justify-center h-full">
               { filterSearch !== "" ?
@@ -104,7 +105,7 @@ function FilteritemGebieden() {
     return (
       <div className="filter-plaats-container filter-plaats-not-active">
         <div className="filter-plaats-title" onClick={e=>{setVisibility('FILTERBAR_EXTENDED', !isFilterBarExtendedVisible)}}>Plaats</div>
-        <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
+        <div className="filter-plaats-box-row flex flex-col justify-center">
           <div className="filter-plaats-value " >{value===""?"Alle Gebieden":value.name}</div>
         </div>
       </div>
@@ -114,7 +115,7 @@ function FilteritemGebieden() {
   return (
     <div className="filter-plaats-container">
       <div className="filter-plaats-title" onClick={e=>{setVisibility('FILTERBAR_EXTENDED', !isFilterBarExtendedVisible)}}>Plaats</div>
-      <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
+      <div className="filter-plaats-box-row flex flex-col justify-center">
         <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{setVisibility('FILTERBAR_EXTENDED', !isFilterBarExtendedVisible)}}>
           {value === "" ? "Alle Gebieden" : value.name}
         </div>

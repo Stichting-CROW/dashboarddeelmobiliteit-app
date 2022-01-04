@@ -35,7 +35,6 @@
 }
 
 .filter-form-values {
-  /* @apply text-sm grid grid-cols-3 auto-rows-auto gap-4; */
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -63,19 +62,7 @@
 }
 
 .form-item {
-/*
-  width: auto;
-  height: auto;
-  overflow:hidden;
-  font: normal normal normal 14px/17px Inter;
-  border: 1px solid #CCCCCC;
-  margin: 0.3em;
-  padding: 1em;
-  background: white;
-  text-align: center;
-  border-radius: 0.5em;*/
-
-  @apply inline-block py-1 px-2 mr-2 mb-2 text-xs;
+  @apply inline-block py-1 px-2 mr-2 mb-2 text-xs cursor-pointer;
   background: #FFFFFF 0% 0% no-repeat padding-box;
   border: 1px solid #707070;
   border-radius: 3px;
