@@ -64,9 +64,13 @@ function FilteritemGebieden() {
           </div>
           <div className="filter-form-values">
             { filterGebied === ""?
-                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
+                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>
+                  Alle Gebieden
+                </div>
                 :
-                <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
+                <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>
+                  Alle Gebieden
+                </div>
             }
             { filteredGebieden.map(a=>{
                 if(filterGebied === a.gm_code) {
@@ -98,7 +102,9 @@ function FilteritemGebieden() {
     <div className="filter-plaats-container">
       <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
       <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
-        <div className="filter-plaats-value" onClick={e=>{setShowSelect(!showSelect)}}>{value===""?"Alle Gebieden":value.name}</div>
+        <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{setShowSelect(!showSelect)}}>
+          {value === "" ? "Alle Gebieden" : value.name}
+        </div>
         { showSelect ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?
               <div className="filter-plaats-img-cancel" onClick={unselectGebied} />

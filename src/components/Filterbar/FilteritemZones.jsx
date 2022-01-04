@@ -117,7 +117,10 @@ function FilteritemZones() {
       <div className="filter-zones-title" onClick={e=>{isActive && setShowSelect(!showSelect)}}>Zones</div>
       <div className="filter-zones-box-row">
         <div
-          className="filter-zones-value flex flex-col justify-center cursor-pointer h-full"
+          className={`
+            filter-zones-value flex flex-col justify-center cursor-pointer h-full
+            ${zonetxt === "Alle Zones" ? 'text-black' : ''}
+          `}
           onClick={e=>{isActive && setShowSelect(!showSelect)}}
           >
           {zonetxt}

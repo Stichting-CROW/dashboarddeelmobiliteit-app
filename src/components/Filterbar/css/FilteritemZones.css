@@ -33,6 +33,9 @@
   text-align: left;
   padding-left: 12px;
 }
+.filter-zones-value.text-black {
+  color: #000;
+}
 
 .filter-zones-box-row {
   display: flex;

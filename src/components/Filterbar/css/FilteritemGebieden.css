@@ -27,6 +27,9 @@
   text-align: left;
   padding-left: 12px;
 }
+.filter-plaats-value.text-black {
+  color: #000000;
+}
 
 .filter-plaats-not-active {
   opacity: 0.6;
