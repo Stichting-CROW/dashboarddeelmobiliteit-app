@@ -8,7 +8,6 @@ import FilteritemAanbieders from './FilteritemAanbieders.jsx';
 import FilteritemZones from './FilteritemZones.jsx';
 import FilteritemMarkers from './FilteritemMarkers.jsx';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
-import SlideBox from '../SlideBox/SlideBox.jsx';
 import Logo from '../Logo.jsx';
 
 function Filterbar({showinterval=false, visible, hideLogo}) {
@@ -18,18 +17,26 @@ function Filterbar({showinterval=false, visible, hideLogo}) {
   
   return (
     <div className="filter-bar-inner py-2">
+
       {! hideLogo && <Logo />}
+
       {isLoggedIn && <div>
         { showinterval
           ? <FilteritemInterval />
           : <FilteritemDatum />
         }
       </div>}
+
       {<FilteritemGebieden />}
+
       {<FilteritemZones />}
+
       {isLoggedIn && <FilteritemMarkers />}
+
       {<FilteritemVoertuigTypes />}
+
       {<FilteritemAanbieders />}
+
     </div>
   )
 }

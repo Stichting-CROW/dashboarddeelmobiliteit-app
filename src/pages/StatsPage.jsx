@@ -9,8 +9,8 @@ import moment from 'moment';
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
+  // BarChart,
+  // Bar,
   XAxis,
   Legend,
   YAxis,

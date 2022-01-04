@@ -3,7 +3,7 @@ import {
  BrowserRouter as Router,
  Switch,
  Route,
- Redirect
+ // Redirect
 } from "react-router-dom";
 import moment from 'moment';
 import { store } from './AppProvider.js';
@@ -41,9 +41,9 @@ function App() {
     return state.authentication.user_data ? true : false;
   });
   
-  const showfilter = useSelector(state => {
-    return state.filter ? state.filter.visible : false;
-  });
+  // const showfilter = useSelector(state => {
+  //   return state.filter ? state.filter.visible : false;
+  // });
   
   const filterDate = useSelector(state => {
     return state.filter ? state.filter.datum : false;

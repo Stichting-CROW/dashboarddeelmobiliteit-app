@@ -14,7 +14,8 @@ const updateParkingData = ()  => {
       // console.log("no redux state available yet - skipping zones update");
       return false;
     }
-    
+
+    // Wait for zone data    
     const state = store_parkingdata.getState();
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
@@ -102,7 +103,7 @@ const updateParkingData = ()  => {
           // return;
         })
 
-        console.log('geoJson in pollParkingData', geoJson)
+        // console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',
