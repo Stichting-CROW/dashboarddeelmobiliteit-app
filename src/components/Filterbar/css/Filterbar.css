@@ -1,10 +1,11 @@
 .filter-bar-inner {
-  width: 100%;
+  width: 290px;
+  max-width: 100%;
 }
 
 @media (min-width: 640px) {
   .filter-bar-inner {
-    width: 300px;
+    max-width: 290px;
   }
 }
 
@@ -86,7 +87,7 @@
 .filter-form-selectie {
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  /*overflow: auto;*/
 }
 
 .modalbox-bg {

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalBox from './ModalBox.jsx';
+import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
 
 function FilteritemZones() {
@@ -18,7 +19,10 @@ function FilteritemZones() {
     return state.filter ? state.filter.gebied : 0;
   });
   
-  let [showSelect, setShowSelect] = useState(false);
+  const filterBarExtendedView = useSelector(state => {
+    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
+  });
+
   let [filterSearch, setFilterSearch] = useState("");
   
   const addToFilterZones = (zone) => {
@@ -33,6 +37,20 @@ function FilteritemZones() {
     dispatch({ type: 'CLEAR_FILTER_ZONES', payload: null })
   }
 
+  const setVisibility = (name, visibility) => {
+    dispatch({
+      type: `SET_VISIBILITY`,
+      payload: {
+        name: name,
+        visibility: visibility
+      }
+    })
+  }
+
+  const toggleZones = (val) => {
+    setVisibility('FILTERBAR_EXTENDED', val)
+  }
+  
   const changeSearchText = e => { setFilterSearch(e.target.value) }
 
   const clearSearchText = e => { setFilterSearch("") }
@@ -43,21 +61,24 @@ function FilteritemZones() {
     })
     
     return (
-      <ModalBox closeFunction={setShowSelect}>
+      <FilterbarExtended closeFunction={(val) => toggleZones(false)}>
         <div className="filter-form-selectie">
             <div className="filter-form-search-container mb-3">
-              <div className="filter-form-title">Selecteer Zones</div>
+              {/*<div className="filter-form-title" hidden>
+                Selecteer Zones
+              </div>*/}
               <div className="filter-form-search-container-2">
               <input type="text"
                 className="filter-form-search"
                 onChange={changeSearchText}
                 value={filterSearch}
+                autoFocus={true}
                 placeholder={"zoek"}/>
               <div className="ml-3 flex flex-col justify-center h-full">
-                {  filterSearch!=="" ?
-                      <div className="filter-zones-img-cancel cursor-pointer" onClick={clearSearchText} />
-                    :
-                      <div className="filter-zones-img-search cursor-pointer" />
+                { filterSearch!=="" ?
+                  <div className="filter-zones-img-cancel cursor-pointer" onClick={clearSearchText} />
+                  :
+                  <div className="filter-zones-img-search cursor-pointer" />
                 }
               </div>
               </div>
@@ -82,7 +103,7 @@ function FilteritemZones() {
               }
           </div>
         </div>
-      </ModalBox>)
+      </FilterbarExtended>)
   }
   
   let selectedzones = [];
@@ -107,21 +128,21 @@ function FilteritemZones() {
   const filteredZones = zones.filter(zone=>{
     return selectedzones.includes(zone.zone_id.toString())
   })
-  
+
   if(! isActive) {
     return <></>
   }
 
   return (
     <div className={`filter-zones-container ${isActive===true ? '':'not-active'}`}>
-      <div className="filter-zones-title" onClick={e=>{isActive && setShowSelect(!showSelect)}}>Zones</div>
+      <div className="filter-zones-title" onClick={e=>{isActive && toggleZones('zones')}}>Zones</div>
       <div className="filter-zones-box-row">
         <div
           className={`
             filter-zones-value flex flex-col justify-center cursor-pointer h-full
             ${zonetxt === "Alle Zones" ? 'text-black' : ''}
           `}
-          onClick={e=>{isActive && setShowSelect(!showSelect)}}
+          onClick={e=>{isActive && toggleZones('zones')}}
           >
           {zonetxt}
         </div>
@@ -130,9 +151,9 @@ function FilteritemZones() {
             :
               null
         }
-        { showSelect ? renderSelectZones(zones) : null }
+        { filterBarExtendedView === 'zones' ? renderSelectZones(zones) : null }
         <div className="ml-3 flex flex-col justify-center h-full">
-          <div className="filter-zones-img-search cursor-pointer" onClick={e=>{setShowSelect(!showSelect)}} />
+          <div className="filter-zones-img-search cursor-pointer" onClick={e=>{toggleZones('zones')}} />
         </div>
       </div>
       <div className="filter-zones-zonelist">
@@ -149,14 +170,6 @@ function FilteritemZones() {
       </div>
     </div>
   )
-  
-  // return (
-  //     <div className="filter-item" onClick={e=>{setShowSelect(!showSelect)}}>
-  //       <div className="filter-title">Zones</div>
-  //       <div className="filter-value">{zonetxt}</div>
-  //       { showSelect ? renderSelectZones(zones) : null }
-  //     </div>
-  //   )
 }
 
 export default FilteritemZones;
