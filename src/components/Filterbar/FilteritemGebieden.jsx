@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ModalBox from './ModalBox.jsx';
+// import ModalBox from './ModalBox.jsx';
+import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
 
 function FilteritemGebieden() {
@@ -13,10 +14,23 @@ function FilteritemGebieden() {
   const filterGebied = useSelector(state => {
     return state.filter ? state.filter.gebied : "";
   });
-  
-  let [showSelect, setShowSelect] = useState(false);
+
+  const filterBarExtendedView = useSelector(state => {
+    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
+  });
+
   let [filterSearch, setFilterSearch] = useState("");
   
+  const setVisibility = (name, visibility) => {
+    dispatch({
+      type: `SET_VISIBILITY`,
+      payload: {
+        name: name,
+        visibility: visibility
+      }
+    })
+  }
+
   const unselectGebied = e => {
     e.preventDefault();
     
@@ -37,26 +51,30 @@ function FilteritemGebieden() {
 
   const clearSearchText = e => { setFilterSearch("") }
   
+  const toggleGebieden = (val) => {
+    setVisibility('FILTERBAR_EXTENDED', val)
+  }
+
   const renderSelectGebieden = (gebieden) => {
     const filteredGebieden = gebieden.filter(gebied=>{
       return filterSearch===''|| gebied.name.toLowerCase().includes(filterSearch.toLowerCase())
     })
     return (
-      <ModalBox closeFunction={setShowSelect}>
+      <FilterbarExtended closeFunction={() => toggleGebieden(false)}>
         <div className="filter-form-selectie">
           <div className="filter-form-search-container mb-3">
-            <div className="filter-form-title">Selecteer Plaats</div>
             <div className="filter-form-search-container-2">
             <input type="text"
               className="filter-form-search"
               onChange={changeSearchText}
               value={filterSearch}
+              autoFocus={true}
               placeholder={"zoek"}/>
             <div className="ml-3 flex flex-col justify-center h-full">
-              {  filterSearch!=="" ?
-                    <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
-                  :
-                    <div className="filter-plaats-img-search" />
+              { filterSearch !== "" ?
+                <div className="filter-plaats-img-cancel" onClick={clearSearchText} />
+                :
+                <div className="filter-plaats-img-search" />
               }
             </div>
             </div>
@@ -64,21 +82,25 @@ function FilteritemGebieden() {
           </div>
           <div className="filter-form-values">
             { filterGebied === ""?
-                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{setShowSelect(false)}}>Alle Gebieden</div>
+                <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{toggleGebieden(false)}}>
+                  Alle Gebieden
+                </div>
                 :
-                <div key={'item-alle'} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>Alle Gebieden</div>
+                <div key={'item-alle'} className="form-item" onClick={e=>{toggleGebieden(false);setFilterGebied("")}}>
+                  Alle Gebieden
+                </div>
             }
             { filteredGebieden.map(a=>{
                 if(filterGebied === a.gm_code) {
-                  return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{setShowSelect(false);setFilterGebied("")}}>{a.name}</div>)
+                  return (<div key={'item-'+a.gm_code} className="form-item-selected form-item" onClick={e=>{toggleGebieden(false);setFilterGebied("")}}>{a.name}</div>)
                 } else {
-                  return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{setShowSelect(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
+                  return (<div key={'item-'+a.gm_code} className="form-item" onClick={e=>{toggleGebieden(false);setFilterGebied(a.gm_code);}}>{a.name}</div>)
                 }
               })
             }
           </div>
         </div>
-      </ModalBox>
+      </FilterbarExtended>
     )
   }
   
@@ -86,8 +108,8 @@ function FilteritemGebieden() {
   if(gebieden.length===1) {
     return (
       <div className="filter-plaats-container filter-plaats-not-active">
-        <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
-        <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
+        <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
+        <div className="filter-plaats-box-row flex flex-col justify-center">
           <div className="filter-plaats-value " >{value===""?"Alle Gebieden":value.name}</div>
         </div>
       </div>
@@ -96,17 +118,19 @@ function FilteritemGebieden() {
   
   return (
     <div className="filter-plaats-container">
-      <div className="filter-plaats-title" onClick={e=>{setShowSelect(!showSelect)}}>Plaats</div>
-      <div className="filter-plaats-box-row cursor-pointer flex flex-col justify-center">
-        <div className="filter-plaats-value" onClick={e=>{setShowSelect(!showSelect)}}>{value===""?"Alle Gebieden":value.name}</div>
-        { showSelect ? renderSelectGebieden(gebieden) : null }
+      <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
+      <div className="filter-plaats-box-row flex flex-col justify-center">
+        <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{toggleGebieden('places')}}>
+          {value === "" ? "Alle Gebieden" : value.name}
+        </div>
+        { filterBarExtendedView === 'places' ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?
               <div className="filter-plaats-img-cancel" onClick={unselectGebied} />
             :
               null
         }
         <div className="flex flex-col justify-center h-full">
-          <div className="filter-plaats-img-search" onClick={e=>{setShowSelect(!showSelect)}} />
+          <div className="filter-plaats-img-search" onClick={e=>{toggleGebieden('places')}} />
         </div>
       </div>
     </div>

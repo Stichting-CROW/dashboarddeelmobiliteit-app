@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
 import { cPollDelayParkingData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
+import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 
 var store_parkingdata = undefined;
 
@@ -15,11 +16,17 @@ const updateParkingData = ()  => {
       return false;
     }
     
+    // Wait for zone data
     const state = store_parkingdata.getState();
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
       // console.log("no zone metadata available yet - skipping parking data update");
       return false;
+    }
+    
+    if(state.layers.displaymode!==DISPLAYMODE_PARK) {
+      console.log('not viewing park data - skip update');
+      return true;
     }
     
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
@@ -102,7 +109,7 @@ const updateParkingData = ()  => {
           // return;
         })
 
-        console.log('geoJson in pollParkingData', geoJson)
+        // console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',

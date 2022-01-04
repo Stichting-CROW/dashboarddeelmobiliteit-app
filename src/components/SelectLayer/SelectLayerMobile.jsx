@@ -1,15 +1,16 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import SlideBox from '../SlideBox/SlideBox.jsx';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
 
 import './SelectLayerMobile.css';
 
 import {
+  DISPLAYMODE_PARK,
+  // DISPLAYMODE_RENTALS,
+  // DISPLAYMODE_OTHER,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
-  DISPLAYMODE_PARKEERDATA_VOERTUIGEN
-} from '../../reducers/layers.js';
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN } from '../../reducers/layers.js';
 
 function SelectLayerMobile(props) {
   const dispatch = useDispatch()
@@ -27,13 +28,19 @@ function SelectLayerMobile(props) {
   });
   
   const displayMode = useSelector(state => {
-    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
+    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
+  const viewPark = useSelector(state => {
+    return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-
+  
+  console.log("MOBILE selection", displayMode)
+  
   const setVisibility = (name, visibility) => {
     dispatch({
       type: `SET_VISIBILITY`,
@@ -43,7 +50,7 @@ function SelectLayerMobile(props) {
       }
     })
   }
-
+  
   return (
     <MobileSlideBox
       title="Lagen"
@@ -59,28 +66,31 @@ function SelectLayerMobile(props) {
         SelectLayerMobile
         flex justify-between
       `}>
-        <div data-type="heat-map" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
-          <span className="layer-title">
-            Heat map
-          </span>
-        </div>
+      { displayMode===DISPLAYMODE_PARK ?
+            <div data-type="heat-map" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
+              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
+              <span className="layer-title">
+                Heat map
+              </span>
+            </div> : null }
 
-        <div data-type="pointers" className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
+      { displayMode===DISPLAYMODE_PARK ?
+        <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
           <span className="layer-title">
             Clusters
           </span>
-        </div>
+          </div> : null }
 
-        <div data-type="vehicles"  className={`layer${displayMode!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_DISPLAYMODE', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
+      { displayMode===DISPLAYMODE_PARK ?
+        <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
           <span className="layer-title">
             Voertuigen
           </span>
-        </div>
+          </div> : null }
 
-        { isLoggedIn && showZoneOnOff ?
+      { isLoggedIn && showZoneOnOff ?
           <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
               dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
           }}>

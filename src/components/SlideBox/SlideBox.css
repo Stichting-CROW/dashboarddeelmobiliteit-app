@@ -1,6 +1,8 @@
 .SlideBox {
   transition: transform 0.4s;
   transition-timing-function: ease-out;
+
+  transition: max-width 1s;
 }
 .SlideBox.is-hidden {
   transition: transform 0.6s;
@@ -15,10 +17,10 @@
 
 .SlideBox-inner {
   background: #fff;
-  box-shadow: -2px 2px 3px #0000002;
-  border-radius: 5px;
+  box-shadow: 0px 3px 6px #00000029;
   opacity: 1;
   overflow-y: auto;
+  overflow-x: visible;
   position: relative;
   z-index: 10;
 }
@@ -51,6 +53,7 @@
 }
 .SlideBox.direction-left .SlideBox-toggle-wrapper {
   right:-28px;
+  z-index: 10;
 }
 .SlideBox.is-hidden .SlideBox-toggle-wrapper {
   cursor: w-resize;

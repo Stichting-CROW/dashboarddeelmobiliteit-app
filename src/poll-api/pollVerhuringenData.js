@@ -1,7 +1,7 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn } from './pollTools.js';
-import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
-const md5 = require('md5');
+import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer } from '../constants.js';
+import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 
 var store_verhuringendata = undefined;
 var timerid_verhuringendata = undefined;
@@ -15,12 +15,10 @@ const updateVerhuringenData = ()  => {
       return false;
     }
 
-    // Wait for zone data
     const state = store_verhuringendata.getState();
-    if(state.metadata.zones_loaded===false) {
-      delay = cPollDelayLoading;
-      // console.log("no zone metadata available yet - skipping parking data update");
-      return false;
+    if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
+      console.log('not viewing rentals data - skip update');
+      return true;
     }
 
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;

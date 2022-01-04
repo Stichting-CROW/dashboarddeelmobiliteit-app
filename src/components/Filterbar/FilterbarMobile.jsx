@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 // import SlideBox from '../SlideBox/SlideBox.jsx';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
 import Filterbar from '../Filterbar/Filterbar.jsx';

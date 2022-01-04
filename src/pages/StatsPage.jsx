@@ -9,10 +9,10 @@ import moment from 'moment';
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
+  // BarChart,
+  // Bar,
   XAxis,
-  Legend,
+  // Legend,
   YAxis,
   CartesianGrid,
   Tooltip,
@@ -52,7 +52,7 @@ const getUniqueProviderNames = (object) => {
 
 class CustomizedAxisTick extends PureComponent {
   render() {
-    const { x, y, stroke, payload } = this.props;
+    const { x, y, payload } = this.props;
 
     return (
       <g transform={`translate(${x},${y})`}>

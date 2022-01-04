@@ -1,4 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, {
+  useRef,
+  // useState
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import './SlideBox.css';
@@ -12,15 +15,24 @@ function SlideBox(props) {
     return state.ui ? state.ui[NAME] : false;
   });
 
-  // Show/hide slidebox on toggle click
-  const toggleSlideBox = () => {
+  const setVisibility = (name, visibility) => {
     dispatch({
       type: `SET_VISIBILITY`,
       payload: {
-        name: NAME,
-        visibility: ! isVisible
+        name: name,
+        visibility: visibility
       }
     })
+  }
+
+  // Show/hide slidebox on toggle click
+  const toggleSlideBox = () => {
+    // If filterbar was visible, hide extended filterbar
+    if(isVisible) {
+      setVisibility('FILTERBAR_EXTENDED', false);
+    }
+    // Now toggle slidebox
+    setVisibility(NAME, ! isVisible)
   };
 
   const {backgroundColor} = props.options || {};

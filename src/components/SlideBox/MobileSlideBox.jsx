@@ -1,9 +1,10 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from "react-router-dom";
+import {
+  // useDispatch,
+  // useSelector
+} from 'react-redux';
 
 import './MobileSlideBox.css';
-// import { IconButtonFilter } from './IconButtons.jsx';
-// import { clearUser } from '../actions/authentication';
+import { IconButtonClose } from '../IconButtons.jsx';
 
 function MobileSlideBox(props) {
   return (
@@ -15,7 +16,7 @@ function MobileSlideBox(props) {
 
       <header className="flex justify-between">
         <h1 className="">{props.title}</h1>
-        <div className="text-2xl font-bold cursor-pointer" onClick={props.closeHandler}>×</div>
+        <IconButtonClose onClick={props.closeHandler} />
       </header>
 
       <div className="w-full">

@@ -1,0 +1,26 @@
+.FilterbarExtended {
+  position: absolute;
+  top: 0;
+  left: 320px;
+  width: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  background: #F6F5F4;
+  width: 100%;
+  @apply px-4 pb-8;
+}
+
+.FilterbarExtended-close-button-wrapper {
+  padding: 15px 5px;
+}
+
+@media (min-width: 640px) {
+  .FilterbarExtended {
+    position: absolute;
+    width: 300px;
+    @apply px-0
+  }  
+  .FilterbarExtended-close-button-wrapper {
+    padding: 5px 5px;
+  }
+}
