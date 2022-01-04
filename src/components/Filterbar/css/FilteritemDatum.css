@@ -59,10 +59,10 @@
   border: 1px solid #CCCCCC;
   border-radius: 10px;
   opacity: 1;
-  background: #FFFFFF url('../../../images/play.svg') no-repeat center border-box;
+  background: #FFFFFF url('../../../images/filterbar/now.svg') no-repeat center border-box;
 }
 
-.filter-datum-img-play {
+.filter-datum-img-now {
   width: 18px;
   height: 20px;
 }

@@ -21,6 +21,7 @@
   /* border: thin solid gray; */
 }
 .react-datetime-picker__inputGroup {
+  order: 1;
   min-width: calc(4px + (4px * 3) +  0.54em * 6  +  0.217em * 2);
   flex-grow: 1;
   padding: 0 2px;
