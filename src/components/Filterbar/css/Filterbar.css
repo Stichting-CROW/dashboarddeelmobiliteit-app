@@ -1,5 +1,11 @@
 .filter-bar-inner {
-  width: 300px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .filter-bar-inner {
+    width: 300px;
+  }
 }
 
 /* Generic items ------------------------------------------------------------*/
@@ -52,12 +58,10 @@
   flex-direction: row;
   border-radius: 0.25em;
   margin-right: 40px;
-  /*padding: 3px;*/
-  /*padding-left: 8px;*/
 }
 
 .filter-form-search {
-  padding: 15px 10px;
+  padding: 5px 10px;
   border: 1px solid #CCCCCC;
 }
 

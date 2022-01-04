@@ -64,7 +64,7 @@ function FilteritemGebieden() {
               className="filter-form-search"
               onChange={changeSearchText}
               value={filterSearch}
-              autoFocus="true"
+              autoFocus={true}
               placeholder={"zoek"}/>
             <div className="ml-3 flex flex-col justify-center h-full">
               { filterSearch !== "" ?
