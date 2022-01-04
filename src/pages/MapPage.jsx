@@ -61,7 +61,6 @@ function Map({mode, mapContainer}) {
       default:
     }
   }
-  
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
@@ -73,7 +72,7 @@ function Map({mode, mapContainer}) {
         <MapComponent
           mapContainer={mapContainer}
           layers={layers}
-          activeSource={activesource}
+          activeSource={activeSource}
         />
       </div>
   </div>);
