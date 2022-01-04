@@ -23,29 +23,28 @@ function Map(props) {
   let layers = [];
   if(showZones) { layers.push('zones-geodata') }
   
-  let activesource = '';
+  let activeSource = '';
   switch(displayMode) {
     case DISPLAYMODE_PARKEERDATA_HEATMAP:
       layers.push('vehicles-heatmap-city-level');
-      activesource = 'vehicles';
+      activeSource = 'vehicles';
       break;
     case DISPLAYMODE_PARKEERDATA_CLUSTERS:
       layers.push('vehicles-clusters');
       layers.push('vehicles-clusters-count');
       layers.push('vehicles-clusters-point');
-      activesource = 'vehicles-clusters';
+      activeSource = 'vehicles-clusters';
       break;
     case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
       layers.push('vehicles-point');
-      activesource = 'vehicles';
+      activeSource = 'vehicles';
       break;
     case DISPLAYMODE_VERHUURDATA:
       layers.push('rentals-point');
-      activesource = 'rentals';
+      activeSource = 'rentals';
       break;
     default:
   }
-  
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
@@ -57,7 +56,7 @@ function Map(props) {
         <MapComponent
           mapContainer={props.mapContainer}
           layers={layers}
-          activeSource={activesource}
+          activeSource={activeSource}
         />
       </div>
   </div>);

@@ -1,19 +1,29 @@
 const initialState = {
-  data: null
+  origins: {},
+  destinations: {}
 }
 
 export default function rentals(state = initialState, action) {
   switch(action.type) {
-    case 'SET_VERHUURDATA': {
-      const vehicles = action.payload
-      return {
-        data: vehicles
-      }
+    case 'SET_RENTALS_ORIGINS': {
+      return Object.assign({}, state, {
+        origins: action.payload
+      })
     }
-    case 'CLEAR_VERHUURDATA': {
-      return {
-        data: []
-      }
+    case 'SET_RENTALS_DESTINATIONS': {
+      return Object.assign({}, state, {
+        destinations: action.payload
+      })
+    }
+    case 'CLEAR_RENTALS_ORIGINS': {
+      return Object.assign({}, state, {
+        origins: []
+      })
+    }
+    case 'CLEAR_RENTALS_DESTINATIONS': {
+      return Object.assign({}, state, {
+        destinations: []
+      })
     }
     default:
       return state;
