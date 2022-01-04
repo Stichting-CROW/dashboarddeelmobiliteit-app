@@ -15,11 +15,10 @@
 
 .SlideBox-inner {
   background: #fff;
-  /*box-shadow: -2px 2px 3px #0000002;*/
   box-shadow: 0px 3px 6px #00000029;
-  /*border-radius: 5px;*/
   opacity: 1;
   overflow-y: auto;
+  overflow-x: visible;
   position: relative;
   z-index: 10;
 }

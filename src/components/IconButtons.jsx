@@ -2,20 +2,8 @@ import React from 'react';
 
 export function IconButtonClose(props) {
   return (
-    <div
-      {...props}
-      className="w-16 h-16 flex items-center justify-center p-3 rounded-full disabled:bg-transparent hover:bg-gray-300 active:bg-gray-400 focus:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:shadow-outline"
-    >
-      <svg
-        height="100%"
-        id="Layer_1"
-        version="1.1"
-        viewBox="0 0 512 512"
-        width="100%"
-        >
-        <path d="M437.5,386.6L306.9,256l130.6-130.6c14.1-14.1,14.1-36.8,0-50.9c-14.1-14.1-36.8-14.1-50.9,0L256,205.1L125.4,74.5  c-14.1-14.1-36.8-14.1-50.9,0c-14.1,14.1-14.1,36.8,0,50.9L205.1,256L74.5,386.6c-14.1,14.1-14.1,36.8,0,50.9  c14.1,14.1,36.8,14.1,50.9,0L256,306.9l130.6,130.6c14.1,14.1,36.8,14.1,50.9,0C451.5,423.4,451.5,400.6,437.5,386.6z"/>
-      </svg>
-    </div>);
+    <div className="text-2xl font-bold cursor-pointer" onClick={props.onClick}>×</div>
+  )
 }
 
 export function IconButtonFilter(props) {
@@ -29,4 +17,3 @@ export function IconButtonFilter(props) {
       </svg>
     </div>);
 }
-
