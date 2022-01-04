@@ -1,5 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from "react-router-dom";
+import { useDispatch } from 'react-redux';
 
 import './MenuSecondaryItem.css';
 // import { IconButtonFilter } from './IconButtons.jsx';

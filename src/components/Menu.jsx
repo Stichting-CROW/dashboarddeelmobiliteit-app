@@ -1,24 +1,16 @@
 import React, { useState } from 'react';
 // import moment from 'moment';
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { IconButtonFilter } from './IconButtons.jsx';
 import { clearUser } from '../actions/authentication.js';
 
 function MenuItem(props) {
-  const [pathName, setPathName] = useState(document.location.pathname);
 
+  const pathName = props.pathName;
   const isActive = pathName === props.path || pathName === props.href;
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
-
-  // Log pathname on navigate
-  // https://v5.reactrouter.com/web/api/Hooks
-  let location = useLocation();
-  React.useEffect(() => {
-    setPathName(document.location ? document.location.pathname : null);
-  }, [location]);
 
   return (
     <>
@@ -30,7 +22,7 @@ function MenuItem(props) {
         href={props.href}
         onClick={props.onClick}
         >
-        {icon ? <img src={icon} /> : ''}
+        {icon ? <img alt={props.text} src={icon} /> : ''}
         <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
           {props.text}
         </span>
@@ -44,7 +36,7 @@ function MenuItem(props) {
         href={props.href}
         onClick={props.onClick}
         >
-        {icon ? <img src={icon} /> : ''}
+        {icon ? <img alt={props.text} src={icon} /> : ''}
         <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
           {props.text}
         </span>
@@ -76,39 +68,22 @@ function SubMenuItem(props) {
   </>
 }
 
-function Menu() {
-  const [pathName, setPathName] = useState(document.location.pathname);
+function Menu({pathName}) {
   const [subMenuIsActive, setSubMenuIsActive] = useState(false);
 
   const dispatch = useDispatch();
   // let dateToShow = moment(moment().format('2021-11-06 06:00'));
-
+  
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-
-  //Get the value of a State variable, and store it to a const, to use it later
-  const showfilter = useSelector(state => {
-    return state.filter ? state.filter.visible : false;
-  });
-
-  const extent = useSelector(state => {
-    return state.layers ? state.layers.extent : [];
-  });
-
-  const toggleFilter = e => {
-    dispatch({
-      type: 'SET_FILTER_VISIBLE',
-      payload: !showfilter
-    })
-  }
-
+  
   const logOut = () => {
     if (isLoggedIn) {
       dispatch( clearUser() );
     }
   }
-
+  
   return (
     <div className="
       Menu
@@ -144,24 +119,28 @@ function Menu() {
 
           {isLoggedIn && <>
             <MenuItem
+              pathName={pathName}
               text={'Aanbod'}
               path={'/map/park'}
               icon={'/images/components/Menu/aanbod.svg'}
             />
 
             <MenuItem
+              pathName={pathName}
               text={'Verhuringen'}
               path={'/map/rentals'}
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
             <MenuItem
+              pathName={pathName}
               text={'Ontwikkeling'}
               href={'/stats/overview'}
               icon={'/images/components/Menu/ontwikkeling.svg'}
             />
 
             <MenuItem
+              pathName={pathName}
               text={''}
               icon={'/images/components/Menu/settings.svg'}
               onClick={(e) => {

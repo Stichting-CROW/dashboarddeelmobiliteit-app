@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import {
+ BrowserRouter as Router,
+} from "react-router-dom";
 // import { bindActionCreators } from 'redux';
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware, compose } from 'redux';
@@ -52,7 +55,9 @@ class AppProvider extends Component {
   render() {
     return (
       <Provider store={store}>
+        <Router>
         <App content={this.props.content} />
+        </Router>
       </Provider>
     )
   }

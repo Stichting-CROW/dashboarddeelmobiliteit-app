@@ -1,6 +1,7 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn } from './pollTools.js';
 import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer } from '../constants.js';
+import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 
 var store_verhuringendata = undefined;
 var timerid_verhuringendata = undefined;
@@ -13,8 +14,13 @@ const updateVerhuringenData = ()  => {
       console.log("no redux state available yet - skipping zones update");
       return false;
     }
-
+    
     const state = store_verhuringendata.getState();
+    if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
+      console.log('not viewing rentals data - skip update');
+      return true;
+    }
+
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
     if(!canfetchdata) {
       store_verhuringendata.dispatch({ type: 'SET_VERHUURDATA', payload: []});

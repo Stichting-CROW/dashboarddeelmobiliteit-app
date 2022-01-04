@@ -31,7 +31,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
     'vehicles-clusters-point'
   ];
 
-  layerNamesToApplyPopupLogicTo.map((layerName) => {
+  layerNamesToApplyPopupLogicTo.forEach((layerName) => {
     // When a click event occurs on a feature in the places layer, open a popup at the
     // location of the feature, with description HTML from its properties.
     currentMap.on('click', layerName, function (e) {
@@ -90,7 +90,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
 
 function MapComponent(props) {
 
-  console.log('Map component')
+  // console.log('Map component')
   // Get vehicles from store
   const vehicles = useSelector(state => {
     return state.vehicles || null;
@@ -134,12 +134,34 @@ function MapComponent(props) {
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
     const initMap = () => {
+      // temp code to make map tiles work @ marc
+      // const style = {
+      //   "version": 8,
+      //   "sources": {
+      //     "osm": {
+      //       "type": "raster",
+      //       "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      //       "tileSize": 256,
+      //       "attribution": "&copy; OpenStreetMap Contributors",
+      //       "maxzoom": 19
+      //     }
+      //   },
+      //   "layers": [
+      //     {
+      //       "id": "osm",
+      //       "type": "raster",
+      //       "source": "osm" // This must match the source key above
+      //     }
+      //   ]
+      // };
+      const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';
       
       if (map.current) return;
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         // style: 'mapbox://styles/mapbox/streets-v11',
-        style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
+        // style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
+        style,
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom,
@@ -288,7 +310,7 @@ function MapComponent(props) {
     }
     addLayers(vehicles, zones_geodata);
     initPopupLogic(map.current, providers, isLoggedIn)
-  }, [vehicles, zones_geodata, counter, props.layers]);
+  }, [vehicles, zones_geodata, counter, props.layers, isLoggedIn, providers]);
 
   useEffect(() => {
     var addProviderImage = async(aanbieder) => {

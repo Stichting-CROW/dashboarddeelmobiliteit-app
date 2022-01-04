@@ -1,9 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
- BrowserRouter as Router,
  Switch,
  Route,
- // Redirect
+ useLocation,
 } from "react-router-dom";
 import moment from 'moment';
 import { store } from './AppProvider.js';
@@ -28,12 +27,35 @@ import { initUpdateTripData, forceUpdateTripData } from './poll-api/pollTripData
 import { initUpdateZonesgeodata, forceUpdateZonesgeodata } from './poll-api/pollMetadataZonesgeodata.js';
 import { initUpdateVerhuringenData, forceUpdateVerhuringenData } from './poll-api/pollVerhuringenData.js';
 
+import { DISPLAYMODE_PARK, DISPLAYMODE_RENTALS, DISPLAYMODE_OTHER } from './reducers/layers.js';
+
 import './App.css';
 
 function App() {
+  const [pathName, setPathName] = useState(document.location.pathname);
+  
   const dispatch = useDispatch()
   
   const mapContainer = useRef(null);
+
+  let location = useLocation();
+  useEffect(() => {
+    setPathName(location ? location.pathname : null);
+  }, [location]);
+  
+  useEffect(()=>{
+    if(pathName.includes("/map/park")||pathName==='/') {
+      console.log('>>> got displaymode park')
+      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_PARK });
+    } else if(pathName.includes("/map/rentals")) {
+      console.log('>>> got displaymode rentals')
+      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_RENTALS });
+    } else {
+      console.log('>>> got displaymode other')
+      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_OTHER });
+    }
+
+  }, [pathName, dispatch]);
 
   // let [json, setJson] = useState(false);
   // let [timestamp, setTimestamp] = useState(false);
@@ -81,7 +103,7 @@ function App() {
     forceUpdateAccessControlList();
   });
 
-  // Set date to current date/time on load 
+  // Set date to current date/time on load
   useEffect(() => {
     if(moment(filterDate).diff(moment(), 'minutes') < -10) {
       setFilterDatum(moment().toDate())
@@ -117,51 +139,44 @@ function App() {
   }
 
   return (
-    <Router>
+    <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
+      <div className="gui-layer">
+        <Switch>
+          <Route exact path="/">
+            <MapPage mapContainer={mapContainer} />
+            {renderMapElements()}
+          </Route>
+          <Route exact path="/login">
+            <Login />
+          </Route>
+          <Route exact path="/map/park">
+            <MapPage mapContainer={mapContainer} />
+            {renderMapElements()}
+          </Route>
+          <Route exact path="/map/rentals">
+            <MapPage mapContainer={mapContainer} />
+            {renderMapElements()}
+          </Route>
+          <Route exact path="/stats/overview">
+            <ContentPage>
+              <StatsPage />
+            </ContentPage>
+            {renderMobileMenus()}
+          </Route>
+          <Route exact path="/monitoring">
+            <Monitoring />
+          </Route>
+          <Route exact path="/over">
+            <ContentPage>
+              <About />
+            </ContentPage>
+          </Route>
+        </Switch>
 
-      {/*<Redirect exact from="/" to="/map/park" />*/}
+        <Menu pathName={pathName} />
 
-      <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
-        <div className="gui-layer">
-
-          <Switch>
-            <Route exact path="/">
-              <MapPage mapContainer={mapContainer} />
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/login">
-              <Login />
-            </Route>
-            <Route exact path="/map/park">
-              <MapPage mapContainer={mapContainer} />
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/map/rentals">
-              <MapPage mapContainer={mapContainer} />
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/stats/overview">
-              <ContentPage>
-                <StatsPage />
-              </ContentPage>
-              {renderMobileMenus()}
-            </Route>
-            <Route exact path="/monitoring">
-              <Monitoring />
-            </Route>
-            <Route exact path="/over">
-              <ContentPage>
-                <About />
-              </ContentPage>
-            </Route>
-          </Switch>
-
-          <Menu />
-
-         </div>
        </div>
-
-     </Router>
+     </div>
   );
 }
 
