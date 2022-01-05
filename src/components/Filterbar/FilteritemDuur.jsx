@@ -95,13 +95,13 @@ function FilterItemInterval() {
   }
   
   let currentDurationIdx = cAnnotations.findIndex(v=>(v.value===duration));
-  if(currentDurationIdx===-1) { currentDurationIdx = 8 }
+  if(currentDurationIdx===-1) { currentDurationIdx = 4 }
   
   console.log("currentDurationIdx", currentDurationIdx);
 
+  // <div className="filter-duur-title">Duur</div>
   return (
     <div className="filter-duur-container">
-      <div className="filter-duur-title">Duur</div>
       <div className="filter-duur-box-row">
         <input className="filter-duur-range" width="100%" type="range" min="0" max={cAnnotations.length-1} step="1" onChange={handleSetDuration} value={currentDurationIdx}/>
         <svg className="filter-duur-tickmarks" role="presentation" width="100%" height="10" xmlns="http://www.w3.org/2000/svg">
