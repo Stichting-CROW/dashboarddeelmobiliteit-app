@@ -1,22 +1,15 @@
-import { useState } from 'react';
 import './css/Filterbar.css';
 import './css/FilteritemDuur.css';
 import { useDispatch, useSelector } from 'react-redux';
-import ModalBox from './ModalBox.jsx';
+
+const c1Hour = 60 * 60 * 1000;
 
 function FilterItemInterval() {
   const dispatch = useDispatch()
   
-  // const filterDuration = useSelector(state => {
-  //   return state.filter ? state.filter.duration : new Date().toISOString();
-  // });
-  //
-  // const filterIntervalEnd = useSelector(state => {
-  //   return state.filter ? state.filter.intervalend : new Date().toISOString();
-  // });
-  //
-  let [duration, setDuration] = useState(undefined);
-  // let [showSelectInterval, setShowSelectInterval] = useState(false);
+  const filterDuration = useSelector(state => {
+    return state.filter ? state.filter.intervalduur : c1Hour;
+  });
   
   // const setFilterInterval = e => {
   //   e.preventDefault();
@@ -69,7 +62,6 @@ function FilterItemInterval() {
 
     //  onClick={e=>{setShowSelectInterval(!showSelectInterval)}}
     //  onClick={e=>{setUseduration(true); setShowSelectInterval(true)}}
-  const c1Hour = 60 * 60 * 1000;
   const cAnnotations = [
     { label:'1h', anchor: 'start', pos: '0%', value: c1Hour },
     { label:'4h', anchor: 'middle', pos: '15%', value: c1Hour * 4},
@@ -89,17 +81,15 @@ function FilterItemInterval() {
   );
   
   const handleSetDuration = e => {
-    const newValue=cAnnotations[e.target.value].value;
-    console.log("set filter duration %s", newValue);
-    setDuration(newValue);
+    dispatch({
+      type: 'SET_FILTER_INTERVAL_DUUR',
+      payload: cAnnotations[e.target.value].value
+    })
   }
   
-  let currentDurationIdx = cAnnotations.findIndex(v=>(v.value===duration));
+  let currentDurationIdx = cAnnotations.findIndex(v=>(v.value===filterDuration));
   if(currentDurationIdx===-1) { currentDurationIdx = 4 }
   
-  console.log("currentDurationIdx", currentDurationIdx);
-
-  // <div className="filter-duur-title">Duur</div>
   return (
     <div className="filter-duur-container">
       <div className="filter-duur-box-row">

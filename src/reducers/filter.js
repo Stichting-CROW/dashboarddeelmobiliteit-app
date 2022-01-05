@@ -4,10 +4,12 @@ const initialState = {
   zones: "",
   datum: (new Date()).toISOString(),
   intervalstart: (new Date()).toISOString(),
-  intervalend: (new Date()).toISOString(),
+  intervalduur: 60 * 60 * 1000,
   aanbiedersexclude: "",
-  markersexclude: "",
+  parkeerduurexclude: "",
   voertuigtypesexclude: "",
+  afstandexclude: "",
+  herkomstbestemming: "",
 }
 
 export default function filter(state = initialState, action) {
@@ -45,11 +47,18 @@ export default function filter(state = initialState, action) {
           intervalstart: action.payload
       };
     }
-    case 'SET_FILTER_INTERVAL_END': {
-      console.log('reducer filter set interval end to %s', action.payload)
+    case 'SET_FILTER_INTERVAL_DUUR': {
+      console.log('reducer filter set interval duration to %s', action.payload)
       return {
           ...state,
-          intervalend: action.payload
+          intervalduur: action.payload
+      };
+    }
+    case 'SET_FILTER_HERKOMSTBESTEMMING': {
+      console.log('reducer filter set herkomstbestemming to %s', action.payload)
+      return {
+          ...state,
+          herkomstbestemming: action.payload
       };
     }
     case 'ADD_TO_FILTER_ZONES': {
@@ -90,49 +99,95 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
-      let markersexclude = [];
+      let parkeerduurexclude = [];
       try {
-        console.log('add item %s to markersexclude filter %o', action.payload, state)
-        if(state.markersexclude) {
+        console.log('add item %s to parkeerduurexclude filter %o', action.payload, state)
+        if(state.parkeerduurexclude) {
           try {
-            markersexclude = state.markersexclude.split(",") || []
+            parkeerduurexclude = state.parkeerduurexclude.split(",") || []
           } catch(ex) {
-            markersexclude = [];
+            parkeerduurexclude = [];
           }
         }
-        if(!markersexclude.includes(action.payload)) {
-          markersexclude.push(action.payload);
+        if(!parkeerduurexclude.includes(action.payload)) {
+          parkeerduurexclude.push(action.payload);
         }
       } catch(ex) {
-        markersexclude = [];
+        parkeerduurexclude = [];
       }
 
       return {
         ...state,
-        markersexclude: markersexclude.join(",")
+        parkeerduurexclude: parkeerduurexclude.join(",")
       };
     }
     case 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE': {
-      console.log('remove item %o from markersexclude filter', action.payload)
-      let markersexclude = [];
+      console.log('remove item %o from parkeerduurexclude filter', action.payload)
+      let parkeerduurexclude = [];
       try {
-        markersexclude = state.markersexclude.split(",") || [];
-        markersexclude = markersexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+        parkeerduurexclude = state.parkeerduurexclude.split(",") || [];
+        parkeerduurexclude = parkeerduurexclude.filter((item) => {return item.toString() !== action.payload.toString() });
       } catch(ex) {
-        markersexclude = [];
+        parkeerduurexclude = [];
       }
 
       return {
           ...state,
-          markersexclude: markersexclude.join(",")
+          parkeerduurexclude: parkeerduurexclude.join(",")
       };
     }
     case 'CLEAR_FILTER_MARKERS_EXCLUDE': {
-      console.log('clear markersexclude filter')
+      console.log('clear parkeerduurexclude filter')
 
       return {
           ...state,
-          markersexclude: ''
+          parkeerduurexclude: ''
+      };
+    }
+    case 'ADD_TO_FILTER_AFSTAND_EXCLUDE': {
+      let afstandexclude = [];
+      try {
+        console.log('add item %s to afstandexclude filter %o', action.payload, state)
+        if(state.afstandexclude) {
+          try {
+            afstandexclude = state.afstandexclude.split(",") || []
+          } catch(ex) {
+            afstandexclude = [];
+          }
+        }
+        if(!afstandexclude.includes(action.payload)) {
+          afstandexclude.push(action.payload);
+        }
+      } catch(ex) {
+        afstandexclude = [];
+      }
+
+      return {
+        ...state,
+        afstandexclude: afstandexclude.join(",")
+      };
+    }
+    case 'REMOVE_FROM_FILTER_AFSTAND_EXCLUDE': {
+      console.log('remove item %o from afstandexclude filter', action.payload)
+      let afstandexclude = [];
+      try {
+        afstandexclude = state.afstandexclude.split(",") || [];
+        afstandexclude = afstandexclude.filter((item) => {return item.toString() !== action.payload.toString() });
+      } catch(ex) {
+        afstandexclude = [];
+      }
+
+      return {
+          ...state,
+          afstandexclude: afstandexclude.join(",")
+      };
+    }
+    case 'CLEAR_FILTER_AFSTAND_EXCLUDE': {
+      console.log('clear afstandexclude filter')
+
+      return {
+          ...state,
+          afstandexclude: ''
       };
     }
     case 'ADD_TO_FILTER_VOERTUIGTYPES_EXCLUDE': {

@@ -2,9 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemMarkers.css';
 
-function FilteritemMarkers() {
-  const dispatch = useDispatch()
-
+export function FilteritemMarkersParkeerduur() {
   const markers = useSelector(state => {
     return [
       { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 uur'},
@@ -14,20 +12,56 @@ function FilteritemMarkers() {
     ];
   });
   
+  return FilteritemMarkers({
+    label: 'Parkeerduur',
+    filtername: 'parkeerduurexclude',
+    markers,
+    addmarker: 'ADD_TO_FILTER_MARKERS_EXCLUDE',
+    removemarker: 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE',
+    clearmarkers: 'CLEAR_FILTER_MARKERS_EXCLUDE'
+  });
+}
+
+export function FilteritemMarkersAfstand() {
+  const markers = useSelector(state => {
+    return [
+      { id: 0, color: '#48E248', fillcolor: '#48E248', name: '5km'},
+      { id: 1, color: '#44BD48', fillcolor: '#44BD48', name: '10km'},
+      { id: 2, color: '#3B7747', fillcolor: '#3B7747', name: '15km'},
+      { id: 3, color: '#343E47', fillcolor: '#343E47', name: '> 25km'}
+    ];
+  });
+  
+  return FilteritemMarkers({
+    label: 'Afstand',
+    filtername: 'afstandexclude',
+    markers,
+    addmarker: 'ADD_TO_FILTER_AFSTAND_EXCLUDE',
+    removemarker: 'REMOVE_FROM_FILTER_AFSTAND_EXCLUDE',
+    clearmarkers: 'CLEAR_FILTER_AFSTAND_EXCLUDE'
+  });
+}
+
+function FilteritemMarkers({label, filtername, markers, addmarker, removemarker, clearmarkers}) {
+  const dispatch = useDispatch()
+
   const filterMarkersExclude = useSelector(state => {
-    return state.filter ? state.filter.markersexclude : '';
+    return state.filter ? state.filter[filtername] : '';
   }) || '';
   
   const addToFilterMarkersExclude = (marker) => {
-    dispatch({ type: 'ADD_TO_FILTER_MARKERS_EXCLUDE', payload: marker })
+    console.log("addtofilter %s -> %s", filtername, marker)
+    dispatch({ type: addmarker, payload: marker })
   }
   
   const removeFromFilterMarkersExclude = (marker) => {
-    dispatch({ type: 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE', payload: marker })
+    console.log("removefromfilter %s -> %s", filtername, marker)
+    dispatch({ type: removemarker, payload: marker })
   }
   
   const clearFilterMarkersExclude = () => {
-    dispatch({ type: 'CLEAR_FILTER_MARKERS_EXCLUDE', payload: null })
+    console.log("clearfilter %s", filtername)
+    dispatch({ type: clearmarkers, payload: null })
   }
   
   // Function that gets executed if user clicks a provider filter
@@ -54,7 +88,7 @@ function FilteritemMarkers() {
   return (
     <div className="filter-markers-container">
     <div className="filter-markers-title-row">
-      <div className="filter-markers-title">Parkeerduur</div>
+      <div className="filter-markers-title">{label}</div>
       { filterMarkersExclude!==''?
           <div className="filter-markers-reset cursor-pointer" onClick={clearFilterMarkersExclude}>
             reset
@@ -102,4 +136,3 @@ function FilteritemMarkers() {
   //   )
 }
 
-export default FilteritemMarkers;

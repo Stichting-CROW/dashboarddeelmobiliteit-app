@@ -14,7 +14,7 @@ import Filterbar from '../Filterbar/Filterbar.jsx';
 //   DISPLAYMODE_PARKEERDATA_VOERTUIGEN
 // } from '../../reducers/layers.js';
 
-function FilterbarDesktop({isVisible, showduur = false}) {
+function FilterbarDesktop({isVisible, isrentals = false}) {
 
   const isFilterBarExtendedVisible = useSelector(state => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
@@ -32,7 +32,7 @@ function FilterbarDesktop({isVisible, showduur = false}) {
     }}
     >
       <div className="py-2 mx-3 h-full">
-        <Filterbar showduur={showduur}/>
+        <Filterbar showduur={isrentals} showparkeerduur={!isrentals} showafstand={isrentals} showherkomstbestemming={isrentals} />
       </div>
     </SlideBox>
   )
