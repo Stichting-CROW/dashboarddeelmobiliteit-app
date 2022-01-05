@@ -57,15 +57,9 @@ function App() {
 
   }, [pathName, dispatch]);
 
-  // let [json, setJson] = useState(false);
-  // let [timestamp, setTimestamp] = useState(false);
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-  
-  // const showfilter = useSelector(state => {
-  //   return state.filter ? state.filter.visible : false;
-  // });
   
   const filterDate = useSelector(state => {
     return state.filter ? state.filter.datum : false;

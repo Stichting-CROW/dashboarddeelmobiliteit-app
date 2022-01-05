@@ -17,7 +17,8 @@ code {
 @tailwind utilities;
 
 #vehicles-heatmap,
-#vehicles-point {
+#vehicles-point,
+#rentals-origins-point {
   position: relative;
   z-index:  100;
 }

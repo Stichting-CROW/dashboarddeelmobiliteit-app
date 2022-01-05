@@ -9,7 +9,7 @@ import { clearUser } from '../actions/authentication.js';
 function MenuItem(props) {
 
   const pathName = props.pathName;
-  const isActive = pathName === props.path || pathName === props.href;
+  const isActive = pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
 
   return (

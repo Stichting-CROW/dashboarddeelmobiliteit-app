@@ -7,6 +7,9 @@ var timerid_tripdata = undefined;
 
 // Function that gets trip data and saves it into store
 const updateTripData = ()  => {
+  // No trip data needed
+  return;
+
   let delay = cPollDelayTripData;
   try {
     if(undefined===store_tripdata) {
