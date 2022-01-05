@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const createFilterparameters = (isParkingData=true, filter, metadata) => {
   // add zones
   let filterparams = [];
@@ -18,9 +20,9 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     } else {
       console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
-    
   }
 
+  // Add provider filter
   if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
     let filteritems = filter.aanbiedersexclude.split(",");
     let selectedaanbieders = metadata.aanbieders
@@ -32,8 +34,9 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     filterparams.push("operators=" + metadata.aanbieders[0].system_id);
   }
   
+  // Add vehicle type filter
+  // form_factors=[cargo_bicycle,moped,bicycle,car,other]
   if(filter.voertuigtypesexclude!=='' && filter.voertuigtypesexclude!==undefined) {
-    // form_factors=cargo_bicycle,moped,bicycle,car,other
     let filteritems = filter.voertuigtypesexclude.split(",");
     let selectedtypes = metadata.vehicle_types
       .filter(vtype=>(filteritems.includes(vtype.id)===false))
@@ -42,6 +45,7 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     filterparams.push("form_factors=" + selectedtypes);
   }
   
+  // Add date (start and/or end)
   if(isParkingData) {
     let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     if(filter.datum!=="") {
@@ -52,6 +56,8 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
   else {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
+    filter.intervalstart = moment().subtract(1, 'day').toISOString();
+    filter.intervalend = moment().toISOString();
     const isInvalid = () => {
       return ! filter
           || filter.intervalstart === ""

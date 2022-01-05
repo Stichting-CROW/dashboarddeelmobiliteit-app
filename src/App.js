@@ -27,7 +27,14 @@ import { initUpdateTripData, forceUpdateTripData } from './poll-api/pollTripData
 import { initUpdateZonesgeodata, forceUpdateZonesgeodata } from './poll-api/pollMetadataZonesgeodata.js';
 import { initUpdateVerhuringenData, forceUpdateVerhuringenData } from './poll-api/pollVerhuringenData.js';
 
-import { DISPLAYMODE_PARK, DISPLAYMODE_RENTALS, DISPLAYMODE_OTHER } from './reducers/layers.js';
+import {
+    DISPLAYMODE_PARK,
+    DISPLAYMODE_RENTALS,
+    DISPLAYMODE_OTHER,
+    // DISPLAYMODE_PARKEERDATA_HEATMAP,
+    // DISPLAYMODE_PARKEERDATA_CLUSTERS,
+    // DISPLAYMODE_PARKEERDATA_VOERTUIGEN
+  } from './reducers/layers.js';
 
 import './App.css';
 
@@ -44,16 +51,15 @@ function App() {
   }, [location]);
   
   useEffect(()=>{
+    let payload
     if(pathName.includes("/map/park")||pathName==='/') {
-      console.log('>>> got displaymode park')
-      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_PARK });
+      payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
-      console.log('>>> got displaymode rentals')
-      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_RENTALS });
+      payload=DISPLAYMODE_RENTALS;
     } else {
-      console.log('>>> got displaymode other')
-      dispatch({type: 'LAYER_SET_DISPLAYMODE',payload: DISPLAYMODE_OTHER });
+      payload=DISPLAYMODE_OTHER;
     }
+    dispatch({type: 'LAYER_SET_DISPLAYMODE',payload });
 
   }, [pathName, dispatch]);
 
@@ -76,6 +82,14 @@ function App() {
   const filter = useSelector(state => {
     return state.filter;
   });
+  
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
+  // const viewPark = useSelector(state => {
+  //   return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
+  // });
 
   const setFilterDatum = newdt => {
     dispatch({
@@ -113,12 +127,14 @@ function App() {
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
+    const showduur = displayMode===DISPLAYMODE_RENTALS;
+    
     return <>
       <div className="hidden sm:block h-full">
-        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} showinterval={false} />
+        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} showduur={showduur} />
       </div>
       <div className="block sm:hidden">
-        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} showinterval={false} />
+        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} showduur={showduur} />
       </div>
       <SelectLayerMobile />
     </>

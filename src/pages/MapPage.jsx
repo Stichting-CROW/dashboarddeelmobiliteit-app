@@ -74,13 +74,10 @@ function Map({mode, mapContainer}) {
       default:
     }
   }
-  
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
-        <SelectLayer
-          layers={layers}
-        />
+        <SelectLayer />
       </div>
       <div className="flex-1 bg-red-400">
         <MapComponent
