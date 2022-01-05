@@ -18,6 +18,12 @@ If you run
 
 the updated app will be deployed to GitHub pages. You can then view the app at https://dashboarddeelmobiliteit.nl
 
+## How to add layers and sources?
+
+Add your sources here:
+- `components/Map/sources.js`
+- `pollApi/`
+
 ## Available Scripts
 
 In the project directory, you can run:

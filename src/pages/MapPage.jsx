@@ -8,7 +8,10 @@ import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  DISPLAYMODE_VERHUURDATA
+  DISPLAYMODE_VERHUURDATA,
+  DISPLAYMODE_VERHUURDATA_HEATMAP,
+  DISPLAYMODE_VERHUURDATA_CLUSTERS,
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
 } from '../reducers/layers.js';
 
 import './MapPage.css';
@@ -33,30 +36,40 @@ function Map({mode, mapContainer}) {
   let layers = [];
   if(showZones) { layers.push('zones-geodata') }
   
-  let activesource = '';
+  let activeSource = '';
   if(displayMode===DISPLAYMODE_PARK) {
     switch(viewPark) {
       case DISPLAYMODE_PARKEERDATA_HEATMAP:
         layers.push('vehicles-heatmap-city-level');
-        activesource = 'vehicles';
+        activeSource = 'vehicles';
         break;
       case DISPLAYMODE_PARKEERDATA_CLUSTERS:
         layers.push('vehicles-clusters');
         layers.push('vehicles-clusters-count');
         layers.push('vehicles-clusters-point');
-        activesource = 'vehicles-clusters';
+        activeSource = 'vehicles-clusters';
         break;
       case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
         layers.push('vehicles-point');
-        activesource = 'vehicles';
+        activeSource = 'vehicles';
         break;
       default:
     }
   } else if(displayMode===DISPLAYMODE_RENTALS) {
     switch(viewRentals) {
-      case DISPLAYMODE_VERHUURDATA:
-        layers.push('rentals-point');
-        activesource = 'rentals';
+      case DISPLAYMODE_VERHUURDATA_HEATMAP:
+        layers.push('rentals-origins-heatmap-city-level');
+        activeSource = 'rentals-origins';
+        break;
+      case DISPLAYMODE_VERHUURDATA_CLUSTERS:
+        layers.push('rentals-origins-clusters');
+        layers.push('rentals-origins-clusters-count');
+        layers.push('rentals-origins-clusters-point');
+        activeSource = 'rentals-origins-clusters';
+        break;
+      case DISPLAYMODE_VERHUURDATA_VOERTUIGEN:
+        layers.push('rentals-origins-point');
+        activeSource = 'rentals-origins';
         break;
       default:
     }
@@ -70,7 +83,7 @@ function Map({mode, mapContainer}) {
         <MapComponent
           mapContainer={mapContainer}
           layers={layers}
-          activeSource={activesource}
+          activeSource={activeSource}
         />
       </div>
   </div>);

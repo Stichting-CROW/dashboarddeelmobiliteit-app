@@ -28,7 +28,11 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
     'vehicles-point',
-    'vehicles-clusters-point'
+    'vehicles-clusters-point',
+    'rentals-origins-point',
+    'rentals-origins-clusters-point',
+    'rentals-destinations-point',
+    'rentals-destinations-clusters-point',
   ];
 
   layerNamesToApplyPopupLogicTo.forEach((layerName) => {
@@ -88,24 +92,20 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
    
 }
 
-// This is the Map Component, that loads the map, source data and layers
 function MapComponent(props) {
-  // We log a string, so we can improve performance
-  // MapComponent should not be (re)loaded too many times
-  console.log('Map component')
-
-  const isLoggedIn = useSelector(state => {
-    return state.authentication.user_data ? true : false;
-  });
+  // console.log('Map component')
 
   // Get vehicles from store
   const vehicles = useSelector(state => {
     return state.vehicles || null;
   });
 
-  // Get rentals from store
   const rentals = useSelector(state => {
     return state.rentals || null;
+  });
+
+  const isLoggedIn = useSelector(state => {
+    return state.authentication.user_data ? true : false;
   });
 
   // Get extent (map boundaries) from store
@@ -113,16 +113,15 @@ function MapComponent(props) {
     return state.layers ? state.layers.extent : null;
   }) || [];
 
-  // Get providers from store
   const providers = useSelector(state => {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
 
-  // Get zones from store
   const zones_geodata = useSelector(state => {
     if(!state||!state.zones_geodata) {
       return null;
     }
+
     return state.zones_geodata;
   });
   
@@ -159,13 +158,12 @@ function MapComponent(props) {
       //     }
       //   ]
       // };
-      const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';
+      const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
+      // style: 'mapbox://styles/mapbox/streets-v11',
       
       if (map.current) return;
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        // style: 'mapbox://styles/mapbox/streets-v11',
-        // style: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
         style,
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
@@ -202,7 +200,6 @@ function MapComponent(props) {
     initMap();
   }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer])
 
-  // Function addOrUpdateSource for adding/updating map sources
   const addOrUpdateSource = (sourceName, sourceData) => {
 
     // If map is not loaded: refresh state after .25 seconds
@@ -221,8 +218,7 @@ function MapComponent(props) {
     // Check if source exists
     const doesSourceExist = map.current.getSource(sourceName);
     // Get md5 hash of the data
-    let hash = sourceData.data && sourceData.data.features ? md5(JSON.stringify(sourceData.data.features)) : md5('No data yet');
-
+    let hash = sourceData && sourceData.features ? md5(JSON.stringify(sourceData.features)) : md5('No data yet');
     // If source does exist: update data
     if(doesSourceExist) {
       if(! sourceHash || sourceHash[sourceName] !== hash) {
@@ -231,11 +227,11 @@ function MapComponent(props) {
         newSourceHashArray[sourceName] = hash;
         setSourceHash(newSourceHashArray);
         // Update data
-        map.current.getSource(sourceName).setData(sourceData.data);
+        map.current.getSource(sourceName).setData(sourceData);
       }
     }
 
-    // If source doesn't exist: add source
+    // If source does not exist: add source
     else {
       if(sourceData) {
         // Set hash
@@ -246,26 +242,41 @@ function MapComponent(props) {
         // Set data
         let source = Object.assign({}, {
           'type': 'geojson',
-          'data': sourceData.data,
+          'data': sourceData,
         }, sources[sourceName] ? sources[sourceName] : {});
         map.current.addSource(sourceName, source);
       }
     }
   }
 
-  // Add sources
   useEffect(() => {
-    addOrUpdateSource('vehicles', vehicles);
-    addOrUpdateSource('zones-geodata', zones_geodata);
-    addOrUpdateSource('vehicles-clusters', vehicles);
-    // addOrUpdateSource('rentals', rentals);
-    // addOrUpdateSource('rentals-origins', rentals.origins);
-    // addOrUpdateSource('rentals-destinations', rentals.destinations);
+    // Add zones
+    if(zones_geodata && zones_geodata.data) {
+      addOrUpdateSource('zones-geodata', zones_geodata.data);
+    }
+
+    // Add park events
+    if(vehicles && vehicles.data) {
+      addOrUpdateSource('vehicles', vehicles.data);
+      addOrUpdateSource('vehicles-clusters', vehicles.data);
+    }
+
+    // Add rentals
+    if(rentals.origins && rentals.origins.type) {
+      addOrUpdateSource('rentals-origins', rentals.origins);
+      addOrUpdateSource('rentals-origins-clusters', rentals.origins);
+    }
+    if(rentals.destinations && rentals.destinations.type) {
+      addOrUpdateSource('rentals-destinations', rentals.destinations);
+      addOrUpdateSource('rentals-destinations-clusters', rentals.destinations);
+    }
+
     // eslint-disable-next-line
   }, [
     // eslint-disable-next-line
     vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
-    // rentals,
+    rentals.origins ? rentals.origins.features : rentals.origins,
+    rentals.destinations,
     zones_geodata,
     zonesGeodataHash,
     counter,
@@ -283,20 +294,23 @@ function MapComponent(props) {
 
   // Add layers
   useEffect(() => {
-    const addLayers = (vehicles, zones_geodata) => {
+    const addLayers = () => {
       if (! map.current || ! map.current.isStyleLoaded()) {
         setTimeout(() => {
           setCounter(counter + 1)
         }, 250)
         return;
       }
-      if (!vehicles || !zones_geodata) return;
 
       // Remove 'old' layers
       const allLayers = map.current.getStyle().layers;
       allLayers.forEach(x => {
         // Check if this is one of our layers
         if(x.id.indexOf('vehicles-') > -1) {
+          // If so, remove
+          map.current.removeLayer(x.id)
+        }
+        if(x.id.indexOf('rentals-') > -1) {
           // If so, remove
           map.current.removeLayer(x.id)
         }
@@ -310,21 +324,16 @@ function MapComponent(props) {
       props.layers.forEach(x => {
         if(props.layers.indexOf(x) >= -1) {
           const doesLayerExist = map.current.getLayer(x);
-          if(! doesLayerExist) {
+          const doesRelatedSourceExist = map.current.getSource(layers[x].source);
+          if(! doesLayerExist && doesRelatedSourceExist) {
             map.current.addLayer(layers[x]);
           }
         }
       })
     }
-    addLayers(vehicles, zones_geodata);
-    // if(rentals && rentals.origins) {
-    //   addLayers({
-    //     data: rentals.origins
-    //   }, zones_geodata);
-    // }
-
+    addLayers();
     initPopupLogic(map.current, providers, isLoggedIn)
-  }, [vehicles, zones_geodata, counter, props.layers, isLoggedIn, providers]);
+  }, [vehicles, rentals.origins, rentals.destinations, zones_geodata, counter, props.layers, isLoggedIn, providers]);
 
   useEffect(() => {
     var addProviderImage = async(aanbieder) => {

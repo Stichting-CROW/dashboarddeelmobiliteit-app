@@ -1,8 +1,7 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn } from './pollTools.js';
-import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer } from '../constants.js';
+import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
-
 const md5 = require('md5');
 
 var store_verhuringendata = undefined;
@@ -17,10 +16,16 @@ const updateVerhuringenData = ()  => {
       return false;
     }
 
+    // Wait for zone data
     const state = store_verhuringendata.getState();
-    if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
-      console.log('not viewing rentals data - skip update');
-      return true;
+    // if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
+    //   console.log('not viewing rentals data - skip update');
+    //   return true;
+    // }
+    if(state.metadata.zones_loaded===false) {
+      delay = cPollDelayLoading;
+      // console.log("no zone metadata available yet - skipping parking data update");
+      return false;
     }
 
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
@@ -69,8 +74,9 @@ const updateVerhuringenData = ()  => {
                  "properties":{
                     "id": md5(v.location.latitude+v.location.longitude),
                     "system_id": v.system_id,
-                    // "in_public_space_since": in_public_space_since,
-                    // "arrival_time": arrival_time,
+                    "arrival_time": v.arrival_time,
+                    "departure_time": v.departure_time,
+                    "duration_bin": 0,
                     "color": "#38ff71" // color
                  },
                  "geometry":{
