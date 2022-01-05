@@ -12,7 +12,7 @@ import Filterbar from '../Filterbar/Filterbar.jsx';
 //   DISPLAYMODE_PARKEERDATA_VOERTUIGEN
 // } from '../../reducers/layers.js';
 
-function FilterbarMobile(props) {
+function FilterbarMobile(isVisible, showduur = false) {
   const dispatch = useDispatch()
 
   const setVisibility = () => {
@@ -28,7 +28,7 @@ function FilterbarMobile(props) {
   return (
     <MobileSlideBox
       title="Filters"
-      isVisible={props.isVisible}
+      isVisible={isVisible}
       closeHandler={() => {
         setVisibility();
       }}
@@ -36,7 +36,7 @@ function FilterbarMobile(props) {
         top-0 overflow-auto
       "
     >
-      <Filterbar hideLogo={true} />
+      <Filterbar hideLogo={true} showduur={showduur}/>
     </MobileSlideBox>
   )
 }

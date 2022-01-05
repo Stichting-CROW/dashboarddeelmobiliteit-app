@@ -14,7 +14,7 @@ import Filterbar from '../Filterbar/Filterbar.jsx';
 //   DISPLAYMODE_PARKEERDATA_VOERTUIGEN
 // } from '../../reducers/layers.js';
 
-function FilterbarDesktop({isVisible}) {
+function FilterbarDesktop({isVisible, showduur = false}) {
 
   const isFilterBarExtendedVisible = useSelector(state => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
@@ -32,7 +32,7 @@ function FilterbarDesktop({isVisible}) {
     }}
     >
       <div className="py-2 mx-3 h-full">
-        <Filterbar />
+        <Filterbar showduur={showduur}/>
       </div>
     </SlideBox>
   )

@@ -3,6 +3,8 @@ import { createFilterparameters, isLoggedIn } from './pollTools.js';
 import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer } from '../constants.js';
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 
+const md5 = require('md5');
+
 var store_verhuringendata = undefined;
 var timerid_verhuringendata = undefined;
 
