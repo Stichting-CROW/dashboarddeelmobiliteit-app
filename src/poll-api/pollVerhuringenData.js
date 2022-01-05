@@ -18,10 +18,10 @@ const updateVerhuringenData = ()  => {
 
     // Wait for zone data
     const state = store_verhuringendata.getState();
-    // if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
-    //   console.log('not viewing rentals data - skip update');
-    //   return true;
-    // }
+    if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
+      console.log('not viewing rentals data - skip update');
+      return true;
+    }
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
       // console.log("no zone metadata available yet - skipping parking data update");
