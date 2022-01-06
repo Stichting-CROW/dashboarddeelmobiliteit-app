@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ModalBox from './ModalBox.jsx';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
 
@@ -64,9 +63,6 @@ function FilteritemZones() {
       <FilterbarExtended closeFunction={(val) => toggleZones(false)}>
         <div className="filter-form-selectie">
             <div className="filter-form-search-container mb-3">
-              {/*<div className="filter-form-title" hidden>
-                Selecteer Zones
-              </div>*/}
               <div className="filter-form-search-container-2">
               <input type="text"
                 className="filter-form-search"
@@ -134,7 +130,7 @@ function FilteritemZones() {
   }
 
   return (
-    <div className={`filter-zones-container ${isActive===true ? '':'not-active'}`}>
+    <div className={`filter-zones-container ${isActive===true ? '':'filter-zones-item-not-active'}`}>
       <div className="filter-zones-title" onClick={e=>{isActive && toggleZones('zones')}}>Zones</div>
       <div className="filter-zones-box-row">
         <div

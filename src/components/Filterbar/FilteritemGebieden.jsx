@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import ModalBox from './ModalBox.jsx';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
 

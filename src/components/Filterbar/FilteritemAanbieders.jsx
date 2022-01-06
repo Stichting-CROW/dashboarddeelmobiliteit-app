@@ -74,7 +74,7 @@ function FilteritemAanbieders() {
             
             return (
               <div
-                className={`filter-aanbieders-item ${excluded ? ' not-active' : ''}`}
+                className={`filter-aanbieders-item ${excluded ? 'filter-aanbieders-item-not-active' : ''}`}
                 onClick={handler}
                 key={aanbieder.name}
                 >

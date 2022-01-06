@@ -126,13 +126,5 @@ function FilteritemMarkers({label, filtername, markers, addmarker, removemarker,
       </div>
     </div>
   )
-  
-  // return (
-  //     <div className="filter-item" onClick={e=>{setShowSelect(!showSelect)}}>
-  //       <div className="filter-title">Markers</div>
-  //       <div className="filter-value">{zonetxt}</div>
-  //       { showSelect ? renderSelectMarkers(zones) : null }
-  //     </div>
-  //   )
 }
 

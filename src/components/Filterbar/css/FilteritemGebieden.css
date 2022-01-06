@@ -13,7 +13,6 @@
 }
 
 .filter-plaats-title {
-  /* @apply text-xs text-left pl-4 font-normal */
   text-align: left;
   opacity: 1;
   background-color: transparent;
@@ -32,6 +31,7 @@
   flex-direction: column;
   display: flex;
 }
+
 .filter-plaats-value.text-black {
   color: #000000;
 }
