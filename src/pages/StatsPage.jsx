@@ -1,7 +1,8 @@
 import React, {useEffect, useState, PureComponent } from 'react';
+import './StatsPage.css'
 
 import {
-  // useDispatch,
+  useDispatch,
   useSelector
 } from 'react-redux';
 import moment from 'moment';
@@ -137,13 +138,15 @@ const renderStackedAreaChart = (data, providers) => {
 // }
 
 function StatsPage(props) {
+  const dispatch = useDispatch()
+
   const token = useSelector(state => state.authentication.user_data.token)
   const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 
   const [vehiclesData, setVehiclesData] = useState([])
   const [rentalsData, setRentalsData] = useState([])
-  const [aggregationLevel, setAggregationLevel] = useState('month')
+  // const [aggregationLevel, setAggregationLevel] = useState('month')
 
   useEffect(() => {
     // Do not reload chart until you have 'zones'
@@ -152,12 +155,12 @@ function StatsPage(props) {
       const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
         filter: filter,
         metadata: metadata,
-        aggregationLevel: aggregationLevel
+        aggregationLevel: filter.ontwikkelingaggregatie
       });
-      setVehiclesData(prepareData('available_vehicles', availableVehicles, aggregationLevel));
+      setVehiclesData(prepareData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
     }
     fetchData();
-  }, [aggregationLevel, filter, metadata, token]);
+  }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
 
   useEffect(() => {
     // Do not reload chart until you have 'zones'
@@ -166,24 +169,33 @@ function StatsPage(props) {
       const rentals = await getAggregatedStats(token, 'rentals', {
         filter: filter,
         metadata: metadata,
-        aggregationLevel: aggregationLevel
+        aggregationLevel: filter.ontwikkelingaggregatie
       });
-      setRentalsData(prepareData('rentals', rentals, aggregationLevel));
+      setRentalsData(prepareData('rentals', rentals, filter.ontwikkelingaggregatie));
     }
     fetchData();
-  }, [aggregationLevel, filter, metadata, token]);
+  }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
+  
+  const setAggregationLevel = (newlevel) => {
+    dispatch({
+      type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
+      payload: newlevel
+    })
+  }
 
   return (
     <div>
-      <button className="mx-2" onClick={() => { setAggregationLevel('day') }}>
-        day
-      </button>
-      <button className="mx-2" onClick={() => { setAggregationLevel('week') }}>
-        week
-      </button>
-      <button className="mx-2" onClick={() => { setAggregationLevel('month') }}>
-        month
-      </button>
+      <div className={"agg-button-container"}>
+        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='day' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('day') }}>
+          dag
+        </div>
+        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='week' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('week') }}>
+          week
+        </div>
+        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='month' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('month') }}>
+          maand
+        </div>
+      </div>
       <h1 className="text-4xl my-2">Beschikbare voertuigen</h1>
       {renderStackedAreaChart(vehiclesData, metadata.aanbieders)}
       <h1 className="text-4xl my-2">Verhuringen</h1>

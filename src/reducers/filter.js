@@ -12,6 +12,7 @@ const initialState = {
   herkomstbestemming: "",
   ontwikkelingvan: (new Date()).toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
+  ontwikkelingaggregatie: "day"
 }
 
 export default function filter(state = initialState, action) {
@@ -286,6 +287,13 @@ export default function filter(state = initialState, action) {
           ...state,
           ontwikkelingvan: action.payload.van,
           ontwikkelingtot: action.payload.tot
+      };
+    }
+    case 'SET_FILTER_ONTWIKKELING_AGGREGATIE': {
+      console.log('reducer filter set aggregatie ontwikkeling %s', action.payload)
+      return {
+          ...state,
+          ontwikkelingaggregatie: action.payload
       };
     }
     case 'RESET_FILTER': {
