@@ -135,7 +135,7 @@ function Menu({pathName}) {
             <MenuItem
               pathName={pathName}
               text={'Ontwikkeling'}
-              href={'/stats/overview'}
+              path={'/stats/overview'}
               icon={'/images/components/Menu/ontwikkeling.svg'}
             />
 

@@ -39,7 +39,7 @@ function SelectLayerMobile(props) {
     return state.authentication.user_data ? true : false;
   });
   
-  console.log("MOBILE selection", displayMode)
+  // console.log("MOBILE selection", displayMode)
   
   const setVisibility = (name, visibility) => {
     dispatch({

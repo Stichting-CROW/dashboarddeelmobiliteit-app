@@ -35,6 +35,7 @@ const updateZones = ()  => {
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+
       return;
       
       // later: show outlines for all municipalities
@@ -77,7 +78,6 @@ export const forceUpdateZones = () => {
 }
 
 export const initUpdateZones = (_store) => {
-  // console.log("initUpdateZones")
   store_zones = _store;
   forceUpdateZones();
 }

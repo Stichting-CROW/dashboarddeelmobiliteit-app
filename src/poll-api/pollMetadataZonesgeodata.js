@@ -137,4 +137,5 @@ export const forceUpdateZonesgeodata = () => {
 
 export const initUpdateZonesgeodata = (_store) => {
   store = _store;
+  forceUpdateZonesgeodata();
 }

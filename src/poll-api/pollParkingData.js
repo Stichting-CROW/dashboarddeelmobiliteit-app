@@ -8,24 +8,22 @@ var store_parkingdata = undefined;
 var timerid_parkingdata = undefined;
 
 const updateParkingData = ()  => {
-  // console.log("updateParkingData")
-  let delay = cPollDelayParkingData;
+  // let delay = cPollDelayParkingData;
   try {
     if(undefined===store_parkingdata) {
-      // console.log("no redux state available yet - skipping zones update");
+      console.error("no redux state available yet - skipping zones update");
       return false;
     }
     
     // Wait for zone data
     const state = store_parkingdata.getState();
     if(state.metadata.zones_loaded===false) {
-      delay = cPollDelayLoading;
-      // console.log("no zone metadata available yet - skipping parking data update");
+      // console.info("no zone metadata available yet - skipping parking data update");
       return false;
     }
     
     if(state.layers.displaymode!==DISPLAYMODE_PARK) {
-      console.log('not viewing park data - skip update');
+      // console.info('not viewing park data - skip update');
       return true;
     }
     
@@ -33,14 +31,12 @@ const updateParkingData = ()  => {
     let url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
     let options = {};
     if(!canfetchdata) {
-      // store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
       let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
       if(filterparams.length>0) {
         url += "?" + filterparams.join("&");
       }
     } else {
       if(null!==state.filter&&null!==state.authenticationdata) {
-        // url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events?timestamp=2021-10-22T15:46:20Z"+aanbiedersfilter; // + "&zone_ids=34234";
         url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events";
         let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
         if(filterparams.length>0) {
@@ -72,7 +68,7 @@ const updateParkingData = ()  => {
         const md5 = require('md5');
         var start_time = moment(state.filter.datum);
         
-        let parkeerduurexclude = state.filter.parkeerduurexclude.split(",");
+        let parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
 
         vehicles.forEach(v => {
           let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
@@ -97,44 +93,35 @@ const updateParkingData = ()  => {
                 ]
              }
           }
-          
+
           let markerVisible = !parkeerduurexclude.includes(duration_bin.toString());
           if(markerVisible) {
             geoJson.features.push(feature);
           }
-          // new maplibregl.Marker({color: "#FF0000"})
-          //   .setLngLat([x.location.longitude, x.location.latitude])
-          //   .addTo(map.current);
-          //
-          // return;
         })
-
         // console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',
           payload: geoJson
         })
-    
-        // setJson(json);
-        // setTimestamp(new Date());
+
       }).catch(ex=>{
         console.error("unable to decode JSON");
-        // setJson(false);
       });
     }).catch(ex=>{
       console.error("fetch error - unable to fetch JSON from %s", url);
-      // setJson(false);
     });
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = cPollDelayParkingData * cPollDelayErrorMultiplyer;
+    // delay = cPollDelayParkingData * cPollDelayErrorMultiplyer;
   } finally {
-    timerid_parkingdata = setTimeout(updateParkingData, delay);
+    // timerid_parkingdata = setTimeout(updateParkingData, delay);
   }
 }
 
 export const forceUpdateParkingData = () => {
+  if(! store_parkingdata) { console.log('No store yet.'); return; }
   if(undefined!==timerid_parkingdata) { clearTimeout(timerid_parkingdata); }
   updateParkingData();
 }

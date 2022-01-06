@@ -37,8 +37,10 @@ store.subscribe(() => {
     // console.log("filter changed - invalidate data and zones here!");
     localStorage.setItem('CROWDD_filterhash', newFilterHash)
     
-    store.dispatch({ type: 'CLEAR_ZONES', payload: null});
+    // store.dispatch({ type: 'CLEAR_ZONES', payload: null});
     store.dispatch({ type: 'CLEAR_VEHICLES', payload: null});
+    store.dispatch({ type: 'CLEAR_RENTALS_ORIGINS', payload: null});
+    store.dispatch({ type: 'CLEAR_RENTALS_DESTINATIONS', payload: null});
   }
   
   const storeStateToSaveInLocalStorage = {

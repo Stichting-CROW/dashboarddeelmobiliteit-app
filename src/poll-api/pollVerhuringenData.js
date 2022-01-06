@@ -12,19 +12,19 @@ const updateVerhuringenData = ()  => {
   let delay = cPollDelayVerhuringenData;
   try {
     if(undefined===store_verhuringendata) {
-      // console.log("no redux state available yet - skipping zones update");
+      console.error("no redux state available yet - skipping zones update");
       return false;
     }
 
     // Wait for zone data
     const state = store_verhuringendata.getState();
     if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
-      console.log('not viewing rentals data - skip update');
+      // console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
       return true;
     }
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
-      // console.log("no zone metadata available yet - skipping parking data update");
+      // console.log("no zone metadata available yet - skipping rentals data update");
       return false;
     }
 
@@ -117,7 +117,7 @@ const updateVerhuringenData = ()  => {
     console.error("Unable to update zones", ex)
     delay = cPollDelayVerhuringenData * cPollDelayErrorMultiplyer;
   } finally {
-    timerid_verhuringendata = setTimeout(updateVerhuringenData, delay);
+    // timerid_verhuringendata = setTimeout(updateVerhuringenData, delay);
   }
 }
 
@@ -127,7 +127,6 @@ export const forceUpdateVerhuringenData = () => {
 }
 
 export const initUpdateVerhuringenData = (_store) => {
-  // console.log("initUpdateVerhuringenData")
   store_verhuringendata = _store;
   forceUpdateVerhuringenData();
 }

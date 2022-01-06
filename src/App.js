@@ -23,9 +23,18 @@ import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx'
 import { initUpdateAccessControlList, forceUpdateAccessControlList } from './poll-api/pollMetadataAccessControlList.js';
 import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.js';
 import { initUpdateParkingData, forceUpdateParkingData } from './poll-api/pollParkingData.js';
-import { initUpdateTripData, forceUpdateTripData } from './poll-api/pollTripData.js';
-import { initUpdateZonesgeodata, forceUpdateZonesgeodata } from './poll-api/pollMetadataZonesgeodata.js';
-import { initUpdateVerhuringenData, forceUpdateVerhuringenData } from './poll-api/pollVerhuringenData.js';
+import {
+  // initUpdateTripData,
+  // forceUpdateTripData
+} from './poll-api/pollTripData.js';
+import {
+  initUpdateZonesgeodata,
+  forceUpdateZonesgeodata
+} from './poll-api/pollMetadataZonesgeodata.js';
+import {
+  initUpdateVerhuringenData,
+  forceUpdateVerhuringenData
+} from './poll-api/pollVerhuringenData.js';
 
 import {
     DISPLAYMODE_PARK,
@@ -47,8 +56,8 @@ function App() {
     setPathName(location ? location.pathname : null);
   }, [location]);
   
-  useEffect(()=>{
-    let payload
+  useEffect(() => {
+    let payload;
     if(pathName.includes("/map/park")||pathName==='/') {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
@@ -83,6 +92,10 @@ function App() {
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
+  
+  const metadata = useSelector(state => {
+    return state.metadata;
+  });
 
   const setFilterDatum = newdt => {
     dispatch({
@@ -91,32 +104,47 @@ function App() {
     })
   }
 
-  // Init polling scripts
-  useEffect(() => {
-    initUpdateZones(store);
-    initUpdateZonesgeodata(store);
-    initUpdateAccessControlList(store);
-    initUpdateParkingData(store);
-    initUpdateTripData(store);
-    initUpdateVerhuringenData(store);
-    forceUpdateZones();
-    forceUpdateZonesgeodata();
-    forceUpdateAccessControlList();
-  });
-
   // Set date to current date/time on load
   useEffect(() => {
     if(moment(filterDate).diff(moment(), 'minutes') < -10) {
       setFilterDatum(moment().toDate())
     }
+  }, [filterDate, setFilterDatum]);
+
+  /*
+  To load data using the API we use the scripts in the poll-api folder.
+  We need zones to be able to fetch parking & trips data.
+
+  First, on app load, we load user information.
+  Then, we load the zones.
+  As soon as the zones are loaded, we load the parking data and rentals data.
+  We reload the parking data and rentals data if the filters or the URL change.
+  */
+
+  // On app start: get user data
+  useEffect(() => {
+    initUpdateAccessControlList(store);
   }, []);
 
-  // update scripts
+  // If path changes: clear zones
   useEffect(() => {
-    forceUpdateTripData();
-    forceUpdateParkingData();
-    forceUpdateVerhuringenData();
-  }, [filter]);
+    store.dispatch({ type: 'CLEAR_ZONES', payload: null});
+    initUpdateZones(store);
+    initUpdateZonesgeodata(store);
+  }, [filter.gebied, pathName]);
+
+  // On app start or if user data is loaded or if place is updated: get zones data
+  useEffect(() => {
+    initUpdateZones(store);
+    initUpdateZonesgeodata(store);
+  }, [isLoggedIn, filter.gebied, pathName]);
+
+  // On app start, if zones are loaded or pathName/filter is changed: reload data
+  useEffect(() => {
+    initUpdateParkingData(store);
+    initUpdateVerhuringenData(store);
+    forceUpdateAccessControlList();
+  }, [isLoggedIn, metadata.zones_loaded, pathName, filter]);
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {

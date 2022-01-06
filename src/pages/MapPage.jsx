@@ -40,7 +40,7 @@ function Map({mode, mapContainer}) {
   if(showZones) { layers.push('zones-geodata') }
   
   let activeSource = '';
-  console.log("Mappage got displaymode", displayMode);
+  // console.log("Mappage got displaymode", displayMode);
   
   if(displayMode===DISPLAYMODE_PARK) {
     switch(viewPark) {
