@@ -6,7 +6,6 @@ export const DISPLAYMODE_OTHER = 'displaymode-other';
 export const DISPLAYMODE_PARKEERDATA_HEATMAP = 'parkeerdata-heatmap';
 export const DISPLAYMODE_PARKEERDATA_CLUSTERS = 'parkeerdata-clusters';
 export const DISPLAYMODE_PARKEERDATA_VOERTUIGEN = 'parkeerdata-voertuigen';
-export const DISPLAYMODE_VERHUURDATA = 'verhuurdata';
 export const DISPLAYMODE_VERHUURDATA_HEATMAP = 'verhuurdata-heatmap';
 export const DISPLAYMODE_VERHUURDATA_CLUSTERS = 'verhuurdata-clusters';
 export const DISPLAYMODE_VERHUURDATA_VOERTUIGEN = 'verhuurdata-voertuigen';
@@ -18,7 +17,7 @@ const initialState = {
   zones_visible: false,
   displaymode: DISPLAYMODE_PARK,
   view_park: DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  view_rentals: DISPLAYMODE_VERHUURDATA,
+  view_rentals: DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
   extent: [],
 }
 

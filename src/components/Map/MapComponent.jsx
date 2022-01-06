@@ -138,29 +138,8 @@ function MapComponent(props) {
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   useEffect(() => {
     const initMap = () => {
-      // temp code to make map tiles work @ marc
-      // const style = {
-      //   "version": 8,
-      //   "sources": {
-      //     "osm": {
-      //       "type": "raster",
-      //       "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      //       "tileSize": 256,
-      //       "attribution": "&copy; OpenStreetMap Contributors",
-      //       "maxzoom": 19
-      //     }
-      //   },
-      //   "layers": [
-      //     {
-      //       "id": "osm",
-      //       "type": "raster",
-      //       "source": "osm" // This must match the source key above
-      //     }
-      //   ]
-      // };
       const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
-      // style: 'mapbox://styles/mapbox/streets-v11',
-      
+      // const style = 'mapbox://styles/mapbox/streets-v11';
       if (map.current) return;
       map.current = new maplibregl.Map({
         container: mapContainer.current,

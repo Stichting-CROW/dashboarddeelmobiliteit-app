@@ -30,13 +30,15 @@ function Map({mode, mapContainer}) {
   });
 
   const viewRentals = useSelector(state => {
-    return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA;
+    return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
   
   let layers = [];
   if(showZones) { layers.push('zones-geodata') }
   
   let activeSource = '';
+  console.log("Mappage got displaymode", displayMode);
+  
   if(displayMode===DISPLAYMODE_PARK) {
     switch(viewPark) {
       case DISPLAYMODE_PARKEERDATA_HEATMAP:
