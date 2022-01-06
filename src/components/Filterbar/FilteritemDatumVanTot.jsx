@@ -33,7 +33,7 @@ function FilterItemDatumVanTot() {
 
       // strip hours, add 24 h
       let tot = new Date(end.toDateString()) ;
-      tot.setDate(tot.getDate() + 1);
+      // tot.setDate(tot.getDate() + 1);
       dispatch({
         type: 'SET_FILTER_ONTWIKKELING_VANTOT',
         payload: { van: van.toISOString(), tot: tot.toISOString() }

@@ -84,7 +84,6 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
   }
   
   if(isOntwikkelingData) {
-    console.log("filter settings:", filter)
     let van = undefined;
     let tot = undefined;
     if(filter.ontwikkelingvan && filter.ontwikkelingtot) {

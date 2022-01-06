@@ -1,0 +1,24 @@
+.agg-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  user-select: none;
+}
+
+.agg-button {
+  width: 59px;
+  height: 25px;
+  border-radius: 0.5em;
+  text-align: center;
+  font-size: 12px;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.agg-button-active {
+  color: white;
+  background-color: #15AEEF;
+}

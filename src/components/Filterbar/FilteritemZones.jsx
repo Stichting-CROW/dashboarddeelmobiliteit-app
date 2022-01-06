@@ -53,6 +53,45 @@ function FilteritemZones() {
   const changeSearchText = e => { setFilterSearch(e.target.value) }
 
   const clearSearchText = e => { setFilterSearch("") }
+  
+  const zone_groups = [
+    {name: 'Wijken', zone_type: 'neighborhood'},
+    {name: 'Stadsdelen', zone_type: 'residential_area'},
+    {name: 'Zones', zone_type: 'custom'},
+    // {name: 'Anders', zone_type: 'municipality'},
+  ];
+  
+  const renderSelectZonesGroup = (group, zones) => {
+    const groupZones = zones.filter(zone=>zone.zone_type===group.zone_type);
+    
+    if(groupZones.length===0) { return null }
+    
+    const sortedZones = groupZones.sort((a,b)=>a.name.localeCompare(b.name));
+    
+    return (
+      <div key={'zg-'+group.zone_type} className="zone-group-container">
+        <span key={'zgn-'+group.zone_type} className="zone-group-title">{group.name}</span>
+        <div key={'zgi-'+group.zone_type} className="filter-zones-zonelist">
+        { sortedZones.map(a=>{
+            let isSelected = filterZones.includes(a.zone_id);
+            if(isSelected) {
+              return (<div key={'item-'+a.zone_id} className="
+                form-item-selected
+                form-item
+                cursor-pointer
+              " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
+            } else {
+              return (<div key={'item-'+a.zone_id} className="
+                form-item
+                cursor-pointer
+              " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
+            }
+          })
+        }
+        </div>
+      </div>
+    )
+  }
 
   const renderSelectZones = (zones) => {
     const filteredZones = zones.filter(zone=>{
@@ -77,26 +116,13 @@ function FilteritemZones() {
                   <div className="filter-zones-img-search cursor-pointer" />
                 }
               </div>
-              </div>
-              <div>&nbsp;</div>
             </div>
-            <div className="filter-form-values">
-              { filteredZones.map(a=>{
-                  let isSelected = filterZones.includes(a.zone_id);
-                  if(isSelected) {
-                    return (<div key={'item-'+a.zone_id} className="
-                      form-item-selected
-                      form-item
-                      cursor-pointer
-                    " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
-                  } else {
-                    return (<div key={'item-'+a.zone_id} className="
-                      form-item
-                      cursor-pointer
-                    " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
-                  }
-                })
-              }
+            <div>&nbsp;</div>
+          </div>
+          <div className="filter-form-values">
+            { zone_groups.map(group=>{
+                return renderSelectZonesGroup(group, filteredZones);
+              })}
           </div>
         </div>
       </FilterbarExtended>)
