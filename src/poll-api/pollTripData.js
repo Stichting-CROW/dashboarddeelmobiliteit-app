@@ -1,6 +1,7 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn } from './pollTools.js';
 import { cPollDelayTripData, cPollDelayErrorMultiplyer } from '../constants.js';
+import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 
 var store_tripdata = undefined;
 var timerid_tripdata = undefined;
@@ -26,7 +27,8 @@ const updateTripData = ()  => {
       let options = {};
       if(null!==state.filter&&null!==state.authenticationdata) {
         url = "https://api.deelfietsdashboard.nl/dashboard-api/trips";
-        let filterparams = createFilterparameters(false, state.filter, state.metadata);
+        // TODO: check if the filter parameters are Ok for this dataset
+        let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
         if(filterparams.length>0) {
           url += "?" + filterparams.join("&");
         }

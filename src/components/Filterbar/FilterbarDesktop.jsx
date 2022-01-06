@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  // useDispatch,
   useSelector
 } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
@@ -8,13 +7,7 @@ import Filterbar from '../Filterbar/Filterbar.jsx';
 
 // import './FilterbarDesktop.css';
 
-// import {
-//   DISPLAYMODE_PARKEERDATA_HEATMAP,
-//   DISPLAYMODE_PARKEERDATA_CLUSTERS,
-//   DISPLAYMODE_PARKEERDATA_VOERTUIGEN
-// } from '../../reducers/layers.js';
-
-function FilterbarDesktop({isVisible, isrentals = false}) {
+function FilterbarDesktop({isVisible, displayMode}) {
 
   const isFilterBarExtendedVisible = useSelector(state => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
@@ -32,7 +25,7 @@ function FilterbarDesktop({isVisible, isrentals = false}) {
     }}
     >
       <div className="py-2 mx-3 h-full">
-        <Filterbar showduur={isrentals} showparkeerduur={!isrentals} showafstand={isrentals} showherkomstbestemming={isrentals} />
+        <Filterbar displayMode={displayMode} />
       </div>
     </SlideBox>
   )

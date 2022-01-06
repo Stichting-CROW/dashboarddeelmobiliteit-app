@@ -1,8 +1,8 @@
 import './css/Filterbar.css';
 import {useSelector} from 'react-redux';
-// import SlideBox from '../SlideBox/SlideBox.jsx';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
+import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
 import FilteritemAanbieders from './FilteritemAanbieders.jsx';
 import FilteritemZones from './FilteritemZones.jsx';
@@ -14,23 +14,41 @@ import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 
-function Filterbar({showduur=false, showparkeerduur=true, showafstand=false, showherkomstbestemming=false, visible, hideLogo}) {
+import {
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_OTHER
+} from '../../reducers/layers.js';
+
+function Filterbar({
+    displayMode,
+    visible,
+    hideLogo}) {
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-
+  
+  const ispark=displayMode===DISPLAYMODE_PARK;
+  const isrentals=displayMode===DISPLAYMODE_RENTALS;
+  const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
+  
+  const showdatum=isrentals||ispark;
+  const showduur=isrentals;
+  const showparkeerduur=ispark||isontwikkeling;
+  const showafstand=isrentals;
+  const showherkomstbestemming=isrentals;
+  const showvantot=isontwikkeling;
+  
   return (
     <div className="filter-bar-inner py-2">
 
       {! hideLogo && <Logo />}
       
-      {isLoggedIn &&
-        <div>
-          <FilteritemDatum />
+      { isLoggedIn && showdatum && <FilteritemDatum /> }
 
-          { showduur ? <FilteritemDuur /> : null }
-        </div>
-      }
+      { isLoggedIn && showduur && <FilteritemDuur /> }
+
+      { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
 
       {<FilteritemGebieden />}
 

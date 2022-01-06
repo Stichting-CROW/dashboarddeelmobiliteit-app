@@ -1,6 +1,16 @@
 import moment from 'moment';
+import {
+    DISPLAYMODE_PARK,
+    DISPLAYMODE_RENTALS,
+    DISPLAYMODE_OTHER,
+  } from '../reducers/layers.js';
 
-export const createFilterparameters = (isParkingData=true, filter, metadata) => {
+
+export const createFilterparameters = (displayMode, filter, metadata) => {
+  const isParkingData=displayMode===DISPLAYMODE_PARK;
+  const isRentalData=displayMode===DISPLAYMODE_RENTALS;
+  const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
+
   // add zones
   let filterparams = [];
   if(filter.zones!=="") {
@@ -53,7 +63,8 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
     }
     filterparams.push("timestamp="+ts)
   }
-  else {
+  
+  if(isRentalData) {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
     filter.intervalstart = moment().subtract(filter.intervalduur / 1000, 'seconds').toISOString();
@@ -69,6 +80,27 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
       ts1 = new Date(filter.intervalstart).toISOString().replace(/.\d+Z$/g, "Z");
       ts2 = new Date(filter.intervalend).toISOString().replace(/.\d+Z$/g, "Z");
     }
+    filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
+  }
+  
+  if(isOntwikkelingData) {
+    console.log("filter settings:", filter)
+    let van = undefined;
+    let tot = undefined;
+    if(filter.ontwikkelingvan && filter.ontwikkelingtot) {
+      van = new Date(filter.ontwikkelingvan);
+      tot = new Date(filter.ontwikkelingtot);
+    }
+    
+    if(!van||!tot) {
+      van = new Date();
+      // take now, strip hours, add 24 h
+      tot = new Date((new Date()).toDateString()) ;
+      van.setDate(tot.getDate()-7); // go back 1 week
+    }
+    
+    let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    let ts2 = tot.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }
   

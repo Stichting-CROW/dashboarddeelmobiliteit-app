@@ -10,6 +10,8 @@ const initialState = {
   voertuigtypesexclude: "",
   afstandexclude: "",
   herkomstbestemming: "",
+  ontwikkelingvan: (new Date()).toISOString(),
+  ontwikkelingtot: (new Date()).toISOString(),
 }
 
 export default function filter(state = initialState, action) {
@@ -276,6 +278,14 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           aanbiedersexclude: ''
+      };
+    }
+    case 'SET_FILTER_ONTWIKKELING_VANTOT': {
+      console.log('reducer filter set datum ontwikkeling van %s to %s', action.payload.van, action.payload.tot)
+      return {
+          ...state,
+          ontwikkelingvan: action.payload.van,
+          ontwikkelingtot: action.payload.tot
       };
     }
     case 'RESET_FILTER': {

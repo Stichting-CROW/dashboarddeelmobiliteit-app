@@ -1,0 +1,94 @@
+.filter-datum-van-tot-container {
+  width: 100%;
+  
+  background-color: transparent;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.filter-datum-van-tot-title {
+  text-align: left;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  background-color: transparent;
+  width: auto;
+  margin-bottom: 10px;
+}
+
+.filter-datum-van-tot-box-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  height: 46px;
+  background: transparent;
+}
+
+.filter-datum-van-tot-box-1 {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 0 1;
+  justify-content: flex-start;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.filter-datum-van-tot-box-2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  cursor: pointer;
+  width: 2.6em;
+  height: 100%;
+  background: ;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+  background: #FFFFFF url('../../../images/filterbar/now.svg') no-repeat center border-box;
+}
+
+.filter-datum-van-tot-img-now {
+  width: 18px;
+  height: 20px;
+}
+
+.filter-datum-van-tot-caret {
+  cursor: pointer;
+  font-size: 1.4em;
+  letter-spacing: 0px;
+  padding: 0 0.4em 0 0.4em;
+  transition: margin 0.2s;
+  user-select: none;
+}
+
+.filter-datum-van-tot-caret:hover {
+  margin-top: -4px;
+}
+
+.filter-datum-van-tot-dtpicker {
+  font: normal normal normal 14px/17px Inter;
+  background-color: white;
+}
+
+.filter-datum-van-tot-picker {
+  width: 100%;
+  height: 46px;
+  text-align: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+}

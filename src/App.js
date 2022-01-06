@@ -31,9 +31,6 @@ import {
     DISPLAYMODE_PARK,
     DISPLAYMODE_RENTALS,
     DISPLAYMODE_OTHER,
-    // DISPLAYMODE_PARKEERDATA_HEATMAP,
-    // DISPLAYMODE_PARKEERDATA_CLUSTERS,
-    // DISPLAYMODE_PARKEERDATA_VOERTUIGEN
   } from './reducers/layers.js';
 
 import './App.css';
@@ -87,10 +84,6 @@ function App() {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  // const viewPark = useSelector(state => {
-  //   return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
-  // });
-
   const setFilterDatum = newdt => {
     dispatch({
       type: 'SET_FILTER_DATUM',
@@ -127,14 +120,12 @@ function App() {
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
-    const isrentals = displayMode===DISPLAYMODE_RENTALS;
-    
     return <>
       <div className="hidden sm:block h-full">
-        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} isrentals={isrentals} />
+        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
       </div>
       <div className="block sm:hidden">
-        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} isrentals={isrentals} />
+        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
       </div>
       <SelectLayerMobile />
     </>

@@ -38,7 +38,7 @@ const updateVerhuringenData = ()  => {
       let options = {};
       if(null!==state.filter&&null!==state.authenticationdata) {
         url = "https://api.deelfietsdashboard.nl/dashboard-api/rentals";
-        let filterparams = createFilterparameters(false, state.filter, state.metadata);
+        let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
         if(filterparams.length>0) {
           url += "?" + filterparams.join("&");
         }

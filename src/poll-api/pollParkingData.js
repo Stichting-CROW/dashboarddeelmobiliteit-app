@@ -34,7 +34,7 @@ const updateParkingData = ()  => {
     let options = {};
     if(!canfetchdata) {
       // store_parkingdata.dispatch({type: 'SET_PARKINGDATA', payload: []});
-      let filterparams = createFilterparameters(true, state.filter, state.metadata);
+      let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
       if(filterparams.length>0) {
         url += "?" + filterparams.join("&");
       }
@@ -42,7 +42,7 @@ const updateParkingData = ()  => {
       if(null!==state.filter&&null!==state.authenticationdata) {
         // url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events?timestamp=2021-10-22T15:46:20Z"+aanbiedersfilter; // + "&zone_ids=34234";
         url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events";
-        let filterparams = createFilterparameters(true, state.filter, state.metadata);
+        let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
         if(filterparams.length>0) {
           url += "?" + filterparams.join("&");
         }

@@ -1,18 +1,11 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-// import SlideBox from '../SlideBox/SlideBox.jsx';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
 import Filterbar from '../Filterbar/Filterbar.jsx';
 
 // import './FilterbarMobile.css';
 
-// import {
-//   DISPLAYMODE_PARKEERDATA_HEATMAP,
-//   DISPLAYMODE_PARKEERDATA_CLUSTERS,
-//   DISPLAYMODE_PARKEERDATA_VOERTUIGEN
-// } from '../../reducers/layers.js';
-
-function FilterbarMobile(isVisible, isrentals = false) {
+function FilterbarMobile(isVisible, displayMode) {
   const dispatch = useDispatch()
 
   const setVisibility = () => {
@@ -36,7 +29,7 @@ function FilterbarMobile(isVisible, isrentals = false) {
         top-0 overflow-auto
       "
     >
-      <Filterbar hideLogo={true} showduur={isrentals} showparkeerduur={!isrentals} showafstand={isrentals} showherkomstbestemming={isrentals} />
+      <Filterbar hideLogo={true} displayMode={displayMode} />
     </MobileSlideBox>
   )
 }
