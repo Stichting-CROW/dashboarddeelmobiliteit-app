@@ -8,7 +8,6 @@ import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  DISPLAYMODE_VERHUURDATA,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
@@ -19,10 +18,6 @@ import './MapPage.css';
 function Map({mode, mapContainer}) {
   const showZones = useSelector(state => {
     return state.layers ? state.layers.zones_visible : false;
-  });
-
-  const filter = useSelector(state => {
-    return state.filter;
   });
 
   const displayMode = useSelector(state => {
@@ -62,21 +57,20 @@ function Map({mode, mapContainer}) {
       default:
     }
   } else if(displayMode===DISPLAYMODE_RENTALS) {
-    const rentalsKey = filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins';
     switch(viewRentals) {
       case DISPLAYMODE_VERHUURDATA_HEATMAP:
-        layers.push(`rentals-${rentalsKey}-heatmap-city-level`);
-        activeSource = `rentals-${rentalsKey}`;
+        layers.push('rentals-origins-heatmap-city-level');
+        activeSource = 'rentals-origins';
         break;
       case DISPLAYMODE_VERHUURDATA_CLUSTERS:
-        layers.push(`rentals-${rentalsKey}-clusters`);
-        layers.push(`rentals-${rentalsKey}-clusters-count`);
-        layers.push(`rentals-${rentalsKey}-clusters-point`);
-        activeSource = `rentals-${rentalsKey}-clusters`;
+        layers.push('rentals-origins-clusters');
+        layers.push('rentals-origins-clusters-count');
+        layers.push('rentals-origins-clusters-point');
+        activeSource = 'rentals-origins-clusters';
         break;
       case DISPLAYMODE_VERHUURDATA_VOERTUIGEN:
-        layers.push(`rentals-${rentalsKey}-point`);
-        activeSource = `rentals-${rentalsKey}`;
+        layers.push('rentals-origins-point');
+        activeSource = 'rentals-origins';
         break;
       default:
     }
