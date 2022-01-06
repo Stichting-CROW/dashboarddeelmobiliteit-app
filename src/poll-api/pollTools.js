@@ -56,7 +56,7 @@ export const createFilterparameters = (isParkingData=true, filter, metadata) => 
   else {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
-    filter.intervalstart = moment().subtract(1, 'day').toISOString();
+    filter.intervalstart = moment().subtract(filter.intervalduur / 1000, 'seconds').toISOString();
     filter.intervalend = moment().toISOString();
     const isInvalid = () => {
       return ! filter

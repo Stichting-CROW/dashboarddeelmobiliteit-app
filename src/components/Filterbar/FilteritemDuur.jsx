@@ -19,14 +19,15 @@ function FilterItemInterval() {
     { label:'16h', anchor: 'middle', pos: '50%', value: c1Hour * 16},
     { label:'20h', anchor: 'middle', pos: '62%', value: c1Hour * 20},
     { label:'24h', anchor: 'middle', pos: '73.5%', value: c1Hour * 24},
-    { label:'5d', anchor: 'middle', pos: '85.5%', value: c1Hour * 24 * 5},
-    { label:'7d', anchor: 'end', pos: '100%', value: c1Hour * 24 * 7}];
+    { label:'2d', anchor: 'middle', pos: '85.5%', value: c1Hour * 24 * 2},
+    { label:'3d', anchor: 'middle', pos: '96%', value: c1Hour * 24 * 3}
+  ];
   let elements = cAnnotations.map(
-    (e,i)=>(<text key={'fide-'+i} className="filter-duur-annotation" x={e.pos} y="14" textAnchor={e.anchor}>{e.label}</text>)
+    (e,i) => (<text key={'fide-'+i} className="filter-duur-annotation" x={e.pos} y="14" textAnchor={e.anchor}>{e.label}</text>)
   );
   
   let ticks = cAnnotations.map(
-    (e,i)=>(<rect key={'fidt-'+i} className="filter-duur-tickmark" x={e.pos} y="0" width="1" height="20"></rect>)
+    (e,i) => (<rect key={'fidt-'+i} className="filter-duur-tickmark" x={e.pos} y="0" width="1" height="20"></rect>)
   );
   
   const handleSetDuration = e => {
