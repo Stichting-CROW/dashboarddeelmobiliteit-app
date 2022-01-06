@@ -6,11 +6,15 @@ import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
 import FilteritemAanbieders from './FilteritemAanbieders.jsx';
 import FilteritemZones from './FilteritemZones.jsx';
-import FilteritemMarkers from './FilteritemMarkers.jsx';
+import {
+  FilteritemMarkersAfstand,
+  FilteritemMarkersParkeerduur
+} from './FilteritemMarkers.jsx';
+import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 
-function Filterbar({showduur=false, visible, hideLogo}) {
+function Filterbar({showduur=false, showparkeerduur=true, showafstand=false, showherkomstbestemming=false, visible, hideLogo}) {
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
@@ -32,7 +36,11 @@ function Filterbar({showduur=false, visible, hideLogo}) {
 
       {<FilteritemZones />}
 
-      {isLoggedIn && <FilteritemMarkers />}
+      {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
+
+      {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
+
+      {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
       {<FilteritemVoertuigTypes />}
 

@@ -72,7 +72,7 @@ const updateParkingData = ()  => {
         const md5 = require('md5');
         var start_time = moment(state.filter.datum);
         
-        let markersexclude = state.filter.markersexclude.split(",");
+        let parkeerduurexclude = state.filter.parkeerduurexclude.split(",");
 
         vehicles.forEach(v => {
           let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
@@ -98,7 +98,7 @@ const updateParkingData = ()  => {
              }
           }
           
-          let markerVisible = !markersexclude.includes(duration_bin.toString());
+          let markerVisible = !parkeerduurexclude.includes(duration_bin.toString());
           if(markerVisible) {
             geoJson.features.push(feature);
           }

@@ -10,37 +10,6 @@
 }
 
 /* Generic items ------------------------------------------------------------*/
-.filter-item {
-  @apply bg-transparent p-1 border-solid gap-4 text-center;
-  display: flex;
-  flex-direction: column;
-  background-color: transparent;
-  padding:5px 0 5px 0;
-}
-
-.filter-title {
-  /* @apply text-xs text-left pl-4 font-normal */
-  text-align: left;
-  font: normal normal normal 14px/17px Inter;
-  letter-spacing: 0px;
-  color: #000000;
-  opacity: 1;
-  background-color: transparent;
-}
-
-.filter-value {
-  /* @apply grid grid-cols-1 */
-  text-align: left;
-  font: normal normal normal 14px/17px Inter;
-  letter-spacing: 0px;
-  color: #333333;
-  opacity: 1;
-}
-
-.filter-form-title {
-  @apply text-xl font-bold text-center flex flex-col justify-center
-}
-
 .filter-form-values {
   display: flex;
   flex-direction: row;
@@ -88,32 +57,4 @@
   display: flex;
   flex-direction: column;
   /*overflow: auto;*/
-}
-
-.modalbox-bg {
-  @apply fixed inset-0 w-screen h-screen flex justify-center align-middle bg-gray-100 bg-opacity-70 box-border z-20
-}
-
-.modalbox {
-  @apply absolute z-30 w-5/6 bg-white h-3/4 overflow-auto mx-auto top-20 bg-white text-left fixed p-4 rounded-xl;
-  /* width: 100vw;
-  height: 50vh;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  top: 0; */
-}
-
-.modal-close {
-  position: relative;
-  right:0;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  color: black;
-  background: url('../../../images/211651_close_round_icon.svg') no-repeat fixed center;
-}
-
-.closebutton {
-  @apply w-16 h-16 bg-green-500 p-4 rounded-xl text-black
 }

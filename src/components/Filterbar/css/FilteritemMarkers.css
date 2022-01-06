@@ -9,14 +9,12 @@
   justify-content: flex-start;
   margin-top: 12px;
   
-  /*padding: 0 12px 0 12px;*/
   font: normal normal normal 14px/17px Inter;
   letter-spacing: 0px;
   color: #000000;
 }
 
 .filter-markers-title {
-  /* @apply text-xs text-left pl-4 font-normal */
   text-align: left;
   opacity: 1;
   background-color: transparent;

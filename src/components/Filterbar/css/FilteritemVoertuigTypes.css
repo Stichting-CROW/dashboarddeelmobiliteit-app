@@ -9,14 +9,12 @@
   justify-content: flex-start;
   margin-top: 25px;
   
-  /*padding: 0 12px 0 12px;*/
   font: normal normal normal 14px/17px Inter;
   letter-spacing: 0px;
   color: #000000;
 }
 
 .filter-voertuigtypes-title {
-  /* @apply text-xs text-left pl-4 font-normal */
   text-align: left;
   opacity: 1;
   background-color: transparent;
@@ -78,7 +76,9 @@
   user-select: none;
   cursor: pointer;
 }
+
 .filter-voertuigtypes-item:last-child,
+
 .filter-voertuigtypes-item-excluded:last-child {
   border-right: 0;
 }
@@ -91,6 +91,7 @@
   opacity: 1;
   color: #343E47;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-itemlabel {
   color: #AFAFAF;
 }
@@ -105,6 +106,7 @@
   color: #AFAFAF;
   background-size: 26px;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon {
   filter: none;
   color: #343E47;
@@ -114,6 +116,7 @@
   background-image: url('../../../images/filterbar/fiets-active.svg');
   background-size: 28px;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-bicycle {
   background-image: url('../../../images/filterbar/fiets.svg');
 }
@@ -122,6 +125,7 @@
   background-image: url('../../../images/filterbar/bakfiets-active.svg');
   background-size: 34px;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-cargo-bicycle {
   background-image: url('../../../images/filterbar/bakfiets.svg');
 }
@@ -130,6 +134,7 @@
   background-image: url('../../../images/filterbar/scooter-active.svg');
   background-size: 24px;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-scooter {
   background-image: url('../../../images/filterbar/scooter.svg');
 }
@@ -138,6 +143,7 @@
   background-image: url('../../../images/filterbar/auto-active.svg');
   background-size: 30px;
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-car {
   background-image: url('../../../images/filterbar/auto.svg');
 }
@@ -145,6 +151,7 @@
 .filter-voertuigtypes-icon-other {
   background-image: url('../../../images/filterbar/172591_dinghy_icon-active.svg');
 }
+
 .filter-voertuigtypes-item-excluded .filter-voertuigtypes-icon-other {
   background-image: url('../../../images/filterbar/172591_dinghy_icon.svg');
 }

@@ -127,14 +127,14 @@ function App() {
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
-    const showduur = displayMode===DISPLAYMODE_RENTALS;
+    const isrentals = displayMode===DISPLAYMODE_RENTALS;
     
     return <>
       <div className="hidden sm:block h-full">
-        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} showduur={showduur} />
+        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} isrentals={isrentals} />
       </div>
       <div className="block sm:hidden">
-        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} showduur={showduur} />
+        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} isrentals={isrentals} />
       </div>
       <SelectLayerMobile />
     </>
