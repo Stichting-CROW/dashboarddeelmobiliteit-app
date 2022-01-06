@@ -104,3 +104,13 @@
   font-size: 18px;
   display:  inline-block;
 }
+
+.zone-group-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.zone-group-title {
+  font-weight: bolder;
+  font-size:smaller;
+}
