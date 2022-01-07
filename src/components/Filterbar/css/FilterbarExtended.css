@@ -1,7 +1,7 @@
 .FilterbarExtended {
   position: absolute;
   top: 0;
-  left: 320px;
+  left: 0;
   width: 300px;
   overflow-y: auto;
   z-index: 10;
@@ -9,6 +9,10 @@
   width: 100%;
   overflow-x: hidden;
   @apply px-4 pb-8;
+}
+.FilterbarExtended h1.title {
+  padding: 15px 0;
+  font-size: 16px;
 }
 
 .FilterbarExtended-close-button-wrapper {
@@ -18,6 +22,7 @@
 @media (min-width: 640px) {
   .FilterbarExtended {
     position: absolute;
+    left: 320px;
     width: 300px;
     @apply px-0
   }  

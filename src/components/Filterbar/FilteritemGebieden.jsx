@@ -59,7 +59,10 @@ function FilteritemGebieden() {
       return filterSearch===''|| gebied.name.toLowerCase().includes(filterSearch.toLowerCase())
     })
     return (
-      <FilterbarExtended closeFunction={() => toggleGebieden(false)}>
+      <FilterbarExtended
+        title="Selecteer een gebied"
+        closeFunction={() => toggleGebieden(false)}
+        >
         <div className="filter-form-selectie">
           <div className="filter-form-search-container mb-3">
             <div className="filter-form-search-container-2">

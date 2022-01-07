@@ -99,7 +99,10 @@ function FilteritemZones() {
     })
     
     return (
-      <FilterbarExtended closeFunction={(val) => toggleZones(false)}>
+      <FilterbarExtended
+        title="Selecteer een zone"
+        closeFunction={(val) => toggleZones(false)}
+      >
         <div className="filter-form-selectie">
             <div className="filter-form-search-container mb-3">
               <div className="filter-form-search-container-2">

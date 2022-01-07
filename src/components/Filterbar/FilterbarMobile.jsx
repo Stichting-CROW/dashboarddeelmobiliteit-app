@@ -5,7 +5,7 @@ import Filterbar from '../Filterbar/Filterbar.jsx';
 
 // import './FilterbarMobile.css';
 
-function FilterbarMobile(isVisible, displayMode) {
+function FilterbarMobile({isVisible, displayMode}) {
   const dispatch = useDispatch()
 
   const setVisibility = () => {
