@@ -34,10 +34,11 @@ function Filterbar({
   
   const showdatum=isrentals||ispark;
   const showduur=isrentals;
-  const showparkeerduur=ispark||isontwikkeling;
+  const showparkeerduur=ispark;
   const showafstand=isrentals;
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
+  const showvervoerstype=isrentals||ispark;
   
   return (
     <div className="filter-bar-inner py-2">
@@ -60,7 +61,7 @@ function Filterbar({
 
       {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
-      {<FilteritemVoertuigTypes />}
+      {isLoggedIn && showvervoerstype && <FilteritemVoertuigTypes />}
 
       {<FilteritemAanbieders />}
 
