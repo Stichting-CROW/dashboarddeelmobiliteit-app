@@ -58,7 +58,6 @@ function StatsPage(props) {
     <div style={{ width: '100%', height: '400px', overflowX: 'hidden', overflowY: 'hidden' }}>
       <ResponsiveContainer>
         <LineChart
-          height={400}
           data={rentalsData}
           margin={{
             top: 10,
@@ -68,7 +67,7 @@ function StatsPage(props) {
           }}
         >
           <CartesianGrid strokeDasharray="3 0" vertical={false} />
-          <XAxis dataKey="name" height={100} tick={<CustomizedXAxisTick />} />
+          <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
           <YAxis tick={<CustomizedYAxisTick />} />
           <Tooltip />
           {getUniqueProviderNames(rentalsData[0]).map(x => {
@@ -78,12 +77,11 @@ function StatsPage(props) {
                 key={x}
                 stackId="1"
                 dot={false}
-                strokeWidth={3}
+                strokeWidth={4}
                 type="monotone"
                 dataKey={x}
                 stroke={providerColor}
                 fill={providerColor}
-                isAnimationActive={false}
               />
             )
           })}
