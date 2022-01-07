@@ -6,7 +6,6 @@ import {
   useSelector
 } from 'react-redux';
 import moment from 'moment';
-// import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import {
   AreaChart,
   Area,
@@ -21,49 +20,16 @@ import {
 } from 'recharts';
 
 import {getAggregatedStats} from '../api/aggregatedStats';
-import {getProviderColor} from '../helpers/providers.js';
+import {
+  getProviderColor,
+  getUniqueProviderNames
+} from '../helpers/providers.js';
+import {
+  prepareAggregatedStatsData,
+} from '../helpers/stats.js';
 
-const prepareData = (key, data, aggregationLevel) => {
-  if(! data || ! data[`${key}_aggregated_stats`] || ! data[`${key}_aggregated_stats`].values) {
-    return [];
-  }
-  const getDateFormat = (aggregationLevel) => {
-    if(aggregationLevel === 'day') {
-      return 'YYYY-MM-DD';
-    }
-    else if(aggregationLevel === 'week') {
-      return 'YYYY-[w]W';
-    }
-    else if(aggregationLevel === 'month') {
-      return 'YYYY-MM';
-    }
-  }
-  return data[`${key}_aggregated_stats`].values.map(x => {
-    const { start_interval, ...rest } = x;
-    return {...rest, ...{ name: moment(start_interval).format(getDateFormat(aggregationLevel)) }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
-  });
-}
-
-const getUniqueProviderNames = (object) => {
-  if(! object) return [];
-  return Object.keys(object).filter((key, val) => {
-    return key !== 'name' ? key : false;
-  })
-}
-
-class CustomizedAxisTick extends PureComponent {
-  render() {
-    const { x, y, payload } = this.props;
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={0} y={0} dy={16} textAnchor="end" fill="#666" transform="rotate(-35)">
-          {payload.value}
-        </text>
-      </g>
-    );
-  }
-}
+import VerhuringenChart from '../components/Chart/VerhuringenChart.jsx';
+import {CustomizedXAxisTick, CustomizedYAxisTick} from '../components/Chart/CustomizedAxisTick.jsx';
 
 const renderStackedAreaChart = (data, providers) => {
   return (
@@ -80,8 +46,8 @@ const renderStackedAreaChart = (data, providers) => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" height={100} tick={<CustomizedAxisTick />} />
-          <YAxis />
+          <XAxis dataKey="name" height={100} tick={<CustomizedXAxisTick />} />
+          <YAxis tick={<CustomizedYAxisTick />} />
           <Tooltip />
           {getUniqueProviderNames(data[0]).map(x => {
             const providerColor = getProviderColor(providers, x)
@@ -145,7 +111,6 @@ function StatsPage(props) {
   const metadata = useSelector(state => state.metadata)
 
   const [vehiclesData, setVehiclesData] = useState([])
-  const [rentalsData, setRentalsData] = useState([])
   // const [aggregationLevel, setAggregationLevel] = useState('month')
 
   useEffect(() => {
@@ -157,25 +122,11 @@ function StatsPage(props) {
         metadata: metadata,
         aggregationLevel: filter.ontwikkelingaggregatie
       });
-      setVehiclesData(prepareData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
+      setVehiclesData(prepareAggregatedStatsData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
     }
     fetchData();
   }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
 
-  useEffect(() => {
-    // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
-    async function fetchData() {
-      const rentals = await getAggregatedStats(token, 'rentals', {
-        filter: filter,
-        metadata: metadata,
-        aggregationLevel: filter.ontwikkelingaggregatie
-      });
-      setRentalsData(prepareData('rentals', rentals, filter.ontwikkelingaggregatie));
-    }
-    fetchData();
-  }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
-  
   const setAggregationLevel = (newlevel) => {
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -185,6 +136,7 @@ function StatsPage(props) {
 
   return (
     <div>
+
       <div className={"agg-button-container"}>
         <div className={"agg-button " + (filter.ontwikkelingaggregatie==='day' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('day') }}>
           dag
@@ -196,10 +148,13 @@ function StatsPage(props) {
           maand
         </div>
       </div>
+
+      <h1 className="text-4xl my-2">Verhuringen</h1>
+      <VerhuringenChart />
+
       <h1 className="text-4xl my-2">Beschikbare voertuigen</h1>
       {renderStackedAreaChart(vehiclesData, metadata.aanbieders)}
-      <h1 className="text-4xl my-2">Verhuringen</h1>
-      {renderStackedAreaChart(rentalsData, metadata.aanbieders)}
+
     </div>
   )
 }
