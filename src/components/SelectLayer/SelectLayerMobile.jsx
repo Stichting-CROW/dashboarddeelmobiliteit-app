@@ -6,11 +6,15 @@ import './SelectLayerMobile.css';
 
 import {
   DISPLAYMODE_PARK,
-  // DISPLAYMODE_RENTALS,
+  DISPLAYMODE_RENTALS,
   // DISPLAYMODE_OTHER,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
-  DISPLAYMODE_PARKEERDATA_VOERTUIGEN } from '../../reducers/layers.js';
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA_HEATMAP,
+  DISPLAYMODE_VERHUURDATA_CLUSTERS,
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+} from '../../reducers/layers.js';
 
 function SelectLayerMobile(props) {
   const dispatch = useDispatch()
@@ -85,6 +89,30 @@ function SelectLayerMobile(props) {
       { displayMode===DISPLAYMODE_PARK ?
         <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
+          <span className="layer-title">
+            Voertuigen
+          </span>
+          </div> : null }
+
+      { displayMode===DISPLAYMODE_RENTALS ?
+            <div data-type="heat-map" className={`layer${viewPark!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}
+              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HEATMAP }) }}>
+              <span className="layer-title">
+                Heat map
+              </span>
+            </div> : null }
+
+      { displayMode===DISPLAYMODE_RENTALS ?
+        <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_VERHUURDATA_CLUSTERS ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_CLUSTERS }) }}>
+          <span className="layer-title">
+            Clusters
+          </span>
+          </div> : null }
+
+      { displayMode===DISPLAYMODE_RENTALS ?
+        <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_VERHUURDATA_VOERTUIGEN ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_VOERTUIGEN }) }}>
           <span className="layer-title">
             Voertuigen
           </span>
