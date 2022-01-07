@@ -144,11 +144,12 @@ function App() {
     initUpdateParkingData(store);
     initUpdateVerhuringenData(store);
     forceUpdateAccessControlList();
+    initUpdateZonesgeodata(store);
   }, [isLoggedIn, metadata.zones_loaded, pathName, filter]);
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
-    return <>
+    return <div>
       <div className="hidden sm:block h-full">
         <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
       </div>
@@ -156,7 +157,7 @@ function App() {
         <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
       </div>
       <SelectLayerMobile />
-    </>
+    </div>
   }
 
   const renderMapElements = () => {

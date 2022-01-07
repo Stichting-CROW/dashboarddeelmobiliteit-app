@@ -7,6 +7,7 @@
   z-index: 10;
   background: #F6F5F4;
   width: 100%;
+  overflow-x: hidden;
   @apply px-4 pb-8;
 }
 
