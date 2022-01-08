@@ -19,6 +19,7 @@ const initialState = {
   view_park: DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   view_rentals: DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
   extent: [],
+  mapextent: [],
 }
 
 const md5 = require('md5');
@@ -60,16 +61,42 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'LAYER_SET_ZONES_EXTENT': {
-      if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.extent||[]))) {
-        // console.log("set extent to %o", action.payload)
+      if(md5(JSON.stringify(action.payload||[]))!==md5(JSON.stringify(state.extent||[]))) {
+        console.log("set extent to %o", action.payload)
         return {
             ...state,
-            extent: action.payload
+            extent: action.payload||[]
         };
       } else {
         // console.log("set extent - not changed")
         return state;
       }
+    }
+    case 'LAYER_SET_MAP_EXTENT': {
+      if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.mapextent||false))) {
+        // console.log("set extent to %o", action.payload)
+        return {
+            ...state,
+            mapextent: action.payload
+        };
+      } else {
+        // console.log("set extent - not changed")
+        return state;
+      }
+    }
+    case 'IMPORT_STATE': {
+      console.log('import layers')
+      
+      return {
+        ...state,
+        ...action.payload.layers
+      }
+    }
+    case 'LOGIN':
+    case 'LOGOUT': {
+      console.log('login/logout - reset layer info')
+      
+      return initialState;
     }
     default:
       return state;

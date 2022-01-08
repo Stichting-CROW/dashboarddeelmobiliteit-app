@@ -1,11 +1,10 @@
-import React, {useEffect, useState, PureComponent } from 'react';
+import React, {useEffect, useState } from 'react';
 import './StatsPage.css'
 
 import {
   useDispatch,
   useSelector
 } from 'react-redux';
-import moment from 'moment';
 import {
   AreaChart,
   Area,

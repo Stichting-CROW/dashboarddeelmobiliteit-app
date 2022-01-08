@@ -1,23 +1,6 @@
-import { cPollDelayMetadataZonesGeodata, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
-
-var store = undefined;
-
 const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
-
-var timerid_zonesgeodata = undefined;
-
-// const cTestFeatureNL = {
-//    "type":"Feature",
-//    "geometry": {
-//      "type": "Polygon",
-//      "coordinates":
-//       [
-//         [[4,53],[6, 53],[6, 52],[4,52],[4,53]]
-//       ]
-//   }
-// }
 
 export const getEmptyZonesGeodataPayload = () => {
   return  {
@@ -29,8 +12,7 @@ export const getEmptyZonesGeodataPayload = () => {
   }
 }
 
-const updateZonesGeodata = ()  => {
-  let delay = cPollDelayMetadataZonesGeodata;
+export const updateZonesgeodata = (store)  => {
   try {
     if(undefined===store) {
       // console.log("no redux state available yet - skipping zones geodata update");
@@ -39,8 +21,7 @@ const updateZonesGeodata = ()  => {
     
     const state = store.getState();
     if(state.metadata.zones_loaded===false) {
-      delay = cPollDelayLoading;
-      // console.log("no zone metadata available yet - skipping zones geodata update");
+      console.log("no zone metadata available yet - skipping zones geodata update");
       return false;
     }
 
@@ -50,13 +31,16 @@ const updateZonesGeodata = ()  => {
       zone_ids = "";
     } else if (state.filter.gebied==="") {
       // get bounds of all municipalities
+      console.log("set empty zones payload (gebied leeg)")
       zone_ids = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality")).map(zone=>zone.zone_id).join(",");
     } else if (state.filter.zones.length===0) {
       // get bounds of single municipality zone
       let list_g = state.metadata.gebieden.filter(gebied=>gebied.gm_code===state.filter.gebied).map(gebied=>gebied.gm_code);
       let list_z = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality"&&list_g.includes(zone.municipality)));
+      console.log("set empty zones payload (zones length 0)", list_g, list_z)
       zone_ids = list_z.map(zone=>zone.zone_id).join(",");
     } else {
+      console.log("set empty zones payload (selected zones")
       // get bounds of all selected zones
       zone_ids = state.filter.zones; // use selected zones
     }
@@ -79,6 +63,7 @@ const updateZonesGeodata = ()  => {
     
       response.json()
         .then((metadata) => {
+          console.log("got zones geodata for ", state.filter.zones||'all zones')
           const st = require('geojson-bounds');
           
           // convert to standard geojson here
@@ -111,7 +96,7 @@ const updateZonesGeodata = ()  => {
 
                 break;
               default:
-                console.warn("pollMetadataZonesgeodata - don't know how to handle %s", zonedata.type, zonedata);
+                console.warn("metadataZonesgeodata - don't know how to handle %s", zonedata.type, zonedata);
                 break
             }
           })
@@ -119,23 +104,9 @@ const updateZonesGeodata = ()  => {
           let payload = { data: geojson, filter: state.filter.zones, bounds: fullextent};
           store.dispatch({ type: 'SET_ZONES_GEODATA', payload});
           store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
-          
         }).catch(ex=>{ console.error("unable to decode JSON", ex); });
       }).catch(ex=>{ console.error("unable to fetch zone geodata"); });
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = cPollDelayMetadataZonesGeodata * cPollDelayErrorMultiplyer;
-  } finally {
-    timerid_zonesgeodata = setTimeout(updateZonesGeodata, delay);
   }
-}
-
-export const forceUpdateZonesgeodata = () => {
-  if(undefined!==timerid_zonesgeodata) { clearTimeout(timerid_zonesgeodata); }
-  updateZonesGeodata();
-}
-
-export const initUpdateZonesgeodata = (_store) => {
-  store = _store;
-  forceUpdateZonesgeodata();
 }

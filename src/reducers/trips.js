@@ -10,6 +10,14 @@ export default function vehicles(state = initialState, action) {
         data: vehicles
       }
     }
+    case 'LOGIN':
+    case 'LOGOUT': {
+      console.log('login/logout - reset trip data')
+      
+      return {
+        data: []
+      }
+    }
     case 'CLEAR_TRIPS': {
       return {
         data: []

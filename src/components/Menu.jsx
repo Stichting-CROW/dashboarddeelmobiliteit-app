@@ -46,6 +46,17 @@ function MenuItem(props) {
 }
 
 function SubMenuItem(props) {
+  const [showMessage, setShowMessage] = useState(false)
+  
+  const onClick = (e) => {
+    console.log('show message')
+    setShowMessage(true);
+    
+    setTimeout(()=>{ console.log('hide message'); setShowMessage(false) }, 3000);
+    
+    props.onClick(e);
+  }
+  
   return <>
     {props.path && <Link className={`text-link`}
       to={props.path}
@@ -53,16 +64,16 @@ function SubMenuItem(props) {
       onClick={props.onClick}
       >
       <span className={`block`}>
-        {props.text}
+        {showMessage ? props.message : props.text}
       </span>
     </Link>}
 
     {! props.path && <a className={`text-link inline-block cursor-pointer`}
       href={props.href}
-      onClick={props.onClick}
+      onClick={onClick}
       >
       <span className={`block`}>
-        {props.text}
+        {showMessage ? props.message : props.text}
       </span>
     </a>}
   </>
@@ -78,10 +89,25 @@ function Menu({pathName}) {
     return state.authentication.user_data ? true : false;
   });
   
+  const exportState = useSelector(state => {
+    return { filter: state.filter, layers: state.layers, ui:state.ui };
+  });
+  
   const logOut = () => {
     if (isLoggedIn) {
       dispatch( clearUser() );
+      dispatch( { type: "LOGOUT", payload: null });
     }
+  }
+  
+  const exportStateToClipboard = () => {
+    // creates a url that recreates the exact view
+    const l = window.location;
+    const base = l.protocol + "//" + l.host + l.pathname;
+    const params = encodeURIComponent(JSON.stringify(exportState));
+    const url = base + "?view=" + params;
+
+    navigator.clipboard.writeText(url);
   }
   
   return (
@@ -203,6 +229,15 @@ function Menu({pathName}) {
                 logOut();
               }}
             />
+            <SubMenuItem
+              text={'Exporteer aanzicht'}
+              message={'Aanzicht gekopieerd'}
+              onClick={(e) => {
+                exportStateToClipboard();
+              }}
+            >
+              <span>Tekst hier</span>
+            </SubMenuItem>
             <SubMenuItem
               text={'Feedback 📨'}
               href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "

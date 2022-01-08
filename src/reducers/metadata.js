@@ -117,6 +117,13 @@ export default function filter(state = initialState, action) {
       };
     }
     
+    case 'LOGIN':
+    case 'LOGOUT': {
+      console.log('login/logout - reset metadata')
+      
+      return initialState;
+    }
+
     default:
       return state;
   }

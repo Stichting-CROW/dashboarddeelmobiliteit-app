@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 // import 'moment/min/moment-with-locales'
@@ -93,6 +93,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
 }
 
 function MapComponent(props) {
+  const dispatch = useDispatch()
   // console.log('Map component')
 
   // Get vehicles from store
@@ -141,6 +142,7 @@ function MapComponent(props) {
       const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
       // const style = 'mapbox://styles/mapbox/streets-v11';
       if (map.current) return;
+      
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         style,
@@ -171,13 +173,32 @@ function MapComponent(props) {
         window.ddMap = map.current;
       });
       
+      const registerMapView = (currentmap) => {
+        const bounds = currentmap.getBounds();
+        const payload = [
+          bounds._sw.lng,
+          bounds._sw.lat,
+          bounds._ne.lng,
+          bounds._ne.lat
+        ]
+        
+        dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
+      }
+      
+      map.current.on('moveend', function() {
+        registerMapView(map.current);
+      })
+      
+      map.current.on('zoomend', function() {
+        registerMapView(map.current);
+      })
+      
       // Disable rotating
       map.current.dragRotate.disable();
       map.current.touchZoomRotate.disableRotation();
-
     }
     initMap();
-  }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer])
+  }, [vehicles, zones_geodata, lng, lat, zoom, counter, mapContainer, dispatch])
 
   const addOrUpdateSource = (sourceName, sourceData) => {
 
@@ -265,11 +286,15 @@ function MapComponent(props) {
   // If area selection (place/zone) changes, navigate to area
   useEffect(() => {
     if(! map.current) return;
-    if(! extent || extent.length === 0) return;
+    if(! extent || extent.length === 0) {
+      return;
+    }
+    
     map.current.fitBounds(extent);
-  }, [
-    extent
-  ])
+    
+    // reset extent action
+    dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
+  }, [ extent, dispatch ])
 
   // Add layers
   useEffect(() => {

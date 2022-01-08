@@ -1,5 +1,3 @@
-import { cPollDelayAccessControlList, cPollDelayErrorMultiplyer } from '../constants.js';
-
 const cPublicAanbieders = [
     { value:"cykl", system_id:"cykl", name:"Cykl" },
     { value:"flickbike", system_id:"flickbike", name:"Flickbike" },
@@ -31,24 +29,22 @@ const cPublicVoertuigTypes = [
     { id: 'unknown', name: 'Onbekend'},
 ]
 
-var store_accesscontrollist = undefined;
-
+// var store_accesscontrollist = undefined;
+//
 const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
-var timerid_gebiedenaanbieders = undefined;
-
-const updateAccessControlList = ()  => {
-  let delay = cPollDelayAccessControlList;
+export const initAccessControlList = (store_accesscontrollist)  => {
   try {
     if(undefined===store_accesscontrollist) {
-      // console.log("no redux state available yet - skipping metadata update");
+      console.log("no redux state available yet - skipping metadata update");
       return false;
     }
     
     const state = store_accesscontrollist.getState();
     if(!isLoggedIn(state)) {
+      console.log("initialize ACL Data (not logged in)")
       // items -> {"name": "Cykl","system_id": "cykl"}
       store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
       
@@ -57,6 +53,7 @@ const updateAccessControlList = ()  => {
 
       store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     } else {
+      console.log("initialize ACL Data (logged in)")
       let url="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
@@ -91,21 +88,6 @@ const updateAccessControlList = ()  => {
       }
   } catch(ex) {
     console.error("Unable to update ACL", ex)
-    delay = cPollDelayAccessControlList * cPollDelayErrorMultiplyer;
-    
     return false;
-  } finally {
-    timerid_gebiedenaanbieders = setTimeout(updateAccessControlList, delay);
   }
 }
-
-export const forceUpdateAccessControlList = () => {
-  if(undefined!==timerid_gebiedenaanbieders) { clearTimeout(timerid_gebiedenaanbieders); }
-  updateAccessControlList();
-}
-
-export const initUpdateAccessControlList = (_store) => {
-  store_accesscontrollist = _store;
-}
-
-forceUpdateAccessControlList();

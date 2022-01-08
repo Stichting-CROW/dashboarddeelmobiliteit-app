@@ -20,20 +20,13 @@ import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
-import { initUpdateAccessControlList, forceUpdateAccessControlList } from './poll-api/pollMetadataAccessControlList.js';
-import { initUpdateZones, forceUpdateZones } from './poll-api/pollMetadataZones.js';
-import { initUpdateParkingData, forceUpdateParkingData } from './poll-api/pollParkingData.js';
+import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
+import { updateZones } from './poll-api/metadataZones.js';
+import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
+
+import { initUpdateParkingData } from './poll-api/pollParkingData.js';
 import {
-  // initUpdateTripData,
-  // forceUpdateTripData
-} from './poll-api/pollTripData.js';
-import {
-  initUpdateZonesgeodata,
-  forceUpdateZonesgeodata
-} from './poll-api/pollMetadataZonesgeodata.js';
-import {
-  initUpdateVerhuringenData,
-  forceUpdateVerhuringenData
+  initUpdateVerhuringenData
 } from './poll-api/pollVerhuringenData.js';
 
 import {
@@ -46,6 +39,7 @@ import './App.css';
 
 function App() {
   const [pathName, setPathName] = useState(document.location.pathname);
+  const [uriParams, setUriParams] = useState(document.location.search);
   
   const dispatch = useDispatch()
   
@@ -54,9 +48,25 @@ function App() {
   let location = useLocation();
   useEffect(() => {
     setPathName(location ? location.pathname : null);
+    setUriParams(location ? location.search : null);
   }, [location]);
   
   useEffect(() => {
+    if(uriParams!==null) {
+      let params = new URLSearchParams(uriParams);
+      let view = params.get('view')
+      if(view) {
+        const importstate = JSON.parse(decodeURIComponent(view));
+        // force update to map extent
+        // importstate.layers.extent = importstate.layers.mapextent;
+        dispatch({type: 'IMPORT_STATE', payload: importstate });
+        
+        setTimeout(()=>dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
+        
+        return;
+      }
+    }
+    
     let payload;
     if(pathName.includes("/map/park")||pathName==='/') {
       payload=DISPLAYMODE_PARK;
@@ -67,7 +77,7 @@ function App() {
     }
     dispatch({type: 'LAYER_SET_DISPLAYMODE',payload });
 
-  }, [pathName, dispatch]);
+  }, [pathName, uriParams, dispatch]);
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
@@ -89,6 +99,10 @@ function App() {
     return state.filter;
   });
   
+  const layers = useSelector(state => {
+    return state.layers;
+  });
+
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
@@ -97,19 +111,19 @@ function App() {
     return state.metadata;
   });
 
-  const setFilterDatum = newdt => {
-    dispatch({
-      type: 'SET_FILTER_DATUM',
-      payload: newdt.toISOString()
-    })
-  }
-
   // Set date to current date/time on load
   useEffect(() => {
+    const setFilterDatum = newdt => {
+      dispatch({
+        type: 'SET_FILTER_DATUM',
+        payload: newdt.toISOString()
+      })
+    }
+
     if(moment(filterDate).diff(moment(), 'minutes') < -10) {
       setFilterDatum(moment().toDate())
     }
-  }, [filterDate, setFilterDatum]);
+  }, [filterDate, dispatch]);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
@@ -123,29 +137,24 @@ function App() {
 
   // On app start: get user data
   useEffect(() => {
-    initUpdateAccessControlList(store);
-  }, []);
-
-  // If path changes: clear zones
+    initAccessControlList(store);
+  }, [isLoggedIn]);
+  
   useEffect(() => {
-    store.dispatch({ type: 'CLEAR_ZONES', payload: null});
-    initUpdateZones(store);
-    initUpdateZonesgeodata(store);
-  }, [filter.gebied, pathName]);
+    console.log('useEffect zones', filter.gebied)
+    updateZones(store);
+  }, [isLoggedIn, metadata.metadata_loaded, filter.gebied])
 
-  // On app start or if user data is loaded or if place is updated: get zones data
   useEffect(() => {
-    initUpdateZones(store);
-    initUpdateZonesgeodata(store);
-  }, [isLoggedIn, filter.gebied, pathName]);
+    console.log('useEffect zones geodata')
+    updateZonesgeodata(store);
+  }, [isLoggedIn, filter.gebied, metadata.zones_loaded, filter.zones])
 
   // On app start, if zones are loaded or pathName/filter is changed: reload data
   useEffect(() => {
     initUpdateParkingData(store);
     initUpdateVerhuringenData(store);
-    forceUpdateAccessControlList();
-    initUpdateZonesgeodata(store);
-  }, [isLoggedIn, metadata.zones_loaded, pathName, filter]);
+  }, [isLoggedIn, metadata.zones_loaded, pathName, filter, layers]);
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {

@@ -25,6 +25,12 @@ export default function rentals(state = initialState, action) {
         destinations: []
       })
     }
+    case 'LOGIN':
+    case 'LOGOUT': {
+      console.log('login/logout - reset rentals data')
+      
+      return initialState;
+    }
     default:
       return state;
   }

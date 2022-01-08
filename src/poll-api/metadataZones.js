@@ -1,26 +1,19 @@
-import { cPollDelayMetadataZones, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
-import { getEmptyZonesGeodataPayload } from './pollMetadataZonesgeodata';
-
-var store_zones = undefined;
+import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
 
 const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
-var timerid_zones = undefined;
-
-const updateZones = ()  => {
-  let delay = cPollDelayMetadataZones;
+export const updateZones = (store_zones)  => {
   try {
     if(undefined===store_zones) {
-      // console.log("no redux state available yet - skipping zones update");
+      console.log("no redux state available yet - skipping zones update");
       return false;
     }
     
     const state = store_zones.getState();
     if(state.metadata.metadata_loaded===false) {
-      delay = cPollDelayLoading;
-      // console.log("no metadata available yet - skipping zones update");
+      console.log("no metadata available yet - skipping zones update");
       return false;
     }
     
@@ -43,6 +36,9 @@ const updateZones = ()  => {
     } else {
       // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
       url_zones="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+state.filter.gebied;
+
+      store_zones.dispatch({ type: 'SET_ZONES', payload: []});
+      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
     }
 
     // let url_geodata="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl"
@@ -66,19 +62,5 @@ const updateZones = ()  => {
       });
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = cPollDelayMetadataZones * cPollDelayErrorMultiplyer;
-  } finally {
-    timerid_zones = setTimeout(updateZones, delay);
   }
 }
-
-export const forceUpdateZones = () => {
-  if(undefined!==timerid_zones) { clearTimeout(timerid_zones); }
-  updateZones();
-}
-
-export const initUpdateZones = (_store) => {
-  store_zones = _store;
-  forceUpdateZones();
-}
-

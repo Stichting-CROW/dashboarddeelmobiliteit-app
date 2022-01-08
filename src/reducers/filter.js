@@ -296,10 +296,26 @@ export default function filter(state = initialState, action) {
           ontwikkelingaggregatie: action.payload
       };
     }
+    case 'LOGIN':
+    case 'LOGOUT': {
+      console.log('login/logout - reset filter')
+      
+      return initialState;
+    }
     case 'RESET_FILTER': {
       console.log('reset filter')
       
       return initialState;
+    }
+    case 'IMPORT_STATE': {
+      console.log('import filter', action.payload.filter)
+      
+      
+      
+      return {
+        ...state,
+        ...action.payload.filter
+      }
     }
     default:
       return state;

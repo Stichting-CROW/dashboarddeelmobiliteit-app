@@ -1,11 +1,11 @@
-import React, {useEffect, useState, PureComponent } from 'react';
+import React, {useEffect, useState } from 'react';
 
 import {
-  useDispatch,
+  // useDispatch,
   useSelector
 } from 'react-redux';
 
-import moment from 'moment';
+// import moment from 'moment';
 
 import {
   // AreaChart,
@@ -32,7 +32,7 @@ import {prepareAggregatedStatsData} from '../../helpers/stats.js';
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 
 function StatsPage(props) {
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   const token = useSelector(state => state.authentication.user_data.token)
   const filter = useSelector(state => state.filter)
