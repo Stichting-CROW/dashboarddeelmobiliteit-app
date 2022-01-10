@@ -11,7 +11,7 @@ import {getProviderColor} from '../../helpers/providers.js';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
-import getVehicleMarkers from './../Map/vehicle_marker.js';
+import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
 
 const md5 = require('md5');
 
@@ -105,6 +105,10 @@ function MapComponent(props) {
 
   const rentals = useSelector(state => {
     return state.rentals || null;
+  });
+
+  const stateLayers = useSelector(state => {
+    return state.layers || null;
   });
 
   const isLoggedIn = useSelector(state => {
@@ -352,15 +356,20 @@ function MapComponent(props) {
         // console.log("image already exists");
         return;
       }
-      var value = await getVehicleMarkers(aanbieder.color);
+      // WIP
+      if(stateLayers.displaymode === 'displaymode-rentals') {
+        var value = await getVehicleMarkers_rentals(aanbieder.color);
+      } else {
+        var value = await getVehicleMarkers(aanbieder.color);
+      }
       value.forEach((img, idx) => {
-        map.current.addImage(aanbieder.system_id + ":" + idx, { width: 25, height: 25, data: img});
+        map.current.addImage(aanbieder.system_id + `:` + idx, { width: 25, height: 25, data: img});
       });
     };
     providers.forEach(aanbieder => {
       addProviderImage(aanbieder);
     });
-  }, [providers]);
+  }, [providers, stateLayers.displaymode]);
 
   return null;
 }

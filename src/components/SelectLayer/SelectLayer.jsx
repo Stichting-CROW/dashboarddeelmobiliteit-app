@@ -45,7 +45,7 @@ function SelectLayer(props) {
   });
   
   if(displayMode===DISPLAYMODE_OTHER||
-     (displayMode===DISPLAYMODE_RENTALS && showZoneOnOff===false)) {
+     (false && displayMode===DISPLAYMODE_RENTALS && showZoneOnOff===false)) {
        return null; // no layer selection
   }
   

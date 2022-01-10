@@ -1,5 +1,5 @@
 // import moment from 'moment';
-import { createFilterparameters, isLoggedIn } from './pollTools.js';
+import { createFilterparameters, isLoggedIn, convertDistanceToBin } from './pollTools.js';
 import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 const md5 = require('md5');
@@ -28,39 +28,35 @@ const updateVerhuringenData = ()  => {
       return false;
     }
 
+    let afstandexclude = state.filter.afstandexclude.split(",") || [];
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
     if(!canfetchdata) {
       store_verhuringendata.dispatch({ type: 'CLEAR_RENTALS_ORIGINS'});
       store_verhuringendata.dispatch({ type: 'CLEAR_RENTALS_DESTINATIOINS'});
     } else {
-      let url = "https://api.deelfietsdashboard.nl/dashboard-api/rentals";
-      // ?start_time=2021-12-06T09:15:00Z&end_time=2021-12-07T09:15:00Z&operators=cykl,flickbike,donkey,mobike,htm,gosharing,check,felyx,deelfietsnederland,keobike,lime,baqme,cargoroo,uwdeelfiets,hely&zone_ids=34217
-      let options = {};
-      if(null!==state.filter&&null!==state.authenticationdata) {
-        url = "https://api.deelfietsdashboard.nl/dashboard-api/rentals";
-        let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
-        if(filterparams.length>0) {
-          url += "?" + filterparams.join("&");
+      const fetchData = (key) => {
+        if(key !== 'destinations' && key !== 'origins') {
+          console.error('No valid key given to fetchData');
+          return;
         }
-        options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
-      }
-      fetch(url, options).then(function(response) {
-        if(!response.ok) {
-          console.error("unable to fetch: %o", response);
-          return false
+        let url = `https://api.deelfietsdashboard.nl/dashboard-api/v2/trips/${key}`;
+        let options = {};
+        if(null!==state.filter&&null!==state.authenticationdata) {
+          url = `https://api.deelfietsdashboard.nl/dashboard-api/v2/trips/${key}`;
+          let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
+          if(filterparams.length>0) {
+            url += "?" + filterparams.join("&");
+          }
+          options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
         }
-        
-        response.json().then(function(data) {
-          let verhuringen = isLoggedIn ? data : [];
+        fetch(url, options).then(function(response) {
+          if(!response.ok) {
+            console.error("unable to fetch: %o", response);
+            return false
+          }
 
-          // generateGeoJsonForVerhuringen :: type ENUM 'start_rentals'|'end_rentals'
-          const generateGeoJsonForVerhuringen = (dataObject, type) => {
-            // Validation
-            if(! dataObject) return;
-            if(! type || (type !== 'start_rentals' && type !== 'end_rentals')) {
-              console.error('Type is invalid. Type is: ', type)
-              return;
-            }
+          response.json().then(function(data) {
+            let verhuringen = isLoggedIn ? data : [];
 
             let geoJson = {
               "type":"FeatureCollection",
@@ -68,50 +64,57 @@ const updateVerhuringenData = ()  => {
             }
 
             // Map data
-            dataObject[type].forEach(v => {
+            verhuringen[`trip_${key}`].forEach(v => {
+              const distance_bin = convertDistanceToBin(v.distance_in_meters);
+
               let feature = {
-                 "type":"Feature",
-                 "properties":{
-                    "id": md5(v.location.latitude+v.location.longitude),
-                    "system_id": v.system_id,
-                    "arrival_time": v.arrival_time,
-                    "departure_time": v.departure_time,
-                    "duration_bin": 0,
-                    "color": "#38ff71" // color
-                 },
-                 "geometry":{
-                    "type":"Point",
-                    "coordinates": [
-                       v.location.longitude,
-                       v.location.latitude,
-                       0.0
-                    ]
-                 }
+               "type":"Feature",
+               "properties":{
+                  "id": md5(v.location.latitude+v.location.longitude),
+                  "system_id": v.system_id,
+                  "arrival_time": v.arrival_time,
+                  "departure_time": v.departure_time,
+                  "distance_bin": distance_bin,
+                  // "duration_bin": 0,
+                  // "color": "#38ff71" // color
+               },
+               "geometry":{
+                  "type":"Point",
+                  "coordinates": [
+                     v.location.longitude,
+                     v.location.latitude,
+                     0.0
+                  ]
+                }
               }
-              geoJson.features.push(feature);
+
+              let markerVisible = !afstandexclude.includes(distance_bin.toString());
+              if(markerVisible) {
+                geoJson.features.push(feature);
+              }
+
             })
 
-            return geoJson;
-          }
-
-          store_verhuringendata.dispatch({
-            type: 'SET_RENTALS_ORIGINS',
-            payload: generateGeoJsonForVerhuringen(verhuringen, 'start_rentals')
-          })
-        
-          store_verhuringendata.dispatch({
-            type: 'SET_RENTALS_DESTINATIONS',
-            payload: generateGeoJsonForVerhuringen(verhuringen, 'end_rentals')
-          })
-        
+            store_verhuringendata.dispatch({
+              type: `SET_RENTALS_${key.toUpperCase()}`,
+              payload: geoJson
+            })
+          
+          }).catch(ex=>{
+            console.error("unable to decode JSON");
+            // setJson(false);
+          });
         }).catch(ex=>{
-          console.error("unable to decode JSON");
+          console.error("fetch error - unable to fetch JSON from %s", url);
           // setJson(false);
         });
-      }).catch(ex=>{
-        console.error("fetch error - unable to fetch JSON from %s", url);
-        // setJson(false);
-      });
+      }
+
+      if(state.filter.herkomstbestemming === 'bestemming') {
+        fetchData('destinations');
+      } else {
+        fetchData('origins');
+      }
     }
   } catch(ex) {
     console.error("Unable to update zones", ex)
@@ -122,6 +125,7 @@ const updateVerhuringenData = ()  => {
 }
 
 export const forceUpdateVerhuringenData = () => {
+  if(! store_verhuringendata) { console.log('No store yet.'); return; }
   if(undefined!==timerid_verhuringendata) { clearTimeout(timerid_verhuringendata); }
   updateVerhuringenData();
 }

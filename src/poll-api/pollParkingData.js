@@ -72,7 +72,6 @@ const updateParkingData = ()  => {
         
         let parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
 
-        console.log('vehicles', vehicles.vehicles_in_public_space)
         vehicles.forEach(v => {
           let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
     
@@ -102,7 +101,7 @@ const updateParkingData = ()  => {
             geoJson.features.push(feature);
           }
         })
-        console.log('geoJson in pollParkingData', geoJson)
+        // console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',

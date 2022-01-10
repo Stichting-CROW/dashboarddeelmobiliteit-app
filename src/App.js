@@ -160,6 +160,9 @@ function App() {
   // On app start, if zones are loaded or pathName/filter is changed: reload data
   useEffect(() => {
     initUpdateParkingData(store);
+  }, [isLoggedIn, metadata.zones_loaded, pathName, filter, layers]);
+
+  useEffect(() => {
     initUpdateVerhuringenData(store);
   }, [isLoggedIn, metadata.zones_loaded, pathName, filter, layers]);
 

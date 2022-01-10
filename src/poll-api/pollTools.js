@@ -123,3 +123,16 @@ export const convertDurationToBin = (duration) => {
   return 3;
 }
 
+export const convertDistanceToBin = (distance_in_meters) => {
+  if (distance_in_meters <= 1000) {
+    return 0;
+  }
+  if (distance_in_meters <= 2000) {
+    return 1;
+  }
+  if (distance_in_meters <= 5000) {
+    return 2;
+  }
+  return 3;
+}
+

@@ -25,10 +25,10 @@ export function FilteritemMarkersParkeerduur() {
 export function FilteritemMarkersAfstand() {
   const markers = useSelector(state => {
     return [
-      { id: 0, color: '#48E248', fillcolor: '#48E248', name: '5km'},
-      { id: 1, color: '#44BD48', fillcolor: '#44BD48', name: '10km'},
-      { id: 2, color: '#3B7747', fillcolor: '#3B7747', name: '15km'},
-      { id: 3, color: '#343E47', fillcolor: '#343E47', name: '> 25km'}
+      { id: 0, color: '#48E248', fillcolor: '#48E248', name: '1km'},
+      { id: 1, color: '#44BD48', fillcolor: '#44BD48', name: '2km'},
+      { id: 2, color: '#3B7747', fillcolor: '#3B7747', name: '5km'},
+      { id: 3, color: '#343E47', fillcolor: '#343E47', name: '> 5km'}
     ];
   });
   

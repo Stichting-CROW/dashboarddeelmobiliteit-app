@@ -4,7 +4,7 @@ const layer = {
   'source': 'rentals-destinations',
   filter: ['!', ['has', 'point_count']],
   'layout': {
-    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'duration_bin']],
+    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'distance_bin']],
     'icon-size': 1,
     'icon-allow-overlap': true,
   },
