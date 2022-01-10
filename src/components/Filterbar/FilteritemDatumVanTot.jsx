@@ -66,23 +66,60 @@ function FilterItemDatumVanTot() {
     setIsOpen(!isOpen);
   };
   
-  const moveFilterDatum = (down) => {
+  // const moveFilterDatum = (down) => {
+  //   let start = startDate;
+  //   let end = endDate;
+  //   switch(filterOntwikkelingAggregatie) {
+  //     case 'week':
+  //       start = addDays(startDate, down?-7:7);
+  //       end = addDays(endDate, down?-7:7);
+  //       break;
+  //     case 'month':
+  //       start = addMonths(startDate, down?-1:1);
+  //       end = addMonths(endDate, down?-1:1);
+  //       break;
+  //     case 'day':
+  //     default:
+  //       start = addDays(startDate, down?-1:1);
+  //       end = addDays(endDate, down?-1:1);
+  //       break;
+  //   }
+  //
+  //   setStartDate(start)
+  //   setEndDate(end)
+  //
+  //   updateFilter(start, end);
+  // }
+  
+  const moveFilterDatum = (movestart) => {
     let start = startDate;
     let end = endDate;
-    switch(filterOntwikkelingAggregatie) {
-      case 'week':
-        start = addDays(startDate, down?-7:7);
-        end = addDays(endDate, down?-7:7);
-        break;
-      case 'month':
-        start = addMonths(startDate, down?-1:1);
-        end = addMonths(endDate, down?-1:1);
-        break;
-      case 'day':
-      default:
-        start = addDays(startDate, down?-1:1);
-        end = addDays(endDate, down?-1:1);
-        break;
+    if(movestart) {
+      switch(filterOntwikkelingAggregatie) {
+        case 'week':
+          start = addDays(startDate, -7);
+          break;
+        case 'month':
+          start = addMonths(startDate, -1);
+          break;
+        case 'day':
+        default:
+          start = addDays(startDate, -1);
+          break;
+      }
+    } else {
+      switch(filterOntwikkelingAggregatie) {
+        case 'week':
+          end = addDays(endDate, 7);
+          break;
+        case 'month':
+          end = addMonths(endDate, 1);
+          break;
+        case 'day':
+        default:
+          end = addDays(endDate, 1);
+          break;
+      }
     }
     
     setStartDate(start)
@@ -90,6 +127,7 @@ function FilterItemDatumVanTot() {
     
     updateFilter(start, end);
   }
+  
   
   const setView = (view) => {
     // strip hours
