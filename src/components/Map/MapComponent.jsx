@@ -21,7 +21,9 @@ moment.locale('nl', localization);
 const providerWebsiteUrls = {
   'check': 'https://ridecheck.app/',
   'felyx': 'https://felyx.com/',
-  'gosharing': 'https://go-sharing.com/'
+  'gosharing': 'https://go-sharing.com/',
+  'baqme': 'https://www.baqme.com/',
+  'donkey': 'https://www.donkey.bike/'
 }
 
 const initPopupLogic = (currentMap, providers, isLoggedIn) => {
@@ -70,9 +72,9 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
               Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
             </div>` : ''}
 
-            ${providerWebsiteUrls && providerWebsiteUrls[vehicleProperties.system_id] ? `<div>
-              <a href="${providerWebsiteUrls[vehicleProperties.system_id]}" rel="external" target="_blank">
-                ${providerWebsiteUrls[vehicleProperties.system_id]}
+            ${providerWebsiteUrls && providerWebsiteUrls[vehicleProperties.system_id] ? `<div class="mt-2">
+              <a href="${providerWebsiteUrls[vehicleProperties.system_id]}" rel="external" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${providerColor};">
+                website
               </a>
             </div>` : ''}
           </div>
