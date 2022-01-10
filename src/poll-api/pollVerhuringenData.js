@@ -75,6 +75,7 @@ const updateVerhuringenData = ()  => {
                   "arrival_time": v.arrival_time,
                   "departure_time": v.departure_time,
                   "distance_bin": distance_bin,
+                  "distance_in_meters": v.distance_in_meters,
                   // "duration_bin": 0,
                   // "color": "#38ff71" // color
                },

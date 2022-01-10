@@ -54,6 +54,7 @@
 }
 
 .filter-datum-van-tot-option {
+  cursor: pointer;
   width: 125px;
   height: auto;
   border-radius: 0.5em;

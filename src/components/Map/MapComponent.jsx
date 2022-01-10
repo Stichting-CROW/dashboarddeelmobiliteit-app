@@ -42,6 +42,7 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
     // location of the feature, with description HTML from its properties.
     currentMap.on('click', layerName, function (e) {
       const vehicleProperties = e.features[0].properties;
+      console.log('vehicleProperties', vehicleProperties)
       const providerColor = getProviderColor(providers, vehicleProperties.system_id)
 
       var coordinates = e.features[0].geometry.coordinates.slice();
@@ -70,6 +71,10 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
             ${vehicleProperties.in_public_space_since ? `<div>
               Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
               Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
+            </div>` : ''}
+
+            ${vehicleProperties.distance_in_meters ? `<div>
+              Dit voertuig is ${vehicleProperties.distance_in_meters} meter verplaatst<br />
             </div>` : ''}
 
             ${providerWebsiteUrls && providerWebsiteUrls[vehicleProperties.system_id] ? `<div class="mt-2">
