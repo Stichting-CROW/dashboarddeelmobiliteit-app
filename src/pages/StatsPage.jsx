@@ -8,10 +8,10 @@ import {
 import {
   AreaChart,
   Area,
-  // BarChart,
-  // Bar,
+  BarChart,
+  Bar,
   XAxis,
-  // Legend,
+  Legend,
   YAxis,
   CartesianGrid,
   Tooltip,
@@ -68,39 +68,39 @@ const renderStackedAreaChart = (data, providers) => {
   )
 }
 
-// const renderStackedBarChart = (data, providers) => {
-//   return <BarChart
-//     width={800}
-//     height={400}
-//     data={data}
-//     margin={{
-//       top: 20,
-//       right: 30,
-//       left: 20,
-//       bottom: 5,
-//     }}
-//   >
-//     <CartesianGrid strokeDasharray="3 3" />
-//     <XAxis dataKey="name" />
-//     <YAxis />
-//     <Tooltip />
-//     <Legend />
-//     {getUniqueProviderNames(data[0]).map(x => {
-//       const providerColor = getProviderColor(providers, x)
-//       return (
-//         <Bar
-//           key={x}
-//           stackId="1"
-//           type="monotone"
-//           dataKey={x}
-//           stroke={providerColor}
-//           fill={providerColor}
-//           isAnimationActive={false}
-//         />
-//       )
-//     })}
-//   </BarChart>
-// }
+const renderStackedBarChart = (data, providers) => {
+  return <BarChart
+    width={800}
+    height={400}
+    data={data}
+    margin={{
+      top: 20,
+      right: 30,
+      left: 20,
+      bottom: 5,
+    }}
+  >
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="name" />
+    <YAxis />
+    <Tooltip />
+    <Legend />
+    {getUniqueProviderNames(data[0]).map(x => {
+      const providerColor = getProviderColor(providers, x)
+      return (
+        <Bar
+          key={x}
+          stackId="1"
+          type="monotone"
+          dataKey={x}
+          stroke={providerColor}
+          fill={providerColor}
+          isAnimationActive={false}
+        />
+      )
+    })}
+  </BarChart>
+}
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -153,6 +153,9 @@ function StatsPage(props) {
 
       <h1 className="text-4xl my-2">Beschikbare voertuigen</h1>
       {renderStackedAreaChart(vehiclesData, metadata.aanbieders)}
+      {renderStackedBarChart(vehiclesData, metadata.aanbieders)}
+
+      {/*Meer dan 12 datapunten: lijn, anders bar.*/}
 
     </div>
   )

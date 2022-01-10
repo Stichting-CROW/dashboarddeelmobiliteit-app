@@ -6,7 +6,7 @@ class CustomizedXAxisTick extends PureComponent {
 
     return (
       <g transform={`translate(${x},${y})`}>
-        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" transform="rotate(0)" font-size="0.8em">
+        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" transform="rotate(0)" fontSize="0.8em">
           {payload.value}
         </text>
       </g>
@@ -20,7 +20,7 @@ class CustomizedYAxisTick extends PureComponent {
 
     return (
       <g transform={`translate(${x},${y})`}>
-        <text x={-4} y={0} dy={3} textAnchor="end" fill="#666" transform="rotate(0)" font-size="0.8em">
+        <text x={-4} y={0} dy={3} textAnchor="end" fill="#666" transform="rotate(0)" fontSize="0.8em">
           {payload.value}
         </text>
       </g>
