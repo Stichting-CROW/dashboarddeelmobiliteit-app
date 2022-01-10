@@ -18,6 +18,7 @@ import Monitoring from './pages/Monitoring.jsx';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
+import Overlay from './components/Overlay/Overlay.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -63,7 +64,7 @@ function App() {
           // importstate.layers.extent = importstate.layers.mapextent;
           dispatch({type: 'IMPORT_STATE', payload: importstate });
           
-          setTimeout(()=>dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
+          setTimeout(() => dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
           return;
         } catch(ex) {
           console.warn("unable to decode application state")
@@ -177,7 +178,7 @@ function App() {
 
   const renderMapElements = () => {
     return <>
-      <div key="mapContainer" ref={mapContainer} className="map-layer"></div>
+      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MenuSecondary />
       {renderMobileMenus()}
     </>
@@ -192,7 +193,11 @@ function App() {
             {renderMapElements()}
           </Route>
           <Route exact path="/login">
-            <Login />
+            <Overlay>
+              <MapPage mapContainer={mapContainer} />
+              <Login />
+            </Overlay>
+            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
           <Route exact path="/map/park">
             <MapPage mapContainer={mapContainer} />
