@@ -336,8 +336,13 @@ function MapComponent(props) {
       })
     }
     addLayers();
-    initPopupLogic(map.current, providers, isLoggedIn)
   }, [vehicles, rentals.origins, rentals.destinations, zones_geodata, counter, props.layers, isLoggedIn, providers]);
+
+  useEffect(() => {
+    if(! map.current) return;
+    if(! providers) return;
+    initPopupLogic(map.current, providers, isLoggedIn)
+  }, [map.current, providers])
 
   useEffect(() => {
     var addProviderImage = async(aanbieder) => {

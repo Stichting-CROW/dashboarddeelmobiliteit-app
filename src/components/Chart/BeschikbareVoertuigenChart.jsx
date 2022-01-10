@@ -30,6 +30,7 @@ import {
 import {prepareAggregatedStatsData} from '../../helpers/stats.js';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
+import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
 function BeschikbareVoertuigenChart(props) {
   // const dispatch = useDispatch()
@@ -55,7 +56,6 @@ function BeschikbareVoertuigenChart(props) {
   }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
   
   const numberOfPointsOnXAxis = vehiclesData ? Object.keys(vehiclesData).length : 0;
-  console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
@@ -71,7 +71,7 @@ function BeschikbareVoertuigenChart(props) {
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip />
+        <Tooltip content={<CustomizedTooltip />} />
         <Legend />
         {getUniqueProviderNames(vehiclesData[0]).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
@@ -102,7 +102,7 @@ function BeschikbareVoertuigenChart(props) {
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
-      <Tooltip />
+      <Tooltip content={<CustomizedTooltip />} />
       <Legend />
       {getUniqueProviderNames(vehiclesData[0]).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)

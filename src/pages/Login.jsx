@@ -3,7 +3,10 @@ import { setUser } from '../actions/authentication';
 import { useDispatch } from 'react-redux';
 import {
   Redirect
- } from "react-router-dom";
+} from "react-router-dom";
+
+import Logo from '../components/Logo.jsx';
+import { IconButtonClose } from '../components/IconButtons.jsx';
 
 const Login = () => {
   const [emailaddress, setEmailaddress] = useState('');
@@ -11,6 +14,7 @@ const Login = () => {
   const [recoverPassword, setRecoverPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
   const dispatch = useDispatch();
 
   const login = e => {
@@ -19,6 +23,17 @@ const Login = () => {
 
     // Clear error message
     setErrorMessage(null);
+
+    // Basic validation
+    if(! emailaddress) {
+      setErrorMessage('Voer alsjeblieft een e-mailadres in');
+      return;
+    }
+
+    if(! password) {
+      setErrorMessage('Voer alsjeblieft een wachtwoord in');
+      return;
+    }
 
     const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/login";
     var data = {
@@ -80,10 +95,40 @@ const Login = () => {
 
   const renderLogin = () => {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg">
-          <h3 className="text-2xl font-bold text-center">Login</h3>
-          <form>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="mx-auto">
+
+          <IconButtonClose
+            onClick={() => setDoRenderRedirect(true)}
+            style={{position: 'absolute', right: '30px', top: '18px'}}
+          />
+
+          <Logo />
+
+          <h2 className="mt-4 mb-4 text-4xl font-bold">
+            Dashboard Deelmobiliteit
+          </h2>
+
+          <p style={{
+            maxWidth: '100%',
+            width: '416px'
+          }} className="mb-4">
+            Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen.
+          </p>
+          <p style={{
+            maxWidth: '100%',
+            width: '416px'
+          }} className="mb-4">
+            Hoe lang en waar staan deelvoertuigen ongebruikt in de openbare ruimte? Hoe vaak worden de deelvoertuigen verhuurd? In welke wijken en op welke tijdstippen zijn deelvoertuigen populair?
+          </p>
+          <p style={{
+            maxWidth: '100%',
+            width: '416px'
+          }} className="mb-4">
+            Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid ontwikkelen, evalueren en bijsturen.
+          </p>
+
+          <form className="mt-8 mb-4">
             <label className="block" htmlFor="emailaddress">Email</label>
             <input
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
@@ -108,13 +153,30 @@ const Login = () => {
               <span className="block sm:inline">{errorMessage}</span>
             </div>}
 
-            <div className="flex items-baseline justify-between">
-                <button className="px-6 py-2 mr-4 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={login}>Login</button>
-                <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900" onClick={() => setRecoverPassword(true)}>Wachtwoord vergeten</button>
+            <p className="my-4">
+              <a href="#" onClick={() => setRecoverPassword(true)} className="
+                text-gray-400
+                underline
+                text-sm
+              ">
+                Wachtwoord vergeten?
+              </a>
+            </p>
+
+            <div className="flex items-baseline mt-4">
+                <button className="px-6 py-2 mr-4 mt-4 text-white bg-theme-blue rounded-lg" onClick={login}>
+                  Login
+                </button>
+                <button className="px-6 py-2 mt-4 text-white bg-gray-300 rounded-lg hover:bg-gray-400" onClick={() => {
+                  setDoRenderRedirect(true)
+                }}>
+                  Annuleer
+                </button>
             </div>
           </form>
         </div>
-      </div>)
+      </div>
+    )
   }
   
   const renderRecoverPassword = () => {
@@ -123,11 +185,11 @@ const Login = () => {
         <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg">
           <h3 className="text-2xl font-bold text-center">Wachtwoord herstellen</h3>
           <form>
-            <label className="block" htmlFor="emailaddress">Email</label>
+            <label className="block" htmlFor="emailaddress">E-mailadres</label>
             <input
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
               autoCapitalize="off"
-              placeholder="Email"
+              placeholder="E-mailadres"
               name="emailaddress"
               required
               onChange={e => setEmailaddress(e.target.value)}
@@ -150,11 +212,11 @@ const Login = () => {
   }
   const renderRedirect = () => {
     return (
-        <Redirect to="/" />
+      <Redirect to="/" />
     );
   }
  
-  if (loggedIn) {
+  if (loggedIn || doRenderRedirect) {
     return renderRedirect();
   }
 

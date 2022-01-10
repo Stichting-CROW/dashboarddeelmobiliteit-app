@@ -67,10 +67,10 @@
   color: white;
   background-color: #15AEEF;
   box-sizing: border-box;
-  margin: 0.1em;
-  padding: 0.3em;
-  padding-top: 0.15em;
-  padding-bottom: 0.15em;
+  margin: 0.2rem 0.25rem;
+  padding: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }
 
 .filter-datum-van-tot-input {

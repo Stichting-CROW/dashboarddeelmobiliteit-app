@@ -2,7 +2,9 @@ import React from 'react';
 
 export function IconButtonClose(props) {
   return (
-    <div className="text-2xl font-bold cursor-pointer" onClick={props.onClick}>×</div>
+    <div className="text-2xl font-bold cursor-pointer" onClick={props.onClick}
+      style={props.style}
+      >×</div>
   )
 }
 
