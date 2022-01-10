@@ -51,6 +51,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       // items -> {"name": "Cykl","system_id": "cykl"}
       store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
 
+      let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented
+      store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: types});
+
       store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     } else {
       console.log("initialize ACL Data (logged in)")

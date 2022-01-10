@@ -61,7 +61,7 @@ function Filterbar({
 
       {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
-      {isLoggedIn && showvervoerstype && <FilteritemVoertuigTypes />}
+      {showvervoerstype && <FilteritemVoertuigTypes />}
 
       {<FilteritemAanbieders />}
 

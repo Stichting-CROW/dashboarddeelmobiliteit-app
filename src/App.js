@@ -167,10 +167,10 @@ function App() {
   const renderMobileMenus = () => {
     return <div>
       <div className="hidden sm:block h-full">
-        <FilterbarDesktop isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
+        <FilterbarDesktop isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
       <div className="block sm:hidden">
-        <FilterbarMobile isVisible={isLoggedIn && isFilterBarVisible} displayMode={displayMode} />
+        <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
       <SelectLayerMobile />
     </div>

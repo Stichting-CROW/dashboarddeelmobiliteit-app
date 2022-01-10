@@ -54,6 +54,8 @@ const updateParkingData = ()  => {
       response.json().then(function(vehicles) {
         if(isLoggedIn(state)) {
           vehicles = vehicles.park_events
+        } else {
+          vehicles = vehicles.vehicles_in_public_space
         }
         let geoJson = {
            "type":"FeatureCollection",
@@ -70,6 +72,7 @@ const updateParkingData = ()  => {
         
         let parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
 
+        console.log('vehicles', vehicles.vehicles_in_public_space)
         vehicles.forEach(v => {
           let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
     
@@ -94,12 +97,12 @@ const updateParkingData = ()  => {
              }
           }
 
-          let markerVisible = !parkeerduurexclude.includes(duration_bin.toString());
+          let markerVisible = ! isLoggedIn(state) || !parkeerduurexclude.includes(duration_bin.toString());
           if(markerVisible) {
             geoJson.features.push(feature);
           }
         })
-        // console.log('geoJson in pollParkingData', geoJson)
+        console.log('geoJson in pollParkingData', geoJson)
     
         store_parkingdata.dispatch({
           type: 'SET_VEHICLES',
