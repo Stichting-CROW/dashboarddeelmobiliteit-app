@@ -30,38 +30,37 @@ import {
 import {prepareAggregatedStatsData} from '../../helpers/stats.js';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
-import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
-function VerhuringenChart(props) {
+function BeschikbareVoertuigenChart(props) {
   // const dispatch = useDispatch()
 
   const token = useSelector(state => state.authentication.user_data.token)
   const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 
-  const [rentalsData, setRentalsData] = useState([])
+  const [vehiclesData, setVehiclesData] = useState([])
 
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
     async function fetchData() {
-      const rentals = await getAggregatedStats(token, 'rentals', {
+      const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
         filter: filter,
         metadata: metadata,
         aggregationLevel: filter.ontwikkelingaggregatie
       });
-      setRentalsData(prepareAggregatedStatsData('rentals', rentals, filter.ontwikkelingaggregatie));
+      setVehiclesData(prepareAggregatedStatsData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
     }
     fetchData();
   }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
   
-  const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
+  const numberOfPointsOnXAxis = vehiclesData ? Object.keys(vehiclesData).length : 0;
   console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
       return <AreaChart
-        data={rentalsData}
+        data={vehiclesData}
         margin={{
           top: 10,
           right: 30,
@@ -72,9 +71,9 @@ function VerhuringenChart(props) {
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip content={<CustomizedTooltip />} />
-        <Legend />} />
-        {getUniqueProviderNames(rentalsData[0]).map(x => {
+        <Tooltip />
+        <Legend />
+        {getUniqueProviderNames(vehiclesData[0]).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -92,7 +91,7 @@ function VerhuringenChart(props) {
     }
 
     return <BarChart
-      data={rentalsData}
+      data={vehiclesData}
       margin={{
         top: 10,
         right: 30,
@@ -103,9 +102,9 @@ function VerhuringenChart(props) {
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
-      <Tooltip content={<CustomizedTooltip />} />
-      <Legend />} />
-      {getUniqueProviderNames(rentalsData[0]).map(x => {
+      <Tooltip />
+      <Legend />
+      {getUniqueProviderNames(vehiclesData[0]).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar
@@ -131,4 +130,4 @@ function VerhuringenChart(props) {
   )
 }
 
-export default VerhuringenChart;
+export default BeschikbareVoertuigenChart;

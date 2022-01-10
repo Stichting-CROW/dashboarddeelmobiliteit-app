@@ -9,7 +9,7 @@ const prepareAggregatedStatsData = (key, data, aggregationLevel) => {
       return 'DD MMM YYYY';
     }
     else if(aggregationLevel === 'week') {
-      return '[w]W YYYY';
+      return '[w]W, YYYY';
     }
     else if(aggregationLevel === 'month') {
       return 'MMM YYYY';

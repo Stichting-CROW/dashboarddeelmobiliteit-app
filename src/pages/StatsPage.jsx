@@ -28,6 +28,9 @@ import {
 } from '../helpers/stats.js';
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart.jsx';
+import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
+import ParkeerduurChart from '../components/Chart/ParkeerduurChart.jsx';
+
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../components/Chart/CustomizedAxisTick.jsx';
 
 const renderStackedAreaChart = (data, providers) => {
@@ -109,23 +112,6 @@ function StatsPage(props) {
   const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 
-  const [vehiclesData, setVehiclesData] = useState([])
-  // const [aggregationLevel, setAggregationLevel] = useState('month')
-
-  useEffect(() => {
-    // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
-    async function fetchData() {
-      const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
-        filter: filter,
-        metadata: metadata,
-        aggregationLevel: filter.ontwikkelingaggregatie
-      });
-      setVehiclesData(prepareAggregatedStatsData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
-    }
-    fetchData();
-  }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
-
   const setAggregationLevel = (newlevel) => {
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -134,7 +120,7 @@ function StatsPage(props) {
   }
 
   return (
-    <div>
+    <div className="StatsPage">
 
       <div className={"agg-button-container"}>
         <div className={"agg-button " + (filter.ontwikkelingaggregatie==='day' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('day') }}>
@@ -148,12 +134,27 @@ function StatsPage(props) {
         </div>
       </div>
 
-      <h1 className="text-4xl my-2">Verhuringen</h1>
-      <VerhuringenChart />
+      <div className="xl:flex">
+        <div className="xl:flex-1">
+          <h2 className="text-4xl my-2">Verhuringen</h2>
+          <VerhuringenChart />
+        </div>
+        <div className="xl:flex-1">
+          <h2 className="text-4xl my-2">Beschikbare voertuigen</h2>
+          <BeschikbareVoertuigenChart />
+        </div>
+      </div>
 
-      <h1 className="text-4xl my-2">Beschikbare voertuigen</h1>
-      {renderStackedAreaChart(vehiclesData, metadata.aanbieders)}
-      {renderStackedBarChart(vehiclesData, metadata.aanbieders)}
+      {/*<div className="xl:flex">
+        <div className="xl:flex-1">
+          <h2 className="text-4xl my-2">Parkeerduur</h2>
+          <ParkeerduurChart />
+        </div>
+        <div className="xl:flex-1">
+          <h2 className="text-4xl my-2">Gemiddeld aantal verhuringen per voertuig per dag</h2>
+          <AantalVerhuringenPerVoertuigPerDagChart />
+        </div>
+      </div>*/}
 
       {/*Meer dan 12 datapunten: lijn, anders bar.*/}
 

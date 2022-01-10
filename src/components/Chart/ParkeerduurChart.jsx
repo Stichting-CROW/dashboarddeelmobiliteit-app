@@ -30,9 +30,8 @@ import {
 import {prepareAggregatedStatsData} from '../../helpers/stats.js';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
-import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
-function VerhuringenChart(props) {
+function ParkeerduurChart(props) {
   // const dispatch = useDispatch()
 
   const token = useSelector(state => state.authentication.user_data.token)
@@ -72,8 +71,8 @@ function VerhuringenChart(props) {
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip content={<CustomizedTooltip />} />
-        <Legend />} />
+        <Tooltip />
+        <Legend />
         {getUniqueProviderNames(rentalsData[0]).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
@@ -103,8 +102,8 @@ function VerhuringenChart(props) {
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
-      <Tooltip content={<CustomizedTooltip />} />
-      <Legend />} />
+      <Tooltip />
+      <Legend />
       {getUniqueProviderNames(rentalsData[0]).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
@@ -131,4 +130,4 @@ function VerhuringenChart(props) {
   )
 }
 
-export default VerhuringenChart;
+export default ParkeerduurChart;
