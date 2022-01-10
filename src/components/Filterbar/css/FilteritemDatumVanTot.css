@@ -24,17 +24,60 @@
 .filter-datum-van-tot-box-row {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   height: 46px;
   background: transparent;
 }
 
-.filter-datum-van-tot-box-1 {
+.filter-datum-van-tot-pickercontainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  margin-top:10px;
+}
+
+.filter-datum-van-tot-picker-options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  height: auto;
+  background: transparent;
+  box-sizing: border-box;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+.filter-datum-van-tot-option {
+  width: 125px;
+  height: auto;
+  border-radius: 0.5em;
+  text-align: center;
+  font-size: 11px;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  color: white;
+  background-color: #15AEEF;
+  box-sizing: border-box;
+  margin: 0.1em;
+  padding: 0.3em;
+  padding-top: 0.15em;
+  padding-bottom: 0.15em;
+}
+
+.filter-datum-van-tot-input {
   display: flex;
   flex-direction: row;
   flex-grow: 0 1;
-  justify-content: flex-start;
+  justify-content: space-around;
   align-items: center;
   width: auto;
   height: 100%;
@@ -44,21 +87,9 @@
   opacity: 1;
   flex: 1;
   margin-right: 10px;
-}
-
-.filter-datum-van-tot-box-2 {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  cursor: pointer;
-  width: 2.6em;
-  height: 100%;
-  background: ;
-  border: 1px solid #CCCCCC;
-  border-radius: 10px;
-  opacity: 1;
-  background: #FFFFFF url('../../../images/filterbar/now.svg') no-repeat center border-box;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 14px;
 }
 
 .filter-datum-van-tot-img-now {
