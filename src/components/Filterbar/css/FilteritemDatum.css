@@ -82,4 +82,5 @@
 .filter-datum-dtpicker {
   font: normal normal normal 14px/17px Inter;
   background-color: white;
+  z-index: 2;
 }
