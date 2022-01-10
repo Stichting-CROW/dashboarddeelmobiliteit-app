@@ -56,14 +56,20 @@ function App() {
       let params = new URLSearchParams(uriParams);
       let view = params.get('view')
       if(view) {
-        const importstate = JSON.parse(decodeURIComponent(view));
-        // force update to map extent
-        // importstate.layers.extent = importstate.layers.mapextent;
-        dispatch({type: 'IMPORT_STATE', payload: importstate });
-        
-        setTimeout(()=>dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
-        
-        return;
+        try {
+          console.log(decodeURIComponent(view));
+          const importstate = JSON.parse(decodeURIComponent(view));
+          // force update to map extent
+          // importstate.layers.extent = importstate.layers.mapextent;
+          dispatch({type: 'IMPORT_STATE', payload: importstate });
+          
+          setTimeout(()=>dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
+          return;
+        } catch(ex) {
+          console.warn("unable to decode application state")
+          alert("Ongeldige link ingegeven");
+        }
+        // continue
       }
     }
     
