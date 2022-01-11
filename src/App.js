@@ -19,6 +19,7 @@ import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
+import Misc from './components/Misc/Misc.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -214,13 +215,6 @@ function App() {
             <MapPage mapContainer={mapContainer} />
             {renderMapElements()}
           </Route>
-          <Route exact path="/login">
-            <Overlay>
-              <MapPage mapContainer={mapContainer} />
-              <Login />
-            </Overlay>
-            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
-          </Route>
           <Route exact path="/map/park">
             <MapPage mapContainer={mapContainer} />
             {renderMapElements()}
@@ -243,6 +237,23 @@ function App() {
               <About />
             </ContentPage>
           </Route>
+
+          <Route exact path="/login">
+            <Overlay>
+              <MapPage mapContainer={mapContainer} />
+              <Login />
+            </Overlay>
+            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+          </Route>
+
+          <Route exact path="/misc">
+            <Overlay>
+              <MapPage mapContainer={mapContainer} />
+              <Misc />
+            </Overlay>
+            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+          </Route>
+
         </Switch>
 
         <Menu pathName={pathName} />

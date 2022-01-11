@@ -47,6 +47,8 @@
   justify-content: space-around;
   align-items: center;
   height: auto;
+  width: 300px;
+  max-width: 100%;
   background: transparent;
   box-sizing: border-box;
   padding-left: 0.5em;

@@ -1,0 +1,22 @@
+.FormSelect select {
+  display: block;
+  flex-direction: row;
+  flex-grow: 0 1;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+  flex: 1 1;
+  margin-right: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 14px;
+  height: 46px;
+  line-height: 46px;
+  width: 100%;
+}

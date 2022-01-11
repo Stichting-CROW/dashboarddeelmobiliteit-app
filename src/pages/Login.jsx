@@ -113,7 +113,7 @@ const Login = () => {
             maxWidth: '100%',
             width: '416px'
           }} className="mb-4">
-            Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen.
+            Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen.
           </p>
           <p style={{
             maxWidth: '100%',
