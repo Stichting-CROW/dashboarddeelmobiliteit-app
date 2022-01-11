@@ -155,16 +155,35 @@ function App() {
   useEffect(() => {
     console.log('useEffect zones geodata')
     updateZonesgeodata(store);
-  }, [isLoggedIn, filter.gebied, metadata.zones_loaded, filter.zones])
+  }, [
+    isLoggedIn,
+    filter.gebied,
+    metadata.zones_loaded,
+    filter.zones
+  ])
 
   // On app start, if zones are loaded or pathName/filter is changed: reload data
   useEffect(() => {
     initUpdateParkingData(store);
-  }, [isLoggedIn, metadata.zones_loaded, pathName, filter, layers]);
+  }, [
+    isLoggedIn,
+    metadata.zones_loaded,
+    pathName,
+    filter,
+    layers.displaymode,
+    layers.zones_visible
+  ]);
 
   useEffect(() => {
     initUpdateVerhuringenData(store);
-  }, [isLoggedIn, metadata.zones_loaded, pathName, filter, layers]);
+  }, [
+    isLoggedIn,
+    metadata.zones_loaded,
+    pathName,
+    filter,
+    layers.displaymode,
+    layers.zones_visible
+  ]);
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
