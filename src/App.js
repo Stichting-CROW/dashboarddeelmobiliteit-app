@@ -119,18 +119,18 @@ function App() {
   });
 
   // Set date to current date/time on load
-  useEffect(() => {
-    const setFilterDatum = newdt => {
-      dispatch({
-        type: 'SET_FILTER_DATUM',
-        payload: newdt.toISOString()
-      })
-    }
+  // useEffect(() => {
+  //   const setFilterDatum = newdt => {
+  //     dispatch({
+  //       type: 'SET_FILTER_DATUM',
+  //       payload: newdt.toISOString()
+  //     })
+  //   }
 
-    if(moment(filterDate).diff(moment(), 'minutes') < -10) {
-      setFilterDatum(moment().toDate())
-    }
-  }, [filterDate, dispatch]);
+  //   if(moment(filterDate).diff(moment(), 'minutes') < -10) {
+  //     setFilterDatum(moment().toDate())
+  //   }
+  // }, [filterDate, dispatch]);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.

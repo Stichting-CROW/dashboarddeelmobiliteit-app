@@ -42,7 +42,6 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
     // location of the feature, with description HTML from its properties.
     currentMap.on('click', layerName, function (e) {
       const vehicleProperties = e.features[0].properties;
-      console.log('vehicleProperties', vehicleProperties)
       const providerColor = getProviderColor(providers, vehicleProperties.system_id)
 
       var coordinates = e.features[0].geometry.coordinates.slice();
