@@ -194,12 +194,12 @@ function FilterItemDatumVanTot() {
           inline
         />
         <div className="filter-datum-van-tot-picker-options">
-          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={()=>{ setView('laatste7dagen')}}>Laatste 7 dagen</div>
-          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={()=>{ setView('laatste30dagen')}}>Laatste 30 dagen</div>
-          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={()=>{ setView('laatste90dagen')}}>Laatste 90 dagen</div>
-          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={()=>{ setView('laatste12maanden')}}>Laatste 12 maanden</div>
-          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={()=>{ setView('ditjaar')}}>Dit jaar</div>
-          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={()=>{ setView('vorigjaar')}}>Vorig jaar </div>
+          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={() => { setView('laatste7dagen')}}>Laatste 7 dagen</div>
+          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={() => { setView('laatste30dagen')}}>Laatste 30 dagen</div>
+          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={() => { setView('laatste90dagen')}}>Laatste 90 dagen</div>
+          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={() => { setView('laatste12maanden')}}>Laatste 12 maanden</div>
+          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={() => { setView('ditjaar')}}>Dit jaar</div>
+          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={() => { setView('vorigjaar')}}>Vorig jaar </div>
         </div>
       </div>
     )
@@ -209,21 +209,21 @@ function FilterItemDatumVanTot() {
     <div className="filter-datum-van-tot-container">
       <div className="filter-datum-van-tot-title">Periode</div>
       <div className="filter-datum-van-tot-box-row">
-        <div
+        <div className="flex flex-col justify-center"><div
           className="filter-datum-caret"
           onClick={() => {moveFilterDatum(true)}}>
           &lsaquo;
-        </div>
+        </div></div>
         <div className="filter-datum-van-tot-input"
           onClick={handleClick}>
           {startDate!==null?format(startDate, "yyyy-MM-dd"):""}
           &nbsp;t/m&nbsp;
           {endDate!==null?format(endDate, "yyyy-MM-dd"):""} </div>
-        <div
+        <div className="flex flex-col justify-center"><div
           className="filter-datum-caret"
           onClick={() => {moveFilterDatum(false)}}>
           &rsaquo;
-        </div>
+        </div></div>
       </div>
       { isOpen && renderPickerInline() }
     </div>

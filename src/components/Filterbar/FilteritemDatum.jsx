@@ -41,35 +41,37 @@ function FilterItemDatum() {
 
   return (
     <div className="filter-datum-container">
-      <div className="filter-datum-title">Datum</div>
+      <div className="filter-datum-title">
+        {displayMode === 'displaymode-rentals' ? 'Eindtijd' : 'Datum'}
+      </div>
       <div className="filter-datum-box-row">
         <div className="filter-datum-box-1">
-            <div
-              className="filter-datum-caret"
-              onClick={() => {
-                setFilterDatum(
-                  moment(filterDatum).subtract(1, 'hours')
-                )
-              }}>
-              &lsaquo;
-            </div>
-              <div className="filter-datum-dtpicker">
-                <DateTimePicker
-                  onChange={setFilterDatum}
-                  value={new Date(filterDatum)}
-                  clearIcon={null}
-                  calendarIcon={<img src={calendarIcon} alt="Logo" />}
-                  format={"y-MM-dd H:mm"}
-                />
-              </div>
-            <div
-              className="filter-datum-caret"
-              onClick={() => {
-                setFilterDatum(
-                  moment(filterDatum).add(1, 'hours')
-                )
-              }}
-              >&rsaquo;</div>
+          <div className="flex flex-col justify-center"><div
+            className="filter-datum-caret"
+            onClick={() => {
+              setFilterDatum(
+                moment(filterDatum).subtract(1, 'hours')
+              )
+            }}>
+            &lsaquo;
+          </div></div>
+          <div className="filter-datum-dtpicker">
+            <DateTimePicker
+              onChange={setFilterDatum}
+              value={new Date(filterDatum)}
+              clearIcon={null}
+              calendarIcon={<img src={calendarIcon} alt="Logo" />}
+              format={"y-MM-dd H:mm"}
+            />
+          </div>
+          <div className="flex flex-col justify-center"><div
+            className="filter-datum-caret"
+            onClick={() => {
+              setFilterDatum(
+                moment(filterDatum).add(1, 'hours')
+              )
+            }}
+            >&rsaquo;</div></div>
         </div>
         <div className="filter-datum-box-2" onClick={() => {
           setFilterDatum(new Date())

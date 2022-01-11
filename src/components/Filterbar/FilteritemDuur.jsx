@@ -42,6 +42,9 @@ function FilterItemInterval() {
   
   return (
     <div className="filter-duur-container">
+      <div className="filter-datum-title">
+        Periode
+      </div>
       <div className="filter-duur-box-row">
         <input className="filter-duur-range" width="100%" type="range" min="0" max={cAnnotations.length-1} step="1" onChange={handleSetDuration} value={currentDurationIdx}/>
         <svg className="filter-duur-tickmarks" role="presentation" width="100%" height="10" xmlns="http://www.w3.org/2000/svg">

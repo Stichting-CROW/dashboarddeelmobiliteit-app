@@ -55,9 +55,9 @@ function FilteritemZones() {
   const clearSearchText = e => { setFilterSearch("") }
   
   const zone_groups = [
-    {name: 'Wijken', zone_type: 'neighborhood'},
     {name: 'Stadsdelen', zone_type: 'residential_area'},
-    {name: 'Zones', zone_type: 'custom'},
+    {name: 'Maatwerkzones', zone_type: 'custom'},
+    {name: 'Wijken', zone_type: 'neighborhood'},
     // {name: 'Anders', zone_type: 'municipality'},
   ];
   
