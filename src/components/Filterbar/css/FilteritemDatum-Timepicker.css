@@ -95,7 +95,7 @@
 }
 .react-datetime-picker__clock {
   width: 200px;
-  height: 200px;
+  height: 200px !important;
   max-width: 100vw;
   padding: 25px;
   background-color: white;
