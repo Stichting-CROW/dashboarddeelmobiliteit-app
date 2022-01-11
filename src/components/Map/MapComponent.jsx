@@ -26,6 +26,33 @@ const providerWebsiteUrls = {
   'donkey': 'https://www.donkey.bike/'
 }
 
+const initClusters = (currentMap) => {
+  ['vehicles-clusters', 'rentals-origins-clusters', 'rentals-destinations-clusters'].map(x => {
+    currentMap.on('click', x, function (e) {
+      var features = currentMap.queryRenderedFeatures(e.point, {
+        layers: [x]
+      });
+      var clusterId = features[0].properties.cluster_id;
+      currentMap.getSource(x).getClusterExpansionZoom(
+        clusterId,
+        function (err, zoom) {
+          if (err) return;
+          currentMap.easeTo({
+            center: features[0].geometry.coordinates,
+            zoom: zoom
+          });
+        }
+      );
+    });
+    currentMap.on('mouseenter', x, function () {
+      currentMap.getCanvas().style.cursor = 'pointer';
+    });
+    currentMap.on('mouseleave', x, function () {
+      currentMap.getCanvas().style.cursor = '';
+    });
+  })
+}
+
 const initPopupLogic = (currentMap, providers, isLoggedIn) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
@@ -354,13 +381,19 @@ function MapComponent(props) {
     initPopupLogic(map.current, providers, isLoggedIn)
   }, [map.current, providers])
 
+  // Init clusters click handler
+  useEffect(() => {
+    if(! map.current) return;
+    initClusters(map.current)
+  }, [map.current])
+
   useEffect(() => {
     var addProviderImage = async(aanbieder) => {
       if (map.current.hasImage(aanbieder.system_id + ':0')) {
         // console.log("image already exists");
         return;
       }
-      // WIP
+      // TODO
       if(stateLayers.displaymode === 'displaymode-rentals') {
         var value = await getVehicleMarkers_rentals(aanbieder.color);
       } else {

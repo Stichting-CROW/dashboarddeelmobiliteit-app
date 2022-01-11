@@ -82,7 +82,7 @@ function App() {
     } else {
       payload=DISPLAYMODE_OTHER;
     }
-    dispatch({type: 'LAYER_SET_DISPLAYMODE',payload });
+    dispatch({type: 'LAYER_SET_DISPLAYMODE', payload});
 
   }, [pathName, uriParams, dispatch]);
 

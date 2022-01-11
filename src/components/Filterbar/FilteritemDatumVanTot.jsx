@@ -215,13 +215,15 @@ function FilterItemDatumVanTot() {
           &lsaquo;
         </div></div>
         <div className="filter-datum-van-tot-input"
-          onClick={handleClick}>
+          onClick={handleClick}
+          >
           {startDate!==null?format(startDate, "yyyy-MM-dd"):""}
           &nbsp;t/m&nbsp;
           {endDate!==null?format(endDate, "yyyy-MM-dd"):""} </div>
         <div className="flex flex-col justify-center"><div
           className="filter-datum-caret"
-          onClick={() => {moveFilterDatum(false)}}>
+          onClick={() => {moveFilterDatum(false)}}
+          >
           &rsaquo;
         </div></div>
       </div>
