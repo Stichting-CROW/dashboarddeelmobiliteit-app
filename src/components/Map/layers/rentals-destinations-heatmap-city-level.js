@@ -1,7 +1,7 @@
 const layer = {
-  'id': 'rentals-origins-heatmap-city-level',
+  'id': 'rentals-destinations-heatmap-city-level',
   'type': 'heatmap',
-  'source': 'rentals-origins',
+  'source': 'rentals-destinations',
   'paint': {
     // Increase the heatmap weight based on frequency and property magnitude
     'heatmap-weight': [

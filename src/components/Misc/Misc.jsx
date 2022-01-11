@@ -69,7 +69,7 @@ export default function Misc(props) {
         <Logo />
 
         <div className="
-          mt-8 pt-12
+          mt-6 pt-10
           border-t-2 border-solid border-gray-200
         ">
 
@@ -115,14 +115,14 @@ export default function Misc(props) {
               }
             })}
           />
-          <Button classes="w-full" color="blue">
+          <Button classes="" color="blue">
             Download rapportage
           </Button>
         </Section>
 
         <Section title="Download ruwe data">
           <DateFromTo label="Periode" />
-          <Button classes="w-full" color="blue">
+          <Button classes="" color="blue">
             Download ruwe data (.csv)
           </Button>
         </Section>

@@ -80,6 +80,8 @@ function Map({mode, mapContainer}) {
       default:
     }
   }
+  // console.log('layers', layers)
+  // console.log('activeSource', activeSource)
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">

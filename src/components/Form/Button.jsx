@@ -7,7 +7,9 @@ export default function Button({
 }) {
   return <button className={`
     px-6 py-2 my-4 rounded-lg
-    ${color === 'blue' ? 'bg-theme-blue text-white' : ''}
+    transition-all
+    duration-100
+    ${color === 'blue' ? 'bg-theme-blue hover:bg-black text-white' : ''}
     ${color === 'gray' ? 'bg-gray-300 hover:bg-gray-400 text-white' : ''}
     ${classes}
   `}
