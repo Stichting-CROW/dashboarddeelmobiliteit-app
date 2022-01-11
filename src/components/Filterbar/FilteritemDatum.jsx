@@ -14,10 +14,25 @@ function FilterItemDatum() {
   const dispatch = useDispatch()
   
   const filterDatum = useSelector(state => {
-    return state.filter ? state.filter.datum : new Date().toISOString();
+    if(state.layers.displaymode === 'displaymode-rentals') {
+      return state.filter ? state.filter.intervalend : new Date().toISOString();
+    } else {
+      return state.filter ? state.filter.datum : new Date().toISOString();
+    }
   });
-  
+
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : null;
+  });
+
   const setFilterDatum = newdt => {
+    if(displayMode === 'displaymode-rentals') {
+      dispatch({
+        type: 'SET_FILTER_INTERVAL_END',
+        payload: newdt.toISOString()
+      })
+      return;
+    }
     dispatch({
       type: 'SET_FILTER_DATUM',
       payload: newdt.toISOString()
@@ -44,7 +59,8 @@ function FilterItemDatum() {
                   value={new Date(filterDatum)}
                   clearIcon={null}
                   calendarIcon={<img src={calendarIcon} alt="Logo" />}
-                  format={"y-MM-dd H:mm"}/>
+                  format={"y-MM-dd H:mm"}
+                />
               </div>
             <div
               className="filter-datum-caret"

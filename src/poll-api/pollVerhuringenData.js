@@ -19,17 +19,19 @@ const updateVerhuringenData = ()  => {
     // Wait for zone data
     const state = store_verhuringendata.getState();
     if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
-      // console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
+      console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
       return true;
     }
+
     if(state.metadata.zones_loaded===false) {
       delay = cPollDelayLoading;
-      // console.log("no zone metadata available yet - skipping rentals data update");
+      console.log("no zone metadata available yet - skipping rentals data update");
       return false;
     }
 
     let afstandexclude = state.filter.afstandexclude.split(",") || [];
     const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
+
     if(!canfetchdata) {
       store_verhuringendata.dispatch({ type: 'CLEAR_RENTALS_ORIGINS'});
       store_verhuringendata.dispatch({ type: 'CLEAR_RENTALS_DESTINATIOINS'});
@@ -49,6 +51,7 @@ const updateVerhuringenData = ()  => {
           }
           options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
         }
+        console.log('url', url)
         fetch(url, options).then(function(response) {
           if(!response.ok) {
             console.error("unable to fetch: %o", response);

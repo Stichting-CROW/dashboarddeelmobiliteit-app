@@ -67,18 +67,18 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
   if(isRentalData) {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
-    filter.intervalstart = moment().subtract(filter.intervalduur / 1000, 'seconds').toISOString();
-    filter.intervalend = moment().toISOString();
+    // filter.intervalstart = moment().subtract(filter.intervalduur / 1000, 'seconds').toISOString();
+    // filter.intervalend = moment().toISOString();
     const isInvalid = () => {
       return ! filter
-          || filter.intervalstart === ""
+          // || filter.intervalstart === ""
           || filter.intervalend === ""
-          || filter.intervalstart === undefined
+          // || filter.intervalstart === undefined
           || filter.intervalend === undefined;
     }
     if(! isInvalid()) {
-      ts1 = new Date(filter.intervalstart).toISOString().replace(/.\d+Z$/g, "Z");
-      ts2 = new Date(filter.intervalend).toISOString().replace(/.\d+Z$/g, "Z");
+      ts1 = moment(filter.intervalend).subtract(filter.intervalduur / 1000, 'seconds').toISOString().replace(/.\d+Z$/g, "Z");
+      ts2 = moment(filter.intervalend).toISOString().replace(/.\d+Z$/g, "Z");
     }
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }

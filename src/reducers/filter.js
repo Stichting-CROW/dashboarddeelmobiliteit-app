@@ -3,7 +3,7 @@ const initialState = {
   gebied: "",
   zones: "",
   datum: (new Date()).toISOString(),
-  intervalstart: (new Date()).toISOString(),
+  // intervalstart: (new Date()).toISOString(),
   intervalduur: 60 * 60 * 1000,
   aanbiedersexclude: "",
   parkeerduurexclude: "",
@@ -48,6 +48,12 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           intervalstart: action.payload
+      };
+    }
+    case 'SET_FILTER_INTERVAL_END': {
+      return {
+          ...state,
+          intervalend: action.payload
       };
     }
     case 'SET_FILTER_INTERVAL_DUUR': {
