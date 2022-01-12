@@ -2,14 +2,15 @@ import { useState } from 'react';
 
 import './FormSelect.css';
 
-function FormSelect({label, options}) {
+function FormSelect({label, options, onChange}) {
   return <div className="FormSelect my-2">
     <div className="filter-datum-van-tot-title">
       {label}
     </div>
-    <select>
+    <select onChange={onChange}>
+      <option key="0"></option>
       {options.map(x => {
-        return <option value={x.value}>
+        return <option key={x.value} value={x.value}>
           {x.title}
         </option>
       })}

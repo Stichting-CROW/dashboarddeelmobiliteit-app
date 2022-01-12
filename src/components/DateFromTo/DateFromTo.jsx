@@ -34,12 +34,15 @@ function DateFromTo(props) {
   //     })
   //   }
   // }
+
   const onChange = (dates) => {
     const [start, end] = dates;
 
     setStartDate(start);
     setEndDate(end);
     
+    props.onChange(dates)
+
     if(null!==end) {
       setIsOpen(!isOpen);
     }

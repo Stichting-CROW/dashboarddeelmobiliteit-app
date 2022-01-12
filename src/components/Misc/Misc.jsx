@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import moment from "moment";
 
+import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
+
 import Logo from '../Logo.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
@@ -28,7 +30,14 @@ function Section({title, children}) {
 export default function Misc(props) {
   const dispatch = useDispatch();
 
+  const [startDate, setStartDate] = useState(moment(moment().subtract(1, 'month')).format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+  const [municipalityCode, setMunicipalityCode] = useState('');
   const [doRenderRedirect, setDoRenderRedirect] = useState(false);
+
+  const token = useSelector(state => state.authentication.user_data.token)
+
+  const isVerified = useSelector(state => state.authentication.user_data.user.verified)
 
   const user = useSelector(state => {
     if(! state.authentication) return false;
@@ -53,9 +62,25 @@ export default function Misc(props) {
     );
   }
  
+  const handleDownloadReportClick = async () => {
+    const result = await downloadReport(token, {
+      startDate: moment(startDate).format('YYYY-MM-DD'),
+      endDate: moment(endDate).format('YYYY-MM-DD'),
+      gm_code: municipalityCode
+    });
+  }
+
+  const handleDownloadRawDataClick = async () => {
+    const result = await downloadRawData(token, {
+      startDate: moment(startDate).format('YYYY-MM-DD'),
+      endDate: moment(endDate).format('YYYY-MM-DD')
+    });
+  }
+
   if (doRenderRedirect) {
     return renderRedirect();
   }
+
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -103,11 +128,19 @@ export default function Misc(props) {
         <Section title="Download standaardrapportage">
           <DateFromTo
             label="Periode"
-            startDate={moment().toDate()}
-            endDate={moment().subtract(7, 'days').toDate()}
+            startDate={moment(startDate).toDate()}
+            endDate={moment(endDate).toDate()}
+            onChange={(dates) => {
+              const [start, end] = dates;
+              setStartDate(start);
+              setEndDate(end);
+            }}
           />
           <FormSelect
             label="Plaats"
+            onChange={(e) => {
+              setMunicipalityCode(e.target.value)
+            }}
             options={places.map(x => {
               return {
                 value: x.gm_code,
@@ -115,17 +148,26 @@ export default function Misc(props) {
               }
             })}
           />
-          <Button classes="" color="blue">
+          <Button classes="" color="blue" onClick={() => handleDownloadReportClick()}>
             Download rapportage
           </Button>
         </Section>
 
-        <Section title="Download ruwe data">
-          <DateFromTo label="Periode" />
-          <Button classes="" color="blue">
+        {isVerified && <Section title="Download ruwe data">
+          <DateFromTo
+            label="Periode"
+            startDate={moment(startDate).toDate()}
+            endDate={moment(endDate).toDate()}
+            onChange={(dates) => {
+              const [start, end] = dates;
+              setStartDate(start);
+              setEndDate(end);
+            }}
+          />
+          <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
             Download ruwe data (.csv)
           </Button>
-        </Section>
+        </Section>}
 
       </div>
     </div>
