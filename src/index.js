@@ -4,6 +4,10 @@ import './index.css';
 import AppProvider from './AppProvider';
 import reportWebVitals from './reportWebVitals';
 
+window.notify = (msg) => {
+  alert(msg);
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <AppProvider />

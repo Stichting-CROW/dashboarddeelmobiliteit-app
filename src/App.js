@@ -32,10 +32,10 @@ import {
 } from './poll-api/pollVerhuringenData.js';
 
 import {
-    DISPLAYMODE_PARK,
-    DISPLAYMODE_RENTALS,
-    DISPLAYMODE_OTHER,
-  } from './reducers/layers.js';
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_OTHER,
+} from './reducers/layers.js';
 
 import './App.css';
 
