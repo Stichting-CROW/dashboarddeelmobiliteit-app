@@ -17,30 +17,34 @@ function MenuItem(props) {
     <>
       {props.path && <Link className={`
           text-menu
+          text-center
           ${isActive ? 'is-active' : ''}
         `}
         to={props.path}
         href={props.href}
         onClick={props.onClick}
+        title={props.title}
         >
         {icon ? <img alt={props.text} src={icon} /> : ''}
-        <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+        {props.text && <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
           {props.text}
-        </span>
+        </span>}
       </Link>}
 
       {! props.path && <a className={`
           text-menu
+          text-center
           inline-block cursor-pointer
           ${isActive ? 'is-active' : ''}
         `}
         href={props.href}
         onClick={props.onClick}
+        title={props.title}
         >
         {icon ? <img alt={props.text} src={icon} /> : ''}
-        <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+        {props.text && <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
           {props.text}
-        </span>
+        </span>}
       </a>}
     </>
   )
@@ -53,7 +57,7 @@ function SubMenuItem(props) {
     console.log('show message')
     setShowMessage(true);
     
-    setTimeout(()=>{ console.log('hide message'); setShowMessage(false) }, 3000);
+    setTimeout(() => { console.log('hide message'); setShowMessage(false) }, 3000);
     
     props.onClick(e);
   }
@@ -109,6 +113,7 @@ function Menu({pathName}) {
     const url = base + "?view=" + params;
 
     navigator.clipboard.writeText(url);
+    window.notify('Link gekopieerd. Gebruik de link om direct naar deze weergave van de kaart te verwijzen.')
   }
   
   return (
@@ -126,7 +131,8 @@ function Menu({pathName}) {
     ">
       <div className="
         Menu-inner
-        px-4
+        px-0
+        sm:px-4
         mx-auto
         bg-white
         box-border
@@ -142,6 +148,7 @@ function Menu({pathName}) {
 
         <div className="
           whitespace-nowrap
+          text-center
         ">
 
           {isLoggedIn && <>
@@ -167,13 +174,19 @@ function Menu({pathName}) {
             />
 
             <MenuItem
-              pathName={pathName}
+              title="Kopieer link"
               text={''}
-              icon={'/images/components/Menu/settings.svg'}
+              icon={'/images/components/Menu/share.svg'}
               onClick={(e) => {
                 e.preventDefault();
-                setSubMenuIsActive(! subMenuIsActive)
+                exportStateToClipboard();
               }}
+            />
+
+            <MenuItem
+              path={'/misc'}
+              text={''}
+              icon={'/images/components/Menu/settings.svg'}
             />
 
           </>}

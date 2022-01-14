@@ -2,8 +2,8 @@
   opacity: 1;
 }
 .Menu {
-  transform: translateX(-50%);
-  left: 50%;
+  transform: translateX(-40%);
+  left: 40%;
 }
 
 @media (min-width: 640px) {
@@ -25,7 +25,7 @@
 }
 
 .text-menu {
-  @apply relative text-black hover:text-blue-800 px-4 inline-block;
+  @apply relative text-black hover:text-blue-800 px-3 sm:px-4 inline-block;
   font-size: 14px;
   line-height: 60px;
   height: 60px;
