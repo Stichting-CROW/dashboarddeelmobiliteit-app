@@ -63,6 +63,18 @@ export default function Misc(props) {
   }
  
   const handleDownloadReportClick = async () => {
+    if(! startDate) {
+      window.notify('Selecteer een startdatum');
+      return;
+    }
+    if(! endDate) {
+      window.notify('Selecteer een einddatum');
+      return;
+    }
+    if(! municipalityCode) {
+      window.notify('Selecteer de gemeente');
+      return;
+    }
     const result = await downloadReport(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD'),
@@ -119,7 +131,9 @@ export default function Misc(props) {
             Zend feedback
           </Button>
           <Button color="gray" onClick={() => {
-            setDoRenderRedirect(true)
+            if(window.confirm('Wil je uitloggen?')) {
+              logOut();
+            }
           }}>
             Uitloggen
           </Button>
