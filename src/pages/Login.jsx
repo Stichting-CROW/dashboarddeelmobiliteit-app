@@ -95,8 +95,13 @@ const Login = () => {
 
   const renderLogin = () => {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="mx-auto">
+      <div className="
+        px-4
+        min-h-screen
+        sm:flex sm:justify-center
+        sm:px-0
+      ">
+        <div className="mx-auto py-8">
 
           <IconButtonClose
             onClick={() => setDoRenderRedirect(true)}

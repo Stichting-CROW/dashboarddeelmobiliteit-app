@@ -95,7 +95,12 @@ export default function Misc(props) {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="
+      px-4
+      min-h-screen
+      sm:flex sm:justify-center
+      sm:px-0
+    ">
       <div className="mx-auto py-8">
 
         <IconButtonClose
