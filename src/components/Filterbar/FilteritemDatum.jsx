@@ -1,4 +1,4 @@
-// import { useState } from 'react';
+import { useEffect } from 'react';
 import './css/FilteritemDatum.css';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
@@ -12,14 +12,19 @@ import calendarIcon from '../../images/calendar.svg';
 
 function FilterItemDatum() {
   const dispatch = useDispatch()
-  
+
   const filterDatum = useSelector(state => {
     if(state.layers.displaymode === 'displaymode-rentals') {
-      return state.filter ? state.filter.intervalend : new Date().toISOString();
+      return state.filter && state.filter.intervalend ? state.filter.intervalend : new Date().toISOString();
     } else {
-      return state.filter ? state.filter.datum : new Date().toISOString();
+      return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
     }
   });
+
+  // On Component load: set filter datum if filterdatum is undefined
+  useEffect(x => {
+    setFilterDatum(new Date(filterDatum));
+  }, [])
 
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : null;
