@@ -112,8 +112,11 @@ const updateParkingData = ()  => {
 
       }).catch(ex=>{
         console.error("unable to decode JSON");
-      });
+      }).finally(()=>{
+        store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
+      })
     }).catch(ex=>{
+      store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
       console.error("fetch error - unable to fetch JSON from %s", url);
     });
   } catch(ex) {

@@ -88,11 +88,14 @@ export const initAccessControlList = (store_accesscontrollist)  => {
           })
         }).catch(ex=>{
           console.error("unable to decode JSON");
-        });
+        }).finally(()=>{
+          store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
+        })
         return true;
       }
   } catch(ex) {
     console.error("Unable to update ACL", ex)
+    store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
     return false;
   }
 }

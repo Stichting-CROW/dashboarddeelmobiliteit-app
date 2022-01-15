@@ -61,8 +61,11 @@ export const updateZones = (store_zones)  => {
         })
       }).catch(ex=>{
         console.error("unable to decode JSON");
-      });
+      }).finally(()=>{
+        store_zones.dispatch({type: 'SHOW_LOADING', payload: false});
+      })
   } catch(ex) {
     console.error("Unable to update zones", ex)
+    store_zones.dispatch({type: 'SHOW_LOADING', payload: false});
   }
 }

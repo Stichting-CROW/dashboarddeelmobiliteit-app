@@ -1,6 +1,5 @@
 // import moment from 'moment';
 import { createFilterparameters, isLoggedIn, convertDistanceToBin } from './pollTools.js';
-import { cPollDelayVerhuringenData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 const md5 = require('md5');
 
@@ -9,7 +8,6 @@ var timerid_verhuringendata = undefined;
 
 // Function that gets trip data and saves it into store_verhuringendata
 const updateVerhuringenData = ()  => {
-  let delay = cPollDelayVerhuringenData;
   try {
     if(undefined===store_verhuringendata) {
       console.error("no redux state available yet - skipping zones update");
@@ -24,7 +22,6 @@ const updateVerhuringenData = ()  => {
     }
 
     if(state.metadata.zones_loaded===false) {
-      delay = cPollDelayLoading;
       console.log("no zone metadata available yet - skipping rentals data update");
       return false;
     }
@@ -55,6 +52,8 @@ const updateVerhuringenData = ()  => {
         store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: true});
         
         fetch(url, options).then(function(response) {
+          store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
+
           if(!response.ok) {
             console.error("unable to fetch: %o", response);
             return false
@@ -109,8 +108,12 @@ const updateVerhuringenData = ()  => {
           }).catch(ex=>{
             console.error("unable to decode JSON");
             // setJson(false);
-          });
+          }).finally(()=>{
+            store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
+          })
+          
         }).catch(ex=>{
+          store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
           console.error("fetch error - unable to fetch JSON from %s", url);
           // setJson(false);
         });
@@ -124,9 +127,8 @@ const updateVerhuringenData = ()  => {
     }
   } catch(ex) {
     console.error("Unable to update zones", ex)
-    delay = cPollDelayVerhuringenData * cPollDelayErrorMultiplyer;
   } finally {
-    // timerid_verhuringendata = setTimeout(updateVerhuringenData, delay);
+    // store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
   }
 }
 

@@ -106,7 +106,11 @@ export const updateZonesgeodata = (store)  => {
           let payload = { data: geojson, filter: state.filter.zones, bounds: fullextent};
           store.dispatch({ type: 'SET_ZONES_GEODATA', payload});
           store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent })
-        }).catch(ex=>{ console.error("unable to decode JSON", ex); });
+        })
+        .catch(ex=>{ console.error("unable to decode JSON", ex); })
+        .finally(()=>{ store.dispatch({type: 'SHOW_LOADING', payload: false});
+      })
+        
       }).catch(ex=>{ console.error("unable to fetch zone geodata"); });
   } catch(ex) {
     console.error("Unable to update zones", ex)
