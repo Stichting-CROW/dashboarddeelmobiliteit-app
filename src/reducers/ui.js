@@ -21,7 +21,7 @@ export default function ui(state = initialState, action) {
       }
     }
     case 'SHOW_LOADING': {
-      console.log("set show loading %s",action.payload)
+      // console.log("set show loading %s",action.payload)
       return {
         ...state,
         showloading: action.payload

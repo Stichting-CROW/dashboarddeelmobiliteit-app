@@ -27,7 +27,7 @@ const providerWebsiteUrls = {
 }
 
 const initClusters = (currentMap) => {
-  ['vehicles-clusters', 'rentals-origins-clusters', 'rentals-destinations-clusters'].map(x => {
+  ['vehicles-clusters', 'rentals-origins-clusters', 'rentals-destinations-clusters'].forEach(x => {
     currentMap.on('click', x, function (e) {
       var features = currentMap.queryRenderedFeatures(e.point, {
         layers: [x]
@@ -221,16 +221,16 @@ function MapComponent(props) {
         dispatch({type: 'SHOW_LOADING', payload: true});
       });
 
-      //
       // map.current.on('sourcedata', function(e) {
       //   console.log('A sourcedata event occurred.',e);
       // });
       //
-      // map.current.on('error', function(e) {
-      //   console.log('An error event occurred.',e);
-      // });
+      map.current.on('error', function(e) {
+        // console.log('An error event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: false});
+      });
       map.current.on('idle', function(e) {
-        console.log('An idle event occurred.',e);
+        // console.log('An idle event occurred.',e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
 
