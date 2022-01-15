@@ -21,6 +21,7 @@ import About from './components/About/About.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
+import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -209,7 +210,8 @@ function App() {
 
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
-      <div className="gui-layer">
+        <LoadingIndicator  />
+        <div className="gui-layer">
         <Switch>
           <Route exact path="/">
             <MapPage mapContainer={mapContainer} />

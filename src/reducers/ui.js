@@ -1,6 +1,7 @@
 const initialState = {
   // FILTERBAR: true,
-  SELECTLAYER: true
+  SELECTLAYER: true,
+  SHOWLOADING: false
 }
 
 export default function ui(state = initialState, action) {
@@ -18,6 +19,13 @@ export default function ui(state = initialState, action) {
         ...state,
         ...action.payload.ui
       }
+    }
+    case 'SHOW_LOADING': {
+      console.log("set show loading %s",action.payload)
+      return {
+        ...state,
+        showloading: action.payload
+      };
     }
     case 'LOGIN':
     case 'LOGOUT': {

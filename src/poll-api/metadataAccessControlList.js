@@ -60,6 +60,8 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       let url="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
+      store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: true});
+      
       fetch(url, options).then((response) => {
         if(!response.ok) {
           console.error("unable to fetch: %o", response);

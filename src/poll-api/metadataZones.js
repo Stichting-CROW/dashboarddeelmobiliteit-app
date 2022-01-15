@@ -45,6 +45,8 @@ export const updateZones = (store_zones)  => {
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids=34217&include_geojson=true
     let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
     
+    store_zones.dispatch({type: 'SHOW_LOADING', payload: true});
+
     fetch(url_zones, options).then((response) => {
       if(!response.ok) {
         console.error("unable to fetch: %o", response);

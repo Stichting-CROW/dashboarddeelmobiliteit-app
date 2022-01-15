@@ -50,6 +50,8 @@ export const updateZonesgeodata = (store)  => {
       return;
     }
     
+    store.dispatch({type: 'SHOW_LOADING', payload: true});
+
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
     let url_zonesgeodata = "https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&&include_geojson=true";
     // let url_geodata="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl"

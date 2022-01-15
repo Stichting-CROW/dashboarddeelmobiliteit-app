@@ -1,6 +1,5 @@
 import moment from 'moment';
 import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
-import { cPollDelayParkingData, cPollDelayErrorMultiplyer, cPollDelayLoading } from '../constants.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 
 var store_parkingdata = undefined;
@@ -45,6 +44,9 @@ const updateParkingData = ()  => {
         options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       }
     }
+    
+    store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: true});
+
     fetch(url, options).then(function(response) {
       if(!response.ok) {
         console.error("unable to fetch: %o", response);

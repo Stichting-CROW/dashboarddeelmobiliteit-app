@@ -51,7 +51,9 @@ const updateVerhuringenData = ()  => {
           }
           options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
         }
-        console.log('url', url)
+        
+        store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: true});
+        
         fetch(url, options).then(function(response) {
           if(!response.ok) {
             console.error("unable to fetch: %o", response);

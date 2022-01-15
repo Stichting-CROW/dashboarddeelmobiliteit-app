@@ -210,6 +210,30 @@ function MapComponent(props) {
         window.ddMap = map.current;
       });
       
+      map.current.on('data', function(e) {
+        // console.log('A data event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: true});
+      });
+      //
+       //
+      map.current.on('sourcedataloading', function(e) {
+        //   console.log('A sourcedataloading event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: true});
+      });
+
+      //
+      // map.current.on('sourcedata', function(e) {
+      //   console.log('A sourcedata event occurred.',e);
+      // });
+      //
+      // map.current.on('error', function(e) {
+      //   console.log('An error event occurred.',e);
+      // });
+      map.current.on('idle', function(e) {
+        console.log('An idle event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: false});
+      });
+
       const registerMapView = (currentmap) => {
         const bounds = currentmap.getBounds();
         const payload = [
