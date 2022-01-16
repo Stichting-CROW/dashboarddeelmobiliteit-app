@@ -8,7 +8,7 @@ const LoadingIndicator = () => {
   
   if(show) {
     return (
-        <img className="loadingindicator" alt="spinning progress indicator" src="/images/components/LoadingIndicator/bike_wheel-512.png"/>
+      <img className="loadingindicator" alt="spinning progress indicator" src="/images/components/LoadingIndicator/bike_wheel-512.png"/>
     )
   } else {
     return null;

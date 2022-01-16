@@ -1,8 +1,8 @@
 .loadingindicator {
   position: absolute;
-  width: 42px;
-  height: 42px;
-  left: 255px;
+  width: 30px;
+  height: 30px;
+  left: 266px;
   top: 19px;
   z-index: 999;
 

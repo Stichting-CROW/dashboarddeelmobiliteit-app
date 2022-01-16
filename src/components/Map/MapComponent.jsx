@@ -210,21 +210,22 @@ function MapComponent(props) {
         window.ddMap = map.current;
       });
       
-      map.current.on('data', function(e) {
-        // console.log('A data event occurred.',e);
-        dispatch({type: 'SHOW_LOADING', payload: true});
-      });
-      //
-       //
-      map.current.on('sourcedataloading', function(e) {
-        //   console.log('A sourcedataloading event occurred.',e);
-        dispatch({type: 'SHOW_LOADING', payload: true});
-      });
+      // map.current.on('data', function(e) {
+      //   console.log('A data event occurred.',e);
+      //   We do not show loading, because this event happens on zoom and map navigate
+      //   dispatch({type: 'SHOW_LOADING', payload: true});
+      // });
+
+      // map.current.on('sourcedataloading', function(e) {
+      //   console.log('A sourcedataloading event occurred.',e);
+      //   We do not show loading, because this event happens on zoom and map navigate
+      //   dispatch({type: 'SHOW_LOADING', payload: true});
+      // });
 
       // map.current.on('sourcedata', function(e) {
       //   console.log('A sourcedata event occurred.',e);
       // });
-      //
+
       map.current.on('error', function(e) {
         // console.log('An error event occurred.',e);
         dispatch({type: 'SHOW_LOADING', payload: false});
