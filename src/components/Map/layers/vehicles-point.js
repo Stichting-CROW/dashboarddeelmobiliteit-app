@@ -3,7 +3,7 @@ const layer = {
   'type': 'symbol',
   'source': 'vehicles',
   'layout': {
-    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'duration_bin']],
+    'icon-image': ["concat", ['get', 'system_id'], '-p:', ['get', 'duration_bin']],
     // 'icon-size': 0.4,
     'icon-size': [
       'interpolate',
