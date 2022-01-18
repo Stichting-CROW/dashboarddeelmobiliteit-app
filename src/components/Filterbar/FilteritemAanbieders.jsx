@@ -8,6 +8,10 @@ function FilteritemAanbieders() {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
   
+  const operatorstats = useSelector(state => {
+    return (state.vehicles && state.vehicles.operatorstats) ? state.vehicles.operatorstats : false;
+  });
+
   const filterAanbiedersExclude = useSelector(state => {
     return state.filter ? state.filter.aanbiedersexclude : [];
   });
@@ -50,6 +54,8 @@ function FilteritemAanbieders() {
     
   }
 
+  console.log("aanbieders map operatorstats: ", operatorstats)
+
   return (
     <div className="filter-aanbieders-container">
       <div className="filter-aanbieders-title-row">
@@ -66,12 +72,32 @@ function FilteritemAanbieders() {
       <div className="filter-aanbieders-box-row">
         {
           aanbieders.map((aanbieder, idx) => {
-            let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : '';
+            let notavailable = operatorstats && (operatorstats[aanbieder.system_id]===0);
+            console.log("aanbieder %s is not available", operatorstats[aanbieder.name])
+            if(notavailable) {
+              return (
+                <div
+                  className={`filter-aanbieders-item filter-aanbieders-item-not-active`}
+                  key={aanbieder.name} >
+                  <div className="filter-aanbieders-marker">
+                    <svg viewBox='0 0 30 30' >
+                      <line x1={'20%'} y1={'20%'} x2={'80%'} y2={'80%'} stroke="#000000" />
+                      <line x1={'20%'} y1={'80%'} x2={'80%'} y2={'20%'} stroke="#000000" />
+                    </svg>
+                  </div>
+                  <div className="filter-aanbieders-itemlabel">
+                    { aanbieder.name }
+                  </div>
+                </div>
+              )
+            }
+            
+            let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : false;
             let handler = excluded ?
                 e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
               :
                 e=>{ e.stopPropagation(); clickFilter(aanbieder); };
-            
+                
             return (
               <div
                 className={`filter-aanbieders-item ${excluded ? 'filter-aanbieders-item-not-active' : ''}`}

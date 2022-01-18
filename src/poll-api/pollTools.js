@@ -33,14 +33,19 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
   }
 
   // Add provider filter
-  if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
-    let filteritems = filter.aanbiedersexclude.split(",");
-    let selectedaanbieders = metadata.aanbieders
-      .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
-      .map(aanbieder=>aanbieder.system_id).join(",");
-
-    filterparams.push("operators=" + selectedaanbieders);
-  } else if (metadata.aanbieders.length===1) {
+  // if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
+  //   let filteritems = filter.aanbiedersexclude.split(",");
+  //   let selectedaanbieders = metadata.aanbieders
+  //     .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
+  //     .map(aanbieder=>aanbieder.system_id).join(",");
+  //
+  //   filterparams.push("operators=" + selectedaanbieders);
+  // } else if (metadata.aanbieders.length===1) {
+  //   filterparams.push("operators=" + metadata.aanbieders[0].system_id);
+  // }
+  
+  // only apply here if there is one aanbieder set
+  if (metadata.aanbieders.length===1) {
     filterparams.push("operators=" + metadata.aanbieders[0].system_id);
   }
   

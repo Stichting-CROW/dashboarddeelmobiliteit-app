@@ -1,5 +1,6 @@
 const initialState = {
-  data: null
+  data: [],
+  operatorstats: [],
 }
 
 export default function vehicles(state = initialState, action) {
@@ -8,34 +9,29 @@ export default function vehicles(state = initialState, action) {
       // console.log("Set Vehicles %o", action.payload);
       const vehicles = action.payload
       return {
+        ...state,
         data: vehicles
       }
     }
-    case 'SET_VEHICLE': {
-      const vehicle = action.payload
-      // Validate input
-      if(! vehicle.uuid) {
-        return {}
+    case 'SET_VEHICLES_OPERATORSTATS': {
+      // console.log("Set Vehicles %o", action.payload);
+      return {
+        ...state,
+        operatorstats: action.payload
       }
-      // Remove changed vehicle
-      const filtered = state.data.filter(function(x) {
-        return x.uuid !== vehicle.uuid;
-      });
-      // Add vehicle to vehicles set
-      filtered.push(vehicle)
-      // Set store
-      return { data: filtered }
     }
     case 'CLEAR_VEHICLES': {
       return {
-        data: []
+        ...state,
+        data: [],
+        operatorstats: []
       }
     }
     case 'LOGIN':
     case 'LOGOUT': {
       console.log('login/logout - reset vehicles data')
       
-      return { data: [] };
+      return { data: [], operatorstats: [] };
     }
     
     default:

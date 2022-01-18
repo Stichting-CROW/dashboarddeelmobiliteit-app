@@ -65,9 +65,13 @@ const updateParkingData = ()  => {
         }
         
         let operatorcolors = {};
+        let operatorstats = {}
         state.metadata.aanbieders.forEach(o => {
           operatorcolors[o.system_id || o.value]=o.color;
+          operatorstats[o.system_id || o.value]=0;
         });
+        
+        let aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || []
     
         const md5 = require('md5');
         var start_time = moment(state.filter.datum);
@@ -98,7 +102,10 @@ const updateParkingData = ()  => {
              }
           }
 
+          operatorstats[v.system_id || v.value]+=1;
+
           let markerVisible = ! isLoggedIn(state) || !parkeerduurexclude.includes(duration_bin.toString());
+          markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
           if(markerVisible) {
             geoJson.features.push(feature);
           }
@@ -110,6 +117,10 @@ const updateParkingData = ()  => {
           payload: geoJson
         })
 
+        store_parkingdata.dispatch({
+          type: 'SET_VEHICLES_OPERATORSTATS',
+          payload: operatorstats
+        })
       }).catch(ex=>{
         console.error("unable to decode JSON");
       }).finally(()=>{
