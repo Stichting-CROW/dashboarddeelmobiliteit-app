@@ -67,6 +67,7 @@ function FilterItemDatum() {
               clearIcon={null}
               calendarIcon={<img src={calendarIcon} alt="Logo" />}
               format={"y-MM-dd H:mm"}
+              disableClock={true}
             />
           </div>
           <div className="flex flex-col justify-center"><div
