@@ -1,8 +1,8 @@
 const cPublicAanbieders = [
     { value:"cykl", system_id:"cykl", name:"Cykl" },
-    { value:"flickbike", system_id:"flickbike", name:"Flickbike" },
+    // { value:"flickbike", system_id:"flickbike", name:"Flickbike" },
     { value:"donkey", system_id:"donkey", name:"Donkey" },
-    { value:"mobike", system_id:"mobike", name:"Mobike" },
+    // { value:"mobike", system_id:"mobike", name:"Mobike" },
     { value:"htm", system_id:"htm", name:"HTM" },
     { value:"gosharing", system_id:"gosharing", name:"GO" },
     { value:"check", system_id:"check", name:"CHECK" },
@@ -13,7 +13,8 @@ const cPublicAanbieders = [
     { value:"baqme", system_id:"baqme", name:"BAQME" },
     { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
     { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
-    { value:"hely", system_id:"hely", name:"Hely" }
+    { value:"hely", system_id:"hely", name:"Hely" },
+    { value:"tier", system_id:"tier", name:"TIER" }
   ];
   
 const cPublicGebieden = [
