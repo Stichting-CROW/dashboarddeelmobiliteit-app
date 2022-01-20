@@ -66,6 +66,13 @@ const updateVerhuringenData = ()  => {
               "type":"FeatureCollection",
               "features":[]
             }
+            
+            let operatorstats = {}
+            state.metadata.aanbieders.forEach(o => {
+              operatorstats[o.system_id || o.value]=0;
+            });
+
+            let aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || []
 
             // Map data
             verhuringen[`trip_${key}`].forEach(v => {
@@ -93,7 +100,10 @@ const updateVerhuringenData = ()  => {
                 }
               }
 
+              operatorstats[v.system_id || v.value]+=1;
+
               let markerVisible = !afstandexclude.includes(distance_bin.toString());
+              markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
               if(markerVisible) {
                 geoJson.features.push(feature);
               }
@@ -104,7 +114,12 @@ const updateVerhuringenData = ()  => {
               type: `SET_RENTALS_${key.toUpperCase()}`,
               payload: geoJson
             })
-          
+            
+            // console.log(`SET_RENTALS_${key.toUpperCase()}_OPERATORSTATS`, JSON.stringify(operatorstats));
+            store_verhuringendata.dispatch({
+              type: `SET_RENTALS_${key.toUpperCase()}_OPERATORSTATS`,
+              payload: operatorstats
+            })
           }).catch(ex=>{
             console.error("unable to decode JSON");
             // setJson(false);

@@ -6,23 +6,18 @@ const initialState = {
 export default function vehicles(state = initialState, action) {
   switch(action.type) {
     case 'SET_VEHICLES': {
-      // console.log("Set Vehicles %o", action.payload);
-      const vehicles = action.payload
       return {
-        ...state,
-        data: vehicles
+        data: action.payload,
+        operatorstats: []
       }
     }
     case 'SET_VEHICLES_OPERATORSTATS': {
-      // console.log("Set Vehicles %o", action.payload);
-      return {
-        ...state,
+      return Object.assign({}, state, {
         operatorstats: action.payload
-      }
+      })
     }
     case 'CLEAR_VEHICLES': {
       return {
-        ...state,
         data: [],
         operatorstats: []
       }
@@ -31,11 +26,10 @@ export default function vehicles(state = initialState, action) {
     case 'LOGOUT': {
       console.log('login/logout - reset vehicles data')
       
-      return { data: [], operatorstats: [] };
+      return initialState;
     }
     
     default:
       return state;
   }
-
 }

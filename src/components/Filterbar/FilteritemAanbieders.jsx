@@ -1,5 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemAanbieders.css';
+import {
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  // DISPLAYMODE_OTHER,
+} from '../../reducers/layers.js';
 
 function FilteritemAanbieders() {
   const dispatch = useDispatch()
@@ -9,7 +14,25 @@ function FilteritemAanbieders() {
   });
   
   const operatorstats = useSelector(state => {
-    return (state.vehicles && state.vehicles.operatorstats) ? state.vehicles.operatorstats : false;
+    let stats = undefined;
+    
+    if(state.layers) {
+      switch(state.layers.displaymode) {
+        case DISPLAYMODE_PARK:
+          stats = (state.vehicles&& state.vehicles.operatorstats) ? state.vehicles.operatorstats : false;
+          break;
+        case DISPLAYMODE_RENTALS:
+          if(state.filter && state.rentals) {
+            const key = (state.filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');
+            stats = state.rentals[`${key}_operatorstats`] ? state.rentals[`${key}_operatorstats`] : undefined;
+          }
+          break;
+        default:
+          ;
+      }
+    }
+    
+    return stats;
   });
 
   const filterAanbiedersExclude = useSelector(state => {
@@ -54,7 +77,7 @@ function FilteritemAanbieders() {
     
   }
 
-  console.log("aanbieders map operatorstats: ", operatorstats)
+  // console.log("aanbieders map operatorstats: ", operatorstats)
 
   return (
     <div className="filter-aanbieders-container">
@@ -72,24 +95,25 @@ function FilteritemAanbieders() {
       <div className="filter-aanbieders-box-row">
         {
           aanbieders.map((aanbieder, idx) => {
-            let notavailable = !operatorstats || (operatorstats && (operatorstats.length===0 || operatorstats[aanbieder.system_id]===0));
-            console.log("aanbieder %s is not available", operatorstats[aanbieder.name])
-            if(notavailable) {
-              return (
-                <div
-                  className={`filter-aanbieders-item filter-aanbieders-item-not-active`}
-                  key={aanbieder.name} >
-                  <div className="filter-aanbieders-marker">
-                    <svg viewBox='0 0 30 30' >
-                      <line x1={'20%'} y1={'20%'} x2={'80%'} y2={'80%'} stroke="#000000" />
-                      <line x1={'20%'} y1={'80%'} x2={'80%'} y2={'20%'} stroke="#000000" />
-                    </svg>
+            if(operatorstats!==undefined) {
+              const notavailable = (operatorstats.length===0 || operatorstats[aanbieder.system_id]===0);
+              if(notavailable) {
+                return (
+                  <div
+                    className={`filter-aanbieders-item filter-aanbieders-item-not-active`}
+                    key={aanbieder.name} >
+                    <div className="filter-aanbieders-marker">
+                      <svg viewBox='0 0 30 30' >
+                        <line x1={'20%'} y1={'20%'} x2={'80%'} y2={'80%'} stroke="#000000" />
+                        <line x1={'20%'} y1={'80%'} x2={'80%'} y2={'20%'} stroke="#000000" />
+                      </svg>
+                    </div>
+                    <div className="filter-aanbieders-itemlabel">
+                      { aanbieder.name }
+                    </div>
                   </div>
-                  <div className="filter-aanbieders-itemlabel">
-                    { aanbieder.name }
-                  </div>
-                </div>
-              )
+                )
+              }
             }
             
             let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : false;

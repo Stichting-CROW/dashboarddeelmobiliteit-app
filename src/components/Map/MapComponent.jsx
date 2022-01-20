@@ -357,7 +357,7 @@ function MapComponent(props) {
     // reset extent action
     dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
   }, [ extent, dispatch ])
-
+  
   // Add layers
   useEffect(() => {
     const addLayers = () => {
@@ -400,23 +400,24 @@ function MapComponent(props) {
     addLayers();
   }, [vehicles, rentals.origins, rentals.destinations, zones_geodata, counter, props.layers, isLoggedIn, providers]);
 
+  const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
     if(! map.current) return;
     if(! providers) return;
     initPopupLogic(map.current, providers, isLoggedIn)
-  }, [map.current, providers, isLoggedIn])
+  }, [mapcurrent_exists, providers, isLoggedIn])
 
   // Init clusters click handler
   useEffect(() => {
     if(! map.current) return;
     initClusters(map.current)
-  }, [map.current])
+  }, [mapcurrent_exists])
 
   useEffect(() => {
     const addProviderImage = async(aanbieder) => {
       let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')
       if (map.current.hasImage(baselabel + ':0')) {
-        // console.log("image already exists");
+        // console.log("provider image for %s already exists", baselabel);
         return;
       }
       // TODO
