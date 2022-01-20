@@ -99,9 +99,13 @@ function Menu({pathName}) {
   });
   
   const logOut = () => {
-    if (isLoggedIn) {
-      dispatch( clearUser() );
-      dispatch( { type: "LOGOUT", payload: null });
+    try {
+      if (isLoggedIn) {
+        dispatch( clearUser() );
+        dispatch( { type: "LOGOUT", payload: null });
+      }
+    } catch(ex) {
+      console.error("Menu.logout - error ", ex);
     }
   }
   

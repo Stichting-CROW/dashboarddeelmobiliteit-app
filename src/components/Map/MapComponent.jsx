@@ -404,7 +404,7 @@ function MapComponent(props) {
     if(! map.current) return;
     if(! providers) return;
     initPopupLogic(map.current, providers, isLoggedIn)
-  }, [map.current, providers])
+  }, [map.current, providers, isLoggedIn])
 
   // Init clusters click handler
   useEffect(() => {
@@ -413,19 +413,21 @@ function MapComponent(props) {
   }, [map.current])
 
   useEffect(() => {
-    var addProviderImage = async(aanbieder) => {
-      if (map.current.hasImage(aanbieder.system_id + ':0')) {
+    const addProviderImage = async(aanbieder) => {
+      let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')
+      if (map.current.hasImage(baselabel + ':0')) {
         // console.log("image already exists");
         return;
       }
       // TODO
+      var value;
       if(stateLayers.displaymode === 'displaymode-rentals') {
-        var value = await getVehicleMarkers_rentals(aanbieder.color);
+        value = await getVehicleMarkers_rentals(aanbieder.color);
       } else {
-        var value = await getVehicleMarkers(aanbieder.color);
+        value = await getVehicleMarkers(aanbieder.color);
       }
       value.forEach((img, idx) => {
-        map.current.addImage(aanbieder.system_id + `:` + idx, { width: 25, height: 25, data: img});
+        map.current.addImage(baselabel + `:` + idx, { width: 25, height: 25, data: img});
       });
     };
     providers.forEach(aanbieder => {

@@ -35,13 +35,28 @@ export default function Misc(props) {
   const [municipalityCode, setMunicipalityCode] = useState('');
   const [doRenderRedirect, setDoRenderRedirect] = useState(false);
 
-  const token = useSelector(state => state.authentication.user_data.token)
+  const token = useSelector(state => {
+    if(state.authentication && state.authentication.user_data) {
+      return state.authentication.user_data.token
+    } else {
+      return undefined;
+    }
+  })
 
-  const isVerified = useSelector(state => state.authentication.user_data.user.verified)
+  const isVerified = useSelector(state => {
+    if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
+      return state.authentication.user_data.user.verified
+    } else {
+      return false;
+    }
+  })
 
   const user = useSelector(state => {
-    if(! state.authentication) return false;
-    return state.authentication.user_data.user
+    if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
+      return state.authentication.user_data.user
+    } else {
+      return false;
+    }
   });
 
   const places = useSelector(state => {
