@@ -72,7 +72,7 @@ function FilteritemAanbieders() {
       <div className="filter-aanbieders-box-row">
         {
           aanbieders.map((aanbieder, idx) => {
-            let notavailable = operatorstats && (operatorstats[aanbieder.system_id]===0);
+            let notavailable = !operatorstats || (operatorstats && (operatorstats.length===0 || operatorstats[aanbieder.system_id]===0));
             console.log("aanbieder %s is not available", operatorstats[aanbieder.name])
             if(notavailable) {
               return (
