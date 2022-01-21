@@ -3,7 +3,7 @@ import './css/FilteritemAanbieders.css';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
-  // DISPLAYMODE_OTHER,
+  DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
 function FilteritemAanbieders() {
@@ -25,6 +25,23 @@ function FilteritemAanbieders() {
           if(state.filter && state.rentals) {
             const key = (state.filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');
             stats = state.rentals[`${key}_operatorstats`] ? state.rentals[`${key}_operatorstats`] : undefined;
+          }
+          break;
+        case DISPLAYMODE_OTHER:
+          if(state.metadata && state.filter && state.stats) {
+            // calculate total stats (operator can appear in any of the charts)
+            let stats = {};
+            state.metadata.aanbieders.forEach(a=>{ stats[a.system_id] = 0 });
+            Object.keys(stats).forEach(key=>{
+              if(key in state.stats.operatorstats_verhuringenchart === true) {
+                stats[key]+=state.stats.operatorstats_verhuringenchart[key];
+              }
+              if(key in state.stats.operatorstats_beschikbarevoertuigenchart === true) {
+                stats[key]+=state.stats.operatorstats_verhuringenchart[key];
+              }
+            })
+            
+            return stats;
           }
           break;
         default:
