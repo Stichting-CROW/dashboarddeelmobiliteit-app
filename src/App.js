@@ -202,9 +202,9 @@ function App() {
 
   const renderMapElements = () => {
     return <>
+      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MenuSecondary />
       {renderMobileMenus()}
-      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
     </>
   }
 

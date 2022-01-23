@@ -43,6 +43,14 @@ function MenuSecondary() {
           setVisibility('MenuSecondary.layers', true)
         }}
       />
+      {/*
+      <MenuSecondaryItem
+        text="Info"
+        onClick={() => {
+          setVisibility('METASTATS', true)
+        }}
+      />
+    */}
     </div>
   )
 }
