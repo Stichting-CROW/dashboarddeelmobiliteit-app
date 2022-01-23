@@ -1,5 +1,5 @@
 const initialState = {
-  // FILTERBAR: true,
+  FILTERBAR: window.innerWidth > 800 ? true : false,
   SELECTLAYER: true,
   SHOWLOADING: false
 }
