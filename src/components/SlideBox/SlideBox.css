@@ -7,7 +7,7 @@
   transition-timing-function: ease-in;
 }
 .SlideBox.direction-right.is-hidden {
-  transform: translateX(95%);
+  transform: translateX(99%);
 }
 .SlideBox.direction-left.is-hidden {
   transform: translateX(-99%);
@@ -50,7 +50,7 @@
   left: -32px;
 }
 .SlideBox.direction-left .SlideBox-toggle-wrapper {
-  right:-28px;
+  right: -22px;
   z-index: 10;
 }
 .SlideBox-toggle {

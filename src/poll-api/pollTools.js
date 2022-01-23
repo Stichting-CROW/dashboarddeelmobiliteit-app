@@ -6,10 +6,14 @@ import {
   } from '../reducers/layers.js';
 
 
-export const createFilterparameters = (displayMode, filter, metadata) => {
+export const createFilterparameters = (displayMode, filter, metadata, options) => {
   const isParkingData=displayMode===DISPLAYMODE_PARK;
   const isRentalData=displayMode===DISPLAYMODE_RENTALS;
   const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
+
+  options = options || {
+    includeOperators: false
+  }
 
   // add zones
   let filterparams = [];
@@ -32,7 +36,7 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
     }
   }
 
-  if(isOntwikkelingData) {
+  if(isOntwikkelingData || options.includeOperators === true) {
     // Add provider filter
     if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
       let filteritems = filter.aanbiedersexclude.split(",");
