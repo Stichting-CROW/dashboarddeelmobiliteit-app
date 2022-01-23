@@ -235,9 +235,11 @@ function App() {
             <Monitoring />
           </Route>
           <Route exact path="/over">
-            <ContentPage>
+            <Overlay>
+              <MapPage mapContainer={mapContainer} />
               <About />
-            </ContentPage>
+            </Overlay>
+            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
           <Route exact path="/login">

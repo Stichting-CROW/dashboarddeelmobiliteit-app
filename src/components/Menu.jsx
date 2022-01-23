@@ -200,6 +200,9 @@ function Menu({pathName}) {
             <Link className="text-menu" to="/login">
               Log in
             </Link>
+            <Link className="text-menu" to="/over">
+              Over
+            </Link>
           </>}
 
           {isLoggedIn && false && <Link className={`
