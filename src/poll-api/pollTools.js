@@ -10,6 +10,10 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   const isParkingData=displayMode===DISPLAYMODE_PARK;
   const isRentalData=displayMode===DISPLAYMODE_RENTALS;
   const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
+  
+  options = options || {
+    includeOperators: false
+  }
 
   options = options || {
     includeOperators: false
@@ -43,7 +47,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
       let selectedaanbieders = metadata.aanbieders
         .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
         .map(aanbieder=>aanbieder.system_id).join(",");
-    
+  
       filterparams.push("operators=" + selectedaanbieders);
     } else if (metadata.aanbieders.length===1) {
       filterparams.push("operators=" + metadata.aanbieders[0].system_id);
@@ -152,4 +156,3 @@ export const convertDistanceToBin = (distance_in_meters) => {
   }
   return 3;
 }
-
