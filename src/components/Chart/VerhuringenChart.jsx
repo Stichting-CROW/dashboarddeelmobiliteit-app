@@ -63,8 +63,8 @@ function VerhuringenChart(props) {
   
   const chartdata = prepareAggregatedStatsData('rentals', rentalsData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude);
   
-  const numberOfPointsOnXAxis = Object.keys(chartdata).length;
   // console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
+  const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
