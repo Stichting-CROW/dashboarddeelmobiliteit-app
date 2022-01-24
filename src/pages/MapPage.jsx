@@ -38,7 +38,7 @@ function Map({mode, mapContainer}) {
   });
   
   let layers = [];
-  if(showZones) { layers.push('zones-geodata') }
+  if(showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
   
   let activeSource = '';
   // console.log("Mappage got displaymode", displayMode);

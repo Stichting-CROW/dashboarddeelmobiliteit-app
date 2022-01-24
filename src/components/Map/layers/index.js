@@ -17,6 +17,7 @@ import rentalsDestinationsClustersCount from './rentals-destinations-clusters-co
 import rentalsDestinationsClustersPoint from './rentals-destinations-clusters-point.js';
 
 import zonesGeodata from './zones-geodata.js';
+import zonesGeodataBorder from './zones-geodata-border.js';
 
 export const layers = {
   'vehicles-point': vehiclesPoint,
@@ -37,5 +38,6 @@ export const layers = {
   'rentals-destinations-clusters-point': rentalsDestinationsClustersPoint,
   'rentals-destinations-heatmap-city-level': rentalsDestinationsHeatmapCityLevel,
 
-  'zones-geodata': zonesGeodata
+  'zones-geodata': zonesGeodata,
+  'zones-geodata-border': zonesGeodataBorder,
 }

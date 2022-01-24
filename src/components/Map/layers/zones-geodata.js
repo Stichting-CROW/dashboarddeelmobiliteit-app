@@ -3,10 +3,11 @@ const layer = {
   'type': 'fill',
   'source': 'zones-geodata',
   'paint': {
-    'fill-color': '#1010e0',
-    'fill-opacity': 0.6
+    'fill-color': '#d1d1e8',
+    'fill-opacity': 0.5
   },
 }
+
 // 'filter': ['==', '$type', 'MultiPolygon'],
 // 'minzoom': 1,
 
