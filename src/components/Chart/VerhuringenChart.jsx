@@ -56,7 +56,6 @@ function VerhuringenChart(props) {
   }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
   
   const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
-  console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {

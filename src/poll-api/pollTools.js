@@ -101,7 +101,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     let tot = undefined;
     if(filter.ontwikkelingvan && filter.ontwikkelingtot) {
       van = new Date(filter.ontwikkelingvan);
-      tot = new Date(filter.ontwikkelingtot);
+      tot = new Date(moment(filter.ontwikkelingtot).add(1, 'day'));
     }
     
     if(!van||!tot) {
@@ -111,8 +111,12 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
       van.setDate(tot.getDate()-7); // go back 1 week
     }
     
-    let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
-    let ts2 = tot.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    // toISOString(true) keeps local timezone://momentjs.com/docs/#/displaying/as-iso-string/
+    // Date format to create: 2020-12-31T23:00:00Z
+    // let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    // let ts2 = tot.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    let ts1 = moment(van).format('YYYY-MM-DDTHH:mm:ss') + 'Z'; // use current time without decimals
+    let ts2 = moment(tot).format('YYYY-MM-DDTHH:mm:ss') + 'Z'; // use current time without decimals
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }
   
