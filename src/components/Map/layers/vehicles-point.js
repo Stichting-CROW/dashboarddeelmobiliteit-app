@@ -10,9 +10,9 @@ const layer = {
         ['linear'],
         ['zoom'],
         11,
-        0.4,
+        0.1,
         16,
-        1.0
+        0.5
       ],
     'icon-allow-overlap': true,
   },
