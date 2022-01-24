@@ -6,6 +6,7 @@ import { clearUser } from '../../actions/authentication.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import moment from "moment";
+import { Link } from "react-router-dom";
 
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
@@ -145,6 +146,16 @@ export default function Misc(props) {
         }} className="mb-4">
           Je bent lid van het Dashboard Deelmobiliteit, een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit willen volgen.
         </p>
+
+        &raquo; <Link to="/over" className="
+          text-gray-400
+          underline
+          block
+          mb-2
+          inline-block
+        ">
+          Meer info
+        </Link>
 
         <div className="flex">
           <Button classes="mr-2" color="blue" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">

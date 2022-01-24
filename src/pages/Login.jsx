@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { setUser } from '../actions/authentication';
 import { useDispatch } from 'react-redux';
-import {
-  Redirect
-} from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 import Logo from '../components/Logo.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';

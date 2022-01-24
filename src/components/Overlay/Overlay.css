@@ -1,0 +1,27 @@
+.Overlay h1 {
+  @apply text-4xl my-4
+}
+
+.Overlay h2 {
+  @apply text-2xl my-4 font-bold;
+}
+
+.Overlay h3 {
+  @apply text-xl my-4
+}
+
+.Overlay ul {
+  @apply list-disc ml-4 my-4
+}
+
+.Overlay p {
+  @apply mb-4;
+}
+
+.Overlay a {
+  text-decoration: none;
+  color: #009fe3;
+}
+.Overlay a:hover {
+  text-decoration: underline;
+}

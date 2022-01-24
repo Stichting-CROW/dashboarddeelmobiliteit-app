@@ -15,6 +15,10 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     includeOperators: false
   }
 
+  options = options || {
+    includeOperators: false
+  }
+
   // add zones
   let filterparams = [];
   if(filter.zones!=="") {

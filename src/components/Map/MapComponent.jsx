@@ -212,13 +212,13 @@ function MapComponent(props) {
       
       // map.current.on('data', function(e) {
       //   console.log('A data event occurred.',e);
-      //   We do not show loading, because this event happens on zoom and map navigate
+      //   // We do not show loading, because this event happens on zoom and map navigate
       //   dispatch({type: 'SHOW_LOADING', payload: true});
       // });
 
       // map.current.on('sourcedataloading', function(e) {
       //   console.log('A sourcedataloading event occurred.',e);
-      //   We do not show loading, because this event happens on zoom and map navigate
+      //   // We do not show loading, because this event happens on zoom and map navigate
       //   dispatch({type: 'SHOW_LOADING', payload: true});
       // });
 
