@@ -6,10 +6,14 @@ import {
   } from '../reducers/layers.js';
 
 
-export const createFilterparameters = (displayMode, filter, metadata) => {
+export const createFilterparameters = (displayMode, filter, metadata, options) => {
   const isParkingData=displayMode===DISPLAYMODE_PARK;
   const isRentalData=displayMode===DISPLAYMODE_RENTALS;
   const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
+  
+  options = options || {
+    includeOperators: false
+  }
 
   // add zones
   let filterparams = [];
@@ -32,21 +36,21 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
     }
   }
 
-  // if(isOntwikkelingData) {
-  //   // Add provider filter
-  //   if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
-  //     let filteritems = filter.aanbiedersexclude.split(",");
-  //     let selectedaanbieders = metadata.aanbieders
-  //       .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
-  //       .map(aanbieder=>aanbieder.system_id).join(",");
-  //
-  //     filterparams.push("operators=" + selectedaanbieders);
-  //   } else if (metadata.aanbieders.length===1) {
-  //     filterparams.push("operators=" + metadata.aanbieders[0].system_id);
-  //   }
-  // } else {
-  //   // filtering is done client side
-  // }
+  if(isOntwikkelingData || options.includeOperators === true) {
+    // Add provider filter
+    if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
+      let filteritems = filter.aanbiedersexclude.split(",");
+      let selectedaanbieders = metadata.aanbieders
+        .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
+        .map(aanbieder=>aanbieder.system_id).join(",");
+  
+      filterparams.push("operators=" + selectedaanbieders);
+    } else if (metadata.aanbieders.length===1) {
+      filterparams.push("operators=" + metadata.aanbieders[0].system_id);
+    }
+  } else {
+    // filtering is done client side
+  }
   
   // only apply here if there is one aanbieder set
   if (metadata.aanbieders.length===1) {
@@ -97,7 +101,7 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
     let tot = undefined;
     if(filter.ontwikkelingvan && filter.ontwikkelingtot) {
       van = new Date(filter.ontwikkelingvan);
-      tot = new Date(filter.ontwikkelingtot);
+      tot = new Date(moment(filter.ontwikkelingtot).add(1, 'day'));
     }
     
     if(!van||!tot) {
@@ -107,8 +111,12 @@ export const createFilterparameters = (displayMode, filter, metadata) => {
       van.setDate(tot.getDate()-7); // go back 1 week
     }
     
-    let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
-    let ts2 = tot.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    // toISOString(true) keeps local timezone://momentjs.com/docs/#/displaying/as-iso-string/
+    // Date format to create: 2020-12-31T23:00:00Z
+    // let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    // let ts2 = tot.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
+    let ts1 = moment(van).format('YYYY-MM-DDTHH:mm:ss') + 'Z'; // use current time without decimals
+    let ts2 = moment(tot).format('YYYY-MM-DDTHH:mm:ss') + 'Z'; // use current time without decimals
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }
   
@@ -144,4 +152,3 @@ export const convertDistanceToBin = (distance_in_meters) => {
   }
   return 3;
 }
-
