@@ -83,12 +83,14 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
 
     width.value = 25;
     height.value = 25;
+
+    let dpr = window.devicePixelRatio || 1;
     
     var canvas = document.createElement('canvas');
     svgElement.setAttribute('width', width.value);
     svgElement.setAttribute('height', height.value);
-    canvas.width = width.value;
-    canvas.height = height.value;
+    canvas.width = width.value * dpr;
+    canvas.height = height.value * dpr;
     var data = new XMLSerializer().serializeToString(svgElement);
     var win = window.URL || window.webkitURL || window;
     var img = new Image();
@@ -98,6 +100,7 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     img.src = url;
     await img.decode();
     var context = canvas.getContext('2d');
+    context.scale(dpr, dpr);
     context.drawImage(img, 0, 0);
     win.revokeObjectURL(url);
  
