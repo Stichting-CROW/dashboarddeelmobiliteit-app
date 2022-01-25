@@ -124,6 +124,8 @@ export default function Misc(props) {
     return renderRedirect();
   }
 
+  const isDateRangeMoreThanOneMonth = moment(endDate).diff(startDate, 'days') > 30;
+
   return (
     <div className="
       px-4
@@ -223,6 +225,13 @@ export default function Misc(props) {
               setEndDate(end);
             }}
           />
+
+          {isDateRangeMoreThanOneMonth && <div className="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">
+            <div>
+              Het is momenteel niet mogelijk om een langere periode dan 1 maand te downloaden. Neem alsjeblieft contact op met ons via <a href="mailto:info@deelfietsdashboard.nl" className="inline">info@deelfietsdashboard.nl</a> als je een export wilt ontvangen voor een langere periode.
+            </div>
+          </div>}
+
           <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
             Download ruwe data (.csv)
           </Button>

@@ -128,8 +128,7 @@ function DateFromTo(props) {
         return; // do nothing
     }
     
-    setStartDate(start)
-    setEndDate(end)
+    onChange([start, end])
   }
 
   const renderPickerInline = () => {
