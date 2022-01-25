@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 
 import {getParkEventsStats} from '../../api/parkEventsStats.js';
@@ -15,21 +15,21 @@ function StatRow({data}) {
   })
 
   return <tr key={data.zone_id}>
-    <td className="py-1 px-2">{data.name}</td>
-    <td className="py-1 px-2">{total}</td>
-    {data.stats.map(x => {
-      return <td key={x} className="py-1 px-2 text-center">{x}</td>
+    <td key={data.zone_id+'name'} className="py-1 px-2">{data.name}</td>
+    <td key={data.zone_id+'total'}className="py-1 px-2">{total}</td>
+    {data.stats.map((x,i) => {
+      return <td key={'p'+i} className="py-1 px-2 text-center">{x}</td>
     })}
   </tr>
 }
 
 function MetaStats(props) {
   // const {setLayers, setActiveSource} = props;
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
-  const isLoggedIn = useSelector(state => {
-    return state.authentication.user_data ? true : false;
-  });
+  // const isLoggedIn = useSelector(state => {
+  //   return state.authentication.user_data ? true : false;
+  // });
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {

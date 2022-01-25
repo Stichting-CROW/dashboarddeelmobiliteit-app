@@ -81,8 +81,8 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     // console.log(svg.firstChild.tagName);
     svgElement.setAttribute("viewBox", "0 0 24 24");
 
-    width.value = 25;
-    height.value = 25;
+    width.value = 50;
+    height.value = 50;
     
     var canvas = document.createElement('canvas');
     svgElement.setAttribute('width', width.value);

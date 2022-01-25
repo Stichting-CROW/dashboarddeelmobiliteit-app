@@ -10,19 +10,19 @@ var timerid_verhuringendata = undefined;
 const updateVerhuringenData = ()  => {
   try {
     if(undefined===store_verhuringendata) {
-      console.error("no redux state available yet - skipping zones update");
+      // console.error("no redux state available yet - skipping zones update");
       return false;
     }
 
     // Wait for zone data
     const state = store_verhuringendata.getState();
     if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
-      console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
+      // console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
       return true;
     }
 
     if(state.metadata.zones_loaded===false) {
-      console.log("no zone metadata available yet - skipping rentals data update");
+      // console.log("no zone metadata available yet - skipping rentals data update");
       return false;
     }
 

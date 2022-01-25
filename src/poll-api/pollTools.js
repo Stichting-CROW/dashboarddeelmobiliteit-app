@@ -15,10 +15,6 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     includeOperators: false
   }
 
-  options = options || {
-    includeOperators: false
-  }
-
   // add zones
   let filterparams = [];
   if(filter.zones!=="") {
@@ -40,7 +36,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     }
   }
 
-  if(isOntwikkelingData || options.includeOperators === true) {
+  if(options.includeOperators === true) {
     // Add provider filter
     if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
       let filteritems = filter.aanbiedersexclude.split(",");
@@ -156,3 +152,4 @@ export const convertDistanceToBin = (distance_in_meters) => {
   }
   return 3;
 }
+

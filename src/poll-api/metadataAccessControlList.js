@@ -39,13 +39,13 @@ const isLoggedIn = (state) => {
 export const initAccessControlList = (store_accesscontrollist)  => {
   try {
     if(undefined===store_accesscontrollist) {
-      console.log("no redux state available yet - skipping metadata update");
+      // console.log("no redux state available yet - skipping metadata update");
       return false;
     }
     
     const state = store_accesscontrollist.getState();
     if(!isLoggedIn(state)) {
-      console.log("initialize ACL Data (not logged in)")
+      // console.log("initialize ACL Data (not logged in)")
       // items -> {"name": "Cykl","system_id": "cykl"}
       store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
       

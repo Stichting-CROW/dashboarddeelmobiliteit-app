@@ -428,7 +428,7 @@ function MapComponent(props) {
         value = await getVehicleMarkers(aanbieder.color);
       }
       value.forEach((img, idx) => {
-        map.current.addImage(baselabel + `:` + idx, { width: 25, height: 25, data: img});
+        map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
       });
     };
     providers.forEach(aanbieder => {

@@ -91,7 +91,7 @@ export default function Misc(props) {
       window.notify('Selecteer de gemeente');
       return;
     }
-    const result = await downloadReport(token, {
+    await downloadReport(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD'),
       gm_code: municipalityCode
@@ -99,7 +99,7 @@ export default function Misc(props) {
   }
 
   const handleDownloadRawDataClick = async () => {
-    const result = await downloadRawData(token, {
+    await downloadRawData(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD')
     });
