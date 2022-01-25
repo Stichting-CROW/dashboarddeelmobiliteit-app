@@ -3,13 +3,15 @@ import './css/FilteritemDatumVanTot.css';
 import { useDispatch, useSelector } from 'react-redux';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from 'react-datepicker';
-import { format, addDays, addMonths }  from 'date-fns';
+import { format, addDays, addMonths } from 'date-fns';
+import moment from 'moment';
 
 function FilterItemDatumVanTot() {
   const dispatch = useDispatch()
 
   const filterOntwikkelingVan = useSelector(state => {
-    return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : new Date();
+    console.log('state.filter.ontwikkelingvan', state.filter.ontwikkelingvan)
+    return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : moment().subtract(30, 'days').toDate();
   });
   
   const filterOntwikkelingTot = useSelector(state => {
@@ -24,13 +26,12 @@ function FilterItemDatumVanTot() {
   const [endDate, setEndDate] = useState(filterOntwikkelingTot);
   const [isOpen, setIsOpen] = useState(false);
 
-
   const updateFilter = (start, end, aggregatie=false) => {
     // strip hours
     const van = new Date(start.toDateString());
 
     // strip hours, add 24 h
-    let tot = new Date(end.toDateString()) ;
+    let tot = new Date(end.toDateString());
     // tot.setDate(tot.getDate() + 1);
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_VANTOT',
@@ -65,31 +66,6 @@ function FilterItemDatumVanTot() {
     
     setIsOpen(!isOpen);
   };
-  
-  // const moveFilterDatum = (down) => {
-  //   let start = startDate;
-  //   let end = endDate;
-  //   switch(filterOntwikkelingAggregatie) {
-  //     case 'week':
-  //       start = addDays(startDate, down?-7:7);
-  //       end = addDays(endDate, down?-7:7);
-  //       break;
-  //     case 'month':
-  //       start = addMonths(startDate, down?-1:1);
-  //       end = addMonths(endDate, down?-1:1);
-  //       break;
-  //     case 'day':
-  //     default:
-  //       start = addDays(startDate, down?-1:1);
-  //       end = addDays(endDate, down?-1:1);
-  //       break;
-  //   }
-  //
-  //   setStartDate(start)
-  //   setEndDate(end)
-  //
-  //   updateFilter(start, end);
-  // }
   
   const moveFilterDatum = (movestart) => {
     let start = startDate;

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const initialState = {
   visible: true,
   gebied: "",
@@ -10,7 +12,7 @@ const initialState = {
   voertuigtypesexclude: "",
   afstandexclude: "",
   herkomstbestemming: "",
-  ontwikkelingvan: (new Date()).toISOString(),
+  ontwikkelingvan: moment().subtract(30, 'days').toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
   ontwikkelingaggregatie: "day"
 }
