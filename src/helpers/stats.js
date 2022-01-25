@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-const prepareAggregatedStatsData = (key, data, aggregationLevel) => {
+const prepareAggregatedStatsData = (key, data, aggregationLevel, aanbiedersexclude='') => {
   if(! data || ! data[`${key}_aggregated_stats`] || ! data[`${key}_aggregated_stats`].values) {
     return [];
   }
@@ -17,7 +17,12 @@ const prepareAggregatedStatsData = (key, data, aggregationLevel) => {
   }
   return data[`${key}_aggregated_stats`].values.map(x => {
     const { start_interval, ...rest } = x;
-    return {...rest, ...{ name: moment(start_interval).format(getDateFormat(aggregationLevel)) }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    let item = {...rest, ...{ name: moment(start_interval).format(getDateFormat(aggregationLevel)) }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    if(aanbiedersexclude!=='') {
+      const exclude = aanbiedersexclude.split(',')
+      Object.keys(item).forEach(key=>{if(exclude.includes(key)) {delete item[key]}});
+    }
+    return item;
   });
 }
 

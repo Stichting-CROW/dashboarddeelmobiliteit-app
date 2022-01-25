@@ -1,7 +1,9 @@
 import React, {useEffect, useState } from 'react';
 
+import { getOperatorStatsForChart } from './chartTools.js';
+
 import {
-  // useDispatch,
+  useDispatch,
   useSelector
 } from 'react-redux';
 
@@ -9,11 +11,11 @@ import {
 
 import {
   AreaChart,
-  LineChart,
+  // LineChart,
   Area,
   BarChart,
   Bar,
-  Line,
+  // Line,
   XAxis,
   Legend,
   YAxis,
@@ -33,7 +35,7 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisT
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
 function BeschikbareVoertuigenChart(props) {
-  // const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector(state => state.filter)
@@ -50,17 +52,23 @@ function BeschikbareVoertuigenChart(props) {
         metadata: metadata,
         aggregationLevel: filter.ontwikkelingaggregatie
       });
-      setVehiclesData(prepareAggregatedStatsData('available_vehicles', availableVehicles, filter.ontwikkelingaggregatie));
+      
+      let operators = getOperatorStatsForChart(availableVehicles.available_vehicles_aggregated_stats.values, metadata.aanbieders)
+      dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
+      
+      setVehiclesData(availableVehicles);
     }
     fetchData();
-  }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
+  }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
   
-  const numberOfPointsOnXAxis = vehiclesData ? Object.keys(vehiclesData).length : 0;
+  const chartdata = prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+
+  const numberOfPointsOnXAxis = chartdata ? Object.keys(chartdata).length : 0;
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
       return <AreaChart
-        data={vehiclesData}
+        data={chartdata}
         margin={{
           top: 10,
           right: 30,
@@ -73,7 +81,7 @@ function BeschikbareVoertuigenChart(props) {
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
         <Legend />
-        {getUniqueProviderNames(vehiclesData[0]).map(x => {
+        {getUniqueProviderNames(chartdata[0]).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -91,7 +99,7 @@ function BeschikbareVoertuigenChart(props) {
     }
 
     return <BarChart
-      data={vehiclesData}
+      data={chartdata}
       margin={{
         top: 10,
         right: 30,
@@ -104,7 +112,7 @@ function BeschikbareVoertuigenChart(props) {
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
       <Legend />
-      {getUniqueProviderNames(vehiclesData[0]).map(x => {
+      {getUniqueProviderNames(chartdata[0]).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar

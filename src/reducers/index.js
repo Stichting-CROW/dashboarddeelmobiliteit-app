@@ -8,6 +8,7 @@ import authentication from './authentication';
 import zones_geodata from './zones_geodata';
 import layers from './layers';
 import ui from './ui';
+import statsreducer from './statsreducer';
 
 export default combineReducers({
   last_update,
@@ -18,5 +19,6 @@ export default combineReducers({
   authentication,
   zones_geodata,
   layers,
-  ui
+  ui,
+  statsreducer
 })

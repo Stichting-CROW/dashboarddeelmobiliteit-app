@@ -10,7 +10,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   const isParkingData=displayMode===DISPLAYMODE_PARK;
   const isRentalData=displayMode===DISPLAYMODE_RENTALS;
   const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
-
+  
   options = options || {
     includeOperators: false
   }
@@ -36,14 +36,14 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     }
   }
 
-  if(isOntwikkelingData || options.includeOperators === true) {
+  if(options.includeOperators === true) {
     // Add provider filter
     if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
       let filteritems = filter.aanbiedersexclude.split(",");
       let selectedaanbieders = metadata.aanbieders
         .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
         .map(aanbieder=>aanbieder.system_id).join(",");
-    
+  
       filterparams.push("operators=" + selectedaanbieders);
     } else if (metadata.aanbieders.length===1) {
       filterparams.push("operators=" + metadata.aanbieders[0].system_id);
