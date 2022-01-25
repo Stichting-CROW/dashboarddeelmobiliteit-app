@@ -132,7 +132,7 @@ function App() {
     if(moment(filterDate).diff(moment(), 'minutes') < -10) {
       setFilterDatum(moment().toDate())
     }
-  }, []);
+  }, [dispatch]);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
@@ -150,12 +150,12 @@ function App() {
   }, [isLoggedIn]);
   
   useEffect(() => {
-    console.log('useEffect zones', filter.gebied)
+    // console.log('useEffect zones', filter.gebied)
     updateZones(store);
   }, [isLoggedIn, metadata.metadata_loaded, filter.gebied])
 
   useEffect(() => {
-    console.log('useEffect zones geodata')
+    // console.log('useEffect zones geodata')
     updateZonesgeodata(store);
   }, [
     isLoggedIn,
@@ -213,27 +213,41 @@ function App() {
         <LoadingIndicator  />
         <div className="gui-layer">
         <Switch>
-          <Route exact path="/">
-            <MapPage mapContainer={mapContainer} />
-            {renderMapElements()}
-          </Route>
-          <Route exact path="/map/park">
-            <MapPage mapContainer={mapContainer} />
-            {renderMapElements()}
-          </Route>
-          <Route exact path="/map/rentals">
-            <MapPage mapContainer={mapContainer} />
-            {renderMapElements()}
-          </Route>
-          <Route exact path="/stats/overview">
-            <ContentPage>
-              <StatsPage />
-            </ContentPage>
-            {renderMobileMenus()}
-          </Route>
-          <Route exact path="/monitoring">
-            <Monitoring />
-          </Route>
+          { isLoggedIn ?
+            <>
+              <Route exact path="/">
+                <MapPage mapContainer={mapContainer} />
+                {renderMapElements()}
+              </Route>
+              <Route exact path="/map/park">
+                <MapPage mapContainer={mapContainer} />
+                {renderMapElements()}
+              </Route>
+              <Route exact path="/map/rentals">
+                <MapPage mapContainer={mapContainer} />
+                {renderMapElements()}
+              </Route>
+              <Route exact path="/stats/overview">
+                <ContentPage>
+                  <StatsPage />
+                </ContentPage>
+                {renderMobileMenus()}
+              </Route>
+              <Route exact path="/monitoring">
+                <Monitoring />
+              </Route>
+              <Route exact path="/misc">
+                <Overlay>
+                  <MapPage mapContainer={mapContainer} />
+                  <Misc />
+                </Overlay>
+                <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+              </Route>
+            </>
+            :
+            null
+          }
+
           <Route exact path="/over">
             <Overlay>
               <MapPage mapContainer={mapContainer} />
@@ -250,12 +264,9 @@ function App() {
             <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
-          <Route exact path="/misc">
-            <Overlay>
-              <MapPage mapContainer={mapContainer} />
-              <Misc />
-            </Overlay>
-            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+          <Route>
+            <MapPage mapContainer={mapContainer} />
+            {renderMapElements()}
           </Route>
 
         </Switch>

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import './FormSelect.css';
 
 function FormSelect({label, options, onChange}) {

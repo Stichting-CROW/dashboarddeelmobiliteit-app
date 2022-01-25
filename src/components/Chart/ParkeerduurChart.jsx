@@ -34,7 +34,7 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisT
 function ParkeerduurChart(props) {
   // const dispatch = useDispatch()
 
-  const token = useSelector(state => state.authentication.user_data.token)
+  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 

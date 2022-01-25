@@ -38,13 +38,13 @@ function Filterbar({
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
   
-  const showdatum=isrentals||ispark;
+  const showdatum=isrentals||ispark||!isLoggedIn;
   const showduur=isrentals;
   const showparkeerduur=ispark;
   const showafstand=isrentals;
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
-  const showvervoerstype=isrentals||ispark;
+  const showvervoerstype=isrentals||ispark||!isLoggedIn;
   
   return (
     <div className="filter-bar-inner py-2">
