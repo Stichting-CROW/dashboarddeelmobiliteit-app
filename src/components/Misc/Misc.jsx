@@ -1,5 +1,5 @@
 // import './ContentPage.css'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // import { setUser } from '../../actions/authentication';
 import { clearUser } from '../../actions/authentication.js';
@@ -35,20 +35,13 @@ export default function Misc(props) {
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [municipalityCode, setMunicipalityCode] = useState('');
   const [doRenderRedirect, setDoRenderRedirect] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token
     } else {
       return undefined;
-    }
-  })
-
-  const isVerified = useSelector(state => {
-    if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
-      return state.authentication.user_data.user.verified
-    } else {
-      return false;
     }
   })
 
@@ -63,6 +56,28 @@ export default function Misc(props) {
   const places = useSelector(state => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
+
+  useEffect(x => {
+    if(! token) return;
+
+    let url = "https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
+    let options = { headers : { "authorization": "Bearer " + token }}
+    
+    fetch(url, options).then((response) => {
+      if(!response.ok) {
+        console.error("unable to fetch: %o", response);
+        return false
+      }
+      response.json().then((acl) => {
+        const isAdmin = acl.is_admin === true;
+        const isContactPerson = acl.is_contact_person_municipality === true;
+
+        if(isAdmin || isContactPerson) {
+          setIsVerified(true);
+        }
+      });
+    });
+  }, [token])
 
   const logOut = () => {
     if (user) {
@@ -108,7 +123,6 @@ export default function Misc(props) {
   if (doRenderRedirect) {
     return renderRedirect();
   }
-
 
   return (
     <div className="
