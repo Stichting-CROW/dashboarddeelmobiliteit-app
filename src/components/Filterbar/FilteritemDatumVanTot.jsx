@@ -10,7 +10,6 @@ function FilterItemDatumVanTot() {
   const dispatch = useDispatch()
 
   const filterOntwikkelingVan = useSelector(state => {
-    console.log('state.filter.ontwikkelingvan', state.filter.ontwikkelingvan)
     return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : moment().subtract(30, 'days').toDate();
   });
   

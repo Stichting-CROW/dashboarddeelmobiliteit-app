@@ -14,6 +14,7 @@ import MapPage from './pages/MapPage.jsx';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
+import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
@@ -260,6 +261,14 @@ function App() {
             <Overlay>
               <MapPage mapContainer={mapContainer} />
               <Login />
+            </Overlay>
+            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+          </Route>
+
+          <Route exact path="/reset-password/:changePasswordCode">
+            <Overlay>
+              <MapPage mapContainer={mapContainer} />
+              <SetPassword />
             </Overlay>
             <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
