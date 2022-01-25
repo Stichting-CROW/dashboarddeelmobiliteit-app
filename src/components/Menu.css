@@ -17,7 +17,9 @@
   }
 
   .Menu-inner {
-    @apply px-4 shadow-lg m-4 mb-1 rounded-3xl;
+    @apply px-4 shadow-lg m-4 mb-0 rounded-3xl;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     display: inline-block;
     overflow-x: auto;
     max-width: 100%;
