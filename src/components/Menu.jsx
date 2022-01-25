@@ -120,23 +120,17 @@ function Menu({pathName}) {
     window.notify('Link gekopieerd. Gebruik de link om direct naar deze weergave van de kaart te verwijzen.')
   }
   
+  let menuClassName = "Menu fixed w-full mx-0 bottom-0 bg-white";
+  menuClassName += " sm:bg-transparent sm:w-full";
+  if(exportState && exportState.ui && exportState.ui.FILTERBAR) {
+    menuClassName += ' filter-open';
+  }
+  
   return (
-    <div className="
-      Menu
-      fixed
-      w-full
-      mx-0
-      bottom-0
-      bg-white
-      sm:bg-transparent
-      sm:bottom-0.5
-      sm:mx-8
-      sm:w-auto
-    ">
+    <div className={menuClassName}>
       <div className="
         Menu-inner
         px-0
-        sm:px-4
         mx-auto
         bg-white
         box-border
@@ -144,6 +138,7 @@ function Menu({pathName}) {
         flex
         flex-col
         justify-center
+        sm:px-4
         sm:shadow-lg
         sm:m-4
         sm:mb-1
