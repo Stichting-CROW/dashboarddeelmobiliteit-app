@@ -4,6 +4,18 @@ import SlideBox from '../SlideBox/SlideBox.jsx';
 
 import {getParkEventsStats} from '../../api/parkEventsStats.js';
 
+import {
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_OTHER,
+  // DISPLAYMODE_PARKEERDATA_HEATMAP,
+  // DISPLAYMODE_PARKEERDATA_CLUSTERS,
+  // DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  // DISPLAYMODE_VERHUURDATA_HEATMAP,
+  // DISPLAYMODE_VERHUURDATA_CLUSTERS,
+  // DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+} from '../../reducers/layers.js';
+
 // import './MetaStats.css';
 
 function StatRow({data}) {
@@ -24,6 +36,10 @@ function StatRow({data}) {
 }
 
 function MetaStats(props) {
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
   // const {setLayers, setActiveSource} = props;
   // const dispatch = useDispatch()
 
@@ -61,6 +77,10 @@ function MetaStats(props) {
     { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '< 4 d'},
     { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '> 4 d'}
   ];
+
+  if(displayMode===DISPLAYMODE_OTHER || displayMode===DISPLAYMODE_RENTALS) {
+    return null; // no meta stats
+  }
 
   if(! metaStatsData || ! metaStatsData.park_event_stats || metaStatsData.park_event_stats.length <= 0) {
     return <></>
