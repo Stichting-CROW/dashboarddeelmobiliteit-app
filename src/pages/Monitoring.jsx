@@ -1,11 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
 
 import {fetchParkEvents} from '../helpers/parkEvents.js';
 
-const numberOfSnapshots = 4*5;//4*5
-const provider = 'htm';//4*5
+const numberOfSnapshots = 40;
+const provider = 'tier';
 let numberOfUniqueVehiclesAfterXIterations = [];
 
 const getUniqueVehicleIds = (dataset) => {
@@ -20,6 +20,8 @@ const getUniqueVehicleIds = (dataset) => {
 }
 
 function Monitoring(props) {
+
+  const [vehiclesData, setVehiclesData] = useState({});
 
   // Get state.authentication
   const authentication = useSelector(state => {
@@ -44,12 +46,16 @@ function Monitoring(props) {
         });
         // Get cumulative unique vehicle IDs
         numberOfUniqueVehiclesAfterXIterations[i] = getUniqueVehicleIds(collectedParkEvents);
+        setVehiclesData(numberOfUniqueVehiclesAfterXIterations);
+        console.table(numberOfUniqueVehiclesAfterXIterations[i].length, dateTime)
       }
       return collectedParkEvents;
     }
 
     fetchMultipleMomentsInTime();
   }, [authentication]);
+
+  console.log(vehiclesData)
 
   return (
     <div className="mt-12">

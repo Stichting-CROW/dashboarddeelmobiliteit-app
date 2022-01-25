@@ -43,7 +43,7 @@ function MetaStats(props) {
   const [metaStatsData, setMetaStatsData] = useState([])
 
   useEffect(() => {
-    // Do not reload chart until you have 'zones'
+    // Do not get meta stats until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
     async function gogogo() {
       const result = await getParkEventsStats(token, {
