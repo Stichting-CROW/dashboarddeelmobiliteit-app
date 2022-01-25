@@ -139,7 +139,7 @@ const Login = () => {
               placeholder="email"
               name="emailaddress"
               required
-              onChange={e => setEmailaddress(e.target.value)}
+              onChange={e => setEmailaddress(e.target.value.trim())}
             />
 
             <label className="mt-4 block" htmlFor="password">Wachtwoord</label>
@@ -195,7 +195,7 @@ const Login = () => {
               placeholder="E-mailadres"
               name="emailaddress"
               required
-              onChange={e => setEmailaddress(e.target.value)}
+              onChange={e => setEmailaddress(e.target.value.trim())}
             />
      
             {errorMessage && <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
