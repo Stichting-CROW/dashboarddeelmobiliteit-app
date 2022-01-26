@@ -13,10 +13,14 @@ import {layers} from './layers';
 import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
 
+import JSConfetti from 'js-confetti'
+
 const md5 = require('md5');
 
 // Set language for momentJS
 moment.locale('nl', localization);
+
+const jsConfetti = new JSConfetti()
 
 const providerWebsiteUrls = {
   'check': 'https://ridecheck.app/',
@@ -50,6 +54,15 @@ const initClusters = (currentMap) => {
     currentMap.on('mouseleave', x, function () {
       currentMap.getCanvas().style.cursor = '';
     });
+  })
+}
+
+window.showConfetti = () => {
+  jsConfetti.addConfetti()
+  jsConfetti.addConfetti({
+    emojis: ['🚲', '🚲', '🚴‍♀️', '🛵', '🛴', '🚗', '🚙', '✨', '✨'],
+    emojiSize: 30,
+    confettiNumber: 100,
   })
 }
 
@@ -87,7 +100,9 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
           <h1 class="mb-2">
             <span
               class="rounded-full inline-block w-4 h-4"
-              style="background-color: ${providerColor};position: relative;top: 2px">
+              style="background-color: ${providerColor};position: relative;top: 2px"
+              onClick="window.showConfetti()"
+              >
             </span>
             <span class="Map-popup-title ml-1" style="color: ${providerColor};">
               ${vehicleProperties.system_id}
