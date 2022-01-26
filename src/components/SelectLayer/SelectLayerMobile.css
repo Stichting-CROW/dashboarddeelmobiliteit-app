@@ -21,13 +21,13 @@
 
 }
 .SelectLayerMobile .layer[data-type="vehicles"] {
-  background-image: url('https://i.imgur.com/ksCt3TQ.png')
+  background-image: url('../../images/SelectLayer/layer-vehicles.png')
 }
 .SelectLayerMobile .layer[data-type="heat-map"] {
-  background-image: url('https://i.imgur.com/AaqWjwK.png')
+  background-image: url('../../images/SelectLayer/layer-heatmap.png')
 }
 .SelectLayerMobile .layer[data-type="pointers"] {
-  background-image: url('https://i.imgur.com/NeqZoh7.png')
+  background-image: url('../../images/SelectLayer/layer-clusters.png')
 }
 .SelectLayerMobile .layer[data-type='zones'] {
   background-image: url('../../images/layer-zones.png')
