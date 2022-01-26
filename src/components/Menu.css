@@ -8,6 +8,7 @@
   transition: width 1s;
   transition-timing-function: ease-out;
   right: 0;
+  z-index: 100;
 }
 
 @media (min-width: calc(640px)) {

@@ -8,9 +8,10 @@ export default function ContentPage(props) {
 
   return (
     <div
-      className={`ContentPage h-full pb-20 ${isFilterBarVisible ? '' : 'full-page'}`}
+      className={`ContentPage relative bg-white h-full pb-20 ${isFilterBarVisible ? '' : 'full-page'}`}
       style={{
         overflowY: 'auto',
+        zIndex: 1,
       }}
     >
       <div className="ContentPage-inner py-8 pl-12">

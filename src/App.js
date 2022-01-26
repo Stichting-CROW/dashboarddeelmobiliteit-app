@@ -209,7 +209,6 @@ function App() {
 
   const renderMapElements = () => {
     return <>
-      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MenuSecondary />
       {renderMobileMenus()}
     </>
@@ -223,15 +222,12 @@ function App() {
           { isLoggedIn ?
             <>
               <Route exact path="/">
-                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
               <Route exact path="/map/park">
-                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
               <Route exact path="/map/rentals">
-                <MapPage mapContainer={mapContainer} />
                 {renderMapElements()}
               </Route>
               <Route exact path="/stats/overview">
@@ -245,7 +241,6 @@ function App() {
               </Route>
               <Route exact path="/misc">
                 <Overlay>
-                  <MapPage mapContainer={mapContainer} />
                   <Misc />
                 </Overlay>
                 <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
@@ -257,7 +252,6 @@ function App() {
 
           <Route exact path="/over">
             <Overlay>
-              <MapPage mapContainer={mapContainer} />
               <About />
             </Overlay>
             <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
@@ -265,7 +259,6 @@ function App() {
 
           <Route exact path="/login">
             <Overlay>
-              <MapPage mapContainer={mapContainer} />
               <Login />
             </Overlay>
             <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
@@ -273,19 +266,19 @@ function App() {
 
           <Route exact path="/reset-password/:changePasswordCode">
             <Overlay>
-              <MapPage mapContainer={mapContainer} />
               <SetPassword />
             </Overlay>
             <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
           <Route>
-            <MapPage mapContainer={mapContainer} />
             {renderMapElements()}
           </Route>
 
         </Switch>
 
+        <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+        <MapPage mapContainer={mapContainer} />
         <Menu pathName={pathName} />
 
        </div>
