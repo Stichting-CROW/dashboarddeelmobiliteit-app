@@ -61,7 +61,7 @@ function App() {
       let view = params.get('view')
       if(view) {
         try {
-          console.log(decodeURIComponent(view));
+          // console.log(decodeURIComponent(view));
           const importstate = JSON.parse(decodeURIComponent(view));
           // force update to map extent
           // importstate.layers.extent = importstate.layers.mapextent;
@@ -130,7 +130,13 @@ function App() {
       })
     }
 
-    if(moment(filterDate).diff(moment(), 'minutes') < -10) {
+    // On load, set datetime to NOW
+    // - Don't do this if datetime < 10 ago
+    // - Don't do this if this is a shared link (we'll then keep the shared datetime)
+    const params = new URLSearchParams(uriParams);
+    const isFilterDateMoreThan10MinutesAgo = moment(filterDate).diff(moment(), 'minutes') < -10;
+    const isSharedLink = params.get('view');// Check if this is a shared link
+    if(! isSharedLink && isFilterDateMoreThan10MinutesAgo) {
       setFilterDatum(moment().toDate())
     }
   }, [dispatch]);
