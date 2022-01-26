@@ -164,9 +164,9 @@ function MapComponent(props) {
   });
   
   const mapContainer = props.mapContainer;
-  const [lng] = useState(4.4671854);
-  const [lat] = useState(51.9250836);
-  const [zoom] = useState(15);
+  const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
+  const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
+  const [zoom] = useState(stateLayers.zoom || 15);
   const [counter, setCounter] = useState(0);
   const [zonesGeodataHash, setZonesGeodataHash] = useState("");
   const [sourceHash, setSourceHash] = useState([]);
@@ -245,6 +245,7 @@ function MapComponent(props) {
         ]
         
         dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
+        dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: currentmap.getZoom() })
       }
       
       map.current.on('moveend', function() {

@@ -84,6 +84,18 @@ export default function filter(state = initialState, action) {
         return state;
       }
     }
+    case 'LAYER_SET_MAP_ZOOM': {
+      if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.zoom||false))) {
+        // console.log("set zoom to %o", action.payload)
+        return {
+            ...state,
+            zoom: action.payload
+        };
+      } else {
+        // console.log("set zoom - not changed")
+        return state;
+      }
+    }
     case 'IMPORT_STATE': {
       console.log('import layers')
       

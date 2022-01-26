@@ -25,6 +25,7 @@ export const updateZones = (store_zones)  => {
       
       return;
     } if(state.filter.gebied==="") {
+
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
