@@ -30,7 +30,7 @@ function MenuSecondary() {
   }
 
   return (
-    <div className="MenuSecondary block sm:hidden absolute left-0">
+    <div className="MenuSecondary block sm:hidden absolute left-0 z-10">
       <MenuSecondaryItem
         text="Filters"
         onClick={() => {

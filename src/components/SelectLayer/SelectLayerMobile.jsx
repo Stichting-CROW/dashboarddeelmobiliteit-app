@@ -64,6 +64,7 @@ function SelectLayerMobile(props) {
       }}
       classes="
         top-auto
+        z-10
       "
     >
       <div className={`

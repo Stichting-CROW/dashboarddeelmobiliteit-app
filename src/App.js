@@ -215,10 +215,10 @@ function App() {
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
     return <div>
-      <div className="hidden sm:block h-full">
+      <div className="hidden sm:block relative h-full z-10">
         <FilterbarDesktop isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
-      <div className="block sm:hidden">
+      <div className="block sm:hidden relative z-10">
         <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
       <SelectLayerMobile />
