@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import {
+  useDispatch,
+  // useSelector
+} from 'react-redux';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from 'react-datepicker';
 import { format, addDays, addMonths }  from 'date-fns';
@@ -8,7 +11,7 @@ import moment from 'moment';
 // import './css/FilteritemDatumVanTot.css';
 
 function DateFromTo(props) {
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   const [startDate, setStartDate] = useState(props.startDate || moment().toDate());
   const [endDate, setEndDate] = useState(props.endDate || moment().toDate());
@@ -90,39 +93,39 @@ function DateFromTo(props) {
 
     let start;
     let end;
-    let agg;
+    // let agg;
     switch(view) {
       case 'laatste7dagen':
         start = addDays(today,-6);
         end = today;
-        agg='day';
+        // agg='day';
         break;
       case 'laatste30dagen':
         start = addDays(today,-30);
         end = today;
-        agg='day';
+        // agg='day';
         break;
       case 'laatste90dagen':
         start = addDays(today,-90);
         end = today;
-        agg='day';
+        // agg='day';
         break;
       case 'laatste12maanden':
         start = addDays(today,-365);
         end = today;
-        agg='week';
+        // agg='week';
         break;
       case 'ditjaar':
         let tyear= today.getFullYear();
         start = new Date(tyear.toString() + '/1/1');
         end = today;
-        agg='month';
+        // agg='month';
         break;
       case 'vorigjaar':
         let lyear= today.getFullYear()-1;
         start = new Date(lyear.toString() + '/1/1');
         end = new Date(lyear.toString() + '/12/31');
-        agg='month';
+        // agg='month';
         break;
       default:
         return; // do nothing

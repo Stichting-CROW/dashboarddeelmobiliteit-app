@@ -28,7 +28,7 @@ function StatRow({data}) {
 
   return <tr key={data.zone_id}>
     <td key={data.zone_id+'name'} className="py-1 px-2">{data.name}</td>
-    <td key={data.zone_id+'total'}className="py-1 px-2">{total}</td>
+    <td key={data.zone_id+'total'} className="py-1 px-2">{total}</td>
     {data.stats.map((x,i) => {
       return <td key={'p'+i} className="py-1 px-2 text-center">{x}</td>
     })}
@@ -101,8 +101,8 @@ function MetaStats(props) {
             <tr>
               <th className="py-1 px-2 text-left font-normal">Zone</th>
               <th className="py-1 px-2 pr-4 text-left font-normal">Totaal</th>
-              {markers.map(marker => {
-                return <th className="py-1 px-2 text-center">
+              {markers.map((marker,i) => {
+                return <th key={'m'+i} className="py-1 px-2 text-center">
                   <div className="w-6 h-6 ">
                     <svg viewBox='0 0 30 30' >
                       <circle cx={'50%'} cy={'50%'} r={'40%'} fill={marker.color} />
@@ -114,8 +114,8 @@ function MetaStats(props) {
             </tr>
           </thead>
           <tbody>
-            {metaStatsData.park_event_stats.map(x => {
-              return <StatRow data={x} />
+            {metaStatsData.park_event_stats.map((x, i) => {
+              return <StatRow key={'stat'+i} data={x} />
             })}
           </tbody>
         </table>

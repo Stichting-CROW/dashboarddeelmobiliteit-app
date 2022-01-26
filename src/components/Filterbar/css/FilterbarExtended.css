@@ -24,7 +24,7 @@
     position: absolute;
     left: 320px;
     width: 300px;
-    @apply px-0
+    @apply px-1
   }  
   .FilterbarExtended-close-button-wrapper {
     padding: 5px 5px;
