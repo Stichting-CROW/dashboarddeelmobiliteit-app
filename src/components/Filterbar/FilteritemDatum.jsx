@@ -13,6 +13,9 @@ import calendarIcon from '../../images/calendar.svg';
 function FilterItemDatum() {
   const dispatch = useDispatch()
 
+  // Variable that stores timeout for delaying setting date 
+  let TO_date = null, TIMEOUT_IN_MS = 0;
+
   const filterDatum = useSelector(state => {
     if(state.layers.displaymode === 'displaymode-rentals') {
       return state.filter && state.filter.intervalend ? state.filter.intervalend : new Date().toISOString();
@@ -31,17 +34,21 @@ function FilterItemDatum() {
   });
 
   const setFilterDatum = newdt => {
-    if(displayMode === 'displaymode-rentals') {
+    if(TO_date) clearTimeout(TO_date);
+
+    TO_date = setTimeout(x => {
+      if(displayMode === 'displaymode-rentals') {
+        dispatch({
+          type: 'SET_FILTER_INTERVAL_END',
+          payload: newdt.toISOString()
+        })
+        return;
+      }
       dispatch({
-        type: 'SET_FILTER_INTERVAL_END',
+        type: 'SET_FILTER_DATUM',
         payload: newdt.toISOString()
       })
-      return;
-    }
-    dispatch({
-      type: 'SET_FILTER_DATUM',
-      payload: newdt.toISOString()
-    })
+    }, TIMEOUT_IN_MS)
   }
 
   return (

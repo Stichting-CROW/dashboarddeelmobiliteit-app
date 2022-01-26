@@ -49,6 +49,8 @@ function App() {
   
   const mapContainer = useRef(null);
 
+  let TO_delay = null, DELAY_TIMEOUT_IN_MS = 500;
+
   let location = useLocation();
   useEffect(() => {
     setPathName(location ? location.pathname : null);
@@ -173,7 +175,15 @@ function App() {
 
   // On app start, if zones are loaded or pathName/filter is changed: reload data
   useEffect(() => {
-    initUpdateParkingData(store);
+    if(displayMode !== 'displaymode-park') {
+      return;
+    }
+
+    if(TO_delay) clearTimeout(TO_delay);
+
+    TO_delay = setTimeout(x => {
+      initUpdateParkingData(store);
+    }, DELAY_TIMEOUT_IN_MS)
   }, [
     isLoggedIn,
     metadata.zones_loaded,
@@ -184,7 +194,15 @@ function App() {
   ]);
 
   useEffect(() => {
-    initUpdateVerhuringenData(store);
+    if(displayMode !== 'displaymode-rentals') {
+      return;
+    }
+
+    if(TO_delay) clearTimeout(TO_delay);
+
+    TO_delay = setTimeout(x => {
+      initUpdateVerhuringenData(store);
+    }, DELAY_TIMEOUT_IN_MS)
   }, [
     isLoggedIn,
     metadata.zones_loaded,
