@@ -24,8 +24,7 @@ export default function vehicles(state = initialState, action) {
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('login/logout - reset vehicles data')
-      
+      // console.log('login/logout - reset vehicles data')      
       return initialState;
     }
     

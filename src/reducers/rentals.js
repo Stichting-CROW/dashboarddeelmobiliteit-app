@@ -33,8 +33,7 @@ export default function rentals(state = initialState, action) {
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('login/logout - reset rentals data')
-      
+      // console.log('login/logout - reset rentals data')      
       return initialState;
     }
     case 'SET_RENTALS_ORIGINS_OPERATORSTATS': {

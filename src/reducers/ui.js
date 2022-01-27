@@ -29,8 +29,7 @@ export default function ui(state = initialState, action) {
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('login/logout - reset ui data')
-      
+      // console.log('login/logout - reset ui data')      
       return initialState;
     }
     default:

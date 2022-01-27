@@ -20,7 +20,7 @@ const initialState = {
 export default function filter(state = initialState, action) {
   switch(action.type) {
     case 'SET_FILTER_VISIBLE': {
-      console.log('reducer filter set filter visible %s', action.payload)
+      // console.log('reducer filter set filter visible %s', action.payload)
       return {
           ...state,
           visible: action.payload
@@ -31,7 +31,7 @@ export default function filter(state = initialState, action) {
         return state;
       }
       
-      console.log('reducer filter set gebied to %s', action.payload)
+      // console.log('reducer filter set gebied to %s', action.payload)
       return {
           ...state,
           gebied: action.payload,
@@ -39,14 +39,14 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'SET_FILTER_DATUM': {
-      console.log('reducer filter set datum to %s', action.payload)
+      // console.log('reducer filter set datum to %s', action.payload)
       return {
           ...state,
           datum: action.payload
       };
     }
     case 'SET_FILTER_INTERVAL_START': {
-      console.log('reducer filter set interval start to %s', action.payload)
+      // console.log('reducer filter set interval start to %s', action.payload)
       return {
           ...state,
           intervalstart: action.payload
@@ -59,21 +59,21 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'SET_FILTER_INTERVAL_DUUR': {
-      console.log('reducer filter set interval duration to %s', action.payload)
+      // console.log('reducer filter set interval duration to %s', action.payload)
       return {
           ...state,
           intervalduur: action.payload
       };
     }
     case 'SET_FILTER_HERKOMSTBESTEMMING': {
-      console.log('reducer filter set herkomstbestemming to %s', action.payload)
+      // console.log('reducer filter set herkomstbestemming to %s', action.payload)
       return {
           ...state,
           herkomstbestemming: action.payload
       };
     }
     case 'ADD_TO_FILTER_ZONES': {
-      console.log('add item %s to zones filter %o', action.payload, state)
+      // console.log('add item %s to zones filter %o', action.payload, state)
       let zones = [];
       if(state.zones) {
         try {
@@ -92,7 +92,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_ZONES': {
-      console.log('remove item %o from zones filter', action.payload)
+      // console.log('remove item %o from zones filter', action.payload)
       let zones = state.zones.split(",") || [];
       zones = zones.filter((item) => {return item.toString() !== action.payload.toString() });
 
@@ -102,7 +102,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'CLEAR_FILTER_ZONES': {
-      console.log('clear zones filter')
+      // console.log('clear zones filter')
 
       return {
           ...state,
@@ -112,7 +112,7 @@ export default function filter(state = initialState, action) {
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
       let parkeerduurexclude = [];
       try {
-        console.log('add item %s to parkeerduurexclude filter %o', action.payload, state)
+        // console.log('add item %s to parkeerduurexclude filter %o', action.payload, state)
         if(state.parkeerduurexclude) {
           try {
             parkeerduurexclude = state.parkeerduurexclude.split(",") || []
@@ -133,7 +133,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_MARKERS_EXCLUDE': {
-      console.log('remove item %o from parkeerduurexclude filter', action.payload)
+      // console.log('remove item %o from parkeerduurexclude filter', action.payload)
       let parkeerduurexclude = [];
       try {
         parkeerduurexclude = state.parkeerduurexclude.split(",") || [];
@@ -148,7 +148,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'CLEAR_FILTER_MARKERS_EXCLUDE': {
-      console.log('clear parkeerduurexclude filter')
+      // console.log('clear parkeerduurexclude filter')
 
       return {
           ...state,
@@ -158,7 +158,7 @@ export default function filter(state = initialState, action) {
     case 'ADD_TO_FILTER_AFSTAND_EXCLUDE': {
       let afstandexclude = [];
       try {
-        console.log('add item %s to afstandexclude filter %o', action.payload, state)
+        // console.log('add item %s to afstandexclude filter %o', action.payload, state)
         if(state.afstandexclude) {
           try {
             afstandexclude = state.afstandexclude.split(",") || []
@@ -179,7 +179,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_AFSTAND_EXCLUDE': {
-      console.log('remove item %o from afstandexclude filter', action.payload)
+      // console.log('remove item %o from afstandexclude filter', action.payload)
       let afstandexclude = [];
       try {
         afstandexclude = state.afstandexclude.split(",") || [];
@@ -194,7 +194,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'CLEAR_FILTER_AFSTAND_EXCLUDE': {
-      console.log('clear afstandexclude filter')
+      // console.log('clear afstandexclude filter')
 
       return {
           ...state,
@@ -204,7 +204,7 @@ export default function filter(state = initialState, action) {
     case 'ADD_TO_FILTER_VOERTUIGTYPES_EXCLUDE': {
       let voertuigtypesexclude = [];
       try {
-        console.log('add item %s to voertuigtypesexclude filter %o', action.payload, state)
+        // console.log('add item %s to voertuigtypesexclude filter %o', action.payload, state)
         if(state.voertuigtypesexclude) {
           try {
             voertuigtypesexclude = state.voertuigtypesexclude.split(",") || []
@@ -225,7 +225,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_VOERTUIGTYPES_EXCLUDE': {
-      console.log('remove item %o from voertuigtypesexclude filter', action.payload)
+      // console.log('remove item %o from voertuigtypesexclude filter', action.payload)
       let voertuigtypesexclude = [];
       try {
         voertuigtypesexclude = state.voertuigtypesexclude.split(",") || [];
@@ -240,7 +240,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'CLEAR_FILTER_VOERTUIGTYPES_EXCLUDE': {
-      console.log('clear voertuigtypesexclude filter')
+      // console.log('clear voertuigtypesexclude filter')
 
       return {
           ...state,
@@ -267,7 +267,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'REMOVE_FROM_FILTER_AANBIEDERS_EXCLUDE': {
-      console.log('remove item %s from aanbiedersexclude filter', action.payload)
+      // console.log('remove item %s from aanbiedersexclude filter', action.payload)
       let aanbiedersexclude = [];
       try {
         aanbiedersexclude = state.aanbiedersexclude.split(",") || [];
@@ -282,7 +282,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'CLEAR_FILTER_AANBIEDERS_EXCLUDE': {
-      console.log('clear aanbiedersexclude filter')
+      // console.log('clear aanbiedersexclude filter')
     
       return {
           ...state,
@@ -290,7 +290,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'SET_FILTER_ONTWIKKELING_VANTOT': {
-      console.log('reducer filter set datum ontwikkeling van %s to %s', action.payload.van, action.payload.tot)
+      // console.log('reducer filter set datum ontwikkeling van %s to %s', action.payload.van, action.payload.tot)
       return {
           ...state,
           ontwikkelingvan: action.payload.van,
@@ -298,7 +298,7 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'SET_FILTER_ONTWIKKELING_AGGREGATIE': {
-      console.log('reducer filter set aggregatie ontwikkeling %s', action.payload)
+      // console.log('reducer filter set aggregatie ontwikkeling %s', action.payload)
       return {
           ...state,
           ontwikkelingaggregatie: action.payload
@@ -306,20 +306,16 @@ export default function filter(state = initialState, action) {
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('login/logout - reset filter')
-      
+      // console.log('login/logout - reset filter')
       return initialState;
     }
     case 'RESET_FILTER': {
-      console.log('reset filter')
+      // console.log('reset filter')
       
       return initialState;
     }
     case 'IMPORT_STATE': {
-      console.log('import filter', action.payload.filter)
-      
-      
-      
+      // console.log('import filter', action.payload.filter)
       return {
         ...state,
         ...action.payload.filter

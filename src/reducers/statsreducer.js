@@ -24,8 +24,7 @@ export default function statsreducer(state = initialState, action) {
     case 'CLEAR_STATS':
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('clear stats state data')
-      
+      // console.log('clear stats state data')
       return initialState;
     }
     

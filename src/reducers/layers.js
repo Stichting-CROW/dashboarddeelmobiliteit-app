@@ -106,8 +106,7 @@ export default function filter(state = initialState, action) {
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      console.log('login/logout - reset layer info')
-      
+      // console.log('login/logout - reset layer info')      
       return initialState;
     }
     default:
