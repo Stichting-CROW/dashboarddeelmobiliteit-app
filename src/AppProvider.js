@@ -44,6 +44,7 @@ store.subscribe(() => {
   }
   
   const storeStateToSaveInLocalStorage = {
+    created: storeState.created ? storeState.created : moment().unix(),
     last_update: moment().unix(),
     authentication: storeState.authentication,
     filter: storeState.filter,

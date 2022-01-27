@@ -16,7 +16,7 @@ export const updateZones = (store_zones)  => {
     
     let url_zones="";
     if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
-      console.log('NOT LOGGED IN')
+      // console.log('NOT LOGGED IN')
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
