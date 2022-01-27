@@ -1,8 +1,5 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
-
-const isLoggedIn = (state) => {
-  return state.authentication.user_data ? true : false;
-};
+import {isLoggedIn} from '../helpers/authentication.js';
 
 export const updateZones = (store_zones)  => {
   try {
@@ -13,7 +10,7 @@ export const updateZones = (store_zones)  => {
     
     const state = store_zones.getState();
     if(state.metadata.metadata_loaded===false) {
-      console.log("no metadata available yet - skipping zones update");
+      // console.log("no metadata available yet - skipping zones update");
       return false;
     }
     

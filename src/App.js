@@ -173,7 +173,10 @@ function App() {
     filter.zones
   ])
 
-  // On app start, if zones are loaded or pathName/filter is changed: reload data
+  // On app start,
+  //  if zones are loaded
+  //  or if pathName/filter is changed:
+  //  reload park events data
   useEffect(() => {
     if(displayMode !== 'displaymode-park') {
       return;

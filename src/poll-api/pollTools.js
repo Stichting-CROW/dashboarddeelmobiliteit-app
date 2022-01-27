@@ -1,10 +1,12 @@
+
 import moment from 'moment';
 import {
-    DISPLAYMODE_PARK,
-    DISPLAYMODE_RENTALS,
-    DISPLAYMODE_OTHER,
-  } from '../reducers/layers.js';
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_OTHER,
+} from '../reducers/layers.js';
 
+export const vehiclesAbortController = new AbortController();
 
 export const createFilterparameters = (displayMode, filter, metadata, options) => {
   const isParkingData=displayMode===DISPLAYMODE_PARK;
@@ -123,10 +125,6 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   return filterparams;
 }
 
-export const isLoggedIn = (state) => {
-  return state.authentication.user_data ? true : false;
-};
-
 export const convertDurationToBin = (duration) => {
   if (duration <= 60) {
     return 0;
@@ -153,3 +151,14 @@ export const convertDistanceToBin = (distance_in_meters) => {
   return 3;
 }
 
+// abortableFetch
+// Source: https://davidwalsh.name/cancel-fetch
+export function abortableFetch(request, opts) {
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  return {
+    abort: () => controller.abort(),
+    ready: fetch(request, { ...opts, signal })
+  };
+}

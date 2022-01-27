@@ -1,6 +1,4 @@
-const isLoggedIn = (state) => {
-  return state.authentication.user_data ? true : false;
-};
+import {isLoggedIn} from '../helpers/authentication.js';
 
 export const getEmptyZonesGeodataPayload = () => {
   return  {
@@ -21,7 +19,7 @@ export const updateZonesgeodata = (store)  => {
     
     const state = store.getState();
     if(state.metadata.zones_loaded===false) {
-      console.log("no zone metadata available yet - skipping zones geodata update");
+      // console.log("no zone metadata available yet - skipping zones geodata update");
       return false;
     }
 
@@ -37,10 +35,10 @@ export const updateZonesgeodata = (store)  => {
       // get bounds of single municipality zone
       let list_g = state.metadata.gebieden.filter(gebied=>gebied.gm_code===state.filter.gebied).map(gebied=>gebied.gm_code);
       let list_z = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality"&&list_g.includes(zone.municipality)));
-      console.log("set empty zones payload (zones length 0)", list_g, list_z)
+      // console.log("set empty zones payload (zones length 0)", list_g, list_z)
       zone_ids = list_z.map(zone=>zone.zone_id).join(",");
     } else {
-      console.log("set empty zones payload (selected zones")
+      // console.log("set empty zones payload (selected zones")
       // get bounds of all selected zones
       zone_ids = state.filter.zones; // use selected zones
     }
@@ -65,7 +63,7 @@ export const updateZonesgeodata = (store)  => {
     
       response.json()
         .then((metadata) => {
-          console.log("got zones geodata for ", state.filter.zones||'all zones')
+          // console.log("got zones geodata for ", state.filter.zones||'all zones')
           const st = require('geojson-bounds');
           
           // convert to standard geojson here

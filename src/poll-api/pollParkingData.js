@@ -1,13 +1,18 @@
 import moment from 'moment';
-import { createFilterparameters, isLoggedIn, convertDurationToBin } from './pollTools.js';
+import {
+  createFilterparameters,
+  convertDurationToBin,
+  abortableFetch
+} from './pollTools.js';
+import { isLoggedIn } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 
 var store_parkingdata = undefined;
-
 var timerid_parkingdata = undefined;
 
-const updateParkingData = ()  => {
-  // let delay = cPollDelayParkingData;
+let theFetch;
+const updateParkingData = async ()  => {
+
   try {
     if(undefined===store_parkingdata) {
       console.error("no redux state available yet - skipping zones update");
@@ -41,13 +46,27 @@ const updateParkingData = ()  => {
         if(filterparams.length>0) {
           url += "?" + filterparams.join("&");
         }
-        options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
+        options = {
+          headers : { "authorization": "Bearer " + state.authentication.user_data.token }
+        }
       }
     }
     
     store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: true});
 
-    fetch(url, options).then(function(response) {
+    // Abort previous fetch
+    // Info:
+    // - https://stackoverflow.com/q/63412985
+    // - https://davidwalsh.name/cancel-fetch
+    if(theFetch) {
+      theFetch.abort();
+    }
+    // Now do a new fetch
+    theFetch = abortableFetch(url, options);
+    theFetch.ready.then(function(response) {
+      // Set theFetch to null, so next request is not aborted
+      theFetch = null;
+
       if(!response.ok) {
         console.error("unable to fetch: %o", response);
         return false
@@ -127,6 +146,10 @@ const updateParkingData = ()  => {
         store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
       })
     }).catch(ex=>{
+      if (ex.name === 'AbortError') {
+        // Abort error handling
+        // console.log('Abort for pollParkingData')
+      }
       store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
       console.error("fetch error - unable to fetch JSON from %s", url);
     });

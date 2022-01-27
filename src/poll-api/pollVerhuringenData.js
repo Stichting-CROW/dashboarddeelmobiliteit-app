@@ -1,10 +1,19 @@
 // import moment from 'moment';
-import { createFilterparameters, isLoggedIn, convertDistanceToBin } from './pollTools.js';
+import {
+  createFilterparameters,
+  convertDistanceToBin,
+  abortableFetch
+} from './pollTools.js';
+import {isLoggedIn} from '../helpers/authentication.js';
+
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
 const md5 = require('md5');
 
 var store_verhuringendata = undefined;
 var timerid_verhuringendata = undefined;
+
+// Variable that will prevent simultaneous loading of fetch requests
+let theFetch;
 
 // Function that gets trip data and saves it into store_verhuringendata
 const updateVerhuringenData = ()  => {
@@ -46,12 +55,23 @@ const updateVerhuringenData = ()  => {
           if(filterparams.length>0) {
             url += "?" + filterparams.join("&");
           }
-          options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
+          options = {
+            headers : { "authorization": "Bearer " + state.authentication.user_data.token }
+          }
         }
         
         store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: true});
         
-        fetch(url, options).then(function(response) {
+        // Abort previous fetch
+        if(theFetch) {
+          theFetch.abort()
+        }
+        // Now do a new fetch
+        theFetch = abortableFetch(url, options);
+        theFetch.ready.then(function(response) {
+          // Set theFetch to null, so next request is not aborted
+          theFetch = null;
+
           store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
 
           if(!response.ok) {

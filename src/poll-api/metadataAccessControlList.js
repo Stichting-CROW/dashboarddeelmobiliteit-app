@@ -31,7 +31,6 @@ const cPublicVoertuigTypes = [
 ]
 
 // var store_accesscontrollist = undefined;
-//
 const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
@@ -57,7 +56,7 @@ export const initAccessControlList = (store_accesscontrollist)  => {
 
       store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     } else {
-      console.log("initialize ACL Data (logged in)")
+      // console.log("initialize ACL Data (logged in)")
       let url="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
