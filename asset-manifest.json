@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.e394cdfb.chunk.css",
-    "main.js": "/static/js/main.425437bf.chunk.js",
-    "main.js.map": "/static/js/main.425437bf.chunk.js.map",
+    "main.css": "/static/css/main.e2d6f7b2.chunk.css",
+    "main.js": "/static/js/main.e05115e0.chunk.js",
+    "main.js.map": "/static/js/main.e05115e0.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.043b65f1.js",
     "runtime-main.js.map": "/static/js/runtime-main.043b65f1.js.map",
     "static/css/2.c8956ef5.chunk.css": "/static/css/2.c8956ef5.chunk.css",
@@ -12,7 +12,7 @@
     "static/js/3.7fe2e072.chunk.js.map": "/static/js/3.7fe2e072.chunk.js.map",
     "index.html": "/index.html",
     "static/css/2.c8956ef5.chunk.css.map": "/static/css/2.c8956ef5.chunk.css.map",
-    "static/css/main.e394cdfb.chunk.css.map": "/static/css/main.e394cdfb.chunk.css.map",
+    "static/css/main.e2d6f7b2.chunk.css.map": "/static/css/main.e2d6f7b2.chunk.css.map",
     "static/js/2.c581454a.chunk.js.LICENSE.txt": "/static/js/2.c581454a.chunk.js.LICENSE.txt",
     "static/media/FilteritemVoertuigTypes.css": "/static/media/scooter.0a9628cb.svg",
     "static/media/calendar.0fe3dc2a.svg": "/static/media/calendar.0fe3dc2a.svg",
@@ -24,7 +24,7 @@
     "static/js/runtime-main.043b65f1.js",
     "static/css/2.c8956ef5.chunk.css",
     "static/js/2.c581454a.chunk.js",
-    "static/css/main.e394cdfb.chunk.css",
-    "static/js/main.425437bf.chunk.js"
+    "static/css/main.e2d6f7b2.chunk.css",
+    "static/js/main.e05115e0.chunk.js"
   ]
 }
