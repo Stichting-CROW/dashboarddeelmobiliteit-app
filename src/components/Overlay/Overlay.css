@@ -1,3 +1,6 @@
+.Overlay {
+  @apply z-20
+}
 .Overlay h1 {
   @apply text-4xl my-4
 }

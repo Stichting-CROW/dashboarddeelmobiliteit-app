@@ -257,11 +257,15 @@ function App() {
               <Route exact path="/monitoring">
                 <Monitoring />
               </Route>
+              <Route exact path="/over">
+                <Overlay>
+                  <About />
+                </Overlay>
+              </Route>
               <Route exact path="/misc">
                 <Overlay>
                   <Misc />
                 </Overlay>
-                <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
               </Route>
             </>
             :
@@ -272,21 +276,18 @@ function App() {
             <Overlay>
               <About />
             </Overlay>
-            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
           <Route exact path="/login">
             <Overlay>
               <Login />
             </Overlay>
-            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
           <Route exact path="/reset-password/:changePasswordCode">
             <Overlay>
               <SetPassword />
             </Overlay>
-            <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
           </Route>
 
           <Route>
