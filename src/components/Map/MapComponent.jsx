@@ -284,7 +284,7 @@ function MapComponent(props) {
     if (! map.current || ! map.current.isStyleLoaded()) {
       setTimeout(() => {
         setCounter(counter + 1)
-      }, 250)
+      }, 500)
       return;
     }
 

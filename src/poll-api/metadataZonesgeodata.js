@@ -29,7 +29,7 @@ export const updateZonesgeodata = (store)  => {
       zone_ids = "";
     } else if (state.filter.gebied==="") {
       // get bounds of all municipalities
-      console.log("set empty zones payload (gebied leeg)")
+      // console.log("set empty zones payload (gebied leeg)")
       zone_ids = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality")).map(zone=>zone.zone_id).join(",");
     } else if (state.filter.zones.length===0) {
       // get bounds of single municipality zone

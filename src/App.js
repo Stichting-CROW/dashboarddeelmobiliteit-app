@@ -235,8 +235,13 @@ function App() {
     </>
   }
 
+  const DEBUG = false;
+
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
+        {DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
+          {layers.displaymode}
+        </div>}
         <LoadingIndicator  />
         <div className="gui-layer">
         <Switch>
