@@ -23,11 +23,21 @@ moment.locale('nl', localization);
 const jsConfetti = new JSConfetti()
 
 const providerWebsiteUrls = {
-  'check': 'https://ridecheck.app/',
-  'felyx': 'https://felyx.com/',
-  'gosharing': 'https://go-sharing.com/',
   'baqme': 'https://www.baqme.com/',
-  'donkey': 'https://www.donkey.bike/'
+  'cykl': 'https://www.cykl.nl/',
+  'check': 'https://ridecheck.app/',
+  'cargoroo': 'https://cargoroo.nl/',
+  'deelfietsnederland': 'https://deelfietsnederland.nl/',
+  'donkey': 'https://www.donkey.bike/',
+  'felyx': 'https://felyx.com/',
+  'flickbike': 'https://www.flickbike.nl/',
+  'gosharing': 'https://go-sharing.com/',
+  'hely': 'https://hely.com/',
+  'htm': 'https://www.htm.nl/ons-vervoer/htm-fiets',
+  'keobike': 'https://keobike.nl/',
+  'lime': 'https://www.li.me/',
+  'tier': 'https://www.tier.app/',
+  'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
 }
 
 const initClusters = (currentMap) => {
