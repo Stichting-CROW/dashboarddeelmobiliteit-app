@@ -159,12 +159,12 @@ function App() {
   }, [isLoggedIn]);
   
   useEffect(() => {
-    // console.log('useEffect zones', filter.gebied)
+    if(process.env.DEBUG) console.log('useEffect zones', filter.gebied)
     updateZones(store);
   }, [isLoggedIn, metadata.metadata_loaded, filter.gebied])
 
   useEffect(() => {
-    // console.log('useEffect zones geodata')
+    if(process.env.DEBUG) console.log('useEffect zones geodata')
     updateZonesgeodata(store);
   }, [
     isLoggedIn,
@@ -178,9 +178,8 @@ function App() {
   //  or if pathName/filter is changed:
   //  reload park events data
   useEffect(() => {
-    if(displayMode !== 'displaymode-park') {
-      return;
-    }
+    if(displayMode !== 'displaymode-park') return;
+    if(metadata.zones_loaded === false) return;
 
     if(TO_delay) clearTimeout(TO_delay);
 
@@ -190,16 +189,16 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    pathName,
     filter,
-    layers.displaymode,
-    layers.zones_visible
+    // pathName,
+    // layers.displaymode,
+    // layers.zones_visible
   ]);
 
+  // Reload rentals data if i.e. filter changes
   useEffect(() => {
-    if(displayMode !== 'displaymode-rentals') {
-      return;
-    }
+    if(displayMode !== 'displaymode-rentals') return;
+    if(metadata.zones_loaded === false) return;
 
     if(TO_delay) clearTimeout(TO_delay);
 
@@ -207,12 +206,12 @@ function App() {
       initUpdateVerhuringenData(store);
     }, DELAY_TIMEOUT_IN_MS)
   }, [
-    isLoggedIn,
-    metadata.zones_loaded,
-    pathName,
+    isLoggedIn,// If we change from guest to logged in we want to update rentals
+    metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
-    layers.displaymode,
-    layers.zones_visible
+    // pathName,
+    // layers.displaymode,
+    // layers.zones_visible
   ]);
 
   // Mobile menu: Filters / Layers
@@ -235,11 +234,9 @@ function App() {
     </>
   }
 
-  const DEBUG = false;
-
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
-        {DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
+        {process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
           {layers.displaymode}
         </div>}
         <LoadingIndicator  />

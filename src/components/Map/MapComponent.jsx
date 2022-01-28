@@ -141,43 +141,26 @@ const initPopupLogic = (currentMap, providers, isLoggedIn) => {
 }
 
 function MapComponent(props) {
+  if(process.env.DEBUG) console.log('Map component')
+
+  // Connect to redux store
   const dispatch = useDispatch()
-  // console.log('Map component')
 
-  // Get vehicles from store
-  const vehicles = useSelector(state => {
-    return state.vehicles || null;
-  });
-
-  const rentals = useSelector(state => {
-    return state.rentals || null;
-  });
-
-  const stateLayers = useSelector(state => {
-    return state.layers || null;
-  });
-
-  const isLoggedIn = useSelector(state => {
-    return state.authentication.user_data ? true : false;
-  });
-
-  // Get extent (map boundaries) from store
-  const extent = useSelector(state => {
-    return state.layers ? state.layers.extent : null;
-  }) || [];
-
-  const providers = useSelector(state => {
-    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
-  });
-
+  // Get data from store
+  const vehicles = useSelector(state => state.vehicles || null);
+  const rentals = useSelector(state => state.rentals || null);
+  const stateLayers = useSelector(state => state.layers || null);
+  const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
+  const providers = useSelector(state => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+  const extent/* map boundaries */ = useSelector(state => state.layers ? state.layers.extent : null);
   const zones_geodata = useSelector(state => {
     if(!state||!state.zones_geodata) {
       return null;
     }
-
     return state.zones_geodata;
   });
-  
+
+  // Define map
   const mapContainer = props.mapContainer;
   const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
   const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
@@ -192,9 +175,10 @@ function MapComponent(props) {
   useEffect(() => {
     const initMap = () => {
       const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
-      // const style = 'mapbox://styles/mapbox/streets-v11';
+
+      // Stop if map exists already
       if (map.current) return;
-      
+
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         style,
@@ -205,7 +189,7 @@ function MapComponent(props) {
         attributionControl: false// Hide info icon
       });
 
-      // Add controls
+      // Hide compass control
       map.current.addControl(new maplibregl.NavigationControl({
         showCompass: false
       }), 'bottom-right');
@@ -221,7 +205,7 @@ function MapComponent(props) {
   
       // Do a state update if map is loaded
       map.current.on('load', function() {
-        setCounter(counter + 1)
+        // setCounter(counter + 1)
         window.ddMap = map.current;
       });
       
@@ -242,11 +226,11 @@ function MapComponent(props) {
       // });
 
       map.current.on('error', function(e) {
-        // console.log('An error event occurred.',e);
+        if(process.env.DEBUG) console.log('An error event occurred.',e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
       map.current.on('idle', function(e) {
-        // console.log('An idle event occurred.',e);
+        if(process.env.DEBUG) console.log('An idle event occurred.',e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
 
@@ -258,19 +242,19 @@ function MapComponent(props) {
           bounds._ne.lng,
           bounds._ne.lat
         ]
-        
+
         dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
         dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: currentmap.getZoom() })
       }
-      
+
       map.current.on('moveend', function() {
         registerMapView(map.current);
       })
-      
+
       map.current.on('zoomend', function() {
         registerMapView(map.current);
       })
-      
+
       // Disable rotating
       map.current.dragRotate.disable();
       map.current.touchZoomRotate.disableRotation();
@@ -282,9 +266,9 @@ function MapComponent(props) {
 
     // If map is not loaded: refresh state after .25 seconds
     if (! map.current || ! map.current.isStyleLoaded()) {
-      setTimeout(() => {
-        setCounter(counter + 1)
-      }, 500)
+      // setTimeout(() => {
+      //   setCounter(counter + 1)
+      // }, 500)
       return;
     }
 
@@ -332,34 +316,40 @@ function MapComponent(props) {
     if(zones_geodata && zones_geodata.data) {
       addOrUpdateSource('zones-geodata', zones_geodata.data);
     }
+  }, [zones_geodata.data]);
 
+  useEffect(() => {
     // Add park events
     if(vehicles && vehicles.data) {
       addOrUpdateSource('vehicles', vehicles.data);
       addOrUpdateSource('vehicles-clusters', vehicles.data);
     }
+  }, [vehicles.data])
 
+  useEffect(() => {
     // Add rentals
     if(rentals.origins && rentals.origins.type) {
       addOrUpdateSource('rentals-origins', rentals.origins);
       addOrUpdateSource('rentals-origins-clusters', rentals.origins);
     }
+  }, [rentals.origins])
+
+  useEffect(() => {
     if(rentals.destinations && rentals.destinations.type) {
       addOrUpdateSource('rentals-destinations', rentals.destinations);
       addOrUpdateSource('rentals-destinations-clusters', rentals.destinations);
     }
-
-    // eslint-disable-next-line
-  }, [
-    // eslint-disable-next-line
-    vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
-    rentals.origins ? rentals.origins.features : rentals.origins,
-    rentals.destinations,
-    zones_geodata,
-    zonesGeodataHash,
-    counter,
-    props.activeSource
-  ])
+  }, [rentals.destinations])
+  // }, [
+  //   map.current,//
+  //   vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
+  //   rentals.origins ? rentals.origins.features : rentals.origins,
+  //   rentals.destinations,
+  //   zones_geodata,
+  //   zonesGeodataHash,
+  //   counter,
+  //   props.activeSource
+  // ])
 
   // If area selection (place/zone) changes, navigate to area
   useEffect(() => {
