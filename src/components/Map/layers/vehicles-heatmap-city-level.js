@@ -1,3 +1,5 @@
+import {heatmapIntensity} from './common.js'
+
 const layer = {
   'id': 'vehicles-heatmap-city-level',
   'type': 'heatmap',
@@ -12,19 +14,7 @@ const layer = {
       10, 1
     ],
 
-    'heatmap-intensity': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      0, 0.0025,
-      5, 0.005,
-      7.5, 0.02,
-      10, 0.1,
-      12, 0.25,/* city level */
-      15, 0.3,
-      17, 0.5,
-      20, 1,
-    ],
+    'heatmap-intensity': heatmapIntensity,
 
     // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
     // Begin color ramp at 0-stop with a 0-transparancy color
