@@ -49,23 +49,23 @@ export default function filter(state = initialState, action) {
 
       // console.log('reducer layer set view_rentals %s', action.payload)
       return {
-          ...state,
-          view_rentals: action.payload
+        ...state,
+        view_rentals: action.payload
       };
     }
     case 'LAYER_TOGGLE_ZONES_VISIBLE': {
       // console.log('reducer layer set zones visible %s', !state.zones_visible)
       return {
-          ...state,
-          zones_visible: !state.zones_visible
+        ...state,
+        zones_visible: !state.zones_visible
       };
     }
     case 'LAYER_SET_ZONES_EXTENT': {
       if(md5(JSON.stringify(action.payload||[]))!==md5(JSON.stringify(state.extent||[]))) {
         // console.log("set extent to %o", action.payload)
         return {
-            ...state,
-            extent: action.payload||[]
+          ...state,
+          extent: action.payload||[]
         };
       } else {
         // console.log("set extent - not changed")
@@ -76,8 +76,8 @@ export default function filter(state = initialState, action) {
       if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.mapextent||false))) {
         // console.log("set extent to %o", action.payload)
         return {
-            ...state,
-            mapextent: action.payload
+          ...state,
+          mapextent: action.payload
         };
       } else {
         // console.log("set extent - not changed")
@@ -88,8 +88,8 @@ export default function filter(state = initialState, action) {
       if(md5(JSON.stringify(action.payload))!==md5(JSON.stringify(state.zoom||false))) {
         // console.log("set zoom to %o", action.payload)
         return {
-            ...state,
-            zoom: action.payload
+          ...state,
+          zoom: action.payload
         };
       } else {
         // console.log("set zoom - not changed")
