@@ -42,6 +42,7 @@ import {
 import './App.css';
 
 function App() {
+  // Our state variables
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
   
@@ -49,8 +50,9 @@ function App() {
   
   const mapContainer = useRef(null);
 
-  let TO_delay = null, DELAY_TIMEOUT_IN_MS = 500;
+  let TO_delay = null, DELAY_TIMEOUT_IN_MS = 250;
 
+  // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
     setPathName(location ? location.pathname : null);
@@ -63,10 +65,8 @@ function App() {
       let view = params.get('view')
       if(view) {
         try {
-          // console.log(decodeURIComponent(view));
           const importstate = JSON.parse(decodeURIComponent(view));
           // force update to map extent
-          // importstate.layers.extent = importstate.layers.mapextent;
           dispatch({type: 'IMPORT_STATE', payload: importstate });
           
           setTimeout(() => dispatch({type: 'LAYER_SET_ZONES_EXTENT', payload: importstate.layers.mapextent}), 2500);
@@ -160,16 +160,24 @@ function App() {
   
   useEffect(() => {
     if(process.env.DEBUG) console.log('useEffect zones', filter.gebied)
+    if(! metadata.metadata_loaded) return;
+
     updateZones(store);
-  }, [isLoggedIn, metadata.metadata_loaded, filter.gebied])
+  }, [
+    isLoggedIn,
+    metadata.metadata_loaded,
+    filter.gebied
+  ])
 
   useEffect(() => {
     if(process.env.DEBUG) console.log('useEffect zones geodata')
+    if(! metadata.metadata_loaded) return;
+
     updateZonesgeodata(store);
   }, [
     isLoggedIn,
-    filter.gebied,
     metadata.zones_loaded,
+    filter.gebied,
     filter.zones
   ])
 

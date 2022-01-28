@@ -61,6 +61,7 @@ function MetaStats(props) {
   useEffect(() => {
     // Do not get meta stats until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
+
     async function gogogo() {
       const result = await getParkEventsStats(token, {
         filter: filter,
@@ -69,7 +70,11 @@ function MetaStats(props) {
       setMetaStatsData(result);
     }
     gogogo();
-  }, [filter, metadata, token]);
+  }, [
+    token,
+    metadata.zones,
+    filter.zones
+  ]);
     
   const markers = [
     { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 uur'},
