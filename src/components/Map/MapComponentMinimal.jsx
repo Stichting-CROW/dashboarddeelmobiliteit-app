@@ -2,23 +2,20 @@ import { useRef, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import moment from 'moment';
-// import 'moment/min/moment-with-locales'
 import localization from 'moment/locale/nl'
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
+import {initPopupLogic} from './MapUtils/popups.js';
+import {initClusters} from './MapUtils/clusters.js';
 
 import './MapComponent.css';
-
-import {getProviderColor} from '../../helpers/providers.js';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
-
-import JSConfetti from 'js-confetti'
 
 const md5 = require('md5');
 
@@ -59,6 +56,40 @@ function MapComponentMinimal(props) {
   const [sourceHash, setSourceHash] = useState([]);
   let map = useRef(null);
 
+  const applyMapSettings = (theMap) => {
+    // Hide compass control
+    theMap.addControl(new maplibregl.NavigationControl({
+      showCompass: false
+    }), 'bottom-right');
+
+    // Add 'current location' button
+    theMap.addControl(
+      new maplibregl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },
+        trackUserLocation: true
+      }), 'bottom-right'
+    );
+
+    // Disable rotating
+    theMap.dragRotate.disable();
+    theMap.touchZoomRotate.disableRotation();
+  }
+
+  const registerMapView = (theMap) => {
+    const bounds = theMap.getBounds();
+    const payload = [
+      bounds._sw.lng,
+      bounds._sw.lat,
+      bounds._ne.lng,
+      bounds._ne.lat
+    ]
+
+    dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
+    dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
+  }
+
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   const mapcurrent_exists = map.current!==undefined;
@@ -89,8 +120,27 @@ function MapComponentMinimal(props) {
         attributionControl: false// Hide info icon
       });
 
+      // Apply settings like disabling rotating the map
+      applyMapSettings(map.current)
+
       // Init MapBox utils
       U.init(map.current);
+      
+      // Map event handlers
+      map.current.on('error', function(e) {
+        if(process.env.DEBUG) console.log('An error event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: false});
+      });
+      map.current.on('idle', function(e) {
+        if(process.env.DEBUG) console.log('An idle event occurred.',e);
+        dispatch({type: 'SHOW_LOADING', payload: false});
+      });
+      map.current.on('moveend', function() {
+        registerMapView(map.current);
+      })
+      map.current.on('zoomend', function() {
+        registerMapView(map.current);
+      })
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
@@ -103,108 +153,6 @@ function MapComponentMinimal(props) {
         addLayers()
 
         setDidInitSourcesAndLayers(true)
-
-
-        // Add a new source from our GeoJSON data and
-        // set the 'cluster' option to true. GL-JS will
-        // add the point_count property to your source data.
-        map.current.addSource('earthquakes', {
-          type: 'geojson',
-          data: 'https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson',
-          cluster: true,
-          clusterMaxZoom: 14, // Max zoom to cluster points on
-          clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
-        });
-
-        // map.current.addLayer({
-        //   id: 'clusters',
-        //   type: 'circle',
-        //   source: 'earthquakes',
-        //   filter: ['has', 'point_count'],
-        //   paint: {
-        //     // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
-        //     // with three steps to implement three types of circles:
-        //     //   * Blue, 20px circles when point count is less than 100
-        //     //   * Yellow, 30px circles when point count is between 100 and 750
-        //     //   * Pink, 40px circles when point count is greater than or equal to 750
-        //     'circle-color': [
-        //       'step',
-        //       ['get', 'point_count'],
-        //       '#51bbd6',
-        //       100,
-        //       '#f1f075',
-        //       750,
-        //       '#f28cb1'
-        //     ],
-        //     'circle-radius': [
-        //       'step',
-        //       ['get', 'point_count'],
-        //       20,
-        //       100,
-        //       30,
-        //       750,
-        //       40
-        //     ]
-        //   }
-        // });
-
-        map.current.addLayer({
-          id: 'clusters',
-          type: 'circle',
-          source: 'earthquakes',
-          filter: ['has', 'point_count'],
-          paint: {
-            // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
-            // with three steps to implement three types of circles:
-            //   * Blue, 20px circles when point count is less than 100
-            //   * Yellow, 30px circles when point count is between 100 and 750
-            //   * Pink, 40px circles when point count is greater than or equal to 750
-            'circle-color': [
-              'step',
-              ['get', 'point_count'],
-              '#51bbd6',
-              100,
-              '#f1f075',
-              750,
-              '#f28cb1'
-            ],
-            'circle-radius': [
-              'step',
-              ['get', 'point_count'],
-              20,
-              100,
-              30,
-              750,
-              40
-            ]
-          }
-        });
-           
-        map.current.addLayer({
-          id: 'cluster-count',
-          type: 'symbol',
-          source: 'earthquakes',
-          filter: ['has', 'point_count'],
-          layout: {
-            'text-field': '{point_count_abbreviated}',
-            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-            'text-size': 12
-          }
-        });
-           
-        map.current.addLayer({
-          id: 'unclustered-point',
-          type: 'circle',
-          source: 'earthquakes',
-          filter: ['!', ['has', 'point_count']],
-          paint: {
-          'circle-color': '#11b4da',
-          'circle-radius': 4,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
-          }
-        });
-
       });
 
       // Disable rotating
@@ -219,6 +167,10 @@ function MapComponentMinimal(props) {
     mapContainer,
     dispatch
   ])
+
+  /**
+   * SET SOURCES AND LAYERS
+  */
 
   // Set active source
   useEffect(x => {
@@ -311,6 +263,47 @@ function MapComponentMinimal(props) {
     didInitSourcesAndLayers,
     rentals.destinations
   ]);
+
+  /**
+   * /SET SOURCES AND LAYERS
+  */
+
+  // If area selection (place/zone) changes, navigate to area
+  useEffect(() => {
+    if(! map.current) return;
+    if(! extent || extent.length === 0) {
+      return;
+    }
+    
+    map.current.fitBounds(extent);
+    
+    // reset extent action
+    dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
+  }, [
+    map.current,
+    extent,
+    dispatch
+  ])
+
+  useEffect(() => {
+    if(! didInitSourcesAndLayers) return;
+    if(! providers) return;
+
+    initPopupLogic(map.current, providers, isLoggedIn)
+  }, [
+    didInitSourcesAndLayers,
+    providers,
+    isLoggedIn
+  ])
+
+  // Init clusters click handler
+  useEffect(() => {
+    if(! didInitSourcesAndLayers) return;
+
+    initClusters(map.current)
+  }, [
+    didInitSourcesAndLayers
+  ])
 
   useEffect(() => {
     const addProviderImage = async(aanbieder) => {
