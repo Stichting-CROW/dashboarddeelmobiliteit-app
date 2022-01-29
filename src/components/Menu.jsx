@@ -220,7 +220,7 @@ function Menu({pathName}) {
             <MenuItem
               pathName={pathName}
               path={'/misc'}
-              text={''}
+              text={'Extra'}
               icon={'/images/components/Menu/settings.svg'}
             />
 

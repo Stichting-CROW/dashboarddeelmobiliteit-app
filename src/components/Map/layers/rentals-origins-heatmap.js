@@ -1,7 +1,7 @@
 import {heatmapIntensity} from './common.js'
 
 const layer = {
-  'id': 'rentals-origins-heatmap-city-level',
+  'id': 'rentals-origins-heatmap',
   'type': 'heatmap',
   'source': 'rentals-origins',
   'paint': {

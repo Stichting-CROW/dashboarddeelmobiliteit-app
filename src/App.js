@@ -141,7 +141,7 @@ function App() {
     if(! isSharedLink && isFilterDateMoreThan10MinutesAgo) {
       setFilterDatum(moment().toDate())
     }
-  }, [dispatch]);
+  }, [dispatch, filterDate, uriParams]);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
@@ -187,10 +187,15 @@ function App() {
   //  reload park events data
   useEffect(() => {
     if(displayMode !== 'displaymode-park') return;
-    if(metadata.zones_loaded === false) return;
+    if(isLoggedIn && metadata.zones_loaded === false) return;
 
     if(TO_delay) clearTimeout(TO_delay);
 
+    // Assignments to the 'TO_delay' variable from inside React Hook useEffect
+    // will be lost after each render. To preserve the value over time, store
+    // it in a useRef Hook and keep the mutable value in the '.current'
+    // property. Otherwise, you can move this variable directly inside useEffect
+    // https://react-hooks/exhaustive-deps
     TO_delay = setTimeout(x => {
       initUpdateParkingData(store);
     }, DELAY_TIMEOUT_IN_MS)
@@ -198,6 +203,7 @@ function App() {
     isLoggedIn,
     metadata.zones_loaded,
     filter,
+    // pathName
     // pathName,
     // layers.displaymode,
     // layers.zones_visible
@@ -206,7 +212,7 @@ function App() {
   // Reload rentals data if i.e. filter changes
   useEffect(() => {
     if(displayMode !== 'displaymode-rentals') return;
-    if(metadata.zones_loaded === false) return;
+    if(isLoggedIn && metadata.zones_loaded === false) return;
 
     if(TO_delay) clearTimeout(TO_delay);
 

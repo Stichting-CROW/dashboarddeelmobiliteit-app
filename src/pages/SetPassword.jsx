@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { setUser } from '../actions/authentication';
-import { useDispatch } from 'react-redux';
+// import { setUser } from '../actions/authentication';
+// import { useDispatch } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -11,13 +11,13 @@ import { IconButtonClose } from '../components/IconButtons.jsx';
 const SetPassword = () => {
   const { changePasswordCode } = useParams();
 
-  const [emailaddress, setEmailaddress] = useState('');
+  // const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
-  const [newPassword, setNewPassword] = useState(null);
+  // const [newPassword, setNewPassword] = useState(null);
   // const [loggedIn, setLoggedIn] = useState(false);
   const [doRenderRedirect, setDoRenderRedirect] = useState(false);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const handleSubmit = e => {
     e.preventDefault();

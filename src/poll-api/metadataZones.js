@@ -10,10 +10,10 @@ export const updateZones = (store_zones)  => {
     
     const state = store_zones.getState();
     if(state.metadata.metadata_loaded===false) {
-      // console.log("no metadata available yet - skipping zones update");
+      console.log("no metadata available yet - skipping zones update");
       return false;
     }
-    
+
     let url_zones="";
     if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
       // console.log('NOT LOGGED IN')
@@ -23,6 +23,7 @@ export const updateZones = (store_zones)  => {
       
       return;
     }
+
     if(state.filter.gebied==="") {
 
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
@@ -55,7 +56,6 @@ export const updateZones = (store_zones)  => {
 
       response.json()
         .then((metadata) => {
-          // items: { "municipality": "GM0785", "name": "Goirle", "owner": null, "zone_id": 34278, "zone_type": "municipality"}
           store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones});
           store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
         })
