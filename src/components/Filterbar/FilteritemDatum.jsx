@@ -24,15 +24,6 @@ function FilterItemDatum() {
     }
   });
 
-  // On Component load: set filter datum if filterdatum is undefined
-  useEffect(x => {
-    setFilterDatum(new Date(filterDatum));
-  }, [])
-
-  const displayMode = useSelector(state => {
-    return state.layers ? state.layers.displaymode : null;
-  });
-
   const setFilterDatum = newdt => {
     if(TO_date) clearTimeout(TO_date);
 
@@ -50,6 +41,15 @@ function FilterItemDatum() {
       })
     }, TIMEOUT_IN_MS)
   }
+
+  // On Component load: set filter datum if filterdatum is undefined
+  useEffect(x => {
+    setFilterDatum(new Date(filterDatum));
+  }, [filterDatum])
+
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : null;
+  });
 
   return (
     <div className="filter-datum-container">

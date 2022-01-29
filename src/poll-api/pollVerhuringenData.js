@@ -23,6 +23,7 @@ const updateVerhuringenData = ()  => {
       return false;
     }
 
+    
     // Wait for zone data
     const state = store_verhuringendata.getState();
     if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {

@@ -139,7 +139,7 @@ const Login = () => {
           </div>}
 
           <p className="my-4">
-            <a href="#" onClick={() => {
+            <a href="#recover" onClick={() => {
               setErrorMessage(null)
               setRecoverPassword(true)
             }} className="

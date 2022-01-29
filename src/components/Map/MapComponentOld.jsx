@@ -5,11 +5,6 @@ import moment from 'moment';
 // import 'moment/min/moment-with-locales'
 import localization from 'moment/locale/nl'
 
-// MapBox utils
-// https://www.npmjs.com/package/mapbox-gl-utils
-// https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
-import U from 'mapbox-gl-utils';
-
 import './MapComponent.css';
 
 import {getProviderColor} from '../../helpers/providers.js';
@@ -183,14 +178,25 @@ function MapComponent(props) {
   const [zoom] = useState(stateLayers.zoom || 15);
   const [counter, setCounter] = useState(0);
   const [sourceCounter, setSourceCounter] = useState(0);
-  const [sourcesSuccesfullyAdded, setSourcesSuccesfullyAdded] = useState(false);
   // const [zonesGeodataHash, setZonesGeodataHash] = useState("");
   const [sourceHash, setSourceHash] = useState([]);
   let map = useRef(null);
 
+  function setLayerSource(layerId, source, sourceLayer) {
+    const oldLayers = map.current.getStyle().layers;
+    const layerIndex = oldLayers.findIndex(l => l.id === layerId);
+    const layerDef = oldLayers[layerIndex];
+    const before = oldLayers[layerIndex + 1] && oldLayers[layerIndex + 1].id;
+    layerDef.source = source;
+    if (sourceLayer) {
+      layerDef['source-layer'] = sourceLayer;
+    }
+    map.current.removeLayer(layerId);
+    map.current.addLayer(layerDef, before);
+  }
+
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
-  const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
     const initMap = () => {
       const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
@@ -207,9 +213,6 @@ function MapComponent(props) {
         maxZoom: 19,
         attributionControl: false// Hide info icon
       });
-
-      // Init MapBox utils
-      U.init(map.current);
 
       // Hide compass control
       map.current.addControl(new maplibregl.NavigationControl({
@@ -285,6 +288,7 @@ function MapComponent(props) {
     }
     initMap();
   }, [
+
     // vehicles,
     // zones_geodata,
     lng,
@@ -295,121 +299,111 @@ function MapComponent(props) {
     dispatch
   ])
 
-  // Load sources
-  useEffect(() => {
-    if(! mapcurrent_exists) return;
-    if(! isStyleLoaded) return;
+  const addOrUpdateSource = (sourceName, sourceData) => {
 
-    props.layers.forEach(layerName => {
-      console.log('add layer', layerName,layers[layerName].source)
-      map.current.U.addGeoJSON(layers[layerName].source)
-      map.current.U.addLayer(map.current.U.properties(layers[layerName]))
-    })
+    // If map is not loaded: refresh state after .25 seconds
+    if (! map.current || ! map.current.isStyleLoaded()) {
+      // setTimeout(() => {
+      //   setCounter(counter + 1)
+      // }, 500)
+      return;
+    }
 
-    setSourcesSuccesfullyAdded(true)
-  }, [
-    mapcurrent_exists,
-    isStyleLoaded,
-    props.layers
-  ])
+    // If no source data is given -> stop
+    if (! sourceData) {
+      return;
+    }
 
-  const addSource = (sourceName, sourceData) => {
-    // Set data
-    let geojson = Object.assign({}, {
-      'type': 'geojson',
-      'data': sourceData,
-    }, sources[sourceName] ? sources[sourceName] : {});
-    console.log('sourceName, geojson', sourceName, geojson)
-    map.current.U.setData(sourceName, geojson);
+    // Check if source exists
+    const doesSourceExist = map.current.getSource(sourceName);
+    console.log('doesSourceExist?', doesSourceExist)
+    // Get md5 hash of the data
+    let hash = sourceData && sourceData.features ? md5(JSON.stringify(sourceData.features)) : md5('No data yet');
+    // If source does exist: update data
+    if(doesSourceExist) {
+      console.log('source does exist.')
+      if(! sourceHash || sourceHash[sourceName] !== hash) {
+        // Set hash
+        let newSourceHashArray = sourceHash;
+        newSourceHashArray[sourceName] = hash;
+        setSourceHash(newSourceHashArray);
+        // Update data
+        map.current.getSource(sourceName).setData(sourceData);
+      }
+    }
+
+    // If source does not exist: add source
+    else {
+      console.log('source does not exist.')
+
+      // Set hash
+      let newSourceHashArray = sourceHash;
+      newSourceHashArray[sourceName] = hash;
+      setSourceHash(newSourceHashArray);
+
+      console.log('sourceName', sourceName, 'sourceData', sourceData, 'sourceHash', sourceHash)
+
+      // Set data
+      let source = Object.assign({}, {
+        'type': 'geojson',
+        'data': sourceData,
+      }, sources[sourceName] ? sources[sourceName] : {});
+      map.current.addSource(sourceName, source);
+
+      setSourceCounter(sourceCounter + 1)
+    }
   }
 
-  // useEffect(() => {
-  //   if(! mapcurrent_exists) return;
-  //   if(! isStyleLoaded) return;
-  //   if(! sourcesSuccesfullyAdded) return;
-
-  //   // Add zones
-  //   if(zones_geodata && zones_geodata.data) {
-  //     map.current.U.setData('zones-geodata', zones_geodata.data);
-  //     map.current.U.setLayerSource('rentals-origins-point', 'zones-geodata');
-  //     map.current.U.show('rentals-origins-point');
-  //   }
-  // }, [
-  //   isStyleLoaded,
-  //   sourcesSuccesfullyAdded,
-  //   mapcurrent_exists,
-  //   zones_geodata.data,
-  // ]);
-
   useEffect(() => {
-    if(! map.current.U) return;
-    if(! sourcesSuccesfullyAdded) return;
-
-    // Add park events
-    if(vehicles && vehicles.data) {
-      addSource('vehicles', vehicles.data)
-      map.current.U.show('vehicles-heatmap-city-level');// Show layer
-      map.current.U.showSource('vehicles');// Show source
-      // map.current.U.addGeoJSON('vehicles', vehicles.data);
-      // map.current.U.setData('vehicles', vehicles.data);
-      // map.current.U.setLayerSource('vehicles', 'vehicles');
-      // map.current.U.show('vehicles');
-
-      // map.current.U.setData('vehicles-clusters', vehicles.data);
+    // Add zones
+    if(zones_geodata && zones_geodata.data) {
+      addOrUpdateSource('zones-geodata', zones_geodata.data);
     }
   }, [
-    sourcesSuccesfullyAdded,
-    vehicles.data,
+    map.current,
+    zones_geodata.data,
+  ]);
+
+  useEffect(() => {
+    // Add park events
+    if(vehicles && vehicles.data) {
+      addOrUpdateSource('vehicles', vehicles.data);
+      addOrUpdateSource('vehicles-clusters', vehicles.data);
+    }
+  }, [
+    map.current,
+    vehicles.data
   ])
 
-  // useEffect(() => {
-  //   if(! sourcesSuccesfullyAdded) return;
+  useEffect(() => {
+    // Add rentals
+    if(rentals.origins && rentals.origins.type) {
+      addOrUpdateSource('rentals-origins', rentals.origins);
+      addOrUpdateSource('rentals-origins-clusters', rentals.origins);
+    }
+  }, [
+    map.current,
+    rentals.origins
+  ])
 
-  //   // Add rentals
-  //   if(rentals.origins && rentals.origins.type) {
-  //     map.current.U.setData('rentals-origins', rentals.origins);
-  //     map.current.U.setData('rentals-origins-clusters', rentals.origins);
-  //   }
+  useEffect(() => {
+    if(rentals.destinations && rentals.destinations.type) {
+      addOrUpdateSource('rentals-destinations', rentals.destinations);
+      addOrUpdateSource('rentals-destinations-clusters', rentals.destinations);
+    }
+  }, [
+    map.current,
+    rentals.destinations
+  ])
   // }, [
-  //   sourcesSuccesfullyAdded,
-  //   rentals.origins
-  // ])
-
-  // useEffect(() => {
-  //   if(! sourcesSuccesfullyAdded) return;
-    
-  //   if(rentals.destinations && rentals.destinations.type) {
-  //     map.current.U.setData('rentals-destinations', rentals.destinations);
-  //     map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
-  //   }
-  // }, [
-  //   mapcurrent_exists,
-  //   sourcesSuccesfullyAdded,
+  //   map.current,//
+  //   vehicles ? (vehicles.data ? vehicles.data.features : vehicles.data) : vehicles,
+  //   rentals.origins ? rentals.origins.features : rentals.origins,
   //   rentals.destinations,
-  //   isStyleLoaded
-  // ])
-
-  // Load layers
-  // setLayerSource(layerId, source, sourceLayer)
-  // useEffect(nix => {
-  //   return;
-  //   props.layers.forEach(x => {
-  //     if(props.layers.indexOf(x) >= -1) {
-  //       const doesLayerExist = map.current.getLayer(x);
-  //       const doesRelatedSourceExist = map.current.getSource(layers[x].source);
-  //       // map.current.U.setLayerSource(x, source)
-  //       if(! doesLayerExist && doesRelatedSourceExist) {
-  //         console.log(counter, 'add layer')
-  //         map.current.addLayer(layers[x]);
-  //       } else {
-  //         console.log(counter, 'not added layer. doesLayerExist/doesRelatedSourceExist', doesLayerExist, doesRelatedSourceExist)
-  //       }
-  //     }
-  //   })
-  // }, [
-  //   mapcurrent_exists,
-  //   isStyleLoaded,
-  //   props.layers
+  //   zones_geodata,
+  //   zonesGeodataHash,
+  //   counter,
+  //   props.activeSource
   // ])
 
   // If area selection (place/zone) changes, navigate to area
@@ -424,11 +418,74 @@ function MapComponent(props) {
     // reset extent action
     dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
   }, [
-    mapcurrent_exists,
+    map.current,
     extent,
     dispatch
   ])
+  
+  // Add layers
+  useEffect(() => {
+    console.log('sourceCounter', sourceCounter)
+    const addLayers = () => {
+      if (! map.current || ! map.current.isStyleLoaded()) {
+        return;
+      }
 
+      if(! props.layers) {
+        return;
+      }
+      console.log('sourceCounter... ', sourceCounter)
+
+      // Remove 'old' layers
+      const allLayers = map.current.getStyle().layers;
+      allLayers.forEach(x => {
+        // Check if this is one of our layers
+        if(x.id.indexOf('vehicles-') > -1) {
+          // If so, remove
+          map.current.removeLayer(x.id)
+        }
+        if(x.id.indexOf('rentals-') > -1) {
+          // If so, remove
+          map.current.removeLayer(x.id)
+        }
+        if(x.id.indexOf('zones-geodata') > -1) {
+          // If so, remove
+          map.current.removeLayer(x.id)
+          // setZonesGeodataHash("");
+        }
+      })
+      // Add selected layers to the map
+      console.log('adding new layers');
+      props.layers.forEach(x => {
+        if(props.layers.indexOf(x) >= -1) {
+          const doesLayerExist = map.current.getLayer(x);
+          const doesRelatedSourceExist = map.current.getSource(layers[x].source);
+          if(! doesLayerExist && doesRelatedSourceExist) {
+            console.log(counter, 'add layer')
+            map.current.addLayer(layers[x]);
+          } else {
+            console.log(counter, 'not added layer. doesLayerExist/doesRelatedSourceExist', doesLayerExist, doesRelatedSourceExist)
+          }
+        }
+      })
+      console.log('added new layers')
+    }
+    addLayers();
+  }, [
+    // map.current,
+    // counter,
+    props.layers,
+    isStyleLoaded,
+    sourceCounter,
+    // isLoggedIn,
+    // vehicles,
+    // rentals.origins,
+    // rentals.destinations,
+    // zones_geodata,
+    // providers
+  ]);
+
+  const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
     if(! map.current) return;
     if(! providers) return;

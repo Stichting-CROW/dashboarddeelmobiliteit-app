@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {MapComponent} from '../components/Map/MapComponent.jsx';
+import {MapComponentMinimal as MapComponent} from '../components/Map/MapComponentMinimal.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
 import {
@@ -38,15 +38,15 @@ function Map({mode, mapContainer}) {
   });
   
   let layers = [];
-  if(showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
+  if(true || showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
   
   let activeSource = '';
   // console.log("Mappage got displaymode", displayMode);
   
-  if(displayMode===DISPLAYMODE_PARK) {
+  if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
       case DISPLAYMODE_PARKEERDATA_HEATMAP:
-        layers.push('vehicles-heatmap-city-level');
+        layers.push('vehicles-heatmap');
         activeSource = 'vehicles';
         break;
       case DISPLAYMODE_PARKEERDATA_CLUSTERS:
@@ -61,11 +61,11 @@ function Map({mode, mapContainer}) {
         break;
       default:
     }
-  } else if(displayMode===DISPLAYMODE_RENTALS) {
+  } else if(displayMode===DISPLAYMODE_RENTALS && viewRentals) {
     const rentalsKey = (filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');
     switch(viewRentals) {
       case DISPLAYMODE_VERHUURDATA_HEATMAP:
-        layers.push(`rentals-${rentalsKey}-heatmap-city-level`);
+        layers.push(`rentals-${rentalsKey}-heatmap`);
         activeSource = `rentals-${rentalsKey}`;
         break;
       case DISPLAYMODE_VERHUURDATA_CLUSTERS:
