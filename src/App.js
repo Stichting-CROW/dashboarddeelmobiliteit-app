@@ -45,12 +45,13 @@ function App() {
   // Our state variables
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
+  const [delayTimeout, setDelayTimeout] = useState(null);
   
   const dispatch = useDispatch()
   
   const mapContainer = useRef(null);
 
-  let TO_delay = null, DELAY_TIMEOUT_IN_MS = 250;
+  let DELAY_TIMEOUT_IN_MS = 250;
 
   // Store window location in a local variable
   let location = useLocation();
@@ -189,22 +190,21 @@ function App() {
     if(displayMode !== 'displaymode-park') return;
     if(isLoggedIn && metadata.zones_loaded === false) return;
 
-    if(TO_delay) clearTimeout(TO_delay);
+    if(delayTimeout) clearTimeout(delayTimeout);
 
-    // Assignments to the 'TO_delay' variable from inside React Hook useEffect
+    // Assignments to the 'setDelayTimeout' variable from inside React Hook useEffect
     // will be lost after each render. To preserve the value over time, store
     // it in a useRef Hook and keep the mutable value in the '.current'
     // property. Otherwise, you can move this variable directly inside useEffect
     // https://react-hooks/exhaustive-deps
-    TO_delay = setTimeout(x => {
+    setDelayTimeout(setTimeout(x => {
       initUpdateParkingData(store);
-    }, DELAY_TIMEOUT_IN_MS)
+    }, DELAY_TIMEOUT_IN_MS))
   }, [
     isLoggedIn,
     metadata.zones_loaded,
     filter,
     // pathName
-    // pathName,
     // layers.displaymode,
     // layers.zones_visible
   ]);
@@ -214,11 +214,11 @@ function App() {
     if(displayMode !== 'displaymode-rentals') return;
     if(isLoggedIn && metadata.zones_loaded === false) return;
 
-    if(TO_delay) clearTimeout(TO_delay);
+    if(delayTimeout) clearTimeout(delayTimeout);
 
-    TO_delay = setTimeout(x => {
+    setDelayTimeout(setTimeout(x => {
       initUpdateVerhuringenData(store);
-    }, DELAY_TIMEOUT_IN_MS)
+    }, DELAY_TIMEOUT_IN_MS))
   }, [
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
