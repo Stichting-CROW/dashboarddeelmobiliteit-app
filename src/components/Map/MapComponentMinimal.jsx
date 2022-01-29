@@ -65,12 +65,11 @@ function MapComponentMinimal(props) {
   useEffect(() => {
     const addSources = () => {
       Object.keys(sources).forEach((key, idx) => {
-        map.current.U.addGeoJSON(key);
+        map.current.U.addGeoJSON(key, null, sources[key]);
       })
     }
     const addLayers = () => {
       Object.keys(layers).forEach((key, idx) => {
-        console.log('ADD LAYER', key)
         map.current.U.addLayer(layers[key]);
       })
     }
@@ -95,6 +94,7 @@ function MapComponentMinimal(props) {
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
+        // Store map in a global variable
         window.ddMap = map.current;
 
         setDidMapLoad(true)
@@ -122,22 +122,21 @@ function MapComponentMinimal(props) {
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
 
-    const activateSource = (sourceName) => {
-      console.log('props.activeSource', props.activeSource, sourceName)
-      map.current.U.showSource(sourceName);
-      console.log("ddMap.getStyle().layers", map.current.getStyle().layers)
+    const activateSources = () => {
+      props.activeSources.forEach(sourceName => {
+        map.current.U.showSource(sourceName);
+      });
       Object.keys(sources).forEach((key, idx) => {
-        if(key !== sourceName) {
-          console.log('HIDE:: ', 'key', key, 'sourceName', sourceName)
+        if(props.activeSources.indexOf(key) <= -1) {
           map.current.U.hideSource(key);
         }
       });
     }
 
-    activateSource(props.activeSource)
+    activateSources()
   }, [
     didInitSourcesAndLayers,
-    props.activeSource
+    props.activeSources
   ])
 
   // Set active layers
@@ -147,14 +146,12 @@ function MapComponentMinimal(props) {
     const activateLayers = (layerName) => {
       // Show given layers
       props.layers.forEach(l => {
-        console.log('show l: ', l)
         map.current.U.show(l);
       });
 
       // Hide all other layers
       Object.keys(layers).forEach((key, idx) => {
         if(props.layers.indexOf(key) <= -1) {
-          console.log('hide l: ', key)
           map.current.U.hide(key);
         }
       })
@@ -166,15 +163,28 @@ function MapComponentMinimal(props) {
     props.layers
   ])
 
-  // Set vehicles layers/sources
+  // Set vehicles sources
   useEffect(x => {
     if(! didMapLoad) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
     map.current.U.setData('vehicles', vehicles.data);
     map.current.U.setData('vehicles-clusters', vehicles.data);
+  }, [
+    didInitSourcesAndLayers,
+    vehicles.data
+  ]);
 
-  }, [didMapLoad, vehicles.data]);
+  // Set zones source
+  useEffect(x => {
+    if(! didMapLoad) return;
+    if(! zones_geodata || zones_geodata.data.length <= 0) return;
+
+    map.current.U.setData('zones-geodata', zones_geodata.data);
+  }, [
+    didInitSourcesAndLayers,
+    zones_geodata.data
+  ]);
 
   useEffect(() => {
     const addProviderImage = async(aanbieder) => {

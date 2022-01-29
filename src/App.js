@@ -176,7 +176,7 @@ function App() {
     updateZonesgeodata(store);
   }, [
     isLoggedIn,
-    metadata.metadata_loaded,
+    metadata.zones_loaded,
     filter.gebied,
     filter.zones
   ])

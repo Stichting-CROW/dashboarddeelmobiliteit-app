@@ -37,27 +37,27 @@ function Map({mode, mapContainer}) {
     return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
   
-  let layers = [];
-  if(true || showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
+  let layers = [], activeSources = [];
+  if(showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
   
-  let activeSource = '';
   // console.log("Mappage got displaymode", displayMode);
   
   if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
       case DISPLAYMODE_PARKEERDATA_HEATMAP:
         layers.push('vehicles-heatmap');
-        activeSource = 'vehicles';
+        activeSources.push('vehicles');
         break;
       case DISPLAYMODE_PARKEERDATA_CLUSTERS:
         layers.push('vehicles-clusters');
         layers.push('vehicles-clusters-count');
         layers.push('vehicles-clusters-point');
-        activeSource = 'vehicles-clusters';
+        activeSources.push('vehicles');
+        activeSources.push('vehicles-clusters');
         break;
       case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
         layers.push('vehicles-point');
-        activeSource = 'vehicles';
+        activeSources.push('vehicles');
         break;
       default:
     }
@@ -66,17 +66,17 @@ function Map({mode, mapContainer}) {
     switch(viewRentals) {
       case DISPLAYMODE_VERHUURDATA_HEATMAP:
         layers.push(`rentals-${rentalsKey}-heatmap`);
-        activeSource = `rentals-${rentalsKey}`;
+        activeSources.push(`rentals-${rentalsKey}`);
         break;
       case DISPLAYMODE_VERHUURDATA_CLUSTERS:
         layers.push(`rentals-${rentalsKey}-clusters`);
         layers.push(`rentals-${rentalsKey}-clusters-count`);
         layers.push(`rentals-${rentalsKey}-clusters-point`);
-        activeSource = `rentals-${rentalsKey}-clusters`;
+        activeSources.push(`rentals-${rentalsKey}-clusters`);
         break;
       case DISPLAYMODE_VERHUURDATA_VOERTUIGEN:
         layers.push(`rentals-${rentalsKey}-point`);
-        activeSource = `rentals-${rentalsKey}`;
+        activeSources.push(`rentals-${rentalsKey}`);
         break;
       default:
     }
@@ -92,7 +92,7 @@ function Map({mode, mapContainer}) {
         <MapComponent
           mapContainer={mapContainer}
           layers={layers}
-          activeSource={activeSource}
+          activeSources={activeSources}
         />
       </div>
   </div>);
