@@ -140,9 +140,11 @@ function App() {
     const isFilterDateMoreThan10MinutesAgo = moment(filterDate).diff(moment(), 'minutes') < -10;
     const isSharedLink = params.get('view');// Check if this is a shared link
     if(! isSharedLink && isFilterDateMoreThan10MinutesAgo) {
-      setFilterDatum(moment().toDate())
+      setTimeout(x => {
+        setFilterDatum(moment().toDate())
+      }, 500)
     }
-  }, [dispatch, filterDate, uriParams]);
+  }, []);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
@@ -172,7 +174,7 @@ function App() {
 
   useEffect(() => {
     if(process.env.DEBUG) console.log('useEffect zones geodata')
-    if(! metadata.metadata_loaded) return;
+    if(! metadata.zones_loaded) return;
 
     updateZonesgeodata(store);
   }, [
@@ -192,11 +194,6 @@ function App() {
 
     if(delayTimeout) clearTimeout(delayTimeout);
 
-    // Assignments to the 'setDelayTimeout' variable from inside React Hook useEffect
-    // will be lost after each render. To preserve the value over time, store
-    // it in a useRef Hook and keep the mutable value in the '.current'
-    // property. Otherwise, you can move this variable directly inside useEffect
-    // https://react-hooks/exhaustive-deps
     setDelayTimeout(setTimeout(x => {
       initUpdateParkingData(store);
     }, DELAY_TIMEOUT_IN_MS))
@@ -247,6 +244,8 @@ function App() {
       {renderMobileMenus()}
     </>
   }
+
+  console.log('App state refresh')
 
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
