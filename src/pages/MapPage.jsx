@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {MapComponentMinimal as MapComponent} from '../components/Map/MapComponentMinimal.jsx';
+import {MapComponent} from '../components/Map/MapComponent.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
 import {
