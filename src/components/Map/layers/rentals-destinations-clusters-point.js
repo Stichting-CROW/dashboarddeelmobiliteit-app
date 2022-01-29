@@ -1,14 +1,11 @@
-const layer = {
+import {clustersPointLayer} from './common.js';
+
+const layer = Object.assign({}, clustersPointLayer, {
   'id': 'rentals-destinations-clusters-point',
-  'type': 'symbol',
-  'source': 'rentals-destinations',
-  filter: ['!', ['has', 'point_count']],
-  'layout': {
-    'icon-image': ["concat", ['get', 'system_id'], ':', ['get', 'distance_bin']],
-    'icon-size': 1,
-    'icon-allow-overlap': true,
-  },
-  'minzoom': 18
-}
+  'source': 'rentals-destinations-clusters',
+  'layout': Object.assign({}, clustersPointLayer.layout, {
+    'icon-image': ["concat", ['get', 'system_id'], '-r:', ['get', 'distance_bin']]
+  }),
+})
 
 export default layer;

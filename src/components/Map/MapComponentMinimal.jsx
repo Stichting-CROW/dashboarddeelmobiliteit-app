@@ -103,6 +103,108 @@ function MapComponentMinimal(props) {
         addLayers()
 
         setDidInitSourcesAndLayers(true)
+
+
+        // Add a new source from our GeoJSON data and
+        // set the 'cluster' option to true. GL-JS will
+        // add the point_count property to your source data.
+        map.current.addSource('earthquakes', {
+          type: 'geojson',
+          data: 'https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson',
+          cluster: true,
+          clusterMaxZoom: 14, // Max zoom to cluster points on
+          clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+        });
+
+        // map.current.addLayer({
+        //   id: 'clusters',
+        //   type: 'circle',
+        //   source: 'earthquakes',
+        //   filter: ['has', 'point_count'],
+        //   paint: {
+        //     // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
+        //     // with three steps to implement three types of circles:
+        //     //   * Blue, 20px circles when point count is less than 100
+        //     //   * Yellow, 30px circles when point count is between 100 and 750
+        //     //   * Pink, 40px circles when point count is greater than or equal to 750
+        //     'circle-color': [
+        //       'step',
+        //       ['get', 'point_count'],
+        //       '#51bbd6',
+        //       100,
+        //       '#f1f075',
+        //       750,
+        //       '#f28cb1'
+        //     ],
+        //     'circle-radius': [
+        //       'step',
+        //       ['get', 'point_count'],
+        //       20,
+        //       100,
+        //       30,
+        //       750,
+        //       40
+        //     ]
+        //   }
+        // });
+
+        map.current.addLayer({
+          id: 'clusters',
+          type: 'circle',
+          source: 'earthquakes',
+          filter: ['has', 'point_count'],
+          paint: {
+            // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
+            // with three steps to implement three types of circles:
+            //   * Blue, 20px circles when point count is less than 100
+            //   * Yellow, 30px circles when point count is between 100 and 750
+            //   * Pink, 40px circles when point count is greater than or equal to 750
+            'circle-color': [
+              'step',
+              ['get', 'point_count'],
+              '#51bbd6',
+              100,
+              '#f1f075',
+              750,
+              '#f28cb1'
+            ],
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20,
+              100,
+              30,
+              750,
+              40
+            ]
+          }
+        });
+           
+        map.current.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'earthquakes',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          }
+        });
+           
+        map.current.addLayer({
+          id: 'unclustered-point',
+          type: 'circle',
+          source: 'earthquakes',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+          'circle-color': '#11b4da',
+          'circle-radius': 4,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+          }
+        });
+
       });
 
       // Disable rotating
@@ -165,7 +267,7 @@ function MapComponentMinimal(props) {
 
   // Set vehicles sources
   useEffect(x => {
-    if(! didMapLoad) return;
+    if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
     map.current.U.setData('vehicles', vehicles.data);
@@ -177,13 +279,37 @@ function MapComponentMinimal(props) {
 
   // Set zones source
   useEffect(x => {
-    if(! didMapLoad) return;
+    if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
 
     map.current.U.setData('zones-geodata', zones_geodata.data);
   }, [
     didInitSourcesAndLayers,
     zones_geodata.data
+  ]);
+
+  // Set rentals origins source
+  useEffect(x => {
+    if(! didInitSourcesAndLayers) return;
+    if(! rentals || ! rentals.origins || Object.keys(rentals.origins).length <= 0) return;
+
+    map.current.U.setData('rentals-origins', rentals.origins);
+    map.current.U.setData('rentals-origins-clusters', rentals.origins);
+  }, [
+    didInitSourcesAndLayers,
+    rentals.origins
+  ]);
+
+  // Set rentals destinations source
+  useEffect(x => {
+    if(! didInitSourcesAndLayers) return;
+    if(! rentals || ! rentals.destinations || Object.keys(rentals.destinations).length <= 0) return;
+
+    map.current.U.setData('rentals-destinations', rentals.destinations);
+    map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+  }, [
+    didInitSourcesAndLayers,
+    rentals.destinations
   ]);
 
   useEffect(() => {
@@ -193,7 +319,6 @@ function MapComponentMinimal(props) {
         // console.log("provider image for %s already exists", baselabel);
         return;
       }
-      // TODO
       var value;
       if(stateLayers.displaymode === 'displaymode-rentals') {
         value = await getVehicleMarkers_rentals(aanbieder.color);
