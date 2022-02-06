@@ -1,7 +1,13 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
 import {isLoggedIn} from '../helpers/authentication.js';
 
-export const updateZones = (store_zones)  => {
+const getFilters = async (token, gm_code) => {
+  let options = { headers : { "authorization": "Bearer " + token }}
+  let url="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+gm_code;
+  return await fetch(url, options).json();
+}
+
+export const updateZones = async (store_zones) => {
   try {
     if(undefined===store_zones) {
       console.log("no redux state available yet - skipping zones update");
@@ -14,9 +20,9 @@ export const updateZones = (store_zones)  => {
       return false;
     }
 
+
     let url_zones="";
-    if(!isLoggedIn(state)||!state) { // ||state.filter.gebied===""
-      // console.log('NOT LOGGED IN')
+    if(!state) { // ||state.filter.gebied===""
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
@@ -24,8 +30,39 @@ export const updateZones = (store_zones)  => {
       return;
     }
 
-    if(state.filter.gebied==="") {
+    // Not logged in:
+    else if(! isLoggedIn(state)) {
 
+      const gm_code = state.filter.gebied;
+      let url = `https://api.deelfietsdashboard.nl/dashboard-api/public/filters?gm_code=${gm_code}`;
+      const zonesGeoDataResult = await fetch(url);
+      const zonesGeoDataJson = await zonesGeoDataResult.json();
+      console.log('metadataZones 2-2')
+      console.log('zonesGeoData..', zonesGeoDataJson)
+      // console.log('zonesGeoData...', zonesGeoData)
+
+      if(state.filter.gebied==="") {
+        store_zones.dispatch({ type: 'SET_ZONES', payload: []});
+        store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+        store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+
+        return;
+      }
+
+      if(zonesGeoDataJson && zonesGeoDataJson.filter_values && zonesGeoDataJson.filter_values.zones) {
+        store_zones.dispatch({ type: 'SET_ZONES', payload: zonesGeoDataJson.filter_values.zones});
+        store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+      }
+      else {
+        store_zones.dispatch({ type: 'SET_ZONES', payload: []});
+        store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
+        store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+      }
+      
+      return;
+    }
+
+    if(state.filter.gebied==="") {
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});

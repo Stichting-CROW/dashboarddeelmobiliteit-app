@@ -24,7 +24,7 @@ export const updateZonesgeodata = (store)  => {
     }
 
     let zone_ids="";
-    if(!isLoggedIn(state)||!state) {
+    if((!isLoggedIn(state))||!state) {
       // no filter data available
       zone_ids = "";
     } else if (state.filter.gebied==="") {

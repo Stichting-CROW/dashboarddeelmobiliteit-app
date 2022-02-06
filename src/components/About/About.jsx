@@ -89,11 +89,11 @@ Overheden hebben alleen toegang tot de informatie over deelvoertuigen in hun eig
 
 ### Hoe krijg ik toegang tot het Dashboard?
 
-Via het CROW of via info@deelfietsdashboard.nl kun je een login aanvragen. Afhankelijk van je taak en de afspraken over de data kun je vervolgens toegang krijgen tot de dashboard informatie voor gebieden en/of van aanbieders. Zo kunnen gemeente medewerkers over het algemeen toegang krijgen voor het dashboard in hun gemeente. Aanbieders van deelfietsen kunnen uiteraard toegang krijgen tot alle infromatie van hun deelfietsen. Neem voor vragen over de rechten ook contact op met het CROW of info@deelfietsdashboard.nl.
+Via het CROW of via info@deelfietsdashboard.nl kun je een login aanvragen. Afhankelijk van je taak en de afspraken over de data kun je vervolgens toegang krijgen tot de dashboard informatie voor gebieden en/of van aanbieders. Zo kunnen gemeente medewerkers over het algemeen toegang krijgen voor het dashboard in hun gemeente. Aanbieders van deelfietsen kunnen uiteraard toegang krijgen tot alle informatie van hun deelfietsen. Neem voor vragen over de rechten ook contact op met het CROW of info@deelfietsdashboard.nl.
 
 ### Welke datastandaarden worden ondersteund
 
-Het Dashboard Deelmobiliteit ondersteunt MDS, GBFS en TOMP. er worden specifieke voorwaarden gesteld aan de feed om bruikbaar in het dashboard te zijn. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
+Het Dashboard Deelmobiliteit ondersteunt MDS, GBFS en TOMP. Er worden specifieke voorwaarden gesteld aan de feed om bruikbaar in het dashboard te zijn. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
 
 ### Is de software open source?
 

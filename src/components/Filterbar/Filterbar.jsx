@@ -70,7 +70,7 @@ function Filterbar({
 
       {<FilteritemGebieden />}
 
-      {isLoggedIn && <FilteritemZones />}
+      {<FilteritemZones />}
 
       {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
 

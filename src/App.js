@@ -245,8 +245,6 @@ function App() {
     </>
   }
 
-  console.log('App state refresh')
-
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
         {process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
