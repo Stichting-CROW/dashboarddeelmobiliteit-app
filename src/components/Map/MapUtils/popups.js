@@ -36,7 +36,7 @@ window.showConfetti = () => {
   })
 }
 
-export const initPopupLogic = (theMap, providers, isLoggedIn) => {
+export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
     'vehicles-point',
@@ -50,7 +50,7 @@ export const initPopupLogic = (theMap, providers, isLoggedIn) => {
   layerNamesToApplyPopupLogicTo.forEach((layerName) => {
     // When a click event occurs on a feature in the places layer, open a popup at the
     // location of the feature, with description HTML from its properties.
-    theMap.on('click', layerName, function (e) {
+    function clickHandler (e) {
       const vehicleProperties = e.features[0].properties;
       const providerColor = getProviderColor(providers, vehicleProperties.system_id)
 
@@ -63,6 +63,8 @@ export const initPopupLogic = (theMap, providers, isLoggedIn) => {
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
+
+      console.log(filterDate);
 
       new maplibregl.Popup()
         .setLngLat(coordinates)
@@ -80,7 +82,7 @@ export const initPopupLogic = (theMap, providers, isLoggedIn) => {
           </h1>
           <div class="Map-popup-body">
             ${vehicleProperties.in_public_space_since ? `<div>
-              Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').fromNow()}<br />
+              Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').from(filterDate)}<br />
               Geparkeerd sinds: ${moment(vehicleProperties.in_public_space_since).format('DD-MM-YYYY HH:mm')}
             </div>` : ''}
 
@@ -96,7 +98,9 @@ export const initPopupLogic = (theMap, providers, isLoggedIn) => {
           </div>
         `)
         .addTo(theMap);
-    });
+    }
+    theMap.off('click', layerName, clickHandler);
+    theMap.on('click', layerName, clickHandler);
     // Change the cursor to a pointer when the mouse is over the places layer.
     theMap.on('mouseenter', layerName, function () {
       theMap.getCanvas().style.cursor = 'pointer';

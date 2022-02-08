@@ -30,6 +30,7 @@ function MapComponent(props) {
 
   // Get data from store
   const vehicles = useSelector(state => state.vehicles || null);
+  const filter = useSelector(state => state.filter || null);
   const rentals = useSelector(state => state.rentals || null);
   const stateLayers = useSelector(state => state.layers || null);
   const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
@@ -289,11 +290,12 @@ function MapComponent(props) {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
 
-    initPopupLogic(map.current, providers, isLoggedIn)
+    initPopupLogic(map.current, providers, isLoggedIn, filter.datum)
   }, [
     didInitSourcesAndLayers,
     providers,
-    isLoggedIn
+    isLoggedIn,
+    filter.datum
   ])
 
   // Init clusters click handler
