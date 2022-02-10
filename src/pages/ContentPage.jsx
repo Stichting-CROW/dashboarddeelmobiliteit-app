@@ -14,7 +14,7 @@ export default function ContentPage(props) {
         zIndex: 1,
       }}
     >
-      <div className="ContentPage-inner py-8 pl-12">
+      <div className="ContentPage-inner py-3 sm:py-8 pl-3 sm:pl-12 pb-20">
         {props.children}
       </div>
     </div>

@@ -1,5 +1,6 @@
 .app {
   overflow-x: hidden;
+  overflow-y: hidden;
   font-family: Inter, sans-serif;
   @apply absolute w-screen h-full z-0 bg-white flex flex-col box-border;
 }

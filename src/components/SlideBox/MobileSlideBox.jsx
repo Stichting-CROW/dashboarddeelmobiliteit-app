@@ -9,7 +9,7 @@ import { IconButtonClose } from '../IconButtons.jsx';
 function MobileSlideBox(props) {
   return (
     <div className={`
-      MobileSlideBox w-full sm:hidden absolute left-0
+      MobileSlideBox w-full sm:hidden fixed left-0
       ${props.isVisible ? 'is-visible' : ''}
       ${props.classes}
     `} style={props.style}>

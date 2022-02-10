@@ -227,7 +227,7 @@ function App() {
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
-    return <div>
+    return <div className="MobileMenus">
       <div className="hidden sm:block relative h-full z-10">
         <FilterbarDesktop isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
@@ -268,7 +268,7 @@ function App() {
                 <ContentPage>
                   <StatsPage />
                 </ContentPage>
-                {renderMobileMenus()}
+                {renderMapElements()}
               </Route>
               <Route exact path="/monitoring">
                 <Monitoring />
