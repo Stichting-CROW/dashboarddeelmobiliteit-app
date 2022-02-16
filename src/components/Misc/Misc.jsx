@@ -171,6 +171,16 @@ export default function Misc(props) {
           inline-block
         ">
           Meer info
+        </Link><br />
+
+        &raquo; <Link to="/rondleiding" className="
+          text-gray-400
+          underline
+          block
+          mb-2
+          inline-block
+        ">
+          Rondleiding
         </Link>
 
         <div className="flex">

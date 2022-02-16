@@ -233,6 +233,9 @@ function Menu({pathName}) {
             <Link className="text-menu" to="/over">
               Over
             </Link>
+            <Link className="text-menu" to="/rondleiding">
+              Rondleiding
+            </Link>
           </>}
 
           {isLoggedIn && false && <Link className={`

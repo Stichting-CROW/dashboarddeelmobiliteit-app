@@ -19,6 +19,7 @@ import Monitoring from './pages/Monitoring.jsx';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
+import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
@@ -278,6 +279,11 @@ function App() {
                   <About />
                 </Overlay>
               </Route>
+              <Route exact path="/rondleiding">
+                <ContentPage forceFullWidth={true}>
+                  <Tour />
+                </ContentPage>
+              </Route>
               <Route exact path="/misc">
                 <Overlay>
                   <Misc />
@@ -292,6 +298,12 @@ function App() {
             <Overlay>
               <About />
             </Overlay>
+          </Route>
+
+          <Route exact path="/rondleiding">
+            <ContentPage forceFullWidth={true}>
+              <Tour />
+            </ContentPage>
           </Route>
 
           <Route exact path="/login">
