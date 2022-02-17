@@ -84,6 +84,7 @@ Overheden hebben alleen toegang tot de informatie over deelvoertuigen in hun eig
 - minder aanvragen vanuit gemeentes
 - geen nieuwe dataformaten nodig i.v.m. gebruik internationale datastandaarden
 - gemeentes hebben beter inzicht in de stand van zaken
+- aanbieders hebben beter inzicht
 
 ## Veel gestelde vragen
 

@@ -21,7 +21,7 @@ const sliderProperties = {
   indicators: true,
   scale: 1.4,
   onChange: (oldIndex, newIndex) => {
-    console.log(`slide transition from ${oldIndex} to ${newIndex}`);
+    // console.log(`slide transition from ${oldIndex} to ${newIndex}`);
   }
 }
 

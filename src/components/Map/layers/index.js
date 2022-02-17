@@ -19,7 +19,13 @@ import rentalsDestinationsClustersPoint from './rentals-destinations-clusters-po
 import zonesGeodata from './zones-geodata.js';
 import zonesGeodataBorder from './zones-geodata-border.js';
 
+// The sort order sets the loading order
+// - 'Zones' have to be at the background,
+// - 'Cluster counts' have to be on top of 'Clusters'
 export const layers = {
+  'zones-geodata': zonesGeodata,
+  'zones-geodata-border': zonesGeodataBorder,
+
   'vehicles-point': vehiclesPoint,
   'vehicles-clusters': vehiclesClusters,
   'vehicles-clusters-count': vehiclesClustersCount,
@@ -36,8 +42,5 @@ export const layers = {
   'rentals-destinations-clusters': rentalsDestinationsClusters,
   'rentals-destinations-clusters-count': rentalsDestinationsClustersCount,
   'rentals-destinations-clusters-point': rentalsDestinationsClustersPoint,
-  'rentals-destinations-heatmap': rentalsDestinationsHeatmapCityLevel,
-
-  'zones-geodata': zonesGeodata,
-  'zones-geodata-border': zonesGeodataBorder,
+  'rentals-destinations-heatmap': rentalsDestinationsHeatmapCityLevel
 }
