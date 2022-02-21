@@ -46,6 +46,7 @@ export default function filter(state = initialState, action) {
         'felyx': '#064627',
         'lime': '#1bd831',
         'baqme': '#4bdfbb',
+        'bird': '#26ccf0',
         'cargoroo': '#ffcb34',
         'hely': '#fd645c',
         'tier': '#0d123f'

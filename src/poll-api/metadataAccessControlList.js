@@ -11,6 +11,7 @@ const cPublicAanbieders = [
   { value:"keobike", system_id:"keobike", name:"Keobike" },
   { value:"lime", system_id:"lime", name:"Lime" },
   { value:"baqme", system_id:"baqme", name:"BAQME" },
+  { value:"bird", system_id:"bird", name:"Bird" },
   { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
   { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
   { value:"hely", system_id:"hely", name:"Hely" },

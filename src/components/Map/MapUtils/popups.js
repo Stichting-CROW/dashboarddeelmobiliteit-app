@@ -10,6 +10,7 @@ moment.locale('nl', localization);
 
 const providerWebsiteUrls = {
   'baqme': 'https://www.baqme.com/',
+  'bird': 'https://www.bird.co/',
   'cykl': 'https://www.cykl.nl/',
   'check': 'https://ridecheck.app/',
   'cargoroo': 'https://cargoroo.nl/',

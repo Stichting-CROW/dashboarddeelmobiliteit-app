@@ -16,7 +16,7 @@ const layer = {
       ],
     'icon-allow-overlap': true,
   },
-  'minzoom': 10,
+  'minzoom': 6,
   // 'paint': {
   // // Size circle radius by earthquake magnitude and zoom level
   // 'circle-radius': [
