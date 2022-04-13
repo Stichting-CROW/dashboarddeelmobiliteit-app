@@ -24,6 +24,7 @@ const providerWebsiteUrls = {
   'keobike': 'https://keobike.nl/',
   'lime': 'https://www.li.me/',
   'tier': 'https://www.tier.app/',
+  'dott': 'https://ridedott.com/',
   'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
 }
 

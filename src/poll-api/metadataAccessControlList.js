@@ -15,7 +15,8 @@ const cPublicAanbieders = [
   { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
   { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
   { value:"hely", system_id:"hely", name:"Hely" },
-  { value:"tier", system_id:"tier", name:"TIER" }
+  { value:"tier", system_id:"tier", name:"TIER" },
+  { value:"dott", system_id:"dott", name:"Dott" },
 ];
   
 const cPublicGebieden = [

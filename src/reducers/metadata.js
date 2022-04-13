@@ -49,7 +49,8 @@ export default function filter(state = initialState, action) {
         'bird': '#26ccf0',
         'cargoroo': '#ffcb34',
         'hely': '#fd645c',
-        'tier': '#0d123f'
+        'tier': '#0d123f',
+        'dott': '#00a8e9'
       }
       const aanbieders = action.payload.map((aanbieder,idx)=>{
         const color = providerColors[aanbieder.system_id] ? providerColors[aanbieder.system_id] : colors[idx];
