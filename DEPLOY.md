@@ -115,3 +115,66 @@ If -in example- the API pod is 'broken', run this:
     kubectl delete pod <pod id>
 
 The pod gets destroyed andn restarts automatically.
+
+## Export raw data manually
+
+    ssh root@auth.deelfietsdashboard.nl
+    su - postgres
+
+Export trips (change variables first) ->
+
+    psql deelfietsdashboard -c "
+    COPY (SELECT *, st_y(start_location) as start_location_latitude, st_x(start_location) as start_location_longitude,
+    st_y(end_location) as end_location_latitude, st_x(end_location) as end_location_longitude,
+    ST_WITHIN(start_location,
+    (
+     select area from zones where zone_id = 34236
+    )) as start_location_in_filtered_zone,
+    ST_WITHIN(end_location,
+    (
+     select area from zones where zone_id = 34236
+    )) as end_location_in_filtered_zone
+    FROM trips
+    WHERE (ST_WITHIN(start_location,
+    (
+     select area from zones where zone_id = 34236
+    )) or 
+    ST_WITHIN(end_location,
+    (
+     select area from zones where zone_id = 34236
+    ))
+    ) 
+    AND start_time >= '2021-09-01' and start_time < '2021-10-01') TO STDOUT CSV HEADER" > 20220404_export_trips_Schiedam__kelt.csv
+
+Export park events (change variables first) ->
+
+    psql deelfietsdashboard -c "
+    COPY (SELECT *, st_y(location) as latitude, st_x(location) as longitude
+    FROM park_events
+    WHERE ST_WITHIN(location,
+    (
+     select area from zones where zone_id = 34236
+    )) AND start_time >= '2021-09-01' and start_time < '2021-10-01') TO STDOUT CSV HEADER" > 20220404_export_parked_Schiedam__kelt.csv
+
+From localhost, copy the files over to your local machine:
+
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_trips_Barendrecht__kelt.csv ~/tmp
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_parked_Barendrecht__kelt.csv ~/tmp
+
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_trips_Albrandswaard__kelt.csv ~/tmp
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_parked_Albrandswaard__kelt.csv ~/tmp
+
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_trips_Ridderkerk__kelt.csv ~/tmp
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_parked_Ridderkerk__kelt.csv ~/tmp
+
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_trips_Schiedam__kelt.csv ~/tmp
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/20220404_export_parked_Schiedam__kelt.csv ~/tmp
+
+## Backup database
+
+    sudo su - postgres
+    pg_dump -U postgres -c -f backup_2022-04-25.sql deelfietsdashboard
+
+en dan op localhost:
+
+    rsync root@auth.deelfietsdashboard.nl:/var/lib/postgresql/backup_2022-04-25.sql ~/tmp
