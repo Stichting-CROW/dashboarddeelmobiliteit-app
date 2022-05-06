@@ -37,6 +37,7 @@ import {
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_ZONES,
   DISPLAYMODE_OTHER,
 } from './reducers/layers.js';
 
@@ -81,11 +82,14 @@ function App() {
       }
     }
     
+    // Decide on which display mode we use, based on URL
     let payload;
     if(pathName.includes("/map/park")||pathName==='/') {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
       payload=DISPLAYMODE_RENTALS;
+    } else if(pathName.includes("/map/zones")) {
+      payload=DISPLAYMODE_ZONES;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -265,6 +269,9 @@ function App() {
               <Route exact path="/map/rentals">
                 {renderMapElements()}
               </Route>
+              <Route exact path="/map/zones">
+                {renderMapElements()}
+              </Route>
               <Route exact path="/stats/overview">
                 <ContentPage>
                   <StatsPage />
@@ -272,7 +279,9 @@ function App() {
                 {renderMapElements()}
               </Route>
               <Route exact path="/monitoring">
-                <Monitoring />
+                <ContentPage>
+                  <Monitoring />
+                </ContentPage>
               </Route>
               <Route exact path="/over">
                 <Overlay>

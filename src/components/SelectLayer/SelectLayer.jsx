@@ -7,6 +7,7 @@ import './SelectLayer.css';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_ZONES,
   DISPLAYMODE_OTHER,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
@@ -44,8 +45,7 @@ function SelectLayer(props) {
     return state.authentication.user_data ? true : false;
   });
   
-  if(displayMode===DISPLAYMODE_OTHER||
-     (false && displayMode===DISPLAYMODE_RENTALS && showZoneOnOff===false)) {
+  if(displayMode===DISPLAYMODE_OTHER) {
        return null; // no layer selection
   }
   

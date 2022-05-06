@@ -6,6 +6,7 @@ import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_ZONES,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
@@ -86,7 +87,7 @@ function Map({mode, mapContainer}) {
     <div className="flex flex-col">
       <div className="hidden sm:block">
         <SelectLayer />
-        <MetaStats />
+        {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
       </div>
       <div className="flex-1 bg-red-400">
         <MapComponent

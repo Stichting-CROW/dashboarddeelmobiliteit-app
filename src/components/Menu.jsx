@@ -208,6 +208,13 @@ function Menu({pathName}) {
             />
 
             <MenuItem
+              pathName={pathName}
+              text={'Zones'}
+              path={'/map/zones'}
+              icon={'https://i.imgur.com/GrF8KBA.png'}
+            />
+
+            <MenuItem
               title="Kopieer link"
               text={''}
               icon={'/images/components/Menu/share.svg'}
@@ -220,7 +227,7 @@ function Menu({pathName}) {
             <MenuItem
               pathName={pathName}
               path={'/misc'}
-              text={'Extra'}
+              text={''}
               icon={'/images/components/Menu/settings.svg'}
             />
 

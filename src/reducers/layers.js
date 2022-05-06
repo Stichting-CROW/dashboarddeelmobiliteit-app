@@ -1,6 +1,7 @@
 
 export const DISPLAYMODE_PARK = 'displaymode-park';
 export const DISPLAYMODE_RENTALS = 'displaymode-rentals';
+export const DISPLAYMODE_ZONES = 'displaymode-zones';
 export const DISPLAYMODE_OTHER = 'displaymode-other';
 
 export const DISPLAYMODE_PARKEERDATA_HEATMAP = 'parkeerdata-heatmap';
