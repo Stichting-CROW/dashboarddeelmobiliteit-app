@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import moment from 'moment';
@@ -10,6 +10,7 @@ import localization from 'moment/locale/nl'
 import U from 'mapbox-gl-utils';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
+import {addZonesToMap} from './MapUtils/zones.js';
 
 import './MapComponent.css';
 
@@ -17,10 +18,10 @@ import {layers} from './layers';
 import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
 
-const md5 = require('md5');
+// const md5 = require('md5');
 
 // Set language for momentJS
-moment.locale('nl', localization);
+moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
   if(process.env.DEBUG) console.log('Map component')
@@ -49,12 +50,12 @@ function MapComponent(props) {
   const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
   const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
   const [zoom] = useState(stateLayers.zoom || 15);
-  const [counter, setCounter] = useState(0);
-  const [sourceCounter, setSourceCounter] = useState(0);
-  const [sourcesSuccesfullyAdded, setSourcesSuccesfullyAdded] = useState(false);
+  // const [counter, setCounter] = useState(0);
+  // const [sourceCounter, setSourceCounter] = useState(0);
+  // const [sourcesSuccesfullyAdded, setSourcesSuccesfullyAdded] = useState(false);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   // const [zonesGeodataHash, setZonesGeodataHash] = useState("");
-  const [sourceHash, setSourceHash] = useState([]);
+  // const [sourceHash, setSourceHash] = useState([]);
   let map = useRef(null);
 
   const applyMapSettings = (theMap) => {
@@ -78,7 +79,7 @@ function MapComponent(props) {
     theMap.touchZoomRotate.disableRotation();
   }
 
-  const registerMapView = (theMap) => {
+  const registerMapView = useCallback(theMap => {
     const bounds = theMap.getBounds();
     const payload = [
       bounds._sw.lng,
@@ -89,11 +90,11 @@ function MapComponent(props) {
 
     dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
-  }
+  }, [dispatch]);
 
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
-  const mapcurrent_exists = map.current!==undefined;
+  // const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
     const addSources = () => {
       Object.keys(sources).forEach((key, idx) => {
@@ -129,11 +130,11 @@ function MapComponent(props) {
       
       // Map event handlers
       map.current.on('error', function(e) {
-        if(process.env.DEBUG) console.log('An error event occurred.',e);
+        if(process.env.DEBUG) console.log('An error event occurred.', e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
       map.current.on('idle', function(e) {
-        if(process.env.DEBUG) console.log('An idle event occurred.',e);
+        if(process.env.DEBUG) console.log('An idle event occurred.', e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
       map.current.on('moveend', function() {
@@ -166,8 +167,21 @@ function MapComponent(props) {
     lat,
     zoom,
     mapContainer,
-    dispatch
+    dispatch,
+    registerMapView
   ])
+
+  /**
+   * MICROHUBS / ZONES LOGIC
+  */
+  useEffect(x => {
+    if(! didMapLoad) return;
+    addZonesToMap(map.current);
+  }, [didMapLoad])
+
+  /**
+   * /MICROHUBS / ZONES LOGIC
+  */
 
   /**
    * SET SOURCES AND LAYERS
@@ -238,7 +252,8 @@ function MapComponent(props) {
     map.current.U.setData('zones-geodata', zones_geodata.data);
   }, [
     didInitSourcesAndLayers,
-    zones_geodata.data
+    zones_geodata,
+    zones_geodata.data,
   ]);
 
   // Set rentals origins source
@@ -250,6 +265,7 @@ function MapComponent(props) {
     map.current.U.setData('rentals-origins-clusters', rentals.origins);
   }, [
     didInitSourcesAndLayers,
+    rentals,
     rentals.origins
   ]);
 
@@ -262,6 +278,7 @@ function MapComponent(props) {
     map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
   }, [
     didInitSourcesAndLayers,
+    rentals,
     rentals.destinations
   ]);
 
@@ -281,7 +298,6 @@ function MapComponent(props) {
     // reset extent action
     dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
   }, [
-    map.current,
     extent,
     dispatch
   ])

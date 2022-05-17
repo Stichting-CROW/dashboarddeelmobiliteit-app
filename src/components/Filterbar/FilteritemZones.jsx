@@ -66,7 +66,7 @@ function FilteritemZones() {
     
     if(groupZones.length===0) { return null }
     
-    const sortedZones = groupZones.sort((a,b)=>a.name.localeCompare(b.name));
+    const sortedZones = groupZones.sort((a,b) => a.name.localeCompare(b.name));
     
     return (
       <div key={'zg-'+group.zone_type} className="zone-group-container">

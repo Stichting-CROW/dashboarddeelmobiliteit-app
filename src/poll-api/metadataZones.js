@@ -1,11 +1,11 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
 import {isLoggedIn} from '../helpers/authentication.js';
 
-const getFilters = async (token, gm_code) => {
-  let options = { headers : { "authorization": "Bearer " + token }}
-  let url="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+gm_code;
-  return await fetch(url, options).json();
-}
+// const getFilters = async (token, gm_code) => {
+//   let options = { headers : { "authorization": "Bearer " + token }}
+//   let url="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+gm_code;
+//   return await fetch(url, options).json();
+// }
 
 export const updateZones = async (store_zones) => {
   try {

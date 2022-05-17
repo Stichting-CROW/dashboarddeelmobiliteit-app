@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import './css/FilteritemDatum.css';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
@@ -14,7 +14,7 @@ function FilterItemDatum() {
   const dispatch = useDispatch()
 
   // Variable that stores timeout for delaying setting date 
-  let TO_date = null, TIMEOUT_IN_MS = 0;
+  let TO_date = useRef(null), TIMEOUT_IN_MS = 0;
 
   const filterDatum = useSelector(state => {
     if(state.layers.displaymode === 'displaymode-rentals') {
@@ -24,10 +24,14 @@ function FilterItemDatum() {
     }
   });
 
-  const setFilterDatum = newdt => {
-    if(TO_date) clearTimeout(TO_date);
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : null;
+  });
 
-    TO_date = setTimeout(x => {
+  const setFilterDatum = useCallback(newdt => {
+    if(TO_date && TO_date.current) clearTimeout(TO_date.current);
+
+    TO_date.current = setTimeout(x => {
       if(displayMode === 'displaymode-rentals') {
         dispatch({
           type: 'SET_FILTER_INTERVAL_END',
@@ -40,16 +44,12 @@ function FilterItemDatum() {
         payload: newdt.toISOString()
       })
     }, TIMEOUT_IN_MS)
-  }
+  }, [TIMEOUT_IN_MS, dispatch, displayMode])
 
   // On Component load: set filter datum if filterdatum is undefined
   useEffect(x => {
     setFilterDatum(new Date(filterDatum));
-  }, [filterDatum])
-
-  const displayMode = useSelector(state => {
-    return state.layers ? state.layers.displaymode : null;
-  });
+  }, [filterDatum, setFilterDatum])
 
   return (
     <div className="filter-datum-container">

@@ -72,7 +72,9 @@ function MetaStats(props) {
     gogogo();
   }, [
     token,
+    metadata,
     metadata.zones,
+    filter,
     filter.zones
   ]);
     

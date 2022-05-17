@@ -202,16 +202,16 @@ function Menu({pathName}) {
 
             <MenuItem
               pathName={pathName}
-              text={'Ontwikkeling'}
-              path={'/stats/overview'}
-              icon={'/images/components/Menu/ontwikkeling.svg'}
+              text={'Zones'}
+              path={'/map/zones'}
+              icon={'https://i.imgur.com/GrF8KBA.png'}
             />
 
             <MenuItem
               pathName={pathName}
-              text={'Zones'}
-              path={'/map/zones'}
-              icon={'https://i.imgur.com/GrF8KBA.png'}
+              text={'Ontwikkeling'}
+              path={'/stats/overview'}
+              icon={'/images/components/Menu/ontwikkeling.svg'}
             />
 
             <MenuItem

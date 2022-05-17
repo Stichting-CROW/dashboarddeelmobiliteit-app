@@ -149,7 +149,7 @@ function App() {
         setFilterDatum(moment().toDate())
       }, 500)
     }
-  }, []);
+  }, [dispatch, filterDate, uriParams]);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
@@ -206,9 +206,9 @@ function App() {
     isLoggedIn,
     metadata.zones_loaded,
     filter,
-    // pathName
-    // layers.displaymode,
-    // layers.zones_visible
+    DELAY_TIMEOUT_IN_MS,
+    delayTimeout,
+    displayMode
   ]);
 
   // Reload rentals data if i.e. filter changes
@@ -225,9 +225,9 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
-    // pathName,
-    // layers.displaymode,
-    // layers.zones_visible
+    DELAY_TIMEOUT_IN_MS,
+    delayTimeout,
+    displayMode
   ]);
 
   // Mobile menu: Filters / Layers

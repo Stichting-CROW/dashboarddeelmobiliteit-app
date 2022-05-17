@@ -9,7 +9,7 @@ import './MenuSecondaryItem.css';
 function MenuSecondaryItem(props) {
   return (
     <a
-      href="#"
+      href="goForIt"
       className="MenuSecondaryItem cursor-pointer mx-2"
       onClick={props.onClick}
     >
@@ -23,13 +23,13 @@ function MenuSecondary() {
 
   // Our state variables
   const [pathName, setPathName] = useState(document.location.pathname);
-  const [uriParams, setUriParams] = useState(document.location.search);
+  // const [uriParams, setUriParams] = useState(document.location.search);
 
   // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
     setPathName(location ? location.pathname : null);
-    setUriParams(location ? location.search : null);
+    // setUriParams(location ? location.search : null);
   }, [location]);
   
   const setVisibility = (name, visibility) => {

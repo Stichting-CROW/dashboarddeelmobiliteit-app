@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react'
-import {marked} from 'marked'
+// import {marked} from 'marked'
 import { Redirect } from "react-router-dom";
-import { Slide, Fade } from 'react-slideshow-image';
+import { Fade } from 'react-slideshow-image';
 
 import Logo from '../Logo.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
@@ -78,24 +78,24 @@ const Tour = () => {
               return <div key={x} className="each-slide">
                 <div style={{'backgroundImage': `url(${slideImages[idx]})`}}>
                   {idx === 10 && <span className="each-slide-text">
-                    <a href="https://docs.crow.nl/deelfietsdashboard/hr-dataspec/" target="_blank" rel="external">
+                    <a href="https://docs.crow.nl/deelfietsdashboard/hr-dataspec/" target="_blank" rel="noreferrer">
                       Klik hier voor de specs
                     </a>
                   </span>}
                   {idx === 11 && <span className="each-slide-text">
-                    <div><a href="https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard" target="_blank" rel="external">
+                    <div><a href="https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard" target="_blank" rel="noreferrer">
                       Openbaarheid en financiering
                     </a></div>
-                    <div><a href="https://github.com/Stichting-CROW/" target="_blank" rel="external">
+                    <div><a href="https://github.com/Stichting-CROW/" target="_blank" rel="noreferrer">
                       GitHub
                     </a></div>
-                    <div><a href="https://gitlab.com/bikedashboard" target="_blank" rel="external">
+                    <div><a href="https://gitlab.com/bikedashboard" target="_blank" rel="noreferrer">
                       GitLab
                     </a></div>
-                    <div><a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues" target="_blank" rel="external">
+                    <div><a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues" target="_blank" rel="noreferrer">
                       Bugs & Suggesties
                     </a></div>
-                    <div><a href="mailto:info@deelfietsdashboard.nl" target="_blank" rel="external">
+                    <div><a href="mailto:info@deelfietsdashboard.nl" target="_blank" rel="noreferrer">
                       info@deelfietsdashboard.nl
                     </a></div>
                   </span>}

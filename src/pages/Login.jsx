@@ -197,7 +197,7 @@ const Login = () => {
             onChange={e => setEmailaddress(e.target.value.trim())}
           />
              
-          {successMessage && <div className="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="info">
+          {successMessage && <div className="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
             <span className="block sm:inline">{successMessage}</span>
           </div>}
 

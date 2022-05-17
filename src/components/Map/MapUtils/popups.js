@@ -6,7 +6,7 @@ import localization from 'moment/locale/nl'
 import {getProviderColor} from '../../../helpers/providers.js';
 
 // Set language for momentJS
-moment.locale('nl', localization);
+moment.updateLocale('nl', localization);
 
 const providerWebsiteUrls = {
   'baqme': 'https://www.baqme.com/',
