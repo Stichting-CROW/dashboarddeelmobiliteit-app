@@ -1,4 +1,5 @@
 import './css/Filterbar.css';
+import {useState, useRef} from 'react';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
 import * as R from 'ramda';
@@ -15,8 +16,9 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
-import Tag from '../Tag/Tag';
+import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
+import FormInput from '../FormInput/FormInput';
 
 import {
   DISPLAYMODE_PARK,
@@ -25,31 +27,41 @@ import {
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
-const renderZoneTag = ({title, type}) => {
-  const backgroundColors = {
-    'parking': '#FD862E',
-    'no-parking': '#FD3E48',
-    'analysis': '#15AEEF'
-  }
-  return <Tag
-    key={title}
-    title={title}
-    backgroundColor={backgroundColors[type] || '#000'}
-  >
-    {title}
-  </Tag>
-}
-
 function FilterbarZones({
   hideLogo
 }) {
+  const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
+  const [activeZone, setActiveZone] = useState({});
+
   const labelClassNames = 'mb-2 text-sm';
-  
+
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
     if(! window.CROW_DD.theDraw) return;
     // Change mode to 'draw polygon'
     window.CROW_DD.theDraw.changeMode('draw_polygon');
+    // Set view mode to 'edit'
+    setViewMode('edit');
+  }
+
+  const disableDrawingPolygons = () => {
+    // Check if the map is initiated and draw is available
+    if(! window.CROW_DD.theDraw) return;
+    // Change mode to 'draw polygon'
+    window.CROW_DD.theDraw.changeMode('static', []);
+    // window.CROW_DD.theDraw.changeMode('simple_select', []);
+    // Set view mode to 'edit'
+    setViewMode('view');
+  }
+
+  const changeHandler = (e) => {
+    if(! e.target) return;
+    if(! e.target.name) return;
+    if(! e.target.value) return;
+    // Update active zone data
+    let updatedZoneData = activeZone;
+    updatedZoneData[e.target.name] = e.target.value;
+    setActiveZone(updatedZoneData);
   }
 
   return (
@@ -84,11 +96,96 @@ function FilterbarZones({
             theme="white"
             onClick={enableDrawingPolygons}
           >Nieuwe hub aanmaken</Button>
-          <Button
+          {/*<Button
             theme="white"
-          >Bekijk publieke weergave</Button>
+          >Bekijk publieke weergave</Button>*/}
         </div>
       </div>
+
+      {(viewMode === 'edit') && <div className="mt-6">
+        <div className={labelClassNames}>
+          Hub wijzigen
+        </div>
+        <div>
+          <Button
+            theme="white"
+            onClick={disableDrawingPolygons}
+          >
+            Opslaan
+          </Button>
+        </div>
+        <div>
+          <FormInput
+            type="text"
+            name="title"
+            defaultValue=""
+            onChange={changeHandler}
+            classes="w-full"
+          />
+        </div>
+        <div>
+          <p>Type zone:</p>
+          <select name="zone-type" onChange={changeHandler}>
+            <option value="analysis">
+              Analyse
+            </option>
+            <option value="parking">
+              Parking
+            </option>
+            <option value="no-parking">
+              No parking
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <p>Zone beschikbaarheid:</p>
+          <select name="zone-availability" onChange={changeHandler}>
+            <option value="analysis">
+              Automatisch
+            </option>
+            <option value="parking">
+              Open
+            </option>
+            <option value="no-parking">
+              Geslopen
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <p>Limiet per modaliteit:</p>
+          Fiets: <FormInput
+            type="number"
+            min="0"
+            name="vehicles-limit.bikes"
+            defaultValue=""
+            onChange={changeHandler}
+          />
+          Bakfiets: <FormInput
+            type="number"
+            min="0"
+            name="vehicles-limit.cargo"
+            defaultValue=""
+            onChange={changeHandler}
+          />
+          Scooter: <FormInput
+            type="number"
+            min="0"
+            name="vehicles-limit.moped"
+            defaultValue=""
+            onChange={changeHandler}
+          />
+          Auto: <FormInput
+            disabled={true}
+            type="number"
+            min="0"
+            name="vehicles-limit.moped"
+            defaultValue=""
+            onChange={changeHandler}
+          />
+        </div>
+      </div>}
 
     </div>
   )

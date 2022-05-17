@@ -1,11 +1,5 @@
+import {themes} from '../../themes';
 
-const themes = {
-  white: {
-    backgroundColor: '#fff',
-    borderColor: '#CCCCCC',
-    color: '#343E47'
-  }
-}
 function Button({
   theme,
   children,

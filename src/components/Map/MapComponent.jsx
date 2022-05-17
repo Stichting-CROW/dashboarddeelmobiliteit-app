@@ -8,6 +8,7 @@ import localization from 'moment/locale/nl'
 // https://github.com/mapbox/mapbox-gl-draw
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
@@ -84,8 +85,15 @@ function MapComponent(props) {
 
   const initMapDrawLogic = (theMap) => {
     if(! theMap) return;
+
+    // Add custom draw mode: 'StaticMode'
+    // https://github.com/mapbox/mapbox-gl-draw-static-mode
+    const modes = MapboxDraw.modes;
+    modes.static = StaticMode;
+
     const draw = new MapboxDraw({
-      displayControlsDefault: false
+      displayControlsDefault: false,
+      modes: modes
     });
     // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
     theMap.addControl(draw, 'top-left');
@@ -197,7 +205,7 @@ function MapComponent(props) {
   */
   useEffect(x => {
     if(! didMapLoad) return;
-    addZonesToMap(map.current);
+    // addZonesToMap(map.current);
   }, [didMapLoad])
 
   /**
