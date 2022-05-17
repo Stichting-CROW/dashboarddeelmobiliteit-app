@@ -4,6 +4,11 @@ import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 import localization from 'moment/locale/nl'
 
+// Mapbox draw functionality
+// https://github.com/mapbox/mapbox-gl-draw
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
@@ -17,8 +22,6 @@ import './MapComponent.css';
 import {layers} from './layers';
 import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
-
-// const md5 = require('md5');
 
 // Set language for momentJS
 moment.updateLocale('nl', localization);
@@ -79,6 +82,21 @@ function MapComponent(props) {
     theMap.touchZoomRotate.disableRotation();
   }
 
+  const initMapDrawLogic = (theMap) => {
+    if(! theMap) return;
+    const draw = new MapboxDraw({
+      displayControlsDefault: false
+    });
+    // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
+    theMap.addControl(draw, 'top-left');
+    // Set Draw to window, for easily making global changes
+    if(window.CROW_DD) {
+      window.CROW_DD.theDraw = draw;
+    } else {
+      window.CROW_DD = {theDraw: draw}
+    }
+  }
+
   const registerMapView = useCallback(theMap => {
     const bounds = theMap.getBounds();
     const payload = [
@@ -124,6 +142,9 @@ function MapComponent(props) {
 
       // Apply settings like disabling rotating the map
       applyMapSettings(map.current)
+
+      // Apply settings like disabling rotating the map
+      initMapDrawLogic(map.current)
 
       // Init MapBox utils
       U.init(map.current);

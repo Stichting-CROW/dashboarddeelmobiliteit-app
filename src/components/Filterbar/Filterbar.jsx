@@ -44,6 +44,13 @@ function FilterbarZones({
   hideLogo
 }) {
   const labelClassNames = 'mb-2 text-sm';
+  
+  const enableDrawingPolygons = () => {
+    // Check if the map is initiated and draw is available
+    if(! window.CROW_DD.theDraw) return;
+    // Change mode to 'draw polygon'
+    window.CROW_DD.theDraw.changeMode('draw_polygon');
+  }
 
   return (
     <div className="filter-bar-inner py-2">
@@ -75,6 +82,7 @@ function FilterbarZones({
         <div>
           <Button
             theme="white"
+            onClick={enableDrawingPolygons}
           >Nieuwe hub aanmaken</Button>
           <Button
             theme="white"

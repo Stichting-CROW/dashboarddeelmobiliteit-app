@@ -22,7 +22,9 @@ function Button({
         mr-2
         mb-2
         text-sm
+        cursor-pointer
       "
+      onClick={onClick}
       style={themes[theme]}
     >
       {children}
