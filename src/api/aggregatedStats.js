@@ -8,7 +8,7 @@ export const getAggregatedStats = async (token, key, options) => {
 
   let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
   if(filterParams.length>0) url += "&" + filterParams.join("&");
-  console.log('url', url)
+  // console.log('url', url)
 
   let fetchOptions = {
     headers: {
