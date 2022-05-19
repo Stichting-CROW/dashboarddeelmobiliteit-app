@@ -4,19 +4,17 @@ import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 import localization from 'moment/locale/nl'
 
-// Mapbox draw functionality
-// https://github.com/mapbox/mapbox-gl-draw
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
-import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
-
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
-import {addZonesToMap} from './MapUtils/zones.js';
+import {
+  addZonesToMap,
+  initMapDrawLogic,
+  getAdminZones
+} from './MapUtils/zones.js';
 
 import './MapComponent.css';
 
@@ -29,6 +27,17 @@ moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
   if(process.env.DEBUG) console.log('Map component')
+
+  const token = useSelector(state => {
+    if(state.authentication && state.authentication.user_data) {
+      return state.authentication.user_data.token;
+    }
+    return null;
+  });
+
+  const filterGebied = useSelector(state => {
+    return state.filter ? state.filter.gebied : null;
+  });
 
   // Connect to redux store
   const dispatch = useDispatch()
@@ -81,28 +90,6 @@ function MapComponent(props) {
     // Disable rotating
     theMap.dragRotate.disable();
     theMap.touchZoomRotate.disableRotation();
-  }
-
-  const initMapDrawLogic = (theMap) => {
-    if(! theMap) return;
-
-    // Add custom draw mode: 'StaticMode'
-    // https://github.com/mapbox/mapbox-gl-draw-static-mode
-    const modes = MapboxDraw.modes;
-    modes.static = StaticMode;
-
-    const draw = new MapboxDraw({
-      displayControlsDefault: false,
-      modes: modes
-    });
-    // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
-    theMap.addControl(draw, 'top-left');
-    // Set Draw to window, for easily making global changes
-    if(window.CROW_DD) {
-      window.CROW_DD.theDraw = draw;
-    } else {
-      window.CROW_DD = {theDraw: draw}
-    }
   }
 
   const registerMapView = useCallback(theMap => {
@@ -205,11 +192,20 @@ function MapComponent(props) {
   */
   useEffect(x => {
     if(! didMapLoad) return;
-    // addZonesToMap(map.current);
-  }, [didMapLoad])
-
+    // Only continue if we are on the zones page
+    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones') return;
+    (async () => {
+      const filter = {
+        municipality: filterGebied
+      }
+      const zonesFromDb = await getAdminZones(token, filter);
+      console.log('zonesFromDb', zonesFromDb)
+      addZonesToMap(token, filter);
+      console.log('zonesFromDb', zonesFromDb);
+    })()
+  }, [didMapLoad, stateLayers.displaymode])
   /**
-   * /MICROHUBS / ZONES LOGIC
+   * / MICROHUBS / ZONES LOGIC
   */
 
   /**

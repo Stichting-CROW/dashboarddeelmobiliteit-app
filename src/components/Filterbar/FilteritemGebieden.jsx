@@ -60,7 +60,7 @@ function FilteritemGebieden() {
     })
     return (
       <FilterbarExtended
-        title="Selecteer een gebied"
+        title="Selecteer een plaats"
         closeFunction={() => toggleGebieden(false)}
         >
         <div className="filter-form-selectie">
@@ -85,11 +85,11 @@ function FilteritemGebieden() {
           <div className="filter-form-values">
             { filterGebied === ""?
                 <div key={'item-alle'} className="form-item-selected form-item" onClick={e=>{toggleGebieden(false)}}>
-                  Alle Gebieden
+                  Alle plaatsen
                 </div>
                 :
                 <div key={'item-alle'} className="form-item" onClick={e=>{toggleGebieden(false);setFilterGebied("")}}>
-                  Alle Gebieden
+                  Alle plaatsen
                 </div>
             }
             { filteredGebieden.map(a=>{
@@ -112,7 +112,7 @@ function FilteritemGebieden() {
       <div className="filter-plaats-container filter-plaats-not-active">
         <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
         <div className="filter-plaats-box-row flex flex-col justify-center">
-          <div className="filter-plaats-value " >{value===""?"Alle Gebieden":value.name}</div>
+          <div className="filter-plaats-value " >{value===""?"Alle plaatsen":value.name}</div>
         </div>
       </div>
     )
@@ -123,7 +123,7 @@ function FilteritemGebieden() {
       <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
       <div className="filter-plaats-box-row flex flex-col justify-center">
         <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{toggleGebieden('places')}}>
-          {value === "" ? "Alle Gebieden" : value.name}
+          {value === "" ? "Alle plaatsen" : value.name}
         </div>
         { filterBarExtendedView === 'places' ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?
