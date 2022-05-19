@@ -1,6 +1,7 @@
-import './css/Filterbar.css';
+import './css/FilterbarZones.css';
 import {useEffect, useState, useRef} from 'react';
 import {useSelector} from 'react-redux';
+// import { motion } from "framer-motion";
 import moment from 'moment';
 import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
@@ -82,7 +83,6 @@ function FilterbarZones({
     }
 
     window.ddMap.on('draw.create', function (e) {
-      console.log(e.features);
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
     });
@@ -96,7 +96,6 @@ function FilterbarZones({
       const filter = {municipality: filterGebied}
       const zonesFromDb = await getAdminZones(token, filter);
       setAdminZones(zonesFromDb);
-      console.log('== zonesFromDb', zonesFromDb)
     })();
 
   }, [])
@@ -140,48 +139,6 @@ function FilterbarZones({
       // published_date: moment().toISOString()
     }))
 
-    console.log('goed', {
-      "published": true,
-      "geography_type": "monitoring",
-      "area": {
-        "type": "Feature",
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [
-                4.45236140345566,
-                51.90422074494702
-              ],
-              [
-                4.442330985516482,
-                51.91682818253603
-              ],
-              [
-                4.458470735799152,
-                51.91919674129942
-              ],
-              [
-                4.45236140345566,
-                51.90422074494702
-              ]
-            ]
-          ]
-        }
-      },
-      "name": "Test zone1",
-      "municipality": "GM0599",
-      "description": "Een test analyse zone"
-    })
-
-    console.log('fout', Object.assign({}, activeZone, {
-      municipality: filterGebied,
-      area: drawedArea,
-      description: 'Zone',
-      // effective_date: moment().toISOString(),
-      // published_date: moment().toISOString()
-    }));
-
     // Set map to normal again
     disableDrawingPolygons();
   }
@@ -213,13 +170,14 @@ function FilterbarZones({
             Nieuwe zone
           </div>
           <div>
-            <Button
+            {viewMode === 'view' && <Button
               theme="white"
               onClick={enableDrawingPolygons}
-            >Nieuwe hub aanmaken</Button>
-            {/*<Button
+            >Nieuwe hub aanmaken</Button>}
+            {viewMode === 'edit' && <Button
               theme="white"
-            >Bekijk publieke weergave</Button>*/}
+              onClick={disableDrawingPolygons}
+            >Annuleer nieuwe hub aanmaken</Button>}
           </div>
         </div>
 
@@ -244,22 +202,45 @@ function FilterbarZones({
               classes="w-full"
             />
           </div>
-          <div>
-            <p>Type zone:</p>
-            <select name="geography_type" onChange={changeHandler}>
-              <option value="monitoring">
-                Analyse
-              </option>
-              <option value="parking">
-                Parking
-              </option>
-              <option value="no-parking">
-                No parking
-              </option>
-            </select>
+          <div className="mt-2">
+            <div className="flex">
+              {R.map(x => {
+                return <div className={`
+                  ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
+                  ${x.name === 'monitoring' ? 'cursor-pointer' : 'disabled'}
+                  flex-1
+                  border-solid
+                  border
+                  rounded-xl
+                  text-gray-500
+                  text-center
+                  border-gray-500
+                  h-10
+                  flex
+                  flex-col
+                  justify-center
+                `} key={x.name} onClick={(e) => {
+                   e.preventDefault();
+                   if(x.name !== 'monitoring') return;
+
+                   changeHandler({
+                    target: {
+                      name: 'geography_type',
+                      value: x.name
+                    }
+                  })
+                }}>
+                  {x.title}
+                </div>
+              }, [
+                {name: 'monitoring', title: 'Analyse'},
+                {name: 'parking', title: 'Parking'},
+                {name: 'no-parking', title: 'No parking'}
+              ])}
+            </div>
           </div>
 
-          <div>
+          <div className="mt-2">
             <p>Zone beschikbaarheid:</p>
             <select name="zone-availability" onChange={changeHandler}>
               <option value="analysis">
