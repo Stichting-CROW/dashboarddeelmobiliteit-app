@@ -116,7 +116,7 @@ function MapComponent(props) {
 
     dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
-  }, [dispatch]);
+  }, []);
 
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
@@ -196,7 +196,7 @@ function MapComponent(props) {
     lat,
     zoom,
     mapContainer,
-    dispatch,
+    // dispatch,
     registerMapView
   ])
 
@@ -328,7 +328,7 @@ function MapComponent(props) {
     dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
   }, [
     extent,
-    dispatch
+    // dispatch
   ])
 
   useEffect(() => {
