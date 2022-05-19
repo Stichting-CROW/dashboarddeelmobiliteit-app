@@ -4,7 +4,9 @@ import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 const getFetchOptions = (token) => {
   return {
     headers: {
-      "authorization": `Bearer ${token}`
+      "authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "charset": "utf-8"
     }
   }
 }
@@ -22,13 +24,11 @@ export const getAdminZones = async (token, filter) => {
 }
 
 export const postZone = async (token, data) => {
+  console.log('postZone data', data);
   const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'POST',
-    body: JSON.stringify(data),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    body: JSON.stringify(data)
   }));
   return await response.json();
 }

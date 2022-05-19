@@ -23,18 +23,18 @@ function Tag({
   )
 }
 
-export const renderZoneTag = ({title, type}) => {
+export const renderZoneTag = ({zone_id, name, geography_type}) => {
   const backgroundColors = {
-    'parking': '#FD862E',
-    'no-parking': '#FD3E48',
-    'analysis': '#15AEEF'
+    'monitoring': '#15AEEF',
+    'stop': '#FD862E',
+    'no-parking': '#FD3E48'
   }
   return <Tag
-    key={title}
-    title={title}
-    backgroundColor={backgroundColors[type] || '#000'}
+    key={zone_id}
+    title={name}
+    backgroundColor={backgroundColors[geography_type] || '#000'}
   >
-    {title}
+    {name}
   </Tag>
 }
 

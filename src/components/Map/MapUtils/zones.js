@@ -44,7 +44,6 @@ export const addZonesToMap = async (token, filter) => {
     return;
   }
 
-  let idx = 0;
   Object.keys(zones).forEach(x => {
     const zone = zones[x];
     window.CROW_DD.theDraw.add({
@@ -54,12 +53,10 @@ export const addZonesToMap = async (token, filter) => {
         properties: {
           zone_type: zone.geography_type
         },
-        id: 'example-id' + zone.zone_id,
+        id: zone.zone_id,
         geometry: zone.area.geometry
       }]
     });
-    console.log(zone.area.geometry);
-    idx++;
   });
 }
 

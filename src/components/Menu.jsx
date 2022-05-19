@@ -200,12 +200,12 @@ function Menu({pathName}) {
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
-            <MenuItem
+{/*            <MenuItem
               pathName={pathName}
               text={'Zones'}
               path={'/map/zones'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
-            />
+            />*/}
 
             <MenuItem
               pathName={pathName}

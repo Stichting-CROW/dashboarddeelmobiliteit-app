@@ -20,6 +20,12 @@ import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
 import FormInput from '../FormInput/FormInput';
 
+import {
+  addZonesToMap,
+  initMapDrawLogic,
+  getAdminZones
+} from '../Map/MapUtils/zones.js';
+
 // Import API functions
 import {postZone} from '../../api/zones';
 
@@ -36,19 +42,20 @@ function FilterbarZones({
   const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
   const [drawedArea, setDrawedArea] = useState(null);
+  const [adminZones, setAdminZones] = useState(null);
   const [activeZone, setActiveZone] = useState({
-    "zone_id": null,
+    // "zone_id": null,
     "area": {},
     "name": '',
     "municipality": null,
-    "geography_id": null,
+    // "geography_id": null,
     "description": null,
     "geography_type": "monitoring",
-    "effective_date": null,
-    "published_date": null,
-    "retire_data": null,
-    "stop": null,
-    "no_parking": null,
+    // "effective_date": null,
+    // "published_date": null,
+    // "retire_data": null,
+    // "stop": null,
+    // "no_parking": null,
     "published": true
   });
 
@@ -82,6 +89,17 @@ function FilterbarZones({
 
     setDidInitEventHandlers(true);
   }, [window.ddMap])
+
+  // Get admin zones
+  useEffect(x => {
+    (async () => {
+      const filter = {municipality: filterGebied}
+      const zonesFromDb = await getAdminZones(token, filter);
+      setAdminZones(zonesFromDb);
+      console.log('== zonesFromDb', zonesFromDb)
+    })();
+
+  }, [])
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
@@ -118,15 +136,50 @@ function FilterbarZones({
       municipality: filterGebied,
       area: drawedArea,
       description: 'Zone',
-      effective_date: moment().toISOString(),
-      published_date: moment().toISOString()
+      // effective_date: moment().toISOString(),
+      // published_date: moment().toISOString()
     }))
-    console.log(Object.assign({}, activeZone, {
+
+    console.log('goed', {
+      "published": true,
+      "geography_type": "monitoring",
+      "area": {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                4.45236140345566,
+                51.90422074494702
+              ],
+              [
+                4.442330985516482,
+                51.91682818253603
+              ],
+              [
+                4.458470735799152,
+                51.91919674129942
+              ],
+              [
+                4.45236140345566,
+                51.90422074494702
+              ]
+            ]
+          ]
+        }
+      },
+      "name": "Test zone1",
+      "municipality": "GM0599",
+      "description": "Een test analyse zone"
+    })
+
+    console.log('fout', Object.assign({}, activeZone, {
       municipality: filterGebied,
       area: drawedArea,
       description: 'Zone',
-      effective_date: moment().toISOString(),
-      published_date: moment().toISOString()
+      // effective_date: moment().toISOString(),
+      // published_date: moment().toISOString()
     }));
 
     // Set map to normal again
@@ -152,12 +205,7 @@ function FilterbarZones({
             Zones
           </div>
           <div>
-            {R.map(renderZoneTag, [
-              {title: 'Strand hub 1', type: 'parking'},
-              {title: 'Strand hub 2', type: 'parking'},
-              {title: 'De pier', type: 'no-parking'},
-              {title: 'Scheveningseweg', type: 'analysis'},
-            ])}
+            {adminZones ? R.map(renderZoneTag, adminZones) : <div />}
           </div>
         </div>
         <div className="mt-6">

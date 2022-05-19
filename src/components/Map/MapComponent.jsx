@@ -189,6 +189,8 @@ function MapComponent(props) {
 
   /**
    * MICROHUBS / ZONES LOGIC
+   * 
+   * Load zones onto the map
   */
   useEffect(x => {
     if(! didMapLoad) return;
@@ -198,10 +200,8 @@ function MapComponent(props) {
       const filter = {
         municipality: filterGebied
       }
-      const zonesFromDb = await getAdminZones(token, filter);
-      console.log('zonesFromDb', zonesFromDb)
+      // const zonesFromDb = await getAdminZones(token, filter);
       addZonesToMap(token, filter);
-      console.log('zonesFromDb', zonesFromDb);
     })()
   }, [didMapLoad, stateLayers.displaymode])
   /**

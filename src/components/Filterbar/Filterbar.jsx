@@ -16,7 +16,6 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
-import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
 import FormInput from '../FormInput/FormInput';
 import FilterbarZones from './FilterbarZones';
