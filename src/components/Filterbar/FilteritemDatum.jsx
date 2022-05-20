@@ -44,12 +44,12 @@ function FilterItemDatum() {
         payload: newdt.toISOString()
       })
     }, TIMEOUT_IN_MS)
-  }, [TIMEOUT_IN_MS, dispatch, displayMode])
+  }, [TIMEOUT_IN_MS, displayMode])
 
   // On Component load: set filter datum if filterdatum is undefined
   useEffect(x => {
     setFilterDatum(new Date(filterDatum));
-  }, [filterDatum, setFilterDatum])
+  }, [filterDatum])
 
   return (
     <div className="filter-datum-container">

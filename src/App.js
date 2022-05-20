@@ -149,7 +149,7 @@ function App() {
         setFilterDatum(moment().toDate())
       }, 500)
     }
-  }, [filterDate, uriParams]);
+  }, []);
 
   /*
   To load data using the API we use the scripts in the poll-api folder.
