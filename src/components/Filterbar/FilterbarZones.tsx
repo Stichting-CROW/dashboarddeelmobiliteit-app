@@ -24,11 +24,12 @@ import FormInput from '../FormInput/FormInput';
 import {
   addZonesToMap,
   initMapDrawLogic,
-  getAdminZones
+  getAdminZones,
+  getZoneById
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
-import {postZone} from '../../api/zones';
+import {postZone, putZone} from '../../api/zones';
 
 import {
   DISPLAYMODE_PARK,
@@ -84,14 +85,16 @@ function FilterbarZones({
 
     window.ddMap.on('draw.create', function (e) {
       if(! e.features || ! e.features[0]) return;
+      console.log('setDrawedArea');
       setDrawedArea(e.features[0]);
     });
 
     setDidInitEventHandlers(true);
   }, [window.ddMap])
 
-  // Get admin zones
+  // Get admin zones on component load
   useEffect(x => {
+
     (async () => {
       const filter = {municipality: filterGebied}
       const zonesFromDb = await getAdminZones(token, filter);
@@ -99,6 +102,33 @@ function FilterbarZones({
     })();
 
   }, [])
+
+  // Listen to zone selection events (for editing zones)
+  useEffect(() => {
+    if(! adminZones) return;
+
+    const eventHandler = (e) => {
+      const zoneId = e.detail;
+      const foundZone = getZoneById(adminZones, zoneId);
+      if(foundZone) {
+        console.log('foundZone', foundZone)
+        // Set zone
+        let zoneToSet = {}
+        zoneToSet.zone_id = foundZone.zone_id;
+        zoneToSet.area = foundZone.area;
+        zoneToSet.name = foundZone.name;
+        zoneToSet.municipality = foundZone.municipality;
+        zoneToSet.geography_type = foundZone.geography_type;
+        zoneToSet.geography_id = foundZone.geography_id;
+        zoneToSet.description = foundZone.description;
+        zoneToSet.published = foundZone.published;
+        setActiveZone(zoneToSet);
+        // Enable edit mode
+        setViewMode('edit');
+      }
+    }
+    window.addEventListener('setSelectedZone', eventHandler);
+  }, [adminZones]);
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
@@ -131,13 +161,22 @@ function FilterbarZones({
 
   const saveZone = () => {
     // Save zone
-    postZone(token, Object.assign({}, activeZone, {
-      municipality: filterGebied,
-      area: drawedArea,
-      description: 'Zone',
-      // effective_date: moment().toISOString(),
-      // published_date: moment().toISOString()
-    }))
+    // If existing: update/put zone
+    if(activeZone.geography_id) {
+      putZone(token, Object.assign({}, activeZone, {
+        area: drawedArea || activeZone.area
+      }))
+    }
+    // If new: post zone
+    else {
+      postZone(token, Object.assign({}, activeZone, {
+        municipality: filterGebied,
+        area: drawedArea,
+        description: 'Zone',
+        // effective_date: moment().toISOString(),
+        // published_date: moment().toISOString()
+      }))
+    }
 
     // Set map to normal again
     disableDrawingPolygons();
@@ -197,7 +236,7 @@ function FilterbarZones({
             <FormInput
               type="text"
               name="name"
-              defaultValue=""
+              defaultValue={activeZone.name}
               onChange={changeHandler}
               classes="w-full"
             />
@@ -219,7 +258,9 @@ function FilterbarZones({
                   flex
                   flex-col
                   justify-center
-                `} key={x.name} onClick={(e) => {
+                `}
+                key={x.name}
+                onClick={(e) => {
                    e.preventDefault();
                    if(x.name !== 'monitoring') return;
 
@@ -242,7 +283,11 @@ function FilterbarZones({
 
           <div className="mt-2">
             <p>Zone beschikbaarheid:</p>
-            <select name="zone-availability" onChange={changeHandler}>
+            <select
+              name="zone-availability"
+              defaultValue={activeZone.zone_availability}
+              onChange={changeHandler}
+              >
               <option value="analysis">
                 Automatisch
               </option>

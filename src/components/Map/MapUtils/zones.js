@@ -33,6 +33,8 @@ const initMapDrawLogic = (theMap) => {
   } else {
     window.CROW_DD = {theDraw: draw}
   }
+  // Select area to edit it
+  initSelectToEdit(theMap);
 }
 
 export const addZonesToMap = async (token, filter) => {
@@ -60,7 +62,39 @@ export const addZonesToMap = async (token, filter) => {
   });
 }
 
+const initSelectToEdit = (theMap) => {
+  if(! theMap) return;
+
+  const onSelectionChange = (e) => {
+    if(! e) return;
+    // Check if only one feature was selected
+    const didSelectOneFeature = e.features && e.features.length === 1;
+    if(! didSelectOneFeature) return;
+    const zoneId = e.features[0].id;
+    // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+    const event = new CustomEvent('setSelectedZone', {
+      detail: zoneId
+    });
+    window.dispatchEvent(event);
+  }
+  theMap.on('draw.selectionchange', onSelectionChange);
+}
+
+const getZoneById = (zones, id) => {
+  if(! zones || ! id) return;
+
+  const filteredZones = zones.filter((x) => {
+    return x.zone_id === id;
+  })
+  if(filteredZones && filteredZones[0]) {
+    return filteredZones[0];
+  }
+  return {};
+}
+
 export {
   initMapDrawLogic,
-  getAdminZones
+  getAdminZones,
+  initSelectToEdit,
+  getZoneById
 }
