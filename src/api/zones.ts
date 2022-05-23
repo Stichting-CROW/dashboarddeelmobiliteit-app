@@ -34,11 +34,18 @@ export const postZone = async (token, data) => {
 }
 
 export const putZone = async (token, data) => {
-  console.log('postZone data', data);
   const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone/${data.geography_id}`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'PUT',
     body: JSON.stringify(data)
+  }));
+  return await response.json();
+}
+
+export const deleteZone = async (token, geography_id) => {
+  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone/${geography_id}`;
+  const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
+    method: 'DELETE'
   }));
   return await response.json();
 }

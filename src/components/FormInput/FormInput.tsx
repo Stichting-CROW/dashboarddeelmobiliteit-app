@@ -4,6 +4,7 @@ function FormInput({
   type,
   name,
   defaultValue,
+  value,
   placeholder,
   min,
   disabled,
@@ -14,6 +15,7 @@ function FormInput({
     <input
       type={type}
       name={name}
+      value={value}
       defaultValue={defaultValue}
       onChange={onChange}
       placeholder={placeholder}

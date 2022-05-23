@@ -29,7 +29,11 @@ import {
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
-import {postZone, putZone} from '../../api/zones';
+import {
+  postZone,
+  putZone,
+  deleteZone
+} from '../../api/zones';
 
 import {
   DISPLAYMODE_PARK,
@@ -43,6 +47,7 @@ function FilterbarZones({
 }) {
   const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
+  const [counter, setCounter] = useState(0);
   const [drawedArea, setDrawedArea] = useState(null);
   const [adminZones, setAdminZones] = useState(null);
   const [activeZone, setActiveZone] = useState({
@@ -122,6 +127,7 @@ function FilterbarZones({
         zoneToSet.geography_id = foundZone.geography_id;
         zoneToSet.description = foundZone.description;
         zoneToSet.published = foundZone.published;
+        console.log('zoneToSet', zoneToSet)
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
@@ -143,8 +149,8 @@ function FilterbarZones({
     // Check if the map is initiated and draw is available
     if(! window.CROW_DD.theDraw) return;
     // Change mode to 'draw polygon'
-    window.CROW_DD.theDraw.changeMode('static', []);
-    // window.CROW_DD.theDraw.changeMode('simple_select', []);
+    // window.CROW_DD.theDraw.changeMode('static', []);
+    window.CROW_DD.theDraw.changeMode('simple_select', []);
     // Set view mode to 'edit'
     setViewMode('view');
   }
@@ -152,20 +158,22 @@ function FilterbarZones({
   const changeHandler = (e) => {
     if(! e.target) return;
     if(! e.target.name) return;
-    if(! e.target.value) return;
+
     // Update active zone data
     let updatedZoneData = activeZone;
     updatedZoneData[e.target.name] = e.target.value;
     setActiveZone(updatedZoneData);
+    setCounter(counter+1);// Because above var is referenced and doesn't trigger a re-render
   }
 
-  const saveZone = () => {
+  const saveZone = async () => {
     // Save zone
     // If existing: update/put zone
     if(activeZone.geography_id) {
-      putZone(token, Object.assign({}, activeZone, {
+      const updatedZone = await putZone(token, Object.assign({}, activeZone, {
         area: drawedArea || activeZone.area
       }))
+      setActiveZone(updatedZone);
     }
     // If new: post zone
     else {
@@ -181,6 +189,21 @@ function FilterbarZones({
     // Set map to normal again
     disableDrawingPolygons();
   }
+
+  const deleteZoneHandler = () => {
+
+    if(! activeZone || ! activeZone.geography_id) return;
+    console.log('deleteZone', activeZone.geography_id)
+    deleteZone(token, activeZone.geography_id)
+
+    // Delete polygon from map
+    window.CROW_DD.theDraw.delete(activeZone.zone_id);
+
+    // Set map to normal again
+    disableDrawingPolygons();
+  }
+
+  console.log('activeZone', activeZone)
 
   return (
     <div className="filter-bar-inner py-2">
@@ -224,19 +247,26 @@ function FilterbarZones({
           <div className={labelClassNames}>
             Hub wijzigen
           </div>
-          <div>
+          <div className="flex justify-between">
             <Button
               theme="white"
               onClick={saveZone}
             >
               Opslaan
             </Button>
+
+            {activeZone.geography_id && <Button
+              theme="white"
+              onClick={deleteZoneHandler}
+            >
+              Verwijder
+            </Button>}
           </div>
           <div>
             <FormInput
               type="text"
               name="name"
-              defaultValue={activeZone.name}
+              value={activeZone.name}
               onChange={changeHandler}
               classes="w-full"
             />
