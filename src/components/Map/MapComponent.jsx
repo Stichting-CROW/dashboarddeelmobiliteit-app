@@ -194,13 +194,18 @@ function MapComponent(props) {
   */
   useEffect(x => {
     if(! didMapLoad) return;
-    // Only continue if we are on the zones page
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones') return;
+    // If we are not on zones page: remove all drawed zones from the map
+    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones') {
+      if(window.CROW_DD && window.CROW_DD.theDraw) {
+        window.CROW_DD.theDraw.deleteAll();
+      }
+      return;
+    }
+    // If on zones page: add zones to map
     (async () => {
       const filter = {
         municipality: filterGebied
       }
-      // const zonesFromDb = await getAdminZones(token, filter);
       addZonesToMap(token, filter);
     })()
   }, [didMapLoad, stateLayers.displaymode])
