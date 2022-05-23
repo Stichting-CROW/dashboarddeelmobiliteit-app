@@ -58,26 +58,29 @@ function ModalityRow({children, imageUrl}) {
 function FilterbarZones({
   hideLogo
 }) {
-  const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
-  const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
-  const [counter, setCounter] = useState(0);
-  const [drawedArea, setDrawedArea] = useState(null);
-  const [adminZones, setAdminZones] = useState(null);
-  const [activeZone, setActiveZone] = useState({
+  const zoneTemplate = {
     // "zone_id": null,
-    "area": {},
-    "name": '',
-    "municipality": null,
+    // "area": {},
+    // "name": '',
+    // "municipality": null,
     // "geography_id": null,
-    "description": null,
+    // "description": null,
     "geography_type": "monitoring",
+    "zone_availability": "auto",
     // "effective_date": null,
     // "published_date": null,
     // "retire_data": null,
     // "stop": null,
     // "no_parking": null,
     "published": true
-  });
+  }
+
+  const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
+  const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
+  const [counter, setCounter] = useState(0);
+  const [drawedArea, setDrawedArea] = useState(null);
+  const [adminZones, setAdminZones] = useState(null);
+  const [activeZone, setActiveZone] = useState(zoneTemplate);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -152,7 +155,7 @@ function FilterbarZones({
     // Change mode to 'draw polygon'
     window.CROW_DD.theDraw.changeMode('draw_polygon');
     // Clear data
-    setActiveZone({});
+    setActiveZone(zoneTemplate);
     // Set view mode to 'edit'
     setViewMode('edit');
   }
@@ -179,6 +182,12 @@ function FilterbarZones({
   }
 
   const saveZone = async () => {
+
+    if(! activeZone.area && activeZone.drawedArea) {
+      notify('Teken eerst een zone voordat je deze opslaat')
+      return;
+    }
+
     // Save zone
     // If existing: update/put zone
     if(activeZone.geography_id) {
@@ -199,6 +208,7 @@ function FilterbarZones({
       // After creating new zone: reload adminZones
       fetchAdminZones();
       // After creating new zone: set polygon data
+      if(! createdZone || ! createdZone.area) return;
       const feature = {
         id: createdZone.zone_id,
         type: 'Feature',
@@ -212,18 +222,26 @@ function FilterbarZones({
     disableDrawingPolygons();
   }
 
-  const deleteZoneHandler = () => {
+  const deleteZoneHandler = async () => {
+
+    if(! window.confirm('Weet je zeker dat je deze zone wilt verwijderen?')) return;
 
     if(! activeZone || ! activeZone.geography_id) return;
-    deleteZone(token, activeZone.geography_id)
+    await deleteZone(token, activeZone.geography_id)
 
     // Delete polygon from map
     window.CROW_DD.theDraw.delete(activeZone.zone_id);
 
     // Set map to normal again
     disableDrawingPolygons();
+
+    // Reload adminZones
+    fetchAdminZones();
   }
 
+  
+  
+  console.log('activeZone.geography_type', activeZone.geography_type)
   return (
     <div className="filter-bar-inner py-2">
       

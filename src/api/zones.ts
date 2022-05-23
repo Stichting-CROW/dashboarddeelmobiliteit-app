@@ -24,7 +24,6 @@ export const getAdminZones = async (token, filter) => {
 }
 
 export const postZone = async (token, data) => {
-  console.log('postZone data', data);
   const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'POST',
