@@ -124,6 +124,10 @@ function Menu({pathName}) {
   const dispatch = useDispatch();
   // let dateToShow = moment(moment().format('2021-11-06 06:00'));
   
+  const userData = useSelector(state => {
+    return state.authentication.user_data;
+  });
+  
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
@@ -131,6 +135,16 @@ function Menu({pathName}) {
   const exportState = useSelector(state => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
+
+  const doShowZones = () => {
+    const validEmailAddresses = [
+      'mail@bartroorda.nl',
+      'rinse.gorter@denhaag.nl',
+      'otto.vanboggelen@crow.nl',
+      'sven.boor@gmail.com'
+    ]
+    return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
+  }
   
   const logOut = () => {
     try {
@@ -161,6 +175,8 @@ function Menu({pathName}) {
     menuClassName += ' filter-open';
   }
   
+  console.log('userData', userData)
+
   return (
     <div className={menuClassName}>
       <div className="
@@ -200,12 +216,12 @@ function Menu({pathName}) {
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
-{/*            <MenuItem
+            {doShowZones && <MenuItem
               pathName={pathName}
               text={'Zones'}
               path={'/map/zones'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
-            />*/}
+            />}
 
             <MenuItem
               pathName={pathName}
