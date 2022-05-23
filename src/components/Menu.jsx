@@ -175,8 +175,6 @@ function Menu({pathName}) {
     menuClassName += ' filter-open';
   }
   
-  console.log('userData', userData)
-
   return (
     <div className={menuClassName}>
       <div className="

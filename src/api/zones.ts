@@ -34,7 +34,7 @@ export const postZone = async (token, data) => {
 }
 
 export const putZone = async (token, data) => {
-  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone/${data.geography_id}`;
+  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'PUT',
     body: JSON.stringify(data)

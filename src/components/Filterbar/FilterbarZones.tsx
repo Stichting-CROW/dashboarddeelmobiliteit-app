@@ -42,6 +42,19 @@ import {
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
+function ModalityRow({children, imageUrl}) {
+  return <div className="
+    bg-left-center
+    bg-no-repeat
+    pl-16
+  " style={{
+    backgroundImage: `url('${imageUrl}')`,
+    backgroundSize: '60px'
+  }}>
+    {children}
+  </div>
+}
+
 function FilterbarZones({
   hideLogo
 }) {
@@ -90,22 +103,20 @@ function FilterbarZones({
 
     window.ddMap.on('draw.create', function (e) {
       if(! e.features || ! e.features[0]) return;
-      console.log('setDrawedArea');
       setDrawedArea(e.features[0]);
     });
 
     setDidInitEventHandlers(true);
   }, [window.ddMap])
 
+  const fetchAdminZones = async () => {
+    const filter = {municipality: filterGebied}
+    const zonesFromDb = await getAdminZones(token, filter);
+    setAdminZones(zonesFromDb);
+  }
   // Get admin zones on component load
-  useEffect(x => {
-
-    (async () => {
-      const filter = {municipality: filterGebied}
-      const zonesFromDb = await getAdminZones(token, filter);
-      setAdminZones(zonesFromDb);
-    })();
-
+  useEffect(() => {
+    fetchAdminZones();
   }, [])
 
   // Listen to zone selection events (for editing zones)
@@ -114,9 +125,9 @@ function FilterbarZones({
 
     const eventHandler = (e) => {
       const zoneId = e.detail;
+      // TODO getZoneById after zone creation
       const foundZone = getZoneById(adminZones, zoneId);
       if(foundZone) {
-        console.log('foundZone', foundZone)
         // Set zone
         let zoneToSet = {}
         zoneToSet.zone_id = foundZone.zone_id;
@@ -127,7 +138,6 @@ function FilterbarZones({
         zoneToSet.geography_id = foundZone.geography_id;
         zoneToSet.description = foundZone.description;
         zoneToSet.published = foundZone.published;
-        console.log('zoneToSet', zoneToSet)
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
@@ -141,6 +151,8 @@ function FilterbarZones({
     if(! window.CROW_DD.theDraw) return;
     // Change mode to 'draw polygon'
     window.CROW_DD.theDraw.changeMode('draw_polygon');
+    // Clear data
+    setActiveZone({});
     // Set view mode to 'edit'
     setViewMode('edit');
   }
@@ -174,16 +186,26 @@ function FilterbarZones({
         area: drawedArea || activeZone.area
       }))
       setActiveZone(updatedZone);
+      // After updating zone: reload adminZones
+      fetchAdminZones();
     }
     // If new: post zone
     else {
-      postZone(token, Object.assign({}, activeZone, {
+      const createdZone = await postZone(token, Object.assign({}, activeZone, {
         municipality: filterGebied,
         area: drawedArea,
-        description: 'Zone',
-        // effective_date: moment().toISOString(),
-        // published_date: moment().toISOString()
+        description: 'Zone'
       }))
+      // After creating new zone: reload adminZones
+      fetchAdminZones();
+      // After creating new zone: set polygon data
+      const feature = {
+        id: createdZone.zone_id,
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: createdZone.area.geometry.coordinates }
+      };
+      const featureIds = window.CROW_DD.theDraw.add(feature);
     }
 
     // Set map to normal again
@@ -193,7 +215,6 @@ function FilterbarZones({
   const deleteZoneHandler = () => {
 
     if(! activeZone || ! activeZone.geography_id) return;
-    console.log('deleteZone', activeZone.geography_id)
     deleteZone(token, activeZone.geography_id)
 
     // Delete polygon from map
@@ -202,8 +223,6 @@ function FilterbarZones({
     // Set map to normal again
     disableDrawingPolygons();
   }
-
-  console.log('activeZone', activeZone)
 
   return (
     <div className="filter-bar-inner py-2">
@@ -265,25 +284,34 @@ function FilterbarZones({
           <div>
             <FormInput
               type="text"
+              placeholder="Naam van de zone"
               name="name"
               value={activeZone.name}
               onChange={changeHandler}
               classes="w-full"
             />
           </div>
-          <div className="mt-2">
-            <div className="flex">
+
+          <div className="
+            mt-0
+          ">
+            <div className="
+              flex
+              rounded-lg bg-white
+              border-solid
+              border
+              border-gray-400
+              text-sm
+            ">
               {R.map(x => {
                 return <div className={`
                   ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
-                  ${x.name === 'monitoring' ? 'cursor-pointer' : 'disabled'}
+                  cursor-pointer
                   flex-1
-                  border-solid
-                  border
-                  rounded-xl
+                  
+                  rounded-lg
                   text-gray-500
                   text-center
-                  border-gray-500
                   h-10
                   flex
                   flex-col
@@ -292,7 +320,6 @@ function FilterbarZones({
                 key={x.name}
                 onClick={(e) => {
                    e.preventDefault();
-                   if(x.name !== 'monitoring') return;
 
                    changeHandler({
                     target: {
@@ -311,56 +338,106 @@ function FilterbarZones({
             </div>
           </div>
 
-          <div className="mt-2">
-            <p>Zone beschikbaarheid:</p>
-            <select
-              name="zone-availability"
-              defaultValue={activeZone.zone_availability}
-              onChange={changeHandler}
-              >
-              <option value="analysis">
-                Automatisch
-              </option>
-              <option value="parking">
-                Open
-              </option>
-              <option value="no-parking">
-                Gesloten
-              </option>
-            </select>
+          <div className="
+            py-2
+          ">
+            <div className="
+              flex
+              rounded-lg bg-white
+              border-solid
+              border
+              border-gray-400
+              text-sm
+            ">
+              {/*
+              Availability zit verstopt in status.
+              is_enabled = true is open, is_enabled = false is gesloten
+              control_automatic=true
+              */}
+              {R.map(x => {
+                return <div className={`
+                  ${activeZone.zone_availability === x.name ? 'Button-blue' : ''}
+                  cursor-pointer
+                  flex-1
+                  rounded-lg
+                  text-gray-500
+                  text-center
+                  border-gray-500
+                  h-10
+                  flex
+                  flex-col
+                  justify-center
+                `}
+                key={x.name}
+                onClick={(e) => {
+                   e.preventDefault();
+
+                   changeHandler({
+                    target: {
+                      name: 'zone_availability',
+                      value: x.name
+                    }
+                  })
+                }}>
+                  {x.title}
+                </div>
+              }, [
+                {name: 'auto', title: 'Automatisch'},
+                {name: 'open', title: 'Open'},
+                {name: 'closed', title: 'Gesloten'}
+              ])}
+            </div>
           </div>
 
-          <div>
-            <p>Limiet per modaliteit:</p>
-            Fiets: <FormInput
-              type="number"
-              min="0"
-              name="vehicles-limit.bikes"
-              defaultValue=""
-              onChange={changeHandler}
-            />
-            Bakfiets: <FormInput
-              type="number"
-              min="0"
-              name="vehicles-limit.cargo"
-              defaultValue=""
-              onChange={changeHandler}
-            />
-            Scooter: <FormInput
-              type="number"
-              min="0"
-              name="vehicles-limit.moped"
-              defaultValue=""
-              onChange={changeHandler}
-            />
-            Auto: <FormInput
-              disabled={true}
-              type="number"
-              min="0"
-              name="vehicles-limit.moped"
-              defaultValue=""
-              onChange={changeHandler}
-            />
+          <p className="mb-2 text-sm">
+            Limiet per modaliteit:
+          </p>
+
+          <div className="
+            rounded-lg
+            bg-white
+            border-solid
+            border
+            border-gray-400
+            p-4
+          ">
+            <ModalityRow imageUrl="https://i.imgur.com/IF05O8u.png">
+              <FormInput
+                type="number"
+                min="0"
+                name="vehicles-limit.bikes"
+                defaultValue=""
+                onChange={changeHandler}
+              />
+            </ModalityRow>
+            <ModalityRow imageUrl="https://i.imgur.com/FdVBJaZ.png">
+              <FormInput
+                type="number"
+                min="0"
+                name="vehicles-limit.cargo"
+                defaultValue=""
+                onChange={changeHandler}
+              />
+            </ModalityRow>
+            <ModalityRow imageUrl="https://i.imgur.com/h264sb2.png">
+              <FormInput
+                type="number"
+                min="0"
+                name="vehicles-limit.moped"
+                defaultValue=""
+                onChange={changeHandler}
+              />
+            </ModalityRow>
+            <ModalityRow imageUrl="https://i.imgur.com/7Y2PYpv.png">
+              <FormInput
+                disabled={true}
+                type="number"
+                min="0"
+                name="vehicles-limit.moped"
+                defaultValue=""
+                onChange={changeHandler}
+              />
+            </ModalityRow>
           </div>
         </div>}
       </>}
