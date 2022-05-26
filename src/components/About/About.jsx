@@ -94,7 +94,7 @@ Via het CROW of via info@deelfietsdashboard.nl kun je een login aanvragen. Afhan
 
 ### Welke datastandaarden worden ondersteund?
 
-Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/)
+Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
 
 ### Wat zijn de afspraken over data en financiering?
 
