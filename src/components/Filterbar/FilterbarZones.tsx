@@ -131,6 +131,7 @@ function FilterbarZones({
       const zoneId = e.detail;
       // TODO getZoneById after zone creation
       const foundZone = getZoneById(adminZones, zoneId);
+      // console.log('getZoneById(adminZones, zoneId)', adminZones, zoneId)
       if(foundZone) {
         // Set zone
         let zoneToSet = zoneTemplate;
@@ -189,12 +190,15 @@ function FilterbarZones({
       return;
     }
 
+    // console.log('activeZone', activeZone)
+
     // Save zone
     // If existing: update/put zone
     if(activeZone.geography_id) {
       const updatedZone = await putZone(token, Object.assign({}, activeZone, {
         area: drawedArea || activeZone.area
       }))
+      // console.log('updatedZone', updatedZone)
       setActiveZone(updatedZone);
       // After updating zone: reload adminZones
       fetchAdminZones();
@@ -221,6 +225,9 @@ function FilterbarZones({
 
     // Set map to normal again
     disableDrawingPolygons();
+
+    // Delete all local zones from map
+    deleteAllLocalZones();
   }
 
   const newZoneButtonHandler = () => {
@@ -234,14 +241,14 @@ function FilterbarZones({
     if(! activeZone || ! activeZone.geography_id) return;
     await deleteZone(token, activeZone.geography_id)
 
-    // Set map to normal again
-    disableDrawingPolygons();
-
     // Reload adminZones
     fetchAdminZones();
 
     // Delete polygon from map
     window.CROW_DD.theDraw.delete(activeZone.zone_id);
+
+    // Set map to normal again
+    disableDrawingPolygons();
   }
   
   const deleteAllLocalZones = () => {
@@ -262,12 +269,13 @@ function FilterbarZones({
   }
 
   const cancelButtonHandler = () => {
-    console.log('cancelButtonHandler', cancelButtonHandler)
     deleteAllLocalZones();
     disableDrawingPolygons();
   }
 
   const isNewZone = ! activeZone.geography_id;
+
+  // console.log('activeZone.name', activeZone, activeZone.name)
 
   return (
     <div className="filter-bar-inner py-2">

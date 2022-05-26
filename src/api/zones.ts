@@ -46,5 +46,5 @@ export const deleteZone = async (token, geography_id) => {
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'DELETE'
   }));
-  return await response.json();
+  return response;
 }
