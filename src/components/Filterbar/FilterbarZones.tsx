@@ -129,9 +129,7 @@ function FilterbarZones({
 
     const eventHandler = (e) => {
       const zoneId = e.detail;
-      // TODO getZoneById after zone creation
       const foundZone = getZoneById(adminZones, zoneId);
-      // console.log('getZoneById(adminZones, zoneId)', adminZones, zoneId)
       if(foundZone) {
         // Set zone
         let zoneToSet = zoneTemplate;
@@ -190,16 +188,23 @@ function FilterbarZones({
       return;
     }
 
-    // console.log('activeZone', activeZone)
-
     // Save zone
     // If existing: update/put zone
     if(activeZone.geography_id) {
       const updatedZone = await putZone(token, Object.assign({}, activeZone, {
         area: drawedArea || activeZone.area
       }))
-      // console.log('updatedZone', updatedZone)
       setActiveZone(updatedZone);
+      // Remove old drawed area
+      window.CROW_DD.theDraw.delete(activeZone.zone_id);
+      // Add new drawed area
+      var feature = {
+        id: updatedZone.zone_id,
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: updatedZone.area.geometry.coordinates }
+      };
+      var featureIds = window.CROW_DD.theDraw.add(feature);
       // After updating zone: reload adminZones
       fetchAdminZones();
     }
@@ -275,8 +280,6 @@ function FilterbarZones({
 
   const isNewZone = ! activeZone.geography_id;
 
-  // console.log('activeZone.name', activeZone, activeZone.name)
-
   return (
     <div className="filter-bar-inner py-2">
       
@@ -346,7 +349,7 @@ function FilterbarZones({
               name="name"
               autoComplete="false"
               id="js-FilterbarZones-name-input"
-              value={activeZone.name}
+              value={activeZone.name || ""}
               onChange={changeHandler}
               classes="w-full"
             />
