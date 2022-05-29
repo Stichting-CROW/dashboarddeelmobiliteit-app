@@ -151,14 +151,14 @@ function FilterbarZones({
         zoneToSet.published = foundZone.published || zoneTemplate.published;
         if(foundZone.stop) {
           zoneToSet.stop = foundZone.stop;
-          zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle;
-          zoneToSet['vehicles-limit.moped'] = foundZone.stop.capacity.moped;
-          zoneToSet['vehicles-limit.scooter'] = foundZone.stop.capacity.scooter;
-          zoneToSet['vehicles-limit.cargo_bicycle'] = foundZone.stop.capacity.cargo_bicycle;
-          zoneToSet['vehicles-limit.car'] = foundZone.stop.capacity.car;
-          zoneToSet['vehicles-limit.other'] = foundZone.stop.capacity.other;
+          zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
+          zoneToSet['vehicles-limit.moped'] = foundZone.stop.capacity.moped || 0;
+          zoneToSet['vehicles-limit.scooter'] = foundZone.stop.capacity.scooter || 0;
+          zoneToSet['vehicles-limit.cargo_bicycle'] = foundZone.stop.capacity.cargo_bicycle || 0;
+          zoneToSet['vehicles-limit.car'] = foundZone.stop.capacity.car || 0;
+          zoneToSet['vehicles-limit.other'] = foundZone.stop.capacity.other || 0;
           // Set zone availability
-          if(foundZone.stop.status.control_automatic === true) {
+          if(foundZone.stop.status.control_a565utomatic === true) {
             zoneToSet.zone_availability = 'auto';
           } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_renting === true) {
             zoneToSet.zone_availability = 'open';
@@ -166,7 +166,6 @@ function FilterbarZones({
             zoneToSet.zone_availability = 'closed';
           }
         }
-        console.log('zoneToSet', zoneToSet)
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
@@ -209,7 +208,7 @@ function FilterbarZones({
 
   const getRequestData = () => {
     // If zone has been updated:
-    console.log('drawedArea', drawedArea, activeZone.geography_id)
+    console.log('drawedArea', drawedArea || activeZone.area, activeZone.geography_id)
     if(activeZone.geography_id) {
       return {
         geography_id: activeZone.geography_id,
@@ -258,12 +257,12 @@ function FilterbarZones({
   const generateStopObject = () => {
     const getCapacity = () => {
       return {
-        "cargo_bicycle": activeZone['vehicles-limit.cargo_bicycle'],
-        "scooter": activeZone['vehicles-limit.scooter'] || 0,
-        "bicycle": activeZone['vehicles-limit.bicycle'] || 0,
-        "car": activeZone['vehicles-limit.car'] || 0,
-        "other": activeZone['vehicles-limit.other'] || 0,
-        "moped": activeZone['vehicles-limit.moped'] || 0
+        "cargo_bicycle": parseInt(activeZone['vehicles-limit.cargo_bicycle']),
+        "scooter": parseInt(activeZone['vehicles-limit.scooter']) || 0,
+        "bicycle": parseInt(activeZone['vehicles-limit.bicycle']) || 0,
+        "car": parseInt(activeZone['vehicles-limit.car']) || 0,
+        "other": parseInt(activeZone['vehicles-limit.other']) || 0,
+        "moped": parseInt(activeZone['vehicles-limit.moped']) || 0
       }
     }
     const getStatus = () => {
@@ -317,7 +316,9 @@ function FilterbarZones({
       var feature = {
         id: updatedZone.zone_id,
         type: 'Feature',
-        properties: {},
+        properties: {
+          geography_type: updatedZone.geography_type
+        },
         geometry: { type: 'Polygon', coordinates: updatedZone.area.geometry.coordinates }
       };
       var featureIds = window.CROW_DD.theDraw.add(feature);
@@ -334,7 +335,9 @@ function FilterbarZones({
       const feature = {
         id: createdZone.zone_id,
         type: 'Feature',
-        properties: {},
+        properties: {
+          geography_type: createdZone.geography_type
+        },
         geometry: { type: 'Polygon', coordinates: createdZone.area.geometry.coordinates }
       };
       const featureIds = window.CROW_DD.theDraw.add(feature);
@@ -564,7 +567,7 @@ function FilterbarZones({
             </div>
           </div>}
 
-          {(activeZone.geography_type === 'stop' && activeZone.zone_availability !== 'closed') && <>
+          {(activeZone.geography_type === 'stop' && activeZone.zone_availability === 'auto') && <>
             <p className="mb-2 text-sm">
               Limiet per modaliteit:
             </p>

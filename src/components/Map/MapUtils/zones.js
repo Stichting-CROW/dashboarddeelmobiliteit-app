@@ -3,6 +3,7 @@
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
+import {themes} from '../../../themes';
 
 // Don't allow moving features, only allow changing bounds
 // Repo: https://github.com/zakjan/mapbox-gl-draw-waypoint
@@ -27,8 +28,76 @@ const initMapDrawLogic = (theMap) => {
     displayControlsDefault: false,
     modes: modes,
     // Custom styles https://stackoverflow.com/a/51305508
-    // userProperties: true,
-    // styles: []
+    userProperties: true,
+    styles: [
+      // Polygon fill
+      {
+        'id': 'gl-draw-polygon-fill',
+        'type': 'fill',
+        'filter': [
+          'all',
+          // ['==', 'active', 'false'],
+          ['==', '$type', 'Polygon'],
+          ['!=', 'mode', 'static']
+        ],
+        'paint': {
+          'fill-color': [
+            // Matching based on user property: https://stackoverflow.com/a/70721495
+            'match', ['get', 'user_geography_type'], // get the property
+            'stop', themes.zone.stop.primaryColor,
+            'no_parking', themes.zone.no_parking.primaryColor,
+            'monitoring', themes.zone.monitoring.primaryColor,
+            themes.zone.monitoring.primaryColor
+           ],
+          'fill-outline-color': '#3bb2d0',
+          'fill-opacity': 0.5
+        }
+      },
+      // Polygon outline stroke
+      // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
+      {
+        'id': 'gl-draw-polygon-stroke-active',
+        'type': 'line',
+        "layout": {
+          "line-cap": "round",
+          "line-join": "round"
+        },
+        'filter': [
+          'all',
+          ['==', '$type', 'Polygon'],
+          ['!=', 'active', 'false']
+        ],
+        "paint": {
+          "line-color": [
+            // Matching based on user property: https://stackoverflow.com/a/70721495
+            'match', ['get', 'user_geography_type'], // get the property
+            'stop', themes.zone.stop.primaryColor,
+            'no_parking', themes.zone.no_parking.primaryColor,
+            'monitoring', themes.zone.monitoring.primaryColor,
+            "#D20C0C"
+           ],
+          "line-dasharray": [0.2, 2],
+          "line-width": 3
+        }
+      },
+      // Vertex points
+      {
+        "id": "gl-draw-polygon-and-line-vertex-active",
+        "type": "circle",
+        "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+        "paint": {
+          "circle-radius": 3,
+          "circle-color": [
+            // Matching based on user property: https://stackoverflow.com/a/70721495
+            'match', ['get', 'user_geography_type'], // get the property
+            'stop', themes.zone.stop.primaryColor,
+            'no_parking', themes.zone.no_parking.primaryColor,
+            'monitoring', themes.zone.monitoring.primaryColor,
+            "#D20C0C"
+          ]
+        }
+      }
+    ]
   });
   // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
   theMap.addControl(draw, 'top-left');
@@ -53,12 +122,13 @@ export const addZonesToMap = async (token, filter) => {
 
   Object.keys(zones).forEach(x => {
     const zone = zones[x];
+    console.log('zone.geography_type', zone.geography_type)
     window.CROW_DD.theDraw.add({
       type: 'FeatureCollection',
       features: [{
         type: 'Feature',
         properties: {
-          zone_type: zone.geography_type
+          geography_type: zone.geography_type
         },
         id: zone.zone_id,
         geometry: zone.area.geometry

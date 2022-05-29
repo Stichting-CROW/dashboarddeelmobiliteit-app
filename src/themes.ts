@@ -14,5 +14,16 @@ export const themes = {
     backgroundColor: '#fff',
     borderColor: '#CCCCCC',
     color: 'darkgreen'
+  },
+  zone: {
+    monitoring: {
+      primaryColor: '#15AEEF',
+    },
+    stop: {
+      primaryColor: '#FD862E'
+    },
+    no_parking: {
+      primaryColor: '#FD3E48'
+    }
   }
 }

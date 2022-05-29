@@ -1,4 +1,4 @@
-// import {themes} from '../../themes';
+import {themes} from '../../themes';
 
 function Tag({
   title,
@@ -25,9 +25,9 @@ function Tag({
 
 export const renderZoneTag = ({zone_id, name, geography_type}) => {
   const backgroundColors = {
-    'monitoring': '#15AEEF',
-    'stop': '#FD862E',
-    'no_parking': '#FD3E48'
+    'monitoring': themes.zone.monitoring.primaryColor,
+    'stop': themes.zone.stop.primaryColor,
+    'no_parking': themes.zone.no_parking.primaryColor
   }
   return <Tag
     key={zone_id}
