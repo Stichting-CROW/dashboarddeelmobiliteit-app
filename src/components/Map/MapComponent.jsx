@@ -63,12 +63,7 @@ function MapComponent(props) {
   const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
   const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
   const [zoom] = useState(stateLayers.zoom || 15);
-  // const [counter, setCounter] = useState(0);
-  // const [sourceCounter, setSourceCounter] = useState(0);
-  // const [sourcesSuccesfullyAdded, setSourcesSuccesfullyAdded] = useState(false);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
-  // const [zonesGeodataHash, setZonesGeodataHash] = useState("");
-  // const [sourceHash, setSourceHash] = useState([]);
   let map = useRef(null);
 
   const applyMapSettings = (theMap) => {

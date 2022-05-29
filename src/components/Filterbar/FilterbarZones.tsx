@@ -4,6 +4,7 @@ import {useSelector} from 'react-redux';
 // import { motion } from "framer-motion";
 import moment from 'moment';
 import * as R from 'ramda';
+import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
@@ -110,12 +111,19 @@ function FilterbarZones({
       setDrawedArea(e.features[0]);
     });
 
+    window.ddMap.on('draw.update', function (e) {
+      console.log('update', e.features[0])
+      if(! e.features || ! e.features[0]) return;
+      setDrawedArea(e.features[0]);
+    });
+
     setDidInitEventHandlers(true);
   }, [window.ddMap])
 
   const fetchAdminZones = async () => {
     const filter = {municipality: filterGebied}
     const zonesFromDb = await getAdminZones(token, filter);
+    const sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
     setAdminZones(zonesFromDb);
   }
   // Get admin zones on component load
@@ -141,6 +149,24 @@ function FilterbarZones({
         zoneToSet.geography_id = foundZone.geography_id;
         zoneToSet.description = foundZone.description;
         zoneToSet.published = foundZone.published || zoneTemplate.published;
+        if(foundZone.stop) {
+          zoneToSet.stop = foundZone.stop;
+          zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle;
+          zoneToSet['vehicles-limit.moped'] = foundZone.stop.capacity.moped;
+          zoneToSet['vehicles-limit.scooter'] = foundZone.stop.capacity.scooter;
+          zoneToSet['vehicles-limit.cargo_bicycle'] = foundZone.stop.capacity.cargo_bicycle;
+          zoneToSet['vehicles-limit.car'] = foundZone.stop.capacity.car;
+          zoneToSet['vehicles-limit.other'] = foundZone.stop.capacity.other;
+          // Set zone availability
+          if(foundZone.stop.status.control_automatic === true) {
+            zoneToSet.zone_availability = 'auto';
+          } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_renting === true) {
+            zoneToSet.zone_availability = 'open';
+          } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_renting === false) {
+            zoneToSet.zone_availability = 'closed';
+          }
+        }
+        console.log('zoneToSet', zoneToSet)
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
@@ -181,19 +207,110 @@ function FilterbarZones({
     setCounter(counter+1);// Because above var is referenced and doesn't trigger a re-render
   }
 
-  const saveZone = async () => {
+  const getRequestData = () => {
+    // If zone has been updated:
+    console.log('drawedArea', drawedArea, activeZone.geography_id)
+    if(activeZone.geography_id) {
+      return Object.assign({
+        geography_id: activeZone.geography_id,
+        geography_type: activeZone.geography_type,
+        municipality: activeZone.municipality,
+        name: activeZone.name,
+        description: activeZone.description,
+        published: activeZone.published,
+        zone_availability: activeZone.zone_availability,
+        zone_id: activeZone.zone_id
+      }, {
+        area: drawedArea || activeZone.area
+      })
+    }
+    // If zone is newly created:
+    else {
+      return Object.assign({
+        geography_id: activeZone.geography_id,
+        geography_type: activeZone.geography_type,
+        name: activeZone.name,
+        published: activeZone.published,
+        zone_availability: activeZone.zone_availability
+      }, {
+        municipality: filterGebied,
+        area: drawedArea,
+        description: 'Zone'
+      })
+    }
+  }
 
+  const getRequestDataForMonitoring = () => {
+    return getRequestData();
+  }
+  const getRequestDataForStop = () => {
+    let data = getRequestData();
+    data.geography_type = 'stop';
+    data.stop = generateStopObject();
+    return data;
+  }
+  const getRequestDataForNoParking = () => {
+    let data = getRequestData();
+    data.no_parking = activeZone.no_parking || {}
+    return data;
+  }
+
+  // Generates the data object for 'stops'
+  const generateStopObject = () => {
+    const getCapacity = () => {
+      return {
+        "cargo_bicycle": activeZone['vehicles-limit.cargo_bicycle'],
+        "scooter": activeZone['vehicles-limit.scooter'] || 0,
+        "bicycle": activeZone['vehicles-limit.bicycle'] || 0,
+        "car": activeZone['vehicles-limit.car'] || 0,
+        "other": activeZone['vehicles-limit.other'] || 0,
+        "moped": activeZone['vehicles-limit.moped'] || 0
+      }
+    }
+    const getStatus = () => {
+      return {
+        "control_automatic": activeZone && activeZone.zone_availability === 'auto',
+        "is_returning": activeZone && (activeZone.zone_availability === 'auto' || activeZone.zone_availability === 'open'),
+        "is_installed": activeZone && activeZone.stop && activeZone.stop.status ? activeZone.stop.status.is_installed : false,
+        "is_renting": activeZone && activeZone.stop && activeZone.stop.status ? activeZone.stop.status.is_renting : false,
+      }
+    }
+    if(activeZone && activeZone.stop && activeZone.stop_id) {
+      return {
+        stop_id: activeZone.stop.stop_id,
+        location: activeZone.stop.location,
+        status: getStatus(),
+        capacity: getCapacity()
+      }
+    }
+    return {
+      location: activeZone.area ? center(activeZone.area) : center(drawedArea),
+      status: getStatus(),
+      capacity: getCapacity()
+    }
+  }
+
+  const saveZone = async () => {
     if(! activeZone.area && activeZone.drawedArea) {
       notify('Teken eerst een zone voordat je deze opslaat')
       return;
     }
 
     // Save zone
+    let requestData = getRequestDataForMonitoring();
+    if(activeZone.geography_type === 'stop') requestData = getRequestDataForStop();
+    else if(activeZone.geography_type === 'no_parking') requestData = getRequestDataForNoParking();
+
     // If existing: update/put zone
     if(activeZone.geography_id) {
-      const updatedZone = await putZone(token, Object.assign({}, activeZone, {
-        area: drawedArea || activeZone.area
-      }))
+      const updatedZone = await putZone(token, requestData);
+      // Error handling
+      if(! updatedZone.zone_id) {
+        console.error(updatedZone);
+        alert('Er ging iets fout bij het opslaan van de zone.')
+        return;
+      }
+      // Set updated zone in states
       setActiveZone(updatedZone);
       // Remove old drawed area
       window.CROW_DD.theDraw.delete(activeZone.zone_id);
@@ -210,11 +327,7 @@ function FilterbarZones({
     }
     // If new: post zone
     else {
-      const createdZone = await postZone(token, Object.assign({}, activeZone, {
-        municipality: filterGebied,
-        area: drawedArea,
-        description: 'Zone'
-      }))
+      const createdZone = await postZone(token, requestData)
       // After creating new zone: reload adminZones
       fetchAdminZones();
       // After creating new zone: set polygon data
@@ -395,13 +508,13 @@ function FilterbarZones({
                 </div>
               }, [
                 {name: 'monitoring', title: 'Analyse'},
-                {name: 'parking', title: 'Parking'},
-                {name: 'no-parking', title: 'No parking'}
+                {name: 'stop', title: 'Parking'},
+                {name: 'no_parking', title: 'No parking'}
               ])}
             </div>
           </div>
 
-          <div className="
+          {activeZone.geography_type === 'stop' && <div className="
             py-2
           ">
             <div className="
@@ -450,58 +563,65 @@ function FilterbarZones({
                 {name: 'closed', title: 'Gesloten'}
               ])}
             </div>
-          </div>
+          </div>}
 
-          <p className="mb-2 text-sm">
-            Limiet per modaliteit:
-          </p>
+          {(activeZone.geography_type === 'stop' && activeZone.zone_availability !== 'closed') && <>
+            <p className="mb-2 text-sm">
+              Limiet per modaliteit:
+            </p>
 
-          <div className="
-            rounded-lg
-            bg-white
-            border-solid
-            border
-            border-gray-400
-            p-4
-          ">
-            <ModalityRow imageUrl="https://i.imgur.com/IF05O8u.png">
-              <FormInput
-                type="number"
-                min="0"
-                name="vehicles-limit.bikes"
-                defaultValue=""
-                onChange={changeHandler}
-              />
-            </ModalityRow>
-            <ModalityRow imageUrl="https://i.imgur.com/FdVBJaZ.png">
-              <FormInput
-                type="number"
-                min="0"
-                name="vehicles-limit.cargo"
-                defaultValue=""
-                onChange={changeHandler}
-              />
-            </ModalityRow>
-            <ModalityRow imageUrl="https://i.imgur.com/h264sb2.png">
-              <FormInput
-                type="number"
-                min="0"
-                name="vehicles-limit.moped"
-                defaultValue=""
-                onChange={changeHandler}
-              />
-            </ModalityRow>
-            <ModalityRow imageUrl="https://i.imgur.com/7Y2PYpv.png">
-              <FormInput
-                disabled={true}
-                type="number"
-                min="0"
-                name="vehicles-limit.moped"
-                defaultValue=""
-                onChange={changeHandler}
-              />
-            </ModalityRow>
-          </div>
+            <div className="
+              rounded-lg
+              bg-white
+              border-solid
+              border
+              border-gray-400
+              p-4
+            ">
+              <ModalityRow imageUrl="https://i.imgur.com/IF05O8u.png">
+                <FormInput
+                  type="number"
+                  min="0"
+                  name="vehicles-limit.bicycle"
+                  defaultValue=""
+                  value={activeZone['vehicles-limit.bicycle']}
+                  onChange={changeHandler}
+                />
+              </ModalityRow>
+              <ModalityRow imageUrl="https://i.imgur.com/FdVBJaZ.png">
+                <FormInput
+                  type="number"
+                  min="0"
+                  name="vehicles-limit.cargo_bicycle"
+                  defaultValue=""
+                  value={activeZone['vehicles-limit.cargo_bicycle']}
+                  onChange={changeHandler}
+                />
+              </ModalityRow>
+              <ModalityRow imageUrl="https://i.imgur.com/h264sb2.png">
+                <FormInput
+                  type="number"
+                  min="0"
+                  name="vehicles-limit.moped"
+                  defaultValue=""
+                  value={activeZone['vehicles-limit.moped']}
+                  onChange={changeHandler}
+                />
+              </ModalityRow>
+              <ModalityRow imageUrl="https://i.imgur.com/7Y2PYpv.png">
+                <FormInput
+                  disabled={true}
+                  type="number"
+                  min="0"
+                  name="vehicles-limit.car"
+                  defaultValue=""
+                  value={activeZone['vehicles-limit.car']}
+                  onChange={changeHandler}
+                />
+              </ModalityRow>
+            </div>
+          </>}
+
         </div>}
 
         {(! isNewZone && viewMode === 'edit') && <div className="my-2 text-center">

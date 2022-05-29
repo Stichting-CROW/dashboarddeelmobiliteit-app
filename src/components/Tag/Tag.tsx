@@ -27,7 +27,7 @@ export const renderZoneTag = ({zone_id, name, geography_type}) => {
   const backgroundColors = {
     'monitoring': '#15AEEF',
     'stop': '#FD862E',
-    'no-parking': '#FD3E48'
+    'no_parking': '#FD3E48'
   }
   return <Tag
     key={zone_id}
