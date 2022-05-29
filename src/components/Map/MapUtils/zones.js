@@ -84,7 +84,35 @@ const initMapDrawLogic = (theMap) => {
       {
         "id": "gl-draw-polygon-and-line-vertex-active",
         "type": "circle",
-        "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+        "filter": [
+          "all",
+          ["==", "meta", "vertex"],
+          ["!=", 'meta', 'midpoint'],
+          ["==", "$type", "Point"],
+          ["!=", "mode", "static"]
+        ],
+        "paint": {
+          "circle-radius": 4,
+          "circle-color": [
+            // Matching based on user property: https://stackoverflow.com/a/70721495
+            'match', ['get', 'user_geography_type'], // get the property
+            'stop', themes.zone.stop.primaryColor,
+            'no_parking', themes.zone.no_parking.primaryColor,
+            'monitoring', themes.zone.monitoring.primaryColor,
+            "#D20C0C"
+          ]
+        }
+      },
+      // Midpoints points
+      {
+        "id": "gl-draw-polygon-and-line-midpoint-active",
+        "type": "circle",
+        "filter": [
+          "all",
+          ["==", 'meta', 'midpoint'],
+          ["==", "$type", "Point"],
+          ["!=", "mode", "static"]
+        ],
         "paint": {
           "circle-radius": 3,
           "circle-color": [
@@ -95,7 +123,8 @@ const initMapDrawLogic = (theMap) => {
             'monitoring', themes.zone.monitoring.primaryColor,
             "#D20C0C"
           ]
-        }
+        },
+        'circle-opacity': 0.5
       }
     ]
   });
@@ -114,15 +143,18 @@ const initMapDrawLogic = (theMap) => {
 export const addZonesToMap = async (token, filter) => {
   if(! window.CROW_DD) return;
 
-  const zones = await getAdminZones(token, filter);
+  let zones = await getAdminZones(token, filter);
 
   if(Object.keys(zones).length <= 0) {
     return;
   }
 
+  // Layer zones per geography_type (monitoring/stop/no_parking)
+  zones = sortZonesInPreferedOrder(zones)
+  console.log('sorted zones', zones)
+
   Object.keys(zones).forEach(x => {
     const zone = zones[x];
-    console.log('zone.geography_type', zone.geography_type)
     window.CROW_DD.theDraw.add({
       type: 'FeatureCollection',
       features: [{
@@ -167,9 +199,34 @@ const getZoneById = (zones, id) => {
   return {};
 }
 
+const sortZonesInPreferedOrder = (zones) => {
+  const groupedZones = [
+    // First, get all 'no_parking' zones
+    zones.filter(x => x.geography_type === 'no_parking'),
+    // Next, get all 'monitoring' zones
+    zones.filter(x => x.geography_type === 'monitoring'),
+    // Next, get all 'stop' zones
+    zones.filter(x => x.geography_type === 'stop'),
+  ]
+  let groupedZonesToReturn = [];
+  groupedZones[0].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  groupedZones[1].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  groupedZones[2].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  console.log('groupedZones[0]', groupedZones[0])
+  console.log('groupedZonesToReturn', groupedZonesToReturn)
+  return groupedZonesToReturn;
+}
+
 export {
   initMapDrawLogic,
   getAdminZones,
   initSelectToEdit,
-  getZoneById
+  getZoneById,
+  sortZonesInPreferedOrder
 }

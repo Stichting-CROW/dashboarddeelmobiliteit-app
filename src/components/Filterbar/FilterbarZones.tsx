@@ -27,7 +27,8 @@ import {
   addZonesToMap,
   initMapDrawLogic,
   getAdminZones,
-  getZoneById
+  getZoneById,
+  sortZonesInPreferedOrder
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
@@ -123,8 +124,9 @@ function FilterbarZones({
   const fetchAdminZones = async () => {
     const filter = {municipality: filterGebied}
     const zonesFromDb = await getAdminZones(token, filter);
-    const sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
-    setAdminZones(zonesFromDb);
+    let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
+    sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
+    setAdminZones(sortedZones);
   }
   // Get admin zones on component load
   useEffect(() => {
@@ -389,6 +391,12 @@ function FilterbarZones({
   }
 
   const cancelButtonHandler = () => {
+    // Only ask for a confirmation if the area was changed
+    if(drawedArea) {
+      if(! window.confirm('Weet je zeker dat je het tekenen van de zone wilt annuleren?')) {
+        return;
+      }
+    }
     deleteAllLocalZones();
     disableDrawingPolygons();
   }
@@ -612,7 +620,6 @@ function FilterbarZones({
               </ModalityRow>
               <ModalityRow imageUrl="https://i.imgur.com/7Y2PYpv.png">
                 <FormInput
-                  disabled={true}
                   type="number"
                   min="0"
                   name="vehicles-limit.car"

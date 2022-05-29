@@ -28,7 +28,7 @@ function FilterbarMobile({isVisible, displayMode}) {
       classes="
         top-0 overflow-auto
       "
-      style={{height: 'calc(100vh - 60px)'}}
+      style={{height: 'calc(100% - 60px)'}}
     >
       <Filterbar hideLogo={true} displayMode={displayMode} />
     </MobileSlideBox>

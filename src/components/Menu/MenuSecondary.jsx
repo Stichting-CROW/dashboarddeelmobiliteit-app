@@ -46,13 +46,15 @@ function MenuSecondary() {
     <div className="MenuSecondary block sm:hidden absolute left-0 z-10">
       <MenuSecondaryItem
         text="Filters"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
           setVisibility('FILTERBAR', true)
         }}
       />
       {pathName !== '/stats/overview' && <MenuSecondaryItem
         text="Lagen"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
           setVisibility('MenuSecondary.layers', true)
         }}
       />}
