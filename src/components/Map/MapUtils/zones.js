@@ -4,6 +4,10 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 
+// Don't allow moving features, only allow changing bounds
+// Repo: https://github.com/zakjan/mapbox-gl-draw-waypoint
+import * as MapboxDrawWaypoint from 'mapbox-gl-draw-waypoint';
+
 // Import API functions
 import {getAdminZones} from '../../../api/zones';
 
@@ -15,7 +19,8 @@ const initMapDrawLogic = (theMap) => {
 
   // Add custom draw mode: 'StaticMode'
   // https://github.com/mapbox/mapbox-gl-draw-static-mode
-  const modes = MapboxDraw.modes;
+  let modes = MapboxDraw.modes;
+  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
   modes.static = StaticMode;
 
   const draw = new MapboxDraw({

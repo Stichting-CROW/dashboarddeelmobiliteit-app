@@ -211,7 +211,7 @@ function FilterbarZones({
     // If zone has been updated:
     console.log('drawedArea', drawedArea, activeZone.geography_id)
     if(activeZone.geography_id) {
-      return Object.assign({
+      return {
         geography_id: activeZone.geography_id,
         geography_type: activeZone.geography_type,
         municipality: activeZone.municipality,
@@ -219,10 +219,9 @@ function FilterbarZones({
         description: activeZone.description,
         published: activeZone.published,
         zone_availability: activeZone.zone_availability,
-        zone_id: activeZone.zone_id
-      }, {
+        zone_id: activeZone.zone_id,
         area: drawedArea || activeZone.area
-      })
+      }
     }
     // If zone is newly created:
     else {
