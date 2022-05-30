@@ -12,8 +12,8 @@ const getFetchOptions = (token) => {
 }
 
 export const getAdminZones = async (token, filter) => {
-  if(! filter) return {};
-  if(! filter.municipality) return {};
+  if(! filter) return [];
+  if(! filter.municipality) return [];
 
   let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
   // filterParams = filterParams.join("&");

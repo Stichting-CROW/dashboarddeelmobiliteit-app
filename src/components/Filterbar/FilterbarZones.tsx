@@ -46,15 +46,39 @@ import {
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
-function ModalityRow({children, imageUrl}) {
+function ModalityRow({
+  children,
+  imageUrl,
+  onChange,
+  name,
+  value
+}) {
   return <div className="
-    bg-left-center
     bg-no-repeat
-    pl-16
+    pl-12
+    h-8
+    flex
+    w-full
   " style={{
     backgroundImage: `url('${imageUrl}')`,
-    backgroundSize: '60px'
+    backgroundSize: '30px',
+    backgroundPosition: 'center left'
   }}>
+    <input
+      name={name}
+      className="flex-1"
+      width="100%"
+      type="range"
+      min="0"
+      max="250"
+      step="1"
+      onChange={onChange}
+      value={value}
+      style={{width: "calc(100% - 48px)"}}
+    />
+    <div className="text-xs ml-2 h-8 flex justify-center flex-col">
+      {value && value > 0 ? value : '∞'}
+    </div>
     {children}
   </div>
 }
@@ -125,6 +149,7 @@ function FilterbarZones({
   const fetchAdminZones = async () => {
     const filter = {municipality: filterGebied}
     const zonesFromDb = await getAdminZones(token, filter);
+    if(! zonesFromDb || zonesFromDb.message) return;
     let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
     sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
     setAdminZones(sortedZones);
@@ -147,9 +172,11 @@ function FilterbarZones({
       if(zoneId === activeZone.zone_id) return;
 
       // Select feature on the map
-      window.CROW_DD.theDraw.changeMode('direct_select', {
-        featureId: zoneId
-      });
+      if(zoneId) {
+        window.CROW_DD.theDraw.changeMode('direct_select', {
+          featureId: zoneId
+        });
+      }
 
       const foundZone = getZoneById(adminZones, zoneId);
       if(foundZone) {
@@ -279,19 +306,22 @@ function FilterbarZones({
   // Generates the data object for 'stops'
   const generateStopObject = () => {
     const getCapacity = () => {
-      if(activeZone['vehicles-limit.combined'] && activeZone['vehicles-limit.combined'] > 0) {
+      if(limitType === 'combined') {
+        if(! activeZone['vehicles-limit.combined'] || activeZone['vehicles-limit.combined'] <= 0) {
+          return {}
+        }
         return {
-          "combined": parseInt(activeZone['vehicles-limit.combined']) || 0
+          "combined": parseInt(activeZone['vehicles-limit.combined'])
         }
       }
-      return {
-        "cargo_bicycle": parseInt(activeZone['vehicles-limit.cargo_bicycle']),
-        "scooter": parseInt(activeZone['vehicles-limit.scooter']) || 0,
-        "bicycle": parseInt(activeZone['vehicles-limit.bicycle']) || 0,
-        "car": parseInt(activeZone['vehicles-limit.car']) || 0,
-        "other": parseInt(activeZone['vehicles-limit.other']) || 0,
-        "moped": parseInt(activeZone['vehicles-limit.moped']) || 0
-      }
+      let capacity = {};
+      if(parseInt(activeZone['vehicles-limit.cargo_bicycle']) > 0) capacity.cargo_bicycle = parseInt(activeZone['vehicles-limit.cargo_bicycle']);
+      if(parseInt(activeZone['vehicles-limit.scooter']) > 0) capacity.scooter = parseInt(activeZone['vehicles-limit.scooter']);
+      if(parseInt(activeZone['vehicles-limit.bicycle']) > 0) capacity.bicycle = parseInt(activeZone['vehicles-limit.bicycle']);
+      if(parseInt(activeZone['vehicles-limit.car']) > 0) capacity.car = parseInt(activeZone['vehicles-limit.car']);
+      if(parseInt(activeZone['vehicles-limit.other']) > 0) capacity.other = parseInt(activeZone['vehicles-limit.other']);
+      if(parseInt(activeZone['vehicles-limit.moped']) > 0) capacity.moped = parseInt(activeZone['vehicles-limit.moped']);
+      return capacity;
     }
     const getStatus = () => {
       return {
@@ -467,9 +497,9 @@ function FilterbarZones({
                 window.dispatchEvent(event);
                 // Zoom in into zone
                 if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                  if(! window.ddMap) return;
                   // Get extent
                   const extent = st.extent(x.area)
-                  console.log(x.area.geometry.coordinates[0], extent);
                   window.ddMap.fitBounds(extent, {
                     padding: {top: 25, bottom: 25, left: 350, right: 25},
                     duration: 1.4*1000 // in ms
@@ -661,52 +691,37 @@ function FilterbarZones({
               border-gray-400
               p-4
             ">
-              {limitType === 'combined' && <ModalityRow imageUrl="">
-                <FormInput
-                  type="number"
-                  min="0"
-                  name="vehicles-limit.combined"
-                  value={activeZone['vehicles-limit.combined']}
+              {limitType === 'combined' && <ModalityRow
+                imageUrl=""
+                name="vehicles-limit.combined"
+                value={activeZone['vehicles-limit.combined']}
+                onChange={changeHandler}
+              />}
+              {limitType === 'modality' && <>
+                <ModalityRow
+                  imageUrl="https://i.imgur.com/IF05O8u.png"
+                  name="vehicles-limit.bicycle"
+                  value={activeZone['vehicles-limit.bicycle']}
                   onChange={changeHandler}
                 />
-              </ModalityRow>}
-              {limitType === 'modality' && <>
-                <ModalityRow imageUrl="https://i.imgur.com/IF05O8u.png">
-                  <FormInput
-                    type="number"
-                    min="0"
-                    name="vehicles-limit.bicycle"
-                    value={activeZone['vehicles-limit.bicycle']}
-                    onChange={changeHandler}
-                  />
-                </ModalityRow>
-                <ModalityRow imageUrl="https://i.imgur.com/FdVBJaZ.png">
-                  <FormInput
-                    type="number"
-                    min="0"
-                    name="vehicles-limit.cargo_bicycle"
-                    value={activeZone['vehicles-limit.cargo_bicycle']}
-                    onChange={changeHandler}
-                  />
-                </ModalityRow>
-                <ModalityRow imageUrl="https://i.imgur.com/h264sb2.png">
-                  <FormInput
-                    type="number"
-                    min="0"
-                    name="vehicles-limit.moped"
-                    value={activeZone['vehicles-limit.moped']}
-                    onChange={changeHandler}
-                  />
-                </ModalityRow>
-                <ModalityRow imageUrl="https://i.imgur.com/7Y2PYpv.png">
-                  <FormInput
-                    type="number"
-                    min="0"
-                    name="vehicles-limit.car"
-                    value={activeZone['vehicles-limit.car']}
-                    onChange={changeHandler}
-                  />
-                </ModalityRow>
+                <ModalityRow
+                  imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                  name="vehicles-limit.cargo_bicycle"
+                  value={activeZone['vehicles-limit.cargo_bicycle']}
+                  onChange={changeHandler}
+                />
+                <ModalityRow
+                  imageUrl="https://i.imgur.com/h264sb2.png"
+                  name="vehicles-limit.moped"
+                  value={activeZone['vehicles-limit.moped']}
+                  onChange={changeHandler}
+                />
+                <ModalityRow
+                  imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                  name="vehicles-limit.car"
+                  value={activeZone['vehicles-limit.car']}
+                  onChange={changeHandler}
+                />
               </>}
             </div>
           </>}
