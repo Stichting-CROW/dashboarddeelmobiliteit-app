@@ -50,7 +50,14 @@ const initMapDrawLogic = (theMap) => {
             themes.zone.monitoring.primaryColor
            ],
           'fill-outline-color': '#3bb2d0',
-          'fill-opacity': 0.4
+          'fill-opacity': [
+            // Matching based on user property: https://stackoverflow.com/a/70721495
+            'match', ['get', 'user_geography_type'], // get the property
+            'no_parking', 0.2,
+            'monitoring', 0.3,
+            'stop', 0.8,
+            0.5
+          ]
         }
       },
       // Polygon outline stroke
@@ -149,7 +156,7 @@ export const addZonesToMap = async (token, filter) => {
     return;
   }
 
-  // Layer/sort zones per geography_type (monitoring/stop/no_parking)
+  // Layer/s zones per geography_type (monitoring/stop/no_parking)
   const groupedZones = groupZonesPerGeographyType(zones)
 
   groupedZones.forEach((groupZones) => {
@@ -220,12 +227,12 @@ const sortZonesInPreferedOrder = (zones) => {
 
 const groupZonesPerGeographyType = (zones) => {
   const groupedZones = [
-    // First, get all 'no_parking' zones
+    // First, get all 'monitoring' zones
+    zones.filter(x => x.geography_type === 'monitoring'),
+    // Next, get all 'no_parking' zones
     zones.filter(x => x.geography_type === 'no_parking'),
     // Next, get all 'stop' zones
     zones.filter(x => x.geography_type === 'stop'),
-    // Next, get all 'monitoring' zones
-    zones.filter(x => x.geography_type === 'monitoring'),
   ]
   return groupedZones;
 }
