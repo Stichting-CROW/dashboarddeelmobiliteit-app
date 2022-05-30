@@ -50,7 +50,7 @@ const initMapDrawLogic = (theMap) => {
             themes.zone.monitoring.primaryColor
            ],
           'fill-outline-color': '#3bb2d0',
-          'fill-opacity': 0.5
+          'fill-opacity': 0.4
         }
       },
       // Polygon outline stroke
@@ -143,30 +143,34 @@ const initMapDrawLogic = (theMap) => {
 export const addZonesToMap = async (token, filter) => {
   if(! window.CROW_DD) return;
 
+  // Get admin zones
   let zones = await getAdminZones(token, filter);
-
   if(Object.keys(zones).length <= 0) {
     return;
   }
 
-  // Layer zones per geography_type (monitoring/stop/no_parking)
-  zones = sortZonesInPreferedOrder(zones)
-  console.log('sorted zones', zones)
+  // Layer/sort zones per geography_type (monitoring/stop/no_parking)
+  const groupedZones = groupZonesPerGeographyType(zones)
 
-  Object.keys(zones).forEach(x => {
-    const zone = zones[x];
-    window.CROW_DD.theDraw.add({
-      type: 'FeatureCollection',
-      features: [{
+  groupedZones.forEach((groupZones) => {
+    let featuresInThisGroup = [];
+    groupZones.forEach(x => {
+      const zone = x;
+      featuresInThisGroup.push({
         type: 'Feature',
         properties: {
           geography_type: zone.geography_type
         },
         id: zone.zone_id,
         geometry: zone.area.geometry
-      }]
+      })
     });
-  });
+    // Now add feature collection/group
+    window.CROW_DD.theDraw.add({
+      type: 'FeatureCollection',
+      features: featuresInThisGroup
+    });
+  })
 }
 
 const initSelectToEdit = (theMap) => {
@@ -200,14 +204,7 @@ const getZoneById = (zones, id) => {
 }
 
 const sortZonesInPreferedOrder = (zones) => {
-  const groupedZones = [
-    // First, get all 'no_parking' zones
-    zones.filter(x => x.geography_type === 'no_parking'),
-    // Next, get all 'monitoring' zones
-    zones.filter(x => x.geography_type === 'monitoring'),
-    // Next, get all 'stop' zones
-    zones.filter(x => x.geography_type === 'stop'),
-  ]
+  const groupedZones = groupZonesPerGeographyType(zones);
   let groupedZonesToReturn = [];
   groupedZones[0].forEach(x => {
     groupedZonesToReturn.push(x);
@@ -218,9 +215,19 @@ const sortZonesInPreferedOrder = (zones) => {
   groupedZones[2].forEach(x => {
     groupedZonesToReturn.push(x);
   })
-  console.log('groupedZones[0]', groupedZones[0])
-  console.log('groupedZonesToReturn', groupedZonesToReturn)
   return groupedZonesToReturn;
+}
+
+const groupZonesPerGeographyType = (zones) => {
+  const groupedZones = [
+    // First, get all 'no_parking' zones
+    zones.filter(x => x.geography_type === 'no_parking'),
+    // Next, get all 'stop' zones
+    zones.filter(x => x.geography_type === 'stop'),
+    // Next, get all 'monitoring' zones
+    zones.filter(x => x.geography_type === 'monitoring'),
+  ]
+  return groupedZones;
 }
 
 export {
