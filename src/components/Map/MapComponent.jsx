@@ -198,12 +198,18 @@ function MapComponent(props) {
     }
     // If on zones page: add zones to map
     (async () => {
+      // Remove existing zones fist
+      window.CROW_DD.theDraw.deleteAll();
       const filter = {
         municipality: filterGebied
       }
       addZonesToMap(token, filter);
     })()
-  }, [didMapLoad, stateLayers.displaymode])
+  }, [
+    didMapLoad,
+    stateLayers.displaymode,
+    filterGebied
+  ])
   /**
    * / MICROHUBS / ZONES LOGIC
   */

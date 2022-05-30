@@ -131,7 +131,9 @@ function FilterbarZones({
   // Get admin zones on component load
   useEffect(() => {
     fetchAdminZones();
-  }, [])
+  }, [
+    filterGebied
+  ])
 
   // Listen to zone selection events (for editing zones)
   useEffect(() => {
