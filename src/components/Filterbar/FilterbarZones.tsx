@@ -3,6 +3,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import {useSelector} from 'react-redux';
 // import { motion } from "framer-motion";
 import moment from 'moment';
+import st from 'geojson-bounds';
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
@@ -144,6 +145,11 @@ function FilterbarZones({
       // Don't update state vars if zone was already active
       // Otherwise you would overwrite manually set params that are now saved yet
       if(zoneId === activeZone.zone_id) return;
+
+      // Select feature on the map
+      window.CROW_DD.theDraw.changeMode('direct_select', {
+        featureId: zoneId
+      });
 
       const foundZone = getZoneById(adminZones, zoneId);
       if(foundZone) {
@@ -451,7 +457,28 @@ function FilterbarZones({
             Zones
           </div>
           <div>
-            {adminZones ? R.map(renderZoneTag, adminZones) : <div />}
+            {adminZones ? R.map((x) => {
+              x.onClick = () => {
+                const zoneId = x.zone_id;
+                // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+                const event = new CustomEvent('setSelectedZone', {
+                  detail: zoneId
+                });
+                window.dispatchEvent(event);
+                // Zoom in into zone
+                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                  // Get extent
+                  const extent = st.extent(x.area)
+                  console.log(x.area.geometry.coordinates[0], extent);
+                  window.ddMap.fitBounds(extent, {
+                    padding: {top: 25, bottom: 25, left: 350, right: 25},
+                    duration: 1.4*1000 // in ms
+                  });
+                }
+
+              };
+              return renderZoneTag(x);
+            }, adminZones) : <div />}
           </div>
         </div>
         
