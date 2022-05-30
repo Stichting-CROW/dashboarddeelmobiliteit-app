@@ -13,7 +13,7 @@ export const Marker = ({ marker, handleRemove }) => {
 
       <img
         onContextMenu={(x) => {
-          x.preventDefault()
+          if(x) x.preventDefault()
           handleRemove()
         }}
 
