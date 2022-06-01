@@ -26,7 +26,8 @@ import {postZone} from '../../api/zones';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
-  DISPLAYMODE_ZONES,
+  DISPLAYMODE_ZONES_ADMIN,
+  DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -46,7 +47,8 @@ function Filterbar({
 
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
-  const iszones=displayMode===DISPLAYMODE_ZONES;
+  const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
+  const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
   
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -57,7 +59,7 @@ function Filterbar({
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
 
-  if(iszones) {
+  if(iszonesadmin) {
     return <FilterbarZones
       hideLogo={hideLogo}
     />

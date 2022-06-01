@@ -37,7 +37,8 @@ import {
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
-  DISPLAYMODE_ZONES,
+  DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
 } from './reducers/layers.js';
 
@@ -89,7 +90,9 @@ function App() {
     } else if(pathName.includes("/map/rentals")) {
       payload=DISPLAYMODE_RENTALS;
     } else if(pathName.includes("/map/zones")) {
-      payload=DISPLAYMODE_ZONES;
+      payload=DISPLAYMODE_ZONES_PUBLIC;
+    } else if(pathName.includes("/admin/zones")) {
+      payload=DISPLAYMODE_ZONES_ADMIN;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -270,6 +273,9 @@ function App() {
                 {renderMapElements()}
               </Route>
               <Route exact path="/map/zones">
+                {renderMapElements()}
+              </Route>
+              <Route exact path="/admin/zones">
                 {renderMapElements()}
               </Route>
               <Route exact path="/stats/overview">

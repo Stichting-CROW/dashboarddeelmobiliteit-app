@@ -221,6 +221,13 @@ function Menu({pathName}) {
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />}
 
+            {doShowZones && <MenuItem
+              pathName={pathName}
+              text={'Zones'}
+              path={'/admin/zones'}
+              icon={'https://i.imgur.com/GrF8KBA.png'}
+            />}
+
             <MenuItem
               pathName={pathName}
               text={'Ontwikkeling'}

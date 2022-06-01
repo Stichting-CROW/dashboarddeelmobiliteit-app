@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 import localization from 'moment/locale/nl'
+import {useLocation} from "react-router-dom";
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
@@ -27,6 +28,8 @@ moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
   if(process.env.DEBUG) console.log('Map component')
+
+  const [uriParams, setUriParams] = useState(document.location.search);
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {
@@ -60,11 +63,18 @@ function MapComponent(props) {
   // Define map
   const mapContainer = props.mapContainer;
   const [didMapLoad, setDidMapLoad] = useState(false);
+  const [didMapDrawLoad, setDidMapDrawLoad] = useState(false);
   const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
   const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
   const [zoom] = useState(stateLayers.zoom || 15);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   let map = useRef(null);
+
+  // Store window location in a local variable
+  let location = useLocation();
+  useEffect(() => {
+    setUriParams(location ? location.search : null);
+  }, [location]);
 
   const applyMapSettings = (theMap) => {
     // Hide compass control
@@ -99,6 +109,24 @@ function MapComponent(props) {
     dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
   }, []);
+
+  // Navigate to zone if uery param is given
+  useEffect(() => {
+    if(! didMapLoad) return;
+    if(! uriParams) return;
+    let params = new URLSearchParams(uriParams);
+    let zone_id = params.get('zone_id');
+    if(zone_id) {
+      const event = new CustomEvent('setSelectedZone', {
+        detail: zone_id
+      });
+      window.dispatchEvent(event);
+    }
+  }, [
+    uriParams,
+    didMapLoad,
+    didMapDrawLoad
+  ]);
 
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
@@ -190,7 +218,7 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didMapLoad) return;
     // If we are not on zones page: remove all drawed zones from the map
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones') {
+    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
       }
@@ -204,6 +232,7 @@ function MapComponent(props) {
         municipality: filterGebied
       }
       addZonesToMap(token, filter);
+      setDidMapDrawLoad(true)
     })()
   }, [
     didMapLoad,
