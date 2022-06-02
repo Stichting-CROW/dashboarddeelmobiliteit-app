@@ -8,6 +8,8 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_OTHER,
+  DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
@@ -15,6 +17,8 @@ import {
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
 } from '../../reducers/layers.js';
+
+import {getMapStyles} from '../Map/MapUtils/map.js';
 
 function SelectLayer(props) {
   // const {setLayers, setActiveSource} = props;
@@ -28,6 +32,10 @@ function SelectLayer(props) {
     return state.layers ? state.layers.zones_visible : false;
   });
   
+  const layers = useSelector(state => {
+    return state.layers ? state.layers : null;
+  });
+
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
@@ -48,6 +56,8 @@ function SelectLayer(props) {
        return null; // no layer selection
   }
   
+  const mapStyles = getMapStyles();
+
   return (
     <SlideBox name="SelectLayer" direction="right" options={{
       title: 'Lagen',
@@ -106,9 +116,28 @@ function SelectLayer(props) {
             </span>
           </div> : null }
 
+        { displayMode===DISPLAYMODE_ZONES_ADMIN && <>
+          <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
+            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
+            window.ddMap.setStyle(mapStyles.default);
+          }}>
+            <span className="layer-title">
+              Terrein
+            </span>
+          </div>
+          <div data-type="map-style-satelite" className={`layer${layers.map_style!=='satelite' ? ' layer-inactive':''}`} onClick={() => {
+            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
+            window.ddMap.setStyle(mapStyles.satelite);
+          }}>
+            <span className="layer-title">
+              Sateliet
+            </span>
+          </div>
+        </>}
+
         { isLoggedIn && showZoneOnOff ?
           <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
-              dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
+            dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
           }}>
             <span className="layer-title">
               Zones

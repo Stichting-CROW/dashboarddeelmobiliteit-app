@@ -62,6 +62,12 @@ export default function filter(state = initialState, action) {
         zones_visible: !state.zones_visible
       };
     }
+    case 'LAYER_SET_MAP_STYLE': {
+      return {
+        ...state,
+        map_style: action.payload
+      };
+    }
     case 'LAYER_SET_ZONES_EXTENT': {
       if(md5(JSON.stringify(action.payload||[]))!==md5(JSON.stringify(state.extent||[]))) {
         // console.log("set extent to %o", action.payload)

@@ -10,9 +10,12 @@ import {themes} from '../../../themes';
 import * as MapboxDrawWaypoint from 'mapbox-gl-draw-waypoint';
 
 // Import API functions
-import {getAdminZones} from '../../../api/zones';
+import {
+  getAdminZones,
+  getPublicZones
+} from '../../../api/zones';
 
-const initMapDrawLogic = (theMap) => {
+const initMapDrawLogic = (theMap, isAdminMode) => {
   if(! theMap) return;
 
   // Don't init multiple times
@@ -24,117 +27,123 @@ const initMapDrawLogic = (theMap) => {
   modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
   modes.static = StaticMode;
 
+  const publicStyles = [
+    // Polygon fill
+    {
+      'id': 'gl-draw-polygon-fill',
+      'type': 'fill',
+      'filter': [
+        'all',
+        // ['==', 'active', 'false'],
+        ['==', '$type', 'Polygon'],
+        ['!=', 'mode', 'static']
+      ],
+      'paint': {
+        'fill-color': [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'stop', themes.zone.stop.primaryColor,
+          'no_parking', themes.zone.no_parking.primaryColor,
+          'monitoring', themes.zone.monitoring.primaryColor,
+          themes.zone.monitoring.primaryColor
+         ],
+        'fill-outline-color': '#3bb2d0',
+        'fill-opacity': [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'no_parking', 0.2,
+          'monitoring', 0.3,
+          'stop', 0.8,
+          0.5
+        ]
+      }
+    }
+  ];
+
+  const adminStyles = [
+    // Polygon outline stroke
+    // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
+    {
+      'id': 'gl-draw-polygon-stroke-active',
+      'type': 'line',
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      'filter': [
+        'all',
+        ['==', '$type', 'Polygon'],
+        ['!=', 'active', 'false']
+      ],
+      "paint": {
+        "line-color": [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'stop', themes.zone.stop.primaryColor,
+          'no_parking', themes.zone.no_parking.primaryColor,
+          'monitoring', themes.zone.monitoring.primaryColor,
+          "#D20C0C"
+         ],
+        "line-dasharray": [0.2, 2],
+        "line-width": 3
+      }
+    },
+    // Vertex points
+    {
+      "id": "gl-draw-polygon-and-line-vertex-active",
+      "type": "circle",
+      "filter": [
+        "all",
+        ["==", "meta", "vertex"],
+        ["!=", 'meta', 'midpoint'],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"]
+      ],
+      "paint": {
+        "circle-radius": 4,
+        "circle-color": [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'stop', themes.zone.stop.primaryColor,
+          'no_parking', themes.zone.no_parking.primaryColor,
+          'monitoring', themes.zone.monitoring.primaryColor,
+          "#D20C0C"
+        ]
+      }
+    },
+    // Midpoints points
+    {
+      "id": "gl-draw-polygon-and-line-midpoint-active",
+      "type": "circle",
+      "filter": [
+        "all",
+        ["==", 'meta', 'midpoint'],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"]
+      ],
+      "paint": {
+        "circle-radius": 3,
+        "circle-color": [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'stop', themes.zone.stop.primaryColor,
+          'no_parking', themes.zone.no_parking.primaryColor,
+          'monitoring', themes.zone.monitoring.primaryColor,
+          "#D20C0C"
+        ]
+      },
+      'circle-opacity': 0.5
+    }
+  ];
+
   const draw = new MapboxDraw({
     displayControlsDefault: false,
     modes: modes,
     // Custom styles https://stackoverflow.com/a/51305508
     userProperties: true,
-    styles: [
-      // Polygon fill
-      {
-        'id': 'gl-draw-polygon-fill',
-        'type': 'fill',
-        'filter': [
-          'all',
-          // ['==', 'active', 'false'],
-          ['==', '$type', 'Polygon'],
-          ['!=', 'mode', 'static']
-        ],
-        'paint': {
-          'fill-color': [
-            // Matching based on user property: https://stackoverflow.com/a/70721495
-            'match', ['get', 'user_geography_type'], // get the property
-            'stop', themes.zone.stop.primaryColor,
-            'no_parking', themes.zone.no_parking.primaryColor,
-            'monitoring', themes.zone.monitoring.primaryColor,
-            themes.zone.monitoring.primaryColor
-           ],
-          'fill-outline-color': '#3bb2d0',
-          'fill-opacity': [
-            // Matching based on user property: https://stackoverflow.com/a/70721495
-            'match', ['get', 'user_geography_type'], // get the property
-            'no_parking', 0.2,
-            'monitoring', 0.3,
-            'stop', 0.8,
-            0.5
-          ]
-        }
-      },
-      // Polygon outline stroke
-      // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
-      {
-        'id': 'gl-draw-polygon-stroke-active',
-        'type': 'line',
-        "layout": {
-          "line-cap": "round",
-          "line-join": "round"
-        },
-        'filter': [
-          'all',
-          ['==', '$type', 'Polygon'],
-          ['!=', 'active', 'false']
-        ],
-        "paint": {
-          "line-color": [
-            // Matching based on user property: https://stackoverflow.com/a/70721495
-            'match', ['get', 'user_geography_type'], // get the property
-            'stop', themes.zone.stop.primaryColor,
-            'no_parking', themes.zone.no_parking.primaryColor,
-            'monitoring', themes.zone.monitoring.primaryColor,
-            "#D20C0C"
-           ],
-          "line-dasharray": [0.2, 2],
-          "line-width": 3
-        }
-      },
-      // Vertex points
-      {
-        "id": "gl-draw-polygon-and-line-vertex-active",
-        "type": "circle",
-        "filter": [
-          "all",
-          ["==", "meta", "vertex"],
-          ["!=", 'meta', 'midpoint'],
-          ["==", "$type", "Point"],
-          ["!=", "mode", "static"]
-        ],
-        "paint": {
-          "circle-radius": 4,
-          "circle-color": [
-            // Matching based on user property: https://stackoverflow.com/a/70721495
-            'match', ['get', 'user_geography_type'], // get the property
-            'stop', themes.zone.stop.primaryColor,
-            'no_parking', themes.zone.no_parking.primaryColor,
-            'monitoring', themes.zone.monitoring.primaryColor,
-            "#D20C0C"
-          ]
-        }
-      },
-      // Midpoints points
-      {
-        "id": "gl-draw-polygon-and-line-midpoint-active",
-        "type": "circle",
-        "filter": [
-          "all",
-          ["==", 'meta', 'midpoint'],
-          ["==", "$type", "Point"],
-          ["!=", "mode", "static"]
-        ],
-        "paint": {
-          "circle-radius": 3,
-          "circle-color": [
-            // Matching based on user property: https://stackoverflow.com/a/70721495
-            'match', ['get', 'user_geography_type'], // get the property
-            'stop', themes.zone.stop.primaryColor,
-            'no_parking', themes.zone.no_parking.primaryColor,
-            'monitoring', themes.zone.monitoring.primaryColor,
-            "#D20C0C"
-          ]
-        },
-        'circle-opacity': 0.5
-      }
-    ]
+    styles: isAdminMode ? [...publicStyles, ...adminStyles] : publicStyles
   });
+
   // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
   theMap.addControl(draw, 'top-left');
   // Set Draw to window, for easily making global changes
@@ -147,7 +156,7 @@ const initMapDrawLogic = (theMap) => {
   initSelectToEdit(theMap);
 }
 
-export const addZonesToMap = async (token, filter) => {
+export const addAdminZonesToMap = async (token, filter) => {
   if(! window.CROW_DD) return;
 
   // Get admin zones
@@ -156,7 +165,40 @@ export const addZonesToMap = async (token, filter) => {
     return;
   }
 
-  // Layer/s zones per geography_type (monitoring/stop/no_parking)
+  // Layer/sort zones per geography_type (monitoring/stop/no_parking)
+  const groupedZones = groupZonesPerGeographyType(zones)
+
+  groupedZones.forEach((groupZones) => {
+    let featuresInThisGroup = [];
+    groupZones.forEach(x => {
+      const zone = x;
+      featuresInThisGroup.push({
+        type: 'Feature',
+        properties: {
+          geography_type: zone.geography_type
+        },
+        id: zone.zone_id,
+        geometry: zone.area.geometry
+      })
+    });
+    // Now add feature collection/group
+    window.CROW_DD.theDraw.add({
+      type: 'FeatureCollection',
+      features: featuresInThisGroup
+    });
+  })
+}
+
+export const addPublicZonesToMap = async (token, filter) => {
+  if(! window.CROW_DD) return;
+
+  // Get admin zones
+  let zones = await getPublicZones(token, filter);
+  if(Object.keys(zones).length <= 0) {
+    return;
+  }
+
+  // Layer/sort zones per geography_type (monitoring/stop/no_parking)
   const groupedZones = groupZonesPerGeographyType(zones)
 
   groupedZones.forEach((groupZones) => {

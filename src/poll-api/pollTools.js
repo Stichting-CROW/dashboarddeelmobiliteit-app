@@ -24,10 +24,10 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   } else if(filter.gebied!=="") {
     // create zone filter
     let candidates = [];
-    let municipality = metadata.gebieden.find(gebied=>gebied.gm_code===filter.gebied);
+    let municipality = metadata.gebieden.find(gebied => gebied.gm_code===filter.gebied);
     if(undefined!==municipality) {
       candidates = metadata.zones.filter(zone => {
-        return zone.municipality===municipality.gm_code&&zone.name===municipality.name
+        return zone.municipality===municipality.gm_code&&zone.name===municipality.name && zone.zone_type!=='custom'
       });
     } else {
     }

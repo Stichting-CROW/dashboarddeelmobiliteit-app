@@ -16,9 +16,17 @@ export const getAdminZones = async (token, filter) => {
   if(! filter.municipality) return [];
 
   let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
-  // filterParams = filterParams.join("&");
-
   const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zones?${filterParams}`;
+  const response = await fetch(url, getFetchOptions(token));
+  return await response.json();
+}
+
+export const getPublicZones = async (token, filter) => {
+  if(! filter) return [];
+  if(! filter.municipality) return [];
+
+  let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
+  const url = `https://mds.dashboarddeelmobiliteit.nl/public/zones?${filterParams}`;
   const response = await fetch(url, getFetchOptions(token));
   return await response.json();
 }

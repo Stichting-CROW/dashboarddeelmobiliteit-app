@@ -214,7 +214,7 @@ function Menu({pathName}) {
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
-            {doShowZones && <MenuItem
+            {false && doShowZones && <MenuItem
               pathName={pathName}
               text={'Zones'}
               path={'/map/zones'}

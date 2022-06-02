@@ -9,10 +9,12 @@ import {useLocation} from "react-router-dom";
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
+import {getMapStyles} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
-  addZonesToMap,
+  addAdminZonesToMap,
+  addPublicZonesToMap,
   initMapDrawLogic,
   getAdminZones
 } from './MapUtils/zones.js';
@@ -143,14 +145,14 @@ function MapComponent(props) {
       })
     }
     const initMap = () => {
-      const style = 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5';//TODO: Move to CROW
+      const mapStyles = getMapStyles();
 
       // Stop if map exists already
       if (map.current) return;
 
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style,
+        style: mapStyles.default,
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom,
@@ -160,9 +162,6 @@ function MapComponent(props) {
 
       // Apply settings like disabling rotating the map
       applyMapSettings(map.current)
-
-      // Apply settings like disabling rotating the map
-      initMapDrawLogic(map.current)
 
       // Init MapBox utils
       U.init(map.current);
@@ -210,8 +209,22 @@ function MapComponent(props) {
     registerMapView
   ])
 
+  useEffect(() => {
+    if(! map.current) return;
+    if(! stateLayers) return;
+
+    // Init map drawing features
+    initMapDrawLogic(
+      map.current,
+      stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
+    )
+  }, [
+    didMapLoad,
+    stateLayers.displaymode
+  ]);
+
   /**
-   * MICROHUBS / ZONES LOGIC
+   * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
    * Load zones onto the map
   */
@@ -219,6 +232,42 @@ function MapComponent(props) {
     if(! didMapLoad) return;
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
+      if(window.CROW_DD && window.CROW_DD.theDraw) {
+        window.CROW_DD.theDraw.deleteAll();
+      }
+      // Do set map style to 'default' as well
+      const mapStyles = getMapStyles();
+      window.ddMap.setStyle(mapStyles.default);
+      return;
+    }
+    // If on zones page: set map style to 'satelite'
+    const mapStyles = getMapStyles();
+    window.ddMap.setStyle(mapStyles.satelite);
+
+    (async () => {
+      // Remove existing zones fist
+      window.CROW_DD.theDraw.deleteAll();
+      const filter = {
+        municipality: filterGebied
+      }
+      addAdminZonesToMap(token, filter);
+      setDidMapDrawLoad(true)
+    })()
+  }, [
+    didMapLoad,
+    stateLayers.displaymode,
+    filterGebied
+  ])
+
+  /**
+   * MICROHUBS / ZONES [PUBLIC] LOGIC
+   * 
+   * Load zones onto the map
+  */
+  useEffect(x => {
+    if(! didMapLoad) return;
+    // If we are not on zones page: remove all drawed zones from the map
+    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
       }
@@ -231,7 +280,7 @@ function MapComponent(props) {
       const filter = {
         municipality: filterGebied
       }
-      addZonesToMap(token, filter);
+      addPublicZonesToMap(token, filter);
       setDidMapDrawLoad(true)
     })()
   }, [
@@ -239,9 +288,6 @@ function MapComponent(props) {
     stateLayers.displaymode,
     filterGebied
   ])
-  /**
-   * / MICROHUBS / ZONES LOGIC
-  */
 
   /**
    * SET SOURCES AND LAYERS
@@ -296,6 +342,7 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
+    if(! map.current || ! map.current.U) return;
 
     map.current.U.setData('vehicles', vehicles.data);
     map.current.U.setData('vehicles-clusters', vehicles.data);

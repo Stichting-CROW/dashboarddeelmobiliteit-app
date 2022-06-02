@@ -35,6 +35,12 @@
 .SelectLayer .layer[data-type='zones'] {
   background-image: url('../../images/layer-zones.png')
 }
+.SelectLayer .layer[data-type='map-style-default'] {
+  background-image: url('../../images/layer-map-style-default.png')
+}
+.SelectLayer .layer[data-type='map-style-satelite'] {
+  background-image: url('../../images/layer-map-style-satelite.png')
+}
 
 .SelectLayer .layer-title {
   text-align: center;
@@ -45,7 +51,8 @@
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
   background: rgba(255, 255, 255, 0.8);
-  
+  font-weight: bold;
+
   @apply block absolute bottom-0 left-0 w-full h-6 flex flex-col justify-center;
 }
 
@@ -53,4 +60,6 @@
   opacity: 0.6;
   filter: grayscale(100%);
 }
-
+.layer-inactive .layer-title {
+  font-weight: normal;
+}
