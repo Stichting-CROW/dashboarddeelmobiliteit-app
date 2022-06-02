@@ -210,6 +210,7 @@ function MapComponent(props) {
   ])
 
   useEffect(() => {
+    if(! didMapLoad) return;
     if(! map.current) return;
     if(! stateLayers) return;
 
@@ -232,17 +233,18 @@ function MapComponent(props) {
     if(! didMapLoad) return;
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
+      // Delete draws
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
       }
       // Do set map style to 'default' as well
-      const mapStyles = getMapStyles();
-      window.ddMap.setStyle(mapStyles.default);
+      // const mapStyles = getMapStyles();
+      // window.ddMap.setStyle(mapStyles.default);
       return;
     }
     // If on zones page: set map style to 'satelite'
-    const mapStyles = getMapStyles();
-    window.ddMap.setStyle(mapStyles.satelite);
+    // const mapStyles = getMapStyles();
+    // window.ddMap.setStyle(mapStyles.satelite);
 
     (async () => {
       // Remove existing zones fist
@@ -342,7 +344,6 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
-    if(! map.current || ! map.current.U) return;
 
     map.current.U.setData('vehicles', vehicles.data);
     map.current.U.setData('vehicles-clusters', vehicles.data);
