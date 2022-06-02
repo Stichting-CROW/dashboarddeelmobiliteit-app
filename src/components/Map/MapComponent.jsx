@@ -152,7 +152,7 @@ function MapComponent(props) {
 
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: mapStyles.default,
+        style: mapStyles.base,
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom,
@@ -184,6 +184,7 @@ function MapComponent(props) {
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
+        console.log('Map load')
         // Store map in a global variable
         window.ddMap = map.current;
 
@@ -217,13 +218,36 @@ function MapComponent(props) {
     // Init map drawing features
     initMapDrawLogic(
       map.current,
-      stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
+      true// stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
     )
   }, [
     didMapLoad,
     stateLayers.displaymode
   ]);
 
+  // Switch to default/satelite view automatically
+  useEffect(x => {
+    if(! didMapLoad) return;
+    if(! stateLayers.displaymode) return;
+    if(! window.ddMap.getSource('vehicles') || ! window.ddMap.isSourceLoaded('vehicles')) return;
+
+    // TODO
+    return;
+
+    const mapStyles = getMapStyles();
+
+    // Set satelite view:
+    if(stateLayers.displaymode === 'displaymode-zones-admin')
+      window.ddMap.setStyle(mapStyles.satelite);
+
+    // Set default view:
+    if(stateLayers.displaymode !== 'displaymode-zones-admin')
+      window.ddMap.setStyle(mapStyles.base);
+  }, [
+    didMapLoad,
+    didInitSourcesAndLayers,
+    stateLayers.displaymode
+  ]);
   /**
    * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
@@ -237,14 +261,11 @@ function MapComponent(props) {
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
       }
-      // Do set map style to 'default' as well
-      // const mapStyles = getMapStyles();
-      // window.ddMap.setStyle(mapStyles.default);
       return;
     }
     // If on zones page: set map style to 'satelite'
-    // const mapStyles = getMapStyles();
-    // window.ddMap.setStyle(mapStyles.satelite);
+    const mapStyles = getMapStyles();
+    window.ddMap.setStyle(mapStyles.satelite);
 
     (async () => {
       // Remove existing zones fist
@@ -345,8 +366,13 @@ function MapComponent(props) {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
-    map.current.U.setData('vehicles', vehicles.data);
-    map.current.U.setData('vehicles-clusters', vehicles.data);
+    if(map.current.getSource('vehicles')) {
+
+      map.current.U.setData('vehicles', vehicles.data);
+    }
+    if(map.current.getSource('vehicles-clusters')) {
+      map.current.U.setData('vehicles-clusters', vehicles.data);
+    }
   }, [
     didInitSourcesAndLayers,
     vehicles.data

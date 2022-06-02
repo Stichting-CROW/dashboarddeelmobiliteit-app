@@ -53,7 +53,7 @@ function SelectLayer(props) {
   });
   
   if(displayMode===DISPLAYMODE_OTHER) {
-       return null; // no layer selection
+    return null; // no layer selection
   }
   
   const mapStyles = getMapStyles();

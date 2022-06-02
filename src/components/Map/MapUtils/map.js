@@ -1,6 +1,10 @@
+import base from '../MapStyles/base.js';
+
 export const getMapStyles = () => {
   return {
-    default: 'mapbox://styles/nine3030/ckv9ni7rj0xwq15qsekqwnlz5',//TODO: Move to CROW
-    satelite: 'https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
+    // NOTE: mapbox:// urls are not supported anymore.
+    // See https://github.com/maplibre/maplibre-gl-js/issues/1225#issuecomment-1118769488
+    base: base,
+    satelite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
   }
 }
