@@ -217,7 +217,7 @@ function MapComponent(props) {
     // Init map drawing features
     initMapDrawLogic(
       map.current,
-      stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
+      true//stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
     )
   }, [
     didMapLoad,
