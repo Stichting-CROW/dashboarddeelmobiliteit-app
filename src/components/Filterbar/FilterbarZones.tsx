@@ -1,24 +1,28 @@
 import './css/FilterbarZones.css';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {
+  useEffect,
+  useState,
+  // useRef
+} from 'react';
 import {useSelector} from 'react-redux';
-import {useLocation} from "react-router-dom";
+// import {useLocation} from "react-router-dom";
 // import { motion } from "framer-motion";
-import moment from 'moment';
+// import moment from 'moment';
 import st from 'geojson-bounds';
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-import FilteritemDatum from './FilteritemDatum.jsx';
-import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
-import FilteritemDuur from './FilteritemDuur.jsx';
-import FilteritemAanbieders from './FilteritemAanbieders.jsx';
-import FilteritemZones from './FilteritemZones.jsx';
-import {
-  FilteritemMarkersAfstand,
-  FilteritemMarkersParkeerduur
-} from './FilteritemMarkers.jsx';
-import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+// import FilteritemDatum from './FilteritemDatum.jsx';
+// import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
+// import FilteritemDuur from './FilteritemDuur.jsx';
+// import FilteritemAanbieders from './FilteritemAanbieders.jsx';
+// import FilteritemZones from './FilteritemZones.jsx';
+// import {
+//   FilteritemMarkersAfstand,
+//   FilteritemMarkersParkeerduur
+// } from './FilteritemMarkers.jsx';
+// import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
+// import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
@@ -26,8 +30,8 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 
 import {
-  addZonesToMap,
-  initMapDrawLogic,
+  // addZonesToMap,
+  // initMapDrawLogic,
   getAdminZones,
   getZoneById,
   sortZonesInPreferedOrder,
@@ -42,13 +46,13 @@ import {
   deleteZone
 } from '../../api/zones';
 
-import {
-  DISPLAYMODE_PARK,
-  DISPLAYMODE_RENTALS,
-  DISPLAYMODE_ZONES_PUBLIC,
-  DISPLAYMODE_ZONES_ADMIN,
-  DISPLAYMODE_OTHER
-} from '../../reducers/layers.js';
+// import {
+//   DISPLAYMODE_PARK,
+//   DISPLAYMODE_RENTALS,
+//   DISPLAYMODE_ZONES_PUBLIC,
+//   DISPLAYMODE_ZONES_ADMIN,
+//   DISPLAYMODE_OTHER
+// } from '../../reducers/layers.js';
 
 function ModalityRow({
   children,

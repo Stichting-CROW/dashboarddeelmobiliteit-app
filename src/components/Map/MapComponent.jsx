@@ -9,14 +9,14 @@ import {useLocation} from "react-router-dom";
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles} from './MapUtils/map.js';
+import {getMapStyles, setMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
   addAdminZonesToMap,
   addPublicZonesToMap,
   initMapDrawLogic,
-  getAdminZones
+  // getAdminZones
 } from './MapUtils/zones.js';
 
 import './MapComponent.css';
@@ -141,6 +141,7 @@ function MapComponent(props) {
     }
     const addLayers = () => {
       Object.keys(layers).forEach((key, idx) => {
+        console.log('adding layer', key)
         map.current.U.addLayer(layers[key]);
       })
     }
@@ -184,7 +185,6 @@ function MapComponent(props) {
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
-        console.log('Map load')
         // Store map in a global variable
         window.ddMap = map.current;
 
@@ -237,12 +237,13 @@ function MapComponent(props) {
     const mapStyles = getMapStyles();
 
     // Set satelite view:
-    if(stateLayers.displaymode === 'displaymode-zones-admin')
-      window.ddMap.setStyle(mapStyles.satelite);
+    // if(stateLayers.displaymode === 'displaymode-zones-admin') {
+    //   window.ddMap.setStyle(mapStyles.satelite);
+    // }
 
     // Set default view:
-    if(stateLayers.displaymode !== 'displaymode-zones-admin')
-      window.ddMap.setStyle(mapStyles.base);
+    // if(stateLayers.displaymode !== 'displaymode-zones-admin')
+    //   window.ddMap.setStyle(mapStyles.base);
   }, [
     didMapLoad,
     didInitSourcesAndLayers,
@@ -255,6 +256,7 @@ function MapComponent(props) {
   */
   useEffect(x => {
     if(! didMapLoad) return;
+
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
       // Delete draws
@@ -263,9 +265,11 @@ function MapComponent(props) {
       }
       return;
     }
+
     // If on zones page: set map style to 'satelite'
+    // Only do this if layers were done loading
     const mapStyles = getMapStyles();
-    window.ddMap.setStyle(mapStyles.satelite);
+    setMapStyle(window.ddMap, mapStyles.satelite);
 
     (async () => {
       // Remove existing zones fist
@@ -278,6 +282,7 @@ function MapComponent(props) {
     })()
   }, [
     didMapLoad,
+    // didInitSourcesAndLayers,
     stateLayers.displaymode,
     filterGebied
   ])
@@ -326,6 +331,8 @@ function MapComponent(props) {
       });
       Object.keys(sources).forEach((key, idx) => {
         if(props.activeSources.indexOf(key) <= -1) {
+          // Don't remove if source does not exist :)
+          if(! map.current.isSourceLoaded(key)) return;
           map.current.U.hideSource(key);
         }
       });
@@ -343,7 +350,13 @@ function MapComponent(props) {
 
     const activateLayers = (layerName) => {
       // Show given layers
+      console.log('props.layers', props.layers)
       props.layers.forEach(l => {
+        // Don't show layers that don't exist
+        // console.log('map.current', map.current, map.current.getLayer)
+        // console.log(map.current.getLayer('zones-geodata-border'))
+        // TODO
+        // if(map.current.getLayer(l) === undefined) return;
         map.current.U.show(l);
       });
 
