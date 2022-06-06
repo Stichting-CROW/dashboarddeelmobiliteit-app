@@ -6,6 +6,7 @@ import {
 } from './pollTools.js';
 import { isLoggedIn } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
+import {shouldFetchVehicles} from './pollTools.js';
 
 var store_parkingdata;
 var timerid_parkingdata;
@@ -19,46 +20,7 @@ let activeVehicles;
 
 // Variable to keep track of filter changes
 // Only do a new fetch() if needed
-let existingFilter = {
-  // datum,
-  // gebied,
-  // herkomstbestemming,
-  // intervalduur,
-  // ontwikkelingaggregatie,
-  // ontwikkelingtot,
-  // ontwikkelingvan,
-  // voertuigtypesexclude,
-  // zones,
-}
-
-// Do we have to (re)fetch vehicles via the API?
-const shouldFetchVehicles = (newFilter, existingFilter) => {
-
-  // If no filter was known of: trigger fetch
-  if(! existingFilter) return true;
-
-  // If one of these fields change, we should (re)fetch
-  const fieldChangesThatShouldTriggerUpdate = [
-    'datum',
-    'gebied',
-    'herkomstbestemming',
-    'intervalduur',
-    'ontwikkelingaggregatie',
-    'ontwikkelingtot',
-    'ontwikkelingvan',
-    'voertuigtypesexclude',
-    'zones',
-  ];
-  let doFetchVehicles = false;
-  fieldChangesThatShouldTriggerUpdate.forEach(x => {
-    // If field was changed: (re)fetch
-    if(newFilter[x] !== existingFilter[x]) {
-      doFetchVehicles = true;
-    }
-  })
-
-  return doFetchVehicles;
-}
+let existingFilter;
 
 const processVehiclesResult = (state, vehicles) => {
   activeVehicles = vehicles;

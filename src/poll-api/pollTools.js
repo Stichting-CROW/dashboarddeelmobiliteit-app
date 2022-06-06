@@ -162,3 +162,36 @@ export function abortableFetch(request, opts) {
     ready: fetch(request, { ...opts, signal })
   };
 }
+
+// Do we have to (re)fetch vehicles via the API?
+export const shouldFetchVehicles = (newFilter, existingFilter) => {
+
+  // If no filter was known of: trigger fetch
+  if(! existingFilter) return true;
+
+  // If one of these fields change, we should (re)fetch
+  const fieldChangesThatShouldTriggerUpdate = [
+    'datum',
+    'gebied',
+    'herkomstbestemming',
+    'intervalend',//Eindtijd
+    'intervalduur',
+    'ontwikkelingaggregatie',
+    'ontwikkelingtot',
+    'ontwikkelingvan',
+    'voertuigtypesexclude',
+    'zones',
+  ];
+
+  let doFetchVehicles = false;
+  fieldChangesThatShouldTriggerUpdate.forEach(x => {
+    // If field was changed: (re)fetch
+    if(newFilter[x] !== existingFilter[x]) {
+      doFetchVehicles = true;
+    }
+  })
+
+  console.log('doFetchVehicles', doFetchVehicles)
+
+  return doFetchVehicles;
+}
