@@ -117,7 +117,7 @@ function MapComponent(props) {
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
   }, []);
 
-  // Navigate to zone if uery param is given
+  // Navigate to zone if query param is given
   useEffect(() => {
     if(! didMapLoad) return;
     if(! uriParams) return;
@@ -143,7 +143,6 @@ function MapComponent(props) {
     const initMap = () => {
       // Stop if map exists already
       if (map.current) return;
-      console.log('initMap');
 
       const mapStyles = getMapStyles();
 
@@ -219,6 +218,7 @@ function MapComponent(props) {
     registerMapView
   ])
 
+  // Init drawing functionality (for drawing zones)
   useEffect(() => {
     if(! didMapLoad) return;
     if(! map.current) return;
@@ -335,7 +335,6 @@ function MapComponent(props) {
   // Set active source
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
-    console.log('setActiveSource. props.activeSources: ', props.activeSources);
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -442,6 +441,7 @@ function MapComponent(props) {
     // dispatch
   ])
 
+  // Init popup logic
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
@@ -463,6 +463,7 @@ function MapComponent(props) {
     didInitSourcesAndLayers
   ])
 
+  // Add provider images/icons
   useEffect(() => {
     const addProviderImage = async(aanbieder) => {
       let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')

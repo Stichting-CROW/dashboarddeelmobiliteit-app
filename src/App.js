@@ -192,6 +192,8 @@ function App() {
     filter.zones
   ])
 
+  // console.log('filter', filter)
+
   // On app start,
   //  if zones are loaded
   //  or if pathName/filter is changed:
@@ -208,7 +210,7 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    filter,
+    filter
     // DELAY_TIMEOUT_IN_MS,
     // delayTimeout,
     // displayMode
