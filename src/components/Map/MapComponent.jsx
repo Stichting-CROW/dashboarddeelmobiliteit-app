@@ -199,10 +199,6 @@ function MapComponent(props) {
         activateLayers(map.current, layers, props.layers);
         // addSources(map.current);
       });
-      // map.current.on('styledata', function() {
-      //   addLayers(map.current);
-      //   addSources(map.current);
-      // });
 
       // Disable rotating
       map.current.dragRotate.disable();
@@ -238,21 +234,22 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
-    if(! window.ddMap.getSource('vehicles') || ! window.ddMap.isSourceLoaded('vehicles')) return;
-
-    // TODO
-    return;
+    if(! window.ddMap.isStyleLoaded()) return;
 
     const mapStyles = getMapStyles();
+    return;
 
     // Set satelite view:
     if(stateLayers.displaymode === 'displaymode-zones-admin') {
-      window.ddMap.setStyle(mapStyles.satelite);
+      setTimeout(() => {
+        setMapStyle(window.ddMap, mapStyles.satelite);
+      }, 150);
     }
-
     // Set default view:
     if(stateLayers.displaymode !== 'displaymode-zones-admin') {
-      window.ddMap.setStyle(mapStyles.base);
+      setTimeout(() => {
+        setMapStyle(window.ddMap, mapStyles.base);
+      }, 150);
     }
   }, [
     didMapLoad,
@@ -278,10 +275,7 @@ function MapComponent(props) {
 
     // If on zones page: set map style to 'satelite'
     // Only do this if layers were done loading
-    const mapStyles = getMapStyles();
-    // setMapStyle(window.ddMap, mapStyles.satelite);
-    // addSources(window.ddMap);
-    // addLayers(window.ddMap);
+    // const mapStyles = getMapStyles();
 
     (async () => {
       // Remove existing zones fist

@@ -51,7 +51,6 @@
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
   background: rgba(255, 255, 255, 0.8);
-  font-weight: bold;
 
   @apply block absolute bottom-0 left-0 w-full h-6 flex flex-col justify-center;
 }

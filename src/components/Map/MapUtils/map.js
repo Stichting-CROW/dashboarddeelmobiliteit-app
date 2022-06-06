@@ -1,4 +1,5 @@
 import base from '../MapStyles/base.js';
+import md5 from 'md5';
 import {layers} from '../layers/index.js';
 import {addSources} from './sources.js';
 import {
@@ -15,14 +16,25 @@ export const getMapStyles = () => {
   }
 }
 
+// Variable to keep track of the map style that we used last
+let mapStyleHash = md5(getMapStyles().base);
 export const setMapStyle = async (map, styleUrlOrObject) => {
-  // return;
+  if(! map) return;
+  if(! styleUrlOrObject) return;
+
+  const newMapStyleHash = md5(styleUrlOrObject);
+  if(mapStyleHash === newMapStyleHash) {
+    return;
+  }
+  mapStyleHash = newMapStyleHash;
+
   // Code source: https://github.com/mapbox/mapbox-gl-js/issues/4006#issuecomment-368273916
   // and https://github.com/mapbox/mapbox-gl-js/issues/4006#issuecomment-1114095622
+  //
   // Related:
   //- https://stackoverflow.com/a/36169495
   //- https://bl.ocks.org/tristen/0c0ed34e210a04e89984
-  //-https://stackoverflow.com/a/42911634
+  //- https://stackoverflow.com/a/42911634
   const currentStyle = map.getStyle();
 
   let newStyle = styleUrlOrObject;
@@ -59,5 +71,5 @@ export const setMapStyle = async (map, styleUrlOrObject) => {
   newStyle.layers = newStyle.layers.concat(appLayers);
 
   // Set new map style (having style _and_ DD layers)
-  map.setStyle(newStyle);
+  await map.setStyle(newStyle);
 }
