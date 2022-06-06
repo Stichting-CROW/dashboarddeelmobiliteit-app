@@ -73,8 +73,17 @@ function Filterbar({
     return (
       <div className="filter-bar-inner py-2">
 
-        {! hideLogo && <Logo />}
-        
+        <div className="justify-between hidden sm:flex">
+          <div style={{minWidth: '82px'}}>
+            {! hideLogo && <Logo />}
+          </div>
+          <div className="ml-4 text-sm flex justify-center flex-col" style={{
+            color: '#FD862E'
+          }}>
+            Nieuw: het Dashboard laadt voertuigdata nu sneller
+          </div>
+        </div> 
+
         { isLoggedIn && showdatum && <FilteritemDatum /> }
         
         { ! isLoggedIn && showdatum && <div>
