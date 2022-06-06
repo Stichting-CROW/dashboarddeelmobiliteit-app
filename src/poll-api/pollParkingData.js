@@ -26,8 +26,8 @@ const processVehiclesResult = (state, vehicles) => {
   activeVehicles = vehicles;
 
   let geoJson = {
-     "type":"FeatureCollection",
-     "features":[]
+   "type":"FeatureCollection",
+   "features":[]
   }
   
   let operatorcolors = {};

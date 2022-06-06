@@ -191,7 +191,31 @@ export const shouldFetchVehicles = (newFilter, existingFilter) => {
     }
   })
 
-  console.log('doFetchVehicles', doFetchVehicles)
+  return doFetchVehicles;
+}
+
+// Do we have to (re)fetch vehicles via the API?
+export const shouldFetchVehicleStats = (newFilter, existingFilter) => {
+
+  // If no filter was known of: trigger fetch
+  if(! existingFilter) return true;
+
+  // If one of these fields change, we should (re)fetch
+  const fieldChangesThatShouldTriggerUpdate = [
+    'datum',
+    'gebied',
+    'herkomstbestemming',
+    'voertuigtypesexclude',
+    'zones',
+  ];
+
+  let doFetchVehicles = false;
+  fieldChangesThatShouldTriggerUpdate.forEach(x => {
+    // If field was changed: (re)fetch
+    if(newFilter[x] !== existingFilter[x]) {
+      doFetchVehicles = true;
+    }
+  })
 
   return doFetchVehicles;
 }
