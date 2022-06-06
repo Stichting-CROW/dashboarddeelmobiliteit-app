@@ -12,6 +12,8 @@ import {
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_ADMIN,
 } from '../reducers/layers.js';
 
 import './MapPage.css';
@@ -38,10 +40,11 @@ function Map({mode, mapContainer}) {
   });
   
   let layers = [], activeSources = [];
-  if(showZones) { layers.push('zones-geodata', 'zones-geodata-border') }
+  if(showZones) {
+    layers.push('zones-geodata', 'zones-geodata-border')
+  }
   
-  // console.log("Mappage got displaymode", displayMode);
-  
+  // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
       case DISPLAYMODE_PARKEERDATA_HEATMAP:
@@ -61,7 +64,9 @@ function Map({mode, mapContainer}) {
         break;
       default:
     }
-  } else if(displayMode===DISPLAYMODE_RENTALS && viewRentals) {
+  }
+  // Active layers for rentals page
+  else if(displayMode===DISPLAYMODE_RENTALS && viewRentals) {
     const rentalsKey = (filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');
     switch(viewRentals) {
       case DISPLAYMODE_VERHUURDATA_HEATMAP:
@@ -78,9 +83,20 @@ function Map({mode, mapContainer}) {
         layers.push(`rentals-${rentalsKey}-point`);
         activeSources.push(`rentals-${rentalsKey}`);
         break;
-      default:
     }
   }
+  // Active layers for zones page
+  else if(displayMode===DISPLAYMODE_ZONES_ADMIN) {
+    // layers.push(`rentals-${rentalsKey}-clusters`);
+    // layers.push(`rentals-${rentalsKey}-clusters-count`);
+    // layers.push(`rentals-${rentalsKey}-clusters-point`);
+    // activeSources.push(`rentals-${rentalsKey}-clusters`);
+    // layers.push('vehicles-heatmap');
+    // activeSources.push('vehicles');
+  }
+
+  // console.log('layers', layers)
+  // console.log('activeSources', activeSources)
 
   return (
     <div className="flex flex-col">

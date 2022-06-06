@@ -4,7 +4,7 @@ const layer = {
   'source': 'zones-geodata',
   'paint': {
     'fill-color': '#d1d1e8',
-    'fill-opacity': 0.2
+    'fill-opacity': 0.3
   },
 }
 

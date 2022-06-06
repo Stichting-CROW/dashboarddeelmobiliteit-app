@@ -8,7 +8,7 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_OTHER,
-  DISPLAYMODE_ZONES_PUBLIC,
+  // DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
@@ -18,7 +18,7 @@ import {
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
 } from '../../reducers/layers.js';
 
-import {getMapStyles} from '../Map/MapUtils/map.js';
+import {getMapStyles, setMapStyle} from '../Map/MapUtils/map.js';
 
 function SelectLayer(props) {
   // const {setLayers, setActiveSource} = props;
@@ -53,7 +53,7 @@ function SelectLayer(props) {
   });
   
   if(displayMode===DISPLAYMODE_OTHER) {
-       return null; // no layer selection
+    return null; // no layer selection
   }
   
   const mapStyles = getMapStyles();
@@ -119,7 +119,7 @@ function SelectLayer(props) {
         { displayMode===DISPLAYMODE_ZONES_ADMIN && <>
           <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
-            window.ddMap.setStyle(mapStyles.default);
+            setMapStyle(window.ddMap, mapStyles.base)
           }}>
             <span className="layer-title">
               Terrein
@@ -127,7 +127,7 @@ function SelectLayer(props) {
           </div>
           <div data-type="map-style-satelite" className={`layer${layers.map_style!=='satelite' ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-            window.ddMap.setStyle(mapStyles.satelite);
+            setMapStyle(window.ddMap, mapStyles.satelite)
           }}>
             <span className="layer-title">
               Sateliet

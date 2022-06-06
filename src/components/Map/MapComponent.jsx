@@ -9,14 +9,19 @@ import {useLocation} from "react-router-dom";
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles} from './MapUtils/map.js';
+import {getMapStyles, setMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
+import {
+  addLayers,
+  activateLayers
+} from './MapUtils/layers.js';
+import {addSources} from './MapUtils/sources.js';
 import {
   addAdminZonesToMap,
   addPublicZonesToMap,
   initMapDrawLogic,
-  getAdminZones
+  // getAdminZones
 } from './MapUtils/zones.js';
 
 import './MapComponent.css';
@@ -130,29 +135,21 @@ function MapComponent(props) {
     didMapDrawLoad
   ]);
 
+
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   // const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
-    const addSources = () => {
-      Object.keys(sources).forEach((key, idx) => {
-        map.current.U.addGeoJSON(key, null, sources[key]);
-      })
-    }
-    const addLayers = () => {
-      Object.keys(layers).forEach((key, idx) => {
-        map.current.U.addLayer(layers[key]);
-      })
-    }
     const initMap = () => {
-      const mapStyles = getMapStyles();
-
       // Stop if map exists already
       if (map.current) return;
+      console.log('initMap');
+
+      const mapStyles = getMapStyles();
 
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: mapStyles.default,
+        style: mapStyles.base,
         accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
         center: [lng, lat],
         zoom: zoom,
@@ -184,16 +181,29 @@ function MapComponent(props) {
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
+
         // Store map in a global variable
         window.ddMap = map.current;
 
         setDidMapLoad(true)
 
-        addSources()
-        addLayers()
+        addSources(map.current)
+        addLayers(map.current)
 
         setDidInitSourcesAndLayers(true)
       });
+
+      // If style was updated: add layers & sources
+      map.current.on('styledata', function() {
+        if(! map.current.isStyleLoaded()) return;
+        addLayers(map.current);
+        activateLayers(map.current, layers, props.layers);
+        // addSources(map.current);
+      });
+      // map.current.on('styledata', function() {
+      //   addLayers(map.current);
+      //   addSources(map.current);
+      // });
 
       // Disable rotating
       map.current.dragRotate.disable();
@@ -217,13 +227,37 @@ function MapComponent(props) {
     // Init map drawing features
     initMapDrawLogic(
       map.current,
-      true//stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
+      true// stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
     )
   }, [
     didMapLoad,
     stateLayers.displaymode
   ]);
 
+  // Switch to default/satelite view automatically
+  useEffect(x => {
+    if(! didMapLoad) return;
+    if(! stateLayers.displaymode) return;
+    if(! window.ddMap.getSource('vehicles') || ! window.ddMap.isSourceLoaded('vehicles')) return;
+
+    // TODO
+    return;
+
+    const mapStyles = getMapStyles();
+
+    // Set satelite view:
+    // if(stateLayers.displaymode === 'displaymode-zones-admin') {
+    //   window.ddMap.setStyle(mapStyles.satelite);
+    // }
+
+    // Set default view:
+    // if(stateLayers.displaymode !== 'displaymode-zones-admin')
+    //   window.ddMap.setStyle(mapStyles.base);
+  }, [
+    didMapLoad,
+    didInitSourcesAndLayers,
+    stateLayers.displaymode
+  ]);
   /**
    * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
@@ -231,20 +265,22 @@ function MapComponent(props) {
   */
   useEffect(x => {
     if(! didMapLoad) return;
+
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
       // Delete draws
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
       }
-      // Do set map style to 'default' as well
-      // const mapStyles = getMapStyles();
-      // window.ddMap.setStyle(mapStyles.default);
       return;
     }
+
     // If on zones page: set map style to 'satelite'
-    // const mapStyles = getMapStyles();
-    // window.ddMap.setStyle(mapStyles.satelite);
+    // Only do this if layers were done loading
+    const mapStyles = getMapStyles();
+    // setMapStyle(window.ddMap, mapStyles.satelite);
+    // addSources(window.ddMap);
+    // addLayers(window.ddMap);
 
     (async () => {
       // Remove existing zones fist
@@ -257,6 +293,7 @@ function MapComponent(props) {
     })()
   }, [
     didMapLoad,
+    // didInitSourcesAndLayers,
     stateLayers.displaymode,
     filterGebied
   ])
@@ -298,6 +335,7 @@ function MapComponent(props) {
   // Set active source
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
+    console.log('setActiveSource. props.activeSources: ', props.activeSources);
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -305,6 +343,8 @@ function MapComponent(props) {
       });
       Object.keys(sources).forEach((key, idx) => {
         if(props.activeSources.indexOf(key) <= -1) {
+          // Don't remove if source does not exist :)
+          if(! map.current.isSourceLoaded(key)) return;
           map.current.U.hideSource(key);
         }
       });
@@ -313,31 +353,18 @@ function MapComponent(props) {
     activateSources()
   }, [
     didInitSourcesAndLayers,
-    props.activeSources
+    JSON.stringify(props.activeSources)
   ])
 
   // Set active layers
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
+    // if(! map.current.isStyleLoaded()) return;
 
-    const activateLayers = (layerName) => {
-      // Show given layers
-      props.layers.forEach(l => {
-        map.current.U.show(l);
-      });
-
-      // Hide all other layers
-      Object.keys(layers).forEach((key, idx) => {
-        if(props.layers.indexOf(key) <= -1) {
-          map.current.U.hide(key);
-        }
-      })
-    }
-
-    activateLayers()
+    activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
-    props.layers
+    JSON.stringify(props.layers)
   ])
 
   // Set vehicles sources
@@ -345,8 +372,13 @@ function MapComponent(props) {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
-    map.current.U.setData('vehicles', vehicles.data);
-    map.current.U.setData('vehicles-clusters', vehicles.data);
+    if(map.current.getSource('vehicles')) {
+
+      map.current.U.setData('vehicles', vehicles.data);
+    }
+    if(map.current.getSource('vehicles-clusters')) {
+      map.current.U.setData('vehicles-clusters', vehicles.data);
+    }
   }, [
     didInitSourcesAndLayers,
     vehicles.data

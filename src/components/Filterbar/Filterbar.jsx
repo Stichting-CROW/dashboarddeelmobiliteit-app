@@ -1,8 +1,12 @@
 import './css/Filterbar.css';
-import {useEffect, useState, useRef} from 'react';
+// import {
+//   useEffect,
+//   useState,
+//   useRef
+// } from 'react';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
-import * as R from 'ramda';
+// import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
@@ -16,8 +20,8 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
-import Button from '../Button/Button';
-import FormInput from '../FormInput/FormInput';
+// import Button from '../Button/Button';
+// import FormInput from '../FormInput/FormInput';
 import FilterbarZones from './FilterbarZones';
 
 // Import API functions
@@ -48,7 +52,7 @@ function Filterbar({
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
-  const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
+  // const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
   
   const showdatum=isrentals||ispark||!isLoggedIn;
