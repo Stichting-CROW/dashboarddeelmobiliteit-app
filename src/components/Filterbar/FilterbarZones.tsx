@@ -594,6 +594,9 @@ function FilterbarZones({
                   flex-col
                   justify-center
                 `}
+                style={{
+                  backgroundColor: `${activeZone.geography_type === x.name ? x.color : ''}`
+                }}
                 key={x.name}
                 onClick={(e) => {
                    e.preventDefault();
@@ -629,9 +632,9 @@ function FilterbarZones({
                   {x.title}
                 </div>
               }, [
-                {name: 'monitoring', title: 'Analyse'},
-                {name: 'stop', title: 'Parking'},
-                {name: 'no_parking', title: 'No parking'}
+                {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
+                {name: 'stop', title: 'Parking', color: '#fd862e'},
+                {name: 'no_parking', title: 'No parking', color: '#fd3e48'}
               ])}
             </div>
           </div>
