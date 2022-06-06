@@ -246,13 +246,14 @@ function MapComponent(props) {
     const mapStyles = getMapStyles();
 
     // Set satelite view:
-    // if(stateLayers.displaymode === 'displaymode-zones-admin') {
-    //   window.ddMap.setStyle(mapStyles.satelite);
-    // }
+    if(stateLayers.displaymode === 'displaymode-zones-admin') {
+      window.ddMap.setStyle(mapStyles.satelite);
+    }
 
     // Set default view:
-    // if(stateLayers.displaymode !== 'displaymode-zones-admin')
-    //   window.ddMap.setStyle(mapStyles.base);
+    if(stateLayers.displaymode !== 'displaymode-zones-admin') {
+      window.ddMap.setStyle(mapStyles.base);
+    }
   }, [
     didMapLoad,
     didInitSourcesAndLayers,
