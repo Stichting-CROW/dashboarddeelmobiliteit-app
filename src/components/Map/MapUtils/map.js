@@ -1,5 +1,10 @@
 import base from '../MapStyles/base.js';
 import {layers} from '../layers/index.js';
+import {addSources} from './sources.js';
+import {
+  addLayers,
+  activateLayers
+} from './layers.js';
 
 export const getMapStyles = () => {
   return {
@@ -11,25 +16,30 @@ export const getMapStyles = () => {
 }
 
 export const setMapStyle = async (map, styleUrlOrObject) => {
+  // return;
   // Code source: https://github.com/mapbox/mapbox-gl-js/issues/4006#issuecomment-368273916
   // and https://github.com/mapbox/mapbox-gl-js/issues/4006#issuecomment-1114095622
-  // var currentStyle = map.getStyle();
+  // Related:
+  //- https://stackoverflow.com/a/36169495
+  //- https://bl.ocks.org/tristen/0c0ed34e210a04e89984
+  //-https://stackoverflow.com/a/42911634
+  // const currentStyle = map.getStyle();
+
   // let newStyle = styleUrlOrObject;
-  // console.log('styleUrlOrObject', styleUrlOrObject)
+  // // If style URL was given: fetch JSON
   // if(typeof styleUrlOrObject === 'string') {
-  //   console.log('nope')
   //   const response = await fetch(styleUrlOrObject);
   //   const responseJson = await response.json();
   //   newStyle = responseJson;
   // }
-  // console.log('newStyle', newStyle)
-  // // ensure any sources from the current style are copied across to the new style
+
+  // // Ensure any sources from the current style are copied across to the new style
   // newStyle.sources = Object.assign({},
   //   currentStyle.sources,
   //   newStyle.sources
   // );
 
-  // // find the index of where to insert our layers to retain in the new style
+  // // Find the index of where to insert our layers to retain in the new style
   // let labelIndex = newStyle.layers.findIndex((el) => {
   //   return el.id == 'waterway-label';
   // });
@@ -39,7 +49,7 @@ export const setMapStyle = async (map, styleUrlOrObject) => {
   //   labelIndex = newStyle.layers.length;
   // }
   // const appLayers = currentStyle.layers.filter((el) => {
-  //   // app layers are the layers to retain, and these are any layers which have a different source set
+  //   // App layers are the layers to retain, and these are any layers which have a different source set
   //   return (
   //     el.source &&
   //     el.source != 'mapbox://mapbox.satellite' &&
@@ -52,8 +62,17 @@ export const setMapStyle = async (map, styleUrlOrObject) => {
   //   ...appLayers,
   //   ...newStyle.layers.slice(labelIndex, -1),
   // ];
+  // console.log('labelIndex', labelIndex)
+  // console.log('currentStyle.layers', currentStyle.layers)
+  // console.log('newStyle.layers', newStyle.layers)
   // map.setStyle(newStyle);
-
+// return;
   // TODO CHECK IF STYLE IS LOADED
-  map.setStyle(styleUrlOrObject);
+  // if(map.isStyleLoaded()) {
+    console.log('setStyle', styleUrlOrObject, 'map.isStyleLoaded()', map.isStyleLoaded())
+    await map.setStyle(styleUrlOrObject);
+    addLayers(map);
+    activateLayers(map, Object.keys(layers));
+    console.log('setStyle doone')
+  // }
 }

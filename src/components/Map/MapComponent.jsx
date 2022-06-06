@@ -13,6 +13,11 @@ import {getMapStyles, setMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
+  addLayers,
+  activateLayers
+} from './MapUtils/layers.js';
+import {addSources} from './MapUtils/sources.js';
+import {
   addAdminZonesToMap,
   addPublicZonesToMap,
   initMapDrawLogic,
@@ -130,26 +135,17 @@ function MapComponent(props) {
     didMapDrawLoad
   ]);
 
+
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
   // const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
-    const addSources = () => {
-      Object.keys(sources).forEach((key, idx) => {
-        map.current.U.addGeoJSON(key, null, sources[key]);
-      })
-    }
-    const addLayers = () => {
-      Object.keys(layers).forEach((key, idx) => {
-        console.log('adding layer', key)
-        map.current.U.addLayer(layers[key]);
-      })
-    }
     const initMap = () => {
-      const mapStyles = getMapStyles();
-
       // Stop if map exists already
       if (map.current) return;
+      console.log('initMap');
+
+      const mapStyles = getMapStyles();
 
       map.current = new maplibregl.Map({
         container: mapContainer.current,
@@ -185,16 +181,29 @@ function MapComponent(props) {
 
       // Do a state update if map is loaded
       map.current.on('load', function() {
+
         // Store map in a global variable
         window.ddMap = map.current;
 
         setDidMapLoad(true)
 
-        addSources()
-        addLayers()
+        addSources(map.current)
+        addLayers(map.current)
 
         setDidInitSourcesAndLayers(true)
       });
+
+      // If style was updated: add layers & sources
+      map.current.on('styledata', function() {
+        if(! map.current.isStyleLoaded()) return;
+        addLayers(map.current);
+        activateLayers(map.current, layers, props.layers);
+        // addSources(map.current);
+      });
+      // map.current.on('styledata', function() {
+      //   addLayers(map.current);
+      //   addSources(map.current);
+      // });
 
       // Disable rotating
       map.current.dragRotate.disable();
@@ -269,7 +278,9 @@ function MapComponent(props) {
     // If on zones page: set map style to 'satelite'
     // Only do this if layers were done loading
     const mapStyles = getMapStyles();
-    setMapStyle(window.ddMap, mapStyles.satelite);
+    // setMapStyle(window.ddMap, mapStyles.satelite);
+    // addSources(window.ddMap);
+    // addLayers(window.ddMap);
 
     (async () => {
       // Remove existing zones fist
@@ -324,6 +335,7 @@ function MapComponent(props) {
   // Set active source
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
+    console.log('setActiveSource. props.activeSources: ', props.activeSources);
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -341,37 +353,18 @@ function MapComponent(props) {
     activateSources()
   }, [
     didInitSourcesAndLayers,
-    props.activeSources
+    JSON.stringify(props.activeSources)
   ])
 
   // Set active layers
   useEffect(x => {
     if(! didInitSourcesAndLayers) return;
+    // if(! map.current.isStyleLoaded()) return;
 
-    const activateLayers = (layerName) => {
-      // Show given layers
-      console.log('props.layers', props.layers)
-      props.layers.forEach(l => {
-        // Don't show layers that don't exist
-        // console.log('map.current', map.current, map.current.getLayer)
-        // console.log(map.current.getLayer('zones-geodata-border'))
-        // TODO
-        // if(map.current.getLayer(l) === undefined) return;
-        map.current.U.show(l);
-      });
-
-      // Hide all other layers
-      Object.keys(layers).forEach((key, idx) => {
-        if(props.layers.indexOf(key) <= -1) {
-          map.current.U.hide(key);
-        }
-      })
-    }
-
-    activateLayers()
+    activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
-    props.layers
+    JSON.stringify(props.layers)
   ])
 
   // Set vehicles sources

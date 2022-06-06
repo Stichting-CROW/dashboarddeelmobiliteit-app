@@ -10,12 +10,14 @@ const base = {
   glyphs: "https://a.tiles.mapbox.com/v4/fontstack/{fontstack}/{range}.pbf?access_token=pk.eyJ1IjoibWF0dCIsImEiOiJTUHZkajU0In0.oB-OGTMFtpkga8vC48HjIg",
   layers: [
     {
-        "id": "background",
-        "type": "background",
-        "paint": {
-            "background-color": "#f8f4f0"
-        },
-        "interactive": true
+            "id": "land",
+            "type": "background",
+            "metadata": {
+                "mapbox:featureComponent": "land-and-water",
+                "mapbox:group": "Land, water, & sky, land"
+            },
+            "layout": {},
+            "paint": {"background-color": "hsl(40, 8%, 96%)"}
     },
     {
         "id": "landuse_overlay_national_park",
