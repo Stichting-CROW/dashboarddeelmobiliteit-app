@@ -687,7 +687,7 @@ function FilterbarZones({
             </div>
           </div>}
 
-          {(activeZone.geography_type === 'stop' && activeZone.zone_availability === 'auto') && <>
+          {(activeZone.geography_type === 'stop') && <>
             <p className="mb-2 text-sm">
               Limiet <a onClick={() => setLimitType('modality')} className={`
                 ${limitType === 'modality' ? 'underline' : ''}
