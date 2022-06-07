@@ -30,8 +30,6 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 
 import {
-  // addZonesToMap,
-  // initMapDrawLogic,
   getAdminZones,
   getZoneById,
   sortZonesInPreferedOrder,
@@ -45,14 +43,6 @@ import {
   putZone,
   deleteZone
 } from '../../api/zones';
-
-// import {
-//   DISPLAYMODE_PARK,
-//   DISPLAYMODE_RENTALS,
-//   DISPLAYMODE_ZONES_PUBLIC,
-//   DISPLAYMODE_ZONES_ADMIN,
-//   DISPLAYMODE_OTHER
-// } from '../../reducers/layers.js';
 
 function ModalityRow({
   children,
@@ -101,14 +91,14 @@ function FilterbarZones({
     // "municipality": null,
     // "geography_id": null,
     // "description": null,
-    "geography_type": "monitoring",
-    "zone_availability": "auto",
+    // "geography_type": "monitoring",
+    // "zone_availability": "auto",
     // "effective_date": null,
     // "published_date": null,
     // "retire_data": null,
     // "stop": null,
     // "no_parking": null,
-    "published": true
+    // "published": true
   }
 
   const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
@@ -195,13 +185,13 @@ function FilterbarZones({
         // Set zone
         let zoneToSet = zoneTemplate;
         zoneToSet.zone_id = foundZone.zone_id;
-        zoneToSet.area = foundZone.area;
-        zoneToSet.name = foundZone.name;
-        zoneToSet.municipality = foundZone.municipality;
-        zoneToSet.geography_type = foundZone.geography_type || zoneTemplate.geography_type;
+        zoneToSet.area = activeZone.area || foundZone.area;
+        zoneToSet.name = activeZone.name || foundZone.name;
+        zoneToSet.municipality = activeZone.municipality || foundZone.municipality;
+        zoneToSet.geography_type = activeZone.geography_type || foundZone.geography_type || zoneTemplate.geography_type;
         zoneToSet.geography_id = foundZone.geography_id;
-        zoneToSet.description = foundZone.description;
-        zoneToSet.published = foundZone.published || zoneTemplate.published;
+        zoneToSet.description = activeZone.description || foundZone.description;
+        zoneToSet.published = activeZone.published || foundZone.published || zoneTemplate.published;
         if(foundZone.stop) {
           zoneToSet.stop = foundZone.stop;
           zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
@@ -235,7 +225,11 @@ function FilterbarZones({
     return () => {
       window.removeEventListener('setSelectedZone', eventHandler);
     }
-  }, [adminZones, activeZone.zone_id]);
+  }, [
+    adminZones,
+    activeZone,// Reinit if activeZone updates, so we keep 'draft' data on polygon click
+    activeZone.zone_id,
+  ]);
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
@@ -561,7 +555,7 @@ function FilterbarZones({
               type="text"
               placeholder="Naam van de zone"
               name="name"
-              autoComplete="false"
+              autoComplete="off"
               id="js-FilterbarZones-name-input"
               value={activeZone.name || ""}
               onChange={changeHandler}
