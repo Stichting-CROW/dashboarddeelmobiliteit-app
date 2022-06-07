@@ -192,14 +192,6 @@ function MapComponent(props) {
         setDidInitSourcesAndLayers(true)
       });
 
-      // If style was updated: add layers & sources
-      map.current.on('styledata', function() {
-        if(! map.current.isStyleLoaded()) return;
-        addLayers(map.current);
-        activateLayers(map.current, layers, props.layers);
-        // addSources(map.current);
-      });
-
       // Disable rotating
       map.current.dragRotate.disable();
       map.current.touchZoomRotate.disableRotation();
@@ -237,7 +229,7 @@ function MapComponent(props) {
     if(! window.ddMap.isStyleLoaded()) return;
 
     const mapStyles = getMapStyles();
-    return;
+    // return;
 
     // Set satelite view:
     if(stateLayers.displaymode === 'displaymode-zones-admin') {
