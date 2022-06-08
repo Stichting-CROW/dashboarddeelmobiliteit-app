@@ -230,6 +230,7 @@ const initSelectToEdit = (theMap) => {
     // Check if only one feature was selected
     const didSelectOneFeature = e.features && e.features.length === 1;
     if(! didSelectOneFeature) return;
+    // Get zoneId
     const zoneId = e.features[0].id;
     // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
     const event = new CustomEvent('setSelectedZone', {

@@ -4,6 +4,7 @@ import React, {
   useState,
   // useRef
 } from 'react';
+import md5 from 'md5';
 import {useSelector} from 'react-redux';
 // import {useLocation} from "react-router-dom";
 // import { motion } from "framer-motion";
@@ -107,6 +108,7 @@ function FilterbarZones({
   const [drawedArea, setDrawedArea] = useState(null);
   const [adminZones, setAdminZones] = useState(null);
   const [activeZone, setActiveZone] = useState(zoneTemplate);
+  const [didChangeZoneConfig, setDidChangeZoneConfig] = useState(false);
   const [limitType, setLimitType] = useState('modality');
 
   const labelClassNames = 'mb-2 text-sm';
@@ -159,15 +161,35 @@ function FilterbarZones({
     filterGebied
   ])
 
+  const autoSaveZone = async () => {
+    return await saveZone();
+  }
+
   // Listen to zone selection events (for editing zones)
   useEffect(() => {
     if(! adminZones) return;
 
-    const eventHandler = (e) => {
+    const eventHandler = async (e) => {
       const zoneId = e.detail;
-      // Don't update state vars if zone was already active
-      // Otherwise you would overwrite manually set params that are now saved yet
-      if(zoneId === activeZone.zone_id) return;
+
+      // console.log('EVENTHANDLER didChangeZoneConfig', didChangeZoneConfig)
+      if(didChangeZoneConfig) {
+        if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // Don't do anything if zone was selected already
+      if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
+        // console.log('Do nothing')
+        return;
+      }
+
+      // if(didChangeZoneConfig) {
+      //   // Auto save currently active zone (if needed)
+      //   await autoSaveZone();
+      // }
 
       // Select feature on the map
       if(window.ddMap && zoneId) {
@@ -181,17 +203,18 @@ function FilterbarZones({
       }
 
       const foundZone = getZoneById(adminZones, zoneId);
+
       if(foundZone) {
         // Set zone
         let zoneToSet = zoneTemplate;
         zoneToSet.zone_id = foundZone.zone_id;
-        zoneToSet.area = activeZone.area || foundZone.area;
-        zoneToSet.name = activeZone.name || foundZone.name;
-        zoneToSet.municipality = activeZone.municipality || foundZone.municipality;
-        zoneToSet.geography_type = activeZone.geography_type || foundZone.geography_type || zoneTemplate.geography_type;
+        zoneToSet.area = foundZone.area;
+        zoneToSet.name = foundZone.name;
+        zoneToSet.municipality = foundZone.municipality;
+        zoneToSet.geography_type = foundZone.geography_type || zoneTemplate.geography_type;
         zoneToSet.geography_id = foundZone.geography_id;
-        zoneToSet.description = activeZone.description || foundZone.description;
-        zoneToSet.published = activeZone.published || foundZone.published || zoneTemplate.published;
+        zoneToSet.description = foundZone.description;
+        zoneToSet.published = foundZone.published || zoneTemplate.published;
         if(foundZone.stop) {
           zoneToSet.stop = foundZone.stop;
           zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
@@ -219,7 +242,10 @@ function FilterbarZones({
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
+        // 
+        setDidChangeZoneConfig(false);
       }
+      return true;
     }
     window.addEventListener('setSelectedZone', eventHandler);
     return () => {
@@ -227,8 +253,8 @@ function FilterbarZones({
     }
   }, [
     adminZones,
-    activeZone,// Reinit if activeZone updates, so we keep 'draft' data on polygon click
     activeZone.zone_id,
+    didChangeZoneConfig
   ]);
 
   const enableDrawingPolygons = () => {
@@ -255,6 +281,9 @@ function FilterbarZones({
   const changeHandler = (e) => {
     if(! e.target) return;
     if(! e.target.name) return;
+
+    // Set didChangeZoneConfig to true
+    setDidChangeZoneConfig(true);
 
     // Update active zone data
     let updatedZoneData = activeZone;
@@ -415,6 +444,10 @@ function FilterbarZones({
 
     // Delete all local zones from map
     deleteAllLocalZones();
+
+    setDidChangeZoneConfig(false);
+
+    return true;
   }
 
   const newZoneButtonHandler = () => {
@@ -537,7 +570,7 @@ function FilterbarZones({
           </div>
           <div className="flex justify-between">
             <Button
-              theme="green"
+              theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
               onClick={saveZone}
             >
               Opslaan

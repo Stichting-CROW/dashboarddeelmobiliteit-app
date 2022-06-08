@@ -15,6 +15,11 @@ export const themes = {
     borderColor: '#CCCCCC',
     color: 'darkgreen'
   },
+  greenHighlighted: {
+    color: '#000',
+    backgroundColor: '#00ff008c',
+    borderColor: '#CCCCCC',
+  },
   zone: {
     monitoring: {
       primaryColor: '#15AEEF',

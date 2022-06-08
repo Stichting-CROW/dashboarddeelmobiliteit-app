@@ -124,6 +124,7 @@ function MapComponent(props) {
     let params = new URLSearchParams(uriParams);
     let zone_id = params.get('zone_id');
     if(zone_id) {
+      console.log('Navigating because zone_id found in uery params')
       const event = new CustomEvent('setSelectedZone', {
         detail: zone_id
       });
