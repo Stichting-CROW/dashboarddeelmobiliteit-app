@@ -173,12 +173,12 @@ function FilterbarZones({
       const zoneId = e.detail;
 
       // console.log('EVENTHANDLER didChangeZoneConfig', didChangeZoneConfig)
-      if(didChangeZoneConfig) {
-        if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
-          e.preventDefault();
-          return;
-        }
-      }
+      // if(didChangeZoneConfig) {
+      //   if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
+      //     e.preventDefault();
+      //     return;
+      //   }
+      // }
 
       // Don't do anything if zone was selected already
       if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
