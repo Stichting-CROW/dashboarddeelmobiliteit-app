@@ -17,6 +17,7 @@ import rentalsDestinationsClustersCount from './rentals-destinations-clusters-co
 import rentalsDestinationsClustersPoint from './rentals-destinations-clusters-point.js';
 
 import zonesMetricsPublic from './zones-metrics-public.js';
+import zonesMetricsPublicBorder from './zones-metrics-public-border.js';
 
 import zonesGeodata from './zones-geodata.js';
 import zonesGeodataBorder from './zones-geodata-border.js';
@@ -46,5 +47,6 @@ export const layers = {
   'rentals-destinations-clusters-point': rentalsDestinationsClustersPoint,
   'rentals-destinations-heatmap': rentalsDestinationsHeatmapCityLevel,
 
-  'zones-metrics-public': zonesMetricsPublic
+  'zones-metrics-public': zonesMetricsPublic,
+  'zones-metrics-public-border': zonesMetricsPublicBorder
 }

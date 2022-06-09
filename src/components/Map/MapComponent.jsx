@@ -163,7 +163,7 @@ function MapComponent(props) {
       applyMapSettings(map.current)
 
       // Init MapBox utils
-      U.init(map.current);
+      U.init(map.current, maplibregl);
       
       // Map event handlers
       map.current.on('error', function(e) {

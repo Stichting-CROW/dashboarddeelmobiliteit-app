@@ -3,8 +3,8 @@ const layer = {
   'type': 'fill',
   'source': 'zones-metrics-public',
   'paint': {
-    'fill-color': '#d1d1e8',
-    'fill-opacity': 1
+    'fill-color': ['get', 'color'],
+    'fill-opacity': ['get', 'opacity']
   },
 }
 

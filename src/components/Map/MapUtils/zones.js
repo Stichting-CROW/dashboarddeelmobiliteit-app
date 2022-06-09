@@ -1,6 +1,7 @@
 // Mapbox draw functionality
 // https://github.com/mapbox/mapbox-gl-draw
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import maplibregl from 'maplibre-gl';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
@@ -16,11 +17,49 @@ import {
   getPublicZones
 } from '../../../api/zones';
 
+const generatePopupHtml = (feature) => {
+  if(! feature || ! feature.layer) return;
+
+  return `
+    <div class="text-lg font-bold">
+      ${feature.properties.name}
+    </div>
+    <div class="text-sm">
+      Bezetting: 35/100
+    </div>
+    <div class="mt-2 text-sm bg-green">
+      [ 35% ........... 100% ] 
+    </div>
+    <div class="mt-2 text-sm">
+      (color) bike 13/70<br />
+      (color) bakfiets 7/10<br />
+      (color) scooter 15/15<br />
+    </div>
+    <div class="mt-2 text-base">
+      Scooter aanbieders:
+    </div>
+    <div>
+      check: 14<br />
+      felyx: 13<br />
+      gosharing: 8<br />
+    </div>
+    <div class="mt-2 text-base">
+      Andere aanbieders:
+    </div>
+    <div class="text-xs">
+      (tellen niet mee voor capaciteit)
+    </div>
+    <div>
+      donkey: 25<br />
+      htm: 4
+    </div>
+  `
+}
+
 const initPublicZonesMap = async (theMap, token, filterGebied) => {
   if(! theMap) return;
 
   const adminZones = await fetchAdminZones(token, filterGebied);
-  console.log('adminZones', adminZones)
 
   let geoJson = {
     "type":"FeatureCollection",
@@ -28,16 +67,34 @@ const initPublicZonesMap = async (theMap, token, filterGebied) => {
   };
 
   adminZones.forEach(x => {
-    console.log(adminZoneToGeoJson(x));
     geoJson.features.push(adminZoneToGeoJson(x));
   });
 
-  if(theMap.getSource('zones-metrics-public')) {
-    theMap.U.setData('zones-metrics-public', geoJson);
-    // Show layer
-    theMap.U.show('zones-metrics-public');
-  }
+  // Check if the source exists
+  if(! theMap.getSource('zones-metrics-public')) return;
 
+  // Set geoJson data
+  theMap.U.setData('zones-metrics-public', geoJson);
+
+  // Show layer
+  theMap.U.show('zones-metrics-public')
+
+  theMap.on('click', 'zones-metrics-public', function (e) {
+    new maplibregl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(generatePopupHtml(e.features[0]))
+     .addTo(theMap);
+  });
+
+  // Change the cursor to a pointer when the mouse is over the states layer.
+  theMap.on('mouseenter', 'zones-metrics-public', function () {
+    theMap.getCanvas().style.cursor = 'pointer';
+  });
+   
+  // Change it back to a pointer when it leaves.
+  theMap.on('mouseleave', 'zones-metrics-public', function () {
+    theMap.getCanvas().style.cursor = '';
+  });
 }
 
 const initMapDrawLogic = (theMap) => {
@@ -411,10 +468,22 @@ const adminZoneToGeoJson = (adminZone) => {
   if(! adminZone) return;
   if(! adminZone.area || ! adminZone.area.geometry || ! adminZone.area.geometry.coordinates) return;
 
+  const getColor = (geography_type) => {
+    if(! themes) return;
+    if(! themes.zone) return;
+    if(! themes.zone[geography_type]) return;
+    return themes.zone[geography_type].primaryColor;
+  }
+
   return {
-    // 'name': adminZone.name,
-    // 'zone_id': adminZone.zone_id,
+    'id': adminZone.zone_id,
     'type': 'Feature',
+    'properties': {
+      zone_id: adminZone.zone_id,
+      name: adminZone.name,
+      color: getColor(adminZone.geography_type),
+      opacity: adminZone.geography_type === 'stop' ? 0.6 : 0.1
+    },
     'geometry': adminZone.area.geometry
   }
 }

@@ -88,6 +88,7 @@ function Map({mode, mapContainer}) {
   // Active layers for zones page
   else if(displayMode===DISPLAYMODE_ZONES_PUBLIC) {
     layers.push('zones-metrics-public');
+    layers.push('zones-metrics-public-border');
     activeSources.push('zones-metrics-public');
   }
 
