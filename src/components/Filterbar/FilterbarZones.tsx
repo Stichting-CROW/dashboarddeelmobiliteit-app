@@ -171,14 +171,20 @@ function FilterbarZones({
 
     const eventHandler = async (e) => {
       const zoneId = e.detail;
+      if(zoneId === activeZone.zone_id) {
+        // Do nothing
+        return;
+      }
 
-      // console.log('EVENTHANDLER didChangeZoneConfig', didChangeZoneConfig)
-      // if(didChangeZoneConfig) {
-      //   if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
-      //     e.preventDefault();
-      //     return;
-      //   }
-      // }
+      if(didChangeZoneConfig) {
+        if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // Set didChangeZoneConfig to false
+      setDidChangeZoneConfig(false);
 
       // Don't do anything if zone was selected already
       if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
@@ -242,8 +248,6 @@ function FilterbarZones({
         setActiveZone(zoneToSet);
         // Enable edit mode
         setViewMode('edit');
-        // 
-        setDidChangeZoneConfig(false);
       }
       return true;
     }
@@ -496,6 +500,8 @@ function FilterbarZones({
     setActiveZone(zoneTemplate);   
     // Reload adminZones
     fetchAdminZones();
+    //
+    setDidChangeZoneConfig(false);
   }
 
   const isNewZone = ! activeZone.geography_id;
@@ -520,6 +526,7 @@ function FilterbarZones({
           </div>
           <div>
             {adminZones ? R.map((x) => {
+              // Add onClick handler
               x.onClick = () => {
                 const zoneId = x.zone_id;
                 // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
@@ -539,7 +546,7 @@ function FilterbarZones({
                 }
 
               };
-              return renderZoneTag(x);
+              return renderZoneTag(x, x.zone_id === activeZone.zone_id);
             }, adminZones) : <div />}
           </div>
         </div>
@@ -648,6 +655,7 @@ function FilterbarZones({
                     // Force rerender of Draw, so that polygon color updates
                     const forceMapRerenderForFeature = (featureId) => {
                       window.CROW_DD.theDraw.changeMode('simple_select', []);
+                      // NOTE: This had a side effect which is re-calling eventHandler()
                       window.CROW_DD.theDraw.changeMode('direct_select', {
                         featureId: featureId
                       });
