@@ -484,7 +484,8 @@ function FilterbarZones({
 
   const cancelButtonHandler = () => {
     // Only ask for a confirmation if the area was changed
-    if(drawedArea) {
+    const isNewZone = ! activeZone.geography_id;
+    if(drawedArea && isNewZone) {
       if(! window.confirm('Weet je zeker dat je het tekenen van de zone wilt annuleren?')) {
         return;
       }
@@ -520,38 +521,7 @@ function FilterbarZones({
       </div>}
 
       {filterGebied && <>
-        <div className="">
-          <div className={labelClassNames}>
-            Zones
-          </div>
-          <div>
-            {adminZones ? R.map((x) => {
-              // Add onClick handler
-              x.onClick = () => {
-                const zoneId = x.zone_id;
-                // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
-                const event = new CustomEvent('setSelectedZone', {
-                  detail: zoneId
-                });
-                window.dispatchEvent(event);
-                // Zoom in into zone
-                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
-                  // Get extent
-                  const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
-                    padding: {top: 25, bottom: 25, left: 350, right: 25},
-                    duration: 1.4*1000 // in ms
-                  });
-                }
-
-              };
-              return renderZoneTag(x, x.zone_id === activeZone.zone_id);
-            }, adminZones) : <div />}
-          </div>
-        </div>
-        
-        {viewMode === 'view' && <div className="mt-6">
+        {viewMode === 'view' && <div>
           <div className={labelClassNames}>
             Nieuwe zone
           </div>
@@ -571,7 +541,7 @@ function FilterbarZones({
           </div>
         </div>}
 
-        {(viewMode === 'edit') && <div className="mt-6">
+        {(viewMode === 'edit') && <div>
           <div className={labelClassNames}>
             Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
           </div>
@@ -583,12 +553,20 @@ function FilterbarZones({
               Opslaan
             </Button>
 
-            <Button
-              theme="white"
-              onClick={cancelButtonHandler}
-            >
-              Annuleer
-            </Button>
+            <div className="-mr-2">
+              {! isNewZone && <Button
+                onClick={deleteZoneHandler}
+              >
+                🗑️
+              </Button>}
+
+              <Button
+                theme="white"
+                onClick={cancelButtonHandler}
+              >
+                Annuleer
+              </Button>
+            </div>
           </div>
           <div>
             <FormInput
@@ -674,9 +652,10 @@ function FilterbarZones({
             </div>
           </div>
 
-          {activeZone.geography_type === 'stop' && <div className="
+          <div className={`
             py-2
-          ">
+            ${activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}
+          `}>
             <div className="
               flex
               rounded-lg bg-white
@@ -723,9 +702,9 @@ function FilterbarZones({
                 {name: 'closed', title: 'Gesloten'}
               ])}
             </div>
-          </div>}
+          </div>
 
-          {(activeZone.geography_type === 'stop') && <>
+          <div className={activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}>
             <p className="mb-2 text-sm">
               Limiet <a onClick={() => setLimitType('modality')} className={`
                 ${limitType === 'modality' ? 'underline' : ''}
@@ -781,11 +760,11 @@ function FilterbarZones({
                 />
               </>}
             </div>
-          </>}
+          </div>
 
         </div>}
 
-        {(! isNewZone && viewMode === 'edit') && <div className="my-2 text-center">
+        {(false && ! isNewZone && viewMode === 'edit') && <div className="my-2 text-center">
           <Text
             theme="red"
             onClick={deleteZoneHandler}
@@ -794,6 +773,37 @@ function FilterbarZones({
             Verwijder zone
           </Text>
         </div>}
+
+        <div className="mt-6">
+          <div className={labelClassNames}>
+            Zones
+          </div>
+          <div>
+            {adminZones ? R.map((x) => {
+              // Add onClick handler
+              x.onClick = () => {
+                const zoneId = x.zone_id;
+                // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+                const event = new CustomEvent('setSelectedZone', {
+                  detail: zoneId
+                });
+                window.dispatchEvent(event);
+                // Zoom in into zone
+                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                  if(! window.ddMap) return;
+                  // Get extent
+                  const extent = st.extent(x.area)
+                  window.ddMap.fitBounds(extent, {
+                    padding: {top: 25, bottom: 25, left: 350, right: 25},
+                    duration: 1.4*1000 // in ms
+                  });
+                }
+
+              };
+              return renderZoneTag(x, x.zone_id === activeZone.zone_id);
+            }, adminZones) : <div />}
+          </div>
+        </div>
 
       </>}
 
