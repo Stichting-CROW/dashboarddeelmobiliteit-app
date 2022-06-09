@@ -105,8 +105,6 @@ export default function filter(state = initialState, action) {
       }
     }
     case 'IMPORT_STATE': {
-      console.log('import layers')
-      
       return {
         ...state,
         ...action.payload.layers

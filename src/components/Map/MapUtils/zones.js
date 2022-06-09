@@ -4,6 +4,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
+// import {getMapboxDrawLayers} from './layers.js'
 
 // Don't allow moving features, only allow changing bounds
 // Repo: https://github.com/zakjan/mapbox-gl-draw-waypoint
@@ -15,12 +16,41 @@ import {
   getPublicZones
 } from '../../../api/zones';
 
-const initMapDrawLogic = (theMap, isAdminMode) => {
+const initPublicZonesMap = async (theMap, token, filterGebied) => {
+  if(! theMap) return;
+
+  const adminZones = await fetchAdminZones(token, filterGebied);
+  console.log('adminZones', adminZones)
+
+  let geoJson = {
+    "type":"FeatureCollection",
+    "features":[]
+  };
+
+  adminZones.forEach(x => {
+    console.log(adminZoneToGeoJson(x));
+    geoJson.features.push(adminZoneToGeoJson(x));
+  });
+
+  if(theMap.getSource('zones-metrics-public')) {
+    theMap.U.setData('zones-metrics-public', geoJson);
+    // Show layer
+    theMap.U.show('zones-metrics-public');
+  }
+
+}
+
+const initMapDrawLogic = (theMap) => {
   if(! theMap) return;
 
   // Don't init multiple times
   if(window.CROW_DD && window.CROW_DD.theDraw) return;
 
+  // Set admin or public view if isAdminMode changed
+  initAdminView(theMap)
+}
+
+const initAdminView = (theMap) => {
   // Add custom draw mode: 'StaticMode'
   // https://github.com/mapbox/mapbox-gl-draw-static-mode
   let modes = MapboxDraw.modes;
@@ -141,7 +171,67 @@ const initMapDrawLogic = (theMap, isAdminMode) => {
     modes: modes,
     // Custom styles https://stackoverflow.com/a/51305508
     userProperties: true,
-    styles: isAdminMode ? [...publicStyles, ...adminStyles] : publicStyles
+    styles: [...publicStyles, ...adminStyles]
+  });
+
+  // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
+  theMap.addControl(draw, 'top-left');
+  // Set Draw to window, for easily making global changes
+  if(window.CROW_DD) {
+    window.CROW_DD.theDraw = draw;
+  } else {
+    window.CROW_DD = {theDraw: draw}
+  }
+  // Select area to edit it
+  initSelectToEdit(theMap);
+}
+
+const initPublicView = (theMap) => {
+  // Add custom draw mode: 'StaticMode'
+  // https://github.com/mapbox/mapbox-gl-draw-static-mode
+  let modes = MapboxDraw.modes;
+  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
+  modes.static = StaticMode;
+
+  const publicStyles = [
+    // Polygon fill
+    {
+      'id': 'gl-draw-polygon-fill',
+      'type': 'fill',
+      'filter': [
+        'all',
+        // ['==', 'active', 'false'],
+        ['==', '$type', 'Polygon'],
+        ['!=', 'mode', 'static']
+      ],
+      'paint': {
+        'fill-color': [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'stop', themes.zone.stop.primaryColor,
+          'no_parking', themes.zone.no_parking.primaryColor,
+          'monitoring', themes.zone.monitoring.primaryColor,
+          themes.zone.monitoring.primaryColor
+         ],
+        'fill-outline-color': '#3bb2d0',
+        'fill-opacity': [
+          // Matching based on user property: https://stackoverflow.com/a/70721495
+          'match', ['get', 'user_geography_type'], // get the property
+          'no_parking', 0.2,
+          'monitoring', 0.3,
+          'stop', 0.8,
+          0.5
+        ]
+      }
+    }
+  ];
+
+  const draw = new MapboxDraw({
+    displayControlsDefault: false,
+    modes: modes,
+    // Custom styles https://stackoverflow.com/a/51305508
+    userProperties: true,
+    styles: publicStyles
   });
 
   // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
@@ -305,6 +395,30 @@ const getDraftFeatureId = () => {
   return false;
 }
 
+const fetchAdminZones = async (token, filterGebied) => {
+  if(! token) return;
+  if(! filterGebied) return;
+
+  const filter = {municipality: filterGebied}
+  const zonesFromDb = await getAdminZones(token, filter);
+  if(! zonesFromDb || zonesFromDb.message) return;
+  let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
+  sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
+  return sortedZones;
+}
+
+const adminZoneToGeoJson = (adminZone) => {
+  if(! adminZone) return;
+  if(! adminZone.area || ! adminZone.area.geometry || ! adminZone.area.geometry.coordinates) return;
+
+  return {
+    // 'name': adminZone.name,
+    // 'zone_id': adminZone.zone_id,
+    'type': 'Feature',
+    'geometry': adminZone.area.geometry
+  }
+}
+
 export {
   initMapDrawLogic,
   getAdminZones,
@@ -312,5 +426,7 @@ export {
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
-  getDraftFeatureId
+  getDraftFeatureId,
+  initPublicZonesMap,
+  fetchAdminZones
 }

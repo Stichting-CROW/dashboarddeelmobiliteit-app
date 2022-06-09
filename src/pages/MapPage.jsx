@@ -86,13 +86,9 @@ function Map({mode, mapContainer}) {
     }
   }
   // Active layers for zones page
-  else if(displayMode===DISPLAYMODE_ZONES_ADMIN) {
-    // layers.push(`rentals-${rentalsKey}-clusters`);
-    // layers.push(`rentals-${rentalsKey}-clusters-count`);
-    // layers.push(`rentals-${rentalsKey}-clusters-point`);
-    // activeSources.push(`rentals-${rentalsKey}-clusters`);
-    // layers.push('vehicles-heatmap');
-    // activeSources.push('vehicles');
+  else if(displayMode===DISPLAYMODE_ZONES_PUBLIC) {
+    layers.push('zones-metrics-public');
+    activeSources.push('zones-metrics-public');
   }
 
   // console.log('layers', layers)

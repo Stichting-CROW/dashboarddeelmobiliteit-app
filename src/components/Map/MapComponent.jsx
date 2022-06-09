@@ -21,6 +21,7 @@ import {
   addAdminZonesToMap,
   addPublicZonesToMap,
   initMapDrawLogic,
+  initPublicZonesMap,
   // getAdminZones
 } from './MapUtils/zones.js';
 
@@ -75,6 +76,7 @@ function MapComponent(props) {
   const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
   const [zoom] = useState(stateLayers.zoom || 15);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
+  const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   let map = useRef(null);
 
   // Store window location in a local variable
@@ -213,13 +215,35 @@ function MapComponent(props) {
     if(! map.current) return;
     if(! stateLayers) return;
 
+    // Only init map draw features if on zones admin page
+    if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
+
     // Init map drawing features
-    initMapDrawLogic(
-      map.current,
-      true// stateLayers.displaymode === 'displaymode-zones-admin'// Admin mode
-    )
+    initMapDrawLogic(map.current)
   }, [
     didMapLoad,
+    stateLayers.displaymode
+  ]);
+
+  // Init public zones map (if needed)
+  useEffect(() => {
+    if(! didMapLoad) return;
+    // If we did add public zones already: return
+    if( didAddPublicZones) return;
+
+    // Only init map draw features if on zones admin page
+    if(stateLayers.displaymode === 'displaymode-zones-public') {
+      // ADD zone layers
+      initPublicZonesMap(map.current, token, filterGebied)
+    } else {
+      // REMOVE zone layers
+      // Not needed, because the layer does hide itself automatically on page change
+    }
+
+    setDidAddPublicZones(true);
+  }, [
+    didMapLoad,
+    didAddPublicZones,
     stateLayers.displaymode
   ]);
 
@@ -229,8 +253,9 @@ function MapComponent(props) {
     if(! stateLayers.displaymode) return;
     if(! window.ddMap.isStyleLoaded()) return;
 
+    let TO_local;
+
     const mapStyles = getMapStyles();
-    // return;
 
     // Set satelite view:
     if(stateLayers.displaymode === 'displaymode-zones-admin') {
@@ -239,11 +264,13 @@ function MapComponent(props) {
       }, 150);
     }
     // Set default view:
-    if(stateLayers.displaymode !== 'displaymode-zones-admin') {
-      setTimeout(() => {
+    else {
+      TO_local = setTimeout(() => {
         setMapStyle(window.ddMap, mapStyles.base);
       }, 150);
     }
+    // Cleanup timeout
+    return () => { clearTimeout(TO_local); }
   }, [
     didMapLoad,
     didInitSourcesAndLayers,
@@ -262,16 +289,18 @@ function MapComponent(props) {
       // Delete draws
       if(window.CROW_DD && window.CROW_DD.theDraw) {
         window.CROW_DD.theDraw.deleteAll();
+        // #TODO Not sure why this is needed.
+        // If the timeout is not here, the draw polygons keep visible
+        // if you witch from zones-admin to zones-public
+        setTimeout(() => {
+          window.CROW_DD.theDraw.deleteAll();
+        }, 500);
       }
       return;
     }
 
-    // If on zones page: set map style to 'satelite'
-    // Only do this if layers were done loading
-    // const mapStyles = getMapStyles();
-
     (async () => {
-      // Remove existing zones fist
+      // Remove existing zones first
       window.CROW_DD.theDraw.deleteAll();
       const filter = {
         municipality: filterGebied
@@ -279,9 +308,10 @@ function MapComponent(props) {
       addAdminZonesToMap(token, filter);
       setDidMapDrawLoad(true)
     })()
+
+    return;
   }, [
     didMapLoad,
-    // didInitSourcesAndLayers,
     stateLayers.displaymode,
     filterGebied
   ])
@@ -292,7 +322,11 @@ function MapComponent(props) {
    * Load zones onto the map
   */
   useEffect(x => {
+    // Make sure map loaded
     if(! didMapLoad) return;
+    // Make sure mapDraw loaded
+    if(! window.CROW_DD || ! window.CROW_DD.theDraw) return;
+
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
       if(window.CROW_DD && window.CROW_DD.theDraw) {

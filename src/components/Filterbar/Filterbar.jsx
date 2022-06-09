@@ -52,7 +52,7 @@ function Filterbar({
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
-  // const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
+  const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
   
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -62,6 +62,13 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
+
+  if(iszonespublic) {
+    return <FilterbarZones
+      hideLogo={hideLogo}
+      view='readonly'
+    />
+  }
 
   if(iszonesadmin) {
     return <FilterbarZones

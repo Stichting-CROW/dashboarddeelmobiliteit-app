@@ -10,6 +10,7 @@ import {useSelector} from 'react-redux';
 // import { motion } from "framer-motion";
 // import moment from 'moment';
 import st from 'geojson-bounds';
+import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
@@ -35,7 +36,8 @@ import {
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
-  getDraftFeatureId
+  getDraftFeatureId,
+  fetchAdminZones
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
@@ -83,7 +85,8 @@ function ModalityRow({
 }
 
 function FilterbarZones({
-  hideLogo
+  hideLogo,
+  view
 }) {
   const zoneTemplate = {
     // "zone_id": null,
@@ -102,7 +105,7 @@ function FilterbarZones({
     // "published": true
   }
 
-  const [viewMode, setViewMode] = useState('view');// Possible modes: view|edit
+  const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: adminView|adminEdit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
   const [counter, setCounter] = useState(0);
   const [drawedArea, setDrawedArea] = useState(null);
@@ -146,17 +149,18 @@ function FilterbarZones({
     setDidInitEventHandlers(true);
   }, [window.ddMap])
 
-  const fetchAdminZones = async () => {
-    const filter = {municipality: filterGebied}
-    const zonesFromDb = await getAdminZones(token, filter);
-    if(! zonesFromDb || zonesFromDb.message) return;
-    let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
-    sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
+  const getAdminZones = async () => {
+    const sortedZones = await fetchAdminZones(token, filterGebied);
     setAdminZones(sortedZones);
   }
+
   // Get admin zones on component load
   useEffect(() => {
-    fetchAdminZones();
+    let TO_local = setTimeout(async () => {
+      getAdminZones();
+    }, 5);
+    // Cleanup
+    return () => { clearTimeout(TO_local); }
   }, [
     filterGebied
   ])
@@ -247,7 +251,7 @@ function FilterbarZones({
         }
         setActiveZone(zoneToSet);
         // Enable edit mode
-        setViewMode('edit');
+        setViewMode('adminEdit');
       }
       return true;
     }
@@ -268,8 +272,8 @@ function FilterbarZones({
     window.CROW_DD.theDraw.changeMode('draw_polygon');
     // Clear data
     setActiveZone(zoneTemplate);
-    // Set view mode to 'edit'
-    setViewMode('edit');
+    // Set view mode to 'adminEdit'
+    setViewMode('adminEdit');
   }
 
   const disableDrawingPolygons = () => {
@@ -278,8 +282,8 @@ function FilterbarZones({
     // Change mode to 'draw polygon'
     // window.CROW_DD.theDraw.changeMode('static', []);
     window.CROW_DD.theDraw.changeMode('simple_select', []);
-    // Set view mode to 'edit'
-    setViewMode('view');
+    // Set view mode to 'adminView'
+    setViewMode('adminView');
   }
 
   const changeHandler = (e) => {
@@ -420,13 +424,13 @@ function FilterbarZones({
       };
       var featureIds = window.CROW_DD.theDraw.add(feature);
       // After updating zone: reload adminZones
-      fetchAdminZones();
+      getAdminZones();
     }
     // If new: post zone
     else {
       const createdZone = await postZone(token, requestData)
       // After creating new zone: reload adminZones
-      fetchAdminZones();
+      getAdminZones();
       // After creating new zone: set polygon data
       if(! createdZone || ! createdZone.area) return;
       const feature = {
@@ -466,7 +470,7 @@ function FilterbarZones({
     await deleteZone(token, activeZone.geography_id)
 
     // Reload adminZones
-    fetchAdminZones();
+    getAdminZones();
 
     // Delete polygon from map
     window.CROW_DD.theDraw.delete(activeZone.zone_id);
@@ -500,7 +504,7 @@ function FilterbarZones({
     // Reset 'activeZone'
     setActiveZone(zoneTemplate);   
     // Reload adminZones
-    fetchAdminZones();
+    getAdminZones();
     //
     setDidChangeZoneConfig(false);
   }
@@ -520,19 +524,63 @@ function FilterbarZones({
         Selecteer een plaats.
       </div>}
 
+      {viewMode === 'readonly' && <>
+        <div className={labelClassNames}>
+          &nbsp;
+        </div>
+        <div className="flex justify-end -mr-2">
+          <Link to="/map/zones">
+            <Button
+              theme="white"
+            >
+              🧮
+            </Button>
+          </Link>
+          
+          <Link to="/admin/zones">
+            <Button
+              theme="white"
+            >
+              🗺️
+            </Button>
+          </Link>
+        </div>
+      </>}
+
       {filterGebied && <>
-        {viewMode === 'view' && <div>
+        {viewMode === 'adminView' && <div>
           <div className={labelClassNames}>
             Nieuwe zone
           </div>
           <div>
-            {viewMode === 'view' && <Button
-              theme="white"
-              onClick={newZoneButtonHandler}
-            >
-              Nieuwe zone aanmaken
-            </Button>}
-            {viewMode === 'edit' && <Button
+            {viewMode === 'adminView' && <div className="flex justify-between">
+              <Button
+                theme="white"
+                onClick={newZoneButtonHandler}
+              >
+                Nieuwe zone aanmaken
+              </Button>
+              
+              <div className="flex -mr-2">
+                <Link to="/map/zones">
+                  <Button
+                    theme="white"
+                  >
+                    🧮
+                  </Button>
+                </Link>
+                
+                <Link to="/admin/zones">
+                  <Button
+                    theme="white"
+                  >
+                    🗺️
+                  </Button>
+                </Link>
+              </div>
+
+            </div>}
+            {viewMode === 'adminEdit' && <Button
               theme="white"
               onClick={cancelButtonHandler}
             >
@@ -541,7 +589,7 @@ function FilterbarZones({
           </div>
         </div>}
 
-        {(viewMode === 'edit') && <div>
+        {(viewMode === 'adminEdit') && <div>
           <div className={labelClassNames}>
             Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
           </div>
@@ -764,7 +812,7 @@ function FilterbarZones({
 
         </div>}
 
-        {(false && ! isNewZone && viewMode === 'edit') && <div className="my-2 text-center">
+        {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
           <Text
             theme="red"
             onClick={deleteZoneHandler}
@@ -781,25 +829,42 @@ function FilterbarZones({
           <div>
             {adminZones ? R.map((x) => {
               // Add onClick handler
-              x.onClick = () => {
-                const zoneId = x.zone_id;
-                // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
-                const event = new CustomEvent('setSelectedZone', {
-                  detail: zoneId
-                });
-                window.dispatchEvent(event);
-                // Zoom in into zone
-                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
-                  // Get extent
-                  const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
-                    padding: {top: 25, bottom: 25, left: 350, right: 25},
-                    duration: 1.4*1000 // in ms
+              const zoneId = x.zone_id;
+              if(viewMode === 'adminView') {
+                x.onClick = () => {
+                  // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+                  const event = new CustomEvent('setSelectedZone', {
+                    detail: zoneId
                   });
-                }
+                  window.dispatchEvent(event);
+                  // Zoom in into zone
+                  if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                    if(! window.ddMap) return;
+                    // Get extent
+                    const extent = st.extent(x.area)
+                    window.ddMap.fitBounds(extent, {
+                      padding: {top: 25, bottom: 25, left: 350, right: 25},
+                      duration: 1.4*1000 // in ms
+                    });
+                  }
 
-              };
+                };
+              }
+              if(viewMode === 'readonly') {
+                x.onClick = () => {
+                  // Zoom in into zone
+                  if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                    if(! window.ddMap) return;
+                    // Get extent
+                    const extent = st.extent(x.area)
+                    window.ddMap.fitBounds(extent, {
+                      padding: {top: 25, bottom: 25, left: 350, right: 25},
+                      duration: 1.4*1000 // in ms
+                    });
+                  }
+
+                };
+              }
               return renderZoneTag(x, x.zone_id === activeZone.zone_id);
             }, adminZones) : <div />}
           </div>

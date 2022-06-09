@@ -39,4 +39,8 @@ export const sources = {
   'zones-geodata': {
     'type': 'geojson',
   },
+
+  'zones-metrics-public': {
+    'type': 'geojson',
+  },
 }

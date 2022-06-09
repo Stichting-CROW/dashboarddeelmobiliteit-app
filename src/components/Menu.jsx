@@ -305,28 +305,10 @@ function Menu({pathName}) {
             absolute
           ">
             <SubMenuItem
-              text={'Log uit'}
-              onClick={(e) => {
-                e.preventDefault();
-                setSubMenuIsActive(! subMenuIsActive)
-                logOut();
-              }}
-            />
-            <SubMenuItem
-              text={'Exporteer aanzicht'}
-              message={'Aanzicht gekopieerd'}
-              onClick={(e) => {
-                exportStateToClipboard();
-              }}
-            >
-              <span>Tekst hier</span>
-            </SubMenuItem>
-            <SubMenuItem
-              text={'Feedback 📨'}
-              href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "
-              onClick={(e) => {
-                setSubMenuIsActive(! subMenuIsActive);
-              }}
+              pathName={pathName}
+              text={'Zones'}
+              path={'/admin/zones'}
+              icon={'https://i.imgur.com/GrF8KBA.png'}
             />
           </div>
         </>}
@@ -335,8 +317,6 @@ function Menu({pathName}) {
     </div>
   )
 
-  // <nav class="flex items-center justify-around flex-wrap bg-teal-500 p-6">
-  // </nav>
 }
 
 export default Menu;

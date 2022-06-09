@@ -24,6 +24,9 @@ Add your sources here:
 - `components/Map/sources.js`
 - `pollApi/`
 
+Activate the layers&sources per page:
+ - `src/pages/MapPage.jsx`
+
 ## Available Scripts
 
 In the project directory, you can run:
