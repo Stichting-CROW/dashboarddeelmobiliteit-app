@@ -25,6 +25,11 @@ const setPublicZoneUrl   = (geographyId) => {
   window.history.pushState(stateObj, 'Zone details', `/map/zones/${geographyId}`);
 }
 
+const setAdminZoneUrl   = (geographyId) => {
+  const stateObj = { geography_id: geographyId };
+  window.history.pushState(stateObj, 'Zone edit', `/admin/zones/${geographyId}`);
+}
+
 const generatePopupHtml = (feature) => {
   if(! feature || ! feature.layer) return;
   if(! feature.properties) return;
@@ -656,6 +661,24 @@ const adminZoneToGeoJson = (adminZone) => {
   }
 }
 
+const triggerGeographyClick = (geographyId, allZones) => {
+  if(! window.CROW_DD) return;
+  if(! window.CROW_DD.theDraw) return;
+  if(! geographyId) return;
+  if(! allZones) return;
+
+  const zone = allZones.filter(x => {
+    return x.geography_id === geographyId
+  });
+
+  const foundZone = zone && zone[0] ? zone[0] : false;
+  if(! foundZone) return;
+
+  window.CROW_DD.theDraw.changeMode('direct_select', {
+    featureId: foundZone.zone_id
+  });
+}
+
 const navigateToGeography = (geographyId, allZones) => {
   if(! geographyId) return;
   if(! allZones) return;
@@ -681,7 +704,7 @@ const navigateToGeography = (geographyId, allZones) => {
         padding: {top: 25, bottom: 25, left: 350, right: 25},
         duration: 1.4*1000 // in ms
       });
-    }, 50);
+    }, 100);
   }
 
   return true;
@@ -700,5 +723,7 @@ export {
   fetchAdminZones,
   fetchPublicZones,
   setPublicZoneUrl,
-  navigateToGeography
+  setAdminZoneUrl,
+  navigateToGeography,
+  triggerGeographyClick
 }

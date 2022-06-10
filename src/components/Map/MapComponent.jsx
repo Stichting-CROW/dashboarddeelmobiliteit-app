@@ -23,6 +23,7 @@ import {
   initMapDrawLogic,
   initPublicZonesMap,
   navigateToGeography,
+  triggerGeographyClick,
   fetchPublicZones
 } from './MapUtils/zones.js';
 
@@ -213,6 +214,13 @@ function MapComponent(props) {
     const geographyId = pathName.split('/zones/')[1];
     // Go for it.
     navigateToGeography(geographyId, publicZones)
+    // Only for admin page: Make polygon active
+    if(window.location.pathname.indexOf('/admin/zones/') > -1) {
+      // Wait until theDraw has been loaded
+      setTimeout(x => {
+        triggerGeographyClick(geographyId, publicZones)
+      }, 1000);
+    }
   }, [
     didMapLoad,
   ])

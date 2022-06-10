@@ -23,6 +23,7 @@ import FormInput from '../FormInput/FormInput';
 
 import {
   setPublicZoneUrl,
+  setAdminZoneUrl,
   getAdminZones,
   getZoneById,
   sortZonesInPreferedOrder,
@@ -222,6 +223,8 @@ function FilterbarZones({
       const foundZone = getZoneById(adminZones, zoneId);
 
       if(foundZone) {
+        // Change URL
+        setAdminZoneUrl(foundZone.geography_id)
         // Set zone
         let zoneToSet = zoneTemplate;
         zoneToSet.zone_id = foundZone.zone_id;
@@ -855,7 +858,7 @@ function FilterbarZones({
                     });
                   }
                   // Change URL
-                  setPublicZoneUrl(x.geography_id)
+                  setAdminZoneUrl(x.geography_id)
                 };
               }
               if(viewMode === 'readonly') {
