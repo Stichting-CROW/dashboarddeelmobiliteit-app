@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
+import {getVehicleIconUrl} from '../../../helpers/vehicleTypes';
 // import {getMapboxDrawLayers} from './layers.js'
 
 // Don't allow moving features, only allow changing bounds
@@ -22,9 +23,8 @@ const generatePopupHtml = (feature) => {
   if(! feature.properties) return;
   if(! feature.properties.stop) return '<div>no stop</div>';
   const stop = JSON.parse(feature.properties.stop);
-  console.log(stop, feature)
-  if(! stop) return '<div>No stop</div>';
-  if(! stop.realtime_data) return '<div>Popup</div>';
+  if(! stop) return;
+  if(! stop.realtime_data) return;
 
   const getNumPlacesAvailable = (realtimeData) => {
     if(! realtimeData) return;
@@ -77,13 +77,72 @@ const generatePopupHtml = (feature) => {
       // Don't show row if no relevant data is available
       if(! parkedVehiclesForModality && ! capacityForModality) return;
 
-      return html += `<div>
-        (color) ${modalityName} ${parkedVehiclesForModality ? parkedVehiclesForModality : ''}/${capacityForModality ? capacityForModality : ''}
-        <br />
+      const getDotColor = () => {
+        const pct = parkedVehiclesForModality/capacityForModality*100;
+        
+        if(isNaN(pct)) {
+          return '#00000029';
+        }
+        else if(pct < 50) {
+          return '#48E248';
+        }
+        else if(pct < 75) {
+          return '#FD862E';
+        }
+        else {
+          return '#FD3E48';
+        }
+      }
+
+      return html += `<div class="flex my-1">
+        <div class="mr-2 flex justify-center flex-col">
+          <div class="rounded-full w-3 h-3" style="background: ${getDotColor()}"></div>
+        </div>
+        <div class="mr-4 w-5">
+          <img class="inline-block w-5" src="${getVehicleIconUrl(modalityName)}" alt="${modalityName}" style="max-width:none;" />
+        </div>
+        <div class="mr-2 flex justify-center flex-col">
+          ${parkedVehiclesForModality ? parkedVehiclesForModality : ''}/${capacityForModality ? capacityForModality : ''}
+        </div>
       </div>`
     });
 
     return html;
+  }
+
+  const renderParkedVehicles = (modality) => {
+    return `<div>
+      check: 14<br />
+      felyx: 13<br />
+      gosharing: 8<br />
+    </div>`
+  }
+
+  const renderVisualIndicator = (numVehicles, numPlaces) => {
+    if(! numVehicles) return;
+    if(! numPlaces) return;
+
+    // Calculate percentage
+    const percentageOfVehiclesAvailable = parseInt(numVehicles/numPlaces*100);
+
+    const getIndicatorColor = () => {
+      if(percentageOfVehiclesAvailable < 50) {
+        return '#48E248';
+      }
+      else if(percentageOfVehiclesAvailable < 75) {
+        return '#FD862E';
+      }
+      else {
+        return '#FD862E';
+      }
+    }
+
+    return `<div class="rounded-xl flex" style="background: #F6F5F4">
+      <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor()};min-width: ${percentageOfVehiclesAvailable}%">
+        ${percentageOfVehiclesAvailable}%
+      </div>
+      <div class="flex-1" />
+    </div>`
   }
 
   // num_places_available is het aantal beschikbare plkken
@@ -91,38 +150,39 @@ const generatePopupHtml = (feature) => {
   // num_vehicles_available = Hoeveel voertuigen staan in dat gebied geparkeerd
   const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
   // Percentage
-  const percentageOfVehiclesAvailable = parseInt(numVehiclesAvailable/numPlacesAvailable);
+  const percentageOfVehiclesAvailable = numVehiclesAvailable/numPlacesAvailable*100;
+  console.log('percentageOfVehiclesAvailable', percentageOfVehiclesAvailable, numVehiclesAvailable, numPlacesAvailable)
 
   return `
-    <div class="text-lg font-bold">
-      ${feature.properties.name}
-    </div>
-    <div class="text-sm">
-      Bezetting: ${numVehiclesAvailable}/${numPlacesAvailable}
-    </div>
-    <div class="mt-2 text-sm bg-green" hidden={isNaN(percentageOfVehiclesAvailable)}>
-      [ ${percentageOfVehiclesAvailable}% ........... 100% ] 
-    </div>
-    <div class="mt-2 text-sm">
-      ${renderModalityRows(stop)}
-    </div>
-    <div class="mt-2 text-base">
-      Scooter aanbieders:
-    </div>
-    <div>
-      check: 14<br />
-      felyx: 13<br />
-      gosharing: 8<br />
-    </div>
-    <div class="mt-2 text-base">
-      Andere aanbieders:
-    </div>
-    <div class="text-xs">
-      (tellen niet mee voor capaciteit)
-    </div>
-    <div>
-      donkey: 25<br />
-      htm: 4
+    <div class="font-inter">
+      <div class="text-lg font-bold">
+        ${feature.properties.name}
+      </div>
+      <div class="mt-2 text-sm font-bold" ${(! numPlacesAvailable || isNaN(percentageOfVehiclesAvailable)) ? 'hidden' : ''}>
+        Bezetting: ${numVehiclesAvailable}/${numPlacesAvailable}
+      </div>
+      <div class="mt-2 text-sm bg-green" ${(! numPlacesAvailable || isNaN(percentageOfVehiclesAvailable)) ? 'hidden' : ''}>
+        ${renderVisualIndicator(numVehiclesAvailable, numPlacesAvailable)}
+      </div>
+      <div class="mt-4 text-sm">
+        ${renderModalityRows(stop)}
+      </div>
+      <div class="mt-2 text-base" hidden>
+        Scooter aanbieders:
+      </div>
+      <div hidden>
+        ${renderParkedVehicles()}
+      </div>
+      <div class="mt-2 text-base" hidden>
+        Andere aanbieders:
+      </div>
+      <div class="text-xs" hidden>
+        (tellen niet mee voor capaciteit)
+      </div>
+      <div hidden>
+        donkey: 25<br />
+        htm: 4
+      </div>
     </div>
   `
 }
