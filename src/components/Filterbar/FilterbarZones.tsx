@@ -4,9 +4,9 @@ import React, {
   useState,
   // useRef
 } from 'react';
+import {useLocation} from "react-router-dom";
 import md5 from 'md5';
 import {useSelector} from 'react-redux';
-// import {useLocation} from "react-router-dom";
 // import { motion } from "framer-motion";
 // import moment from 'moment';
 import st from 'geojson-bounds';
@@ -14,16 +14,6 @@ import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-// import FilteritemDatum from './FilteritemDatum.jsx';
-// import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
-// import FilteritemDuur from './FilteritemDuur.jsx';
-// import FilteritemAanbieders from './FilteritemAanbieders.jsx';
-// import FilteritemZones from './FilteritemZones.jsx';
-// import {
-//   FilteritemMarkersAfstand,
-//   FilteritemMarkersParkeerduur
-// } from './FilteritemMarkers.jsx';
-// import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 // import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
@@ -32,12 +22,13 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 
 import {
+  setPublicZoneUrl,
   getAdminZones,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
   getDraftFeatureId,
-  fetchAdminZones
+  fetchAdminZones,
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
@@ -113,6 +104,7 @@ function FilterbarZones({
   const [activeZone, setActiveZone] = useState(zoneTemplate);
   const [didChangeZoneConfig, setDidChangeZoneConfig] = useState(false);
   const [limitType, setLimitType] = useState('modality');
+  const [pathName, setPathName] = useState(document.location.pathname);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -126,6 +118,13 @@ function FilterbarZones({
     }
     return null;
   });
+
+  // Store window location in a local variable
+  let location = useLocation();
+  // ?const isThereMonkeyBusiness = window?.history?.pushState.name === ''
+  useEffect(() => {
+    setPathName(location ? location.pathname : null);
+  }, [location]);
 
   // Set map event handlers
   useEffect(() => {
@@ -156,11 +155,19 @@ function FilterbarZones({
 
   // Get admin zones on component load
   useEffect(() => {
+    //
     let TO_local = setTimeout(async () => {
       getAdminZones();
     }, 5);
+    // Set an interval: refresh data every 60s
+    let TO_local_interval = setInterval(async () => {
+      getAdminZones();
+    }, 60*1000);
     // Cleanup
-    return () => { clearTimeout(TO_local); }
+    return () => {
+      clearTimeout(TO_local);
+      clearInterval(TO_local_interval);
+    }
   }, [
     filterGebied
   ])
@@ -847,7 +854,8 @@ function FilterbarZones({
                       duration: 1.4*1000 // in ms
                     });
                   }
-
+                  // Change URL
+                  setPublicZoneUrl(x.geography_id)
                 };
               }
               if(viewMode === 'readonly') {
@@ -862,7 +870,8 @@ function FilterbarZones({
                       duration: 1.4*1000 // in ms
                     });
                   }
-
+                  // Change URL
+                  setPublicZoneUrl(x.geography_id)
                 };
               }
               return renderZoneTag(x, x.zone_id === activeZone.zone_id);

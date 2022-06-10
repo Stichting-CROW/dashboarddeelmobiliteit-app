@@ -274,7 +274,7 @@ function App() {
               <Route exact path="/map/rentals">
                 {renderMapElements()}
               </Route>
-              <Route exact path="/map/zones">
+              <Route path="/map/zones">
                 {renderMapElements()}
               </Route>
               <Route exact path="/admin/zones">

@@ -22,7 +22,8 @@ import {
   addPublicZonesToMap,
   initMapDrawLogic,
   initPublicZonesMap,
-  // getAdminZones
+  navigateToGeography,
+  fetchPublicZones
 } from './MapUtils/zones.js';
 
 import './MapComponent.css';
@@ -37,6 +38,7 @@ moment.updateLocale('nl', localization);
 function MapComponent(props) {
   if(process.env.DEBUG) console.log('Map component')
 
+  const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
   const token = useSelector(state => {
@@ -70,6 +72,7 @@ function MapComponent(props) {
 
   // Define map
   const mapContainer = props.mapContainer;
+  const [publicZones, setPublicZones] = useState(null);
   const [didMapLoad, setDidMapLoad] = useState(false);
   const [didMapDrawLoad, setDidMapDrawLoad] = useState(false);
   const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
@@ -84,6 +87,16 @@ function MapComponent(props) {
   useEffect(() => {
     setUriParams(location ? location.search : null);
   }, [location]);
+
+  // Get public zones on component load
+  useEffect(x => {
+    getPublicZones();
+  }, [])
+
+  const getPublicZones = async () => {
+    const zones = await fetchPublicZones(token, filterGebied);
+    setPublicZones(zones);
+  }
 
   const applyMapSettings = (theMap) => {
     // Hide compass control
@@ -118,26 +131,6 @@ function MapComponent(props) {
     dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
   }, []);
-
-  // Navigate to zone if query param is given
-  useEffect(() => {
-    if(! didMapLoad) return;
-    if(! uriParams) return;
-    let params = new URLSearchParams(uriParams);
-    let zone_id = params.get('zone_id');
-    if(zone_id) {
-      console.log('Navigating because zone_id found in uery params')
-      const event = new CustomEvent('setSelectedZone', {
-        detail: zone_id
-      });
-      window.dispatchEvent(event);
-    }
-  }, [
-    uriParams,
-    didMapLoad,
-    didMapDrawLoad
-  ]);
-
 
   // Init MapLibre map
   // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
@@ -189,10 +182,11 @@ function MapComponent(props) {
 
         setDidMapLoad(true)
 
-        addSources(map.current)
-        addLayers(map.current)
+        addSources(map.current);
+        addLayers(map.current);
 
-        setDidInitSourcesAndLayers(true)
+        setDidInitSourcesAndLayers(true);
+
       });
 
       // Disable rotating
@@ -207,6 +201,20 @@ function MapComponent(props) {
     mapContainer,
     // dispatch,
     registerMapView
+  ])
+
+  // If geographyId is in URL -> navigate to zone
+  useEffect(() => {
+    if(! didMapLoad) return;
+
+    // Check if we are on the zones page
+    if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return;
+    // Get geographyId from URL
+    const geographyId = pathName.split('/zones/')[1];
+    // Go for it.
+    navigateToGeography(geographyId, publicZones)
+  }, [
+    didMapLoad,
   ])
 
   // Init drawing functionality (for drawing zones)

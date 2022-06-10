@@ -6,6 +6,8 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
 import {getVehicleIconUrl} from '../../../helpers/vehicleTypes';
+import {useLocation, useRouteMatch} from "react-router-dom";
+
 // import {getMapboxDrawLayers} from './layers.js'
 
 // Don't allow moving features, only allow changing bounds
@@ -18,17 +20,35 @@ import {
   getPublicZones
 } from '../../../api/zones';
 
+const setPublicZoneUrl   = (geographyId) => {
+  const stateObj = { geography_id: geographyId };
+  window.history.pushState(stateObj, 'Zone details', `/map/zones/${geographyId}`);
+}
+
 const generatePopupHtml = (feature) => {
   if(! feature || ! feature.layer) return;
   if(! feature.properties) return;
-  if(! feature.properties.stop) return '<div>no stop</div>';
+  if(! feature.properties.stop) return;
   const stop = JSON.parse(feature.properties.stop);
-  if(! stop) return;
+  if(! stop) return `
+    <div class="font-inter" style="min-width:180px">
+      <div class="text-lg font-bold">
+        ${feature.properties.name}
+      </div>
+    </div>
+  `;
   if(! stop.realtime_data) return;
 
-  const getNumPlacesAvailable = (realtimeData) => {
+  const getNumPlacesAvailable = (stop) => {
+    if(! stop) return;
+    const realtimeData = stop.realtime_data;
     if(! realtimeData) return;
     if(! realtimeData.num_places_available) return;
+
+    // If it's a combined capacity: return this capacity
+    if(stop.capacity && stop.capacity.combined) {
+      return stop.capacity.combined;
+    }
 
     let total = 0;
     Object.keys(realtimeData.num_places_available).forEach(key => {
@@ -94,7 +114,7 @@ const generatePopupHtml = (feature) => {
         }
       }
 
-      return html += `<div class="flex my-1">
+      return html += `<div class="flex my-1" style="min-width:180px">
         <div class="mr-2 flex justify-center flex-col">
           <div class="rounded-full w-3 h-3" style="background: ${getDotColor()}"></div>
         </div>
@@ -133,12 +153,12 @@ const generatePopupHtml = (feature) => {
         return '#FD862E';
       }
       else {
-        return '#FD862E';
+        return '#FD3E48';
       }
     }
 
     return `<div class="rounded-xl flex" style="background: #F6F5F4">
-      <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor()};min-width: ${percentageOfVehiclesAvailable}%">
+      <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor()};min-width: ${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%">
         ${percentageOfVehiclesAvailable}%
       </div>
       <div class="flex-1" />
@@ -146,12 +166,11 @@ const generatePopupHtml = (feature) => {
   }
 
   // num_places_available is het aantal beschikbare plkken
-  const numPlacesAvailable = getNumPlacesAvailable(stop.realtime_data)
+  const numPlacesAvailable = getNumPlacesAvailable(stop)
   // num_vehicles_available = Hoeveel voertuigen staan in dat gebied geparkeerd
   const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
   // Percentage
   const percentageOfVehiclesAvailable = numVehiclesAvailable/numPlacesAvailable*100;
-  console.log('percentageOfVehiclesAvailable', percentageOfVehiclesAvailable, numVehiclesAvailable, numPlacesAvailable)
 
   return `
     <div class="font-inter">
@@ -215,6 +234,10 @@ const initPublicZonesMap = async (theMap, token, filterGebied) => {
       .setLngLat(e.lngLat)
       .setHTML(generatePopupHtml(e.features[0]))
      .addTo(theMap);
+
+    // Set page URL without reloading page
+    const geographyId = e.features[0].properties.geography_id;
+    setPublicZoneUrl(geographyId);
   });
 
   // Change the cursor to a pointer when the mouse is over the states layer.
@@ -595,6 +618,18 @@ const fetchAdminZones = async (token, filterGebied) => {
   return sortedZones;
 }
 
+const fetchPublicZones = async (token, filterGebied) => {
+  if(! token) return;
+  if(! filterGebied) return;
+
+  const filter = {municipality: filterGebied}
+  const zonesFromDb = await getPublicZones(token, filter);
+  if(! zonesFromDb || zonesFromDb.message) return;
+  let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
+  sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
+  return sortedZones;
+}
+
 const adminZoneToGeoJson = (adminZone) => {
   if(! adminZone) return;
   if(! adminZone.area || ! adminZone.area.geometry || ! adminZone.area.geometry.coordinates) return;
@@ -611,6 +646,7 @@ const adminZoneToGeoJson = (adminZone) => {
     'type': 'Feature',
     'properties': {
       zone_id: adminZone.zone_id,
+      geography_id: adminZone.geography_id,
       name: adminZone.name,
       stop: JSON.stringify(adminZone.stop),
       color: getColor(adminZone.geography_type),
@@ -620,14 +656,49 @@ const adminZoneToGeoJson = (adminZone) => {
   }
 }
 
+const navigateToGeography = (geographyId, allZones) => {
+  if(! geographyId) return;
+  if(! allZones) return;
+
+  const zone = allZones.filter(x => {
+    return x.geography_id === geographyId
+  });
+
+  const foundZone = zone && zone[0] ? zone[0] : false;
+  if(! foundZone) return;
+
+  const st = require('geojson-bounds');
+
+  // Navigate to zone / Zoom in into zone
+  if(foundZone.area && foundZone.area.geometry && foundZone.area.geometry.coordinates && foundZone.area.geometry.coordinates[0]) {
+    if(! window.ddMap) return;
+    // Get extent
+    const extent = st.extent(foundZone.area)
+    // Delay it a little bit, so it comes after the
+    // 'zoom in to extent' on filterGebied change/load
+    setTimeout(x => {
+      window.ddMap.fitBounds(extent, {
+        padding: {top: 25, bottom: 25, left: 350, right: 25},
+        duration: 1.4*1000 // in ms
+      });
+    }, 50);
+  }
+
+  return true;
+}
+
 export {
   initMapDrawLogic,
   getAdminZones,
+  getPublicZones,
   initSelectToEdit,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
   getDraftFeatureId,
   initPublicZonesMap,
-  fetchAdminZones
+  fetchAdminZones,
+  fetchPublicZones,
+  setPublicZoneUrl,
+  navigateToGeography
 }

@@ -1,7 +1,6 @@
 import {themes} from '../../themes';
 import {motion} from 'framer-motion/dist/framer-motion'
 
-
 function Tag({
   title,
   backgroundColor,
