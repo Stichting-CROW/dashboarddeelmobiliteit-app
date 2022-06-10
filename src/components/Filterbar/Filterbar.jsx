@@ -87,7 +87,7 @@ function Filterbar({
           <div className="ml-4 text-sm flex justify-center flex-col" style={{
             color: '#FD862E'
           }}>
-            Nieuw: het Dashboard laadt voertuigdata nu sneller
+            {/*Nieuw: het Dashboard laadt voertuigdata nu sneller*/}
           </div>
         </div> 
 

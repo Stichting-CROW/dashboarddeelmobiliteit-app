@@ -19,21 +19,92 @@ import {
 
 const generatePopupHtml = (feature) => {
   if(! feature || ! feature.layer) return;
+  if(! feature.properties) return;
+  if(! feature.properties.stop) return '<div>no stop</div>';
+  const stop = JSON.parse(feature.properties.stop);
+  console.log(stop, feature)
+  if(! stop) return '<div>No stop</div>';
+  if(! stop.realtime_data) return '<div>Popup</div>';
+
+  const getNumPlacesAvailable = (realtimeData) => {
+    if(! realtimeData) return;
+    if(! realtimeData.num_places_available) return;
+
+    let total = 0;
+    Object.keys(realtimeData.num_places_available).forEach(key => {
+      total += parseInt(realtimeData.num_places_available[key]);
+    });
+
+    return total;
+  }
+
+  const getNumVehiclesAvailable = (realtimeData) => {
+    if(! realtimeData) return;
+    if(! realtimeData.num_vehicles_available) return;
+
+    let total = 0;
+    Object.keys(realtimeData.num_vehicles_available).forEach(key => {
+      total += parseInt(realtimeData.num_vehicles_available[key]);
+    });
+
+    return total;
+  }
+
+  const renderModalityRows = (stop) => {
+    if(! stop) return;
+
+    const getCapacityForModality = (capacity, modality) => {
+      // Return nothing if no stop capacity was found
+      if(! capacity || capacity.length === 0) return;
+      // If it's a modality specific value: return value
+      if(capacity[modality]) return capacity[modality];
+      // If it's a combined value: return combined
+      return capacity.combined;
+    }
+
+    const getParkedVehiclesForModality = (num_vehicles_available, modality) => {
+      // Return nothing if no stop capacity was found
+      if(! num_vehicles_available || num_vehicles_available.length === 0) return;
+      // If it's a modality specific value: return value
+      if(num_vehicles_available[modality]) return num_vehicles_available[modality];
+    }
+
+    // Loop modalities
+    let html = '';
+    Object.keys(stop.realtime_data.num_places_available).forEach(modalityName => {
+      const parkedVehiclesForModality = getParkedVehiclesForModality(stop.realtime_data.num_vehicles_available, modalityName);
+      const capacityForModality = getCapacityForModality(stop.capacity, modalityName);
+      // Don't show row if no relevant data is available
+      if(! parkedVehiclesForModality && ! capacityForModality) return;
+
+      return html += `<div>
+        (color) ${modalityName} ${parkedVehiclesForModality ? parkedVehiclesForModality : ''}/${capacityForModality ? capacityForModality : ''}
+        <br />
+      </div>`
+    });
+
+    return html;
+  }
+
+  // num_places_available is het aantal beschikbare plkken
+  const numPlacesAvailable = getNumPlacesAvailable(stop.realtime_data)
+  // num_vehicles_available = Hoeveel voertuigen staan in dat gebied geparkeerd
+  const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
+  // Percentage
+  const percentageOfVehiclesAvailable = parseInt(numVehiclesAvailable/numPlacesAvailable);
 
   return `
     <div class="text-lg font-bold">
       ${feature.properties.name}
     </div>
     <div class="text-sm">
-      Bezetting: 35/100
+      Bezetting: ${numVehiclesAvailable}/${numPlacesAvailable}
     </div>
-    <div class="mt-2 text-sm bg-green">
-      [ 35% ........... 100% ] 
+    <div class="mt-2 text-sm bg-green" hidden={isNaN(percentageOfVehiclesAvailable)}>
+      [ ${percentageOfVehiclesAvailable}% ........... 100% ] 
     </div>
     <div class="mt-2 text-sm">
-      (color) bike 13/70<br />
-      (color) bakfiets 7/10<br />
-      (color) scooter 15/15<br />
+      ${renderModalityRows(stop)}
     </div>
     <div class="mt-2 text-base">
       Scooter aanbieders:
@@ -481,6 +552,7 @@ const adminZoneToGeoJson = (adminZone) => {
     'properties': {
       zone_id: adminZone.zone_id,
       name: adminZone.name,
+      stop: JSON.stringify(adminZone.stop),
       color: getColor(adminZone.geography_type),
       opacity: adminZone.geography_type === 'stop' ? 0.6 : 0.1
     },
