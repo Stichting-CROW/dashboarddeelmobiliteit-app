@@ -95,7 +95,7 @@ function MapComponent(props) {
   }, [])
 
   const getPublicZones = async () => {
-    const zones = await fetchPublicZones(token, filterGebied);
+    const zones = await fetchPublicZones(filterGebied);
     setPublicZones(zones);
   }
 
@@ -235,7 +235,7 @@ function MapComponent(props) {
     if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
 
     // Init map drawing features
-    initMapDrawLogic(map.current)
+    initMapDrawLogic(map.current,)
   }, [
     didMapLoad,
     stateLayers.displaymode
@@ -250,7 +250,7 @@ function MapComponent(props) {
     // Only init map draw features if on zones admin page
     if(stateLayers.displaymode === 'displaymode-zones-public') {
       // ADD zone layers
-      initPublicZonesMap(map.current, token, filterGebied)
+      initPublicZonesMap(map.current, filterGebied)
     } else {
       // REMOVE zone layers
       // Not needed, because the layer does hide itself automatically on page change

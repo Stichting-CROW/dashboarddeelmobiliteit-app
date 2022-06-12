@@ -2,9 +2,17 @@ import { createFilterparameters } from '../poll-api/pollTools.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 
 const getFetchOptions = (token) => {
+  if(token) {
+    return {
+      headers: {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "charset": "utf-8"
+      }
+    }
+  }
   return {
     headers: {
-      "authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
       "charset": "utf-8"
     }
@@ -21,13 +29,13 @@ export const getAdminZones = async (token, filter) => {
   return await response.json();
 }
 
-export const getPublicZones = async (token, filter) => {
+export const getPublicZones = async (filter) => {
   if(! filter) return [];
   if(! filter.municipality) return [];
 
   let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
   const url = `https://mds.dashboarddeelmobiliteit.nl/public/zones?${filterParams}`;
-  const response = await fetch(url, getFetchOptions(token));
+  const response = await fetch(url, getFetchOptions());
   return await response.json();
 }
 

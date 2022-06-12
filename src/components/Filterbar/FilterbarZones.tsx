@@ -25,11 +25,13 @@ import {
   setPublicZoneUrl,
   setAdminZoneUrl,
   getAdminZones,
+  getPublicZones,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
   getDraftFeatureId,
   fetchAdminZones,
+  fetchPublicZones
 } from '../Map/MapUtils/zones.js';
 
 // Import API functions
@@ -154,15 +156,20 @@ function FilterbarZones({
     setAdminZones(sortedZones);
   }
 
+  const getPublicZones = async () => {
+    const sortedZones = await fetchPublicZones(filterGebied);
+    setAdminZones(sortedZones);
+  }
+
   // Get admin zones on component load
   useEffect(() => {
     //
     let TO_local = setTimeout(async () => {
-      getAdminZones();
+      getPublicZones();
     }, 5);
     // Set an interval: refresh data every 60s
     let TO_local_interval = setInterval(async () => {
-      getAdminZones();
+      getPublicZones();
     }, 60*1000);
     // Cleanup
     return () => {
@@ -576,7 +583,7 @@ function FilterbarZones({
                   <Button
                     theme="white"
                   >
-                    🧮
+                    📊
                   </Button>
                 </Link>
                 
@@ -584,7 +591,7 @@ function FilterbarZones({
                   <Button
                     theme="white"
                   >
-                    🗺️
+                    ✏️
                   </Button>
                 </Link>
               </div>

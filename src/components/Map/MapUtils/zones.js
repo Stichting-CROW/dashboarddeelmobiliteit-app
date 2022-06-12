@@ -209,10 +209,11 @@ const generatePopupHtml = (feature) => {
   `
 }
 
-const initPublicZonesMap = async (theMap, token, filterGebied) => {
+const initPublicZonesMap = async (theMap, filterGebied) => {
   if(! theMap) return;
 
-  const publicZones = await fetchPublicZones(token, filterGebied);
+  const publicZones = await fetchPublicZones(filterGebied);
+  if(! publicZones) return;
 
   let geoJson = {
     "type":"FeatureCollection",
@@ -248,7 +249,6 @@ const initPublicZonesMap = async (theMap, token, filterGebied) => {
     theMap.getCanvas().style.cursor = 'pointer';
   });
 
-   
   // Change it back to a pointer when it leaves.
   theMap.on('mouseleave', 'zones-metrics-public', function () {
     theMap.getCanvas().style.cursor = '';
@@ -562,12 +562,11 @@ const fetchAdminZones = async (token, filterGebied) => {
   return sortedZones;
 }
 
-const fetchPublicZones = async (token, filterGebied) => {
-  if(! token) return;
+const fetchPublicZones = async (filterGebied) => {
   if(! filterGebied) return;
 
   const filter = {municipality: filterGebied}
-  const zonesFromDb = await getPublicZones(token, filter);
+  const zonesFromDb = await getPublicZones(filter);
   if(! zonesFromDb || zonesFromDb.message) return;
   let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));
   sortedZones = sortZonesInPreferedOrder(sortedZones)// Sort per geography_type
