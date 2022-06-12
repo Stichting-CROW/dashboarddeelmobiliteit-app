@@ -63,8 +63,14 @@ export const renderZoneTag = (
     'stop': themes.zone.stop.primaryColor,
     'no_parking': themes.zone.no_parking.primaryColor
   }
-  // Set color that represents how full the zone is
+  // Function that adds some HTML to the tag
   const getBeforeHtml = (stop) => {
+    if(! stop) return '';
+    // 1. If manually closed: show this is the case
+    if(stop.status.control_automatic ===  false && stop.status.is_returning === false) {
+      return '<div class="mr-1">🔒</div>';
+    }
+    // 2. Set color that represents how full the zone is
     // Don't show color indicator if in admin mode
     if(viewMode !== 'readonly') return;
     // Check if stop has capacity property

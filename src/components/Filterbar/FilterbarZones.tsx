@@ -543,7 +543,7 @@ function FilterbarZones({
             <Button
               theme="white"
             >
-              🧮
+              📊
             </Button>
           </Link>
           
@@ -551,7 +551,7 @@ function FilterbarZones({
             <Button
               theme="white"
             >
-              🗺️
+              ✏️
             </Button>
           </Link>
         </div>
