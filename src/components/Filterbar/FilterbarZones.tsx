@@ -877,7 +877,7 @@ function FilterbarZones({
                   setPublicZoneUrl(x.geography_id)
                 };
               }
-              return renderZoneTag(x, x.zone_id === activeZone.zone_id);
+              return renderZoneTag(x, x.zone_id === activeZone.zone_id, viewMode);
             }, adminZones) : <div />}
           </div>
         </div>

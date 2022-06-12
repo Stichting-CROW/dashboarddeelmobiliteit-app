@@ -247,6 +247,7 @@ const initPublicZonesMap = async (theMap, token, filterGebied) => {
   theMap.on('mouseenter', 'zones-metrics-public', function () {
     theMap.getCanvas().style.cursor = 'pointer';
   });
+
    
   // Change it back to a pointer when it leaves.
   theMap.on('mouseleave', 'zones-metrics-public', function () {
@@ -584,10 +585,6 @@ const zoneToGeoJson = (adminZone) => {
     const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
 
     return getIndicatorColor(numPlacesAvailable, numVehiclesAvailable);
-    // if(! themes) return;
-    // if(! themes.zone) return;
-    // if(! themes.zone[geography_type]) return;
-    // return themes.zone[geography_type].primaryColor;
   }
 
   const getBorderColor = (geography_type) => {
@@ -596,8 +593,6 @@ const zoneToGeoJson = (adminZone) => {
     if(! themes.zone[geography_type]) return;
     return themes.zone[geography_type].primaryColor;
   }
-
-  console.log(adminZone)
 
   return {
     'id': adminZone.zone_id,
@@ -680,5 +675,8 @@ export {
   setPublicZoneUrl,
   setAdminZoneUrl,
   navigateToGeography,
-  triggerGeographyClick
+  triggerGeographyClick,
+  getIndicatorColor,
+  getNumVehiclesAvailable,
+  getNumPlacesAvailable
 }

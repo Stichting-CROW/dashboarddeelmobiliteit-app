@@ -1,9 +1,15 @@
 import {themes} from '../../themes';
+import {
+  getIndicatorColor,
+  getNumVehiclesAvailable,
+  getNumPlacesAvailable
+} from '../Map/MapUtils/zones.js';
 import {motion} from 'framer-motion/dist/framer-motion'
 
 function Tag({
   title,
   backgroundColor,
+  beforeHtml,
   onClick,
   isActive
 }) {
@@ -35,6 +41,7 @@ function Tag({
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 1.01 }}
     >
+      <div className="inline-block" dangerouslySetInnerHTML={{ __html: beforeHtml}} />
       {title}
     </motion.div>
   )
@@ -45,19 +52,37 @@ export const renderZoneTag = (
     zone_id,
     name,
     geography_type,
+    stop,
     onClick
   },
-  isActive
+  isActive,
+  viewMode
 ) => {
   const backgroundColors = {
     'monitoring': themes.zone.monitoring.primaryColor,
     'stop': themes.zone.stop.primaryColor,
     'no_parking': themes.zone.no_parking.primaryColor
   }
+  // Set color that represents how full the zone is
+  const getBeforeHtml = (stop) => {
+    // Don't show color indicator if in admin mode
+    if(viewMode !== 'readonly') return;
+    // Check if stop has capacity property
+    if(stop && stop.capacity) {
+      const numPlacesAvailable = getNumPlacesAvailable(stop)
+      const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
+      return `<div class="
+        rounded-full w-3 h-3 mr-2
+        border border-2 border-white
+      " style="background-color: ${getIndicatorColor(numPlacesAvailable, numVehiclesAvailable)}" />`
+    }
+    return '';
+  }
   return <Tag
     key={zone_id}
     title={name}
     backgroundColor={backgroundColors[geography_type] || '#000'}
+    beforeHtml={getBeforeHtml(stop)}
     onClick={onClick}
     isActive={isActive}
   >
