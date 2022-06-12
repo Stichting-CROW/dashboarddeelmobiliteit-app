@@ -29,6 +29,16 @@ export const themes = {
     },
     no_parking: {
       primaryColor: '#FD3E48'
+    },
+    //
+    quiet: {
+      primaryColor: '#48E248',
+    },
+    moderate: {
+      primaryColor: '#FD862E'
+    },
+    busy: {
+      primaryColor: '#FD3E48'
     }
   }
 }

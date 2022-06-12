@@ -30,6 +30,54 @@ const setAdminZoneUrl   = (geographyId) => {
   window.history.pushState(stateObj, 'Zone edit', `/admin/zones/${geographyId}`);
 }
 
+const getNumPlacesAvailable = (stop) => {
+  if(! stop) return;
+  const realtimeData = stop.realtime_data;
+  if(! realtimeData) return;
+  if(! realtimeData.num_places_available) return;
+
+  // If it's a combined capacity: return this capacity
+  if(stop.capacity && stop.capacity.combined) {
+    return stop.capacity.combined;
+  }
+
+  let total = 0;
+  Object.keys(realtimeData.num_places_available).forEach(key => {
+    total += parseInt(realtimeData.num_places_available[key]);
+  });
+
+  return total;
+}
+
+const getNumVehiclesAvailable = (realtimeData) => {
+  if(! realtimeData) return;
+  if(! realtimeData.num_vehicles_available) return;
+
+  let total = 0;
+  Object.keys(realtimeData.num_vehicles_available).forEach(key => {
+    total += parseInt(realtimeData.num_vehicles_available[key]);
+  });
+
+  return total;
+}
+
+const getIndicatorColor = (parked, capacity) => {
+  const pct = parseInt(parked/capacity*100);
+
+  if(isNaN(pct)) {
+    return '#00000029';
+  }
+  else if(pct < 50) {
+    return themes.zone.quiet.primaryColor;
+  }
+  else if(pct < 75) {
+    return themes.zone.moderate.primaryColor;
+  }
+  else {
+    return themes.zone.busy.primaryColor;
+  }
+}
+
 const generatePopupHtml = (feature) => {
   if(! feature || ! feature.layer) return;
   if(! feature.properties) return;
@@ -44,55 +92,24 @@ const generatePopupHtml = (feature) => {
   `;
   if(! stop.realtime_data) return;
 
-  const getNumPlacesAvailable = (stop) => {
-    if(! stop) return;
-    const realtimeData = stop.realtime_data;
-    if(! realtimeData) return;
-    if(! realtimeData.num_places_available) return;
-
-    // If it's a combined capacity: return this capacity
-    if(stop.capacity && stop.capacity.combined) {
-      return stop.capacity.combined;
-    }
-
-    let total = 0;
-    Object.keys(realtimeData.num_places_available).forEach(key => {
-      total += parseInt(realtimeData.num_places_available[key]);
-    });
-
-    return total;
+  const getCapacityForModality = (capacity, modality) => {
+    // Return nothing if no stop capacity was found
+    if(! capacity || capacity.length === 0) return;
+    // If it's a modality specific value: return value
+    if(capacity[modality]) return capacity[modality];
+    // If it's a combined value: return combined
+    return capacity.combined;
   }
 
-  const getNumVehiclesAvailable = (realtimeData) => {
-    if(! realtimeData) return;
-    if(! realtimeData.num_vehicles_available) return;
-
-    let total = 0;
-    Object.keys(realtimeData.num_vehicles_available).forEach(key => {
-      total += parseInt(realtimeData.num_vehicles_available[key]);
-    });
-
-    return total;
+  const getParkedVehiclesForModality = (num_vehicles_available, modality) => {
+    // Return nothing if no stop capacity was found
+    if(! num_vehicles_available || num_vehicles_available.length === 0) return;
+    // If it's a modality specific value: return value
+    if(num_vehicles_available[modality]) return num_vehicles_available[modality];
   }
 
   const renderModalityRows = (stop) => {
     if(! stop) return;
-
-    const getCapacityForModality = (capacity, modality) => {
-      // Return nothing if no stop capacity was found
-      if(! capacity || capacity.length === 0) return;
-      // If it's a modality specific value: return value
-      if(capacity[modality]) return capacity[modality];
-      // If it's a combined value: return combined
-      return capacity.combined;
-    }
-
-    const getParkedVehiclesForModality = (num_vehicles_available, modality) => {
-      // Return nothing if no stop capacity was found
-      if(! num_vehicles_available || num_vehicles_available.length === 0) return;
-      // If it's a modality specific value: return value
-      if(num_vehicles_available[modality]) return num_vehicles_available[modality];
-    }
 
     // Loop modalities
     let html = '';
@@ -103,20 +120,7 @@ const generatePopupHtml = (feature) => {
       if(! parkedVehiclesForModality && ! capacityForModality) return;
 
       const getDotColor = () => {
-        const pct = parkedVehiclesForModality/capacityForModality*100;
-        
-        if(isNaN(pct)) {
-          return '#00000029';
-        }
-        else if(pct < 50) {
-          return '#48E248';
-        }
-        else if(pct < 75) {
-          return '#FD862E';
-        }
-        else {
-          return '#FD3E48';
-        }
+        return getIndicatorColor(parkedVehiclesForModality, capacityForModality);
       }
 
       return html += `<div class="flex my-1" style="min-width:180px">
@@ -127,7 +131,13 @@ const generatePopupHtml = (feature) => {
           <img class="inline-block w-5" src="${getVehicleIconUrl(modalityName)}" alt="${modalityName}" style="max-width:none;" />
         </div>
         <div class="mr-2 flex justify-center flex-col">
-          ${parkedVehiclesForModality ? parkedVehiclesForModality : ''}/${capacityForModality ? capacityForModality : ''}
+          ${parkedVehiclesForModality
+              ? parkedVehiclesForModality
+              : '0'
+            }${stop.capacity && stop.capacity.combined
+            ? ''
+            : capacityForModality ? `/${capacityForModality}` : ''
+          }
         </div>
       </div>`
     });
@@ -150,20 +160,8 @@ const generatePopupHtml = (feature) => {
     // Calculate percentage
     const percentageOfVehiclesAvailable = parseInt(numVehicles/numPlaces*100);
 
-    const getIndicatorColor = () => {
-      if(percentageOfVehiclesAvailable < 50) {
-        return '#48E248';
-      }
-      else if(percentageOfVehiclesAvailable < 75) {
-        return '#FD862E';
-      }
-      else {
-        return '#FD3E48';
-      }
-    }
-
     return `<div class="rounded-xl flex" style="background: #F6F5F4">
-      <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor()};min-width: ${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%">
+      <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor(numVehicles, numPlaces)};min-width: ${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%">
         ${percentageOfVehiclesAvailable}%
       </div>
       <div class="flex-1" />
@@ -214,15 +212,15 @@ const generatePopupHtml = (feature) => {
 const initPublicZonesMap = async (theMap, token, filterGebied) => {
   if(! theMap) return;
 
-  const adminZones = await fetchAdminZones(token, filterGebied);
+  const publicZones = await fetchPublicZones(token, filterGebied);
 
   let geoJson = {
     "type":"FeatureCollection",
     "features":[]
   };
 
-  adminZones.forEach(x => {
-    geoJson.features.push(adminZoneToGeoJson(x));
+  publicZones.forEach(x => {
+    geoJson.features.push(zoneToGeoJson(x));
   });
 
   // Check if the source exists
@@ -388,66 +386,6 @@ const initAdminView = (theMap) => {
     // Custom styles https://stackoverflow.com/a/51305508
     userProperties: true,
     styles: [...publicStyles, ...adminStyles]
-  });
-
-  // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
-  theMap.addControl(draw, 'top-left');
-  // Set Draw to window, for easily making global changes
-  if(window.CROW_DD) {
-    window.CROW_DD.theDraw = draw;
-  } else {
-    window.CROW_DD = {theDraw: draw}
-  }
-  // Select area to edit it
-  initSelectToEdit(theMap);
-}
-
-const initPublicView = (theMap) => {
-  // Add custom draw mode: 'StaticMode'
-  // https://github.com/mapbox/mapbox-gl-draw-static-mode
-  let modes = MapboxDraw.modes;
-  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
-  modes.static = StaticMode;
-
-  const publicStyles = [
-    // Polygon fill
-    {
-      'id': 'gl-draw-polygon-fill',
-      'type': 'fill',
-      'filter': [
-        'all',
-        // ['==', 'active', 'false'],
-        ['==', '$type', 'Polygon'],
-        ['!=', 'mode', 'static']
-      ],
-      'paint': {
-        'fill-color': [
-          // Matching based on user property: https://stackoverflow.com/a/70721495
-          'match', ['get', 'user_geography_type'], // get the property
-          'stop', themes.zone.stop.primaryColor,
-          'no_parking', themes.zone.no_parking.primaryColor,
-          'monitoring', themes.zone.monitoring.primaryColor,
-          themes.zone.monitoring.primaryColor
-         ],
-        'fill-outline-color': '#3bb2d0',
-        'fill-opacity': [
-          // Matching based on user property: https://stackoverflow.com/a/70721495
-          'match', ['get', 'user_geography_type'], // get the property
-          'no_parking', 0.2,
-          'monitoring', 0.3,
-          'stop', 0.8,
-          0.5
-        ]
-      }
-    }
-  ];
-
-  const draw = new MapboxDraw({
-    displayControlsDefault: false,
-    modes: modes,
-    // Custom styles https://stackoverflow.com/a/51305508
-    userProperties: true,
-    styles: publicStyles
   });
 
   // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
@@ -635,16 +573,31 @@ const fetchPublicZones = async (token, filterGebied) => {
   return sortedZones;
 }
 
-const adminZoneToGeoJson = (adminZone) => {
+const zoneToGeoJson = (adminZone) => {
   if(! adminZone) return;
   if(! adminZone.area || ! adminZone.area.geometry || ! adminZone.area.geometry.coordinates) return;
 
-  const getColor = (geography_type) => {
+  const getColor = (stop) => {
+    if(! stop) return 'transparent';
+
+    const numPlacesAvailable = getNumPlacesAvailable(stop)
+    const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
+
+    return getIndicatorColor(numPlacesAvailable, numVehiclesAvailable);
+    // if(! themes) return;
+    // if(! themes.zone) return;
+    // if(! themes.zone[geography_type]) return;
+    // return themes.zone[geography_type].primaryColor;
+  }
+
+  const getBorderColor = (geography_type) => {
     if(! themes) return;
     if(! themes.zone) return;
     if(! themes.zone[geography_type]) return;
     return themes.zone[geography_type].primaryColor;
   }
+
+  console.log(adminZone)
 
   return {
     'id': adminZone.zone_id,
@@ -652,9 +605,11 @@ const adminZoneToGeoJson = (adminZone) => {
     'properties': {
       zone_id: adminZone.zone_id,
       geography_id: adminZone.geography_id,
+      geography_type: adminZone.geography_type,
       name: adminZone.name,
       stop: JSON.stringify(adminZone.stop),
-      color: getColor(adminZone.geography_type),
+      color: getColor(adminZone.stop),
+      borderColor: getBorderColor(adminZone.geography_type),
       opacity: adminZone.geography_type === 'stop' ? 0.6 : 0.1
     },
     'geometry': adminZone.area.geometry
