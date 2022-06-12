@@ -154,8 +154,8 @@ const generatePopupHtml = (feature) => {
   }
 
   const renderVisualIndicator = (numVehicles, numPlaces) => {
-    if(! numVehicles) return;
-    if(! numPlaces) return;
+    if(! numVehicles) return '<div />';
+    if(! numPlaces) return '<div />';
 
     // Calculate percentage
     const percentageOfVehiclesAvailable = parseInt(numVehicles/numPlaces*100);
