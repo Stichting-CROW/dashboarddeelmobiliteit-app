@@ -99,7 +99,7 @@ function FilterbarZones({
     // "published": true
   }
 
-  const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: adminView|adminEdit
+  const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: readonly|adminView|adminEdit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
   const [counter, setCounter] = useState(0);
   const [drawedArea, setDrawedArea] = useState(null);
@@ -128,6 +128,11 @@ function FilterbarZones({
   useEffect(() => {
     setPathName(location ? location.pathname : null);
   }, [location]);
+
+  // If viewMode prop changed: update state
+  useEffect(() => {
+    setViewMode(view);
+  }, [view]);
 
   // Set map event handlers
   useEffect(() => {
@@ -190,13 +195,25 @@ function FilterbarZones({
 
     const eventHandler = async (e) => {
       const zoneId = e.detail;
-      if(zoneId === activeZone.zone_id) {
+      if(
+        zoneId === activeZone.zone_id// Currently edited zone
+        || typeof zoneId === 'string'// New zone
+      ) {
         // Do nothing
         return;
       }
 
       if(didChangeZoneConfig) {
-        if(! window.confirm('Als je doorgaat gaan de wijzigingen verloren. Klik op annuleren als je je wijzigingen nog wilt opslaan.')) {
+        // Ask for confirmation
+        if(window.confirm('Je hebt onopgeslagen wijzigingen. Wil je doorgaan zonder op te slaan?')) {
+          // Check if there's a draft polygon: if so -> remove
+          const draftFeatureId = getDraftFeatureId();
+          if(draftFeatureId) {
+            window.CROW_DD.theDraw.delete(draftFeatureId);
+          }
+        }
+        // If user clicks cancel button: do nothing
+        else {
           e.preventDefault();
           return;
         }
@@ -210,11 +227,6 @@ function FilterbarZones({
         // console.log('Do nothing')
         return;
       }
-
-      // if(didChangeZoneConfig) {
-      //   // Auto save currently active zone (if needed)
-      //   await autoSaveZone();
-      // }
 
       // Select feature on the map
       if(window.ddMap && zoneId) {
@@ -407,7 +419,7 @@ function FilterbarZones({
   }
 
   const saveZone = async () => {
-    if(! activeZone.area && activeZone.drawedArea) {
+    if(! activeZone.area && ! drawedArea) {
       notify('Teken eerst een zone voordat je deze opslaat')
       return;
     }
@@ -541,7 +553,7 @@ function FilterbarZones({
         Selecteer een plaats.
       </div>}
 
-      {viewMode === 'readonly' && <>
+      {(viewMode === 'readonly' && token) && <>
         <div className={labelClassNames}>
           &nbsp;
         </div>
@@ -694,11 +706,11 @@ function FilterbarZones({
                   }
 
                   if(zoneId) {
-                    window.CROW_DD.theDraw.setFeatureProperty(zoneId, 'geography_type', x.name);
                     // Force rerender of Draw, so that polygon color updates
                     const forceMapRerenderForFeature = (featureId) => {
                       window.CROW_DD.theDraw.changeMode('simple_select', []);
                       // NOTE: This had a side effect which is re-calling eventHandler()
+                      // NOTE: The side effect is that if creating new zone: name is discarted
                       window.CROW_DD.theDraw.changeMode('direct_select', {
                         featureId: featureId
                       });

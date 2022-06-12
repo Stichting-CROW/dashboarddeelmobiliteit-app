@@ -63,15 +63,9 @@ function Filterbar({
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
 
-  if(iszonespublic) {
+  if(iszonespublic || iszonesadmin) {
     return <FilterbarZones
-      hideLogo={hideLogo}
-      view='readonly'
-    />
-  }
-
-  if(iszonesadmin) {
-    return <FilterbarZones
+      view={iszonespublic ? 'readonly' : 'adminView'}
       hideLogo={hideLogo}
     />
   }

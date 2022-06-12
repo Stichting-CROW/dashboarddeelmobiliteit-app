@@ -64,6 +64,7 @@ function MapComponent(props) {
   const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
   const providers = useSelector(state => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
   const extent/* map boundaries */ = useSelector(state => state.layers ? state.layers.extent : null);
+  const [counter, setCounter] = useState(0);
   const zones_geodata = useSelector(state => {
     if(!state||!state.zones_geodata) {
       return null;
@@ -235,7 +236,13 @@ function MapComponent(props) {
     if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
 
     // Init map drawing features
-    initMapDrawLogic(map.current,)
+    initMapDrawLogic(map.current);
+
+    // Switch to satelite view
+    setTimeout(() => {
+      const mapStyles = getMapStyles();
+      setMapStyle(window.ddMap, mapStyles.satelite);
+    }, 5);
   }, [
     didMapLoad,
     stateLayers.displaymode
@@ -245,12 +252,17 @@ function MapComponent(props) {
   useEffect(() => {
     if(! didMapLoad) return;
     // If we did add public zones already: return
-    if( didAddPublicZones) return;
+    // if( didAddPublicZones) return;
 
     // Only init map draw features if on zones admin page
     if(stateLayers.displaymode === 'displaymode-zones-public') {
       // ADD zone layers
       initPublicZonesMap(map.current, filterGebied)
+      // Switch to base map
+      setTimeout(() => {
+        const mapStyles = getMapStyles();
+        setMapStyle(window.ddMap, mapStyles.base);
+      }, 5);
     } else {
       // REMOVE zone layers
       // Not needed, because the layer does hide itself automatically on page change
@@ -263,35 +275,40 @@ function MapComponent(props) {
     stateLayers.displaymode
   ]);
 
-  // Switch to default/satelite view automatically
+  // Auto reload zones on displaymode update
+  // only on the zones-page (public or admin)
+  useEffect(() => {
+    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
+    getPublicZones();
+  }, [
+    stateLayers.displaymode
+  ]);
+
+  // Switch to satelite -> view automatically
+  // let TO_local;
   useEffect(x => {
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
     if(! window.ddMap.isStyleLoaded()) return;
 
-    let TO_local;
-
     const mapStyles = getMapStyles();
 
-    // Set satelite view:
-    if(stateLayers.displaymode === 'displaymode-zones-admin') {
-      setTimeout(() => {
-        setMapStyle(window.ddMap, mapStyles.satelite);
-      }, 150);
-    }
-    // Set default view:
-    else {
+    // Switch from satelite to base view
+    let TO_local;
+    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
       TO_local = setTimeout(() => {
         setMapStyle(window.ddMap, mapStyles.base);
-      }, 150);
+      }, 100);
     }
-    // Cleanup timeout
-    return () => { clearTimeout(TO_local); }
+    return () => {
+      clearTimeout(TO_local);
+    }
   }, [
     didMapLoad,
     didInitSourcesAndLayers,
     stateLayers.displaymode
   ]);
+
   /**
    * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
@@ -323,6 +340,8 @@ function MapComponent(props) {
       }
       addAdminZonesToMap(token, filter);
       setDidMapDrawLoad(true)
+      // Force DOM update
+      setCounter(counter+1)
     })()
 
     return;

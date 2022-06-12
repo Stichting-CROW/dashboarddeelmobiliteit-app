@@ -21,11 +21,13 @@ import {
 } from '../../../api/zones';
 
 const setPublicZoneUrl   = (geographyId) => {
+  if(! geographyId) return;
   const stateObj = { geography_id: geographyId };
   window.history.pushState(stateObj, 'Zone details', `/map/zones/${geographyId}`);
 }
 
 const setAdminZoneUrl   = (geographyId) => {
+  if(! geographyId) return;
   const stateObj = { geography_id: geographyId };
   window.history.pushState(stateObj, 'Zone edit', `/admin/zones/${geographyId}`);
 }
@@ -65,7 +67,7 @@ const getIndicatorColor = (parked, capacity) => {
   const pct = parseInt(parked/capacity*100);
 
   if(isNaN(pct)) {
-    return '#00000029';
+    return 'transparent';
   }
   else if(pct < 50) {
     return themes.zone.quiet.primaryColor;
@@ -79,9 +81,9 @@ const getIndicatorColor = (parked, capacity) => {
 }
 
 const generatePopupHtml = (feature) => {
-  if(! feature || ! feature.layer) return;
-  if(! feature.properties) return;
-  if(! feature.properties.stop) return;
+  if(! feature || ! feature.layer) return '<div />';
+  if(! feature.properties) return '<div />';
+  if(! feature.properties.stop) return '<div />';
   const stop = JSON.parse(feature.properties.stop);
   if(! stop) return `
     <div class="font-inter" style="min-width:180px">
@@ -90,7 +92,7 @@ const generatePopupHtml = (feature) => {
       </div>
     </div>
   `;
-  if(! stop.realtime_data) return;
+  if(! stop.realtime_data) return '<div>:)</div>';// Realtime data not yet loaded
 
   const getCapacityForModality = (capacity, modality) => {
     // Return nothing if no stop capacity was found
