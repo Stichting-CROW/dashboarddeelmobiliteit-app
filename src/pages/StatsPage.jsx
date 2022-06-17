@@ -22,7 +22,7 @@ function StatsPage(props) {
   }
 
   return (
-    <div className="StatsPage pt-4">
+    <div className="StatsPage pt-4 pb-24">
 
       <div className={"agg-button-container"}>
         <div className={"agg-button " + (filter.ontwikkelingaggregatie==='day' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('day') }}>
