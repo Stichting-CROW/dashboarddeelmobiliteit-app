@@ -95,11 +95,27 @@ const generatePopupHtml = (feature) => {
     return capacity.combined;
   }
 
+  const getAvailableForModality = (num_places_available, modality) => {
+    // Return nothing if no stop capacity was found
+    if(! num_places_available) return;
+    if(! modality) return;
+
+    if(num_places_available[modality]) return num_places_available[modality];
+  }
+
   const getParkedVehiclesForModality = (num_vehicles_available, modality) => {
     // Return nothing if no stop capacity was found
     if(! num_vehicles_available || num_vehicles_available.length === 0) return;
     // If it's a modality specific value: return value
     if(num_vehicles_available[modality]) return num_vehicles_available[modality];
+  }
+
+  const modalityNameToModalityTitle = (modalityName) => {
+    if(modalityName === 'moped') return 'scooters';
+    if(modalityName === 'bicycle') return 'fietsen';
+    if(modalityName === 'cargo_bicycle') return 'bakfietsen';
+    if(modalityName === 'car') return 'auto\'s';
+    if(modalityName === 'other') return 'overige voertuigen';
   }
 
   const renderModalityRows = (stop) => {
@@ -110,16 +126,24 @@ const generatePopupHtml = (feature) => {
     Object.keys(stop.realtime_data.num_places_available).forEach(modalityName => {
       const parkedVehiclesForModality = getParkedVehiclesForModality(stop.realtime_data.num_vehicles_available, modalityName);
       const capacityForModality = getCapacityForModality(stop.capacity, modalityName);
+      const availableForModality = getAvailableForModality(stop.realtime_data.num_places_available, modalityName);
       // Don't show row if no relevant data is available
       if(! parkedVehiclesForModality && ! capacityForModality) return;
 
       const getDotColor = () => {
-        return getIndicatorColor(parkedVehiclesForModality, capacityForModality);
+        if(availableForModality > 0) {
+          return themes.zone.quiet.primaryColor;
+        } else {
+          return themes.zone.busy.primaryColor;
+        }
       }
 
       return html += `<div class="flex my-1" style="min-width:180px">
         <div class="mr-2 flex justify-center flex-col">
-          <div class="rounded-full w-3 h-3" style="background: ${getDotColor()}"></div>
+          <div
+            class="rounded-full w-3 h-3" style="background: ${getDotColor()}"
+            title="${availableForModality > 0 ? `Open voor` : `Gesloten voor`} ${modalityNameToModalityTitle(modalityName)}"
+          ></div>
         </div>
         <div class="mr-4 w-5">
           <img class="inline-block w-5" src="${getVehicleIconUrl(modalityName)}" alt="${modalityName}" style="max-width:none;" />
