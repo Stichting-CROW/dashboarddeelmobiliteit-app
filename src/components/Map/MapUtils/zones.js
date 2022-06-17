@@ -69,15 +69,7 @@ const getIndicatorColor = (parked, capacity) => {
   if(isNaN(pct)) {
     return 'transparent';
   }
-  else if(pct < 50) {
-    return themes.zone.quiet.primaryColor;
-  }
-  else if(pct < 75) {
-    return themes.zone.moderate.primaryColor;
-  }
-  else {
-    return themes.zone.busy.primaryColor;
-  }
+  return calculateGradient(parked, capacity);
 }
 
 const generatePopupHtml = (feature) => {
@@ -573,6 +565,27 @@ const fetchPublicZones = async (filterGebied) => {
   return sortedZones;
 }
 
+// Color between green and red
+const perc2color = (perc) => {
+  var perc = 100 - perc;
+  var r, g, b = 0;
+  if(perc < 50) {
+    r = 255;
+    g = Math.round(5.1 * perc);
+  }
+  else {
+    g = 255;
+    r = Math.round(510 - 5.10 * perc);
+  }
+  var h = r * 0x10000 + g * 0x100 + b * 0x1;
+  return '#' + ('000000' + h.toString(16)).slice(-6);
+}
+
+const calculateGradient = (number_of_vehicles, capacity) => {
+  var ratio = Math.min(100.0, number_of_vehicles / capacity * 100);
+  return perc2color(ratio);
+}
+
 const zoneToGeoJson = (adminZone) => {
   if(! adminZone) return;
   if(! adminZone.area || ! adminZone.area.geometry || ! adminZone.area.geometry.coordinates) return;
@@ -583,7 +596,7 @@ const zoneToGeoJson = (adminZone) => {
     const numPlacesAvailable = getNumPlacesAvailable(stop)
     const numVehiclesAvailable = getNumVehiclesAvailable(stop.realtime_data)
 
-    return getIndicatorColor(numPlacesAvailable, numVehiclesAvailable);
+    return calculateGradient(numVehiclesAvailable, numPlacesAvailable)
   }
 
   const getBorderColor = (geography_type) => {

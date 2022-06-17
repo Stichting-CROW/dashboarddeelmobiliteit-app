@@ -30,10 +30,8 @@ export const getAdminZones = async (token, filter) => {
 }
 
 export const getPublicZones = async (filter) => {
-  if(! filter) return [];
-  if(! filter.municipality) return [];
-
-  let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
+  let filterParams = (filter && filter.municipality) ? `municipality=${filter.municipality}&` : '';
+  filterParams += `geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
   const url = `https://mds.dashboarddeelmobiliteit.nl/public/zones?${filterParams}`;
   const response = await fetch(url, getFetchOptions());
   return await response.json();
