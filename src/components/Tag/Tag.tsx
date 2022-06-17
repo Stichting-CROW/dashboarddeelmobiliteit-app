@@ -80,7 +80,7 @@ export const renderZoneTag = (
       return `<div class="
         rounded-full w-3 h-3 mr-2
         border border-2 border-white
-      " style="background-color: ${getIndicatorColor(numPlacesAvailable, numVehiclesAvailable)}" />`
+      " style="background-color: ${getIndicatorColor(numVehiclesAvailable, numPlacesAvailable)}" />`
     }
     return '';
   }
