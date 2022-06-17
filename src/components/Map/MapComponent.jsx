@@ -257,7 +257,7 @@ function MapComponent(props) {
     // Only init map draw features if on zones admin page
     if(stateLayers.displaymode === 'displaymode-zones-public') {
       // ADD zone layers
-      initPublicZonesMap(map.current, filterGebied)
+      initPublicZonesMap(map.current)
       // Switch to base map
       setTimeout(() => {
         const mapStyles = getMapStyles();

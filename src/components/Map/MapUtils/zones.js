@@ -211,10 +211,10 @@ const generatePopupHtml = (feature) => {
   `
 }
 
-const initPublicZonesMap = async (theMap, filterGebied) => {
+const initPublicZonesMap = async (theMap) => {
   if(! theMap) return;
 
-  const publicZones = await fetchPublicZones(filterGebied);
+  const publicZones = await fetchPublicZones();
   if(! publicZones) return;
 
   let geoJson = {
@@ -565,9 +565,7 @@ const fetchAdminZones = async (token, filterGebied) => {
 }
 
 const fetchPublicZones = async (filterGebied) => {
-  if(! filterGebied) return;
-
-  const filter = {municipality: filterGebied}
+  const filter = filterGebied ? {municipality: filterGebied} : {}
   const zonesFromDb = await getPublicZones(filter);
   if(! zonesFromDb || zonesFromDb.message) return;
   let sortedZones = zonesFromDb.sort((a,b) => a.name.localeCompare(b.name));

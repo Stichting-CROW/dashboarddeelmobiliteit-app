@@ -72,7 +72,7 @@ function ModalityRow({
       style={{width: "calc(100% - 48px)"}}
     />
     <div className="text-xs ml-2 h-8 flex justify-center flex-col">
-      {value && value > 0 ? value : '∞'}
+      {value ? value : ''}
     </div>
     {children}
   </div>
@@ -549,7 +549,7 @@ function FilterbarZones({
         <FilteritemGebieden />
       </div>
 
-      {! filterGebied && <div>
+      {! filterGebied && false && <div>
         Selecteer een plaats.
       </div>}
 
@@ -576,332 +576,329 @@ function FilterbarZones({
         </div>
       </>}
 
-      {filterGebied && <>
-        {viewMode === 'adminView' && <div>
-          <div className={labelClassNames}>
-            Nieuwe zone
-          </div>
-          <div>
-            {viewMode === 'adminView' && <div className="flex justify-between">
-              <Button
-                theme="white"
-                onClick={newZoneButtonHandler}
-              >
-                Nieuwe zone aanmaken
-              </Button>
+      {viewMode === 'adminView' && <div>
+        <div className={labelClassNames}>
+          Nieuwe zone
+        </div>
+        <div>
+          {viewMode === 'adminView' && <div className="flex justify-between">
+            <Button
+              theme="white"
+              onClick={newZoneButtonHandler}
+            >
+              Nieuwe zone aanmaken
+            </Button>
+            
+            <div className="flex -mr-2">
+              <Link to="/map/zones">
+                <Button
+                  theme="white"
+                >
+                  📊
+                </Button>
+              </Link>
               
-              <div className="flex -mr-2">
-                <Link to="/map/zones">
-                  <Button
-                    theme="white"
-                  >
-                    📊
-                  </Button>
-                </Link>
-                
-                <Link to="/admin/zones">
-                  <Button
-                    theme="white"
-                  >
-                    ✏️
-                  </Button>
-                </Link>
-              </div>
+              <Link to="/admin/zones">
+                <Button
+                  theme="white"
+                >
+                  ✏️
+                </Button>
+              </Link>
+            </div>
 
-            </div>}
-            {viewMode === 'adminEdit' && <Button
+          </div>}
+          {viewMode === 'adminEdit' && <Button
+            theme="white"
+            onClick={cancelButtonHandler}
+          >
+            Annuleer
+          </Button>}
+        </div>
+      </div>}
+
+      {(viewMode === 'adminEdit') && <div>
+        <div className={labelClassNames}>
+          Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
+        </div>
+        <div className="flex justify-between">
+          <Button
+            theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
+            onClick={saveZone}
+          >
+            Opslaan
+          </Button>
+
+          <div className="-mr-2">
+            {! isNewZone && <Button
+              onClick={deleteZoneHandler}
+            >
+              🗑️
+            </Button>}
+
+            <Button
               theme="white"
               onClick={cancelButtonHandler}
             >
               Annuleer
-            </Button>}
-          </div>
-        </div>}
-
-        {(viewMode === 'adminEdit') && <div>
-          <div className={labelClassNames}>
-            Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
-          </div>
-          <div className="flex justify-between">
-            <Button
-              theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
-              onClick={saveZone}
-            >
-              Opslaan
             </Button>
-
-            <div className="-mr-2">
-              {! isNewZone && <Button
-                onClick={deleteZoneHandler}
-              >
-                🗑️
-              </Button>}
-
-              <Button
-                theme="white"
-                onClick={cancelButtonHandler}
-              >
-                Annuleer
-              </Button>
-            </div>
           </div>
-          <div>
-            <FormInput
-              type="text"
-              placeholder="Naam van de zone"
-              name="name"
-              autoComplete="off"
-              id="js-FilterbarZones-name-input"
-              value={activeZone.name || ""}
-              onChange={changeHandler}
-              classes="w-full"
-            />
-          </div>
+        </div>
+        <div>
+          <FormInput
+            type="text"
+            placeholder="Naam van de zone"
+            name="name"
+            autoComplete="off"
+            id="js-FilterbarZones-name-input"
+            value={activeZone.name || ""}
+            onChange={changeHandler}
+            classes="w-full"
+          />
+        </div>
 
+        <div className="
+          mt-0
+        ">
           <div className="
-            mt-0
+            flex
+            rounded-lg bg-white
+            border-solid
+            border
+            border-gray-400
+            text-sm
           ">
-            <div className="
-              flex
-              rounded-lg bg-white
-              border-solid
-              border
-              border-gray-400
-              text-sm
-            ">
-              {R.map(x => {
-                return <div className={`
-                  ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
-                  cursor-pointer
-                  flex-1
-                  
-                  rounded-lg
-                  text-gray-500
-                  text-center
-                  h-10
-                  flex
-                  flex-col
-                  justify-center
-                `}
-                style={{
-                  backgroundColor: `${activeZone.geography_type === x.name ? x.color : ''}`
-                }}
-                key={x.name}
-                onClick={(e) => {
-                   e.preventDefault();
-
-                   // Save state
-                   changeHandler({
-                    target: {
-                      name: 'geography_type',
-                      value: x.name
-                    }
-                  })
-
-                  // Update map feature props (geography_type)
-                  let zoneId = activeZone.zone_id;
-                  // If not in edit mode: check if there's 1 newly created polygon
-                  if(! zoneId) {
-                    zoneId = getDraftFeatureId();
-                  }
-
-                  if(zoneId) {
-                    // Force rerender of Draw, so that polygon color updates
-                    const forceMapRerenderForFeature = (featureId) => {
-                      window.CROW_DD.theDraw.changeMode('simple_select', []);
-                      // NOTE: This had a side effect which is re-calling eventHandler()
-                      // NOTE: The side effect is that if creating new zone: name is discarted
-                      window.CROW_DD.theDraw.changeMode('direct_select', {
-                        featureId: featureId
-                      });
-                    }
-                    forceMapRerenderForFeature(zoneId);
-                  }
-
-                }}>
-                  {x.title}
-                </div>
-              }, [
-                {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
-                {name: 'stop', title: 'Parking', color: '#fd862e'},
-                {name: 'no_parking', title: 'No parking', color: '#fd3e48'}
-              ])}
-            </div>
-          </div>
-
-          <div className={`
-            py-2
-            ${activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}
-          `}>
-            <div className="
-              flex
-              rounded-lg bg-white
-              border-solid
-              border
-              border-gray-400
-              text-sm
-            ">
-              {/*
-              Availability zit verstopt in status.
-              is_enabled = true is open, is_enabled = false is gesloten
-              control_automatic=true
-              */}
-              {R.map(x => {
-                return <div className={`
-                  ${activeZone.zone_availability === x.name ? 'Button-blue' : ''}
-                  cursor-pointer
-                  flex-1
-                  rounded-lg
-                  text-gray-500
-                  text-center
-                  border-gray-500
-                  h-10
-                  flex
-                  flex-col
-                  justify-center
-                `}
-                key={x.name}
-                onClick={(e) => {
-                   e.preventDefault();
-
-                   changeHandler({
-                    target: {
-                      name: 'zone_availability',
-                      value: x.name
-                    }
-                  })
-                }}>
-                  {x.title}
-                </div>
-              }, [
-                {name: 'auto', title: 'Automatisch'},
-                {name: 'open', title: 'Open'},
-                {name: 'closed', title: 'Gesloten'}
-              ])}
-            </div>
-          </div>
-
-          <div className={activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}>
-            <p className="mb-2 text-sm">
-              Limiet <a onClick={() => setLimitType('modality')} className={`
-                ${limitType === 'modality' ? 'underline' : ''}
+            {R.map(x => {
+              return <div className={`
+                ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
                 cursor-pointer
-              `}>
-                per modaliteit
-              </a> | <a onClick={() => setLimitType('combined')} className={`
-                ${limitType === 'combined' ? 'underline' : ''}
-                cursor-pointer
-              `}>
-                totaal
-              </a>
-            </p>
+                flex-1
+                
+                rounded-lg
+                text-gray-500
+                text-center
+                h-10
+                flex
+                flex-col
+                justify-center
+              `}
+              style={{
+                backgroundColor: `${activeZone.geography_type === x.name ? x.color : ''}`
+              }}
+              key={x.name}
+              onClick={(e) => {
+                 e.preventDefault();
 
-            <div className="
-              rounded-lg
-              bg-white
-              border-solid
-              border
-              border-gray-400
-              p-4
-            ">
-              {limitType === 'combined' && <ModalityRow
-                imageUrl=""
-                name="vehicles-limit.combined"
-                value={activeZone['vehicles-limit.combined']}
-                onChange={changeHandler}
-              />}
-              {limitType === 'modality' && <>
-                <ModalityRow
-                  imageUrl="https://i.imgur.com/IF05O8u.png"
-                  name="vehicles-limit.bicycle"
-                  value={activeZone['vehicles-limit.bicycle']}
-                  onChange={changeHandler}
-                />
-                <ModalityRow
-                  imageUrl="https://i.imgur.com/FdVBJaZ.png"
-                  name="vehicles-limit.cargo_bicycle"
-                  value={activeZone['vehicles-limit.cargo_bicycle']}
-                  onChange={changeHandler}
-                />
-                <ModalityRow
-                  imageUrl="https://i.imgur.com/h264sb2.png"
-                  name="vehicles-limit.moped"
-                  value={activeZone['vehicles-limit.moped']}
-                  onChange={changeHandler}
-                />
-                <ModalityRow
-                  imageUrl="https://i.imgur.com/7Y2PYpv.png"
-                  name="vehicles-limit.car"
-                  value={activeZone['vehicles-limit.car']}
-                  onChange={changeHandler}
-                />
-              </>}
-            </div>
-          </div>
+                 // Save state
+                 changeHandler({
+                  target: {
+                    name: 'geography_type',
+                    value: x.name
+                  }
+                })
 
-        </div>}
+                // Update map feature props (geography_type)
+                let zoneId = activeZone.zone_id;
+                // If not in edit mode: check if there's 1 newly created polygon
+                if(! zoneId) {
+                  zoneId = getDraftFeatureId();
+                }
 
-        {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
-          <Text
-            theme="red"
-            onClick={deleteZoneHandler}
-            classes="text-xs"
-          >
-            Verwijder zone
-          </Text>
-        </div>}
-
-        <div className="mt-6">
-          <div className={labelClassNames}>
-            Zones
-          </div>
-          <div>
-            {adminZones ? R.map((x) => {
-              // Add onClick handler
-              const zoneId = x.zone_id;
-              if(viewMode === 'adminView') {
-                x.onClick = () => {
-                  // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
-                  const event = new CustomEvent('setSelectedZone', {
-                    detail: zoneId
-                  });
-                  window.dispatchEvent(event);
-                  // Zoom in into zone
-                  if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                    if(! window.ddMap) return;
-                    // Get extent
-                    const extent = st.extent(x.area)
-                    window.ddMap.fitBounds(extent, {
-                      padding: {top: 25, bottom: 25, left: 350, right: 25},
-                      duration: 1.4*1000 // in ms
+                if(zoneId) {
+                  // Force rerender of Draw, so that polygon color updates
+                  const forceMapRerenderForFeature = (featureId) => {
+                    window.CROW_DD.theDraw.changeMode('simple_select', []);
+                    // NOTE: This had a side effect which is re-calling eventHandler()
+                    // NOTE: The side effect is that if creating new zone: name is discarted
+                    window.CROW_DD.theDraw.changeMode('direct_select', {
+                      featureId: featureId
                     });
                   }
-                  // Change URL
-                  setAdminZoneUrl(x.geography_id)
-                };
-              }
-              if(viewMode === 'readonly') {
-                x.onClick = () => {
-                  // Zoom in into zone
-                  if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                    if(! window.ddMap) return;
-                    // Get extent
-                    const extent = st.extent(x.area)
-                    window.ddMap.fitBounds(extent, {
-                      padding: {top: 25, bottom: 25, left: 350, right: 25},
-                      duration: 1.4*1000 // in ms
-                    });
-                  }
-                  // Change URL
-                  setPublicZoneUrl(x.geography_id)
-                };
-              }
-              return renderZoneTag(x, x.zone_id === activeZone.zone_id, viewMode);
-            }, adminZones) : <div />}
+                  forceMapRerenderForFeature(zoneId);
+                }
+
+              }}>
+                {x.title}
+              </div>
+            }, [
+              {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
+              {name: 'stop', title: 'Parking', color: '#fd862e'},
+              {name: 'no_parking', title: 'No parking', color: '#fd3e48'}
+            ])}
           </div>
         </div>
 
-      </>}
+        <div className={`
+          py-2
+          ${activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}
+        `}>
+          <div className="
+            flex
+            rounded-lg bg-white
+            border-solid
+            border
+            border-gray-400
+            text-sm
+          ">
+            {/*
+            Availability zit verstopt in status.
+            is_enabled = true is open, is_enabled = false is gesloten
+            control_automatic=true
+            */}
+            {R.map(x => {
+              return <div className={`
+                ${activeZone.zone_availability === x.name ? 'Button-blue' : ''}
+                cursor-pointer
+                flex-1
+                rounded-lg
+                text-gray-500
+                text-center
+                border-gray-500
+                h-10
+                flex
+                flex-col
+                justify-center
+              `}
+              key={x.name}
+              onClick={(e) => {
+                 e.preventDefault();
+
+                 changeHandler({
+                  target: {
+                    name: 'zone_availability',
+                    value: x.name
+                  }
+                })
+              }}>
+                {x.title}
+              </div>
+            }, [
+              {name: 'auto', title: 'Automatisch'},
+              {name: 'open', title: 'Open'},
+              {name: 'closed', title: 'Gesloten'}
+            ])}
+          </div>
+        </div>
+
+        <div className={activeZone.geography_type === 'stop' ? 'visible' : 'invisible'}>
+          <p className="mb-2 text-sm">
+            Limiet <a onClick={() => setLimitType('modality')} className={`
+              ${limitType === 'modality' ? 'underline' : ''}
+              cursor-pointer
+            `}>
+              per modaliteit
+            </a> | <a onClick={() => setLimitType('combined')} className={`
+              ${limitType === 'combined' ? 'underline' : ''}
+              cursor-pointer
+            `}>
+              totaal
+            </a>
+          </p>
+
+          <div className="
+            rounded-lg
+            bg-white
+            border-solid
+            border
+            border-gray-400
+            p-4
+          ">
+            {limitType === 'combined' && <ModalityRow
+              imageUrl=""
+              name="vehicles-limit.combined"
+              value={activeZone['vehicles-limit.combined']}
+              onChange={changeHandler}
+            />}
+            {limitType === 'modality' && <>
+              <ModalityRow
+                imageUrl="https://i.imgur.com/IF05O8u.png"
+                name="vehicles-limit.bicycle"
+                value={activeZone['vehicles-limit.bicycle']}
+                onChange={changeHandler}
+              />
+              <ModalityRow
+                imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                name="vehicles-limit.cargo_bicycle"
+                value={activeZone['vehicles-limit.cargo_bicycle']}
+                onChange={changeHandler}
+              />
+              <ModalityRow
+                imageUrl="https://i.imgur.com/h264sb2.png"
+                name="vehicles-limit.moped"
+                value={activeZone['vehicles-limit.moped']}
+                onChange={changeHandler}
+              />
+              <ModalityRow
+                imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                name="vehicles-limit.car"
+                value={activeZone['vehicles-limit.car']}
+                onChange={changeHandler}
+              />
+            </>}
+          </div>
+        </div>
+
+      </div>}
+
+      {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
+        <Text
+          theme="red"
+          onClick={deleteZoneHandler}
+          classes="text-xs"
+        >
+          Verwijder zone
+        </Text>
+      </div>}
+
+      <div className="mt-6">
+        <div className={labelClassNames}>
+          Zones
+        </div>
+        <div>
+          {adminZones ? R.map((x) => {
+            // Add onClick handler
+            const zoneId = x.zone_id;
+            if(viewMode === 'adminView') {
+              x.onClick = () => {
+                // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+                const event = new CustomEvent('setSelectedZone', {
+                  detail: zoneId
+                });
+                window.dispatchEvent(event);
+                // Zoom in into zone
+                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                  if(! window.ddMap) return;
+                  // Get extent
+                  const extent = st.extent(x.area)
+                  window.ddMap.fitBounds(extent, {
+                    padding: {top: 25, bottom: 25, left: 350, right: 25},
+                    duration: 1.4*1000 // in ms
+                  });
+                }
+                // Change URL
+                setAdminZoneUrl(x.geography_id)
+              };
+            }
+            if(viewMode === 'readonly') {
+              x.onClick = () => {
+                // Zoom in into zone
+                if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
+                  if(! window.ddMap) return;
+                  // Get extent
+                  const extent = st.extent(x.area)
+                  window.ddMap.fitBounds(extent, {
+                    padding: {top: 25, bottom: 25, left: 350, right: 25},
+                    duration: 1.4*1000 // in ms
+                  });
+                }
+                // Change URL
+                setPublicZoneUrl(x.geography_id)
+              };
+            }
+            return renderZoneTag(x, x.zone_id === activeZone.zone_id, viewMode);
+          }, adminZones) : <div />}
+        </div>
+      </div>
 
     </div>
   )
