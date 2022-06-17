@@ -164,7 +164,7 @@ const generatePopupHtml = (feature) => {
 
     return `<div class="rounded-xl flex" style="background: #F6F5F4">
       <div class="rounded-l-xl font-bold py-1 px-2" style="background-color: ${getIndicatorColor(numVehicles, numPlaces)};min-width: ${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%">
-        ${percentageOfVehiclesAvailable}%
+        ${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%
       </div>
       <div class="flex-1" />
     </div>`
