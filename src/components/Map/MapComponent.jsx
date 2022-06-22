@@ -4,6 +4,7 @@ import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 import localization from 'moment/locale/nl'
 import {useLocation} from "react-router-dom";
+import center from '@turf/center'
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
@@ -12,6 +13,7 @@ import U from 'mapbox-gl-utils';
 import {getMapStyles, setMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
+import {addIsochronesToMap} from './MapUtils/isochrones.js';
 import {
   addLayers,
   activateLayers
@@ -27,6 +29,11 @@ import {
   fetchPublicZones
 } from './MapUtils/zones.js';
 
+// Import API functions
+import {
+  getIsochronesForFootWalking
+} from '../../api/isochrones';
+
 import './MapComponent.css';
 
 import {layers} from './layers';
@@ -41,6 +48,7 @@ function MapComponent(props) {
 
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
+  const [isochroneMarker, setIsochroneMarker] = useState(false);
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {
@@ -84,6 +92,10 @@ function MapComponent(props) {
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   let map = useRef(null);
 
+  const userData = useSelector(state => {
+    return state.authentication.user_data;
+  });
+
   // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
@@ -104,6 +116,7 @@ function MapComponent(props) {
     // Hide compass control
     theMap.addControl(new maplibregl.NavigationControl({
       showCompass: false
+      // showZoom: false
     }), 'bottom-right');
 
     // Add 'current location' button
@@ -188,7 +201,6 @@ function MapComponent(props) {
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
-
       });
 
       // Disable rotating
@@ -329,6 +341,8 @@ function MapComponent(props) {
           window.CROW_DD.theDraw.deleteAll();
         }, 500);
       }
+      // Also, hide isochrones layer
+      window.ddMap.U.hide('zones-isochrones')
       return;
     }
 
@@ -488,6 +502,15 @@ function MapComponent(props) {
     if(! extent || extent.length === 0) {
       return;
     }
+    // Do not zoom to place if zone geography is in URL
+    const hasZoneInUrl = () => {
+      // Check if we are on the zones page
+      if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return false;
+      // Get geographyId from URL
+      const geographyId = pathName.split('/zones/')[1];
+      return geographyId ? true : false;
+    }
+    if(hasZoneInUrl()) return;
     
     map.current.fitBounds(extent);
     
@@ -546,7 +569,90 @@ function MapComponent(props) {
     stateLayers.displaymode
   ]);
 
-  return null;
+  // Add isochrone marker
+  const addIsochroneMarker = (theMap) => {
+    if(! theMap) return;
+    if(isochroneMarker) return;
+
+    const addIsochronesForLngLat = async (theMap, lng, lat) => {
+      // Get foot walking isochrones
+      const result = await getIsochronesForFootWalking(lng, lat);
+      addIsochronesToMap(theMap, result)
+      return;
+    }
+
+    const onDragEnd = async () => {
+      const lngLat = marker.getLngLat();
+      await addIsochronesForLngLat(theMap, lngLat.lng, lngLat.lat)
+    }
+
+    // Get center of map
+    const {lng, lat} = theMap.getCenter();
+    var marker = new maplibregl.Marker({
+      draggable: true
+    })
+    .setLngLat([lng, lat])
+    .addTo(theMap);
+  
+    // Add isochrones around the new marker
+    addIsochronesForLngLat(theMap, lng, lat)
+
+    marker.on('dragend', onDragEnd);
+
+    setIsochroneMarker(marker);
+  }
+
+  // Remove isochrone marker
+  const removeIsochroneMarker = (theMap) => {
+    if(! isochroneMarker) return;
+    // Remove it
+    isochroneMarker.remove();
+
+    // Update state
+    setIsochroneMarker(null);
+
+    // Hide isochrones layer
+    theMap.U.hide('zones-isochrones')
+  }
+
+  const doShowIsochroneButton = () => {
+    const validEmailAddresses = [
+      'mail@bartroorda.nl',
+      'rinse.gorter@denhaag.nl',
+      'otto.vanboggelen@crow.nl',
+      'sven.boor@gmail.com'
+    ]
+    return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
+  }
+
+  // Add map controls for isochrone view
+  return doShowIsochroneButton ? (
+    <>
+      <div className="fixed bg-white p-1" style={{
+        bottom: '117px',
+        right: '10px',
+        borderRadius: '4px',
+        minWidth: '29px',
+        textAlign: 'center',
+        boxShadow: '0 0 0 2px rgb(0 0 0 / 10%)'
+      }}>
+        {! isochroneMarker && <div 
+          className="cursor-pointer"
+          onClick={() => {addIsochroneMarker(window.ddMap)}}
+          title="Voeg punt voor isochronenweergave toe"
+        >
+          ⚓
+        </div>}
+        {isochroneMarker && <div 
+          className="cursor-pointer"
+          onClick={() => {removeIsochroneMarker(window.ddMap)}}
+          title="Stop isochronenweergave"
+        >
+          ❎
+        </div>}
+      </div>
+    </>
+  ) : null;
 }
 
 export {

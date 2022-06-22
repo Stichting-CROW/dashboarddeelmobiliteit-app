@@ -43,4 +43,8 @@ export const sources = {
   'zones-metrics-public': {
     'type': 'geojson',
   },
+
+  'zones-isochrones': {
+    'type': 'geojson',
+  },
 }

@@ -43,6 +43,8 @@ function Map({mode, mapContainer}) {
   if(showZones) {
     layers.push('zones-geodata', 'zones-geodata-border')
   }
+
+  layers.push('zones-isochrones');
   
   // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK && viewPark) {

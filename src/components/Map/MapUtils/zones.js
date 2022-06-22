@@ -660,9 +660,14 @@ const triggerGeographyClick = (geographyId, allZones) => {
   const foundZone = zone && zone[0] ? zone[0] : false;
   if(! foundZone) return;
 
-  window.CROW_DD.theDraw.changeMode('direct_select', {
-    featureId: foundZone.zone_id
-  });
+  // Check if feature exists
+  const feature = window.CROW_DD.theDraw.get(foundZone.zone_id);
+  // If it exists: select it
+  if(feature) {
+    window.CROW_DD.theDraw.changeMode('direct_select', {
+      featureId: foundZone.zone_id
+    });
+  }
 }
 
 const navigateToGeography = (geographyId, allZones) => {

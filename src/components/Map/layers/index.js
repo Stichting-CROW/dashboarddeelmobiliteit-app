@@ -22,6 +22,8 @@ import zonesMetricsPublicBorder from './zones-metrics-public-border.js';
 import zonesGeodata from './zones-geodata.js';
 import zonesGeodataBorder from './zones-geodata-border.js';
 
+import zonesIsochrones from './zones-isochrones.js';
+
 // The sort order sets the loading order
 // - 'Zones' have to be at the background,
 // - 'Cluster counts' have to be on top of 'Clusters'
@@ -48,5 +50,7 @@ export const layers = {
   'rentals-destinations-heatmap': rentalsDestinationsHeatmapCityLevel,
 
   'zones-metrics-public': zonesMetricsPublic,
-  'zones-metrics-public-border': zonesMetricsPublicBorder
+  'zones-metrics-public-border': zonesMetricsPublicBorder,
+
+  'zones-isochrones': zonesIsochrones
 }
