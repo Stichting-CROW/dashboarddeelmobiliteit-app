@@ -232,7 +232,7 @@ function MapComponent(props) {
       // Wait until theDraw has been loaded
       setTimeout(x => {
         triggerGeographyClick(geographyId, publicZones)
-      }, 1000);
+      }, 2500);
     }
   }, [
     didMapLoad,
@@ -629,7 +629,8 @@ function MapComponent(props) {
   return doShowIsochroneButton ? (
     <>
       <div className="fixed bg-white p-1" style={{
-        bottom: '117px',
+        // bottom: '117px',
+        bottom: '177px',
         right: '10px',
         borderRadius: '4px',
         minWidth: '29px',
