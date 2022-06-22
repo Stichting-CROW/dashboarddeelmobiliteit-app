@@ -224,7 +224,7 @@ function Menu({pathName}) {
             {doShowZones && <MenuItem
               pathName={pathName}
               text={'Zones'}
-              path={'/admin/zones'}
+              path={'/map/zones'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />}
 
