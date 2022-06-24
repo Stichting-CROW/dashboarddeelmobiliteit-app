@@ -7,11 +7,14 @@
   align-items: center;
   transition: width 1s;
   transition-timing-function: ease-out;
-  right: 50px;
+  right: 0;
   z-index: 100;
 }
 
-@media (min-width: calc(640px)) {
+@media (min-width: 640px) {
+  .Menu {
+    right: 50px;/* Some space because of map action buttons */
+  }
   .Menu.filter-open {
     transition-timing-function: ease-in;
     width: calc(100% - 324px);
