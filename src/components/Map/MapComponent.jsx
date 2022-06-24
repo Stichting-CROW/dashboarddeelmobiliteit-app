@@ -90,6 +90,7 @@ function MapComponent(props) {
   const [zoom] = useState(stateLayers.zoom || 15);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
+  const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   let map = useRef(null);
 
   const userData = useSelector(state => {
@@ -220,6 +221,7 @@ function MapComponent(props) {
   // If geographyId is in URL -> navigate to zone
   useEffect(() => {
     if(! didMapLoad) return;
+    if(! didAddPublicZones && ! didAddAdminZones) return;
 
     // Check if we are on the zones page
     if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return;
@@ -236,6 +238,8 @@ function MapComponent(props) {
     }
   }, [
     didMapLoad,
+    didAddPublicZones,
+    didAddAdminZones
   ])
 
   // Init drawing functionality (for drawing zones)
@@ -255,6 +259,8 @@ function MapComponent(props) {
       const mapStyles = getMapStyles();
       setMapStyle(window.ddMap, mapStyles.satelite);
     }, 5);
+
+    setDidAddAdminZones(true);
   }, [
     didMapLoad,
     stateLayers.displaymode

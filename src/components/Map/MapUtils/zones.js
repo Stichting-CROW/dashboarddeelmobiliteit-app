@@ -671,15 +671,24 @@ const triggerGeographyClick = (geographyId, allZones) => {
 }
 
 const navigateToGeography = (geographyId, allZones) => {
-  if(! geographyId) return;
-  if(! allZones) return;
+  if(! geographyId) {
+    console.log('navigateToGeography :: No geographyId given');
+    return;
+  }
+  if(! allZones) {
+    console.log('navigateToGeography :: No allZones given');
+    return;
+  }
 
   const zone = allZones.filter(x => {
     return x.geography_id === geographyId
   });
 
   const foundZone = zone && zone[0] ? zone[0] : false;
-  if(! foundZone) return;
+  if(! foundZone) {
+    console.log('navigateToGeography :: Zone not found')
+    return;
+  }
 
   const st = require('geojson-bounds');
 
@@ -692,7 +701,12 @@ const navigateToGeography = (geographyId, allZones) => {
     // 'zoom in to extent' on filterGebied change/load
     setTimeout(x => {
       window.ddMap.fitBounds(extent, {
-        padding: {top: 25, bottom: 25, left: 350, right: 25},
+        padding: {
+          top: 25,
+          bottom: 25,
+          left: window.innerWidth > 800 ? 350 : 25,
+          right: 25
+        },
         duration: 1.4*1000 // in ms
       });
     }, 100);
