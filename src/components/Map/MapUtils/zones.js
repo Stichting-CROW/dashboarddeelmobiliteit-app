@@ -7,6 +7,7 @@ import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
 import {getVehicleIconUrl} from '../../../helpers/vehicleTypes';
 import {useLocation, useRouteMatch} from "react-router-dom";
+import center from '@turf/center'
 
 // import {getMapboxDrawLayers} from './layers.js'
 
@@ -255,7 +256,7 @@ const initPublicZonesMap = async (theMap) => {
     new maplibregl.Popup()
       .setLngLat(e.lngLat)
       .setHTML(generatePopupHtml(e.features[0]))
-     .addTo(theMap);
+      .addTo(theMap);
 
     // Set page URL without reloading page
     const geographyId = e.features[0].properties.geography_id;
@@ -670,6 +671,17 @@ const triggerGeographyClick = (geographyId, allZones) => {
   }
 }
 
+const openPopup = (theMap, foundZone) => {
+  // https://stackoverflow.com/a/57533307
+  // https://maplibre.org/maplibre-gl-js-docs/api/geography/#lnglat
+  setTimeout(() => {
+    const location = center(foundZone.area);
+    theMap.fire('click', {
+      lngLat: new maplibregl.LngLat(location.geometry.coordinates[0], location.geometry.coordinates[1])
+    });
+  }, 1500)
+}
+
 const navigateToGeography = (geographyId, allZones) => {
   if(! geographyId) {
     console.log('navigateToGeography :: No geographyId given');
@@ -686,7 +698,7 @@ const navigateToGeography = (geographyId, allZones) => {
 
   const foundZone = zone && zone[0] ? zone[0] : false;
   if(! foundZone) {
-    console.log('navigateToGeography :: Zone not found')
+    console.log('navigateToGeography :: Zone not found :: Was searching for x.geography_id === geographyId', allZones, geographyId)
     return;
   }
 
@@ -709,6 +721,8 @@ const navigateToGeography = (geographyId, allZones) => {
         },
         duration: 1.4*1000 // in ms
       });
+      // Open popup for this polygon automatically
+      openPopup(window.ddMap, foundZone);
     }, 100);
   }
 
@@ -729,6 +743,7 @@ export {
   fetchPublicZones,
   setPublicZoneUrl,
   setAdminZoneUrl,
+  openPopup,
   navigateToGeography,
   triggerGeographyClick,
   getIndicatorColor,
