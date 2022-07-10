@@ -3,30 +3,18 @@ import moment from 'moment';
 import maplibregl from 'maplibre-gl';
 import localization from 'moment/locale/nl'
 
-import {getProviderColor} from '../../../helpers/providers.js';
+import {
+  getProviderColor,
+  getPrettyProviderName,
+  getProviderWebsiteUrl
+} from '../../../helpers/providers.js';
+
+import {
+  getPrettyVehicleTypeName
+} from '../../../helpers/vehicleTypes';
 
 // Set language for momentJS
 moment.updateLocale('nl', localization);
-
-const providerWebsiteUrls = {
-  'baqme': 'https://www.baqme.com/',
-  'bird': 'https://www.bird.co/',
-  'cykl': 'https://www.cykl.nl/',
-  'check': 'https://ridecheck.app/',
-  'cargoroo': 'https://cargoroo.nl/',
-  'deelfietsnederland': 'https://deelfietsnederland.nl/',
-  'donkey': 'https://www.donkey.bike/',
-  'felyx': 'https://felyx.com/',
-  'flickbike': 'https://www.flickbike.nl/',
-  'gosharing': 'https://go-sharing.com/',
-  'hely': 'https://hely.com/',
-  'htm': 'https://www.htm.nl/ons-vervoer/htm-fiets',
-  'keobike': 'https://keobike.nl/',
-  'lime': 'https://www.li.me/',
-  'tier': 'https://www.tier.app/',
-  'dott': 'https://ridedott.com/',
-  'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
-}
 
 const jsConfetti = new JSConfetti()
 window.showConfetti = () => {
@@ -85,6 +73,10 @@ export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
+      console.log(vehicleProperties);
+      const providerWebsiteUrl = getProviderWebsiteUrl(vehicleProperties.system_id);
+      const prettyVehicleTypeName = getPrettyVehicleTypeName(vehicleProperties.form_factor);
+
       popup = new maplibregl.Popup()
         .setLngLat(coordinates)
         .setHTML(`
@@ -96,7 +88,7 @@ export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
               >
             </span>
             <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-              ${vehicleProperties.system_id}
+              ${getPrettyProviderName(vehicleProperties.system_id)} ${prettyVehicleTypeName ? prettyVehicleTypeName : ''}
             </span>
           </h1>
           <div class="Map-popup-body">
@@ -109,8 +101,8 @@ export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
               Dit voertuig is ${vehicleProperties.distance_in_meters} meter verplaatst<br />
             </div>` : ''}
 
-            ${providerWebsiteUrls && providerWebsiteUrls[vehicleProperties.system_id] ? `<div class="mt-2">
-              <a href="${providerWebsiteUrls[vehicleProperties.system_id]}" rel="external" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${providerColor};">
+            ${providerWebsiteUrl ? `<div class="mt-2">
+              <a href="${providerWebsiteUrl}" rel="external" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${providerColor};">
                 website
               </a>
             </div>` : ''}

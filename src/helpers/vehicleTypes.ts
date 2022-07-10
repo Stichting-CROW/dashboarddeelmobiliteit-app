@@ -16,3 +16,24 @@ export const getVehicleIconUrl = (vehicleType) => {
     return '/components/MapComponent/vehicle-type-other.svg';
   }
 }
+
+export const getPrettyVehicleTypeName = (vehicleType) => {
+  if(vehicleType === 'bicycle') {
+    return 'fiets';
+  }
+  else if(vehicleType === 'cargo_bicycle') {
+    return 'bakfiets';
+  }
+  else if(vehicleType === 'moped') {
+    return 'scooter';
+  }
+  else if(vehicleType === 'car') {
+    return 'auto';
+  }
+  else if(vehicleType === 'other') {
+    return '';
+  }
+  else {
+    return null;
+  }
+}

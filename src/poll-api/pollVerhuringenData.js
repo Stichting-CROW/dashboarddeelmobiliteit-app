@@ -48,6 +48,7 @@ const processRentalsResult = (state, type, rentals) => {
      "properties":{
         "id": md5(v.location.latitude+v.location.longitude),
         "system_id": v.system_id,
+        "form_factor": v.form_factor || null,
         "arrival_time": v.arrival_time,
         "departure_time": v.departure_time,
         "distance_bin": distance_bin,
