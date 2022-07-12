@@ -73,7 +73,6 @@ export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      console.log(vehicleProperties);
       const providerWebsiteUrl = getProviderWebsiteUrl(vehicleProperties.system_id);
       const prettyVehicleTypeName = getPrettyVehicleTypeName(vehicleProperties.form_factor);
 
