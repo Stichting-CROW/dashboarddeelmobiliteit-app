@@ -81,7 +81,7 @@ function Filterbar({
           <div className="ml-4 text-sm flex justify-center flex-col" style={{
             color: '#FD862E'
           }}>
-            Nieuw: Bolt en Bondi toegevoegd + GO Sharing nu te filteren op Fiets/Scooter
+            Nieuw: Bolt, Bondi en MoveYou toegevoegd + GO Sharing nu te filteren op Fiets/Scooter
           </div>
         </div> 
 

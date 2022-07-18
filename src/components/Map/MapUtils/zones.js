@@ -253,6 +253,14 @@ const initPublicZonesMap = async (theMap) => {
   theMap.U.show('zones-metrics-public')
 
   theMap.on('click', 'zones-metrics-public', function (e) {
+    // Don't show popup if it's a no_parking zone
+    if(e && e.features && e.features[0]
+         && e.features[0].properties && e.features[0].properties.geography_type
+         && e.features[0].properties.geography_type === 'no_parking')
+    {
+      return;
+    }
+
     new maplibregl.Popup()
       .setLngLat(e.lngLat)
       .setHTML(generatePopupHtml(e.features[0]))
