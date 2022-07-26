@@ -255,6 +255,18 @@ function Menu({pathName}) {
           </>}
           
           {! isLoggedIn && <>
+            <MenuItem
+              pathName={pathName}
+              text={'Aanbod'}
+              path={'/map/park'}
+              icon={'/images/components/Menu/aanbod.svg'}
+            />
+            <MenuItem
+              pathName={pathName}
+              text={'Zones'}
+              path={'/map/zones'}
+              icon={'https://i.imgur.com/GrF8KBA.png'}
+            />
             <Link className="text-menu" to="/login">
               Log in
             </Link>
