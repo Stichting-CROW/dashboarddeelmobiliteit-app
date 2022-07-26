@@ -63,6 +63,19 @@ function Filterbar({
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
 
+  let zonesToShow;
+  if(isontwikkeling) {
+    zonesToShow = [
+      'residential_area',
+    ];
+  } else {
+    zonesToShow = [
+      'residential_area',
+      'custom',
+      'neighborhood'
+    ];
+  }
+
   if(iszonespublic || iszonesadmin) {
     return <FilterbarZones
       view={iszonespublic ? 'readonly' : 'adminView'}
@@ -81,7 +94,7 @@ function Filterbar({
           <div className="ml-4 text-sm flex justify-center flex-col" style={{
             color: '#FD862E'
           }}>
-            Nieuw: Bolt, Bondi en MoveYou toegevoegd + GO Sharing nu te filteren op Fiets/Scooter
+            {/* INFO */}
           </div>
         </div> 
 
@@ -104,7 +117,9 @@ function Filterbar({
 
         {<FilteritemGebieden />}
 
-        {<FilteritemZones />}
+        {<FilteritemZones 
+          zonesToShow={zonesToShow}
+          />}
 
         {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
 

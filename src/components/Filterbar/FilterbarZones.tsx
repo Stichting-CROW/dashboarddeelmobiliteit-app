@@ -82,22 +82,7 @@ function FilterbarZones({
   hideLogo,
   view
 }) {
-  const zoneTemplate = {
-    // "zone_id": null,
-    // "area": {},
-    // "name": '',
-    // "municipality": null,
-    // "geography_id": null,
-    // "description": null,
-    // "geography_type": "monitoring",
-    // "zone_availability": "auto",
-    // "effective_date": null,
-    // "published_date": null,
-    // "retire_data": null,
-    // "stop": null,
-    // "no_parking": null,
-    // "published": true
-  }
+  const zoneTemplate = {}
 
   const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: readonly|adminView|adminEdit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
@@ -433,7 +418,7 @@ function FilterbarZones({
     if(activeZone.geography_id) {
       const updatedZone = await putZone(token, requestData);
       // Error handling
-      if(! updatedZone.zone_id) {
+      if(! updatedZone || ! updatedZone.zone_id) {
         console.error(updatedZone);
         alert('Er ging iets fout bij het opslaan van de zone.')
         return;

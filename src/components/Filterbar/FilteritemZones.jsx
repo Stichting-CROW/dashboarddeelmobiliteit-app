@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
 
-function FilteritemZones() {
+function FilteritemZones({
+  zonesToShow
+}) {
   const dispatch = useDispatch()
   
   const zones = useSelector(state => {
@@ -60,6 +62,16 @@ function FilteritemZones() {
     {name: 'Wijken', zone_type: 'neighborhood'},
     // {name: 'Anders', zone_type: 'municipality'},
   ];
+
+  let zone_groups_filtered = [];
+  (zonesToShow || [
+      'residential_area',
+      'custom',
+      'neighborhood'
+  ]).forEach(zoneType => {
+    const zone = zone_groups.filter(x => x.zone_type === zoneType);
+    if(zone) zone_groups_filtered.push(zone[0]);
+  })
   
   const renderSelectZonesGroup = (group, zones) => {
     const groupZones = zones.filter(zone=>zone.zone_type===group.zone_type);
@@ -123,7 +135,7 @@ function FilteritemZones() {
             <div>&nbsp;</div>
           </div>
           <div className="filter-form-values">
-            { zone_groups.map(group=>{
+            { zone_groups_filtered.map(group=>{
                 return renderSelectZonesGroup(group, filteredZones);
               })}
           </div>
