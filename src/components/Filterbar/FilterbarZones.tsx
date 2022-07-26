@@ -528,7 +528,7 @@ function FilterbarZones({
   return (
     <div className="filter-bar-inner py-2">
       
-      {! hideLogo && <Logo />}
+      {! hideLogo && <Link to="/"><Logo /></Link>}
       
       <div className="mt-6">
         <FilteritemGebieden />

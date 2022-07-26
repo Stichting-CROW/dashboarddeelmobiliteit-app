@@ -33,7 +33,7 @@ export default function filter(state = initialState, action) {
   switch(action.type) {
     case 'SET_AANBIEDERS': {
       let current = state.aanbieders ? state.aanbieders: [];
-      
+
       // add colors (will be supplied by the API later)
       const colors = generateHslaColors(action.payload.length)
       const providerColors = getProviderColors();

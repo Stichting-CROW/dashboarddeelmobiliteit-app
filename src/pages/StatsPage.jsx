@@ -21,6 +21,14 @@ function StatsPage(props) {
     })
   }
 
+  if(filter && ! filter.gebied) {
+    return (
+      <div className="StatsPage pt-8 pb-24">
+        Selecteer een plaats
+      </div>
+    )
+  }
+
   return (
     <div className="StatsPage pt-4 pb-24">
 

@@ -15,7 +15,7 @@ function FilteritemAanbieders() {
   
   const operatorstats = useSelector(state => {
     let stats = undefined;
-    
+
     if(state.layers) {
       switch(state.layers.displaymode) {
         case DISPLAYMODE_PARK:

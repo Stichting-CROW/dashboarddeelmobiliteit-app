@@ -37,9 +37,6 @@ export const updateZones = async (store_zones) => {
       let url = `https://api.deelfietsdashboard.nl/dashboard-api/public/filters?gm_code=${gm_code}`;
       const zonesGeoDataResult = await fetch(url);
       const zonesGeoDataJson = await zonesGeoDataResult.json();
-      console.log('metadataZones 2-2')
-      console.log('zonesGeoData..', zonesGeoDataJson)
-      // console.log('zonesGeoData...', zonesGeoData)
 
       if(state.filter.gebied==="") {
         store_zones.dispatch({ type: 'SET_ZONES', payload: []});

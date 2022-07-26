@@ -4,6 +4,7 @@ import './css/Filterbar.css';
 //   useState,
 //   useRef
 // } from 'react';
+import { Link } from "react-router-dom";
 import {useSelector} from 'react-redux';
 import moment from 'moment';
 // import * as R from 'ramda';
@@ -89,7 +90,11 @@ function Filterbar({
 
         <div className="justify-between hidden sm:flex">
           <div style={{minWidth: '82px'}}>
-            {! hideLogo && <Logo />}
+            {! hideLogo && (
+              ispark
+                ? <Logo />
+                : <Link to="/"><Logo /></Link>
+            )}
           </div>
           <div className="ml-4 text-sm flex justify-center flex-col" style={{
             color: '#FD862E'
