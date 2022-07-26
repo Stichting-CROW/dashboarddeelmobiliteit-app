@@ -28,10 +28,11 @@ export const getPrettyProviderName = (system_id) => {
     'gosharing': 'GO Sharing',
     'hely': 'Hely',
     'htm': 'HTM Fiets',
+    'moveyou': 'MoveYou',
     'keobike': 'KeoBike',
     'lime': 'Lime',
     'tier': 'TIER',
-    'dott': 'Dorr',
+    'dott': 'Dott',
     'uwdeelfiets': 'Uw Deelfiets'
   }
   return providerPrettyNames[system_id]
@@ -49,6 +50,7 @@ export const getProviderWebsiteUrl = (system_id) => {
     'cargoroo': 'https://cargoroo.nl/',
     'deelfietsnederland': 'https://deelfietsnederland.nl/',
     'donkey': 'https://www.donkey.bike/',
+    'moveyou': 'https://www.moveyou.com/',
     'felyx': 'https://felyx.com/',
     'flickbike': 'https://www.flickbike.nl/',
     'gosharing': 'https://go-sharing.com/',
@@ -63,4 +65,26 @@ export const getProviderWebsiteUrl = (system_id) => {
   return providerWebsiteUrls[system_id]
     ? providerWebsiteUrls[system_id]
     : null;
+}
+
+export const getProviderColors = () => {
+  return  {
+    'cykl': '#a5e067',
+    'flickbike': '#fe431d',
+    'mobike': '#ed5144',
+    'donkey': '#ed5144',
+    'htm': '#db291e',
+    'jump': '#fd3e48',
+    'gosharing': '#77b136',
+    'check': '#8f3af8',
+    'felyx': '#064627',
+    'lime': '#1bd831',
+    'baqme': '#4bdfbb',
+    'bird': '#26ccf0',
+    'cargoroo': '#ffcb34',
+    'moveyou': '#13D6A6',
+    'hely': '#fd645c',
+    'tier': '#0d123f',
+    'dott': '#00a8e9'
+  }
 }
