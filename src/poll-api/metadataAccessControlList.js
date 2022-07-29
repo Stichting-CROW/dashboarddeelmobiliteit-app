@@ -4,7 +4,7 @@ const cPublicAanbieders = [
   { value:"donkey", system_id:"donkey", name:"Donkey" },
   // { value:"mobike", system_id:"mobike", name:"Mobike" },
   { value:"htm", system_id:"htm", name:"HTM" },
-  { value:"gosharing", system_id:"gosharing", name:"GO" },
+  { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
   { value:"check", system_id:"check", name:"CHECK" },
   { value:"felyx", system_id:"felyx", name:"Felyx" },
   { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },

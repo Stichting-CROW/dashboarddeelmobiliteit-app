@@ -15,6 +15,7 @@ const Login = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [doRenderRedirect, setDoRenderRedirect] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useDispatch();
 
   const login = e => {
@@ -125,14 +126,26 @@ const Login = () => {
           />
 
           <label className="mt-4 block" htmlFor="password">Wachtwoord</label>
-          <input
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-            type="password"
-            placeholder="Wachtwoord"
-            name="password"
-            required
-            onChange={e => setPassword(e.target.value)}
-          />
+          <div className="relative">
+            <input
+              className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+              type={isPasswordVisible ? 'text' : 'password'}
+              placeholder="Wachtwoord"
+              name="password"
+              required
+              onChange={e => setPassword(e.target.value)}
+            />
+            <div className="absolute h-full right-1 top-0 mt-1 flex justify-center flex-col">
+              <img
+                className="w-10 cursor-pointer"
+                src={`/images/components/Login/${isPasswordVisible ? 'eye_hidden_view_see_icon' : 'eye_view_see_look_icon'}.svg`}
+                alt="Toggle visibility of password"
+                onClick={() => {
+                  setIsPasswordVisible(! isPasswordVisible)
+                }}
+              />
+            </div>
+          </div>
 
           {errorMessage && <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{errorMessage}</span>
