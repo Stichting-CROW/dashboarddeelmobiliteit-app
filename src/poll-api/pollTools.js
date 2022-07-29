@@ -17,11 +17,14 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     includeOperators: false
   }
 
-  // add zones
+  // ADD ZONES
   let filterparams = [];
+  // If zones are explicity asked: add these to the request query
   if(filter.zones!=="") {
     filterparams.push("zone_ids="+filter.zones);
-  } else if(filter.gebied!=="") {
+  }
+  // If a place is selected, get all zones for this place
+  else if(filter.gebied!=="") {
     // create zone filter
     let candidates = [];
     let municipality = metadata.gebieden.find(gebied => gebied.gm_code===filter.gebied);
@@ -36,6 +39,11 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     } else {
       console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
+  }
+  // If no place is set: Get NL data (NL 'zone')
+  // Only providers and admins are allowed to see this info
+  else {
+    filterparams.push("zone_ids=51233");
   }
 
   if(options.includeOperators === true) {
