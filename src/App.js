@@ -7,6 +7,7 @@ import {
 import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
+import 'tw-elements';
 
 import Menu from './components/Menu.jsx';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';

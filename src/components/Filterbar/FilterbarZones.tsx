@@ -2,6 +2,7 @@ import './css/FilterbarZones.css';
 import React, {
   useEffect,
   useState,
+  useCallback,
   // useRef
 } from 'react';
 import {useLocation} from "react-router-dom";
@@ -15,11 +16,13 @@ import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 // import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
+import Modal from '../Modal/Modal.jsx';
 
 import {
   setPublicZoneUrl,
@@ -82,7 +85,10 @@ function FilterbarZones({
   hideLogo,
   view
 }) {
-  const zoneTemplate = {}
+  const zoneTemplate = {
+    geography_type: 'monitoring',
+    zone_availability: 'auto'
+  }
 
   const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: readonly|adminView|adminEdit
   const [didInitEventHandlers, setDidInitEventHandlers] = useState(false);
@@ -90,9 +96,11 @@ function FilterbarZones({
   const [drawedArea, setDrawedArea] = useState(null);
   const [adminZones, setAdminZones] = useState(null);
   const [activeZone, setActiveZone] = useState(zoneTemplate);
+  const [lastClickedZone, setLastClickedZone] = useState();
   const [didChangeZoneConfig, setDidChangeZoneConfig] = useState(false);
   const [limitType, setLimitType] = useState('modality');
   const [pathName, setPathName] = useState(document.location.pathname);
+  const [doShowModal, setDoShowModal] = useState(false);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -114,6 +122,12 @@ function FilterbarZones({
     setPathName(location ? location.pathname : null);
   }, [location]);
 
+  // Do something if admin changes zone boundaries
+  useEffect(() => {
+    if(! drawedArea) return;
+    setDidChangeZoneConfig(true);
+  }, [drawedArea])
+
   // If viewMode prop changed: update state
   useEffect(() => {
     setViewMode(view);
@@ -131,19 +145,97 @@ function FilterbarZones({
     window.ddMap.on('draw.create', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
+      setDidChangeZoneConfig(true);
     });
 
     window.ddMap.on('draw.update', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
+      setDidChangeZoneConfig(true);
     });
 
     setDidInitEventHandlers(true);
   }, [window.ddMap])
 
+  // Call function if polygon is selected (for editting zones)
+  useEffect(() => {
+    window.addEventListener('setSelectedZone', eventHandler)
+    return () => {
+      window.removeEventListener('setSelectedZone', eventHandler);
+    }
+  }, [
+    // Update on adminZones, as we need to be able to read the db values
+    adminZones,
+    // Update on didChangeZoneConfig, as we need to know if a zone was edited
+    didChangeZoneConfig,
+    // Update on activeZone, so we can compare zone_id
+    activeZone,
+  ])
+
+  const selectMapFeature = (zoneId) => {
+    // Check if dependencies are present
+    if(! window.ddMap || ! zoneId) return;
+    // Get feature
+    const feature = window.CROW_DD.theDraw.get(zoneId);
+    // Check if feature was found
+    if(! feature) return;
+    // Select after a few milliseconds
+    // setTimeout(() => {
+      window.CROW_DD.theDraw.changeMode('direct_select', {
+        featureId: zoneId
+      });
+    // }, 5)
+  }
+
+  const eventHandler = async (e, config) => {
+    const zoneId = e.detail;
+    if(
+      zoneId === activeZone.zone_id// Currently edited zone
+      || typeof zoneId === 'string'// New zone
+    ) {
+      // Do nothing
+      return;
+    }
+
+    // Store clicked zone (ID) in state
+    setLastClickedZone(zoneId);
+
+    // If a second zone is selected, but the active one is not saved yet:
+    const skipConfirmation = config && config.skipConfirmation;
+    if(didChangeZoneConfig && ! skipConfirmation) {
+      // Ask for confirmation
+      setDoShowModal(true);
+      // Stop executing rest of script
+      return;
+    }
+
+    // Set didChangeZoneConfig to false
+    setDidChangeZoneConfig(false);
+
+    // Don't do anything if zone was selected already
+    if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
+      console.log('Stopped executing as zone was selected already')
+      return;
+    }
+
+    // Select selected feature on the map
+    selectFeature(zoneId);
+
+    // Update state
+    const didZoneUpdate = updateZoneStateToDatabaseValues(zoneId);
+
+    // Enable edit mode
+    if(didZoneUpdate) {
+      setViewMode('adminEdit');
+    }
+
+    return true;
+  }
+
   const getAdminZones = async () => {
     const sortedZones = await fetchAdminZones(token, filterGebied);
     setAdminZones(sortedZones);
+    return sortedZones;
   }
 
   const getPublicZones = async () => {
@@ -151,7 +243,7 @@ function FilterbarZones({
     setAdminZones(sortedZones);
   }
 
-  // Get admin zones on component load
+  // Get public zones on component load, and keep refreshing
   useEffect(() => {
     //
     let TO_local = setTimeout(async () => {
@@ -174,110 +266,64 @@ function FilterbarZones({
     return await saveZone();
   }
 
-  // Listen to zone selection events (for editing zones)
-  useEffect(() => {
-    if(! adminZones) return;
+  const updateZoneStateToDatabaseValues = (zoneId) => {
+    // Get zone info from database
+    const foundZone = getZoneById(adminZones, zoneId);
 
-    const eventHandler = async (e) => {
-      const zoneId = e.detail;
-      if(
-        zoneId === activeZone.zone_id// Currently edited zone
-        || typeof zoneId === 'string'// New zone
-      ) {
-        // Do nothing
-        return;
-      }
-
-      if(didChangeZoneConfig) {
-        // Ask for confirmation
-        if(window.confirm('Je hebt onopgeslagen wijzigingen. Wil je doorgaan zonder op te slaan?')) {
-          // Check if there's a draft polygon: if so -> remove
-          const draftFeatureId = getDraftFeatureId();
-          if(draftFeatureId) {
-            window.CROW_DD.theDraw.delete(draftFeatureId);
-          }
+    if(foundZone) {
+      // Change URL
+      setAdminZoneUrl(foundZone.geography_id)
+      // Set zone data
+      let zoneToSet = zoneTemplate;
+      zoneToSet.zone_id = foundZone.zone_id;
+      zoneToSet.area = foundZone.area;
+      zoneToSet.name = foundZone.name;
+      zoneToSet.municipality = foundZone.municipality;
+      zoneToSet.geography_type = foundZone.geography_type || zoneTemplate.geography_type;
+      zoneToSet.geography_id = foundZone.geography_id;
+      zoneToSet.description = foundZone.description;
+      zoneToSet.published = foundZone.published || zoneTemplate.published;
+      if(foundZone.stop) {
+        zoneToSet.stop = foundZone.stop;
+        zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
+        zoneToSet['vehicles-limit.moped'] = foundZone.stop.capacity.moped || 0;
+        zoneToSet['vehicles-limit.scooter'] = foundZone.stop.capacity.scooter || 0;
+        zoneToSet['vehicles-limit.cargo_bicycle'] = foundZone.stop.capacity.cargo_bicycle || 0;
+        zoneToSet['vehicles-limit.car'] = foundZone.stop.capacity.car || 0;
+        zoneToSet['vehicles-limit.other'] = foundZone.stop.capacity.other || 0;
+        zoneToSet['vehicles-limit.combined'] = foundZone.stop.capacity.combined || 0;
+        // Set zone availability
+        if(foundZone.stop.status.control_automatic === true) {
+          zoneToSet.zone_availability = 'auto';
+        } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_returning === true) {
+          zoneToSet.zone_availability = 'open';
+        } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_returning === false) {
+          zoneToSet.zone_availability = 'closed';
         }
-        // If user clicks cancel button: do nothing
-        else {
-          e.preventDefault();
-          return;
-        }
-      }
-
-      // Set didChangeZoneConfig to false
-      setDidChangeZoneConfig(false);
-
-      // Don't do anything if zone was selected already
-      if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
-        // console.log('Do nothing')
-        return;
-      }
-
-      // Select feature on the map
-      if(window.ddMap && zoneId) {
-        const feature = window.CROW_DD.theDraw.get(zoneId);
-        if(feature) {
-          // Select
-          window.CROW_DD.theDraw.changeMode('direct_select', {
-            featureId: zoneId
-          });
+        // Set limit type
+        if(zoneToSet['vehicles-limit.combined'] && zoneToSet['vehicles-limit.combined'] > 0) {
+          setLimitType('combined');
+        } else {
+          setLimitType('modality');
         }
       }
-
-      const foundZone = getZoneById(adminZones, zoneId);
-
-      if(foundZone) {
-        // Change URL
-        setAdminZoneUrl(foundZone.geography_id)
-        // Set zone
-        let zoneToSet = zoneTemplate;
-        zoneToSet.zone_id = foundZone.zone_id;
-        zoneToSet.area = foundZone.area;
-        zoneToSet.name = foundZone.name;
-        zoneToSet.municipality = foundZone.municipality;
-        zoneToSet.geography_type = foundZone.geography_type || zoneTemplate.geography_type;
-        zoneToSet.geography_id = foundZone.geography_id;
-        zoneToSet.description = foundZone.description;
-        zoneToSet.published = foundZone.published || zoneTemplate.published;
-        if(foundZone.stop) {
-          zoneToSet.stop = foundZone.stop;
-          zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
-          zoneToSet['vehicles-limit.moped'] = foundZone.stop.capacity.moped || 0;
-          zoneToSet['vehicles-limit.scooter'] = foundZone.stop.capacity.scooter || 0;
-          zoneToSet['vehicles-limit.cargo_bicycle'] = foundZone.stop.capacity.cargo_bicycle || 0;
-          zoneToSet['vehicles-limit.car'] = foundZone.stop.capacity.car || 0;
-          zoneToSet['vehicles-limit.other'] = foundZone.stop.capacity.other || 0;
-          zoneToSet['vehicles-limit.combined'] = foundZone.stop.capacity.combined || 0;
-          // Set zone availability
-          if(foundZone.stop.status.control_automatic === true) {
-            zoneToSet.zone_availability = 'auto';
-          } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_returning === true) {
-            zoneToSet.zone_availability = 'open';
-          } else if(! foundZone.stop.status.control_automatic && foundZone.stop.status.is_returning === false) {
-            zoneToSet.zone_availability = 'closed';
-          }
-          // Set limit type
-          if(zoneToSet['vehicles-limit.combined'] && zoneToSet['vehicles-limit.combined'] > 0) {
-            setLimitType('combined');
-          } else {
-            setLimitType('modality');
-          }
-        }
-        setActiveZone(zoneToSet);
-        // Enable edit mode
-        setViewMode('adminEdit');
-      }
-      return true;
+      setActiveZone(zoneToSet);
     }
-    window.addEventListener('setSelectedZone', eventHandler);
-    return () => {
-      window.removeEventListener('setSelectedZone', eventHandler);
+
+    return foundZone;
+  }
+
+  const selectFeature = (zoneId) => {
+    if(window.ddMap && zoneId) {
+      const feature = window.CROW_DD.theDraw.get(zoneId);
+      if(feature) {
+        // Select
+        window.CROW_DD.theDraw.changeMode('direct_select', {
+          featureId: zoneId
+        });
+      }
     }
-  }, [
-    adminZones,
-    activeZone.zone_id,
-    didChangeZoneConfig
-  ]);
+  }
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
@@ -500,25 +546,44 @@ function FilterbarZones({
     })
   }
 
-  const cancelButtonHandler = () => {
+  const cancelButtonHandler = async ({skipConfirmation}) => {
     // Only ask for a confirmation if the area was changed
     const isNewZone = ! activeZone.geography_id;
-    if(drawedArea && isNewZone) {
+    if(drawedArea && isNewZone && ! skipConfirmation) {
       if(! window.confirm('Weet je zeker dat je het tekenen van de zone wilt annuleren?')) {
         return;
       }
     }
     // Cleanup
     // - Revert changes to existing polygons
-    window.CROW_DD.theDraw.trash()
+    window.CROW_DD.theDraw.trash();
+    setDrawedArea(null);
     // - Delete local polygons
     deleteAllLocalZones();
     // Disable drawing mode
     disableDrawingPolygons();
     // Reset 'activeZone'
-    setActiveZone(zoneTemplate);   
+    setActiveZone(zoneTemplate);
     // Reload adminZones
-    getAdminZones();
+    await getAdminZones();
+    // Set active to back to default (unedited) data
+    if(! isNewZone) {
+      const originalZone = getZoneById(adminZones, activeZone.zone_id);
+      if(! originalZone) {
+        console.error('originalZone was not found while executing cancelButtonHandler')
+        return;
+      }
+
+      const feature = {
+        id: activeZone.zone_id,
+        type: 'Feature',
+        properties: {
+          geography_type: originalZone.geography_type
+        },
+        geometry: { type: 'Polygon', coordinates: originalZone.area.geometry.coordinates }
+      };
+      const featureIds = window.CROW_DD.theDraw.add(feature);
+    }
     //
     setDidChangeZoneConfig(false);
   }
@@ -527,7 +592,7 @@ function FilterbarZones({
 
   return (
     <div className="filter-bar-inner py-2">
-      
+
       {! hideLogo && <Link to="/"><Logo /></Link>}
       
       <div className="mt-6">
@@ -602,7 +667,7 @@ function FilterbarZones({
         </div>
       </div>}
 
-      {(viewMode === 'adminEdit') && <div>
+      {viewMode === 'adminEdit' && <div>
         <div className={labelClassNames}>
           Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
         </div>
@@ -884,6 +949,52 @@ function FilterbarZones({
           }, adminZones) : <div />}
         </div>
       </div>
+
+      <Modal
+        isVisible={doShowModal}
+        title="Wil je doorgaan zonder opslaan?"
+        button1Title={false}
+        button1Handler={(e) => {
+          setDoShowModal(false);
+          selectMapFeature(activeZone.zone_id);
+        }}
+        button2Title={"Doorgaan"}
+        button2Handler={(e) => {
+          e.preventDefault();
+          // Hide modal
+          setDoShowModal(false);
+          // Cancel all changes
+          cancelButtonHandler({ skipConfirmation: true })
+          // Re-click zone that was clicked by user
+          // selectMapFeature(lastClickedZone);
+          eventHandler({detail: lastClickedZone}, {
+            skipConfirmation: true
+          })
+        }}
+        saveHandlerUNEXISTING={async (e) => {
+          e.preventDefault();
+          // Hide modal
+          setDoShowModal(false);
+          // Wait until zone is saved
+          await saveZone();
+          // Click zone that was clicked by user
+          selectMapFeature(lastClickedZone);
+        }}
+        hideModalHandler={() => {
+          setDoShowModal(false);
+          selectMapFeature(activeZone.zone_id);
+        }}
+      >
+        <p className="mb-4">
+          Je hebt nog onopgeslagen wijzigingen.
+        </p>
+        <p className="my-4">
+          Sluit dit venster om je wijzigingen te behouden. Je kunt dan zelf de wijzigingen opslaan.
+        </p>
+        <p className="mt-4">
+          Je kunt ook <b>Doorgaan</b> zonder op te slaan.
+        </p>
+      </Modal>
 
     </div>
   )

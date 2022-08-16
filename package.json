@@ -36,6 +36,7 @@
     "recharts": "^2.1.6",
     "redux": "^4.1.1",
     "redux-thunk": "^2.3.0",
+    "tw-elements": "^1.0.0-alpha12",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
