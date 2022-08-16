@@ -164,6 +164,7 @@ function FilterbarZones({
       window.removeEventListener('setSelectedZone', eventHandler);
     }
   }, [
+    viewMode,
     // Update on adminZones, as we need to be able to read the db values
     adminZones,
     // Update on didChangeZoneConfig, as we need to know if a zone was edited
@@ -188,6 +189,8 @@ function FilterbarZones({
   }
 
   const eventHandler = async (e, config) => {
+    if(viewMode !== 'adminView' && viewMode !== 'adminEdit') return;
+
     const zoneId = e.detail;
     if(
       zoneId === activeZone.zone_id// Currently edited zone
