@@ -87,7 +87,8 @@ function FilterbarZones({
 }) {
   const zoneTemplate = {
     geography_type: 'monitoring',
-    zone_availability: 'auto'
+    zone_availability: 'auto',
+    published: true
   }
 
   const [viewMode, setViewMode] = useState(view || 'adminView');// Possible modes: readonly|adminView|adminEdit
@@ -285,7 +286,7 @@ function FilterbarZones({
       zoneToSet.geography_type = foundZone.geography_type || zoneTemplate.geography_type;
       zoneToSet.geography_id = foundZone.geography_id;
       zoneToSet.description = foundZone.description;
-      zoneToSet.published = foundZone.published || zoneTemplate.published;
+      zoneToSet.published = true;//foundZone.published || zoneTemplate.published;
       if(foundZone.stop) {
         zoneToSet.stop = foundZone.stop;
         zoneToSet['vehicles-limit.bicycle'] = foundZone.stop.capacity.bicycle || 0;
