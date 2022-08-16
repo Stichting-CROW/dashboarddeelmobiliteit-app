@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from "react-router-dom";
 
 import './MenuSecondaryItem.css';
@@ -10,7 +10,7 @@ function MenuSecondaryItem(props) {
   return (
     <a
       href="goForIt"
-      className="MenuSecondaryItem cursor-pointer mx-2"
+      className="MenuSecondaryItem cursor-pointer mx-1"
       onClick={props.onClick}
     >
       {props.text}
@@ -20,6 +20,10 @@ function MenuSecondaryItem(props) {
 
 function MenuSecondary() {
   const dispatch = useDispatch()
+
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : null;
+  });
 
   // Our state variables
   const [pathName, setPathName] = useState(document.location.pathname);
@@ -42,10 +46,31 @@ function MenuSecondary() {
     })
   }
 
+  const setFilterDatum = (newdt) => {
+    if(displayMode === 'displaymode-rentals') {
+      dispatch({
+        type: 'SET_FILTER_INTERVAL_END',
+        payload: newdt.toISOString()
+      })
+      return;
+    }
+    dispatch({
+      type: 'SET_FILTER_DATUM',
+      payload: newdt.toISOString()
+    })
+  }
+
   return (
     <div className="MenuSecondary block sm:hidden absolute left-0 z-10">
+      {displayMode !== 'displaymode-other' && <MenuSecondaryItem
+        text="🕓"
+        onClick={(e) => {
+          e.preventDefault();
+          setFilterDatum(new Date())
+        }}
+      />}
       <MenuSecondaryItem
-        text="Filters"
+        text={displayMode.indexOf('displaymode-zones-') > -1 ? 'Opties' : 'Filters'}
         onClick={(e) => {
           e.preventDefault();
           setVisibility('FILTERBAR', true)
