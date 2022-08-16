@@ -23,6 +23,7 @@ import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import Modal from '../Modal/Modal.jsx';
+import FilteritemDatum from './FilteritemDatum.jsx';
 
 import {
   setPublicZoneUrl,
@@ -599,7 +600,9 @@ function FilterbarZones({
 
       {! hideLogo && <Link to="/"><Logo /></Link>}
       
-      <div className="mt-6">
+      <FilteritemDatum disabled={true} />
+
+      <div className="mt-0">
         <FilteritemGebieden />
       </div>
 

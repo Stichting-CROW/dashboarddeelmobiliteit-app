@@ -10,7 +10,7 @@ import './css/FilteritemDatum-Clock.css';
 import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle'; //
 import calendarIcon from '../../images/calendar.svg';
 
-function FilterItemDatum() {
+function FilterItemDatum({disabled}) {
   const dispatch = useDispatch()
 
   // Variable that stores timeout for delaying setting date 
@@ -54,11 +54,11 @@ function FilterItemDatum() {
   return (
     <div className="filter-datum-container">
       <div className="filter-datum-title">
-        {displayMode === 'displaymode-rentals' ? 'Eindtijd' : 'Datum'}
+        {displayMode === 'displaymode-rentals' ? 'Eindtijd' : 'Datum/tijd'}
       </div>
       <div className="filter-datum-box-row">
         <div className="filter-datum-box-1">
-          <div className="flex flex-col justify-center"><div
+          <div className={`flex flex-col justify-center ${disabled ? 'invisible' : ''}`}><div
             className="filter-datum-caret"
             onClick={() => {
               setFilterDatum(
@@ -72,12 +72,13 @@ function FilterItemDatum() {
               onChange={setFilterDatum}
               value={new Date(filterDatum)}
               clearIcon={null}
+              disabled={disabled}
               calendarIcon={<img src={calendarIcon} alt="Logo" />}
               format={"y-MM-dd H:mm"}
               disableClock={true}
             />
           </div>
-          <div className="flex flex-col justify-center"><div
+          <div className={`flex flex-col justify-center ${disabled ? 'invisible' : ''}`}><div
             className="filter-datum-caret"
             onClick={() => {
               setFilterDatum(
