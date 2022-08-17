@@ -13,7 +13,6 @@ import U from 'mapbox-gl-utils';
 import {getMapStyles, setMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
-import {addIsochronesToMap} from './MapUtils/isochrones.js';
 import {
   addLayers,
   activateLayers
@@ -29,16 +28,13 @@ import {
   fetchPublicZones
 } from './MapUtils/zones.js';
 
-// Import API functions
-import {
-  getIsochronesForFootWalking
-} from '../../api/isochrones';
-
 import './MapComponent.css';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
+
+import IsochroneTools from '../IsochroneTools/IsochroneTools';
 
 // Set language for momentJS
 moment.updateLocale('nl', localization);
@@ -575,93 +571,10 @@ function MapComponent(props) {
     stateLayers.displaymode
   ]);
 
-  // Add isochrone marker
-  const addIsochroneMarker = (theMap) => {
-    if(! theMap) return;
-    if(isochroneMarker) return;
-
-    const addIsochronesForLngLat = async (theMap, lng, lat) => {
-      // Get foot walking isochrones
-      const result = await getIsochronesForFootWalking(lng, lat);
-      addIsochronesToMap(theMap, result)
-      return;
-    }
-
-    const onDragEnd = async () => {
-      const lngLat = marker.getLngLat();
-      await addIsochronesForLngLat(theMap, lngLat.lng, lngLat.lat)
-    }
-
-    // Get center of map
-    const {lng, lat} = theMap.getCenter();
-    var marker = new maplibregl.Marker({
-      draggable: true
-    })
-    .setLngLat([lng, lat])
-    .addTo(theMap);
-  
-    // Add isochrones around the new marker
-    addIsochronesForLngLat(theMap, lng, lat)
-
-    marker.on('dragend', onDragEnd);
-
-    setIsochroneMarker(marker);
-  }
-
-  // Remove isochrone marker
-  const removeIsochroneMarker = (theMap) => {
-    if(! isochroneMarker) return;
-    // Remove it
-    isochroneMarker.remove();
-
-    // Update state
-    setIsochroneMarker(null);
-
-    // Hide isochrones layer
-    theMap.U.hide('zones-isochrones')
-  }
-
-  const doShowIsochroneButton = () => {
-    const validEmailAddresses = [
-      'mail@bartroorda.nl',
-      'rinse.gorter@denhaag.nl',
-      'otto.vanboggelen@crow.nl',
-      'sven.boor@gmail.com'
-    ]
-    return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
-  }
-
   // Add map controls for isochrone view
-  return doShowIsochroneButton ? (
-    <>
-      <div className="fixed bg-white p-1" style={{
-        // bottom: '117px',
-        bottom: '177px',
-        right: '10px',
-        borderRadius: '4px',
-        minWidth: '29px',
-        textAlign: 'center',
-        boxShadow: '0 0 0 2px rgb(0 0 0 / 10%)'
-      }}>
-        {! isochroneMarker && <div 
-          className="cursor-pointer"
-          onClick={() => {addIsochroneMarker(window.ddMap)}}
-          title="Voeg punt voor isochronenweergave toe"
-        >
-          ⚓
-        </div>}
-        {isochroneMarker && <div 
-          className="cursor-pointer"
-          onClick={() => {removeIsochroneMarker(window.ddMap)}}
-          title="Stop isochronenweergave"
-        >
-          ❎
-        </div>}
-      </div>
-    </>
-  ) : null;
+  return isLoggedIn ? <IsochroneTools /> : null;
 }
 
 export {
   MapComponent
-};
+}

@@ -8,7 +8,7 @@ export const getFetchOptions = () => {
   }
 }
 
-export const getIsochronesForFootWalking = async (lng, lat) => {
+export const getIsochronesForFootWalking = async (locations) => {
   const url = `https://ors.dashboarddeelmobiliteit.nl/v2/isochrones/foot-walking`;
   const data = {
   "range": [
@@ -19,10 +19,7 @@ export const getIsochronesForFootWalking = async (lng, lat) => {
     ],
     "range_type": "time",
     "locations": [
-      [
-        lng,
-        lat
-      ]
+      locations
     ],
     "intersections": false
   }
