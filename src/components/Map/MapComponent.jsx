@@ -44,7 +44,6 @@ function MapComponent(props) {
 
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
-  const [isochroneMarker, setIsochroneMarker] = useState(false);
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {

@@ -87,6 +87,10 @@ const generatePopupHtml = (feature) => {
   `;
   if(! stop.realtime_data) return '<div>:)</div>';// Realtime data not yet loaded
 
+  const isControlledAutomatically = stop.status.control_automatic === true;
+  const isManuallySetToOpen = ! isControlledAutomatically && stop.status.is_returning === true;
+  const isManuallySetToClosed = ! isControlledAutomatically && stop.status.is_returning === false;
+
   const getCapacityForModality = (capacity, modality) => {
     // Return nothing if no stop capacity was found
     if(! capacity || capacity.length === 0) return;
@@ -199,8 +203,11 @@ const generatePopupHtml = (feature) => {
       <div class="text-lg font-bold">
         ${feature.properties.name}
       </div>
+      <div class="mt-2 text-sm font-bold" ${isControlledAutomatically ? 'hidden' : ''} style="color:#15aeef;">
+        Instelling actief: <b>altijd ${isManuallySetToOpen ? 'open' : 'gesloten'}</b>
+      </div>
       <div class="mt-2 text-sm font-bold" ${(! numPlacesAvailable || isNaN(percentageOfVehiclesAvailable)) ? 'hidden' : ''}>
-        Bezetting: ${numVehiclesAvailable}/${numPlacesAvailable}
+        Bezetting: ${numVehiclesAvailable}${isControlledAutomatically ? `/${numPlacesAvailable}` : ''}
       </div>
       <div class="mt-2 text-sm bg-green" ${(! numPlacesAvailable || isNaN(percentageOfVehiclesAvailable)) ? 'hidden' : ''}>
         ${renderVisualIndicator(numVehiclesAvailable, numPlacesAvailable)}
@@ -296,7 +303,7 @@ const initAdminView = (theMap) => {
   // Add custom draw mode: 'StaticMode'
   // https://github.com/mapbox/mapbox-gl-draw-static-mode
   let modes = MapboxDraw.modes;
-  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
+  modes = MapboxDrawWaypoint.enable(modes);// Di`sable moving features
   modes.static = StaticMode;
 
   const publicStyles = [
@@ -682,12 +689,12 @@ const triggerGeographyClick = (geographyId, allZones) => {
 const openPopup = (theMap, foundZone) => {
   // https://stackoverflow.com/a/57533307
   // https://maplibre.org/maplibre-gl-js-docs/api/geography/#lnglat
-  setTimeout(() => {
-    const location = center(foundZone.area);
-    theMap.fire('click', {
-      lngLat: new maplibregl.LngLat(location.geometry.coordinates[0], location.geometry.coordinates[1])
-    });
-  }, 1500)
+  const location = center(foundZone.area);
+  theMap.fire('click', {
+    lngLat: new maplibregl.LngLat(location.geometry.coordinates[0], location.geometry.coordinates[1])
+  });
+  // TODO Make sure the correct layer is clicked on (i.e. monitoring, not no-parking)
+  //      Info: https://github.com/mapbox/mapbox-gl-js/issues/9875
 }
 
 const navigateToGeography = (geographyId, allZones) => {
@@ -730,7 +737,9 @@ const navigateToGeography = (geographyId, allZones) => {
         duration: 1.4*1000 // in ms
       });
       // Open popup for this polygon automatically
-      openPopup(window.ddMap, foundZone);
+      setTimeout(() => {
+        openPopup(window.ddMap, foundZone);
+      }, 1500);
     }, 100);
   }
 

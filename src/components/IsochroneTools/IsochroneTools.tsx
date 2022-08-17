@@ -31,6 +31,7 @@ const addIsochronesForMarkers = async (theMap, locations) => {
 const IsochroneTools = () => {
 
   const [isochroneMarkers, setIsochroneMarkers] = useState([]);
+  const [counter, setCounter] = useState(0);
 
   // Add isochrone marker
   const addIsochroneMarker = (theMap) => {
@@ -73,6 +74,8 @@ const IsochroneTools = () => {
     // Add isochrone marker to local state
     isochroneMarkers.push(marker);
     setIsochroneMarkers(isochroneMarkers);
+    // Force update state
+    setCounter(counter + 1);
   }
 
 
@@ -91,7 +94,6 @@ const IsochroneTools = () => {
     // Hide isochrones layer
     theMap.U.hide('zones-isochrones')
   }
-
 
   const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
 
