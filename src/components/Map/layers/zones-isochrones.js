@@ -3,7 +3,14 @@ const layer = {
   'type': 'fill',
   'source': 'zones-isochrones',
   'paint': {
-    'fill-color': '#15AEEF',
+    'fill-color': [
+      'match', ['get','value'],
+      60.0, '#15AEEF',
+      120.0, '#15AEEF',
+      180.0, '#15AEEF',
+      300.0, '#15AEEF',
+      '#15AEEF'
+    ],
     'fill-opacity': [
       'match', ['get','value'],
       60.0, 0.4,

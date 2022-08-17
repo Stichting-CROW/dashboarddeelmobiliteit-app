@@ -21,24 +21,20 @@ const addIsochronesToMap = (theMap, featureCollection) => {
 
 }
 
+const addIsochronesForMarkers = async (theMap, locations) => {
+  // Get foot walking isochrones
+  const result = await getIsochronesForFootWalking(locations);
+  addIsochronesToMap(theMap, result)
+  return;
+}
+
 const IsochroneTools = () => {
+
+  const [isochroneMarkers, setIsochroneMarkers] = useState([]);
 
   // Add isochrone marker
   const addIsochroneMarker = (theMap) => {
     if(! theMap) return;
-    if(isochroneMarker) return;
-
-    const addIsochronesForLngLat = async (theMap, lng, lat) => {
-      // Get foot walking isochrones
-      const result = await getIsochronesForFootWalking([lng, lat]);
-      addIsochronesToMap(theMap, result)
-      return;
-    }
-
-    const onDragEnd = async () => {
-      const lngLat = marker.getLngLat();
-      await addIsochronesForLngLat(theMap, lngLat.lng, lngLat.lat)
-    }
 
     // Get center of map
     const {lng, lat} = theMap.getCenter();
@@ -49,30 +45,53 @@ const IsochroneTools = () => {
     .addTo(theMap);
 
     // Add isochrones around the new marker
-    addIsochronesForLngLat(theMap, lng, lat)
+    (() => {
+      let locations = [];
+      // Get all existing marker
+      isochroneMarkers.forEach(x => {
+        const lngLat = x.getLngLat();
+        locations.push([lngLat.lng, lngLat.lat]);
+      });
+      // Add last added marker
+      locations.push([lng, lat]);
+      // Add isochrones
+      addIsochronesForMarkers(theMap, locations)
+    })();
 
+    // On drag end: calculate isochrones and add these to the map
+    const onDragEnd = async () => {
+      let locations = [];
+      // Get every marker
+      isochroneMarkers.forEach(x => {
+        const lngLat = x.getLngLat();
+        locations.push([lngLat.lng, lngLat.lat]);
+      });
+      await addIsochronesForMarkers(theMap, locations)
+    }
     marker.on('dragend', onDragEnd);
 
-    setIsochroneMarker(marker);
+    // Add isochrone marker to local state
+    isochroneMarkers.push(marker);
+    setIsochroneMarkers(isochroneMarkers);
   }
 
 
   // Remove isochrone marker
   const removeIsochroneMarker = (theMap) => {
-    if(! isochroneMarker) return;
+    if(! isochroneMarkers) return;
 
     // Remove it
-    isochroneMarker.remove();
+    isochroneMarkers.forEach(x => {
+      x.remove();
+    });
 
     // Update state
-    setIsochroneMarker(null);
+    setIsochroneMarkers([]);
 
     // Hide isochrones layer
     theMap.U.hide('zones-isochrones')
   }
 
-
-  const [isochroneMarker, setIsochroneMarker] = useState(false);
 
   const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
 
@@ -87,7 +106,7 @@ const IsochroneTools = () => {
         textAlign: 'center',
         boxShadow: '0 0 0 2px rgb(0 0 0 / 10%)'
       }}>
-        {! isochroneMarker && <div 
+        {(! isochroneMarkers || isochroneMarkers.length <= 0) && <div 
           className="cursor-pointer"
           onClick={() => {
             addIsochroneMarker(window.ddMap)
@@ -97,10 +116,10 @@ const IsochroneTools = () => {
           ⚓
         </div>}
 
-        {isochroneMarker && <>
+        {(isochroneMarkers && isochroneMarkers.length > 0) && <>
           <div 
             className="cursor-pointer mb-2"
-            onClick={() => {removeIsochroneMarker(window.ddMap)}}
+            onClick={() => {addIsochroneMarker(window.ddMap)}}
             title="Voeg nieuw punt toe"
           >
             ➕

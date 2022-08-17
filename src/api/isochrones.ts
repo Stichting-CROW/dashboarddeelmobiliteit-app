@@ -18,9 +18,7 @@ export const getIsochronesForFootWalking = async (locations) => {
       300
     ],
     "range_type": "time",
-    "locations": [
-      locations
-    ],
+    "locations": locations,
     "intersections": false
   }
   
