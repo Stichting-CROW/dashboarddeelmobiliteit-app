@@ -36,7 +36,7 @@ const removeExistingPopups = () => {
   }
 }
 
-export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
+export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) => {
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
     'vehicles-point',
@@ -100,11 +100,16 @@ export const initPopupLogic = (theMap, providers, isLoggedIn, filterDate) => {
               Dit voertuig is ${vehicleProperties.distance_in_meters} meter verplaatst<br />
             </div>` : ''}
 
+            ${canSeeVehicleId ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
+              ${vehicleProperties.vehicle_id}
+            </div>` : ''}
+
             ${providerWebsiteUrl ? `<div class="mt-2">
               <a href="${providerWebsiteUrl}" rel="external" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${providerColor};">
                 website
               </a>
             </div>` : ''}
+
           </div>
         `)
         .addTo(theMap);

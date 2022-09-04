@@ -50,6 +50,7 @@ const processVehiclesResult = (state, vehicles) => {
        "type":"Feature",
        "properties":{
           "id":md5(v.location.latitude+v.location.longitude),
+          "vehicle_id":v.bike_id,
           "system_id": v.system_id || v.value,// v.value is used in the public map
           "form_factor": v.form_factor || null,
           "in_public_space_since": in_public_space_since,

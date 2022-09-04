@@ -527,11 +527,21 @@ function MapComponent(props) {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
 
-    initPopupLogic(map.current, providers, isLoggedIn, filter.datum)
+    // Only admins see vehicle ID
+    // const canSeeVehicleId = userData && userData.user && userData.user.registrations && userData.user.registrations[0].roles.indexOf('administer') > -1;
+    // Only S and B see vehicle ID
+    const canSeeVehicleId = () => {
+      const validEmailAddresses = [
+        'mail@bartroorda.nl',
+        'sven.boor@gmail.com'
+      ]
+      return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
+    }
+
+    initPopupLogic(map.current, providers, canSeeVehicleId, filter.datum)
   }, [
     didInitSourcesAndLayers,
     providers,
-    isLoggedIn,
     filter.datum
   ])
 
