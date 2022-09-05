@@ -45,8 +45,8 @@ const getNumPlacesAvailable = (stop) => {
   }
 
   let total = 0;
-  Object.keys(realtimeData.num_places_available).forEach(key => {
-    total += parseInt(realtimeData.num_places_available[key]);
+  Object.keys(stop.capacity).forEach(key => {
+    total += parseInt(stop.capacity[key]);
   });
 
   return total;
