@@ -102,7 +102,7 @@ Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, g
 
 ### Is de software open source?
 
-Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) en [Gitlab](https://gitlab.com/bikedashboard) kun de laaste versie van de broncode bekijken.
+Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) en [Gitlab](https://gitlab.com/bikedashboard) kun de laatste versie van de broncode bekijken.
 
 Velen handen maken licht werk. We zijn daarom blij als je wilt helpen. Gemeenten of andere overheden kunnen helpen bij het specificeren van handige overzichten. Deelmobiliteitbedrijven kunnen meebouwen aan open source tools. Ontwikkelaars kunnen bijdragen aan de code. Ontwerpers kunnen de look & feel verbeteren. Mail ons als je wilt weten hoe je mee kunt helpen!
 

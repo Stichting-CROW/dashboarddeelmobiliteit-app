@@ -88,3 +88,9 @@ export const getProviderColors = () => {
     'dott': '#00a8e9'
   }
 }
+
+// These archived providers will not be included in charts etc
+export const archivedProviders = [
+  'dott',
+  'jump'
+]
