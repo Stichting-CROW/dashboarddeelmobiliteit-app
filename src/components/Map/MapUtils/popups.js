@@ -100,7 +100,7 @@ export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) =
               Dit voertuig is ${vehicleProperties.distance_in_meters} meter verplaatst<br />
             </div>` : ''}
 
-            ${canSeeVehicleId ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
+            ${(canSeeVehicleId && vehicleProperties.vehicle_id) ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
               ${vehicleProperties.vehicle_id}
             </div>` : ''}
 

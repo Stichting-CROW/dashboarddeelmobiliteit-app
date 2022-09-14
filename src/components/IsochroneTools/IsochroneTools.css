@@ -1,0 +1,96 @@
+.IsochroneTools {
+  bottom: 220px;
+  right: 10px;
+}
+@media(min-width:  640px) {
+  .IsochroneTools {
+    bottom: 157px;
+  }
+}
+
+.IsochroneTools-ctrl-group {
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 5px;
+}
+.IsochroneTools-ctrl {
+  width: 43px;
+  height: 43px;
+  background-size: 16px;
+  background-color: transparent;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.IsochroneTools-ctrl:hover {
+  background-color: rgba(0,0,0,.05);
+}
+.IsochroneTools-ctrl-start {
+  background-image: url('./images/isochrones-walker.svg');
+  background-size: 14px;
+}
+.IsochroneTools-ctrl-start:hover {
+  background-image: url('./images/isochrones-walker-aqua.svg');
+}
+.IsochroneTools-ctrl-add {
+  background-image: url('./images/isochrones-add.svg');
+  background-size: 18px;
+}
+.IsochroneTools-ctrl-close {
+  border-top: 1px solid #ddd;
+  background-image: url('./images/isochrones-close.svg');
+}
+
+/* LEGEND */
+
+.IsochroneTools-legend-container {
+  width: 100%;
+  position: fixed;
+  bottom:  78px;
+  transition: width 1s;
+  transition-timing-function: ease-out;
+  display: none;
+}
+.IsochroneTools-legend {
+  width: 322px;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 16px;  
+  padding: 10px;
+}
+@media(min-width:  640px) {
+  .IsochroneTools-legend-container {
+    display: block;
+    right: 50px;
+  }
+  .IsochroneTools.filter-open .IsochroneTools-legend-container {
+    width: calc(100% - 324px);
+    transition-timing-function: ease-in;
+  }
+}
+.IsochroneTools-legend .walker-icon {
+  background-image: url('./images/isochrones-walker-aqua.svg');
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 12px;
+  width: 20px;
+}
+.IsochroneTools-legend-parts {
+  border: 1px solid #15aeef;
+  background: #15AEEF66 0% 0% no-repeat padding-box;
+  mix-blend-mode: multiply;
+  border: 1px solid #15AEEF;
+  border-radius: 10px;
+  opacity: 1;
+  overflow: hidden;
+}
+.IsochroneTools-legend-parts div {
+  flex: 1;
+  text-align: center;
+  color: #fff;
+  font: normal normal normal 14px/33px Inter;
+}
+.IsochroneTools-legend-parts div:nth-child(1) { background-color: #2896e7; }
+.IsochroneTools-legend-parts div:nth-child(2) { background-color: #40abed; }
+.IsochroneTools-legend-parts div:nth-child(3) { background-color: #66c3f3; }
+.IsochroneTools-legend-parts div:nth-child(4) { background-color: #a1dff9; }

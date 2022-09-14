@@ -5,6 +5,8 @@ import {
   getIsochronesForFootWalking
 } from '../../api/isochrones';
 
+import './IsochroneTools.css';
+
 const addIsochronesToMap = (theMap, featureCollection) => {
 
   if(! theMap) return;
@@ -32,6 +34,14 @@ const IsochroneTools = () => {
 
   const [isochroneMarkers, setIsochroneMarkers] = useState([]);
   const [counter, setCounter] = useState(0);
+
+  const dispatch = useDispatch();
+
+  const exportState = useSelector(state => {
+    return { filter: state.filter, layers: state.layers, ui:state.ui };
+  });
+
+  const isFilterbarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
 
   // Add isochrone marker
   const addIsochroneMarker = (theMap) => {
@@ -100,40 +110,42 @@ const IsochroneTools = () => {
   return (
     <>
 
-      <div className="fixed bg-white p-1" style={{
-        bottom: '177px',
-        right: '10px',
-        borderRadius: '4px',
-        minWidth: '29px',
-        textAlign: 'center',
-        boxShadow: '0 0 0 2px rgb(0 0 0 / 10%)'
-      }}>
-        {(! isochroneMarkers || isochroneMarkers.length <= 0) && <div 
-          className="cursor-pointer"
-          onClick={() => {
-            addIsochroneMarker(window.ddMap)
-          }}
-          title="Voeg punt voor isochronenweergave toe"
-        >
-          ⚓
+      <div className={`IsochroneTools ${isFilterbarOpen ? 'filter-open' : ''} fixed bg-white`}>
+        {(! isochroneMarkers || isochroneMarkers.length <= 0) && <div
+          className="IsochroneTools-ctrl-group">
+            <div 
+            className="IsochroneTools-ctrl IsochroneTools-ctrl-start cursor-pointer flex justify-center flex-col text-center"
+            onClick={() => {
+              addIsochroneMarker(window.ddMap)
+            }}
+            title="Voeg punt voor isochronenweergave toe"
+          />
         </div>}
 
-        {(isochroneMarkers && isochroneMarkers.length > 0) && <>
+        {(isochroneMarkers && isochroneMarkers.length > 0) && <div className="IsochroneTools-ctrl-group">
           <div 
-            className="cursor-pointer mb-2"
+            className="IsochroneTools-ctrl IsochroneTools-ctrl-add cursor-pointer flex justify-center flex-col text-center"
             onClick={() => {addIsochroneMarker(window.ddMap)}}
             title="Voeg nieuw punt toe"
-          >
-            ➕
-          </div>
+          />
           <div 
-            className="cursor-pointer"
+            className="IsochroneTools-ctrl IsochroneTools-ctrl-close cursor-pointer flex justify-center flex-col text-center"
             onClick={() => {removeIsochroneMarker(window.ddMap)}}
             title="Stop isochronenweergave"
-          >
-            ❎
+          />
+        </div>}
+
+        {(isochroneMarkers && isochroneMarkers.length > 0) && <div className="IsochroneTools-legend-container">
+          <div className="IsochroneTools-legend flex">
+            <div className="walker-icon" />
+            <div className="IsochroneTools-legend-parts flex-1 flex justify-center">
+              <div>1m</div>
+              <div>2m</div>
+              <div>3m</div>
+              <div>4m</div>
+            </div>
           </div>
-        </>}
+        </div>}
 
       </div>
     </>

@@ -44,3 +44,31 @@
   position: relative;
   left: -1px;
 }
+
+/* CONTROLS */
+
+/* Controls wrapper */
+.mapboxgl-ctrl-group:not(:empty),
+.maplibregl-ctrl-group:not(:empty) {
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 5px;
+}
+.mapboxgl-ctrl-group button, .maplibregl-ctrl-group button {
+  width: 43px;
+  height: 43px;
+}
+
+/* Zoom in */
+.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon,
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon {
+  background-image: url('./images/controls-zoom-in.svg');
+  background-size: 16px;
+}
+
+/* Zoom out */
+.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon,
+.maplibregl-ctrl button.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
+  background-image: url('./images/controls-zoom-out.svg');
+  background-size: 16px;
+}

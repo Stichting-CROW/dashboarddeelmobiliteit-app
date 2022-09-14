@@ -3,7 +3,7 @@
 This is the frontend app of [dashboarddeelmobiliteit.nl](https://dashboarddeelmobiliteit.nl/), bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 The goal of this app is to give insightful information on the use of shared mobility in The Netherlands.
-- Not logged in uers can see where shared vehicles are at the current moment
+- Not logged in users can see where shared vehicles are at the current moment
 - Logged in users (municipalities) can see more indepth insights
 
 The app uses the [API](https://gitlab.com/bikedashboard/dashboard-api) to get its data. The API gets its data from the postgresql database. The postgresql database is filled with data from the [go-import-vehicles](https://gitlab.com/bikedashboard/go-import-vehicles) script, that sources the data from all the different shared mobility providers.
