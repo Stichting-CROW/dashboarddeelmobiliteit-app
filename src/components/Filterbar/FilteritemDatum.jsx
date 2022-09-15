@@ -51,6 +51,9 @@ function FilterItemDatum({disabled}) {
     setFilterDatum(new Date(filterDatum));
   }, [filterDatum])
 
+  // Check if filterDatum is in future
+  const isInFuture = moment(filterDatum).unix() > moment().unix();
+
   return (
     <div className="filter-datum-container">
       <div className="filter-datum-title">
@@ -92,6 +95,11 @@ function FilterItemDatum({disabled}) {
         }} title="Toon huidige datum en tijd">
           <div className="filter-datum-img-now" />
         </div>
+      </div>
+      <div>
+        {isInFuture && <div className="my-2 text-red-500 text-sm">
+          Let op: de ingestelde datum/tijd is in de toekomst
+        </div>}
       </div>
     </div>
   )
