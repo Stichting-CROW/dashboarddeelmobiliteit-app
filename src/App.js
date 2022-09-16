@@ -193,8 +193,6 @@ function App() {
     filter.zones
   ])
 
-  // console.log('filter', filter)
-
   // On app start,
   //  if zones are loaded
   //  or if pathName/filter is changed:

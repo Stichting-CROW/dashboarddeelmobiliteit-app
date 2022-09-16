@@ -20,7 +20,6 @@ export const updateZones = async (store_zones) => {
       return false;
     }
 
-
     let url_zones="";
     if(!state) { // ||state.filter.gebied===""
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
@@ -32,6 +31,7 @@ export const updateZones = async (store_zones) => {
 
     // Not logged in:
     else if(! isLoggedIn(state)) {
+      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
 
       const gm_code = state.filter.gebied;
       let url = `https://api.deelfietsdashboard.nl/dashboard-api/public/filters?gm_code=${gm_code}`;

@@ -34,8 +34,7 @@ export const updateZonesgeodata = (store)  => {
       zone_ids = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality")).map(zone=>zone.zone_id).join(",");
     } else if (state.filter.zones.length===0) {
       // get bounds of single municipality zone
-      // console.log('state.filter.zones.length===0', state.filter.zones.length===0)
-      let list_g = state.metadata.gebieden.filter(gebied=>gebied.gm_code===state.filter.gebied).map(gebied=>gebied.gm_code);
+      // console.log('state.filter.zones.length===0', state.filter.zones.length===0) let list_g = state.metadata.gebieden.filter(gebied=>gebied.gm_code===state.filter.gebied).map(gebied=>gebied.gm_code);
       let list_z = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality"&&list_g.includes(zone.municipality)));
       // console.log("set empty zones payload (zones length 0)", list_g, list_z)
       zone_ids = list_z.map(zone=>zone.zone_id).join(",");
@@ -46,21 +45,18 @@ export const updateZonesgeodata = (store)  => {
       zone_ids = state.filter.zones; // use selected zones
     }
 
-    // console.log('TEST. zone_ids:', zone_ids)
-
     if(zone_ids==="") {
       store.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
       return;
     }
-    
+
     store.dispatch({type: 'SHOW_LOADING', payload: true});
 
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
     let url_zonesgeodata = isLoggedIn(state) 
-      ? "https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&&include_geojson=true"
-      : "https://api.deelfietsdashboard.nl/dashboard-api/public/zones?zone_ids="+zone_ids+"&&include_geojson=true";
-    // let url_geodata="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl"
-    // https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids=34217&include_geojson=true
+      ? "https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&include_geojson=true"
+      : "https://api.deelfietsdashboard.nl/dashboard-api/public/zones?zone_ids="+zone_ids+"&include_geojson=true";
+
     let options = isLoggedIn(state) ? { headers : { "authorization": "Bearer " + state.authentication.user_data.token }} : {}
 
     fetch(url_zonesgeodata, options).then((response) => {
