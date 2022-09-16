@@ -37,7 +37,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     if(candidates.length===1) {
       filterparams.push("zone_ids="+candidates[0].zone_id);
     } else {
-      console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
+      // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
   }
   // If no place is set: Get NL data (NL 'zone')

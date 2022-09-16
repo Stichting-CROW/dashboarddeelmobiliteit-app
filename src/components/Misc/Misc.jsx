@@ -120,6 +120,10 @@ export default function Misc(props) {
     });
   }
 
+  const updateMunicipalityCode = (gm_code) => {
+    setMunicipalityCode(gm_code);
+  }
+
   if (doRenderRedirect) {
     return renderRedirect();
   }
@@ -209,9 +213,7 @@ export default function Misc(props) {
           />
           <FormSelect
             label="Plaats"
-            onChange={(e) => {
-              setMunicipalityCode(e.target.value)
-            }}
+            onChange={(e) => updateMunicipalityCode(e.target.value)}
             options={places.map(x => {
               return {
                 value: x.gm_code,

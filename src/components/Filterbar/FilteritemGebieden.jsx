@@ -3,6 +3,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
 
+const setQueryParam = (key, val) => {
+  let searchParams = new URLSearchParams(window.location.search);
+  if(! val) {
+    searchParams.delete(key);
+  } else {
+    searchParams.set(key, val);
+  }
+  if (window.history.replaceState) {
+    const url = window.location.protocol 
+                + "//" + window.location.host 
+                + window.location.pathname 
+                + (searchParams.toString() ? "?" : "")
+                + searchParams.toString();
+    window.history.replaceState({ path: url }, "", url)
+  }
+}
+
 function FilteritemGebieden() {
   const dispatch = useDispatch()
 
@@ -32,6 +49,9 @@ function FilteritemGebieden() {
 
   const unselectGebied = e => {
     e.preventDefault();
+
+    // Reset query param
+    setQueryParam('gm_code', null);
     
     dispatch({
       type: 'SET_FILTER_GEBIED',
@@ -40,6 +60,9 @@ function FilteritemGebieden() {
   }
   
   const setFilterGebied = (gebied) => {
+    // Set query param
+    setQueryParam('gm_code', gebied);
+    // Call action
     dispatch({
       type: 'SET_FILTER_GEBIED',
       payload: gebied
@@ -48,7 +71,12 @@ function FilteritemGebieden() {
   
   const changeSearchText = e => { setFilterSearch(e.target.value) }
 
-  const clearSearchText = e => { setFilterSearch("") }
+  const clearSearchText = e => {
+    // Reset query param
+    setQueryParam('gm_code', null);
+    // Clear search query
+    setFilterSearch('')
+  }
   
   const toggleGebieden = (val) => {
     setVisibility('FILTERBAR_EXTENDED', val)
