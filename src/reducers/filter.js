@@ -1,8 +1,32 @@
 import moment from 'moment';
 
+// Always start with an initial municipality
+// This prevents a slow website on initial load
+const randomInitialMunicipality = () => {
+  const municipalitiesWithLotsOfVehicles = [
+    'GM0080',// Leeuwarden
+    'GM0014',// Groningen
+    // '',// Alkmaar
+    'GM0392',// Haarlem
+    'GM0034',// Almere
+    'GM0193',// Zwolle
+    'GM0402',// Hilversum
+    'GM0307',// Amersfoort
+    'GM0344',// Utrecht
+    'GM0200',// Apeldoorn
+    'GM0518',// Den Haag
+    'GM0599',// Rotterdam
+    'GM0758',// Breda,
+    'GM0855',// Tilburg
+    'GM0772'// Eindhoven
+  ];
+  const randomMunicipality = municipalitiesWithLotsOfVehicles[Math.floor(Math.random() * municipalitiesWithLotsOfVehicles.length)];
+  return randomMunicipality;
+}
+
 const initialState = {
   visible: true,
-  gebied: "",
+  gebied: randomInitialMunicipality(),
   zones: "",
   datum: (new Date()).toISOString(),
   // intervalstart: (new Date()).toISOString(),
