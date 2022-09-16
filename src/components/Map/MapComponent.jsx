@@ -213,7 +213,7 @@ function MapComponent(props) {
     registerMapView
   ])
 
-  // If geographyId is in URL -> navigate to zone
+  // If on Zones page and geographyId is in URL -> navigate to zone
   useEffect(() => {
     if(! didMapLoad) return;
     if(! didAddPublicZones && ! didAddAdminZones) return;
@@ -230,6 +230,29 @@ function MapComponent(props) {
       setTimeout(x => {
         triggerGeographyClick(geographyId, publicZones)
       }, 2500);
+    }
+  }, [
+    didMapLoad,
+    didAddPublicZones,
+    didAddAdminZones
+  ])
+
+  // If on Map page and gm_zone is in URL -> navigate to place
+  useEffect(() => {
+    if(! didMapLoad) return;
+
+    // Only continue if we are on the park or rentals page
+    if(window.location.pathname.indexOf('/map/park') === -1 && window.location.pathname.indexOf('/map/rentals') === -1) return;
+
+    // Get gm_code from URL
+    const queryParams = new URLSearchParams(window.location.search);
+    const gm_code = queryParams.get("gm_code");
+
+    if(gm_code) {
+      dispatch({
+        type: 'SET_FILTER_GEBIED',
+        payload: gm_code
+      })
     }
   }, [
     didMapLoad,
