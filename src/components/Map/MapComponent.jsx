@@ -22,10 +22,11 @@ import {
   addAdminZonesToMap,
   addPublicZonesToMap,
   initMapDrawLogic,
-  initPublicZonesMap,
+  initZonesMap,
   navigateToGeography,
   triggerGeographyClick,
-  fetchPublicZones
+  fetchPublicZones,
+  fetchAdminZones
 } from './MapUtils/zones.js';
 
 import './MapComponent.css';
@@ -44,13 +45,6 @@ function MapComponent(props) {
 
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
-
-  const token = useSelector(state => {
-    if(state.authentication && state.authentication.user_data) {
-      return state.authentication.user_data.token;
-    }
-    return null;
-  });
 
   const filterGebied = useSelector(state => {
     return state.filter ? state.filter.gebied : null;
@@ -92,6 +86,13 @@ function MapComponent(props) {
     return state.authentication.user_data;
   });
 
+  const token = useSelector(state => {
+    if(state.authentication && state.authentication.user_data) {
+      return state.authentication.user_data.token;
+    }
+    return null;
+  });
+
   // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
@@ -100,12 +101,22 @@ function MapComponent(props) {
 
   // Get public zones on component load
   useEffect(x => {
-    getPublicZones();
+    // Decide on the function to call (admin or public)
+    const getZonesFunc = token ? getAdminZones : getPublicZones;
+    // Get zones
+    getZonesFunc();
   }, [])
 
+  const getAdminZones = async () => {
+    const sortedZones = await fetchAdminZones(token, filterGebied);
+
+    setPublicZones(sortedZones);
+  }
+
   const getPublicZones = async () => {
-    const zones = await fetchPublicZones(filterGebied);
-    setPublicZones(zones);
+    const sortedZones = await fetchPublicZones(filterGebied);
+
+    setPublicZones(sortedZones);
   }
 
   const applyMapSettings = (theMap) => {
@@ -270,7 +281,7 @@ function MapComponent(props) {
     // Only init map draw features if on zones admin page
     if(stateLayers.displaymode === 'displaymode-zones-public') {
       // ADD zone layers
-      initPublicZonesMap(map.current)
+      initZonesMap(map.current, token, filterGebied)
       // Switch to base map
       setTimeout(() => {
         const mapStyles = getMapStyles();
@@ -285,6 +296,7 @@ function MapComponent(props) {
   }, [
     didMapLoad,
     didAddPublicZones,
+    filterGebied,
     stateLayers.displaymode
   ]);
 
@@ -292,7 +304,10 @@ function MapComponent(props) {
   // only on the zones-page (public or admin)
   useEffect(() => {
     if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
-    getPublicZones();
+    // Decide on the function to call (admin or public)
+    const getZonesFunc = token ? getAdminZones : getPublicZones;
+    // Get zones
+    getZonesFunc();
   }, [
     stateLayers.displaymode
   ]);
