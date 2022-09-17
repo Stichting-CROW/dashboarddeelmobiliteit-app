@@ -29,7 +29,7 @@ import {
   setPublicZoneUrl,
   setAdminZoneUrl,
   getAdminZones,
-  getPublicZones,
+  // getPublicZones,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
@@ -240,23 +240,27 @@ function FilterbarZones({
   const getAdminZones = async () => {
     const sortedZones = await fetchAdminZones(token, filterGebied);
     setAdminZones(sortedZones);
+
     return sortedZones;
   }
 
   const getPublicZones = async () => {
     const sortedZones = await fetchPublicZones(filterGebied);
+
     setAdminZones(sortedZones);
   }
 
   // Get public zones on component load, and keep refreshing
   useEffect(() => {
-    //
+    // Decide on the function to call (admin or public)
+    const getZonesFunc = token ? getAdminZones : getPublicZones;
+    // On load: get zones
     let TO_local = setTimeout(async () => {
-      getPublicZones();
+      getZonesFunc();
     }, 5);
     // Set an interval: refresh data every 60s
     let TO_local_interval = setInterval(async () => {
-      getPublicZones();
+      getZonesFunc();
     }, 60*1000);
     // Cleanup
     return () => {

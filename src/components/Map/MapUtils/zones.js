@@ -235,10 +235,10 @@ const generatePopupHtml = (feature) => {
   `
 }
 
-const initPublicZonesMap = async (theMap) => {
+const initZonesMap = async (theMap, token, filterGebied) => {
   if(! theMap) return;
 
-  const publicZones = await fetchPublicZones();
+  const publicZones = token ? await fetchAdminZones(token, filterGebied) : await fetchPublicZones();
   if(! publicZones) return;
 
   let geoJson = {
@@ -471,7 +471,7 @@ export const addAdminZonesToMap = async (token, filter) => {
 export const addPublicZonesToMap = async (token, filter) => {
   if(! window.CROW_DD) return;
 
-  // Get admin zones
+  // Get public zones
   let zones = await getPublicZones(token, filter);
   if(Object.keys(zones).length <= 0) {
     return;
@@ -755,7 +755,7 @@ export {
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
   getDraftFeatureId,
-  initPublicZonesMap,
+  initZonesMap,
   fetchAdminZones,
   fetchPublicZones,
   setPublicZoneUrl,
