@@ -142,7 +142,7 @@ const IsochroneTools = () => {
               <div>1m</div>
               <div>2m</div>
               <div>3m</div>
-              <div>4m</div>
+              <div>5m</div>
             </div>
           </div>
         </div>}
