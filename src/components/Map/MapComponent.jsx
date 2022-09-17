@@ -241,9 +241,6 @@ function MapComponent(props) {
   useEffect(() => {
     if(! didMapLoad) return;
 
-    // Only continue if we are on the park or rentals page
-    if(window.location.pathname.indexOf('/map/park') === -1 && window.location.pathname.indexOf('/map/rentals') === -1) return;
-
     // Get gm_code from URL
     const queryParams = new URLSearchParams(window.location.search);
     const gm_code = queryParams.get("gm_code");
