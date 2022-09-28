@@ -249,7 +249,7 @@ function Menu({pathName}) {
 
             <MenuItem
               pathName={pathName}
-              path={'/misc'}
+              path={'/profile'}
               text={''}
               icon={'/images/components/Menu/settings.svg'}
             />

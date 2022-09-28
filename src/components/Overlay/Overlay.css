@@ -17,6 +17,10 @@
   @apply list-disc ml-4 my-4
 }
 
+.Overlay ol {
+  @apply list-decimal ml-4 my-4
+}
+
 .Overlay p {
   @apply mb-4;
 }

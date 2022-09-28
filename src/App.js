@@ -23,6 +23,9 @@ import About from './components/About/About.jsx';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
+import Faq from './components/Faq/Faq';
+import Profile from './components/Profile/Profile';
+import Export from './components/Export/Export';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 
@@ -303,6 +306,27 @@ function App() {
               <Route exact path="/misc">
                 <Overlay>
                   <Misc />
+                </Overlay>
+              </Route>
+              <Route exact path="/profile">
+                <Overlay>
+                  <Misc>
+                    <Profile />
+                  </Misc>
+                </Overlay>
+              </Route>
+              <Route exact path="/export">
+                <Overlay>
+                  <Misc>
+                    <Export />
+                  </Misc>
+                </Overlay>
+              </Route>
+              <Route exact path="/faq">
+                <Overlay>
+                  <Misc>
+                    <Faq />
+                  </Misc>
                 </Overlay>
               </Route>
             </>
