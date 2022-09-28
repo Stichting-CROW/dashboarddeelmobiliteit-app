@@ -137,6 +137,8 @@ function Menu({pathName}) {
   });
 
   const doShowZones = () => {
+    return true;
+
     const validEmailAddresses = [
       'mail@bartroorda.nl',
       'rinse.gorter@denhaag.nl',
