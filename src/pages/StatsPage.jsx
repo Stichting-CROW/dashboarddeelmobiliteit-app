@@ -8,6 +8,7 @@ import {
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart.jsx';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
+import FormInput from '../components/FormInput/FormInput';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -19,6 +20,28 @@ function StatsPage(props) {
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
       payload: newlevel
     })
+  }
+
+  const setAggregationTime = (newtime) => {
+    dispatch({
+      type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE_TIJD',
+      payload: newtime
+    })
+  }
+
+  const renderTimeControl = () => {
+    return  (
+      <div className="StatsPage-time-selection flex justify-center flex-col">
+        <FormInput
+          name="time"
+          type="time"
+          value={filter.ontwikkelingaggregatie_tijd}
+          onChange={(e) => {
+            setAggregationTime(e.target.value)
+          }}
+        />
+      </div>
+    )
   }
 
   const renderAggregationButton = (name, title) => {
@@ -49,12 +72,18 @@ function StatsPage(props) {
       </div>
 
       <div className="xl:flex">
-        <div className="xl:flex-1">
-          <h2 className="text-4xl my-2">Verhuringen</h2>
+        <div className="xl:flex-1 mt-8 xl:mt-0">
+          <div className="flex justify-between">
+            <h2 className="text-4xl my-2">Verhuringen</h2>
+            {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+          </div>
           <VerhuringenChart />
         </div>
-        <div className="xl:flex-1">
-          <h2 className="text-4xl my-2">Beschikbare voertuigen</h2>
+        <div className="xl:flex-1 mt-8 xl:mt-0">
+          <div className="flex justify-between">
+            <h2 className="text-4xl my-2">Beschikbare voertuigen</h2>
+            {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+          </div>
           <BeschikbareVoertuigenChart />
         </div>
       </div>

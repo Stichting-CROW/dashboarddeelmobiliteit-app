@@ -51,7 +51,8 @@ function BeschikbareVoertuigenChart(props) {
       const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
         filter: filter,
         metadata: metadata,
-        aggregationLevel: filter.ontwikkelingaggregatie
+        aggregationLevel: filter.ontwikkelingaggregatie,
+        aggregationTime: filter.ontwikkelingaggregatie_tijd
       });
 
       // Return if no stats are available

@@ -12,7 +12,7 @@ const getFetchOptions = (token) => {
 
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}`;
+  let url = `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
@@ -49,4 +49,3 @@ export const downloadRawData = async (token, options) => {
 
   saveAs(responseBlob, `export_dashboarddeelmobiliteit_${options.startDate}-${options.endDate}_${options.gm_code}.zip`)
 }
-

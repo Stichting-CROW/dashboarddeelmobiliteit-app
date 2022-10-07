@@ -18,26 +18,6 @@ function DateFromTo(props) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // const updateFilter = (start, end, aggregatie=false) => {
-  //   // strip hours
-  //   const van = new Date(start.toDateString());
-
-  //   // strip hours, add 24 h
-  //   let tot = new Date(end.toDateString()) ;
-  //   // tot.setDate(tot.getDate() + 1);
-  //   dispatch({
-  //     type: 'SET_FILTER_ONTWIKKELING_VANTOT',
-  //     payload: { van: van.toISOString(), tot: tot.toISOString() }
-  //   })
-    
-  //   if(aggregatie!==false) {
-  //     dispatch({
-  //       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
-  //       payload: aggregatie
-  //     })
-  //   }
-  // }
-
   const onChange = (dates) => {
     const [start, end] = dates;
 

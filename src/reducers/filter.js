@@ -328,6 +328,12 @@ export default function filter(state = initialState, action) {
           ontwikkelingaggregatie: action.payload
       };
     }
+    case 'SET_FILTER_ONTWIKKELING_AGGREGATIE_TIJD': {
+      return {
+          ...state,
+          ontwikkelingaggregatie_tijd: action.payload
+      };
+    }
     case 'LOGIN':
     case 'LOGOUT': {
       // console.log('login/logout - reset filter')
