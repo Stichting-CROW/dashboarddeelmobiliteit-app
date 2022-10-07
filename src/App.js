@@ -7,6 +7,7 @@ import {
 import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
+import {AnimatePresence, motion} from 'framer-motion/dist/framer-motion'
 import 'tw-elements';
 
 import Menu from './components/Menu.jsx';
@@ -39,6 +40,10 @@ import {
 } from './poll-api/pollVerhuringenData.js';
 
 import {
+  showNotification,
+} from './helpers/notify';
+
+import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_ZONES_PUBLIC,
@@ -48,17 +53,61 @@ import {
 
 import './App.css';
 
+const Notification = ({ doShowNotification, setDoShowNotification, isFilterBarOpen }) => {
+  return <AnimatePresence>
+    {doShowNotification && <motion.div
+      key="notification"
+      initial={{ opacity: 0.5 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed top-5 z-20 left-5 right-5"
+    >
+      <motion.div
+        drag
+        dragConstraints={{
+          top: -10,
+          left: -50,
+          right: 50,
+          bottom: 10,
+        }}
+        className="relative bg-white/60 backdrop-blur-xl w-max-w-md rounded-lg mx-auto p-6 shadow hover:opacity-75" style={{
+          width: window.innerWidth > 640 ? '322px' : '100%',
+          left: (isFilterBarOpen && window.innerWidth > 640) ? '162px' : 0,
+          cursor: 'pointer'
+        }}
+        onClick={() => setDoShowNotification(false)}
+      >
+        <h1 className="text-xl text-slate-700 font-medium text-center">
+          {doShowNotification}
+        </h1>
+        <div className="flex justify-between items-center">
+          <a href="#" className="hidden text-slate-500 hover:text-slate-700 text-sm inline-flex space-x-1 items-center">
+            <span>Go to Dashboard</span>
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </a>
+        </div>
+      </motion.div>
+    </motion.div>}
+  </AnimatePresence>
+}
+
 function App() {
   // Our state variables
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
   const [delayTimeout, setDelayTimeout] = useState(null);
+  const [doShowNotification, setDoShowNotification] = useState('');
   
   const dispatch = useDispatch()
   
   const mapContainer = useRef(null);
 
   let DELAY_TIMEOUT_IN_MS = 250;
+
+  const exportState = useSelector(state => {
+    return { filter: state.filter, layers: state.layers, ui:state.ui };
+  });
+  const isFilterBarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
 
   // Store window location in a local variable
   let location = useLocation();
@@ -67,6 +116,13 @@ function App() {
     setUriParams(location ? location.search : null);
   }, [location]);
   
+  // Init notify bar logic
+  useEffect(() => {
+    window.notify = (msg) => {
+      showNotification(msg, setDoShowNotification);
+    }
+  }, [])
+
   useEffect(() => {
     if(uriParams!==null) {
       let params = new URLSearchParams(uriParams);
@@ -259,117 +315,123 @@ function App() {
 
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
-        {process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
-          {layers.displaymode}
-        </div>}
-        <LoadingIndicator  />
-        <div className="gui-layer">
-        <Switch>
-          { isLoggedIn ?
-            <>
-              <Route exact path="/">
-                {renderMapElements()}
-              </Route>
-              <Route exact path="/map/park">
-                {renderMapElements()}
-              </Route>
-              <Route exact path="/map/rentals">
-                {renderMapElements()}
-              </Route>
-              <Route path="/map/zones">
-                {renderMapElements()}
-              </Route>
-              <Route path="/admin/zones">
-                {renderMapElements()}
-              </Route>
-              <Route exact path="/stats/overview">
-                <ContentPage>
-                  <StatsPage />
-                </ContentPage>
-                {renderMapElements()}
-              </Route>
-              <Route exact path="/monitoring">
-                <ContentPage>
-                  <Monitoring />
-                </ContentPage>
-              </Route>
-              <Route exact path="/over">
-                <Overlay>
-                  <About />
-                </Overlay>
-              </Route>
-              <Route exact path="/rondleiding">
-                <ContentPage forceFullWidth={true}>
-                  <Tour />
-                </ContentPage>
-              </Route>
-              <Route exact path="/misc">
-                <Overlay>
-                  <Misc />
-                </Overlay>
-              </Route>
-              <Route exact path="/profile">
-                <Overlay>
-                  <Misc>
-                    <Profile />
-                  </Misc>
-                </Overlay>
-              </Route>
-              <Route exact path="/export">
-                <Overlay>
-                  <Misc>
-                    <Export />
-                  </Misc>
-                </Overlay>
-              </Route>
-              <Route exact path="/faq">
-                <Overlay>
-                  <Misc>
-                    <Faq />
-                  </Misc>
-                </Overlay>
-              </Route>
-            </>
-            :
-            null
-          }
 
-          <Route exact path="/over">
-            <Overlay>
-              <About />
-            </Overlay>
-          </Route>
+      <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
 
-          <Route exact path="/rondleiding">
-            <ContentPage forceFullWidth={true}>
-              <Tour />
-            </ContentPage>
-          </Route>
+      {process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
+        {layers.displaymode}
+      </div>}
 
-          <Route exact path="/login">
-            <Overlay>
-              <Login />
-            </Overlay>
-          </Route>
+      <LoadingIndicator  />
 
-          <Route exact path="/reset-password/:changePasswordCode">
-            <Overlay>
-              <SetPassword />
-            </Overlay>
-          </Route>
+      <div className="gui-layer">
 
-          <Route>
-            {renderMapElements()}
-          </Route>
+      <Switch>
+        { isLoggedIn ?
+          <>
+            <Route exact path="/">
+              {renderMapElements()}
+            </Route>
+            <Route exact path="/map/park">
+              {renderMapElements()}
+            </Route>
+            <Route exact path="/map/rentals">
+              {renderMapElements()}
+            </Route>
+            <Route path="/map/zones">
+              {renderMapElements()}
+            </Route>
+            <Route path="/admin/zones">
+              {renderMapElements()}
+            </Route>
+            <Route exact path="/stats/overview">
+              <ContentPage>
+                <StatsPage />
+              </ContentPage>
+              {renderMapElements()}
+            </Route>
+            <Route exact path="/monitoring">
+              <ContentPage>
+                <Monitoring />
+              </ContentPage>
+            </Route>
+            <Route exact path="/over">
+              <Overlay>
+                <About />
+              </Overlay>
+            </Route>
+            <Route exact path="/rondleiding">
+              <ContentPage forceFullWidth={true}>
+                <Tour />
+              </ContentPage>
+            </Route>
+            <Route exact path="/misc">
+              <Overlay>
+                <Misc />
+              </Overlay>
+            </Route>
+            <Route exact path="/profile">
+              <Overlay>
+                <Misc>
+                  <Profile />
+                </Misc>
+              </Overlay>
+            </Route>
+            <Route exact path="/export">
+              <Overlay>
+                <Misc>
+                  <Export />
+                </Misc>
+              </Overlay>
+            </Route>
+            <Route exact path="/faq">
+              <Overlay>
+                <Misc>
+                  <Faq />
+                </Misc>
+              </Overlay>
+            </Route>
+          </>
+          :
+          null
+        }
 
-        </Switch>
+        <Route exact path="/over">
+          <Overlay>
+            <About />
+          </Overlay>
+        </Route>
 
-        <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
-        <MapPage mapContainer={mapContainer} />
-        <Menu pathName={pathName} />
+        <Route exact path="/rondleiding">
+          <ContentPage forceFullWidth={true}>
+            <Tour />
+          </ContentPage>
+        </Route>
 
-       </div>
+        <Route exact path="/login">
+          <Overlay>
+            <Login />
+          </Overlay>
+        </Route>
+
+        <Route exact path="/reset-password/:changePasswordCode">
+          <Overlay>
+            <SetPassword />
+          </Overlay>
+        </Route>
+
+        <Route>
+          {renderMapElements()}
+        </Route>
+
+      </Switch>
+
+      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+      <MapPage mapContainer={mapContainer} />
+      <Menu pathName={pathName} />
+
      </div>
+    </div>
   );
 }
 

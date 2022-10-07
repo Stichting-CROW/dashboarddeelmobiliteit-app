@@ -92,6 +92,7 @@ function FilterItemDatum({disabled}) {
         </div>
         <div className="filter-datum-box-2" onClick={() => {
           setFilterDatum(new Date())
+          window['notify']('Datum/tijd geupdate')
         }} title="Toon huidige datum en tijd">
           <div className="filter-datum-img-now" />
         </div>
