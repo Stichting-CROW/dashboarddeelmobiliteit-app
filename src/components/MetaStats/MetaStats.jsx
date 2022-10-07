@@ -8,12 +8,6 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_OTHER,
-  // DISPLAYMODE_PARKEERDATA_HEATMAP,
-  // DISPLAYMODE_PARKEERDATA_CLUSTERS,
-  // DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  // DISPLAYMODE_VERHUURDATA_HEATMAP,
-  // DISPLAYMODE_VERHUURDATA_CLUSTERS,
-  // DISPLAYMODE_VERHUURDATA_VOERTUIGEN
 } from '../../reducers/layers.js';
 
 // import './MetaStats.css';
@@ -39,13 +33,6 @@ function MetaStats(props) {
   const displayMode = useSelector(state => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
-
-  // const {setLayers, setActiveSource} = props;
-  // const dispatch = useDispatch()
-
-  // const isLoggedIn = useSelector(state => {
-  //   return state.authentication.user_data ? true : false;
-  // });
 
   const token = useSelector(state => {
     if(state.authentication && state.authentication.user_data) {

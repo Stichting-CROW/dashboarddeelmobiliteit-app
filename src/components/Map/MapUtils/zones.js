@@ -259,6 +259,7 @@ const initZonesMap = async (theMap, token, filterGebied) => {
   // Show layer
   theMap.U.show('zones-metrics-public')
 
+  // Define map click handler
   theMap.on('click', 'zones-metrics-public', function (e) {
     // Don't show popup if it's a no_parking zone
     if(e && e.features && e.features[0]

@@ -1,4 +1,5 @@
-import base from '../MapStyles/base.js';
+import baseStyle from '../MapStyles/base.js';
+import nine3030Style from '../MapStyles/nine3030.js';
 import md5 from 'md5';
 import {layers} from '../layers/index.js';
 import {addSources} from './sources.js';
@@ -11,13 +12,14 @@ export const getMapStyles = () => {
   return {
     // NOTE: mapbox:// urls are not supported anymore.
     // See https://github.com/maplibre/maplibre-gl-js/issues/1225#issuecomment-1118769488
-    base: base,
+    base: nine3030Style,
     satelite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
   }
 }
 
 // Variable to keep track of the map style that we used last
 let mapStyleHash = md5(getMapStyles().base);
+// Function setMapStyle -- It reorders all layers, so the layers stay in the order we want
 export const setMapStyle = async (map, styleUrlOrObject) => {
   if(! map) return;
   if(! styleUrlOrObject) return;

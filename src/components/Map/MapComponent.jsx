@@ -300,7 +300,7 @@ function MapComponent(props) {
 
     // Only init map draw features if on zones admin page
     if(stateLayers.displaymode === 'displaymode-zones-public') {
-      // ADD zone layers
+      // Add zone layers
       initZonesMap(map.current, token, filterGebied)
       // Switch to base map
       setTimeout(() => {
@@ -372,7 +372,7 @@ function MapComponent(props) {
         window.CROW_DD.theDraw.deleteAll();
         // #TODO Not sure why this is needed.
         // If the timeout is not here, the draw polygons keep visible
-        // if you witch from zones-admin to zones-public
+        // if you switch from zones-admin to zones-public
         setTimeout(() => {
           window.CROW_DD.theDraw.deleteAll();
         }, 500);
@@ -550,7 +550,7 @@ function MapComponent(props) {
     
     map.current.fitBounds(extent);
     
-    // reset extent action
+    // Reset extent action
     dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: [] });
   }, [
     extent,
@@ -566,11 +566,19 @@ function MapComponent(props) {
     // const canSeeVehicleId = userData && userData.user && userData.user.registrations && userData.user.registrations[0].roles.indexOf('administer') > -1;
     // Only S and B see vehicle ID
     const canSeeVehicleId = () => {
-      const validEmailAddresses = [
+      // If user isn't logged in, it's no analyst
+      if(! userData || ! userData.user) {
+        return false;
+      }
+      // Define email addresses of analysts
+      const analystEmailAddresses = [
         'mail@bartroorda.nl',
         'sven.boor@gmail.com'
       ]
-      return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
+      // isAnalyst :: Checks if given email is an analyst 
+      const isAnalyst = (email) => analystEmailAddresses.indexOf(email) > -1;
+      // Return if user is analyst or not
+      return isAnalyst(userData.user.email);
     }
 
     initPopupLogic(map.current, providers, canSeeVehicleId, filter.datum)
