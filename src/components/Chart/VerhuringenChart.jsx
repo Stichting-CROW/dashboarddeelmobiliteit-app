@@ -53,6 +53,11 @@ function VerhuringenChart(props) {
         aggregationLevel: filter.ontwikkelingaggregatie
       });
 
+      // Return if no stats are available
+      if(! rentals || ! rentals.rentals_aggregated_stats) {
+        return;
+      }
+      
       let operators = getOperatorStatsForChart(rentals.rentals_aggregated_stats.values, metadata.aanbieders)
       dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
 
@@ -62,8 +67,6 @@ function VerhuringenChart(props) {
   }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
   
   const chartdata = prepareAggregatedStatsData('rentals', rentalsData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude);
-  
-  // console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
   const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
 
   const renderChart = () => {

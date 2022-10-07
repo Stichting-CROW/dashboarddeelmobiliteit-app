@@ -21,27 +21,31 @@ function StatsPage(props) {
     })
   }
 
-  // if(filter && ! filter.gebied) {
-  //   return (
-  //     <div className="StatsPage pt-8 pb-24">
-  //       Selecteer een plaats
-  //     </div>
-  //   )
-  // }
+  const renderAggregationButton = (name, title) => {
+    return (
+      <div
+        key={`agg-level-${name}`}
+        className={"agg-button " + (filter.ontwikkelingaggregatie===name ? " agg-button-active":"")}
+        onClick={() => { setAggregationLevel(name) }}
+      >
+        {title}
+      </div>
+    )
+  }
+
+  const aggregationButtonsToRender = [
+    {name: 'minute', title: 'minuut'},
+    {name: 'hour', title: 'uur'},
+    {name: 'day', title: 'dag'},
+    {name: 'week', title: 'week'},
+    {name: 'month', title: 'maand'},
+  ]
 
   return (
     <div className="StatsPage pt-4 pb-24">
 
       <div className={"agg-button-container"}>
-        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='day' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('day') }}>
-          dag
-        </div>
-        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='week' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('week') }}>
-          week
-        </div>
-        <div className={"agg-button " + (filter.ontwikkelingaggregatie==='month' ? " agg-button-active":"")} onClick={() => { setAggregationLevel('month') }}>
-          maand
-        </div>
+        {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))}
       </div>
 
       <div className="xl:flex">

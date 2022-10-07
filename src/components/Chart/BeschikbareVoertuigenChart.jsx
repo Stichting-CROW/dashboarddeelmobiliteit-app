@@ -46,12 +46,18 @@ function BeschikbareVoertuigenChart(props) {
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
+
     async function fetchData() {
       const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
         filter: filter,
         metadata: metadata,
         aggregationLevel: filter.ontwikkelingaggregatie
       });
+
+      // Return if no stats are available
+      if(! availableVehicles || ! availableVehicles.available_vehicles_aggregated_stats) {
+        return;
+      }
       
       let operators = getOperatorStatsForChart(availableVehicles.available_vehicles_aggregated_stats.values, metadata.aanbieders)
       dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
