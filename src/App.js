@@ -230,7 +230,7 @@ function App() {
   }, [isLoggedIn]);
   
   useEffect(() => {
-    if(process.env.DEBUG) console.log('useEffect zones', filter.gebied)
+    if(process && process.env.DEBUG) console.log('useEffect zones', filter.gebied)
     if(! metadata.metadata_loaded) return;
 
     updateZones(store);
@@ -241,7 +241,7 @@ function App() {
   ])
 
   useEffect(() => {
-    if(process.env.DEBUG) console.log('useEffect zones geodata')
+    if(process && process.env.DEBUG) console.log('useEffect zones geodata')
     if(! metadata.zones_loaded) return;
 
     updateZonesgeodata(store);
@@ -318,7 +318,7 @@ function App() {
 
       <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
 
-      {process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
+      {process && process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
         {layers.displaymode}
       </div>}
 

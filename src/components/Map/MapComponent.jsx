@@ -41,7 +41,7 @@ import IsochroneTools from '../IsochroneTools/IsochroneTools';
 moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
-  if(process.env.DEBUG) console.log('Map component')
+  if(process && process.env.DEBUG) console.log('Map component')
 
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
@@ -167,7 +167,7 @@ function MapComponent(props) {
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         style: mapStyles.base,
-        accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
+        accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
         center: [lng, lat],
         zoom: zoom,
         maxZoom: 19,
@@ -182,11 +182,11 @@ function MapComponent(props) {
       
       // Map event handlers
       map.current.on('error', function(e) {
-        if(process.env.DEBUG) console.log('An error event occurred.', e);
+        if(process && process.env.DEBUG) console.log('An error event occurred.', e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
       map.current.on('idle', function(e) {
-        if(process.env.DEBUG) console.log('An idle event occurred.', e);
+        if(process && process.env.DEBUG) console.log('An idle event occurred.', e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
       map.current.on('moveend', function() {

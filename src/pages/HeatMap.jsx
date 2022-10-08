@@ -16,7 +16,7 @@ function HeatMap() {
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v11',
-      accessToken: process.env.REACT_APP_MAPBOX_TOKEN,
+      accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
       center: [lng, lat],
       zoom: zoom
     });

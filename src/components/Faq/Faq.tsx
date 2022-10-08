@@ -26,7 +26,7 @@ Wil je zones toevoegen, aanpassen of verwijderen? Doe dit als volgt:
 ### Toevoegen
 
 3. Klik op **Nieuwe zone aanmaken**
-4. Klik meerdere keren op de kaart om een gebied af te definieren<br /><br />![img](https://i.imgur.com/gV2mMvl.png)<br />
+4. Klik meerdere keren op de kaart om een gebied af te kaderen<br /><br />![img](https://i.imgur.com/gV2mMvl.png)<br />
 5. Geef de zone een **naam**
 6. Bepaal welk type zone dit is:
   - Analysezone: Definieer een zone voor toekomstige analyses

@@ -101,7 +101,7 @@ function Map({mode, mapContainer}) {
       <div className="hidden sm:block">
         <SelectLayer />
           {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
-          {true && <SlideBox name="HubStatsWidget" direction="right" options={{
+          {false && <SlideBox name="HubStatsWidget" direction="right" options={{
             title: 'Hub',
             backgroundColor: '#fff',
           }} style={{

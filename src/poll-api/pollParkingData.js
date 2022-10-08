@@ -81,7 +81,7 @@ const processVehiclesResult = (state, vehicles) => {
       geoJson.features.push(feature);
     }
   })
-  if(process.env.DEBUG) console.log('geoJson in pollParkingData', geoJson)
+  if(process && process.env.DEBUG) console.log('geoJson in pollParkingData', geoJson)
 
   // Save vehicles in store
   store_parkingdata.dispatch({
@@ -175,7 +175,7 @@ const updateParkingData = async () => {
 
   try {
     if(undefined===store_parkingdata) {
-      if(process.env.DEBUG) console.error("no redux state available yet - skipping zones update");
+      if(process && process.env.DEBUG) console.error("no redux state available yet - skipping zones update");
       return false;
     }
     

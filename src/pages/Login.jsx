@@ -36,11 +36,11 @@ const Login = () => {
       return;
     }
 
-    const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/login";
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/login";
     var data = {
       loginId: emailaddress,
       password: password,
-      applicationId: process.env.REACT_APP_FUSIONAUTH_APPLICATION_ID
+      applicationId: process ? process.env.REACT_APP_FUSIONAUTH_APPLICATION_ID : ''
     };
     
     fetch(url, {
@@ -69,7 +69,7 @@ const Login = () => {
     // Clear error message
     setErrorMessage(null);
 
-    const url = process.env.REACT_APP_FUSIONAUTH_SERVER + "/user/forgot-password"
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/user/forgot-password"
     var data = {
       loginId: emailaddress,
     };
