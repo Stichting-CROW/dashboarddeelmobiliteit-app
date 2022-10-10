@@ -562,26 +562,32 @@ function MapComponent(props) {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
 
-    // Only admins see vehicle ID
-    // const canSeeVehicleId = userData && userData.user && userData.user.registrations && userData.user.registrations[0].roles.indexOf('administer') > -1;
-    // Only S and B see vehicle ID
-    const canSeeVehicleId = () => {
-      // If user isn't logged in, it's no analyst
-      if(! userData || ! userData.user) {
-        return false;
-      }
+    const isAnalyst = (email) => {
       // Define email addresses of analysts
       const analystEmailAddresses = [
         'mail@bartroorda.nl',
         'sven.boor@gmail.com'
       ]
-      // isAnalyst :: Checks if given email is an analyst 
-      const isAnalyst = (email) => analystEmailAddresses.indexOf(email) > -1;
-      // Return if user is analyst or not
-      return isAnalyst(userData.user.email);
+      // Return true if user is analyst
+      return false;
+      return analystEmailAddresses.indexOf(email) > -1;
     }
 
-    initPopupLogic(map.current, providers, canSeeVehicleId, filter.datum)
+    const isProvider = (user) => {
+      return user.registrations[0].roles.indexOf('operator') > -1;
+    }
+
+    // Only S&B and providers can see vehicle ID
+    const canSeeVehicleId = () => {
+      // If user isn't logged in, it's no analyst
+      if(! userData || ! userData.user) {
+        return false;
+      }
+      // Return if user can see vehicle ID
+      return isAnalyst(userData.user.email) || isProvider(userData.user);
+    }
+
+    initPopupLogic(map.current, providers, canSeeVehicleId(), filter.datum)
   }, [
     didInitSourcesAndLayers,
     providers,
