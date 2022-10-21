@@ -18,6 +18,12 @@ export default function Misc({children}) {
     return renderRedirect();
   }
 
+  const pillMenuItems = [
+    {title: 'Profile', url: '/profile'},
+    {title: 'FAQ', url: '/faq'},
+    {title: 'Exporteer', url: '/export'}
+  ]
+
   return (
     <div className="
       px-4
@@ -38,7 +44,7 @@ export default function Misc({children}) {
         <Logo title="Extra" />
 
         <div className="mt-8">
-          <PillMenu />
+          <PillMenu items={pillMenuItems} />
         </div>
 
         <div className="

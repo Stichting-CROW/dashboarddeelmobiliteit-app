@@ -27,6 +27,7 @@ import Misc from './components/Misc/Misc.jsx';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
+import Admin from './components/Admin/Admin';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 
@@ -162,6 +163,12 @@ function App() {
 
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
+  });
+  
+  const isAdmin = useSelector(state => {
+    if(! state.authentication) return false;
+    if(! state.authentication.user_data) return false;
+    return state.authentication.user_data.user.registrations[0].roles.indexOf('administer') > -1 ? true : false;
   });
   
   const filterDate = useSelector(state => {
@@ -329,6 +336,20 @@ function App() {
       <Switch>
         { isLoggedIn ?
           <>
+            { isAdmin ?
+              <>
+                <Route exact path="/admin">
+                  <Overlay>
+                    <Admin />
+                  </Overlay>
+                </Route>
+                <Route exact path="/admin/stats">
+                  <Overlay>
+                    <Admin />
+                  </Overlay>
+                </Route>
+              </> : null
+            }
             <Route exact path="/">
               {renderMapElements()}
             </Route>
