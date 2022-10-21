@@ -119,7 +119,6 @@ function FilterbarZones({
 
   // Store window location in a local variable
   let location = useLocation();
-  // ?const isThereMonkeyBusiness = window?.history?.pushState.name === ''
   useEffect(() => {
     setPathName(location ? location.pathname : null);
   }, [location]);

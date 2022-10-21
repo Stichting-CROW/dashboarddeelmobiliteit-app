@@ -34,11 +34,10 @@ import {prepareAggregatedStatsData} from '../../helpers/stats.js';
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
-function BeschikbareVoertuigenChart(props) {
+function BeschikbareVoertuigenChart({filter}) {
   const dispatch = useDispatch()
 
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
-  const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 
   const [vehiclesData, setVehiclesData] = useState([])

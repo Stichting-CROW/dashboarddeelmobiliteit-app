@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import {MapComponent} from '../components/Map/MapComponent.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
+import {HubStatsWidget} from '../components/HubStatsWidget/HubStatsWidget';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
@@ -102,6 +103,7 @@ function Map({mode, mapContainer}) {
       <div className="hidden sm:block">
         <SelectLayer />
         {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
+        {(displayMode === DISPLAYMODE_ZONES_PUBLIC) && <HubStatsWidget />}
       </div>
       <div className="flex-1 bg-red-400">
         <MapComponent

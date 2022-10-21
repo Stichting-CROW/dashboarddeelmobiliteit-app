@@ -6,6 +6,8 @@ import {
   useSelector
 } from 'react-redux';
 
+import moment from 'moment';
+
 import VerhuringenChart from '../components/Chart/VerhuringenChart.jsx';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
 import FormInput from '../components/FormInput/FormInput';
@@ -13,8 +15,8 @@ import FormInput from '../components/FormInput/FormInput';
 function StatsPage(props) {
   const dispatch = useDispatch()
 
-  const filter = useSelector(state => state.filter)
-
+  const filter = useSelector(state => state.filter);
+  
   const setAggregationLevel = (newlevel) => {
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -84,7 +86,9 @@ function StatsPage(props) {
             <h2 className="text-4xl my-2">Beschikbare voertuigen</h2>
             {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
           </div>
-          <BeschikbareVoertuigenChart />
+          <BeschikbareVoertuigenChart
+            filter={filter}
+            />
         </div>
       </div>
 

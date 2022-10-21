@@ -201,7 +201,8 @@ const generatePopupHtml = (feature) => {
   return `
     <div class="font-inter">
       <div class="text-lg font-bold">
-        ${feature.properties.name}
+        ${feature.properties.name}<br />
+        ${feature.properties.geography_id}
       </div>
       <div class="mt-2 text-sm font-bold" ${isControlledAutomatically ? 'hidden' : ''} style="color:#15aeef;">
         Instelling actief: <b>altijd ${isManuallySetToOpen ? 'open' : 'gesloten'}</b>
@@ -268,6 +269,7 @@ const initZonesMap = async (theMap, token, filterGebied) => {
       return;
     }
 
+    // Add map popup
     new maplibregl.Popup()
       .setLngLat(e.lngLat)
       .setHTML(generatePopupHtml(e.features[0]))
