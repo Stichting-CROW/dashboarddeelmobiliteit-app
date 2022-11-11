@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
@@ -25,7 +25,7 @@ function FilteritemZones({
   });
 
   let [filterSearch, setFilterSearch] = useState("");
-  
+
   const addToFilterZones = (zone) => {
     dispatch({ type: 'ADD_TO_FILTER_ZONES', payload: zone })
   }
@@ -79,7 +79,7 @@ function FilteritemZones({
     if(groupZones.length===0) { return null }
     
     const sortedZones = groupZones.sort((a,b) => a.name.localeCompare(b.name));
-    
+
     return (
       <div key={'zg-'+group.zone_type} className="zone-group-container">
         <span key={'zgn-'+group.zone_type} className="zone-group-title">{group.name}</span>

@@ -7,7 +7,7 @@ import {
   useSelector
 } from 'react-redux';
 
-// import moment from 'moment';
+import moment from 'moment';
 
 import {
   AreaChart,
@@ -24,12 +24,17 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats} from '../../api/aggregatedStats';
+import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
 import {
   getProviderColor,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
-import {prepareAggregatedStatsData} from '../../helpers/stats.js';
+import {
+  prepareAggregatedStatsData,
+  prepareAggregatedStatsData_timescaleDB,
+  sumAggregatedStats,
+  doShowDetailledAggregatedData
+} from '../../helpers/stats.js';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
@@ -37,44 +42,83 @@ import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 function BeschikbareVoertuigenChart({filter}) {
   const dispatch = useDispatch()
 
+  // Get authentication token
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+  // Get metadata
   const metadata = useSelector(state => state.metadata)
 
+  // Get all zones
+  const zones = useSelector(state => {
+    return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
+  });
+
+  // Define state variables
   const [vehiclesData, setVehiclesData] = useState([])
 
+  // On updated filter: re-fetch data
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
 
     async function fetchData() {
-      const availableVehicles = await getAggregatedStats(token, 'available_vehicles', {
+      let availableVehicles;
+      const options = {
         filter: filter,
         metadata: metadata,
         aggregationLevel: filter.ontwikkelingaggregatie,
-        aggregationTime: filter.ontwikkelingaggregatie_tijd
-      });
+        aggregationTime: filter.ontwikkelingaggregatie_tijd,
+        aggregationFunction: filter.ontwikkelingaggregatie_function
+      }
+      if(doShowDetailledAggregatedData(filter, zones)) {
+        availableVehicles = await getAggregatedStats_timescaleDB(token, 'available_vehicles', options);
+      } else {
+        availableVehicles = await getAggregatedStats(token, 'available_vehicles', options);
+      }
 
       // Return if no stats are available
-      if(! availableVehicles || ! availableVehicles.available_vehicles_aggregated_stats) {
+      if(! availableVehicles || (! availableVehicles.availability_stats && ! availableVehicles.available_vehicles_aggregated_stats)) {
         return;
       }
-      
-      let operators = getOperatorStatsForChart(availableVehicles.available_vehicles_aggregated_stats.values, metadata.aanbieders)
-      dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
-      
       setVehiclesData(availableVehicles);
+
+      // Sum amount of vehicles per operator, used in FilteritemAanbieders component
+      let operators;
+      if(availableVehicles && availableVehicles.available_vehicles_aggregated_stats) {
+        operators = getOperatorStatsForChart(availableVehicles.available_vehicles_aggregated_stats.values, metadata.aanbieders);
+      }
+      else {
+        operators = getOperatorStatsForChart(availableVehicles.availability_stats.values, metadata.aanbieders);
+      }
+      dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
+    
     }
     fetchData();
   }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
   
-  const chartdata = prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+  // On load: get chart data
+  const getChartData = () => {
+    if(doShowDetailledAggregatedData(filter, zones)) {
+      return prepareAggregatedStatsData_timescaleDB('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    } else {
+      return prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    }
+  }
 
-  const numberOfPointsOnXAxis = chartdata ? Object.keys(chartdata).length : 0;
+  // Populate chart data
+  let chartData = getChartData();
+  // chartData = sumAggregatedStats(chartData);
+  // console.log(chartData);
 
+  const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
+
+  // Function that renders the chart
   const renderChart = () => {
-    if(numberOfPointsOnXAxis > 12) {
+
+    // Render area line chart 
+    if(numberOfPointsOnXAxis > 24) {
       return <AreaChart
-        data={chartdata}
+        data={chartData}
         margin={{
           top: 10,
           right: 30,
@@ -83,12 +127,13 @@ function BeschikbareVoertuigenChart({filter}) {
         }}
       >
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
-        <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
+        <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
         <Legend />
-        {getUniqueProviderNames(chartdata[0]).map(x => {
+        {getUniqueProviderNames(chartData).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
+          if(x === 'time') return;
           return (
             <Area
               key={x}
@@ -104,8 +149,9 @@ function BeschikbareVoertuigenChart({filter}) {
       </AreaChart>
     }
 
+    // Or render bar chart
     return <BarChart
-      data={chartdata}
+      data={chartData}
       margin={{
         top: 10,
         right: 30,
@@ -114,12 +160,13 @@ function BeschikbareVoertuigenChart({filter}) {
       }}
     >
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
-      <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
+      <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
       <Legend />
-      {getUniqueProviderNames(chartdata[0]).map(x => {
+      {getUniqueProviderNames(chartData).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
+        if(x === 'time') return;
         return (
           <Bar
             key={x}

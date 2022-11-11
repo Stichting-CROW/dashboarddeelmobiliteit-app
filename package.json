@@ -24,6 +24,7 @@
     "marked": "^4.0.8",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.38",
     "npm": "^8.4.0",
     "react": "^17.0.2",
     "react-datepicker": "^4.5.0",

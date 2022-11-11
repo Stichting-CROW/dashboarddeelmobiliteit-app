@@ -34,10 +34,10 @@ function HubStatsWidget(props) {
     // Set some filter values
     const chartFilter = Object.assign({}, filter, {
       datum: moment().toISOString(),
-      ontwikkelingvan: moment(moment().subtract('4', 'days')).toISOString(),
-      ontwikkelingtot: moment().toISOString(),
-      ontwikkelingaggregatie: 'day',
-      zones: ''
+      ontwikkelingvan: moment('YYYY-MM-DD 00:00').subtract('1', 'days').toISOString(),
+      ontwikkelingtot: moment('YYYY-MM-DD 00:00').add(1, 'day').toISOString(),
+      ontwikkelingaggregatie: '15m',
+      zones: '51234'
     })
 
     return <div>

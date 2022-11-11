@@ -6,11 +6,21 @@ export const getProviderColor = (providers, providerName) => {
   return found && found[0] ? found[0].color : '#666';
 }
 
-export const getUniqueProviderNames = (object) => {
-  if(! object) return [];
-  return Object.keys(object).filter((key, val) => {
-    return key !== 'name' ? key : false;
-  })
+export const getUniqueProviderNames = (objects) => {
+  // Check if object was given
+  if(! objects || ! objects[0]) return [];
+  // Get unique provider names
+  const uniqueProviderNames = [];
+  objects.forEach(x => {
+    Object.keys(x).filter((key, val) => {
+      if(key !== 'name') {
+        if(uniqueProviderNames.indexOf(key) <= -1) {
+          uniqueProviderNames.push(key);
+        }
+      }
+    })
+  });
+  return uniqueProviderNames;
 }
 
 export const getPrettyProviderName = (system_id) => {

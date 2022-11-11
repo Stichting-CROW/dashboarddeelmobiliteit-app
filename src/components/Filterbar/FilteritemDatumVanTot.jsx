@@ -25,6 +25,13 @@ function FilterItemDatumVanTot() {
   const [endDate, setEndDate] = useState(filterOntwikkelingTot);
   const [isOpen, setIsOpen] = useState(false);
 
+  const setAggregationLevel = (newlevel) => {
+    dispatch({
+      type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
+      payload: newlevel
+    })
+  }
+
   const updateFilter = (start, end, aggregatie=false) => {
     // strip hours
     const van = new Date(start.toDateString());
@@ -112,6 +119,16 @@ function FilterItemDatumVanTot() {
     let end;
     let agg;
     switch(view) {
+      case 'vandaag':
+        start = today;
+        end = today;
+        agg='15m';
+        break;
+      case 'laatste2dagen':
+        start = addDays(today,-1);
+        end = today;
+        agg='15m';
+        break;
       case 'laatste7dagen':
         start = addDays(today,-6);
         end = today;
@@ -148,6 +165,8 @@ function FilterItemDatumVanTot() {
         return; // do nothing
     }
     
+    setAggregationLevel(agg);
+
     setStartDate(start)
     setEndDate(end)
     
@@ -169,12 +188,14 @@ function FilterItemDatumVanTot() {
           inline
         />
         <div className="filter-datum-van-tot-picker-options">
-          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={() => { setView('laatste7dagen')}}>Laatste 7 dagen</div>
-          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={() => { setView('laatste30dagen')}}>Laatste 30 dagen</div>
-          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={() => { setView('laatste90dagen')}}>Laatste 90 dagen</div>
-          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={() => { setView('laatste12maanden')}}>Laatste 12 maanden</div>
-          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={() => { setView('ditjaar')}}>Dit jaar</div>
-          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={() => { setView('vorigjaar')}}>Vorig jaar </div>
+          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={() => { setView('vandaag')}}>Vandaag</div>
+          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={() => { setView('laatste2dagen')}}>Laatste 2 dagen</div>
+          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={() => { setView('laatste7dagen')}}>Laatste 7 dagen</div>
+          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={() => { setView('laatste30dagen')}}>Laatste 30 dagen</div>
+          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={() => { setView('laatste90dagen')}}>Laatste 90 dagen</div>
+          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={() => { setView('laatste12maanden')}}>Laatste 12 maanden</div>
+          <div key="fdvt-po7" className="filter-datum-van-tot-option" onClick={() => { setView('ditjaar')}}>Dit jaar</div>
+          <div key="fdvt-po8" className="filter-datum-van-tot-option" onClick={() => { setView('vorigjaar')}}>Vorig jaar </div>
         </div>
       </div>
     )

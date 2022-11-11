@@ -46,6 +46,10 @@ function Filterbar({
     return state.authentication.user_data ? true : false;
   });
 
+  const filter = useSelector(state => {
+    return state.filter;
+  });
+
   const filterDatum = useSelector(state => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
@@ -64,11 +68,19 @@ function Filterbar({
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
 
+  // Show custom zones if >= 2022-11
+  // We have detailled aggregated stats from 2022-11
+  const doShowCustomZones =
+    moment(filter.ontwikkelingvan).unix() >= moment('2022-11-01 00:00').unix();
+
   let zonesToShow;
   if(isontwikkeling) {
     zonesToShow = [
       'residential_area',
     ];
+    if(doShowCustomZones) {
+      zonesToShow.push('custom')
+    }
   } else {
     zonesToShow = [
       'residential_area',

@@ -5,7 +5,8 @@ import saveAs from 'file-saver';
 const getFetchOptions = (token) => {
   return {
     headers: {
-      "authorization": `Bearer ${token}`
+      "authorization": `Bearer ${token}`,
+      'mode':'no-cors'
     }
   }
 }
@@ -13,6 +14,29 @@ const getFetchOptions = (token) => {
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
   let url = `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
+
+  // Set filter params if needed
+  // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
+  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
+  if(filterParams.length>0) url += "&" + filterParams.join("&");
+
+  // Get API response  
+  const fetchOptions = getFetchOptions(token)
+  const response = await fetch(url, fetchOptions);
+  const responseJson = await response.json();
+
+  // Return
+  return responseJson;
+}
+export const getAggregatedStats_timescaleDB = async (token, key, options) => {
+  // Define API end point URL
+  //
+  // curl --location --request GET 'https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/availability_stats?aggregation_level=5m&group_by=operator&start_time=2022-11-07T00:00:00&end_time=2022-11-09T00:00:00&zone_ids=51856' \
+  // --header 'Authorization: Bearer TOKEN'
+  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/availability_stats?`;
+  url += `aggregation_level=${options.aggregationLevel}`
+  url += `&group_by=operator`;
+  url += `&aggregation_function=${options.aggregationFunction || 'AVG'}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
