@@ -165,6 +165,8 @@ function StatsPage(props) {
     {name: 'MAX', title: 'max'},
   ];
 
+            // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+            // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   return (
     <div className="StatsPage pt-4 pb-24">
 
@@ -176,7 +178,6 @@ function StatsPage(props) {
         <div className="xl:flex-1 mt-8 xl:mt-0">
           <div className="flex justify-between">
             <h2 className="text-4xl my-2">Verhuringen</h2>
-            {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
           </div>
           <VerhuringenChart />
         </div>
@@ -190,7 +191,6 @@ function StatsPage(props) {
               </div>
             </div>}
 
-            {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
 
           </div>
           <BeschikbareVoertuigenChart

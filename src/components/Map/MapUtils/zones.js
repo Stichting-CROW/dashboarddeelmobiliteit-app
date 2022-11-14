@@ -201,8 +201,7 @@ const generatePopupHtml = (feature) => {
   return `
     <div class="font-inter">
       <div class="text-lg font-bold">
-        ${feature.properties.name}<br />
-        ${feature.properties.geography_id}
+        ${feature.properties.name}
       </div>
       <div class="mt-2 text-sm font-bold" ${isControlledAutomatically ? 'hidden' : ''} style="color:#15aeef;">
         Instelling actief: <b>altijd ${isManuallySetToOpen ? 'open' : 'gesloten'}</b>

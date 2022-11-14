@@ -11,15 +11,42 @@ import BeschikbareVoertuigenChart from '../Chart/BeschikbareVoertuigenChart.jsx'
 
 // import './HubStatsWidget.css';
 
+import {
+  setPublicZoneUrl,
+  setAdminZoneUrl,
+  getAdminZones,
+  // getPublicZones,
+  getZoneById,
+  sortZonesInPreferedOrder,
+  getLocalDrawsOnly,
+  getDraftFeatureId,
+  fetchAdminZones,
+  fetchPublicZones
+} from '../Map/MapUtils/zones.js';
+
 function HubStatsWidget(props) {
   const [pathName, setPathName] = useState(null)
+  const [publicZones, setPublicZones] = useState(null)
+
+  const filterGebied = useSelector(state => {
+    return state.filter ? state.filter.gebied : 0;
+  });
+
+  const getPublicZones = async () => {
+    const result = await fetchPublicZones(filterGebied);
+    setPublicZones(result);
+  }
 
   let location = useLocation();
   useEffect(() => {
-    setPathName(location ? location.pathname : null);
-  }, [location]);
+    setPathName(location.pathname);
+  }, [location.pathname]);
 
   const filter = useSelector(state => state.filter);
+
+  useEffect(x => {
+    getPublicZones();
+  }, [filterGebied])
 
   const getZoneIdFromPath = (pathname) => {
     if(! pathname) return;
@@ -29,21 +56,35 @@ function HubStatsWidget(props) {
   }
 
   const getZoneStats = () => {
-    const zoneId = getZoneIdFromPath(document.location.pathname);
+    const zoneIdAsString = getZoneIdFromPath(document.location.pathname);
+    const getZoneIdAsNumber = (zoneIdAsString) => {
+      if(! publicZones) return;
+      let foundZoneId;
+      publicZones.forEach(x => {
+        if(x.geography_id === zoneIdAsString) {
+          foundZoneId = x.zone_id;
+        }
+      })
+      return foundZoneId;
+    }
+    const zoneIdAsNumber = getZoneIdAsNumber(zoneIdAsString)
+    if(! zoneIdAsNumber) return <div />;
 
     // Set some filter values
     const chartFilter = Object.assign({}, filter, {
       datum: moment().toISOString(),
-      ontwikkelingvan: moment('YYYY-MM-DD 00:00').subtract('1', 'days').toISOString(),
-      ontwikkelingtot: moment('YYYY-MM-DD 00:00').add(1, 'day').toISOString(),
-      ontwikkelingaggregatie: '15m',
-      zones: '51234'
+      ontwikkelingvan: moment(moment().format('YYYY-MM-DD 00:00')).subtract('1', 'days').toISOString(),
+      ontwikkelingtot: moment(moment().format('YYYY-MM-DD 00:00')).add(1, 'day').toISOString(),
+      ontwikkelingaggregatie: 'hour',
+      zones: ''+zoneIdAsNumber// Cast to string
     })
 
     return <div>
-      {zoneId}
       <BeschikbareVoertuigenChart
         filter={chartFilter}
+        config={{
+          sumTotal: true
+        }}
         />
     </div>
   }

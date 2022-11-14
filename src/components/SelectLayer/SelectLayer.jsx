@@ -135,7 +135,7 @@ function SelectLayer(props) {
           </div>
         </>}
 
-        {displayMode===DISPLAYMODE_ZONES_PUBLIC && <>
+        {displayMode===DISPLAYMODE_ZONES_PUBLIC && false && <>
 
           <div
             data-type="monitoring"

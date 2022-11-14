@@ -39,7 +39,7 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
-function BeschikbareVoertuigenChart({filter}) {
+function BeschikbareVoertuigenChart({filter, config}) {
   const dispatch = useDispatch()
 
   // Get authentication token
@@ -107,16 +107,17 @@ function BeschikbareVoertuigenChart({filter}) {
 
   // Populate chart data
   let chartData = getChartData();
-  // chartData = sumAggregatedStats(chartData);
+  if(config && config.sumTotal === true) {
+    // chartData = sumAggregatedStats(chartData);
+  }
   // console.log(chartData);
-
   const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
 
   // Function that renders the chart
   const renderChart = () => {
 
     // Render area line chart 
-    if(numberOfPointsOnXAxis > 24) {
+    if(numberOfPointsOnXAxis > 24 && filter.ontwikkelingaggregatie !== '15m' && filter.ontwikkelingaggregatie !== '5m' && filter.ontwikkelingaggregatie !== 'hour') {
       return <AreaChart
         data={chartData}
         margin={{
@@ -130,7 +131,7 @@ function BeschikbareVoertuigenChart({filter}) {
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
-        <Legend />
+        {config && config.sumTotal === true ? '' : <Legend />}
         {getUniqueProviderNames(chartData).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           if(x === 'time') return;
@@ -163,7 +164,7 @@ function BeschikbareVoertuigenChart({filter}) {
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
-      <Legend />
+      {config && config.sumTotal === true ? '' : <Legend />}
       {getUniqueProviderNames(chartData).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         if(x === 'time') return;

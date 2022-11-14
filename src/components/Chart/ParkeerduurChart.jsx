@@ -71,7 +71,7 @@ function ParkeerduurChart(props) {
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip />
         <Legend />
-        {getUniqueProviderNames(rentalsData[0]).map(x => {
+        {getUniqueProviderNames(rentalsData).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -102,7 +102,7 @@ function ParkeerduurChart(props) {
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip />
       <Legend />
-      {getUniqueProviderNames(rentalsData[0]).map(x => {
+      {getUniqueProviderNames(rentalsData).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar
