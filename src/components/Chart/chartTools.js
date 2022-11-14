@@ -12,4 +12,3 @@ export const getOperatorStatsForChart = (data, aanbieders) => {
   
   return operators;
 }
-

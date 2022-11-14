@@ -24,12 +24,20 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats} from '../../api/aggregatedStats';
+import {
+  getAggregatedStats,
+  getAggregatedStats_timescaleDB
+} from '../../api/aggregatedStats';
 import {
   getProviderColor,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
-import {prepareAggregatedStatsData} from '../../helpers/stats.js';
+import {
+  prepareAggregatedStatsData,
+  prepareAggregatedStatsData_timescaleDB,
+  sumAggregatedStats,
+  doShowDetailledAggregatedData
+} from '../../helpers/stats.js';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
@@ -53,6 +61,11 @@ function VerhuringenChart(props) {
         aggregationLevel: filter.ontwikkelingaggregatie
       });
 
+      // Return if no stats are available
+      if(! rentals || ! rentals.rentals_aggregated_stats) {
+        return;
+      }
+      
       let operators = getOperatorStatsForChart(rentals.rentals_aggregated_stats.values, metadata.aanbieders)
       dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
 
@@ -62,8 +75,6 @@ function VerhuringenChart(props) {
   }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
   
   const chartdata = prepareAggregatedStatsData('rentals', rentalsData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude);
-  
-  // console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
   const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
 
   const renderChart = () => {
@@ -82,7 +93,7 @@ function VerhuringenChart(props) {
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
         <Legend />} />
-        {getUniqueProviderNames(chartdata[0]).map(x => {
+        {getUniqueProviderNames(chartdata).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -113,7 +124,7 @@ function VerhuringenChart(props) {
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
       <Legend />} />
-      {getUniqueProviderNames(chartdata[0]).map(x => {
+      {getUniqueProviderNames(chartdata).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar

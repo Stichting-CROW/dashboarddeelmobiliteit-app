@@ -29,18 +29,19 @@ function FilteritemAanbieders() {
           break;
         case DISPLAYMODE_OTHER:
           if(state.metadata && state.filter && state.statsreducer) {
-            // calculate total stats (operator can appear in any of the charts)
+            // Calculate total stats (operator can appear in any of the charts)
             let stats = {};
             state.metadata.aanbieders.forEach(a=>{ stats[a.system_id] = 0 });
             Object.keys(stats).forEach(key=>{
               if(key in state.statsreducer.operatorstats_verhuringenchart === true) {
-                stats[key]+=state.statsreducer.operatorstats_verhuringenchart[key];
+                stats[key] += state.statsreducer.operatorstats_verhuringenchart[key];
               }
               if(key in state.statsreducer.operatorstats_beschikbarevoertuigenchart === true) {
-                stats[key]+=state.statsreducer.operatorstats_verhuringenchart[key];
+                stats[key] += state.statsreducer.operatorstats_beschikbarevoertuigenchart[key];
               }
             })
             
+            // console.log('stats', stats)
             return stats;
           }
           break;
@@ -93,8 +94,6 @@ function FilteritemAanbieders() {
     }
     
   }
-
-  // console.log("aanbieders map operatorstats: ", operatorstats)
 
   return (
     <div className="filter-aanbieders-container">

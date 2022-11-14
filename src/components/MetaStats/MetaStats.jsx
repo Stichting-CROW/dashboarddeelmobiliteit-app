@@ -17,7 +17,7 @@ function StatRow({data}) {
 
   let total = 0;
   data.stats.forEach(x => {
-    total += x
+    total += parseInt(x)
   })
 
   return <tr key={data.zone_id}>
