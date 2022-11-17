@@ -111,3 +111,8 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Dashboard Deelmobiliteit in the media
+
+- [October 2022: Nieuwe tool helpt overlast deelvoertuigen te beperken](https://www.verkeersnet.nl/actueel/44883/nieuwe-tool-helpt-overlast-deelvoertuigen-te-beperken/)
+- [July 2022: Alle scooters naar het SMÈRRIG Zomerfestival](https://observablehq.com/@geodan/data-uit-deelmobiliteit-en-evenementen)
