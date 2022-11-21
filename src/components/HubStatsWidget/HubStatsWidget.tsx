@@ -6,6 +6,7 @@ import {useLocation} from "react-router-dom";
 import moment from 'moment';
 
 import BeschikbareVoertuigenChart from '../Chart/BeschikbareVoertuigenChart.jsx';
+import PillMenu from '../PillMenu/PillMenu';
 
 // import {getParkEventsStats} from '../../api/parkEventsStats.js';
 
@@ -27,6 +28,8 @@ import {
 function HubStatsWidget(props) {
   const [pathName, setPathName] = useState(null)
   const [publicZones, setPublicZones] = useState(null)
+  const [ontwikkelingVan, setOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
+  const [ontwikkelingTot, setOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')).add(1, 'day'))
 
   const filterGebied = useSelector(state => {
     return state.filter ? state.filter.gebied : 0;
@@ -68,13 +71,13 @@ function HubStatsWidget(props) {
       return foundZoneId;
     }
     const zoneIdAsNumber = getZoneIdAsNumber(zoneIdAsString)
-    if(! zoneIdAsNumber) return <div />;
+    if(! zoneIdAsNumber) return false;
 
     // Set some filter values
     const chartFilter = Object.assign({}, filter, {
       datum: moment().toISOString(),
-      ontwikkelingvan: moment(moment().format('YYYY-MM-DD 00:00')).subtract('1', 'days').toISOString(),
-      ontwikkelingtot: moment(moment().format('YYYY-MM-DD 00:00')).add(1, 'day').toISOString(),
+      ontwikkelingvan: ontwikkelingVan.toISOString(),
+      ontwikkelingtot: ontwikkelingTot.toISOString(),
       ontwikkelingaggregatie: 'hour',
       zones: ''+zoneIdAsNumber// Cast to string
     })
@@ -89,6 +92,26 @@ function HubStatsWidget(props) {
     </div>
   }
 
+  const chartArrows = [
+    {
+      title: '<',
+      link: () => {
+        setOntwikkelingVan(ontwikkelingVan.subtract(1, 'day'))
+        setOntwikkelingTot(ontwikkelingTot.subtract(1, 'day'))
+      }
+    },
+    {
+      title: '>',
+      link: () => {
+        setOntwikkelingVan(ontwikkelingVan.add(1, 'day'))
+        setOntwikkelingTot(ontwikkelingTot.add(1, 'day'))
+      }
+    }
+  ];
+
+  const zoneStatsDiv = getZoneStats();
+  if(! zoneStatsDiv) return <div/>
+
   return (
     <SlideBox name="HubStatsWidget" direction="right" options={{
       title: 'Hub',
@@ -99,7 +122,25 @@ function HubStatsWidget(props) {
       right: 0
     }}>
       <div className="HubStatsWidget px-2 py-2" style={{minWidth: '356px', minHeight: '105px'}}>
-        {getZoneStats()}
+        
+        {zoneStatsDiv}
+
+        <div className={"agg-button-container justify-center mt-4 mb-2"}>
+          {chartArrows.map(x => {
+            return <div
+              key={x.title}
+              className="agg-button"
+              onClick={x.link}
+              >
+              {x.title}
+            </div>
+          })}
+        </div>
+
+        <div className="mb-2 text-center">
+          {moment(ontwikkelingVan).format('dddd')}
+        </div>
+
       </div>
     </SlideBox>
   )

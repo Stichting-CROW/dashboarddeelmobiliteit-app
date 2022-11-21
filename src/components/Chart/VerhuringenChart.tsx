@@ -156,22 +156,31 @@ function VerhuringenChart(props) {
   }
 
   return (
-    <div className="relative" style={{ width: '100%', height: '400px' }}>
-      {chartdata && chartdata.length > 0 && <div className="absolute right-0" style={{
-        top: '-45px',
-        right: '25px'
-      }}>
-        <button onClick={() => {
-          const preparedData = prepareDataForCsv(chartdata);
-          const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
-          downloadCsv(preparedData, filename);
-        }} className="opacity-50 cursor-pointer">
-          <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
-        </button>
-      </div>}
-      <ResponsiveContainer>
-        {renderChart()}
-      </ResponsiveContainer>
+    <div className="relative">
+
+      <div className="flex flex-start">
+
+        {props.title && <h2 className="text-4xl my-2">
+          {props.title}
+        </h2>}
+
+        {chartdata && chartdata.length > 0 && <div className="flex justify-center flex-col ml-2">
+          <button onClick={() => {
+            const preparedData = prepareDataForCsv(chartdata);
+            const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+            downloadCsv(preparedData, filename);
+          }} className="opacity-50 cursor-pointer">
+            <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+          </button>
+        </div>}
+
+      </div>
+
+      <div className="relative" style={{ width: '100%', height: '400px' }}>
+        <ResponsiveContainer>
+          {renderChart()}
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

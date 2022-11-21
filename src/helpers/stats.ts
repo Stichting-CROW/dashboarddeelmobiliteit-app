@@ -115,6 +115,11 @@ const sumAggregatedStats = (data) => {
   });
 }
 
+export const aggregationFunctionButtonsToRender = [
+  {name: 'MIN', title: 'min'},
+  {name: 'AVG', title: 'gemiddeld'},
+  {name: 'MAX', title: 'max'},
+];
 
 export const prepareDataForCsv = (data: any) => {
   if(! data || data.length <= 0) return;

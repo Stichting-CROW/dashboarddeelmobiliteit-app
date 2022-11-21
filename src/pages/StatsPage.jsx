@@ -10,7 +10,8 @@ import moment from 'moment';
 
 import {
   doShowDetailledAggregatedData,
-  didSelectAtLeastOneCustomZone
+  didSelectAtLeastOneCustomZone,
+  aggregationFunctionButtonsToRender
 } from '../helpers/stats';
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart';
@@ -123,50 +124,50 @@ function StatsPage(props) {
 
   const daysInSelectedPeriod = moment(filter.ontwikkelingtot).diff(moment(filter.ontwikkelingvan), 'days');
 
-  let aggregationButtonsToRender = [];
-  if(doShowDetailledAggregatedData(filter, zones)) {
-    const doShow5m = daysInSelectedPeriod <= 1;
-    const doShow15m = daysInSelectedPeriod <= 2;
-    const doShowHour = daysInSelectedPeriod <= 5;
+  const getAggregationButtonsToRender = () => {
+    let ret = [];
+    if(doShowDetailledAggregatedData(filter, zones)) {
+      const doShow5m = daysInSelectedPeriod <= 1;
+      const doShow15m = daysInSelectedPeriod <= 2;
+      const doShowHour = daysInSelectedPeriod <= 10;
 
-    if(doShow5m) {
-      aggregationButtonsToRender.push(
-        {name: '5m', title: '5 min'},
-      );
+      if(doShow5m) {
+        ret.push(
+          {name: '5m', title: '5 min'},
+        );
+      }
+      if(doShow15m) {
+        ret.push(
+          {name: '15m', title: 'kwartier'},
+        );
+      }
+      if(doShowHour) {
+        ret.push(
+          {name: 'hour', title: 'uur'}
+        );
+      }
     }
-    if(doShow15m) {
-      aggregationButtonsToRender.push(
-        {name: '15m', title: 'kwartier'},
-      );
-    }
-    if(doShowHour) {
-      aggregationButtonsToRender.push(
-        {name: 'hour', title: 'uur'}
-      );
-    }
-  }
-  aggregationButtonsToRender.push(
-    {name: 'day', title: 'dag'},
-  );
-  if(daysInSelectedPeriod >= 6) {
-    aggregationButtonsToRender.push(
-      {name: 'week', title: 'week'},
+    ret.push(
+      {name: 'day', title: 'dag'},
     );
+    if(daysInSelectedPeriod >= 6) {
+      ret.push(
+        {name: 'week', title: 'week'},
+      );
+    }
+    if(daysInSelectedPeriod >= 27) {
+      ret.push(
+        {name: 'month', title: 'maand'},
+      );
+    }
+    
+    return ret;
   }
-  if(daysInSelectedPeriod >= 27) {
-    aggregationButtonsToRender.push(
-      {name: 'month', title: 'maand'},
-    );
-  }
-  
-  const aggregationFunctionButtonsToRender = [
-    {name: 'MIN', title: 'min'},
-    {name: 'AVG', title: 'gemiddeld'},
-    {name: 'MAX', title: 'max'},
-  ];
 
-            // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
-            // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+  const aggregationButtonsToRender = getAggregationButtonsToRender();
+
+  // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+  // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   return (
     <div className="StatsPage pt-4 pb-24">
 
@@ -176,25 +177,15 @@ function StatsPage(props) {
 
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">
-          <div className="flex justify-between">
-            <h2 className="text-4xl my-2">Verhuringen</h2>
-          </div>
-          <VerhuringenChart />
+          <VerhuringenChart
+            title="Verhuringen"
+            />
         </div>
         <div className="xl:flex-1 mt-8 xl:mt-0">
-          <div className="flex justify-between">
-            <h2 className="text-4xl my-2">Beschikbare voertuigen</h2>
 
-            {doShowDetailledAggregatedData(filter, zones) && <div className={"text-sm flex flex-col justify-center"}>
-              <div className="flex">
-                {aggregationFunctionButtonsToRender.map(x => renderAggregationFunctionButton(x.name, x.title))}
-              </div>
-            </div>}
-
-
-          </div>
           <BeschikbareVoertuigenChart
             filter={filter}
+            title="Beschikbare voertuigen"
             />
         </div>
       </div>

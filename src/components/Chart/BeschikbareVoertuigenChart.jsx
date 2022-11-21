@@ -34,6 +34,8 @@ import {
   prepareAggregatedStatsData_timescaleDB,
   sumAggregatedStats,
   doShowDetailledAggregatedData,
+  didSelectAtLeastOneCustomZone,
+  aggregationFunctionButtonsToRender,
   getDateFormat,
   prepareDataForCsv,
   downloadCsv
@@ -42,7 +44,7 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 
-function BeschikbareVoertuigenChart({filter, config}) {
+function BeschikbareVoertuigenChart({filter, config, title}) {
   const dispatch = useDispatch()
 
   // Get authentication token
@@ -119,6 +121,21 @@ function BeschikbareVoertuigenChart({filter, config}) {
     })
   }
   const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)
+
+  const setAggregationFunction = (value) => {
+    dispatch({
+      type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE_FUNCTION',
+      payload: value
+    })
+  }
+
+  const renderAggregationFunctionButton = (name, title) => {
+    return (
+      <div key={`agg-level-`+name} className={"agg-button " + (filter.ontwikkelingaggregatie_function === name ? " agg-button-active":"")} onClick={() => { setAggregationFunction(name) }}>
+        {title}
+      </div>
+    )
+  }
 
   if(config && config.sumTotal === true) {
     // chartData = sumAggregatedStats(chartData);
@@ -197,22 +214,41 @@ function BeschikbareVoertuigenChart({filter, config}) {
   }
 
   return (
-    <div className="relative" style={{ width: '100%', height: '400px' }}>
-      {chartData && chartData.length > 0 && <div className="absolute right-0" style={{
-        top: '-42px',
-        right: '25px'
-      }}>
-        <button onClick={() => {
-          const preparedData = prepareDataForCsv(chartData);
-          const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
-          downloadCsv(preparedData, filename);
-        }} className="opacity-50 cursor-pointer">
-          <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
-        </button>
-      </div>}
-      <ResponsiveContainer>
-        {renderChart()}
-      </ResponsiveContainer>
+    <div className="relative">
+      
+      <div className="flex justify-between my-2">
+        <div className="flex flex-start">
+
+          {title && <h2 className="text-4xl my-2">
+            {title}
+          </h2>}
+
+          {chartData && chartData.length > 0 && <div className="flex justify-center flex-col ml-2">
+            <button onClick={() => {
+              const preparedData = prepareDataForCsv(chartData);
+              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+              downloadCsv(preparedData, filename);
+            }} className="opacity-50 cursor-pointer">
+              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+            </button>
+          </div>}
+
+        </div>
+
+        {doShowDetailledAggregatedData(filter, zones) && <div className={"text-sm flex flex-col justify-center"}>
+          <div className="flex">
+            {aggregationFunctionButtonsToRender.map(x => renderAggregationFunctionButton(x.name, x.title))}
+          </div>
+        </div>}
+
+      </div>
+
+      <div className="relative" style={{ width: '100%', height: '400px' }}>
+        <ResponsiveContainer>
+          {renderChart()}
+        </ResponsiveContainer>
+      </div>
+
     </div>
   )
 }

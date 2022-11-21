@@ -13,7 +13,6 @@ import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
 import Button from '../Form/Button.jsx';
-import PillMenu from '../PillMenu/PillMenu';
 import Section from '../Section/Section';
 
 // import './Profile.css';
