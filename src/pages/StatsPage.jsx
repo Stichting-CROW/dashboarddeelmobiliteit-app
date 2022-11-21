@@ -11,9 +11,9 @@ import moment from 'moment';
 import {
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone
-} from '../helpers/stats.js';
+} from '../helpers/stats';
 
-import VerhuringenChart from '../components/Chart/VerhuringenChart.jsx';
+import VerhuringenChart from '../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
 import FormInput from '../components/FormInput/FormInput';
 

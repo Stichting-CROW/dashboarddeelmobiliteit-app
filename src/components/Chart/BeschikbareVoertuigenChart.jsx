@@ -33,8 +33,11 @@ import {
   prepareAggregatedStatsData,
   prepareAggregatedStatsData_timescaleDB,
   sumAggregatedStats,
-  doShowDetailledAggregatedData
-} from '../../helpers/stats.js';
+  doShowDetailledAggregatedData,
+  getDateFormat,
+  prepareDataForCsv,
+  downloadCsv
+} from '../../helpers/stats';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
@@ -107,6 +110,16 @@ function BeschikbareVoertuigenChart({filter, config}) {
 
   // Populate chart data
   let chartData = getChartData();
+  // 
+  const getChartDataWithNiceDates = (data) => {
+    const aggregationLevel = filter.ontwikkelingaggregatie;
+    const dateFormat = getDateFormat(aggregationLevel);
+    return data.map(x => {
+      return {...x, ...{ name: moment(x.name).format(dateFormat) }}
+    })
+  }
+  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)
+
   if(config && config.sumTotal === true) {
     // chartData = sumAggregatedStats(chartData);
   }
@@ -119,7 +132,7 @@ function BeschikbareVoertuigenChart({filter, config}) {
     // Render area line chart 
     if(numberOfPointsOnXAxis > 24 && filter.ontwikkelingaggregatie !== '15m' && filter.ontwikkelingaggregatie !== '5m' && filter.ontwikkelingaggregatie !== 'hour') {
       return <AreaChart
-        data={chartData}
+        data={chartDataWithNiceDates}
         margin={{
           top: 10,
           right: 30,
@@ -132,7 +145,7 @@ function BeschikbareVoertuigenChart({filter, config}) {
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
         {config && config.sumTotal === true ? '' : <Legend />}
-        {getUniqueProviderNames(chartData).map(x => {
+        {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           if(x === 'time') return;
           return (
@@ -152,7 +165,7 @@ function BeschikbareVoertuigenChart({filter, config}) {
 
     // Or render bar chart
     return <BarChart
-      data={chartData}
+      data={chartDataWithNiceDates}
       margin={{
         top: 10,
         right: 30,
@@ -165,7 +178,7 @@ function BeschikbareVoertuigenChart({filter, config}) {
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
       {config && config.sumTotal === true ? '' : <Legend />}
-      {getUniqueProviderNames(chartData).map(x => {
+      {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         if(x === 'time') return;
         return (
@@ -184,7 +197,19 @@ function BeschikbareVoertuigenChart({filter, config}) {
   }
 
   return (
-    <div style={{ width: '100%', height: '400px', overflowX: 'hidden', overflowY: 'hidden' }}>
+    <div className="relative" style={{ width: '100%', height: '400px' }}>
+      {chartData && chartData.length > 0 && <div className="absolute right-0" style={{
+        top: '-42px',
+        right: '25px'
+      }}>
+        <button onClick={() => {
+          const preparedData = prepareDataForCsv(chartData);
+          const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+          downloadCsv(preparedData, filename);
+        }} className="opacity-50 cursor-pointer">
+          <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+        </button>
+      </div>}
       <ResponsiveContainer>
         {renderChart()}
       </ResponsiveContainer>

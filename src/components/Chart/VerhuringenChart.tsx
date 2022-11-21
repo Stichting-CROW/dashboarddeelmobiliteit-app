@@ -7,7 +7,7 @@ import {
   useSelector
 } from 'react-redux';
 
-// import moment from 'moment';
+import moment from 'moment';
 
 import {
   AreaChart,
@@ -36,8 +36,9 @@ import {
   prepareAggregatedStatsData,
   prepareAggregatedStatsData_timescaleDB,
   sumAggregatedStats,
-  doShowDetailledAggregatedData
-} from '../../helpers/stats.js';
+  doShowDetailledAggregatedData,
+  getDateFormat
+} from '../../helpers/stats';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
@@ -65,7 +66,7 @@ function VerhuringenChart(props) {
       if(! rentals || ! rentals.rentals_aggregated_stats) {
         return;
       }
-      
+
       let operators = getOperatorStatsForChart(rentals.rentals_aggregated_stats.values, metadata.aanbieders)
       dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
 
@@ -74,13 +75,24 @@ function VerhuringenChart(props) {
     fetchData();
   }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
   
+  //
   const chartdata = prepareAggregatedStatsData('rentals', rentalsData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude);
+  // 
+  const getchartDataWithNiceDates = (data) => {
+    const aggregationLevel = filter.ontwikkelingaggregatie;
+    const dateFormat = getDateFormat(aggregationLevel);
+    return data.map(x => {
+      return {...x, ...{ name: moment(x.name).format(dateFormat) }}
+    })
+  }
+  const chartdataWithNiceDates = getchartDataWithNiceDates(chartdata)
+
   const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
       return <AreaChart
-        data={chartdata}
+        data={chartdataWithNiceDates}
         margin={{
           top: 10,
           right: 30,
@@ -92,8 +104,8 @@ function VerhuringenChart(props) {
         <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
-        <Legend />} />
-        {getUniqueProviderNames(chartdata).map(x => {
+        <Legend />
+        {getUniqueProviderNames(chartdataWithNiceDates).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -111,7 +123,7 @@ function VerhuringenChart(props) {
     }
 
     return <BarChart
-      data={chartdata}
+      data={chartdataWithNiceDates}
       margin={{
         top: 10,
         right: 30,
@@ -123,8 +135,8 @@ function VerhuringenChart(props) {
       <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
-      <Legend />} />
-      {getUniqueProviderNames(chartdata).map(x => {
+      <Legend></Legend>
+      {getUniqueProviderNames(chartdataWithNiceDates).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar
@@ -142,7 +154,19 @@ function VerhuringenChart(props) {
   }
 
   return (
-    <div style={{ width: '100%', height: '400px', overflowX: 'hidden', overflowY: 'hidden' }}>
+    <div className="relative" style={{ width: '100%', height: '400px' }}>
+      {chartdata && chartdata.length > 0 && <div className="absolute right-0" style={{
+        top: '-45px',
+        right: '25px'
+      }}>
+        <button onClick={() => {
+          const preparedData = prepareDataForCsv(chartdata);
+          const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+          downloadCsv(preparedData, filename);
+        }} className="opacity-50 cursor-pointer">
+          <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+        </button>
+      </div>}
       <ResponsiveContainer>
         {renderChart()}
       </ResponsiveContainer>

@@ -5,7 +5,7 @@ import {
   getZoneById,
 } from '../components/Map/MapUtils/zones.js';
 
-const getDateFormat = (aggregationLevel) => {
+export const getDateFormat = (aggregationLevel) => {
   if(aggregationLevel === '5m') {
     return 'DD/MM HH:mm';
   }
@@ -57,10 +57,9 @@ const prepareAggregatedStatsData = (key, data, aggregationLevel, aanbiedersexclu
   // Exclude some providers from the result
   const providersToRemoveFromData = archivedProviders;
   // Map data
-  const dateFormat = getDateFormat(aggregationLevel);
   return data[`${key}_aggregated_stats`].values.map(x => {
     const { start_interval, ...rest } = x;
-    let item = {...rest, ...{ name: moment(start_interval).format(dateFormat) }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    let item = {...rest, ...{ name: start_interval }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
     if(aanbiedersexclude !== '') {
       const exclude = aanbiedersexclude.split(',')
       Object.keys(item).forEach(key=>{if(exclude.includes(key)) {delete item[key]}});
@@ -114,6 +113,58 @@ const sumAggregatedStats = (data) => {
       total: total
     }
   });
+}
+
+
+export const prepareDataForCsv = (data: any) => {
+  if(! data || data.length <= 0) return;
+  if(  typeof data !== 'object') return;
+
+  let csvRows = [];
+
+  // Get headers
+  const headers = Object.keys(data[0])
+  csvRows.push(headers.join(','));
+
+  // Loop over the rows
+  for (const row of data) {
+    const values = headers.map(header => {
+      let value = row[header];
+
+      // If this is the name (date) field: convert it to YYYY-MM-DD
+      if(header === 'name') {
+        value = moment(row[header]).format('YYYY-MM-DD');
+      }
+      // Escape it: Replace " with \"
+      value = (''+value).replace(/"/g, '\\"');
+      // Return
+      return `"${value}"`;
+    });
+    csvRows.push(values.join(','));
+  };
+
+  csvRows = csvRows.join("\n");
+
+  return csvRows;
+}
+
+export const downloadCsv = (data: any, filename?: string) => {
+  // Create blob
+  const blob = new Blob([data], { type: 'text/csv' });
+  // Send blog to the browser
+  const url = window.URL.createObjectURL(blob);
+  // Create an a-tag
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', filename ? filename : 'download.csv');
+  document.body.appendChild(a);
+  // Click it
+  a.click();
+  // Remove it
+  document.body.removeChild(a);
+
+  return;
 }
 
 export {
