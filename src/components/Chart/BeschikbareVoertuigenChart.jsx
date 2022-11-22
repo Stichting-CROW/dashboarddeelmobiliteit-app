@@ -99,7 +99,16 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     
     }
     fetchData();
-  }, [filter, filter.ontwikkelingaggregatie, metadata, token, dispatch]);
+  }, [
+    filter.ontwikkelingvan,
+    filter.ontwikkelingtot,
+    filter.ontwikkelingaggregatie,
+    filter.ontwikkelingaggregatie_function,
+    filter.zones,
+    metadata,
+    token,
+    dispatch
+  ]);
   
   // On load: get chart data
   const getChartData = () => {

@@ -52,9 +52,9 @@ function StatsPage(props) {
     }
     // If no custom zone:
     else {
-      const detailledAggLevels = ['5m', '15m', 'hour'];
+      const availableAggLevels = ['day', 'week', 'month'];
       // If agg level is specific to detailled agg data: switch to other agg level
-      if(detailledAggLevels.indexOf(filter.ontwikkelingaggregatie) > -1) {
+      if(availableAggLevels.indexOf(filter.ontwikkelingaggregatie) <= -1) {
         // Switch to non-detailled agg level
         agg = 'day';
       }
@@ -67,7 +67,7 @@ function StatsPage(props) {
     const userDidSelectCustomZone = didSelectAtLeastOneCustomZone(filter, zones);
     const agg = decideOnAggregationLevel(userDidSelectCustomZone);
     if(agg) setAggregationLevel(agg);
-  }, [filterZones])
+  }, [filterZones, filter.ontwikkelingvan, filter.ontwikkelingtot])
 
   const setAggregationTime = (newtime) => {
     dispatch({

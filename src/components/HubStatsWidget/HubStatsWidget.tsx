@@ -26,6 +26,7 @@ import {
 } from '../Map/MapUtils/zones.js';
 
 function HubStatsWidget(props) {
+  const [counter, setCounter] = useState(0)
   const [pathName, setPathName] = useState(null)
   const [publicZones, setPublicZones] = useState(null)
   const [ontwikkelingVan, setOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
@@ -75,12 +76,11 @@ function HubStatsWidget(props) {
 
     // Set some filter values
     const chartFilter = Object.assign({}, filter, {
-      datum: moment().toISOString(),
       ontwikkelingvan: ontwikkelingVan.toISOString(),
       ontwikkelingtot: ontwikkelingTot.toISOString(),
       ontwikkelingaggregatie: 'hour',
       zones: ''+zoneIdAsNumber// Cast to string
-    })
+    });
 
     return <div>
       <BeschikbareVoertuigenChart
@@ -96,15 +96,21 @@ function HubStatsWidget(props) {
     {
       title: '<',
       link: () => {
-        setOntwikkelingVan(ontwikkelingVan.subtract(1, 'day'))
-        setOntwikkelingTot(ontwikkelingTot.subtract(1, 'day'))
+        const newOntwikkelingVan = ontwikkelingVan.subtract(1, 'day');
+        const newOntwikkelingTot = ontwikkelingTot.subtract(1, 'day');
+        setOntwikkelingVan(newOntwikkelingVan)
+        setOntwikkelingTot(newOntwikkelingTot)
+        setCounter(counter+1);
       }
     },
     {
       title: '>',
       link: () => {
-        setOntwikkelingVan(ontwikkelingVan.add(1, 'day'))
-        setOntwikkelingTot(ontwikkelingTot.add(1, 'day'))
+        const newOntwikkelingVan = ontwikkelingVan.add(1, 'day');
+        const newOntwikkelingTot = ontwikkelingTot.add(1, 'day');
+        setOntwikkelingVan(newOntwikkelingVan)
+        setOntwikkelingTot(newOntwikkelingTot)
+        setCounter(counter+1);
       }
     }
   ];
