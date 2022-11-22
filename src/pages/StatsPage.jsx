@@ -195,7 +195,7 @@ function StatsPage(props) {
           <h2 className="text-4xl my-2">
             Gemiddelde bezetting
           </h2>
-          <div className="my-8 mx-16 max-w-3xl">
+          <div className="my-8 mr-8 ml-16 max-w-3xl">
             <TimeGrid_VehicleAvailability />
           </div>
         </div>)}

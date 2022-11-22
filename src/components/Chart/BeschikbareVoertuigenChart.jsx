@@ -103,7 +103,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);
     return data.map(x => {
-      return {...x, ...{ name: moment(x.name).format(dateFormat) }}
+      return {...x, ...{ time: moment(x.time).format(dateFormat) }}
     })
   }
   const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)

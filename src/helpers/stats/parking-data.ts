@@ -74,18 +74,16 @@ export const getSummedTotalsPerWeekdayAndHour = (data: object) => {
     // Get hour
     const hour = moment(data[key].time.replace('Z', '')).hour();
     // Store in array
-    if(aggregatedTotals[weekDay] === undefined) {
-      aggregatedTotals[''+weekDay] = [];
-      aggregatedTotals[''+weekDay][''+hour] = data[key].total;
+    if(aggregatedTotals[`day-${weekDay}`] === undefined) {
+      aggregatedTotals[`day-${weekDay}`] = [];
+      aggregatedTotals[`day-${weekDay}`][`hour-${hour}`] = data[key].total;
     }
-    else if(aggregatedTotals[weekDay][hour] === undefined) {
-      aggregatedTotals[''+weekDay][''+hour] = data[key].total;
+    else if(aggregatedTotals[`day-${weekDay}`][`hour-${hour}`] === undefined) {
+      aggregatedTotals[`day-${weekDay}`][`hour-${hour}`] = data[key].total;
     }
     else {
-      aggregatedTotals[''+weekDay][''+hour] += data[key].total;
+      aggregatedTotals[`day-${weekDay}`][`hour-${hour}`] += data[key].total;
     }
-    
-    // console.log(weekDay, hour, data[key].total, aggregatedTotals[weekDay][hour], aggregatedTotals)
   }
   return aggregatedTotals;
 }

@@ -88,7 +88,7 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
   const dateFormat = getDateFormat(aggregationLevel);
   return data[`availability_stats`].values.map(x => {
     const { time, ...rest } = x;
-    let item = {...rest, ...{ time: moment(time.replace('Z', '')).format(dateFormat) }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
     // Remove providers that are not selected
     if(aanbiedersexclude !== '') {
       const exclude = aanbiedersexclude.split(',')
