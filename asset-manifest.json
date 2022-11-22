@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.0fcd0176.chunk.css",
-    "main.js": "/static/js/main.a80bdd53.chunk.js",
-    "main.js.map": "/static/js/main.a80bdd53.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.595c4d07.js",
-    "runtime-main.js.map": "/static/js/runtime-main.595c4d07.js.map",
+    "main.css": "/static/css/main.b9d2d4cf.chunk.css",
+    "main.js": "/static/js/main.dd0005c9.chunk.js",
+    "main.js.map": "/static/js/main.dd0005c9.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.ecb91972.js",
+    "runtime-main.js.map": "/static/js/runtime-main.ecb91972.js.map",
     "static/css/2.d86f4523.chunk.css": "/static/css/2.d86f4523.chunk.css",
-    "static/js/2.1771e584.chunk.js": "/static/js/2.1771e584.chunk.js",
-    "static/js/2.1771e584.chunk.js.map": "/static/js/2.1771e584.chunk.js.map",
-    "static/js/3.c68c1983.chunk.js": "/static/js/3.c68c1983.chunk.js",
-    "static/js/3.c68c1983.chunk.js.map": "/static/js/3.c68c1983.chunk.js.map",
+    "static/js/2.20f00eaf.chunk.js": "/static/js/2.20f00eaf.chunk.js",
+    "static/js/2.20f00eaf.chunk.js.map": "/static/js/2.20f00eaf.chunk.js.map",
+    "static/js/3.b421dbc3.chunk.js": "/static/js/3.b421dbc3.chunk.js",
+    "static/js/3.b421dbc3.chunk.js.map": "/static/js/3.b421dbc3.chunk.js.map",
     "index.html": "/index.html",
     "static/css/2.d86f4523.chunk.css.map": "/static/css/2.d86f4523.chunk.css.map",
-    "static/css/main.0fcd0176.chunk.css.map": "/static/css/main.0fcd0176.chunk.css.map",
-    "static/js/2.1771e584.chunk.js.LICENSE.txt": "/static/js/2.1771e584.chunk.js.LICENSE.txt",
+    "static/css/main.b9d2d4cf.chunk.css.map": "/static/css/main.b9d2d4cf.chunk.css.map",
+    "static/js/2.20f00eaf.chunk.js.LICENSE.txt": "/static/js/2.20f00eaf.chunk.js.LICENSE.txt",
     "static/media/FilteritemVoertuigTypes.css": "/static/media/scooter.0a9628cb.svg",
     "static/media/calendar.0fe3dc2a.svg": "/static/media/calendar.0fe3dc2a.svg",
     "static/media/MapComponent.css": "/static/media/controls-zoom-out.b83ce275.svg",
@@ -24,10 +24,10 @@
     "static/media/FilteritemZones.css": "/static/media/times-circle.d3585a7d.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.595c4d07.js",
+    "static/js/runtime-main.ecb91972.js",
     "static/css/2.d86f4523.chunk.css",
-    "static/js/2.1771e584.chunk.js",
-    "static/css/main.0fcd0176.chunk.css",
-    "static/js/main.a80bdd53.chunk.js"
+    "static/js/2.20f00eaf.chunk.js",
+    "static/css/main.b9d2d4cf.chunk.css",
+    "static/js/main.dd0005c9.chunk.js"
   ]
 }
