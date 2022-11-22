@@ -40,7 +40,7 @@ import {
   prepareDataForCsv,
   downloadCsv,
   getDateFormat
-} from '../../helpers/stats';
+} from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';

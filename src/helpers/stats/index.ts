@@ -1,9 +1,14 @@
 import moment from 'moment-timezone';
-import {archivedProviders} from './providers.js';
+import {archivedProviders} from '../providers.js';
+
+import {
+  getAggregatedChartData,
+  getAggregatedVehicleData
+} from './parking-data';
 
 import {
   getZoneById,
-} from '../components/Map/MapUtils/zones.js';
+} from '../../components/Map/MapUtils/zones.js';
 
 export const getDateFormat = (aggregationLevel) => {
   if(aggregationLevel === '5m') {
@@ -177,5 +182,7 @@ export {
   prepareAggregatedStatsData_timescaleDB,
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone,
-  sumAggregatedStats
+  sumAggregatedStats,
+  getAggregatedVehicleData,
+  getAggregatedChartData
 }

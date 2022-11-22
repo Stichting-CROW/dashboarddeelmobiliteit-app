@@ -27,7 +27,7 @@ import {
   getProviderColor,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
-import {prepareAggregatedStatsData} from '../../helpers/stats';
+import {prepareAggregatedStatsData} from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 

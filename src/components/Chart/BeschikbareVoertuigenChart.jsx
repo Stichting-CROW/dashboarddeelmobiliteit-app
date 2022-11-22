@@ -38,8 +38,10 @@ import {
   aggregationFunctionButtonsToRender,
   getDateFormat,
   prepareDataForCsv,
-  downloadCsv
-} from '../../helpers/stats';
+  downloadCsv,
+  getAggregatedVehicleData,
+  getAggregatedChartData
+} from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
@@ -67,36 +69,20 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
 
     async function fetchData() {
-      let availableVehicles;
-      const options = {
-        filter: filter,
-        metadata: metadata,
-        aggregationLevel: filter.ontwikkelingaggregatie,
-        aggregationTime: filter.ontwikkelingaggregatie_tijd,
-        aggregationFunction: filter.ontwikkelingaggregatie_function
-      }
-      if(doShowDetailledAggregatedData(filter, zones)) {
-        availableVehicles = await getAggregatedStats_timescaleDB(token, 'available_vehicles', options);
-      } else {
-        availableVehicles = await getAggregatedStats(token, 'available_vehicles', options);
-      }
-
-      // Return if no stats are available
-      if(! availableVehicles || (! availableVehicles.availability_stats && ! availableVehicles.available_vehicles_aggregated_stats)) {
-        return;
-      }
-      setVehiclesData(availableVehicles);
+      // Get aggregated vehicle data
+      const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
+      // Set state
+      setVehiclesData(aggregatedVehicleData);
 
       // Sum amount of vehicles per operator, used in FilteritemAanbieders component
       let operators;
-      if(availableVehicles && availableVehicles.available_vehicles_aggregated_stats) {
-        operators = getOperatorStatsForChart(availableVehicles.available_vehicles_aggregated_stats.values, metadata.aanbieders);
+      if(aggregatedVehicleData && aggregatedVehicleData.available_vehicles_aggregated_stats) {
+        operators = getOperatorStatsForChart(aggregatedVehicleData.available_vehicles_aggregated_stats.values, metadata.aanbieders);
       }
       else {
-        operators = getOperatorStatsForChart(availableVehicles.availability_stats.values, metadata.aanbieders);
+        operators = getOperatorStatsForChart(aggregatedVehicleData.availability_stats.values, metadata.aanbieders);
       }
       dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
-    
     }
     fetchData();
   }, [
@@ -110,18 +96,9 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     dispatch
   ]);
   
-  // On load: get chart data
-  const getChartData = () => {
-    if(doShowDetailledAggregatedData(filter, zones)) {
-      return prepareAggregatedStatsData_timescaleDB('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
-    } else {
-      return prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
-    }
-  }
-
   // Populate chart data
-  let chartData = getChartData();
-  // 
+  let chartData = getAggregatedChartData(vehiclesData, filter, zones);
+
   const getChartDataWithNiceDates = (data) => {
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);

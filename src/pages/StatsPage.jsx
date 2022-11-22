@@ -12,11 +12,12 @@ import {
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone,
   aggregationFunctionButtonsToRender
-} from '../helpers/stats';
+} from '../helpers/stats/index';
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
 import FormInput from '../components/FormInput/FormInput';
+import TimeGrid_VehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -189,6 +190,8 @@ function StatsPage(props) {
             />
         </div>
       </div>
+
+      <TimeGrid_VehicleAvailability />
 
     </div>
   )
