@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
 
 import {
@@ -41,4 +42,50 @@ export const getAggregatedChartData = (vehiclesData, filter, zones) => {
   } else {
     return prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
   }
+}
+
+export const getTotalsPerHour = (data: object) => {
+  return data.map(timeIntervalData => {
+    let totalVehiclesForTimeInterval = 0, time;
+    Object.keys(timeIntervalData).forEach(key => {
+      if(key === 'time') {
+        // Get the time
+        time = timeIntervalData[key];
+        // Do not continue as there's nothing to count
+        return;
+      }
+      // Increment total vehicles count
+      totalVehiclesForTimeInterval += timeIntervalData[key];
+    })
+    return {
+      time: time,
+      total: Math.round(totalVehiclesForTimeInterval)
+    }
+  });
+}
+
+export const getSummedTotalsPerWeekdayAndHour = (data: object) => {
+  let aggregatedTotals = [];
+  // Loop all data rows and group per weekday and time
+  for(let key in data) {
+    // Get weekday, 1 = Monday
+    // TODO Fix Z timezone
+    const weekDay = moment(data[key].time.replace('Z', '')).day();
+    // Get hour
+    const hour = moment(data[key].time.replace('Z', '')).hour();
+    // Store in array
+    if(aggregatedTotals[weekDay] === undefined) {
+      aggregatedTotals[''+weekDay] = [];
+      aggregatedTotals[''+weekDay][''+hour] = data[key].total;
+    }
+    else if(aggregatedTotals[weekDay][hour] === undefined) {
+      aggregatedTotals[''+weekDay][''+hour] = data[key].total;
+    }
+    else {
+      aggregatedTotals[''+weekDay][''+hour] += data[key].total;
+    }
+    
+    // console.log(weekDay, hour, data[key].total, aggregatedTotals[weekDay][hour], aggregatedTotals)
+  }
+  return aggregatedTotals;
 }

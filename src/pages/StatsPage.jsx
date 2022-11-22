@@ -172,26 +172,35 @@ function StatsPage(props) {
   return (
     <div className="StatsPage pt-4 pb-24">
 
-      <div className={"agg-button-container"}>
+      <div className={"agg-button-container mb-8"}>
         {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))}
       </div>
 
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">
-          <VerhuringenChart
-            title="Verhuringen"
-            />
-        </div>
-        <div className="xl:flex-1 mt-8 xl:mt-0">
-
           <BeschikbareVoertuigenChart
             filter={filter}
             title="Beschikbare voertuigen"
             />
         </div>
+        <div className="xl:flex-1 mt-8 xl:mt-0">
+          <VerhuringenChart
+            title="Verhuringen"
+            />
+        </div>
       </div>
 
-      <TimeGrid_VehicleAvailability />
+      <div className="xl:flex">
+        {doShowDetailledAggregatedData && (<div className="my-16 xl:flex-1">
+          <h2 className="text-4xl my-2">
+            Gemiddelde bezetting
+          </h2>
+          <div className="my-8 mx-16 max-w-3xl">
+            <TimeGrid_VehicleAvailability />
+          </div>
+        </div>)}
+        <div className="flex-1" />
+      </div>
 
     </div>
   )
