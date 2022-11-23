@@ -81,7 +81,7 @@ function TimeGrid({
 }) {
 
   const [counter, setCounter] = useState(0);
-  const [showIt, setShowIt] = useState(true);
+  const [showIt, setShowIt] = useState(false);
 
   useEffect(() => {
     if(! showIt) return;
