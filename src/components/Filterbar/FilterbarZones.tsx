@@ -103,6 +103,7 @@ function FilterbarZones({
   const [limitType, setLimitType] = useState('modality');
   const [pathName, setPathName] = useState(document.location.pathname);
   const [doShowModal, setDoShowModal] = useState(false);
+  const [doShowImportModal, setDoShowImportModal] = useState(false);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -642,12 +643,52 @@ function FilterbarZones({
         </div>
         <div>
           {viewMode === 'adminView' && <div className="flex justify-between">
-            <Button
-              theme="white"
-              onClick={newZoneButtonHandler}
-            >
-              Nieuwe zone aanmaken
-            </Button>
+            <div className="flex">
+              <Button
+                theme="white"
+                onClick={newZoneButtonHandler}
+              >
+                Teken zone
+              </Button>
+
+              <Button
+                theme="white"
+                title="Importeer zone vanuit een GIS-bestand"
+                onClick={() => {
+                  setDoShowImportModal(true)
+                }}
+              >
+                ⬆️
+              </Button>
+
+              <Modal
+                isVisible={doShowImportModal}
+                title="Importeer een GIS-bestand"
+                button1Title={'Annuleer'}
+                button1Handler={(e) => {
+                  setDoShowImportModal(false);
+                }}
+                button2Title={"Importeer"}
+                button2Handler={(e) => {
+                  e.preventDefault();
+                  setTimeout(x => {
+                    // Hide modal
+                    setDoShowImportModal(false);
+                  }, 1500)
+                }}
+                hideModalHandler={() => {
+                  setDoShowImportModal(false);
+                }}
+              >
+                <p className="mb-4">
+                  Importeer een SPH-bestand met zone-polygonen middels onderstaande upload-functie. Tip: importeer niet te veel zones, maar enkel de zones waar je analyses op gaat doen.
+                </p>
+
+                <p className="mt-4">
+                  <input type="file" name="file" accept=".sph" />
+                </p>
+              </Modal>
+            </div>
             
             <div className="flex -mr-2">
               <Link to="/map/zones">
