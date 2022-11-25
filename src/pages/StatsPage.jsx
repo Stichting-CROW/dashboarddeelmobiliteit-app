@@ -191,7 +191,7 @@ function StatsPage(props) {
       </div>
 
       <div className="xl:flex">
-        {doShowDetailledAggregatedData && (<div className="my-16 xl:flex-1">
+        {doShowDetailledAggregatedData(filter, zones) && (<div className="my-16 xl:flex-1">
           <h2 className="text-4xl my-2">
             Gemiddelde bezetting
           </h2>
