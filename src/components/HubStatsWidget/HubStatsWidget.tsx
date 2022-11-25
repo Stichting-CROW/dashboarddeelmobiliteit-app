@@ -30,7 +30,7 @@ function HubStatsWidget(props) {
   const [pathName, setPathName] = useState(null)
   const [publicZones, setPublicZones] = useState(null)
   const [ontwikkelingVan, setOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
-  const [ontwikkelingTot, setOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')).add(1, 'day'))
+  const [ontwikkelingTot, setOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
 
   const filterGebied = useSelector(state => {
     return state.filter ? state.filter.gebied : 0;
@@ -76,8 +76,8 @@ function HubStatsWidget(props) {
 
     // Set some filter values
     const chartFilter = Object.assign({}, filter, {
-      ontwikkelingvan: ontwikkelingVan.toISOString(),
-      ontwikkelingtot: ontwikkelingTot.toISOString(),
+      ontwikkelingvan: ontwikkelingVan.format(),
+      ontwikkelingtot: ontwikkelingTot.format(),
       ontwikkelingaggregatie: 'hour',
       zones: ''+zoneIdAsNumber// Cast to string
     });
