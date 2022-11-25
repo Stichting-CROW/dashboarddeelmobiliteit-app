@@ -21,7 +21,7 @@ export const getDateFormat = (aggregationLevel) => {
     return 'DD/MM HH:ss';
   }
   else if(aggregationLevel === 'day') {
-    return 'DD MMM YYYY';
+    return 'dd DD MMM YYYY';
   }
   else if(aggregationLevel === 'week') {
     return '[w]W, YYYY';
