@@ -71,6 +71,8 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     async function fetchData() {
       // Get aggregated vehicle data
       const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
+      if(! aggregatedVehicleData) return;
+
       // Set state
       setVehiclesData(aggregatedVehicleData);
 
