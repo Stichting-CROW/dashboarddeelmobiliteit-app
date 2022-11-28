@@ -105,7 +105,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);
     return data.map(x => {
-      return {...x, ...{ time: moment(x.time).format(dateFormat) }}
+      return {...x, ...{ time: moment(x.time ? x.time : x.name).format(dateFormat) }}
     })
   }
   const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)
@@ -125,10 +125,11 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     )
   }
 
-  if(config && config.sumTotal === true) {
-    // chartData = sumAggregatedStats(chartData);
-  }
+  // if(config && config.sumTotal === true) {
+  //   chartData = sumAggregatedStats(chartData);
+  // }
   // console.log(chartData);
+
   const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
 
   // Function that renders the chart
