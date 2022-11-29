@@ -18,6 +18,7 @@ import VerhuringenChart from '../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart.jsx';
 import FormInput from '../components/FormInput/FormInput';
 import TimeGrid_VehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
+import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -173,7 +174,12 @@ function StatsPage(props) {
     <div className="StatsPage pt-4 pb-24">
 
       <div className={"agg-button-container mb-8"}>
-        {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))}
+
+        {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))} 
+
+        {aggregationButtonsToRender && aggregationButtonsToRender.length > 0 && (<InfoTooltip className="mx-2 inline-block">
+          Toon de data in intervallen van {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je bekijkt nu {aggregationButtonsToRender.filter(x => filter.ontwikkelingaggregatie == x.name).pop()?.title}-niveau.
+        </InfoTooltip>)}
       </div>
 
       <div className="xl:flex">

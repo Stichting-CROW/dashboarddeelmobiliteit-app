@@ -45,6 +45,7 @@ import {
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
+import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
 
 function BeschikbareVoertuigenChart({filter, config, title}) {
   const dispatch = useDispatch()
@@ -226,6 +227,12 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
 
         {doShowDetailledAggregatedData(filter, zones) && <div className={"text-sm flex flex-col justify-center"}>
           <div className="flex">
+            {doShowDetailledAggregatedData(filter, zones) && (
+              <InfoTooltip className="mx-2 inline-block">
+                Zie wat de minimale bezetting was, de gemiddelde bezetting, of juist de maximale bezetting in ieder tijdsinterval.
+              </InfoTooltip>
+            )}
+
             {aggregationFunctionButtonsToRender.map(x => renderAggregationFunctionButton(x.name, x.title))}
           </div>
         </div>}
