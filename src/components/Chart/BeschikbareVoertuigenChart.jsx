@@ -229,7 +229,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
           <div className="flex">
             {doShowDetailledAggregatedData(filter, zones) && (
               <InfoTooltip className="mx-2 inline-block">
-                Zie wat de minimale bezetting was, de gemiddelde bezetting, of juist de maximale bezetting in ieder tijdsinterval.
+                Zie in ieder tijdsinterval wat de minimale bezetting was, de gemiddelde bezetting of juist de maximale bezetting.
               </InfoTooltip>
             )}
 
