@@ -135,7 +135,7 @@ function VerhuringenChart(props) {
         }}
       >
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
-        <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
+        <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
         <Legend />
@@ -168,7 +168,7 @@ function VerhuringenChart(props) {
       }}
     >
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
-      <XAxis dataKey="name" tick={<CustomizedXAxisTick />} />
+      <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
       <Legend></Legend>
