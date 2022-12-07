@@ -39,7 +39,7 @@ const initialState = {
   ontwikkelingvan: moment().subtract(30, 'days').toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
   ontwikkelingaggregatie: "day",
-  ontwikkelingaggregatie_function: 'AVG'
+  ontwikkelingaggregatie_function: 'MAX'
 }
 
 export default function filter(state = initialState, action) {

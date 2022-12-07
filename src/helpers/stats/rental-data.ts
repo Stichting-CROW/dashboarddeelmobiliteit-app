@@ -1,5 +1,8 @@
 import moment from 'moment-timezone';
-import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
+import {
+  getAggregatedStats,
+  getAggregatedStats_timescaleDB
+ } from '../../api/aggregatedStats';
 
 import {
   prepareAggregatedStatsData,
@@ -13,7 +16,7 @@ import {
   downloadCsv
 } from './index';
 
-export const getAggregatedVehicleData = async (token, filter, zones, metadata) => {
+export const getAggregatedRentalsData = async (token, filter, zones, metadata) => {
   let aggregatedVehicleData;
   const options = {
     filter: filter,
@@ -23,24 +26,24 @@ export const getAggregatedVehicleData = async (token, filter, zones, metadata) =
     aggregationFunction: filter.ontwikkelingaggregatie_function
   }
   if(doShowDetailledAggregatedData(filter, zones)) {
-    aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'available_vehicles', options);
+    aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'rentals', options);
   } else {
-    aggregatedVehicleData = await getAggregatedStats(token, 'available_vehicles', options);
+    aggregatedVehicleData = await getAggregatedStats(token, 'rentals', options);
   }
 
   // Return if no stats are available
-  if(! aggregatedVehicleData || (! aggregatedVehicleData.availability_stats && ! aggregatedVehicleData.available_vehicles_aggregated_stats)) {
+  if(! aggregatedVehicleData || (! aggregatedVehicleData.rental_stats && ! aggregatedVehicleData.rentals_aggregated_stats)) {
     return;
   }
 
   return aggregatedVehicleData;
 }
 
-export const getAggregatedChartData = (vehiclesData, filter, zones) => {
+export const getAggregatedRentalsChartData = (vehiclesData, filter, zones) => {
   if(doShowDetailledAggregatedData(filter, zones)) {
-    return prepareAggregatedStatsData_timescaleDB('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    return prepareAggregatedStatsData_timescaleDB('rentals', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
   } else {
-    return prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    return prepareAggregatedStatsData('rentals', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
   }
 }
 

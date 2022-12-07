@@ -33,10 +33,10 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
   //
   // curl --location --request GET 'https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/availability_stats?aggregation_level=5m&group_by=operator&start_time=2022-11-07T00:00:00&end_time=2022-11-09T00:00:00&zone_ids=51856' \
   // --header 'Authorization: Bearer TOKEN'
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/availability_stats?`;
+  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/${key === 'available_vehicles' ? 'availability_stats' : 'rental_stats'}?`;
   url += `aggregation_level=${options.aggregationLevel}`
   url += `&group_by=operator`;
-  url += `&aggregation_function=${options.aggregationFunction || 'AVG'}`;
+  url += `&aggregation_function=${options.aggregationFunction || 'MAX'}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;

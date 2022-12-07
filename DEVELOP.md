@@ -100,3 +100,13 @@ curl -X "POST" "https://ors.dashboarddeelmobiliteit.nl/v2/isochrones/cycling-reg
   "intersections": false
 }'
 ```
+
+## Aggregated rental data API call
+
+Example of aggregated rental data API call:
+
+```bash
+curl --location --request GET 'https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/rental_stats?zone_ids=51802&aggregation_level=hour&start_time=2022-12-06T20:00:00&end_time=2022-12-06T23:00:00' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Bearer TOKEN'
+```

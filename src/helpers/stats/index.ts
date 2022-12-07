@@ -7,6 +7,11 @@ import {
 } from './parking-data';
 
 import {
+  getAggregatedRentalsData,
+  getAggregatedRentalsChartData
+} from './rental-data';
+
+import {
   getZoneById,
 } from '../../components/Map/MapUtils/zones.js';
 
@@ -78,17 +83,39 @@ const prepareAggregatedStatsData = (key, data, aggregationLevel, aanbiedersexclu
 }
 
 const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aanbiedersexclude='') => {
+  const theKey = key === 'available_vehicles' ? 'availability_stats' : 'rental_stats';
   // Validate data object
-  if(! data || ! data[`availability_stats`] || ! data[`availability_stats`].values) {
+  if(! data || ! data[theKey] || ! data[theKey].values
+   ) {
     return [];
   }
   // Exclude some providers from the result
   const providersToRemoveFromData = archivedProviders;
   // Map data
   const dateFormat = getDateFormat(aggregationLevel);
-  return data[`availability_stats`].values.map(x => {
+  return data[theKey].values.map(x => {
     const { time, ...rest } = x;
     let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+
+    // For rental data: sum modality counts for every provider
+    if(theKey === 'rental_stats') {
+      let newProviderObject = {};
+      // Loop all providers for this item
+      Object.keys(item).forEach(providerKey => {
+        if(providerKey === 'time') {
+          newProviderObject.time = item[providerKey];
+          return;
+        }
+        // Loop all modalities for this item
+        let providerRentalsCount = 0;
+        Object.keys(item[providerKey]).forEach(modalityKey => {
+          providerRentalsCount += item[providerKey][modalityKey].rentals_started;
+        });
+        newProviderObject[providerKey] = providerRentalsCount;
+      });
+      item = newProviderObject;
+    }
+
     // Remove providers that are not selected
     if(aanbiedersexclude !== '') {
       const exclude = aanbiedersexclude.split(',')
@@ -121,8 +148,8 @@ const sumAggregatedStats = (data) => {
 }
 
 export const aggregationFunctionButtonsToRender = [
-  {name: 'MIN', title: 'min'},
-  {name: 'AVG', title: 'gemiddeld'},
+  // {name: 'MIN', title: 'min'},
+  // {name: 'AVG', title: 'gemiddeld'},
   {name: 'MAX', title: 'max'},
 ];
 
@@ -184,5 +211,8 @@ export {
   didSelectAtLeastOneCustomZone,
   sumAggregatedStats,
   getAggregatedVehicleData,
-  getAggregatedChartData
+  getAggregatedChartData,
+
+  getAggregatedRentalsData,
+  getAggregatedRentalsChartData
 }
