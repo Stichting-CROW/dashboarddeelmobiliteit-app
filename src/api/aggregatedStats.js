@@ -69,7 +69,7 @@ export const downloadRawData = async (token, options) => {
   // Get API response      
   const fetchOptions = getFetchOptions(token)
   const response = await fetch(url, fetchOptions);
-  const responseBlob = await response.blob();
+  const json = await response.json();
 
-  saveAs(responseBlob, `export_dashboarddeelmobiliteit_${options.startDate}-${options.endDate}_${options.gm_code}.zip`)
+  return json;
 }
