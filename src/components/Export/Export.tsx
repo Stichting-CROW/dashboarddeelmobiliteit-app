@@ -120,16 +120,18 @@ function Export() {
       <div className="my-5">
 
         <Section title="Download standaardrapportage">
-          <DateFromTo
-            label="Periode"
-            startDate={moment(startDate).toDate()}
-            endDate={moment(endDate).toDate()}
-            onChange={(dates) => {
-              const [start, end] = dates;
-              setStartDate(start);
-              setEndDate(end);
-            }}
-          />
+          <div className="lg:w-72">
+            <DateFromTo
+              label="Periode"
+              startDate={moment(startDate).toDate()}
+              endDate={moment(endDate).toDate()}
+              onChange={(dates) => {
+                const [start, end] = dates;
+                setStartDate(start);
+                setEndDate(end);
+              }}
+            />
+          </div>
           <FormSelect
             label="Plaats"
             onChange={(e) => updateMunicipalityCode(e.target.value)}
@@ -146,16 +148,18 @@ function Export() {
         </Section>
 
         {isVerified && <Section title="Download ruwe data">
-          <DateFromTo
-            label="Periode"
-            startDate={moment(startDate).toDate()}
-            endDate={moment(endDate).toDate()}
-            onChange={(dates) => {
-              const [start, end] = dates;
-              setStartDate(start);
-              setEndDate(end);
-            }}
-          />
+          <div className="lg:w-72">
+            <DateFromTo
+              label="Periode"
+              startDate={moment(startDate).toDate()}
+              endDate={moment(endDate).toDate()}
+              onChange={(dates) => {
+                const [start, end] = dates;
+                setStartDate(start);
+                setEndDate(end);
+              }}
+            />
+          </div>
 
           <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
             Vraag ruwe data export aan (.csv)
