@@ -569,7 +569,6 @@ function MapComponent(props) {
         'sven.boor@gmail.com'
       ]
       // Return true if user is analyst
-      return false;
       return analystEmailAddresses.indexOf(email) > -1;
     }
 
