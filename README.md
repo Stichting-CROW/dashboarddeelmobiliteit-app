@@ -114,5 +114,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ## Dashboard Deelmobiliteit in the media
 
+- [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)
 - [October 2022: Nieuwe tool helpt overlast deelvoertuigen te beperken](https://www.verkeersnet.nl/actueel/44883/nieuwe-tool-helpt-overlast-deelvoertuigen-te-beperken/)
 - [July 2022: Alle scooters naar het SMÈRRIG Zomerfestival](https://observablehq.com/@geodan/data-uit-deelmobiliteit-en-evenementen)
