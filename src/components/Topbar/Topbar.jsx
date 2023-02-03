@@ -20,7 +20,7 @@ function Topbar() {
     <div className="topbar flex justify-between">
       <div className="topbar-logo" />
       {isLoggedIn
-        && <a className="text-right cursor-pointer" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
+        && <a className="text-right cursor-pointer" href="mailto:info@dashboarddeelmobiliteit.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
             Feedback
           </a>}
       {isLoggedIn

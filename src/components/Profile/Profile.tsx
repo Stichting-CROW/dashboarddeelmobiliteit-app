@@ -74,7 +74,7 @@ function Profile() {
       </Link>
 
       <div className="flex">
-        <Button classes="mr-2" color="blue" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
+        <Button classes="mr-2" color="blue" href="mailto:info@dashboarddeelmobiliteit.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
           Zend feedback
         </Button>
         <Button color="gray" onClick={() => {

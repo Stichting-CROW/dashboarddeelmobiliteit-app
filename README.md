@@ -8,7 +8,7 @@ The goal of this app is to give insightful information on the use of shared mobi
 
 The app uses the [API](https://gitlab.com/bikedashboard/dashboard-api) to get its data. The API gets its data from the postgresql database. The postgresql database is filled with data from the [go-import-vehicles](https://gitlab.com/bikedashboard/go-import-vehicles) script, that sources the data from all the different shared mobility providers.
 
-Dashboard Deelmobiliteit is a project by non profit organisation [CROW](https://crow.nl/). Tips, comments or questions? Contact the team at info@deelfietsdashboard.nl!
+Dashboard Deelmobiliteit is a project by non profit organisation [CROW](https://crow.nl/). Tips, comments or questions? Contact the team at info@dashboarddeelmobiliteit.nl!
 
 ## How to deploy?
 
