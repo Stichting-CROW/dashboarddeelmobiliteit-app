@@ -10,7 +10,7 @@ const CustomizedTooltip = ({ active, payload, label }) => {
     const sumValue = () => {
       let res = 0;
       payload.forEach(x => {
-        res += x.value;
+        res += parseInt(x.value);
       })
       return res;
     }
@@ -23,7 +23,7 @@ const CustomizedTooltip = ({ active, payload, label }) => {
         <ul className="my-0 py-0">
           {arrayReverseObj(payload).map((x,i) => {
             return <li key={'c-'+i} style={{color: x.fill}}>
-              {x.name}: {x.value}
+              {x.name}: {parseInt(x.value)}
             </li>
           })}
         </ul>

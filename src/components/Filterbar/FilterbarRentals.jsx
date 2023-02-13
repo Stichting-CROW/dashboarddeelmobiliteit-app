@@ -1,9 +1,4 @@
 import './css/Filterbar.css';
-// import {
-//   useEffect,
-//   useState,
-//   useRef
-// } from 'react';
 import { Link } from "react-router-dom";
 import {useSelector} from 'react-redux';
 import moment from 'moment';
@@ -21,9 +16,9 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
-
+// import Button from '../Button/Button';
+// import FormInput from '../FormInput/FormInput';
 import FilterbarZones from './FilterbarZones';
-import FilterbarRentals from './FilterbarRentals';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -89,78 +84,59 @@ function Filterbar({
     ];
   }
 
-  // Zones
-  if(iszonespublic || iszonesadmin) {
-    return <FilterbarZones
-      view={iszonespublic ? 'readonly' : 'adminView'}
-      hideLogo={hideLogo}
-    />
-  }
+  return (
+    <div className="filter-bar-inner py-2">
 
-  // Verhuringen
-  else if (isrentals) {
-    return <FilterbarRentals
-      hideLogo={hideLogo}
-      displayMode={displayMode}
-      visible={visible}
-    />
-  }
+      <div className="justify-between hidden sm:flex">
+        <div style={{minWidth: '82px'}}>
+          {! hideLogo && (
+            ispark
+              ? <Logo />
+              : <Link to="/"><Logo /></Link>
+          )}
+        </div>
+        <div className="ml-4 text-sm flex justify-center flex-col" style={{
+          color: '#FD862E'
+        }}>
+          {/* INFO */}
+        </div>
+      </div> 
 
-  else {
-    return (
-      <div className="filter-bar-inner py-2">
-
-        <div className="justify-between hidden sm:flex">
-          <div style={{minWidth: '82px'}}>
-            {! hideLogo && (
-              ispark
-                ? <Logo />
-                : <Link to="/"><Logo /></Link>
-            )}
+      { isLoggedIn && showdatum && <FilteritemDatum /> }
+      
+      { ! isLoggedIn && showdatum && <div>
+        <div className="filter-datum-container">
+          <div className="filter-datum-title">
+            Tijd
           </div>
-          <div className="ml-4 text-sm flex justify-center flex-col" style={{
-            color: '#FD862E'
-          }}>
-            {/* INFO */}
+          <div className="filter-datum-box-row">
+            {moment(filterDatum).format('HH:mm')}
           </div>
-        </div> 
+        </div>
+      </div> }
 
-        { isLoggedIn && showdatum && <FilteritemDatum /> }
-        
-        { ! isLoggedIn && showdatum && <div>
-          <div className="filter-datum-container">
-            <div className="filter-datum-title">
-              Tijd
-            </div>
-            <div className="filter-datum-box-row">
-              {moment(filterDatum).format('HH:mm')}
-            </div>
-          </div>
-        </div> }
+      { isLoggedIn && showduur && <FilteritemDuur /> }
 
-        { isLoggedIn && showduur && <FilteritemDuur /> }
+      { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
 
-        { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
+      {<FilteritemGebieden />}
 
-        {<FilteritemGebieden />}
+      {<FilteritemZones 
+        zonesToShow={zonesToShow}
+        />}
 
-        {<FilteritemZones 
-          zonesToShow={zonesToShow}
-          />}
+      {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
 
-        {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
+      {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
 
-        {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
+      {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
-        {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
+      {showvervoerstype && <FilteritemVoertuigTypes />}
 
-        {showvervoerstype && <FilteritemVoertuigTypes />}
+      {<FilteritemAanbieders />}
 
-        {<FilteritemAanbieders />}
-
-      </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default Filterbar;

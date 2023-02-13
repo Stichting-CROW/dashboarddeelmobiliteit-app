@@ -23,7 +23,7 @@ _This CONTRIBUTING document is inspired by https://github.com/atom/atom/blob/mas
 
 ## I don't want to read this whole thing I just have a question!!!
 
-Please file an issue to ask a question, or contact info@deelfietsdashboard.nl
+Please file an issue to ask a question, or contact info@dashboarddeelmobiliteit.nl
 
 ## What should I know before I get started?
 

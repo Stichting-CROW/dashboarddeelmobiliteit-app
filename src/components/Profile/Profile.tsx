@@ -13,7 +13,6 @@ import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
 import Button from '../Form/Button.jsx';
-import PillMenu from '../PillMenu/PillMenu';
 import Section from '../Section/Section';
 
 // import './Profile.css';
@@ -75,7 +74,7 @@ function Profile() {
       </Link>
 
       <div className="flex">
-        <Button classes="mr-2" color="blue" href="mailto:info@deelfietsdashboard.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
+        <Button classes="mr-2" color="blue" href="mailto:info@dashboarddeelmobiliteit.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
           Zend feedback
         </Button>
         <Button color="gray" onClick={() => {

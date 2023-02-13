@@ -24,7 +24,9 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
+import {
+  getAggregatedStats
+} from '../../api/aggregatedStats';
 import {
   getProviderColor,
   getUniqueProviderNames
@@ -34,26 +36,22 @@ import {
   prepareAggregatedStatsData_timescaleDB,
   sumAggregatedStats,
   doShowDetailledAggregatedData,
-  didSelectAtLeastOneCustomZone,
-  aggregationFunctionButtonsToRender,
-  getDateFormat,
   prepareDataForCsv,
   downloadCsv,
-  getAggregatedVehicleData,
-  getAggregatedChartData
+  getDateFormat,
+  getAggregatedRentalsData,
+  getAggregatedRentalsChartData
 } from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
 
-function BeschikbareVoertuigenChart({filter, config, title}) {
+function VerhuringenChart(props) {
   const dispatch = useDispatch()
 
-  // Get authentication token
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
-
-  // Get metadata
+  const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
 
   // Get all zones
@@ -61,31 +59,28 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
-  // Define state variables
-  const [vehiclesData, setVehiclesData] = useState([])
+  const [rentalsData, setRentalsData] = useState([])
 
-  // On updated filter: re-fetch data
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
-
     async function fetchData() {
       // Get aggregated vehicle data
-      const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
-      if(! aggregatedVehicleData) return;
+      const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
+      if(! aggregatedData) return;
 
       // Set state
-      setVehiclesData(aggregatedVehicleData);
+      setRentalsData(aggregatedData);
 
       // Sum amount of vehicles per operator, used in FilteritemAanbieders component
       let operators;
-      if(aggregatedVehicleData && aggregatedVehicleData.available_vehicles_aggregated_stats) {
-        operators = getOperatorStatsForChart(aggregatedVehicleData.available_vehicles_aggregated_stats.values, metadata.aanbieders);
+      if(aggregatedData && aggregatedData.rentals_aggregated_stats) {
+        operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
       }
       else {
-        operators = getOperatorStatsForChart(aggregatedVehicleData.availability_stats.values, metadata.aanbieders);
+        operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
       }
-      dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
+      dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
     }
     fetchData();
   }, [
@@ -100,7 +95,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
   ]);
   
   // Populate chart data
-  let chartData = getAggregatedChartData(vehiclesData, filter, zones);
+  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones);
 
   const getChartDataWithNiceDates = (data) => {
     const aggregationLevel = filter.ontwikkelingaggregatie;
@@ -126,17 +121,9 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
     )
   }
 
-  // if(config && config.sumTotal === true) {
-  //   chartData = sumAggregatedStats(chartData);
-  // }
-  // console.log(chartData);
+  const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
 
-  const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
-
-  // Function that renders the chart
   const renderChart = () => {
-
-    // Render area line chart 
     if(numberOfPointsOnXAxis > 24 && filter.ontwikkelingaggregatie !== '15m' && filter.ontwikkelingaggregatie !== '5m' && filter.ontwikkelingaggregatie !== 'hour') {
       return <AreaChart
         data={chartDataWithNiceDates}
@@ -151,7 +138,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
-        {config && config.sumTotal === true ? '' : <Legend />}
+        <Legend />
         {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           if(x === 'time') return;
@@ -184,7 +171,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
-      {config && config.sumTotal === true ? '' : <Legend />}
+      <Legend></Legend>
       {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         if(x === 'time') return;
@@ -205,12 +192,12 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
 
   return (
     <div className="relative">
-      
+
       <div className="flex justify-between my-2">
         <div className="flex flex-start">
 
-          {title && <h2 className="text-4xl my-2">
-            {title}
+          {props.title && <h2 className="text-4xl my-2">
+            {props.title}
           </h2>}
 
           {chartData && chartData.length > 0 && <div className="flex justify-center flex-col ml-2">
@@ -225,16 +212,13 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
 
         </div>
 
-        {doShowDetailledAggregatedData(filter, zones) && <div className={"text-sm flex flex-col justify-center"}>
+        {false && doShowDetailledAggregatedData(filter, zones) && <div className={"text-sm flex flex-col justify-center"}>
           <div className="flex">
             {doShowDetailledAggregatedData(filter, zones) && (
               <InfoTooltip className="mx-2 inline-block">
-                {/*Zie in ieder tijdsinterval wat de minimale bezetting was, de gemiddelde bezetting of juist de maximale bezetting.*/}
-                Zie in ieder tijdsinterval wat de (maximale) bezetting was.
+                Zie in ieder tijdsinterval wat het totaal aantal verhuringen was in dat interval.
               </InfoTooltip>
             )}
-
-            {aggregationFunctionButtonsToRender.map(x => renderAggregationFunctionButton(x.name, x.title))}
           </div>
         </div>}
 
@@ -245,9 +229,8 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
           {renderChart()}
         </ResponsiveContainer>
       </div>
-
     </div>
   )
 }
 
-export default BeschikbareVoertuigenChart;
+export default VerhuringenChart;

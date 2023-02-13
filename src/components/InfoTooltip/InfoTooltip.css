@@ -1,0 +1,79 @@
+
+/* Source: https://codepen.io/WithAnEs/pen/EZPPzN */
+
+.infoButton {
+    appearance: none;
+    border: 0;
+    background-color: transparent;
+    font-size: 14px;
+    position: relative;
+}
+
+.infoButton-btn {
+    appearance: none;
+    background-color: transparent;
+    border: 1px solid #15AEEF;
+    border-radius: 10px;
+    width: 20px;
+    height: 20px;
+    color: #15AEEF;
+    background-color: white;
+    font-weight: 700;
+    transform: rotate(-45deg);
+    transition: border-radius 200ms ease-in-out;
+}
+
+.infoButton-btn-text {
+    display: block;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    line-height: 20px;
+    font-weight: bold;
+    transform: rotate(45deg);
+}
+
+.infoButton-container {
+    position: absolute;
+    z-index: 10;
+    top: calc(-100% + 60px);
+    right: 0;
+    margin-right: -90px;
+    transform: scale(0);
+    transition: transform 0ms linear 200ms;
+}
+
+.infoButton-container-message {
+    box-sizing: border-box;
+    width: 200px;
+    padding: 16px 20px;
+    font-size: 14px;
+    box-shadow: 0 1px 1px 0 rgba(0,0,0, 0.26);
+    border-radius: 4px;
+    line-height: 1.3;
+    text-align: left;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+    background-color: white;
+}
+
+/*.infoButton:focus .infoButton-btn,*/
+.infoButton_isActive .infoButton-btn {
+    border-bottom-left-radius: 0;
+    transition: border-radius 200ms ease-in-out;
+    background-color: #15AEEF;
+    color: white;
+}
+
+/*.infoButton:focus .infoButton-container,*/
+.infoButton_isActive .infoButton-container {
+    transform: scale(1);
+    transition: transform 0ms linear;
+}
+
+/*.infoButton:focus .infoButton-container-message,*/
+.infoButton_isActive .infoButton-container-message {
+    transform: translate(0);
+    opacity: 1;
+}

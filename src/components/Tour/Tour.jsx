@@ -95,8 +95,8 @@ const Tour = () => {
                     <div><a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues" target="_blank" rel="noreferrer">
                       Bugs & Suggesties
                     </a></div>
-                    <div><a href="mailto:info@deelfietsdashboard.nl" target="_blank" rel="noreferrer">
-                      info@deelfietsdashboard.nl
+                    <div><a href="mailto:info@dashboarddeelmobiliteit.nl" target="_blank" rel="noreferrer">
+                      info@dashboarddeelmobiliteit.nl
                     </a></div>
                   </span>}
                 </div>

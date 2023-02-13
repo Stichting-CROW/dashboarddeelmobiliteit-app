@@ -8,7 +8,7 @@ The goal of this app is to give insightful information on the use of shared mobi
 
 The app uses the [API](https://gitlab.com/bikedashboard/dashboard-api) to get its data. The API gets its data from the postgresql database. The postgresql database is filled with data from the [go-import-vehicles](https://gitlab.com/bikedashboard/go-import-vehicles) script, that sources the data from all the different shared mobility providers.
 
-Dashboard Deelmobiliteit is a project by non profit organisation [CROW](https://crow.nl/). Tips, comments or questions? Contact the team at info@deelfietsdashboard.nl!
+Dashboard Deelmobiliteit is a project by non profit organisation [CROW](https://crow.nl/). Tips, comments or questions? Contact the team at info@dashboarddeelmobiliteit.nl!
 
 ## How to deploy?
 
@@ -31,7 +31,7 @@ Activate the layers&sources per page:
 
 In the project directory, you can run:
 
-### `yarn start`
+### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
@@ -39,12 +39,12 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
 
-### `yarn test`
+### `npm test`
 
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `yarn build`
+### `npm build`
 
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
@@ -54,7 +54,7 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
+### `npm eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
@@ -111,3 +111,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Dashboard Deelmobiliteit in the media
+
+- [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)
+- [October 2022: Nieuwe tool helpt overlast deelvoertuigen te beperken](https://www.verkeersnet.nl/actueel/44883/nieuwe-tool-helpt-overlast-deelvoertuigen-te-beperken/)
+- [July 2022: Alle scooters naar het SMÈRRIG Zomerfestival](https://observablehq.com/@geodan/data-uit-deelmobiliteit-en-evenementen)

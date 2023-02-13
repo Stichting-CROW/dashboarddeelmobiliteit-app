@@ -8,7 +8,7 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_OTHER,
-  // DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
@@ -69,20 +69,20 @@ function SelectLayer(props) {
     }}>
       <div className="SelectLayer pr-1">
         { displayMode===DISPLAYMODE_PARK ?
-            <div data-type="heat-map" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
-              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
-              <span className="layer-title">
-                Heat map
-              </span>
-            </div>: null }
+          <div data-type="heat-map" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}>
+            <span className="layer-title">
+              Heat map
+            </span>
+          </div>: null }
 
         { displayMode===DISPLAYMODE_PARK ?
-            <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
-              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
-              <span className="layer-title">
-                Clusters
-              </span>
-            </div> : null }
+          <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
+            <span className="layer-title">
+              Clusters
+            </span>
+          </div> : null }
 
         { displayMode===DISPLAYMODE_PARK ?
           <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
@@ -93,30 +93,30 @@ function SelectLayer(props) {
           </div> : null }
 
         { displayMode===DISPLAYMODE_RENTALS ?
-            <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}
-              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HEATMAP }) }}>
-              <span className="layer-title">
-                Heat map
-              </span>
-            </div>: null }
-
-        { displayMode===DISPLAYMODE_RENTALS ?
-            <div data-type="pointers" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_CLUSTERS ? ' layer-inactive':''}`}
-              onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_CLUSTERS }) }}>
-              <span className="layer-title">
-                Clusters
-              </span>
-            </div> : null }
-
-        { displayMode===DISPLAYMODE_RENTALS ?
-          <div data-type="vehicles"  className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_VOERTUIGEN }) }}>
+          <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HEATMAP }) }}>
             <span className="layer-title">
-              Voertuigen
+              Heat map
+            </span>
+          </div>: null }
+
+        { displayMode===DISPLAYMODE_RENTALS ?
+          <div data-type="pointers" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_CLUSTERS ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_CLUSTERS }) }}>
+            <span className="layer-title">
+              Clusters
             </span>
           </div> : null }
 
-        { displayMode===DISPLAYMODE_ZONES_ADMIN && <>
+        { displayMode===DISPLAYMODE_RENTALS ?
+        <div data-type="vehicles"  className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_VOERTUIGEN ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_VOERTUIGEN }) }}>
+          <span className="layer-title">
+            Voertuigen
+          </span>
+        </div> : null }
+
+        {displayMode===DISPLAYMODE_ZONES_ADMIN && <>
           <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
             setMapStyle(window.ddMap, mapStyles.base)
@@ -135,6 +135,40 @@ function SelectLayer(props) {
           </div>
         </>}
 
+        {displayMode===DISPLAYMODE_ZONES_PUBLIC && false && <>
+
+          <div
+            data-type="monitoring"
+            className={`layer`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          >
+            <span className="layer-title">
+              Analyse
+            </span>
+          </div>
+
+          <div
+            data-type="parking"
+            className={`layer`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          >
+            <span className="layer-title">
+              Parking
+            </span>
+          </div>
+
+          <div
+            data-type="no parking"
+            className={`layer`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          >
+            <span className="layer-title">
+              No parking
+            </span>
+          </div>
+
+        </>}
+
         { isLoggedIn && showZoneOnOff ?
           <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
@@ -144,6 +178,7 @@ function SelectLayer(props) {
             </span>
           </div> : null
         }
+
       </div>
     </SlideBox>
   )

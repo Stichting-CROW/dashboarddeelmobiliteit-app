@@ -269,6 +269,7 @@ const initZonesMap = async (theMap, token, filterGebied) => {
       return;
     }
 
+    // Add map popup
     new maplibregl.Popup()
       .setLngLat(e.lngLat)
       .setHTML(generatePopupHtml(e.features[0]))

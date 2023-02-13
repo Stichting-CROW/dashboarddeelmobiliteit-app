@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import './PillMenu.css';
 
@@ -20,11 +20,15 @@ function PillMenu({
     <div className="PillMenu px-5">
       <ul className="flex">
         {items.map(x => {
-          return <li key={x.url}>
-            <Link to={x.url}>
-              {x.title}
-            </Link>
-          </li>
+          return (
+            <li key={x.title}>
+              {typeof x.link === 'function' ? <div onClick={x.link}>
+                {x.title}
+              </div> : <Link to={x.link}>
+                {x.title}
+              </Link>}
+            </li>
+          )
         })}
       </ul>
     </div>

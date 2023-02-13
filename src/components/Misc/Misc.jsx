@@ -19,10 +19,19 @@ export default function Misc({children}) {
   }
 
   const pillMenuItems = [
-    {title: 'Profile', url: '/profile'},
-    {title: 'FAQ', url: '/faq'},
-    {title: 'Exporteer', url: '/export'}
-  ]
+    {
+      title: 'Profiel',
+      link: '/profile'
+    },
+    {
+      title: 'FAQ',
+      link: '/faq'
+    },
+    {
+      title: 'Exporteer',
+      link: '/export'
+    }
+  ];
 
   return (
     <div className="

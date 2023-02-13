@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import {MapComponent} from '../components/Map/MapComponent.jsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
+import {HubStatsWidget} from '../components/HubStatsWidget/HubStatsWidget';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
@@ -15,8 +16,6 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
 } from '../reducers/layers.js';
-
-import SlideBox from '../components/SlideBox/SlideBox.jsx';
 
 import './MapPage.css';
 
@@ -96,24 +95,15 @@ function Map({mode, mapContainer}) {
     activeSources.push('zones-metrics-public');
   }
 
+  // console.log('layers', layers)
+  // console.log('activeSources', activeSources)
+
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
         <SelectLayer />
-          {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
-          {false && <SlideBox name="HubStatsWidget" direction="right" options={{
-            title: 'Hub',
-            backgroundColor: '#fff',
-          }} style={{
-            position: 'absolute',
-            top: '125px',
-            right: 0
-          }}>
-            <div className="px-2 py-2" style={{minWidth: '356px', minHeight: '105px'}}>
-              dsds
-              {/*<HubStatsWidget />*/}
-            </div>
-          </SlideBox>}
+        {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
+        {(displayMode === DISPLAYMODE_ZONES_PUBLIC) && <HubStatsWidget />}
       </div>
       <div className="flex-1 bg-red-400">
         <MapComponent

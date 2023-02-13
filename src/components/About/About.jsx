@@ -90,7 +90,7 @@ Overheden hebben alleen toegang tot de informatie over deelvoertuigen in hun eig
 
 ### Hoe krijg ik toegang tot het Dashboard?
 
-Via het CROW of via info@deelfietsdashboard.nl kun je een login aanvragen. Afhankelijk van je taak en de afspraken over de data kun je vervolgens toegang krijgen tot de dashboard informatie voor gebieden en/of van aanbieders. Zo kunnen gemeente medewerkers over het algemeen toegang krijgen voor het dashboard in hun gemeente. Aanbieders van deelfietsen kunnen uiteraard toegang krijgen tot alle informatie van hun deelfietsen. Neem voor vragen over de rechten ook contact op met het CROW of info@deelfietsdashboard.nl.
+Via het CROW of via info@dashboarddeelmobiliteit.nl kun je een login aanvragen. Afhankelijk van je taak en de afspraken over de data kun je vervolgens toegang krijgen tot de dashboard informatie voor gebieden en/of van aanbieders. Zo kunnen gemeente medewerkers over het algemeen toegang krijgen voor het dashboard in hun gemeente. Aanbieders van deelfietsen kunnen uiteraard toegang krijgen tot alle informatie van hun deelfietsen. Neem voor vragen over de rechten ook contact op met het CROW of info@dashboarddeelmobiliteit.nl.
 
 ### Welke datastandaarden worden ondersteund?
 
@@ -106,11 +106,11 @@ Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/d
 
 Velen handen maken licht werk. We zijn daarom blij als je wilt helpen. Gemeenten of andere overheden kunnen helpen bij het specificeren van handige overzichten. Deelmobiliteitbedrijven kunnen meebouwen aan open source tools. Ontwikkelaars kunnen bijdragen aan de code. Ontwerpers kunnen de look & feel verbeteren. Mail ons als je wilt weten hoe je mee kunt helpen!
 
-We nodigen iedereen uit om mee te kijken en mee te ontwikkelen. Bugs en suggesties kunnen direct in de [issue-lijst](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues) geplaatst worden. Ons mailen op info@deelfietsdashboard.nl kan natuurlijk ook.
+We nodigen iedereen uit om mee te kijken en mee te ontwikkelen. Bugs en suggesties kunnen direct in de [issue-lijst](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues) geplaatst worden. Ons mailen op info@dashboarddeelmobiliteit.nl kan natuurlijk ook.
 
 ## Tot slot
 
-Wil je contact opnemen met het team achter het Dashboard Deelmobiliteit, neem dan contact op met <a href="mailto:info@deelfietsdashboard.nl?Subject=Hallo">info@deelfietsdashboard.nl</a>
+Wil je contact opnemen met het team achter het Dashboard Deelmobiliteit, neem dan contact op met <a href="mailto:info@dashboarddeelmobiliteit.nl?Subject=Hallo">info@dashboarddeelmobiliteit.nl</a>
           `)}}
         />
       </div>

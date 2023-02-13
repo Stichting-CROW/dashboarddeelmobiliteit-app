@@ -27,13 +27,11 @@ import {
   getProviderColor,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
-import {prepareAggregatedStatsData} from '../../helpers/stats.js';
+import {prepareAggregatedStatsData} from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 
 function ParkeerduurChart(props) {
-  // const dispatch = useDispatch()
-
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector(state => state.filter)
   const metadata = useSelector(state => state.metadata)
@@ -47,7 +45,8 @@ function ParkeerduurChart(props) {
       const rentals = await getAggregatedStats(token, 'rentals', {
         filter: filter,
         metadata: metadata,
-        aggregationLevel: filter.ontwikkelingaggregatie
+        aggregationLevel: filter.ontwikkelingaggregatie,
+        aggregationTime: filter.ontwikkelingaggregatie_tijd
       });
       setRentalsData(prepareAggregatedStatsData('rentals', rentals, filter.ontwikkelingaggregatie));
     }
@@ -55,7 +54,6 @@ function ParkeerduurChart(props) {
   }, [filter, filter.ontwikkelingaggregatie, metadata, token]);
   
   const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
-  console.log('numberOfPointsOnXAxis', numberOfPointsOnXAxis)
 
   const renderChart = () => {
     if(numberOfPointsOnXAxis > 12) {
@@ -73,7 +71,7 @@ function ParkeerduurChart(props) {
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip />
         <Legend />
-        {getUniqueProviderNames(rentalsData[0]).map(x => {
+        {getUniqueProviderNames(rentalsData).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           return (
             <Area
@@ -104,7 +102,7 @@ function ParkeerduurChart(props) {
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip />
       <Legend />
-      {getUniqueProviderNames(rentalsData[0]).map(x => {
+      {getUniqueProviderNames(rentalsData).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         return (
           <Bar

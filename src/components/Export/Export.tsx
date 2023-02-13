@@ -23,6 +23,9 @@ function Export() {
   const [startDate, setStartDate] = useState(moment(moment().subtract(1, 'month')).format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [municipalityCode, setMunicipalityCode] = useState('');
+  const [succesfullRawDataRequest, setSuccesfullRawDataRequest] = useState(false);
+  const [succesfullRawDataRequestEmail, setSuccesfullRawDataRequestEmail] = useState("");
+  const [succesfullRawDataRequestNumberOfTasks, setSuccesfullRawDataRequestNumberOfTasks] = useState(0);
 
   const places = useSelector(state => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
@@ -87,10 +90,16 @@ function Export() {
   }
 
   const handleDownloadRawDataClick = async () => {
-    await downloadRawData(token, {
+    setSuccesfullRawDataRequest(false);
+    let result = await downloadRawData(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD')
     });
+    if ("email" in result) {
+      setSuccesfullRawDataRequest(true);
+      setSuccesfullRawDataRequestEmail(result.email);
+      setSuccesfullRawDataRequestNumberOfTasks(result.number_of_requests_in_queue);
+    }
   }
 
   const updateMunicipalityCode = (gm_code) => {
@@ -111,16 +120,18 @@ function Export() {
       <div className="my-5">
 
         <Section title="Download standaardrapportage">
-          <DateFromTo
-            label="Periode"
-            startDate={moment(startDate).toDate()}
-            endDate={moment(endDate).toDate()}
-            onChange={(dates) => {
-              const [start, end] = dates;
-              setStartDate(start);
-              setEndDate(end);
-            }}
-          />
+          <div className="lg:w-72">
+            <DateFromTo
+              label="Periode"
+              startDate={moment(startDate).toDate()}
+              endDate={moment(endDate).toDate()}
+              onChange={(dates) => {
+                const [start, end] = dates;
+                setStartDate(start);
+                setEndDate(end);
+              }}
+            />
+          </div>
           <FormSelect
             label="Plaats"
             onChange={(e) => updateMunicipalityCode(e.target.value)}
@@ -137,26 +148,31 @@ function Export() {
         </Section>
 
         {isVerified && <Section title="Download ruwe data">
-          <DateFromTo
-            label="Periode"
-            startDate={moment(startDate).toDate()}
-            endDate={moment(endDate).toDate()}
-            onChange={(dates) => {
-              const [start, end] = dates;
-              setStartDate(start);
-              setEndDate(end);
-            }}
-          />
-
-          {isDateRangeMoreThanOneMonth && <div className="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">
-            <div>
-              Het is momenteel niet mogelijk om een langere periode dan 1 week te downloaden. Neem alsjeblieft contact op met ons via <a href="mailto:info@deelfietsdashboard.nl" className="inline">info@deelfietsdashboard.nl</a> als je een export wilt ontvangen voor een langere periode.
-            </div>
-          </div>}
+          <div className="lg:w-72">
+            <DateFromTo
+              label="Periode"
+              startDate={moment(startDate).toDate()}
+              endDate={moment(endDate).toDate()}
+              onChange={(dates) => {
+                const [start, end] = dates;
+                setStartDate(start);
+                setEndDate(end);
+              }}
+            />
+          </div>
 
           <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
-            Download ruwe data (.csv)
+            Vraag ruwe data export aan (.csv)
           </Button>
+
+          {succesfullRawDataRequest && <div className="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+            <span className="block sm:inline">
+              Succesvolle ruwe data export aangevraagd, zodra de gegevens geëxporteerd zijn ontvangt u een mail op {succesfullRawDataRequestEmail}.
+              Dit duurt tussen de 5-60 minuten afhankelijk van de hoeveelheid te exporteren data en het aantal export verzoeken.
+              Op dit moment staan er {succesfullRawDataRequestNumberOfTasks} (andere) dataverzoeken in de wachtrij.
+            </span>
+          </div>}
+          
         </Section>}
 
       </div>

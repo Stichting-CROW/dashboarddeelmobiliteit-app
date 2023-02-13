@@ -573,7 +573,7 @@ function MapComponent(props) {
     }
 
     const isProvider = (user) => {
-      return user.registrations[0].roles.indexOf('operator') > -1;
+      return user.registrations && user.registrations[0].roles.indexOf('operator') > -1;
     }
 
     // Only S&B and providers can see vehicle ID

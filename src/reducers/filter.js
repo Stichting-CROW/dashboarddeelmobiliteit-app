@@ -38,7 +38,8 @@ const initialState = {
   herkomstbestemming: "",
   ontwikkelingvan: moment().subtract(30, 'days').toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
-  ontwikkelingaggregatie: "day"
+  ontwikkelingaggregatie: "day",
+  ontwikkelingaggregatie_function: 'MAX'
 }
 
 export default function filter(state = initialState, action) {
@@ -326,6 +327,18 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           ontwikkelingaggregatie: action.payload
+      };
+    }
+    case 'SET_FILTER_ONTWIKKELING_AGGREGATIE_TIJD': {
+      return {
+          ...state,
+          ontwikkelingaggregatie_tijd: action.payload
+      };
+    }
+    case 'SET_FILTER_ONTWIKKELING_AGGREGATIE_FUNCTION': {
+      return {
+          ...state,
+          ontwikkelingaggregatie_function: action.payload
       };
     }
     case 'LOGIN':
