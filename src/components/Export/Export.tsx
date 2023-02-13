@@ -169,8 +169,7 @@ function Export() {
             <span className="block sm:inline">
               Succesvolle ruwe data export aangevraagd, zodra de gegevens geëxporteerd zijn ontvangt u een mail op {succesfullRawDataRequestEmail}.
               Dit duurt tussen de 5-60 minuten afhankelijk van de hoeveelheid te exporteren data en het aantal export verzoeken.
-              Op dit moment staan er {succesfullRawDataRequestNumberOfTasks} dataverzoeken in de rij.
-
+              Op dit moment staan er {succesfullRawDataRequestNumberOfTasks} (andere) dataverzoeken in de wachtrij.
             </span>
           </div>}
           
