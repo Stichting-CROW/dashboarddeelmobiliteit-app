@@ -168,7 +168,12 @@ function App() {
   const isAdmin = useSelector(state => {
     if(! state.authentication) return false;
     if(! state.authentication.user_data) return false;
-    return state.authentication.user_data.user.registrations[0].roles.indexOf('administer') > -1 ? true : false;
+    let userIsAdmin = false;
+    state.authentication.user_data.user.registrations.forEach(x => {
+      if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
+      if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
+    });
+    return userIsAdmin;
   });
   
   const filterDate = useSelector(state => {
@@ -339,6 +344,11 @@ function App() {
             { isAdmin ?
               <>
                 <Route exact path="/admin">
+                  <Overlay>
+                    <Admin />
+                  </Overlay>
+                </Route>
+                <Route exact path="/admin/users">
                   <Overlay>
                     <Admin />
                   </Overlay>

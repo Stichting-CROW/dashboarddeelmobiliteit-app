@@ -3,12 +3,15 @@ import { Redirect, useLocation,  } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
-import LoginStats from '../LoginStats/LoginStats';
 import { IconButtonClose } from '../IconButtons.jsx';
+
+import LoginStats from '../LoginStats/LoginStats';
+import UserList from '../UserList/UserList';
 
 export default function Admin() {
   // Our state variables
-  const [pathName, setPathName] = useState(document.location.pathname);
+  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
+  const [pathName, setPathName] = useState(document.location ? document.location.pathname : null);
 
   // Store window location in a local variable
   let location = useLocation();
@@ -18,16 +21,27 @@ export default function Admin() {
 
   // Define menu items for this Admin page
   const pillMenuItems = [
-    {title: 'Statistieken', url: '/admin/stats'},
+    {title: 'Gebruikers', link: '/admin/users'},
+    {title: 'Statistieken', link: '/admin/stats'},
   ]
 
   const renderInnerContent = (pathname) => {
     if(! pathname) return <div />
 
-    if(pathname === '/admin') return <LoginStats />
+    if(pathname === '/admin') return <UserList />
+    if(pathname === '/admin/users') return <UserList />
     if(pathname === '/admin/stats') return <LoginStats />
   }
 
+  const renderRedirect = () => {
+    return (
+      <Redirect to="/" />
+    );
+  }
+  if (doRenderRedirect) {
+    return renderRedirect();
+  }
+ 
   return (
     <div className="
       px-4
