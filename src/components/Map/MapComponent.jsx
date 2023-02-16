@@ -11,6 +11,10 @@ import center from '@turf/center'
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {getMapStyles, setMapStyle} from './MapUtils/map.js';
+import {
+  renderH3Grid,
+  removeH3Grid
+} from './MapUtils/map.hb';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -68,6 +72,8 @@ function MapComponent(props) {
     }
     return state.zones_geodata;
   });
+  const viewRentals = useSelector(state => state.layers ? state.layers.view_rentals : null);
+  const is_hb_view=viewRentals==='verhuurdata-hb';
 
   // Define map
   const mapContainer = props.mapContainer;
@@ -222,6 +228,20 @@ function MapComponent(props) {
     mapContainer,
     // dispatch,
     registerMapView
+  ])
+
+  useEffect(() => {
+    // Stop if map didn't load
+    if(! didMapLoad) return;
+    // Always remove 'old' H3 grid from map first
+    removeH3Grid(map.current);
+    // Don't do anything if we don't view the HB map
+    if(! is_hb_view) return;
+    // If HB map is active: render hexagons
+    renderH3Grid(map.current);
+  }, [
+    didMapLoad,
+    is_hb_view
   ])
 
   // If on Zones page and geographyId is in URL -> navigate to zone
