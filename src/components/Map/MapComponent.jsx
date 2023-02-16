@@ -238,7 +238,7 @@ function MapComponent(props) {
     // Don't do anything if we don't view the HB map
     if(! is_hb_view) return;
     // If HB map is active: render hexagons
-    renderH3Grid(map.current);
+    renderH3Grid(map.current, token, filter);
   }, [
     didMapLoad,
     is_hb_view

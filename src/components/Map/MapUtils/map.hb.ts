@@ -1,7 +1,7 @@
 import h3 from 'h3-js';
 import geojson2h3 from 'geojson2h3';
 
-const hexagons = {
+const exampleHexagons = {
   '88283082a3fffff': 0.23360022663054658,
   '88283082a1fffff': 0.5669828486310873,
   '88283082a7fffff': 0.16348940282992852,
@@ -48,6 +48,38 @@ const config = ({
   fillOpacity: 0.6,
   colorScale: ['#ffffcc', '#78c679', '#006837']
 })
+
+const fetchHexagons = async (token: string, filter: any) => {
+  const getFetchOptions = () => {
+    return {
+      headers: {
+        "authorization": `Bearer ${token}`,
+        'mode':'no-cors'
+      }
+    }
+  }
+
+  // Get API response
+  const url = `https://api.deelfietsdashboard.nl/od-api/destinations/h3`+
+              `?h3_resolution=7`+
+              `&end_date=2023-02-06`+
+              `&start_date=2023-01-05`+
+              `&time_periods=2-6`+
+              `&days_of_week=fr%2Csa%2Csu`+
+              `&origin_cells=87196bb51ffffff`
+  ;
+
+  let response, responseJson;
+
+  try {
+    response = await fetch(url, getFetchOptions());
+    responseJson = await response.json();
+  } catch(e) {
+    console.error(e);
+  }
+
+  return responseJson;
+}
 
 const removeH3Grid = (map: any) => {
   let layer, key;
@@ -146,14 +178,24 @@ function renderAreas(map, hexagons, threshold) {
   source.setData(geojson);
 }
 
-const renderH3Grid = (
-  map: any
+const renderH3Grid = async (
+  map: any,
+  token: string,
+  filter: any
 ) => {
 
-  console.log('renderH3Grid')
+  // const hexagonsResponse = await fetchHexagons(token, filter);
+  // if(! hexagonsResponse || ! hexagonsResponse.result) return;
+  // const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
 
-  renderHexes(map, hexagons);
-  renderAreas(map, hexagons, 0.75);
+  // let hexagonsAsArray;
+
+  // hexagons.forEach((x: object) => {
+  //   hexagonsAsArray[x.cell] = x.number_of_trips;
+  // })
+
+  renderHexes(map, exampleHexagons);
+  renderAreas(map, exampleHexagons, 0.75);
 }
 
 export {
