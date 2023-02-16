@@ -112,6 +112,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
+### HB matrix API documentation
+
+- https://api.deelfietsdashboard.nl/od-api/openapi.json
+- https://api.deelfietsdashboard.nl/od-api/docs
+
 ## Dashboard Deelmobiliteit in the media
 
 - [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)
