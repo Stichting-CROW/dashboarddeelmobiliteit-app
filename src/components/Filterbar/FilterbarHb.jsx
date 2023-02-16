@@ -1,9 +1,4 @@
 import './css/Filterbar.css';
-// import {
-//   useEffect,
-//   useState,
-//   useRef
-// } from 'react';
 import { Link } from "react-router-dom";
 import {useSelector} from 'react-redux';
 import moment from 'moment';
@@ -14,6 +9,7 @@ import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
 import FilteritemAanbieders from './FilteritemAanbieders.jsx';
 import FilteritemZones from './FilteritemZones.jsx';
+import FilteritemH3Niveau from './FilteritemH3Niveau.jsx';
 import {
   FilteritemMarkersAfstand,
   FilteritemMarkersParkeerduur
@@ -21,10 +17,8 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
-
-import FilterbarZones from './FilterbarZones';
-import FilterbarRentals from './FilterbarRentals';
-import FilterbarHb from './FilterbarHb';
+import Button from '../Button/Button';
+import Fieldset from '../Fieldset/Fieldset';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -37,7 +31,37 @@ import {
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
-function Filterbar({
+const Weekdays = () => {
+  const weekdays = [
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+  ];
+  const weekdayTitles = [
+    'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'
+  ];
+
+  return (
+    <div>
+
+      {weekdays.map((x, idx) => {
+        return <Button key={idx} theme={'white'}>
+          {weekdayTitles[idx].toLowerCase()}
+        </Button>
+      })}
+
+
+    </div>
+  );
+}
+
+const Timeframes = () => {
+  return (
+    <Button theme={'white'}>
+      2-6
+    </Button>
+  )
+}
+
+function FilterbarHb({
   displayMode,
   visible,
   hideLogo
@@ -66,7 +90,7 @@ function Filterbar({
   const showparkeerduur=ispark;
   const showafstand=isrentals;
   const showherkomstbestemming=isrentals;
-  const showvantot=isontwikkeling;
+  const showvantot=isontwikkeling || true;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
 
   // Show custom zones if >= 2022-11
@@ -90,87 +114,56 @@ function Filterbar({
     ];
   }
 
-  // Zones
-  if(iszonespublic || iszonesadmin) {
-    return <FilterbarZones
-      view={iszonespublic ? 'readonly' : 'adminView'}
-      hideLogo={hideLogo}
-    />
-  }
+  return (
+    <div className="filter-bar-inner py-2">
 
-  // HB
-  else if(true) {
-    return <FilterbarHb
-      hideLogo={hideLogo}
-      displayMode={displayMode}
-      visible={visible}
-    />
-  }
+      <div className="justify-between hidden sm:flex">
+        <div style={{minWidth: '82px'}}>
+          {! hideLogo && (
+            ispark
+              ? <Logo />
+              : <Link to="/"><Logo /></Link>
+          )}
+        </div>
+        <div className="ml-4 text-sm flex justify-center flex-col" style={{
+          color: '#FD862E'
+        }}>
+          {/* INFO */}
+        </div>
+      </div> 
 
-  // Verhuringen
-  else if (isrentals) {
-    return <FilterbarRentals
-      hideLogo={hideLogo}
-      displayMode={displayMode}
-      visible={visible}
-    />
-  }
+      <br />
 
-  else {
-    return (
-      <div className="filter-bar-inner py-2">
+      <Fieldset title="Plaats">
+        <FilteritemGebieden />
+      </Fieldset>
 
-        <div className="justify-between hidden sm:flex">
-          <div style={{minWidth: '82px'}}>
-            {! hideLogo && (
-              ispark
-                ? <Logo />
-                : <Link to="/"><Logo /></Link>
-            )}
-          </div>
-          <div className="ml-4 text-sm flex justify-center flex-col" style={{
-            color: '#FD862E'
-          }}>
-            {/* INFO */}
-          </div>
-        </div> 
+      <Fieldset title="Periode">
+        <FilteritemDatumVanTot />
+      </Fieldset>
 
-        { isLoggedIn && showdatum && <FilteritemDatum /> }
-        
-        { ! isLoggedIn && showdatum && <div>
-          <div className="filter-datum-container">
-            <div className="filter-datum-title">
-              Tijd
-            </div>
-            <div className="filter-datum-box-row">
-              {moment(filterDatum).format('HH:mm')}
-            </div>
-          </div>
-        </div> }
+      <Fieldset title="Weekdag">
+        <Weekdays />
+      </Fieldset>
 
-        { isLoggedIn && showduur && <FilteritemDuur /> }
+      <Fieldset title="Tijdvak">
+        <Timeframes />
+      </Fieldset>
 
-        { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
+      <Fieldset title="Vervoerstype">
+        <FilteritemVoertuigTypes />
+      </Fieldset>
 
-        {<FilteritemGebieden />}
+      <Fieldset title="Detailniveau">
+        <FilteritemH3Niveau />
+      </Fieldset>
 
-        {<FilteritemZones 
-          zonesToShow={zonesToShow}
-          />}
+      <Fieldset title="Herkomst of bestemming?">
+        <FilteritemHerkomstBestemming />
+      </Fieldset>
 
-        {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
-
-        {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
-
-        {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
-
-        {showvervoerstype && <FilteritemVoertuigTypes />}
-
-        {<FilteritemAanbieders />}
-
-      </div>
-    )
-  }
+    </div>
+  )
 }
 
-export default Filterbar;
+export default FilterbarHb;

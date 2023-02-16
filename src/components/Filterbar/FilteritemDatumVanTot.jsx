@@ -203,7 +203,6 @@ function FilterItemDatumVanTot() {
     
   return (
     <div className="filter-datum-van-tot-container">
-      <div className="filter-datum-van-tot-title">Periode</div>
       <div className="filter-datum-van-tot-box-row">
         <div className="flex flex-col justify-center"><div
           className="filter-datum-caret"

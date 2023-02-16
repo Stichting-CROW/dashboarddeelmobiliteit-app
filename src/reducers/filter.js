@@ -97,6 +97,12 @@ export default function filter(state = initialState, action) {
           herkomstbestemming: action.payload
       };
     }
+    case 'SET_FILTER_H3NIVEAU': {
+      return {
+          ...state,
+          h3niveau: action.payload
+      };
+    }
     case 'ADD_TO_FILTER_ZONES': {
       // console.log('add item %s to zones filter %o', action.payload, state)
       let zones = [];

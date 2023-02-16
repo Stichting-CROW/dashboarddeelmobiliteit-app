@@ -138,7 +138,6 @@ function FilteritemGebieden() {
   if(gebieden.length===1) {
     return (
       <div className="filter-plaats-container filter-plaats-not-active">
-        <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
         <div className="filter-plaats-box-row flex flex-col justify-center">
           <div className="filter-plaats-value " >{value===""?"Alle plaatsen":value.name}</div>
         </div>
@@ -148,7 +147,6 @@ function FilteritemGebieden() {
   
   return (
     <div className="filter-plaats-container">
-      <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
       <div className="filter-plaats-box-row flex flex-col justify-center">
         <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{toggleGebieden('places')}}>
           {value === "" ? "Alle plaatsen" : value.name}

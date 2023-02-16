@@ -57,9 +57,8 @@ function FilteritemVoertuigTypes() {
   }
   
   return (
-    <div className="filter-voertuigtypes-container">
+    <div className="w-full filter-voertuigtypes-container">
       <div className="filter-voertuigtypes-title-row">
-        <div className="filter-voertuigtypes-title">Vervoerstype</div>
         { filterVoertuigTypesExclude!==''?
             <div className="filter-voertuigtypes-reset cursor-pointer" onClick={clearFilterVoertuigTypesExclude}>
               reset

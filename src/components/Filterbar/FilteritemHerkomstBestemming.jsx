@@ -31,6 +31,15 @@ export default function FilteritemHerkomstBestemming() {
         <div className={classNameHerkomst} onClick={setFilterHerkomstBestemming('herkomst')}>Herkomst</div>
         <div className={classNameBestemming} onClick={setFilterHerkomstBestemming('bestemming')}>Bestemming</div>
       </div>
+      <p className="my-2 px-4">
+        {filterHerkomstBestemming==='herkomst' && <small>
+          Je ziet nu waar men vandaan kwam, voordat men reisde naar het door jou geselecteerde vlak.
+        </small>}
+
+        {filterHerkomstBestemming==='bestemming' && <small>
+          Je ziet nu waar men naartoe reisde, vanaf het door jou geselecteerd vlak.
+        </small>}
+      </p>
     </div>
   )
 }
