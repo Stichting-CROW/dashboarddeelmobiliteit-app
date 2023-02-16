@@ -103,6 +103,18 @@ export default function filter(state = initialState, action) {
           h3niveau: action.payload
       };
     }
+    case 'SET_FILTER_WEEKDAYS': {
+      return {
+          ...state,
+          weekdays: action.payload
+      };
+    }
+    case 'SET_FILTER_TIMEFRAMES': {
+      return {
+          ...state,
+          timeframes: action.payload
+      };
+    }
     case 'ADD_TO_FILTER_ZONES': {
       // console.log('add item %s to zones filter %o', action.payload, state)
       let zones = [];

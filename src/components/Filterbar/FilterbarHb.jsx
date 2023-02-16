@@ -1,6 +1,7 @@
 import './css/Filterbar.css';
 import { Link } from "react-router-dom";
-import {useSelector} from 'react-redux';
+import {useState, useEffect} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 // import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
@@ -32,8 +33,34 @@ import {
 } from '../../reducers/layers.js';
 
 const Weekdays = () => {
+  const dispatch = useDispatch();
+
+  const activeWeekdays = useSelector(state => {
+    return (state.filter && state.filter.weekdays) ? state.filter.weekdays : '';
+  });
+
+  const toggleWeekday = (weekday) => e => {
+    // Get active weekdays as array
+    const activeWeekdaysArray = activeWeekdays.split(',');
+    let newActiveWeekdaysArray = activeWeekdaysArray;
+    // If day was not in array: Add it
+    if(activeWeekdaysArray.indexOf(weekday) <= -1) {
+      newActiveWeekdaysArray.push(weekday);
+    }
+    // If day was already in array: Remove it
+    else {
+      newActiveWeekdaysArray = newActiveWeekdaysArray.filter(x => x !== weekday);
+    }
+
+    dispatch({ type: 'SET_FILTER_WEEKDAYS', payload: newActiveWeekdaysArray.join(',') })
+  }
+
+  const isWeekdayActive = (weekday) => {
+    return activeWeekdays.indexOf(weekday) > -1;
+  }
+
   const weekdays = [
-    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+    'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'
   ];
   const weekdayTitles = [
     'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'
@@ -43,7 +70,11 @@ const Weekdays = () => {
     <div>
 
       {weekdays.map((x, idx) => {
-        return <Button key={idx} theme={'white'}>
+        return <Button
+          key={idx}
+          theme={isWeekdayActive(x) ? 'blue' : 'white'}
+          onClick={toggleWeekday(x)}
+        >
           {weekdayTitles[idx].toLowerCase()}
         </Button>
       })}
@@ -54,10 +85,48 @@ const Weekdays = () => {
 }
 
 const Timeframes = () => {
+  const dispatch = useDispatch();
+
+  const activeTimeframes = useSelector(state => {
+    return (state.filter && state.filter.timeframes) ? state.filter.timeframes : '';
+  });
+
+  const toggleTimeframe = (timeframe) => e => {
+    // Get active timeframes as array
+    const activeTimeframesArray = activeTimeframes.split(',');
+    let newActiveTimeframeArray = activeTimeframesArray;
+    // If day was not in array: Add it
+    if(activeTimeframesArray.indexOf(timeframe) <= -1) {
+      newActiveTimeframeArray.push(timeframe);
+    }
+    // If day was already in array: Remove it
+    else {
+      newActiveTimeframeArray = newActiveTimeframeArray.filter(x => x !== timeframe);
+    }
+
+    dispatch({ type: 'SET_FILTER_TIMEFRAMES', payload: newActiveTimeframeArray.join(',') })
+  }
+
+  const isTimeframeActive = (timeframe) => {
+    return activeTimeframes.indexOf(timeframe) > -1;
+  }
+
+  const timeframes = [
+    '2-6', '6-10', '10-14', '14-18', '18-22', '22-2'
+  ];
+
   return (
-    <Button theme={'white'}>
-      2-6
-    </Button>
+    <div>
+      {timeframes.map((x, idx) => {
+        return <Button
+          key={idx}
+          theme={isTimeframeActive(x) ? 'blue' : 'white'}
+          onClick={toggleTimeframe(x)}
+        >
+          {x}
+        </Button>
+      })}
+    </div>
   )
 }
 

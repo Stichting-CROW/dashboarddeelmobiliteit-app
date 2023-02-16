@@ -13,6 +13,7 @@ import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA_HB,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
@@ -91,6 +92,14 @@ function SelectLayer(props) {
               Voertuigen
             </span>
           </div> : null }
+
+        { displayMode===DISPLAYMODE_RENTALS ?
+          <div data-type="hb" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
+            <span className="layer-title">
+              HB
+            </span>
+          </div>: null }
 
         { displayMode===DISPLAYMODE_RENTALS ?
           <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}

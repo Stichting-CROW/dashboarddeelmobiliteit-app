@@ -55,6 +55,10 @@ function Filterbar({
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
 
+  const viewRentals = useSelector(state => {
+    return state.layers ? state.layers.view_rentals : null;
+  });
+
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
@@ -68,6 +72,7 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
+  const is_hb_view=viewRentals==='verhuurdata-hb';
 
   // Show custom zones if >= 2022-11
   // We have detailled aggregated stats from 2022-11
@@ -99,7 +104,7 @@ function Filterbar({
   }
 
   // HB
-  else if(true) {
+  else if(is_hb_view) {
     return <FilterbarHb
       hideLogo={hideLogo}
       displayMode={displayMode}

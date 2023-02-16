@@ -5,6 +5,11 @@ export const themes = {
     borderColor: '#CCCCCC',
     color: '#343E47'
   },
+  blue: {
+    backgroundColor: '#15AEEF',
+    borderColor: '#ccc',
+    color: '#fff'
+  },
   red: {
     backgroundColor: '#fff',
     borderColor: '#CCCCCC',
