@@ -6,6 +6,7 @@ import {
   useSelector
 } from 'react-redux';
 import Button from '../Button/Button';
+import AddUserModule from '../AddUserModule/AddUserModule';
 
 const renderTableRow = (user: any) => {
   return <React.Fragment key={user.id}>
@@ -25,6 +26,7 @@ const renderTableRow = (user: any) => {
 // Mockup for UserList
 export default function UserList() {
   const [users, setUsers] = useState([]);
+  const [showModule, setShowModule] = useState(false)
 
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
@@ -62,13 +64,12 @@ export default function UserList() {
       setUsers(actualUsersFromDatabase);
     })();
 
-    const exampleUsers = [
-      {id: 1, name: 'Giulia'},
-      {id: 2, name: 'Sven'}
-    ];
 
-    //setUsers(exampleUsers);
   }, []);
+
+  const handleClik = () => {
+    setShowModule(true)
+  }
 
   return (
     <div className="">
@@ -79,9 +80,10 @@ export default function UserList() {
         Gebruikers
       </h1>
       <div>
-        <Button>Nieuwe gebruiker</Button>
+        <Button onClick={handleClik}>Nieuwe gebruiker</Button>
         <Button>Exporteer gebruikers als spreadsheet</Button>
       </div>
+      <AddUserModule showModule={showModule} setShowModule={setShowModule}/> 
       <div className="grid gap-4 grid-cols-3">
         <div className="font-bold">Email</div>
         <div className="font-bold">Rol</div>
