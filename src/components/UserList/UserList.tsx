@@ -5,14 +5,19 @@ import {
   // useDispatch,
   useSelector
 } from 'react-redux';
+import Button from '../Button/Button';
 
 const renderTableRow = (user: any) => {
   return <React.Fragment key={user.id}>
     <div className="">
-      {user.name}
+      {user.username}
     </div>
     <div className="">
       Admin
+    </div>
+    <div className="">
+      <button>Edit</button>
+      <button>Delete</button>
     </div>
   </React.Fragment>
 }
@@ -54,7 +59,7 @@ export default function UserList() {
     (async () => {
       const actualUsersFromDatabase = await getUsersFromDatabase();
       console.log('actualUsersFromDatabase', actualUsersFromDatabase);
-      // setUsers(actualUsersFromDatabase);
+      setUsers(actualUsersFromDatabase);
     })();
 
     const exampleUsers = [
@@ -62,7 +67,7 @@ export default function UserList() {
       {id: 2, name: 'Sven'}
     ];
 
-    setUsers(exampleUsers);
+    //setUsers(exampleUsers);
   }, []);
 
   return (
@@ -73,9 +78,14 @@ export default function UserList() {
       ">
         Gebruikers
       </h1>
-      <div className="grid gap-4 grid-cols-2">
+      <div>
+        <Button>Nieuwe gebruiker</Button>
+        <Button>Exporteer gebruikers als spreadsheet</Button>
+      </div>
+      <div className="grid gap-4 grid-cols-3">
         <div className="font-bold">Email</div>
         <div className="font-bold">Rol</div>
+        <div className="font-bold"></div>
         {users.map(user => renderTableRow(user))}
       </div>
     </div>
