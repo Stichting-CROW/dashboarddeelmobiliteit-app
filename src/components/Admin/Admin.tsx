@@ -49,8 +49,8 @@ export default function Admin() {
       sm:flex sm:justify-center
       sm:px-0
     ">
-      <div className="mx-auto py-8" style={{
-        width: '500px',
+      <div className="mx-auto px-8 py-8" style={{
+        width: '100%',
         maxWidth: '100%'
       }}>
 
