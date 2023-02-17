@@ -241,7 +241,13 @@ function MapComponent(props) {
     renderH3Grid(map.current, token, filter);
   }, [
     didMapLoad,
-    is_hb_view
+    is_hb_view,
+    filter.h3niveau,
+    filter.ontwikkelingvan,
+    filter.ontwikkelingtot,
+    filter.timeframes,
+    filter.weekdays,
+    filter.herkomstbestemming
   ])
 
   // If on Zones page and geographyId is in URL -> navigate to zone

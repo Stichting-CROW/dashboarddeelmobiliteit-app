@@ -1,3 +1,4 @@
+import moment from 'moment';
 import h3 from 'h3-js';
 import geojson2h3 from 'geojson2h3';
 
@@ -60,14 +61,19 @@ const fetchHexagons = async (token: string, filter: any) => {
   }
 
   // Get API response
-  const url = `https://api.deelfietsdashboard.nl/od-api/destinations/h3`+
-              `?h3_resolution=7`+
-              `&end_date=2023-02-06`+
-              `&start_date=2023-01-05`+
-              `&time_periods=2-6`+
-              `&days_of_week=fr%2Csa%2Csu`+
-              `&origin_cells=87196bb51ffffff`
-  ;
+  const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/h3`+
+              `?h3_resolution=${filter.h3niveau}`+
+              `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
+              `&end_date=${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}`+
+              `&time_periods=${filter.timeframes}`+
+              `&days_of_week=mo,tu,we,tu,fr,sa,su`+
+              (filter.herkomstbestemming === 'bestemming'
+                ? `&origin_cells=88196ba259fffff,88196ba25bfffff`
+                : `&destination_cells=88196ba259fffff,88196ba25bfffff`)
+  );
+
+  console.log('filter', filter)
+  console.log('url', url)
 
   let response, responseJson;
 
@@ -136,8 +142,8 @@ function renderHexes(map, hexagons) {
     property: 'value',
     stops: [
       [0, config.colorScale[0]],
-      [0.5, config.colorScale[1]],
-      [1, config.colorScale[2]]
+      [50, config.colorScale[1]],
+      [100, config.colorScale[2]]
     ]
   });
   
@@ -184,18 +190,20 @@ const renderH3Grid = async (
   filter: any
 ) => {
 
-  // const hexagonsResponse = await fetchHexagons(token, filter);
-  // if(! hexagonsResponse || ! hexagonsResponse.result) return;
-  // const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
+  const hexagonsResponse = await fetchHexagons(token, filter);
+  if(! hexagonsResponse || ! hexagonsResponse.result) return;
+  const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
 
-  // let hexagonsAsArray;
+  let hexagonsAsArray = [];
 
-  // hexagons.forEach((x: object) => {
-  //   hexagonsAsArray[x.cell] = x.number_of_trips;
-  // })
+  hexagons.forEach((x: object) => {
+    hexagonsAsArray[x.cell] = x.number_of_trips;
+  })
 
-  renderHexes(map, exampleHexagons);
-  renderAreas(map, exampleHexagons, 0.75);
+  console.log('hexagonsAsArray', hexagonsAsArray)
+
+  renderHexes(map, hexagonsAsArray);
+  renderAreas(map, hexagonsAsArray, 0.75);
 }
 
 export {

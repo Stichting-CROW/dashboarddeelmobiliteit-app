@@ -76,7 +76,7 @@ Heb je geen downloadrechten en wil je deze wel hebben? Vraag deze dan aan via [i
 
 ## Zo download je de ruwe data
 
-1. Ga naar [Export](https://dashboarddeelmobiliteit.nl/export)
+1. Ga naar **[Export](https://dashboarddeelmobiliteit.nl/export)**
 2. Klik op **Download ruwe data**
 3. Selecteer de periode waarvan je ruwe data wilt downloaden
 4. Klik op de knop **Vraag ruwe data export**

@@ -52,6 +52,9 @@ const Weekdays = () => {
       newActiveWeekdaysArray = newActiveWeekdaysArray.filter(x => x !== weekday);
     }
 
+    console.log('activeWeekdaysArray', activeWeekdaysArray)
+    console.log('newActiveWeekdaysArray', newActiveWeekdaysArray)
+    console.log('newActiveWeekdaysArray.join(',')', newActiveWeekdaysArray.join(','))
     dispatch({ type: 'SET_FILTER_WEEKDAYS', payload: newActiveWeekdaysArray.join(',') })
   }
 
