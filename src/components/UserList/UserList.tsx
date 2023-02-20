@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, useLocation,  } from "react-router-dom";
+import './UserList.css'; 
 
 import {
   // useDispatch,
@@ -10,17 +11,17 @@ import AddUserModule from '../AddUserModule/AddUserModule';
 
 const renderTableRow = (user: any) => {
   return <React.Fragment key={user.id}>
-    <div className="">
+    <div className="text-sm">
       {user.username}
     </div>
-    <div className="">
+    <div className="text-sm">
       {user && 
         user.filter_municipality ? "Overheid" 
         : user.filter_operator ? "Aanbieder"
         : user.is_admin ? "Admin"
         : null}
     </div>
-    <div className="">
+    <div className="text-sm">
       <button>Edit</button>
       <button>Delete</button>
     </div>
@@ -83,12 +84,45 @@ export default function UserList() {
       ">
         Gebruikers
       </h1>
-      <div>
-        <Button onClick={handleClik}>Nieuwe gebruiker</Button>
-        <Button>Exporteer gebruikers als spreadsheet</Button>
+      <div className='pb-4'>
+        <button className=" 
+          rounded-lg
+          inline-block
+          border-solid border-2
+          px-2
+          py-2
+          mr-2
+          mb-2
+          text-sm
+          cursor-pointer
+          w-40
+          mx-2
+          my-2
+          bg-primary 
+          text-white
+          border-primary" 
+        onClick={handleClik}>Nieuwe gebruiker</button>
+        <button className=" 
+          rounded-lg
+          inline-block
+          border-solid border-2
+          px-2
+          py-2
+          pr-4
+          pl-4
+          mr-2
+          mb-2
+          text-sm
+          cursor-pointer
+          mx-2
+          my-2
+          bg-primary 
+          text-white
+          border-primary"
+        >Exporteer gebruikers als spreadsheet</button>
       </div>
       <AddUserModule showModule={showModule} setShowModule={setShowModule}/> 
-      <div className="grid gap-4 grid-cols-3">
+      <div className="grid gap-4 grid-cols-3 grid-container">
         <div className="font-bold">Email</div>
         <div className="font-bold">Rol</div>
         <div className="font-bold"></div>

@@ -16,7 +16,7 @@ function AddUserModule(props) {
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
-
+  console.log(admin)
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   if (!props.showModule) {
@@ -112,8 +112,8 @@ const handleSubmit = (event) => {
         <div className="p-2">
           <label className='font-medium'>Rollen</label>
           <ul className='rollen'>
-            <li>
-              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+            <li >
+              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
                 htmlFor="admin">Admin</label>
               <input 
                 type="radio" 
@@ -123,8 +123,8 @@ const handleSubmit = (event) => {
                 onChange={(event) => setAdmin(true)}
               />
             </li>
-            <li>
-              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+            <li >
+              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer`}
                 htmlFor="overheid">Overheid</label>
               <input 
                 type="radio" 
@@ -190,7 +190,10 @@ const handleSubmit = (event) => {
             cursor-pointer
             w-40
             mx-2
-            my-2"
+            my-2
+            bg-primary 
+            text-white
+            border-primary"
             //style={themes[extends.colors.primary]}
         >Opslaan</button>
       </form>

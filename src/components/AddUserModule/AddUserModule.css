@@ -1,3 +1,4 @@
+
 .add-user-form {
     display: flex;
     flex-direction: column;
@@ -12,6 +13,7 @@
     list-style-type: none;
     margin: 0;
     padding: 0;
+    
 }
 
 .rollen li {
@@ -26,14 +28,15 @@
 }
 
 .rollen input[type="radio"]:checked + label {
-  /*  background-color: blue; */
+  background-color: #15AEEF;
 }
 
 .rollen label {
 /*      padding:5px;
-     border:1px solid #CCC; 
      cursor:pointer;
     z-index:90; */
+    background-color: #F6F5F4;
+    border: 1px solid #F6F5F4;
 }
 
 .rollen label:hover {
@@ -43,4 +46,8 @@
 .email {
     display: flex;
     flex-direction: column;
+}
+
+.active {
+    background-color: #15AEEF;
 }
