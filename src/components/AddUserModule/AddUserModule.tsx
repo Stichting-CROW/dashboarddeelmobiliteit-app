@@ -100,72 +100,81 @@ const handleSubmit = (event) => {
   return (
     <div>
       <form onSubmit={handleSubmit} className='add-user-form'>
-        <label>Emailadres</label>
-        <input 
-          type="email" 
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-        <label>Rollen</label>
-        <div>
-          <label htmlFor="admin">Admin</label>
+        <div className="email p-2">
+          <label className='font-medium'>Emailadres</label>
           <input 
-            type="radio" 
-            id="admin"
-            name="admin"
-            value={admin}
-            onChange={(event) => setAdmin(true)}
+            type="email" 
+            className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer w-80"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
-        <div>
-          <label htmlFor="overheid">Overheid</label>
-          <input 
-            type="radio" 
-            id="overheid"
-            name="overheid"
-            value={overheid}
-            onChange={(event) => setOverheid(true)}
+        <div className="p-2">
+          <label className='font-medium'>Rollen</label>
+          <ul className='rollen'>
+            <li>
+              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+                htmlFor="admin">Admin</label>
+              <input 
+                type="radio" 
+                id="admin"
+                name="rollen"
+                value={admin}
+                onChange={(event) => setAdmin(true)}
+              />
+            </li>
+            <li>
+              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+                htmlFor="overheid">Overheid</label>
+              <input 
+                type="radio" 
+                id="overheid"
+                name="rollen"
+                value={overheid}
+                onChange={(event) => setOverheid(true)}
+              />
+            </li>
+            <li>
+              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+                htmlFor="aanbieder">Aanbieder</label>
+              <input 
+                type="radio" 
+                id="aanbieder"
+                name="rollen"
+                value={aanbieder}
+                onChange={(event) => setAanbieder(true)}
+              />
+            </li>
+          </ul>
+          {/* <input 
+            type="checkbox" 
+            id="overigBedrijf"
+            name="overigBedrijf"
+            value={overigBedrijf}
+            onChange={(event) => setOverigBedrijf(event.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="aanbieder">Aanbieder</label>
           <input 
-            type="radio" 
-            id="aanbieder"
-            name="aanbieder"
-            value={aanbieder}
-            onChange={(event) => setAanbieder(true)}
+            type="checkbox" 
+            id="kernteam"
+            name="kernteam"
+            value={kernteam}
+            onChange={(event) => setKernteam(event.target.value)}
           />
+          <input 
+            type="checkbox" 
+            id="downloadrechten"
+            name="downloadrechten"
+            value={downloadrechten}
+            onChange={(event) => setDownloadrechten(event.target.value)}
+          /> */}
         </div>
-
-        {/* <input 
-          type="checkbox" 
-          id="overigBedrijf"
-          name="overigBedrijf"
-          value={overigBedrijf}
-          onChange={(event) => setOverigBedrijf(event.target.value)}
-        />
-        <input 
-          type="checkbox" 
-          id="kernteam"
-          name="kernteam"
-          value={kernteam}
-          onChange={(event) => setKernteam(event.target.value)}
-        />
-        <input 
-          type="checkbox" 
-          id="downloadrechten"
-          name="downloadrechten"
-          value={downloadrechten}
-          onChange={(event) => setDownloadrechten(event.target.value)}
-        /> */}
-        <div>
+        <div className="p-2">
           <input 
             type="checkbox" 
             value={sendEmail}
             onChange={(event) => setSendEmail(event.target.value)}
           />
-          <label>Stuur welkomstmail</label>
+          <label className="p-3">Stuur welkomstmail</label>
         </div>
         
         <button type="submit" 
@@ -178,7 +187,10 @@ const handleSubmit = (event) => {
             mr-2
             mb-2
             text-sm
-            cursor-pointer"
+            cursor-pointer
+            w-40
+            mx-2
+            my-2"
             //style={themes[extends.colors.primary]}
         >Opslaan</button>
       </form>

@@ -1,4 +1,46 @@
 .add-user-form {
     display: flex;
     flex-direction: column;
+    margin: 2% 0 4% 0;
+}
+
+.rollen {
+    margin: 0 !important;
+    padding: 0;
+}
+.rollen > li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.rollen li {
+    float: left;
+    position: relative;
+}
+
+.rollen input[type="radio"] {
+    opacity:0.011;
+    z-index:100;
+    
+}
+
+.rollen input[type="radio"]:checked + label {
+  /*  background-color: blue; */
+}
+
+.rollen label {
+/*      padding:5px;
+     border:1px solid #CCC; 
+     cursor:pointer;
+    z-index:90; */
+}
+
+.rollen label:hover {
+    /*  background:#DDD; */
+}
+
+.email {
+    display: flex;
+    flex-direction: column;
 }
