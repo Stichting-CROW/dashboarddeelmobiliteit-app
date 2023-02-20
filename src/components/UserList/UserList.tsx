@@ -14,7 +14,11 @@ const renderTableRow = (user: any) => {
       {user.username}
     </div>
     <div className="">
-      Admin
+      {user && 
+        user.filter_municipality ? "Overheid" 
+        : user.filter_operator ? "Aanbieder"
+        : user.is_admin ? "Admin"
+        : null}
     </div>
     <div className="">
       <button>Edit</button>

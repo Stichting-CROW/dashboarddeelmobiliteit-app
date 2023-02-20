@@ -17,9 +17,10 @@ function Button({
         mb-2
         text-sm
         cursor-pointer
-      "
+        "
+        
       onClick={onClick}
-      style={themes[theme]}
+      //style={themes[theme]}
     >
       {children}
     </div>

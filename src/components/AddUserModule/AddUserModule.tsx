@@ -3,6 +3,8 @@ import Button from '../Button/Button'
 import {
   useSelector
 } from 'react-redux';
+import './AddUserModule.css'; 
+import {themes} from '../../themes';
 
 function AddUserModule(props) {
   const [message, setMessage] = useState('')
@@ -66,7 +68,7 @@ const handleSubmit = (event) => {
     };
     let body = {
         email: email,
-        user_type: userRoles
+        user_type: roles[role]
     };
     console.log(body);
     let url = 'https://api.deelfietsdashboard.nl/dashboard-api/admin/user/create';
@@ -97,7 +99,7 @@ const handleSubmit = (event) => {
   
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='add-user-form'>
         <label>Emailadres</label>
         <input 
           type="email" 
@@ -105,30 +107,37 @@ const handleSubmit = (event) => {
           onChange={(event) => setEmail(event.target.value)}
         />
         <label>Rollen</label>
-        <label htmlFor="admin">Admin</label>
-        <input 
-          type="checkbox" 
-          id="admin"
-          name="admin"
-          value={admin}
-          onChange={(event) => setAdmin(!admin)}
-        />
-        <label htmlFor="overheid">Overheid</label>
-        <input 
-          type="checkbox" 
-          id="overheid"
-          name="overheid"
-          value={overheid}
-          onChange={(event) => setOverheid(!overheid)}
-        />
-        <label htmlFor="aanbieder">Aanbieder</label>
-        <input 
-          type="checkbox" 
-          id="aanbieder"
-          name="aanbieder"
-          value={aanbieder}
-          onChange={(event) => setAanbieder(!aanbieder)}
-        />
+        <div>
+          <label htmlFor="admin">Admin</label>
+          <input 
+            type="radio" 
+            id="admin"
+            name="admin"
+            value={admin}
+            onChange={(event) => setAdmin(true)}
+          />
+        </div>
+        <div>
+          <label htmlFor="overheid">Overheid</label>
+          <input 
+            type="radio" 
+            id="overheid"
+            name="overheid"
+            value={overheid}
+            onChange={(event) => setOverheid(true)}
+          />
+        </div>
+        <div>
+          <label htmlFor="aanbieder">Aanbieder</label>
+          <input 
+            type="radio" 
+            id="aanbieder"
+            name="aanbieder"
+            value={aanbieder}
+            onChange={(event) => setAanbieder(true)}
+          />
+        </div>
+
         {/* <input 
           type="checkbox" 
           id="overigBedrijf"
@@ -150,13 +159,28 @@ const handleSubmit = (event) => {
           value={downloadrechten}
           onChange={(event) => setDownloadrechten(event.target.value)}
         /> */}
-        <label>Stuur welkomstmail</label>
-        <input 
-          type="checkbox" 
-          value={sendEmail}
-          onChange={(event) => setSendEmail(event.target.value)}
-        />
-        <button type="submit" >Opslaan</button>
+        <div>
+          <input 
+            type="checkbox" 
+            value={sendEmail}
+            onChange={(event) => setSendEmail(event.target.value)}
+          />
+          <label>Stuur welkomstmail</label>
+        </div>
+        
+        <button type="submit" 
+          className="
+            rounded-lg
+            inline-block
+            border-solid border-2
+            px-2
+            py-2
+            mr-2
+            mb-2
+            text-sm
+            cursor-pointer"
+            //style={themes[extends.colors.primary]}
+        >Opslaan</button>
       </form>
       {message && <p>{message}</p>}
     </div>
