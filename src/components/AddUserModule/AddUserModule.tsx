@@ -5,7 +5,7 @@ import {
 } from 'react-redux';
 
 function AddUserModule(props) {
-  const [errorMessage, setErrorMessage] = useState('')
+  const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
   const [admin, setAdmin] = useState(false)
@@ -21,33 +21,80 @@ function AddUserModule(props) {
     return null
   }
 
-  const fetchOptions = {
-    headers: {
-      "authorization": `Bearer ${token}`,
-      'mode':'no-cors'
-    },
-    method: "POST", 
-    body: JSON.stringify({email}),
-  }
+let userRoles = []
 
-  const handleSubmit = async (event) => {
+const handleSubmit = (event) => {
     event.preventDefault();
-    try {
-      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/admin/user/list', fetchOptions);
-      const parsed = await response.json();
-      console.log('parsed', parsed)
-      if (response.status === 201) {
-        console.log('ok')
-        props.setShowModule(false);
-      } else {
-        console.log('not ok')
-        setErrorMessage(parsed.message);
+    console.log('admin', admin)
+    if (admin) {
+      userRoles.push("Admin")
+    } 
+    if (overheid) {
+      userRoles.push("Overheid")
+    } 
+    if (aanbieder) {
+      userRoles.push("Aanbieder")
+    } 
+    console.log('userRoles', userRoles)
+    createUser(email, userRoles)
+  }
+  
+  function getHeaders() {
+    return {
+      headers: {
+        "Authorization":  `Bearer ${token}`
       }
-    } catch (error) {
-      setErrorMessage(error.message)
-    }
+    };
+  }
+  
+  const handleClose = () => {
+    props.setShowModule(false);
+    setMessage('')
+    setEmail('')
+    setSendEmail(false)
+    setAdmin(false)
+    setOverheid(false)
+    setAanbieder(false)
   }
 
+
+  function createUser(email, role) {
+    let roles = {
+        "Admin": "administer",
+        "Overheid": "municipality",
+        "Aanbieder": "operator",
+    };
+    let body = {
+        email: email,
+        user_type: userRoles
+    };
+    console.log(body);
+    let url = 'https://api.deelfietsdashboard.nl/dashboard-api/admin/user/create';
+    let options =  getHeaders();
+    options.method = "PUT";
+    options.body = JSON.stringify(body);
+    options.headers['Content-Type'] = 'application/json';
+    return fetch(url, options)
+        .then((response) => {
+            if (response.status == 200) {
+              setMessage("User created successfully!")         
+              setTimeout(() => {
+                handleClose()
+              }, "1500")
+            } else {
+                //errorNoPermission(response);
+                setMessage("There has been an error. Please try again.")
+                setTimeout(() => {
+                  handleClose()
+                }, "1500")
+                
+            }
+            return response.json();
+        });
+  }
+
+
+  
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -64,7 +111,7 @@ function AddUserModule(props) {
           id="admin"
           name="admin"
           value={admin}
-          onChange={(event) => setAdmin(event.target.value)}
+          onChange={(event) => setAdmin(!admin)}
         />
         <label htmlFor="overheid">Overheid</label>
         <input 
@@ -72,7 +119,7 @@ function AddUserModule(props) {
           id="overheid"
           name="overheid"
           value={overheid}
-          onChange={(event) => setOverheid(event.target.value)}
+          onChange={(event) => setOverheid(!overheid)}
         />
         <label htmlFor="aanbieder">Aanbieder</label>
         <input 
@@ -80,7 +127,7 @@ function AddUserModule(props) {
           id="aanbieder"
           name="aanbieder"
           value={aanbieder}
-          onChange={(event) => setAanbieder(event.target.value)}
+          onChange={(event) => setAanbieder(!aanbieder)}
         />
         {/* <input 
           type="checkbox" 
@@ -109,11 +156,13 @@ function AddUserModule(props) {
           value={sendEmail}
           onChange={(event) => setSendEmail(event.target.value)}
         />
-        <Button type="submit" >Opslaan</Button>
+        <button type="submit" >Opslaan</button>
       </form>
-      {errorMessage && <p>{errorMessage}</p>}
+      {message && <p>{message}</p>}
     </div>
   )
 }
 
 export default AddUserModule
+
+
