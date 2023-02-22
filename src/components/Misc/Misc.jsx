@@ -1,22 +1,12 @@
 import { useState } from 'react';
-import { Redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 export default function Misc({children}) {
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
-
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
-
-  if (doRenderRedirect) {
-    return renderRedirect();
-  }
+  const navigate = useNavigate();
 
   const pillMenuItems = [
     {
@@ -46,7 +36,7 @@ export default function Misc({children}) {
       }}>
 
         <IconButtonClose
-          onClick={() => setDoRenderRedirect(true)}
+          onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 

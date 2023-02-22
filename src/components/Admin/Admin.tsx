@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Redirect, useLocation,  } from "react-router-dom";
+import { useNavigate, useLocation,  } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
@@ -9,8 +9,9 @@ import LoginStats from '../LoginStats/LoginStats';
 import UserList from '../UserList/UserList';
 
 export default function Admin() {
+  const navigate = useNavigate();
+
   // Our state variables
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
   const [pathName, setPathName] = useState(document.location ? document.location.pathname : null);
 
   // Store window location in a local variable
@@ -33,15 +34,6 @@ export default function Admin() {
     if(pathname === '/admin/stats') return <LoginStats />
   }
 
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
-  if (doRenderRedirect) {
-    return renderRedirect();
-  }
- 
   return (
     <div className="
       px-4
@@ -55,7 +47,7 @@ export default function Admin() {
       }}>
 
         <IconButtonClose
-          onClick={() => setDoRenderRedirect(true)}
+          onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 

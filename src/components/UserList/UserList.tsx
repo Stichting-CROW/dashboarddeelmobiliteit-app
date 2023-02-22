@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Redirect, useLocation,  } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import './UserList.css'; 
 import {
   // useDispatch,
@@ -30,10 +30,15 @@ const renderTableRow = (user: any) => {
 }
 
 // Mockup for UserList
-export default function UserList() {
+export default function UserList({
+  showAddUserModule
+}: {
+  showAddUserModule?: boolean
+}) {
   const [users, setUsers] = useState([]);
-  const [showModule, setShowModule] = useState(false)
+  const [showModule, setShowModule] = useState(showAddUserModule || false)
 
+  const navigate = useNavigate();
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   const fetchOptions = {
@@ -73,15 +78,16 @@ export default function UserList() {
 
   }, []);
 
-  const handleClik = () => {
-    setShowModule(true)
+  const handleClick = () => {
+    // setShowModule(true)
+    navigate('/admin/users/new');
   }
 
   return (
     <div className="">
       <H1Title>Gebruikers</H1Title>
       <div className='pb-4'>
-        <Button theme='primary' onClick={handleClik}>Nieuwe gebruiker</Button>
+        <Button theme='primary' onClick={handleClick}>Nieuwe gebruiker</Button>
         <Button theme='primary'>Exporteer gebruikers als spreadsheet</Button>
       </div>
       <AddUser showModule={showModule} setShowModule={setShowModule}/> 
