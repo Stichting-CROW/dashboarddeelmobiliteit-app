@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
- Switch,
+ BrowserRouter,
+ Routes,
  Route,
  useLocation,
 } from "react-router-dom";
@@ -30,6 +31,8 @@ import Export from './components/Export/Export';
 import Admin from './components/Admin/Admin';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
+import LoginStats from './components/LoginStats/LoginStats';
+import UserList from './components/UserList/UserList';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -338,124 +341,127 @@ function App() {
 
       <div className="gui-layer">
 
-      <Switch>
+      <Routes>
         { isLoggedIn ?
           <>
             { isAdmin ?
               <>
-                <Route exact path="/admin">
+                <Route exact path="/admin" element={
                   <Overlay>
-                    <Admin />
+                    <Admin>
+
+                    </Admin>
                   </Overlay>
-                </Route>
-                <Route exact path="/admin/users">
+                } />
+                <Route exact path="/admin/users" element={
                   <Overlay>
-                    <Admin />
+                    <Admin>
+                      <UserList />
+                    </Admin>
                   </Overlay>
-                </Route>
-                <Route exact path="/admin/stats">
+                } />
+                <Route exact path="/admin/users/new" element={
                   <Overlay>
-                    <Admin />
+                    <Admin>
+                      <UserList showAddUserModule={true} />
+                    </Admin>
                   </Overlay>
-                </Route>
+                } />
+                <Route exact path="/admin/users/edit/:userId" element={
+                  <Overlay>
+                    <Admin>
+                      <UserList />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/stats" element={
+                  <Overlay>
+                    <Admin>
+                      <LoginStats />
+                    </Admin>
+                  </Overlay>
+                } />
               </> : null
             }
-            <Route exact path="/">
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/map/park">
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/map/rentals">
-              {renderMapElements()}
-            </Route>
-            <Route path="/map/zones">
-              {renderMapElements()}
-            </Route>
-            <Route path="/admin/zones">
-              {renderMapElements()}
-            </Route>
-            <Route exact path="/stats/overview">
+            <Route exact path="/" element={renderMapElements()} />
+            <Route exact path="/map/park" element={renderMapElements()} />
+            <Route exact path="/map/rentals" element={renderMapElements()} />
+            <Route path="/map/zones" element={renderMapElements()} />
+            <Route path="/admin/zones" element={renderMapElements()} />
+            <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
               </ContentPage>
               {renderMapElements()}
-            </Route>
-            <Route exact path="/monitoring">
+            </>} />
+            <Route exact path="/monitoring" element={
               <ContentPage>
                 <Monitoring />
               </ContentPage>
-            </Route>
-            <Route exact path="/over">
+            } />
+            <Route exact path="/over" element={
               <Overlay>
                 <About />
               </Overlay>
-            </Route>
-            <Route exact path="/rondleiding">
+            } />
+            <Route exact path="/rondleiding" element={
               <ContentPage forceFullWidth={true}>
                 <Tour />
               </ContentPage>
-            </Route>
-            <Route exact path="/misc">
+            } />
+            <Route exact path="/misc" element={
               <Overlay>
                 <Misc />
               </Overlay>
-            </Route>
-            <Route exact path="/profile">
+            } />
+            <Route exact path="/profile" element={
               <Overlay>
                 <Misc>
                   <Profile />
                 </Misc>
               </Overlay>
-            </Route>
-            <Route exact path="/export">
+            } />
+            <Route exact path="/export" element={
               <Overlay>
                 <Misc>
                   <Export />
                 </Misc>
               </Overlay>
-            </Route>
-            <Route exact path="/faq">
+            } />
+            <Route exact path="/faq" element={
               <Overlay>
                 <Misc>
                   <Faq />
                 </Misc>
               </Overlay>
-            </Route>
+            } />
           </>
           :
           null
         }
 
-        <Route exact path="/over">
+        <Route exact path="/over" element={
           <Overlay>
             <About />
           </Overlay>
-        </Route>
-
-        <Route exact path="/rondleiding">
+        } />
+        <Route exact path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
           </ContentPage>
-        </Route>
-
-        <Route exact path="/login">
+        } />
+        <Route exact path="/login" element={
           <Overlay>
             <Login />
           </Overlay>
-        </Route>
-
-        <Route exact path="/reset-password/:changePasswordCode">
+        } />
+        <Route exact path="/reset-password/:changePasswordCode" element={
           <Overlay>
             <SetPassword />
           </Overlay>
-        </Route>
-
-        <Route>
-          {renderMapElements()}
-        </Route>
-
-      </Switch>
+        } />
+        <Route element={renderMapElements()} />
+      </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MapPage mapContainer={mapContainer} />
