@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, useLocation,  } from "react-router-dom";
 import './UserList.css'; 
-
 import {
   // useDispatch,
   useSelector
 } from 'react-redux';
 import Button from '../Button/Button';
-import AddUserModule from '../AddUserModule/AddUserModule';
+import AddUser from '../AddUser/AddUser';
+import H1Title from '../H1Title/H1Title';
+import H4Title from '../H4Title/H4Title';
 
 const renderTableRow = (user: any) => {
   return <React.Fragment key={user.id}>
@@ -78,54 +79,16 @@ export default function UserList() {
 
   return (
     <div className="">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Gebruikers
-      </h1>
+      <H1Title>Gebruikers</H1Title>
       <div className='pb-4'>
-        <button className=" 
-          rounded-lg
-          inline-block
-          border-solid border-2
-          px-2
-          py-2
-          mr-2
-          mb-2
-          text-sm
-          cursor-pointer
-          w-40
-          mx-2
-          my-2
-          bg-primary 
-          text-white
-          border-primary" 
-        onClick={handleClik}>Nieuwe gebruiker</button>
-        <button className=" 
-          rounded-lg
-          inline-block
-          border-solid border-2
-          px-2
-          py-2
-          pr-4
-          pl-4
-          mr-2
-          mb-2
-          text-sm
-          cursor-pointer
-          mx-2
-          my-2
-          bg-primary 
-          text-white
-          border-primary"
-        >Exporteer gebruikers als spreadsheet</button>
+        <Button theme='primary' onClick={handleClik}>Nieuwe gebruiker</Button>
+        <Button theme='primary'>Exporteer gebruikers als spreadsheet</Button>
       </div>
-      <AddUserModule showModule={showModule} setShowModule={setShowModule}/> 
+      <AddUser showModule={showModule} setShowModule={setShowModule}/> 
       <div className="grid gap-4 grid-cols-3 grid-container">
-        <div className="font-bold">Email</div>
-        <div className="font-bold">Rol</div>
-        <div className="font-bold"></div>
+        <H4Title>Email</H4Title>
+        <H4Title>Rol</H4Title>
+        <H4Title></H4Title>
         {users.map(user => renderTableRow(user))}
       </div>
     </div>

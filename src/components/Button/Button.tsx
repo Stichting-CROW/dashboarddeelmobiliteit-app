@@ -3,10 +3,11 @@ import {themes} from '../../themes';
 function Button({
   theme,
   children,
-  onClick
+  onClick,
+  type
 }) {
   return (
-    <div
+    <button
       className="
         rounded-lg
         inline-block
@@ -17,13 +18,17 @@ function Button({
         mb-2
         text-sm
         cursor-pointer
+        w-40
+        mx-2
+        my-2
+        text-center
         "
-        
+      type={type}
       onClick={onClick}
-      //style={themes[theme]}
+      style={themes[theme]}
     >
       {children}
-    </div>
+    </button>
   )
 }
 

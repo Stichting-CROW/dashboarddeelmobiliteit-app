@@ -48,6 +48,7 @@
     flex-direction: column;
 }
 
-.active {
+.rollen .active {
     background-color: #15AEEF;
+    color: white
 }

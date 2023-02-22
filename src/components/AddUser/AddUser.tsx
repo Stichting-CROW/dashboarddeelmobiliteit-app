@@ -3,20 +3,19 @@ import Button from '../Button/Button'
 import {
   useSelector
 } from 'react-redux';
-import './AddUserModule.css'; 
-import {themes} from '../../themes';
+import './AddUser.css'; 
+import H5Title from '../H5Title/H5Title';
 
-function AddUserModule(props) {
+function AddUser(props) {
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
-  const [admin, setAdmin] = useState(false)
+  const [admin, setAdmin] = useState(true)
   const [overheid, setOverheid] = useState(false)
   const [aanbieder, setAanbieder] = useState(false)
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
-  console.log(admin)
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   if (!props.showModule) {
@@ -27,7 +26,7 @@ let userRoles = []
 
 const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('admin', admin)
+    console.log(admin)
     if (admin) {
       userRoles.push("Admin")
     } 
@@ -35,9 +34,13 @@ const handleSubmit = (event) => {
       userRoles.push("Overheid")
     } 
     if (aanbieder) {
-      userRoles.push("Aanbieder")
+          userRoles.push("Aanbieder")
     } 
     console.log('userRoles', userRoles)
+    console.log('admin', admin)
+    console.log('overheid', overheid)
+    console.log('aanbieder', aanbieder)
+    return;
     createUser(email, userRoles)
   }
   
@@ -70,7 +73,6 @@ const handleSubmit = (event) => {
         email: email,
         user_type: roles[role]
     };
-    console.log(body);
     let url = 'https://api.deelfietsdashboard.nl/dashboard-api/admin/user/create';
     let options =  getHeaders();
     options.method = "PUT";
@@ -82,26 +84,26 @@ const handleSubmit = (event) => {
               setMessage("User created successfully!")         
               setTimeout(() => {
                 handleClose()
-              }, "1500")
+              }, 2000)
             } else {
                 //errorNoPermission(response);
                 setMessage("There has been an error. Please try again.")
                 setTimeout(() => {
                   handleClose()
-                }, "1500")
+                }, 2000)
                 
             }
             return response.json();
         });
   }
 
-
+  
   
   return (
     <div>
       <form onSubmit={handleSubmit} className='add-user-form'>
         <div className="email p-2">
-          <label className='font-medium'>Emailadres</label>
+          <H5Title>Emailadres</H5Title>
           <input 
             type="email" 
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer w-80"
@@ -110,9 +112,9 @@ const handleSubmit = (event) => {
           />
         </div>
         <div className="p-2">
-          <label className='font-medium'>Rollen</label>
+          <H5Title>Rollen</H5Title>
           <ul className='rollen'>
-            <li >
+            <li>
               <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
                 htmlFor="admin">Admin</label>
               <input 
@@ -120,53 +122,44 @@ const handleSubmit = (event) => {
                 id="admin"
                 name="rollen"
                 value={admin}
-                onChange={(event) => setAdmin(true)}
+                onClick={() =>{
+                  setAdmin(true)
+                  setAanbieder(false)
+                  setOverheid(false)
+                }}
               />
             </li>
             <li >
-              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer`}
+              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${overheid ? "active" : ""}`}
                 htmlFor="overheid">Overheid</label>
               <input 
                 type="radio" 
                 id="overheid"
                 name="rollen"
                 value={overheid}
-                onChange={(event) => setOverheid(true)}
+                onClick={() => {
+                  setOverheid(true)
+                  setAanbieder(false)
+                  setAdmin(false)
+                }}
               />
             </li>
             <li>
-              <label className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer"
+              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${aanbieder ? "active" : ""}`}
                 htmlFor="aanbieder">Aanbieder</label>
               <input 
                 type="radio" 
                 id="aanbieder"
                 name="rollen"
                 value={aanbieder}
-                onChange={(event) => setAanbieder(true)}
+                onClick={() => {
+                  setAanbieder(true); 
+                  setAdmin(false)
+                  setOverheid(false)
+                }}
               />
             </li>
           </ul>
-          {/* <input 
-            type="checkbox" 
-            id="overigBedrijf"
-            name="overigBedrijf"
-            value={overigBedrijf}
-            onChange={(event) => setOverigBedrijf(event.target.value)}
-          />
-          <input 
-            type="checkbox" 
-            id="kernteam"
-            name="kernteam"
-            value={kernteam}
-            onChange={(event) => setKernteam(event.target.value)}
-          />
-          <input 
-            type="checkbox" 
-            id="downloadrechten"
-            name="downloadrechten"
-            value={downloadrechten}
-            onChange={(event) => setDownloadrechten(event.target.value)}
-          /> */}
         </div>
         <div className="p-2">
           <input 
@@ -174,34 +167,16 @@ const handleSubmit = (event) => {
             value={sendEmail}
             onChange={(event) => setSendEmail(event.target.value)}
           />
-          <label className="p-3">Stuur welkomstmail</label>
+          <H5Title className="p-3">Stuur welkomstmail</H5Title>
         </div>
-        
-        <button type="submit" 
-          className="
-            rounded-lg
-            inline-block
-            border-solid border-2
-            px-2
-            py-2
-            mr-2
-            mb-2
-            text-sm
-            cursor-pointer
-            w-40
-            mx-2
-            my-2
-            bg-primary 
-            text-white
-            border-primary"
-            //style={themes[extends.colors.primary]}
-        >Opslaan</button>
+      
+        <Button type="submit" theme="primary">Opslaan</Button>
       </form>
       {message && <p>{message}</p>}
     </div>
   )
 }
 
-export default AddUserModule
+export default AddUser
 
 
