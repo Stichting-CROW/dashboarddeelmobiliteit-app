@@ -8,31 +8,18 @@ import { IconButtonClose } from '../IconButtons.jsx';
 import LoginStats from '../LoginStats/LoginStats';
 import UserList from '../UserList/UserList';
 
-export default function Admin() {
+export default function Admin({
+  children
+}: {
+  children: any
+}) {
   const navigate = useNavigate();
-
-  // Our state variables
-  const [pathName, setPathName] = useState(document.location ? document.location.pathname : null);
-
-  // Store window location in a local variable
-  let location = useLocation();
-  useEffect(() => {
-    setPathName(location ? location.pathname : null);
-  }, [location]);
 
   // Define menu items for this Admin page
   const pillMenuItems = [
     {title: 'Gebruikers', link: '/admin/users'},
     {title: 'Statistieken', link: '/admin/stats'},
   ]
-
-  const renderInnerContent = (pathname) => {
-    if(! pathname) return <div />
-
-    if(pathname === '/admin') return <UserList />
-    if(pathname === '/admin/users') return <UserList />
-    if(pathname === '/admin/stats') return <LoginStats />
-  }
 
   return (
     <div className="
@@ -60,7 +47,7 @@ export default function Admin() {
         <div className="
           mt-8
         ">
-          {renderInnerContent(location?.pathname)}
+          {children}
         </div>
 
       </div>

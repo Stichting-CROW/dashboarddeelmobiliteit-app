@@ -33,6 +33,7 @@ import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx'
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
+import EditUser from './components/EditUser/EditUser';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -349,7 +350,7 @@ function App() {
                 <Route exact path="/admin" element={
                   <Overlay>
                     <Admin>
-
+                      <UserList />
                     </Admin>
                   </Overlay>
                 } />
@@ -367,7 +368,7 @@ function App() {
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/users/edit/:userId" element={
+                <Route exact path="/admin/users/:username" element={
                   <Overlay>
                     <Admin>
                       <UserList />
