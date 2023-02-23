@@ -110,3 +110,23 @@ curl --location --request GET 'https://api.deelfietsdashboard.nl/dashboard-api/s
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --header 'Authorization: Bearer TOKEN'
 ```
+
+## HB matrices
+
+### HB matrices for H3 grid areas
+
+``` bash
+curl --location 'https://api.deelfietsdashboard.nl/od-api/destinations/h3?h3_resolution=7&end_date=2023-02-06&start_date=2023-01-05&time_periods=2-6&days_of_week=fr%2Csa%2Csu&origin_cells=87196bb51ffffff' \
+--header 'authorization: Bearer TOKEN'
+```
+
+### HB matrices for municipality zones
+
+```bash
+curl --location 'https://api.deelfietsdashboard.nl/od-api/origins/geometry?end_date=2022-02-06&start_date=2022-01-05&destination_stat_refs=cbs%3AWK059901' \
+--header 'authorization: Bearer TOKEN'
+```
+Everything's the same as for H3 grid HB matrices, apart from:
+
+- We use the endpoint `/origins/geometry` instead of `/origins/h3`
+- Key `destination_stat_refs` is used instead of `destination_cells`
