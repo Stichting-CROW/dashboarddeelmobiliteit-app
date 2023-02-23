@@ -22,25 +22,24 @@ function AddUser(props) {
     return null
   }
 
-let userRoles = []
+let userRoles = ""
 
 const handleSubmit = (event) => {
     event.preventDefault();
     console.log(admin)
     if (admin) {
-      userRoles.push("Admin")
+      userRoles = ""
+      userRoles = "Admin"
     } 
     if (overheid) {
-      userRoles.push("Overheid")
+      userRoles = ""
+      userRoles = "Overheid"
     } 
     if (aanbieder) {
-          userRoles.push("Aanbieder")
+      userRoles = ""
+      userRoles = "Aanbieder"
     } 
     console.log('userRoles', userRoles)
-    console.log('admin', admin)
-    console.log('overheid', overheid)
-    console.log('aanbieder', aanbieder)
-    return;
     createUser(email, userRoles)
   }
   
