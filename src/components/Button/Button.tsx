@@ -4,11 +4,12 @@ function Button({
   theme,
   children,
   onClick,
-  type
+  type,
+  classes
 }) {
   return (
     <button
-      className="
+      className={`
         rounded-lg
         inline-block
         border-solid border-2
@@ -18,11 +19,11 @@ function Button({
         mb-2
         text-sm
         cursor-pointer
-        w-40
         mx-2
         my-2
         text-center
-        "
+        ${classes}
+        `}
       type={type}
       onClick={onClick}
       style={themes[theme]}

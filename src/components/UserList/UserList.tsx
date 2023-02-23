@@ -101,8 +101,8 @@ export default function UserList({
     <div className="">
       <H1Title>Gebruikers</H1Title>
       <div className='pb-4'>
-        <Button theme='primary' onClick={handleClick}>Nieuwe gebruiker</Button>
-        <Button theme='primary'>Exporteer gebruikers als spreadsheet</Button>
+        <Button theme='primary' classes='add-new' onClick={handleClick}>Nieuwe gebruiker</Button>
+        <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
       </div>
       <AddUser showModule={showAddUserModule} /> 
       <div className="grid gap-4 grid-cols-3 grid-container">

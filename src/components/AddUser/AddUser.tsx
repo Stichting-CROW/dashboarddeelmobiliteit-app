@@ -20,6 +20,7 @@ function AddUser(props) {
 
   // State variables
   const [message, setMessage] = useState('')
+  const [messageDesign, setMessageDesign] = useState('')
   const [email, setEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
   const [admin, setAdmin] = useState(true)
@@ -28,7 +29,7 @@ function AddUser(props) {
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
-
+  
   if (!props.showModule) {
     return null
   }
@@ -37,7 +38,6 @@ let userRoles = ""
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(admin)
     if (admin) {
       userRoles = ""
       userRoles = "Admin"
@@ -50,7 +50,6 @@ let userRoles = ""
       userRoles = ""
       userRoles = "Aanbieder"
     } 
-    console.log('userRoles', userRoles)
     createUser(email, userRoles)
   }
   
@@ -84,15 +83,19 @@ let userRoles = ""
     return fetch(url, options)
         .then((response) => {
             if (response.status == 200) {
-              setMessage("User created successfully!")         
+              setMessage("User created successfully!") 
+              setMessageDesign('green')        
               setTimeout(() => {
                 handleClose()
+                setMessage('')
               }, 2000)
             } else {
                 //errorNoPermission(response);
+                setMessageDesign('red')        
                 setMessage("There has been an error. Please try again.")
                 setTimeout(() => {
                   handleClose()
+                  setMessage('')
                 }, 2000)
                 
             }
@@ -173,9 +176,9 @@ let userRoles = ""
           <H5Title className="p-3">Stuur welkomstmail</H5Title>
         </div>
       
-        <Button type="submit" theme="primary">Opslaan</Button>
+        <Button classes={'w-40 save'} type="submit" theme="primary">Opslaan</Button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}
     </div>
   )
 }

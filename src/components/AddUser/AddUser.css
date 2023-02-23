@@ -52,3 +52,24 @@
     background-color: #15AEEF;
     color: white
 }
+
+.error-message {
+    background-color: #F6F5F4;
+    border-color: #F6F5F4;
+    color: #FD3E48;
+    padding-bottom: 2%;
+}
+
+.success-message {
+    background-color: #F6F5F4;
+    border-color: #F6F5F4;
+    color: #1FA024;
+    padding-bottom: 2%;
+}
+
+.save::before {
+    content: url('../../images/UserList/save-outline.svg');
+    margin-right: 8px;
+    margin-left: 5px;
+
+}
