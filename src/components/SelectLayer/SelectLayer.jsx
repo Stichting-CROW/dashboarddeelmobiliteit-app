@@ -94,7 +94,7 @@ function SelectLayer(props) {
           </div> : null }
 
         { displayMode===DISPLAYMODE_RENTALS ?
-          <div data-type="hb" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
+          <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
             onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
             <span className="layer-title">
               HB

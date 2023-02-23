@@ -28,6 +28,9 @@
 .SelectLayer .layer[data-type="heat-map"] {
   background-image: url('../../images/SelectLayer/layer-heatmap.png')
 }
+.SelectLayer .layer[data-type="od"] {
+  background-image: url('../../images/SelectLayer/layer-od.png')
+}
 .SelectLayer .layer[data-type="pointers"] {
   background-image: url('../../images/SelectLayer/layer-clusters.png')
 }

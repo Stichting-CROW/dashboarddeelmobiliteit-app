@@ -12,6 +12,7 @@ import {
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
+  DISPLAYMODE_VERHUURDATA_HB,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
 } from '../../reducers/layers.js';
@@ -94,6 +95,14 @@ function SelectLayerMobile(props) {
           onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
           <span className="layer-title">
             Voertuigen
+          </span>
+        </div> : null }
+
+      { displayMode===DISPLAYMODE_RENTALS ?
+        <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
+          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
+          <span className="layer-title">
+            HB
           </span>
         </div> : null }
 

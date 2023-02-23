@@ -26,6 +26,9 @@
 .SelectLayerMobile .layer[data-type="heat-map"] {
   background-image: url('../../images/SelectLayer/layer-heatmap.png')
 }
+.SelectLayerMobile .layer[data-type="od"] {
+  background-image: url('../../images/SelectLayer/layer-od.png')
+}
 .SelectLayerMobile .layer[data-type="pointers"] {
   background-image: url('../../images/SelectLayer/layer-clusters.png')
 }
