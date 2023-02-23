@@ -1,22 +1,12 @@
 import React, {useState} from 'react'
 import {marked} from 'marked'
-import { Redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 const About = () => {
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
-
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
- 
-  if (doRenderRedirect) {
-    return renderRedirect();
-  }
+  const navigate = useNavigate();
 
   return (
     <div className="
@@ -28,7 +18,7 @@ const About = () => {
       <div className="mx-auto py-8">
 
         <IconButtonClose
-          onClick={() => setDoRenderRedirect(true)}
+          onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 

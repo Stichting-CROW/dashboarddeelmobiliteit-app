@@ -5,10 +5,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "blue",
+        primary:  "#15AEEF",
         secondary: "purple",
+        "dark-blue": '#343E47',
         "text-base": "white",
         "text-menu": "text-blue-500"
+      }, 
+      fontSize: {
+        sm: ['14px', '17px'],
+        base: ['16px', '24px'],
+        lg: ['20px', '28px'],
+        xl: ['34px', '41px'],
       }
     },
   },

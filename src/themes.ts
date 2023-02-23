@@ -5,10 +5,10 @@ export const themes = {
     borderColor: '#CCCCCC',
     color: '#343E47'
   },
-  blue: {
-    backgroundColor: '#15AEEF',
-    borderColor: '#ccc',
-    color: '#fff'
+  primary: {
+    backgroundColor: '#15AEEF', 
+    color: 'white',
+    borderColor: '#15AEEF',     
   },
   red: {
     backgroundColor: '#fff',

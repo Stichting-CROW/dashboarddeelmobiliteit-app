@@ -1,27 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation,  } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
-export default function Misc({children}) {
+import LoginStats from '../LoginStats/LoginStats';
+import UserList from '../UserList/UserList';
+
+export default function Admin({
+  children
+}: {
+  children: any
+}) {
   const navigate = useNavigate();
 
+  // Define menu items for this Admin page
   const pillMenuItems = [
-    {
-      title: 'Profiel',
-      link: '/profile'
-    },
-    {
-      title: 'FAQ',
-      link: '/faq'
-    },
-    {
-      title: 'Exporteer',
-      link: '/export'
-    }
-  ];
+    {title: 'Gebruikers', link: '/admin/users'},
+    {title: 'Statistieken', link: '/admin/stats'},
+  ]
 
   return (
     <div className="
@@ -30,8 +28,8 @@ export default function Misc({children}) {
       sm:flex sm:justify-center
       sm:px-0
     ">
-      <div className="mx-auto py-8" style={{
-        width: '500px',
+      <div className="mx-auto px-8 py-8" style={{
+        width: '100%',
         maxWidth: '100%'
       }}>
 
@@ -40,7 +38,7 @@ export default function Misc({children}) {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo title="Extra" />
+        <Logo title="Admin" />
 
         <div className="mt-8">
           <PillMenu items={pillMenuItems} />
