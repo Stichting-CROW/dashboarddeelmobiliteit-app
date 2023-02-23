@@ -1,12 +1,24 @@
-import { React, useState } from 'react'
+import React, { useState } from 'react'
 import Button from '../Button/Button'
 import {
   useSelector
 } from 'react-redux';
+import { useLocation, useNavigate } from "react-router-dom";
+
+// Styles
 import './AddUser.css'; 
+
+// Components
 import H5Title from '../H5Title/H5Title';
 
 function AddUser(props) {
+  // Init navigation class, so we can easily redirect using navigate('/path')
+  const navigate = useNavigate();
+
+  // Get API token
+  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+  // State variables
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
@@ -16,7 +28,6 @@ function AddUser(props) {
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   if (!props.showModule) {
     return null
@@ -24,7 +35,7 @@ function AddUser(props) {
 
 let userRoles = ""
 
-const handleSubmit = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     console.log(admin)
     if (admin) {
@@ -52,15 +63,8 @@ const handleSubmit = (event) => {
   }
   
   const handleClose = () => {
-    props.setShowModule(false);
-    setMessage('')
-    setEmail('')
-    setSendEmail(false)
-    setAdmin(false)
-    setOverheid(false)
-    setAanbieder(false)
+    navigate('/admin/users');
   }
-
 
   function createUser(email, role) {
     let roles = {

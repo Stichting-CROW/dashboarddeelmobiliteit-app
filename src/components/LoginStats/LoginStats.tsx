@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Redirect, useLocation,  } from "react-router-dom";
 
 const renderTableRow = () => {
   return <div className="Table-tr flex justify-between">
