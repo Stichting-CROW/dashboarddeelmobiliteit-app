@@ -169,7 +169,8 @@ function BeschikbareVoertuigenChart({
               stackId="1"
               type="monotone"
               dataKey={x}
-              stroke={providerColor}
+              stroke="#fff"
+              strokeWidth={2}
               fill={providerColor}
               isAnimationActive={false}
             />
