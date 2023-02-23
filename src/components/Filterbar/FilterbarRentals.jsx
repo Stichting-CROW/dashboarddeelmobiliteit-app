@@ -20,6 +20,8 @@ import Logo from '../Logo.jsx';
 // import FormInput from '../FormInput/FormInput';
 import Fieldset from '../Fieldset/Fieldset';
 
+import {StateType} from '../../types/StateType';
+
 // Import API functions
 import {postZone} from '../../api/zones';
 
@@ -37,15 +39,15 @@ function Filterbar({
   hideLogo
 }) {
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
 
@@ -123,9 +125,11 @@ function Filterbar({
         <FilteritemGebieden />
       </Fieldset>
 
-      {<FilteritemZones 
-        zonesToShow={zonesToShow}
-        />}
+      <Fieldset title="Zones">
+        <FilteritemZones 
+          zonesToShow={zonesToShow}
+        />
+      </Fieldset>
 
       {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
 

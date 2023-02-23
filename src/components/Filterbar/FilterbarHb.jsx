@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {useState, useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-// import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
@@ -21,6 +20,8 @@ import Logo from '../Logo.jsx';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';
 
+import {StateType} from '../../types/StateType';
+
 // Import API functions
 import {postZone} from '../../api/zones';
 
@@ -35,7 +36,7 @@ import {
 const Weekdays = () => {
   const dispatch = useDispatch();
 
-  const activeWeekdays = useSelector(state => {
+  const activeWeekdays = useSelector((state: StateType) => {
     return (state.filter && state.filter.weekdays) ? state.filter.weekdays : '';
   });
 
@@ -78,7 +79,7 @@ const Weekdays = () => {
           key={idx}
           theme={isWeekdayActive(x) ? 'blue' : 'white'}
           onClick={toggleWeekday(x)}
-          classes="mt-1 mb-1"
+          classes="mt-1 mr-1 mb-1 ml-1"
         >
           {weekdayTitles[idx].toLowerCase()}
         </Button>
@@ -92,7 +93,7 @@ const Weekdays = () => {
 const Timeframes = () => {
   const dispatch = useDispatch();
 
-  const activeTimeframes = useSelector(state => {
+  const activeTimeframes = useSelector((state: StateType) => {
     return (state.filter && state.filter.timeframes) ? state.filter.timeframes : '';
   });
 
@@ -131,7 +132,7 @@ const Timeframes = () => {
           key={idx}
           theme={isTimeframeActive(x) ? 'blue' : 'white'}
           onClick={toggleTimeframe(x)}
-          classes="mt-1 mb-1"
+          classes="mt-1 mr-1 mb-1 ml-1"
         >
           {x}
         </Button>
@@ -146,15 +147,15 @@ function FilterbarHb({
   hideLogo
 }) {
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
 

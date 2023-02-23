@@ -1,8 +1,10 @@
 import './ContentPage.css'
 import { useSelector } from 'react-redux';
 
+import {StateType} from '../types/StateType';
+
 export default function ContentPage(props) {
-  const isFilterBarVisible = useSelector(state => {
+  const isFilterBarVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui.FILTERBAR : false;
   });
 

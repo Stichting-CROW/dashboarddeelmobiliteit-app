@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
 
+import {StateType} from '../types/StateType';
+
 import {fetchParkEvents} from '../helpers/parkEvents.js';
 
 const numberOfSnapshots = 40;
@@ -24,7 +26,7 @@ function Monitoring(props) {
   const [vehiclesData, setVehiclesData] = useState({});
 
   // Get state.authentication
-  const authentication = useSelector(state => {
+  const authentication = useSelector((state: StateType) => {
     return state.authentication ? state.authentication : false;
   });
 

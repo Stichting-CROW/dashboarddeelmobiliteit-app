@@ -4,6 +4,8 @@ import SlideBox from '../SlideBox/SlideBox.jsx';
 
 import {getParkEventsStats} from '../../api/parkEventsStats.js';
 
+import {StateType} from '../../types/StateType';
+
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
@@ -30,11 +32,11 @@ function StatRow({data}) {
 }
 
 function MetaStats(props) {
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
     }

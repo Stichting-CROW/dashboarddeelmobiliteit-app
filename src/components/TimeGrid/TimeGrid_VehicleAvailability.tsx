@@ -5,6 +5,8 @@ import {
 } from 'react-redux';
 import moment from 'moment';
 
+import {StateType} from '../../types/StateType';
+
 import {
   getAggregatedVehicleData,
 } from '../../helpers/stats/index';
@@ -24,10 +26,10 @@ function TimeGrid_VehicleAvailability({
   const dispatch = useDispatch()
 
   // Get redux state vars
-  const filter = useSelector(state => state.filter);
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
-  const metadata = useSelector(state => state.metadata)
-  const zones = useSelector(state => { return (state.metadata && state.metadata.zones) ? state.metadata.zones : []; });
+  const filter = useSelector((state: StateType) => state.filter);
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const metadata = useSelector((state: StateType) => state.metadata)
+  const zones = useSelector((state: StateType) => { return (state.metadata && state.metadata.zones) ? state.metadata.zones : []; });
 
   // Define local state variables
   const [totalsPerWeekdayAndHour, setTotalsPerWeekdayAndHour] = useState([])

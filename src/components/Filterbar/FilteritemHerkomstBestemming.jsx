@@ -2,6 +2,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemHerkomstBestemming.css';
 
+import {StateType} from '../../types/StateType';
+
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
@@ -13,15 +15,15 @@ import {
 export default function FilteritemHerkomstBestemming() {
   const dispatch = useDispatch()
 
-  const viewRentals = useSelector(state => {
+  const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : null;
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const filterHerkomstBestemming = useSelector(state => {
+  const filterHerkomstBestemming = useSelector((state: StateType) => {
     let value = 'herkomst';
     if(state.filter) {
       value=state.filter.herkomstbestemming==='bestemming' ? 'bestemming':'herkomst';

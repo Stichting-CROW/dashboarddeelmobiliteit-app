@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
 
+import {StateType} from '../../types/StateType';
+
 const setQueryParam = (key, val) => {
   let searchParams = new URLSearchParams(window.location.search);
   if(! val) {
@@ -23,15 +25,15 @@ const setQueryParam = (key, val) => {
 function FilteritemGebieden() {
   const dispatch = useDispatch()
 
-  const gebieden = useSelector(state => {
+  const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
   
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : "";
   });
 
-  const filterBarExtendedView = useSelector(state => {
+  const filterBarExtendedView = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
   });
 

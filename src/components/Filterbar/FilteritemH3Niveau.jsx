@@ -2,10 +2,12 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemHerkomstBestemming.css';
 
+import {StateType} from '../../types/StateType';
+
 export default function FilteritemH3Niveau() {
   const dispatch = useDispatch()
 
-  const filterHerkomstBestemming = useSelector(state => {
+  const filterHerkomstBestemming = useSelector((state: StateType) => {
     let value = 7;
     if(state.filter) {
       value=state.filter.h3niveau === 7 ? 7 : 8;

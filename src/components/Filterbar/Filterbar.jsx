@@ -1,13 +1,7 @@
 import './css/Filterbar.css';
-// import {
-//   useEffect,
-//   useState,
-//   useRef
-// } from 'react';
 import { Link } from "react-router-dom";
 import {useSelector} from 'react-redux';
 import moment from 'moment';
-// import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
@@ -22,6 +16,8 @@ import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
+
+import {StateType} from '../../types/StateType';
 
 import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
@@ -44,19 +40,19 @@ function Filterbar({
   hideLogo
 }) {
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
 
-  const viewRentals = useSelector(state => {
+  const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : null;
   });
 
@@ -162,9 +158,11 @@ function Filterbar({
           <FilteritemGebieden />
         </Fieldset>
 
-        {<FilteritemZones 
-          zonesToShow={zonesToShow}
-          />}
+        <Fieldset title="Zones">
+          <FilteritemZones
+            zonesToShow={zonesToShow}
+          />
+        </Fieldset>
 
         {isLoggedIn && showparkeerduur && (
           <Fieldset title="Parkeerduur">

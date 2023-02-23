@@ -1,4 +1,6 @@
-function Logo({title}) {
+function Logo({
+  title = ''
+}) {
   return (
     <div className="flex">
       <img alt="Logo CROW" src="/images/logo-fietsberaad-crow.svg" width="82" />

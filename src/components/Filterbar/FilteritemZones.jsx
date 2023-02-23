@@ -3,24 +3,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
 
+import {StateType} from '../../types/StateType';
+
 function FilteritemZones({
   zonesToShow
 }) {
   const dispatch = useDispatch()
   
-  const zones = useSelector(state => {
+  const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
   
-  const filterZones = useSelector(state => {
+  const filterZones = useSelector((state: StateType) => {
     return state.filter ? state.filter.zones : 0;
   });
   
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : 0;
   });
   
-  const filterBarExtendedView = useSelector(state => {
+  const filterBarExtendedView = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
   });
 
@@ -65,9 +67,9 @@ function FilteritemZones({
 
   let zone_groups_filtered = [];
   (zonesToShow || [
-      'residential_area',
-      'custom',
-      'neighborhood'
+    'residential_area',
+    'custom',
+    'neighborhood'
   ]).forEach(zoneType => {
     const zone = zone_groups.filter(x => x.zone_type === zoneType);
     if(zone) zone_groups_filtered.push(zone[0]);
@@ -82,7 +84,9 @@ function FilteritemZones({
 
     return (
       <div key={'zg-'+group.zone_type} className="zone-group-container">
-        <span key={'zgn-'+group.zone_type} className="zone-group-title">{group.name}</span>
+        <span key={'zgn-'+group.zone_type} className="zone-group-title">
+          {group.name}
+        </span>
         <div key={'zgi-'+group.zone_type} className="filter-zones-zonelist">
         { sortedZones.map(a=>{
             let isSelected = filterZones.includes(a.zone_id);
@@ -172,7 +176,6 @@ function FilteritemZones({
 
   return (
     <div className={`filter-zones-container ${isActive===true ? '':'filter-zones-item-not-active'}`}>
-      <div className="filter-zones-title" onClick={e=>{isActive && toggleZones('zones')}}>Zones</div>
       <div className="filter-zones-box-row">
         <div
           className={`
@@ -193,18 +196,18 @@ function FilteritemZones({
           <div className="filter-zones-img-search cursor-pointer" onClick={e=>{toggleZones('zones')}} />
         </div>
       </div>
-      <div className="filter-zones-zonelist">
-      {
-        filteredZones.map(zone => {
+      {(filteredZones && filteredZones.length >= 1) && (
+        <div className="filter-zones-zonelist">
+        {filteredZones.map(zone => {
           return (
             <div className="filter-zones-zoneitem" key={zone.zone_id}>
               { zone.name}
               <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}}>×</div>
             </div>
           )
-        })
-      }
-      </div>
+        })}
+        </div>
+      )}
     </div>
   )
 }

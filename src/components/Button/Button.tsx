@@ -5,7 +5,15 @@ function Button({
   children,
   onClick,
   type,
+  title,
   classes
+}: {
+  theme?: string,
+  children?: any,
+  onClick?: any,
+  title?: any,
+  type?: "button" | "reset" | "submit",
+  classes?: string
 }) {
   return (
     <button

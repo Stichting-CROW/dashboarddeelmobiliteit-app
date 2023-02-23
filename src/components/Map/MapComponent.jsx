@@ -6,6 +6,8 @@ import localization from 'moment/locale/nl'
 import {useLocation} from "react-router-dom";
 import center from '@turf/center'
 
+import {StateType} from '../../types/StateType';
+
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
@@ -52,16 +54,14 @@ import IsochroneTools from '../IsochroneTools/IsochroneTools';
 moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
-  if(process && process.env.DEBUG) console.log('Map component')
-
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null;
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
@@ -77,7 +77,7 @@ function MapComponent(props) {
   const providers = useSelector(state => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
   const extent/* map boundaries */ = useSelector(state => state.layers ? state.layers.extent : null);
   const [counter, setCounter] = useState(0);
-  const zones_geodata = useSelector(state => {
+  const zones_geodata = useSelector((state: StateType) => {
     if(!state||!state.zones_geodata) {
       return null;
     }
@@ -100,11 +100,11 @@ function MapComponent(props) {
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   let map = useRef(null);
 
-  const userData = useSelector(state => {
+  const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
     }
@@ -218,7 +218,7 @@ function MapComponent(props) {
       map.current.on('load', function() {
 
         // Store map in a global variable
-        window.ddMap = map.current;
+        window['ddMap'] = map.current;
 
         setDidMapLoad(true)
 
@@ -325,7 +325,7 @@ function MapComponent(props) {
     // Switch to satelite view
     setTimeout(() => {
       const mapStyles = getMapStyles();
-      setMapStyle(window.ddMap, mapStyles.satelite);
+      setMapStyle(window['ddMap'], mapStyles.satelite);
     }, 5);
 
     setDidAddAdminZones(true);
@@ -347,7 +347,7 @@ function MapComponent(props) {
       // Switch to base map
       setTimeout(() => {
         const mapStyles = getMapStyles();
-        setMapStyle(window.ddMap, mapStyles.base);
+        setMapStyle(window['ddMap'], mapStyles.base);
       }, 5);
     } else {
       // REMOVE zone layers
@@ -379,7 +379,7 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
-    if(! window.ddMap.isStyleLoaded()) return;
+    if(! window['ddMap'].isStyleLoaded()) return;
 
     const mapStyles = getMapStyles();
 
@@ -387,7 +387,7 @@ function MapComponent(props) {
     let TO_local;
     if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
       TO_local = setTimeout(() => {
-        setMapStyle(window.ddMap, mapStyles.base);
+        setMapStyle(window['ddMap'], mapStyles.base);
       }, 100);
     }
     return () => {
@@ -420,7 +420,7 @@ function MapComponent(props) {
         }, 500);
       }
       // Also, hide isochrones layer
-      window.ddMap.U.hide('zones-isochrones')
+      window['ddMap'].U.hide('zones-isochrones')
       return;
     }
 

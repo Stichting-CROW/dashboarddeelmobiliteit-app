@@ -15,7 +15,6 @@ import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-// import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
@@ -24,6 +23,8 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import Modal from '../Modal/Modal.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
+
+import {StateType} from '../../types/StateType';
 
 import {
   setPublicZoneUrl,
@@ -51,6 +52,12 @@ function ModalityRow({
   onChange,
   name,
   value
+}: {
+  children?: any,
+  imageUrl?: any,
+  onChange?: any,
+  name?: any,
+  value?: any
 }) {
   return <div className="
     bg-no-repeat
@@ -87,6 +94,15 @@ function FilterbarZones({
   view
 }) {
   const zoneTemplate = {
+    zone_id: null,
+    stop_id: null,
+    area: null,
+    name: null,
+    municipality: null,
+    geography_id: null,
+    stop: null,
+    description: null,
+    no_parking: null,
     geography_type: 'monitoring',
     zone_availability: 'auto',
     published: true
@@ -107,11 +123,11 @@ function FilterbarZones({
 
   const labelClassNames = 'mb-2 text-sm';
 
-  const filterGebied = useSelector(state => {
-    return state.filter ? state.filter.gebied : null;
+  const filterGebied = useSelector((state: StateType) => {
+    return state.filter ? state.filter.gebied : null
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
     }
@@ -137,32 +153,34 @@ function FilterbarZones({
 
   // Set map event handlers
   useEffect(() => {
-    if(! window.ddMap) {
+    if(! window['ddMap']) {
       return;
     }
     if(didInitEventHandlers) {
       return;
     }
 
-    window.ddMap.on('draw.create', function (e) {
+    window['ddMap'].on('draw.create', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
       setDidChangeZoneConfig(true);
     });
 
-    window.ddMap.on('draw.update', function (e) {
+    window['ddMap'].on('draw.update', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
       setDidChangeZoneConfig(true);
     });
 
     setDidInitEventHandlers(true);
-  }, [window.ddMap])
+  }, [window['ddMap']])
 
   // Call function if polygon is selected (for editting zones)
   useEffect(() => {
+    // @ts-ignore
     window.addEventListener('setSelectedZone', eventHandler)
     return () => {
+      // @ts-ignore
       window.removeEventListener('setSelectedZone', eventHandler);
     }
   }, [
@@ -177,14 +195,14 @@ function FilterbarZones({
 
   const selectMapFeature = (zoneId) => {
     // Check if dependencies are present
-    if(! window.ddMap || ! zoneId) return;
+    if(! window['ddMap'] || ! zoneId) return;
     // Get feature
-    const feature = window.CROW_DD.theDraw.get(zoneId);
+    const feature = window['CROW_DD'].theDraw.get(zoneId);
     // Check if feature was found
     if(! feature) return;
     // Select after a few milliseconds
     // setTimeout(() => {
-      window.CROW_DD.theDraw.changeMode('direct_select', {
+      window['CROW_DD'].theDraw.changeMode('direct_select', {
         featureId: zoneId
       });
     // }, 5)
@@ -218,7 +236,7 @@ function FilterbarZones({
     setDidChangeZoneConfig(false);
 
     // Don't do anything if zone was selected already
-    if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
+    if(zoneId === activeZone.zone_id && window['CROW_DD'].theDraw.getMode() === 'direct_select') {
       console.log('Stopped executing as zone was selected already')
       return;
     }
@@ -323,11 +341,11 @@ function FilterbarZones({
   }
 
   const selectFeature = (zoneId) => {
-    if(window.ddMap && zoneId) {
-      const feature = window.CROW_DD.theDraw.get(zoneId);
+    if(window['ddMap'] && zoneId) {
+      const feature = window['CROW_DD'].theDraw.get(zoneId);
       if(feature) {
         // Select
-        window.CROW_DD.theDraw.changeMode('direct_select', {
+        window['CROW_DD'].theDraw.changeMode('direct_select', {
           featureId: zoneId
         });
       }
@@ -336,9 +354,9 @@ function FilterbarZones({
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
-    if(! window.CROW_DD.theDraw) return;
+    if(! window['CROW_DD'].theDraw) return;
     // Change mode to 'draw polygon'
-    window.CROW_DD.theDraw.changeMode('draw_polygon');
+    window['CROW_DD'].theDraw.changeMode('draw_polygon');
     // Clear data
     setActiveZone(zoneTemplate);
     // Set view mode to 'adminEdit'
@@ -347,10 +365,10 @@ function FilterbarZones({
 
   const disableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
-    if(! window.CROW_DD.theDraw) return;
+    if(! window['CROW_DD'].theDraw) return;
     // Change mode to 'draw polygon'
-    // window.CROW_DD.theDraw.changeMode('static', []);
-    window.CROW_DD.theDraw.changeMode('simple_select', []);
+    // window['CROW_DD'].theDraw.changeMode('static', []);
+    window['CROW_DD'].theDraw.changeMode('simple_select', []);
     // Set view mode to 'adminView'
     setViewMode('adminView');
   }
@@ -373,6 +391,8 @@ function FilterbarZones({
     // If zone has been updated:
     if(activeZone.geography_id) {
       return {
+        stop: null,
+        no_parking: null,
         geography_id: activeZone.geography_id,
         geography_type: activeZone.geography_type,
         municipality: activeZone.municipality,
@@ -387,6 +407,8 @@ function FilterbarZones({
     // If zone is newly created:
     else {
       return Object.assign({
+        stop: null,
+        no_parking: null,
         geography_id: activeZone.geography_id,
         geography_type: activeZone.geography_type,
         name: activeZone.name,
@@ -426,7 +448,14 @@ function FilterbarZones({
           "combined": parseInt(activeZone['vehicles-limit.combined'])
         }
       }
-      let capacity = {};
+      let capacity: {
+        cargo_bicycle?: any
+        scooter?: any
+        bicycle?: any
+        car?: any
+        other?: any
+        moped?: any
+      } = {};
       if(parseInt(activeZone['vehicles-limit.cargo_bicycle']) > 0) capacity.cargo_bicycle = parseInt(activeZone['vehicles-limit.cargo_bicycle']);
       if(parseInt(activeZone['vehicles-limit.scooter']) > 0) capacity.scooter = parseInt(activeZone['vehicles-limit.scooter']);
       if(parseInt(activeZone['vehicles-limit.bicycle']) > 0) capacity.bicycle = parseInt(activeZone['vehicles-limit.bicycle']);
@@ -460,7 +489,7 @@ function FilterbarZones({
 
   const saveZone = async () => {
     if(! activeZone.area && ! drawedArea) {
-      notify('Teken eerst een zone voordat je deze opslaat')
+      window['notify']('Teken eerst een zone voordat je deze opslaat')
       return;
     }
 
@@ -481,7 +510,7 @@ function FilterbarZones({
       // Set updated zone in states
       setActiveZone(updatedZone);
       // Remove old drawed area
-      window.CROW_DD.theDraw.delete(activeZone.zone_id);
+      window['CROW_DD'].theDraw.delete(activeZone.zone_id);
       // Add new drawed area
       var feature = {
         id: updatedZone.zone_id,
@@ -491,7 +520,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: updatedZone.area.geometry.coordinates }
       };
-      var featureIds = window.CROW_DD.theDraw.add(feature);
+      var featureIds = window['CROW_DD'].theDraw.add(feature);
       // After updating zone: reload adminZones
       getAdminZones();
     }
@@ -510,7 +539,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: createdZone.area.geometry.coordinates }
       };
-      const featureIds = window.CROW_DD.theDraw.add(feature);
+      const featureIds = window['CROW_DD'].theDraw.add(feature);
     }
 
     // Set map to normal again
@@ -542,16 +571,16 @@ function FilterbarZones({
     getAdminZones();
 
     // Delete polygon from map
-    window.CROW_DD.theDraw.delete(activeZone.zone_id);
+    window['CROW_DD'].theDraw.delete(activeZone.zone_id);
 
     // Set map to normal again
     disableDrawingPolygons();
   }
   
   const deleteAllLocalZones = () => {
-    const allDraws = window.CROW_DD.theDraw.getAll();
+    const allDraws = window['CROW_DD'].theDraw.getAll();
     getLocalDrawsOnly(allDraws.features).map(x => {
-      window.CROW_DD.theDraw.delete(x.id);
+      window['CROW_DD'].theDraw.delete(x.id);
     })
   }
 
@@ -565,7 +594,7 @@ function FilterbarZones({
     }
     // Cleanup
     // - Revert changes to existing polygons
-    window.CROW_DD.theDraw.trash();
+    window['CROW_DD'].theDraw.trash();
     setDrawedArea(null);
     // - Delete local polygons
     deleteAllLocalZones();
@@ -591,7 +620,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: originalZone.area.geometry.coordinates }
       };
-      const featureIds = window.CROW_DD.theDraw.add(feature);
+      const featureIds = window['CROW_DD'].theDraw.add(feature);
     }
     //
     setDidChangeZoneConfig(false);
@@ -808,10 +837,10 @@ function FilterbarZones({
                 if(zoneId) {
                   // Force rerender of Draw, so that polygon color updates
                   const forceMapRerenderForFeature = (featureId) => {
-                    window.CROW_DD.theDraw.changeMode('simple_select', []);
+                    window['CROW_DD'].theDraw.changeMode('simple_select', []);
                     // NOTE: This had a side effect which is re-calling eventHandler()
                     // NOTE: The side effect is that if creating new zone: name is discarted
-                    window.CROW_DD.theDraw.changeMode('direct_select', {
+                    window['CROW_DD'].theDraw.changeMode('direct_select', {
                       featureId: featureId
                     });
                   }
@@ -968,10 +997,10 @@ function FilterbarZones({
                 window.dispatchEvent(event);
                 // Zoom in into zone
                 if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
+                  if(! window['ddMap']) return;
                   // Get extent
                   const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
+                  window['ddMap'].fitBounds(extent, {
                     padding: {top: 25, bottom: 25, left: 350, right: 25},
                     duration: 1.4*1000 // in ms
                   });
@@ -984,10 +1013,10 @@ function FilterbarZones({
               x.onClick = () => {
                 // Zoom in into zone
                 if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
+                  if(! window['ddMap']) return;
                   // Get extent
                   const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
+                  window['ddMap'].fitBounds(extent, {
                     padding: {top: 25, bottom: 25, left: 350, right: 25},
                     duration: 1.4*1000 // in ms
                   });
@@ -1021,15 +1050,6 @@ function FilterbarZones({
           eventHandler({detail: lastClickedZone}, {
             skipConfirmation: true
           })
-        }}
-        saveHandlerUNEXISTING={async (e) => {
-          e.preventDefault();
-          // Hide modal
-          setDoShowModal(false);
-          // Wait until zone is saved
-          await saveZone();
-          // Click zone that was clicked by user
-          selectMapFeature(lastClickedZone);
         }}
         hideModalHandler={() => {
           setDoShowModal(false);

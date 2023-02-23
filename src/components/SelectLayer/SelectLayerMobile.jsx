@@ -2,6 +2,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
 
+import {StateType} from '../../types/StateType';
+
 import './SelectLayerMobile.css';
 
 import {
@@ -20,35 +22,35 @@ import {
 function SelectLayerMobile(props) {
   const dispatch = useDispatch()
 
-  const isVisible = useSelector(state => {
+  const isVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['MenuSecondary.layers'] : false;
   });
 
-  const showZoneOnOff = useSelector(state => {
+  const showZoneOnOff = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied!=='' : false;
   });
 
-  const zonesVisible = useSelector(state => {
+  const zonesVisible = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
   });
   
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const viewPark = useSelector(state => {
+  const viewPark = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
 
-  const viewRentals = useSelector(state => {
+  const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
  
-  const userData = useSelector(state => {
+  const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
   });
  

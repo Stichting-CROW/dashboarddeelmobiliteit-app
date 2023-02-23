@@ -13,10 +13,10 @@ const weekDays = [
 const getOpacityForCount = (count: number, maxCount: number): number => {
   if(! count) return 0;
   if(! maxCount) return 0;
-  return (count / maxCount).toFixed(1);
+  return (count / maxCount);
 }
 
-const getHourlyCount = (data, weekDay, hour, maxCount) => {
+const getHourlyCount = (data: any, weekDay: any, hour: any, maxCount?: any): number => {
   if(! data) return 0;
   if(! data[`day-${weekDay}`]) return 0;
   if(! data[`day-${weekDay}`][`hour-${hour}`]) return 0;

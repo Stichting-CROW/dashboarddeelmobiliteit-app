@@ -6,18 +6,20 @@ import DatePicker from 'react-datepicker';
 import { format, addDays, addMonths } from 'date-fns';
 import moment from 'moment';
 
+import {StateType} from '../../types/StateType';
+
 function FilterItemDatumVanTot() {
   const dispatch = useDispatch()
 
-  const filterOntwikkelingVan = useSelector(state => {
+  const filterOntwikkelingVan = useSelector((state: StateType) => {
     return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : moment().subtract(30, 'days').toDate();
   });
   
-  const filterOntwikkelingTot = useSelector(state => {
+  const filterOntwikkelingTot = useSelector((state: StateType) => {
     return state.filter && state.filter.ontwikkelingtot ? new Date(state.filter.ontwikkelingtot) : new Date();
   });
 
-  const filterOntwikkelingAggregatie = useSelector(state => {
+  const filterOntwikkelingAggregatie = useSelector((state: StateType) => {
     return state.filter && state.filter.ontwikkelingaggregatie ? state.filter.ontwikkelingaggregatie : 'day';
   });
 

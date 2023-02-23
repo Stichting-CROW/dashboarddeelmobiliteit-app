@@ -47,7 +47,7 @@ export const getAggregatedRentalsChartData = (vehiclesData, filter, zones) => {
   }
 }
 
-export const getTotalsPerHour = (data: object) => {
+export const getTotalsPerHour = (data: Object[]) => {
   return data.map(timeIntervalData => {
     let totalVehiclesForTimeInterval = 0, time;
     Object.keys(timeIntervalData).forEach(key => {

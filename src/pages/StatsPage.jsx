@@ -8,6 +8,8 @@ import {
 
 import moment from 'moment';
 
+import {StateType} from '../types/StateType';
+
 import {
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone,
@@ -25,11 +27,11 @@ function StatsPage(props) {
 
   const filter = useSelector(state => state.filter);
 
-  const zones = useSelector(state => {
+  const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
-  const filterZones = useSelector(state => {
+  const filterZones = useSelector((state: StateType) => {
     return state.filter ? state.filter.zones : 0;
   });
 

@@ -7,6 +7,9 @@ import {
   useSelector
 } from 'react-redux';
 
+import {UserType} from '../../types/UserType';
+import {StateType} from '../../types/StateType';
+
 import Button from '../Button/Button';
 import AddUser from '../AddUser/AddUser';
 import EditUser from '../EditUser/EditUser';
@@ -50,7 +53,7 @@ export default function UserList({
   const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   const fetchOptions = {
     headers: {
@@ -93,7 +96,7 @@ export default function UserList({
     navigate('/admin/users/new');
   }
 
-  const editClickHandler = (user: object) => {
+  const editClickHandler = (user: UserType) => {
     navigate(`/admin/users/${user.username}`)
   }
 

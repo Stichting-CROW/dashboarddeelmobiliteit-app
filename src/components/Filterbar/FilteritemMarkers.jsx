@@ -2,8 +2,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemMarkers.css';
 
+import {StateType} from '../../types/StateType';
+
 export function FilteritemMarkersParkeerduur() {
-  const markers = useSelector(state => {
+  const markers = useSelector((state: StateType) => {
     return [
       { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 uur'},
       { id: 1, color: '#48E248', fillcolor: '#48E248', name: '< 24 uur'},
@@ -23,7 +25,7 @@ export function FilteritemMarkersParkeerduur() {
 }
 
 export function FilteritemMarkersAfstand() {
-  const markers = useSelector(state => {
+  const markers = useSelector((state: StateType) => {
     return [
       { id: 0, color: '#48E248', fillcolor: '#48E248', name: '1km'},
       { id: 1, color: '#44BD48', fillcolor: '#44BD48', name: '2km'},
@@ -45,7 +47,7 @@ export function FilteritemMarkersAfstand() {
 function FilteritemMarkers({label, filtername, markers, addmarker, removemarker, clearmarkers}) {
   const dispatch = useDispatch()
 
-  const filterMarkersExclude = useSelector(state => {
+  const filterMarkersExclude = useSelector((state: StateType) => {
     return state.filter ? state.filter[filtername] : '';
   }) || '';
   

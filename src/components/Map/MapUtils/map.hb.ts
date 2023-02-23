@@ -2,6 +2,8 @@ import moment from 'moment';
 import h3 from 'h3-js';
 import geojson2h3 from 'geojson2h3';
 
+type HexagonType = any;
+
 const exampleHexagons = {
   '88283082a3fffff': 0.23360022663054658,
   '88283082a1fffff': 0.5669828486310873,
@@ -77,9 +79,6 @@ const fetchHexagons = async (token: string, filter: any) => {
                 ? `&origin_cells=88196ba259fffff,88196ba25bfffff`
                 : `&destination_cells=88196ba259fffff,88196ba25bfffff`)
   );
-
-  console.log('filter', filter)
-  console.log('url', url)
 
   let response, responseJson;
 
@@ -202,7 +201,7 @@ const renderH3Grid = async (
 
   let hexagonsAsArray = [];
 
-  hexagons.forEach((x: object) => {
+  hexagons.forEach((x: HexagonType) => {
     hexagonsAsArray[x.cell] = x.number_of_trips;
   })
 

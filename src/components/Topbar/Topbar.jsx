@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { clearUser } from '../../actions/authentication';
 
+import {StateType} from '../../types/StateType';
+
 function Topbar() {
   const dispatch = useDispatch();
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 

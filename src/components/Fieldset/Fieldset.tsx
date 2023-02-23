@@ -7,7 +7,7 @@ function Fieldset({
 }) {
   return (
     <fieldset className="mb-6">
-      <legend className="text-sm mb-1">
+      <legend className="text-sm" style={{marginBottom: '10px'}}>
         {title}
       </legend>
       {children}

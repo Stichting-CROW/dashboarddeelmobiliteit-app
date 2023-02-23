@@ -6,12 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import './SlideBox.css';
 
+import {StateType} from '../../types/StateType';
+
 function SlideBox(props) {
   const dispatch = useDispatch();
   const containerRef = useRef(null);
   const NAME = props.name.toUpperCase();
 
-  const isVisible = useSelector(state => {
+  const isVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui[NAME] : false;
   });
 

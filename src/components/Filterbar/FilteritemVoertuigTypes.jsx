@@ -2,14 +2,16 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemVoertuigTypes.css';
 
+import {StateType} from '../../types/StateType';
+
 function FilteritemVoertuigTypes() {
   const dispatch = useDispatch()
 
-  const voertuigtypes = useSelector(state => {
+  const voertuigtypes = useSelector((state: StateType) => {
     return state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : [];
   });
   
-  const filterVoertuigTypesExclude = useSelector(state => {
+  const filterVoertuigTypesExclude = useSelector((state: StateType) => {
     if(Array.isArray(state.filter.voertuigtypesexclude)) {
       return '';
     }
