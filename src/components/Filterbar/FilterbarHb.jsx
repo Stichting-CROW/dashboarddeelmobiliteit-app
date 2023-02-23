@@ -39,6 +39,13 @@ const Weekdays = () => {
     return (state.filter && state.filter.weekdays) ? state.filter.weekdays : '';
   });
 
+  const weekdays = [
+    'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'
+  ];
+  const weekdayTitles = [
+    'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'
+  ];
+
   const toggleWeekday = (weekday) => e => {
     // Get active weekdays as array
     const activeWeekdaysArray = activeWeekdays.split(',');
@@ -51,23 +58,17 @@ const Weekdays = () => {
     else {
       newActiveWeekdaysArray = newActiveWeekdaysArray.filter(x => x !== weekday);
     }
+    // Make sure no empty array is possible. If empty: Then all
+    if(newActiveWeekdaysArray.length <= 0) {
+      newActiveWeekdaysArray = weekdays;
+    }
 
-    console.log('activeWeekdaysArray', activeWeekdaysArray)
-    console.log('newActiveWeekdaysArray', newActiveWeekdaysArray)
-    console.log('newActiveWeekdaysArray.join(',')', newActiveWeekdaysArray.join(','))
     dispatch({ type: 'SET_FILTER_WEEKDAYS', payload: newActiveWeekdaysArray.join(',') })
   }
 
   const isWeekdayActive = (weekday) => {
     return activeWeekdays.indexOf(weekday) > -1;
   }
-
-  const weekdays = [
-    'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'
-  ];
-  const weekdayTitles = [
-    'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'
-  ];
 
   return (
     <div>
@@ -77,6 +78,7 @@ const Weekdays = () => {
           key={idx}
           theme={isWeekdayActive(x) ? 'blue' : 'white'}
           onClick={toggleWeekday(x)}
+          classes="mt-1 mb-1"
         >
           {weekdayTitles[idx].toLowerCase()}
         </Button>
@@ -94,6 +96,10 @@ const Timeframes = () => {
     return (state.filter && state.filter.timeframes) ? state.filter.timeframes : '';
   });
 
+  const timeframes = [
+    '2-6', '6-10', '10-14', '14-18', '18-22', '22-2'
+  ];
+
   const toggleTimeframe = (timeframe) => e => {
     // Get active timeframes as array
     const activeTimeframesArray = activeTimeframes.split(',');
@@ -106,6 +112,10 @@ const Timeframes = () => {
     else {
       newActiveTimeframeArray = newActiveTimeframeArray.filter(x => x !== timeframe);
     }
+    // Make sure no empty array is possible. If empty: Then all
+    if(newActiveTimeframeArray.length <= 0) {
+      newActiveTimeframeArray = timeframes;
+    }
 
     dispatch({ type: 'SET_FILTER_TIMEFRAMES', payload: newActiveTimeframeArray.join(',') })
   }
@@ -114,10 +124,6 @@ const Timeframes = () => {
     return activeTimeframes.indexOf(timeframe) > -1;
   }
 
-  const timeframes = [
-    '2-6', '6-10', '10-14', '14-18', '18-22', '22-2'
-  ];
-
   return (
     <div>
       {timeframes.map((x, idx) => {
@@ -125,6 +131,7 @@ const Timeframes = () => {
           key={idx}
           theme={isTimeframeActive(x) ? 'blue' : 'white'}
           onClick={toggleTimeframe(x)}
+          classes="mt-1 mb-1"
         >
           {x}
         </Button>
@@ -222,14 +229,14 @@ function FilterbarHb({
         <Timeframes />
       </Fieldset>
 
-      <Fieldset title="Vervoerstype">
+      <Fieldset title="Voertuigtype">
         <FilteritemVoertuigTypes />
       </Fieldset>
 
-      <Fieldset title="Detailniveau">
+{/*      <Fieldset title="Detailniveau">
         <FilteritemH3Niveau />
       </Fieldset>
-
+*/}
       <Fieldset title="Herkomst of bestemming?">
         <FilteritemHerkomstBestemming />
       </Fieldset>

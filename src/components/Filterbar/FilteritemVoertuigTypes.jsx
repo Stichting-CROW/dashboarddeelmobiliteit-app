@@ -58,15 +58,11 @@ function FilteritemVoertuigTypes() {
   
   return (
     <div className="w-full filter-voertuigtypes-container">
-      <div className="filter-voertuigtypes-title-row">
-        { filterVoertuigTypesExclude!==''?
-            <div className="filter-voertuigtypes-reset cursor-pointer" onClick={clearFilterVoertuigTypesExclude}>
-              reset
-            </div>
-            :
-            null
-        }
-      </div>
+      {filterVoertuigTypesExclude!=='' ? <div className="filter-voertuigtypes-title-row">
+        <div className="text-right filter-voertuigtypes-reset cursor-pointer" onClick={clearFilterVoertuigTypesExclude}>
+          reset
+        </div>
+      </div> : ''}
       <div className="filter-voertuigtypes-box-row">
         {
           voertuigtypes.map((voertuigtype,idx) => {
@@ -89,7 +85,7 @@ function FilteritemVoertuigTypes() {
             }
                 
             return (
-              <div className={`${baseClassName}${idx===voertuigtypes.length-1?' filter-voertuigtypes-item-last':''}`} key={voertuigtype.id} onClick={handler}>
+              <div className={`flex-1 ${baseClassName}${idx===voertuigtypes.length-1?' filter-voertuigtypes-item-last':''}`} key={voertuigtype.id} onClick={handler}>
                 <div className={`filter-voertuigtypes-icon ${extraclass}`} onClick={handler} />
                 <div className="filter-voertuigtypes-itemlabel">
                   { voertuigtype.name }

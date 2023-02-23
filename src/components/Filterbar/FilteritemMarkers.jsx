@@ -87,16 +87,11 @@ function FilteritemMarkers({label, filtername, markers, addmarker, removemarker,
   
   return (
     <div className="filter-markers-container">
-    <div className="filter-markers-title-row">
-      <div className="filter-markers-title">{label}</div>
-      { filterMarkersExclude!==''?
-          <div className="filter-markers-reset cursor-pointer" onClick={clearFilterMarkersExclude}>
-            reset
-          </div>
-          :
-          null
-      }
-    </div>
+      {filterMarkersExclude!=='' ? <div className="filter-markers-title-row">
+        <div className="filter-markers-reset cursor-pointer" onClick={clearFilterMarkersExclude}>
+          reset
+        </div>
+      </div> : ''}
       <div className="filter-markers-box-row">
         {
           markers.map(marker => {

@@ -82,7 +82,7 @@ const Notification = ({ doShowNotification, setDoShowNotification, isFilterBarOp
         }}
         onClick={() => setDoShowNotification(false)}
       >
-        <h1 className="text-xl text-slate-700 font-medium text-center">
+        <h1 className="text-lg text-slate-700 font-medium text-center">
           {doShowNotification}
         </h1>
         <div className="flex justify-between items-center">
@@ -440,6 +440,32 @@ function App() {
           :
           null
         }
+
+        { ! isLoggedIn ? <>
+          <Route exact path="/" element={renderMapElements()} />
+          <Route exact path="/map/park" element={renderMapElements()} />
+          <Route exact path="/map/rentals" element={renderMapElements()} />
+          <Route path="/map/zones" element={renderMapElements()} />
+          <Route exact path="/misc" element={
+            <Overlay>
+              <Misc />
+            </Overlay>
+          } />
+          <Route exact path="/profile" element={
+            <Overlay>
+              <Misc>
+                <Profile />
+              </Misc>
+            </Overlay>
+          } />
+          <Route exact path="/faq" element={
+            <Overlay>
+              <Misc>
+                <Faq />
+              </Misc>
+            </Overlay>
+          } />
+        </> : '' }
 
         <Route exact path="/over" element={
           <Overlay>

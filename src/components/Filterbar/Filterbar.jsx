@@ -21,6 +21,7 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
+import Fieldset from '../Fieldset/Fieldset';
 
 import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
@@ -72,7 +73,7 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
-  const is_hb_view=viewRentals==='verhuurdata-hb';
+  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
 
   // Show custom zones if >= 2022-11
   // We have detailled aggregated stats from 2022-11
@@ -157,19 +158,29 @@ function Filterbar({
 
         { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
 
-        {<FilteritemGebieden />}
+        <Fieldset title="Plaats">
+          <FilteritemGebieden />
+        </Fieldset>
 
         {<FilteritemZones 
           zonesToShow={zonesToShow}
           />}
 
-        {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
+        {isLoggedIn && showparkeerduur && (
+          <Fieldset title="Parkeerduur">
+            <FilteritemMarkersParkeerduur />
+          </Fieldset>
+        )}
 
         {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
 
         {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
-        {showvervoerstype && <FilteritemVoertuigTypes />}
+        {showvervoerstype && (
+          <Fieldset title="Voertuigtype">
+            <FilteritemVoertuigTypes />
+          </Fieldset>
+        )}
 
         {<FilteritemAanbieders />}
 

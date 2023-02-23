@@ -47,7 +47,11 @@ function SelectLayerMobile(props) {
   const isLoggedIn = useSelector(state => {
     return state.authentication.user_data ? true : false;
   });
-  
+ 
+  const userData = useSelector(state => {
+    return state.authentication.user_data;
+  });
+ 
   const setVisibility = (name, visibility) => {
     dispatch({
       type: `SET_VISIBILITY`,
@@ -57,7 +61,17 @@ function SelectLayerMobile(props) {
       }
     })
   }
-  
+
+  const doShowOd = () => {
+    const emailAddresses = [
+      'mail@bartroorda.nl',
+      // 'rinse.gorter@denhaag.nl',
+      'otto.vanboggelen@crow.nl',
+      'sven.boor@gmail.com'
+    ]
+    return userData && userData.user && emailAddresses.indexOf(userData.user.email) > -1;
+  }
+
   return (
     <MobileSlideBox
       title="Lagen"
@@ -98,7 +112,7 @@ function SelectLayerMobile(props) {
           </span>
         </div> : null }
 
-      { displayMode===DISPLAYMODE_RENTALS ?
+      { (displayMode===DISPLAYMODE_RENTALS && doShowOd()) ?
         <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
           <span className="layer-title">

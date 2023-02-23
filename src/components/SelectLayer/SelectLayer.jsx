@@ -53,8 +53,22 @@ function SelectLayer(props) {
     return state.authentication.user_data ? true : false;
   });
   
+  const userData = useSelector(state => {
+    return state.authentication.user_data;
+  });
+
   if(displayMode===DISPLAYMODE_OTHER) {
     return null; // no layer selection
+  }
+
+  const doShowOd = () => {
+    const emailAddresses = [
+      'mail@bartroorda.nl',
+      // 'rinse.gorter@denhaag.nl',
+      'otto.vanboggelen@crow.nl',
+      'sven.boor@gmail.com'
+    ]
+    return userData && userData.user && emailAddresses.indexOf(userData.user.email) > -1;
   }
   
   const mapStyles = getMapStyles();
@@ -93,7 +107,7 @@ function SelectLayer(props) {
             </span>
           </div> : null }
 
-        { displayMode===DISPLAYMODE_RENTALS ?
+        { (displayMode===DISPLAYMODE_RENTALS && doShowOd()) ?
           <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
             onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
             <span className="layer-title">

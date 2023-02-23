@@ -60,13 +60,19 @@ const fetchHexagons = async (token: string, filter: any) => {
     }
   }
 
+  // Get the modalities that are active
+  const allModalities = ['cargo_bicycle', 'moped', 'bicycle', 'car', 'unknown'];
+  const excludedModalities = filter.voertuigtypesexclude;
+  const includedModalities = allModalities.filter(x => excludedModalities.split(',').indexOf(x) <= -1);
+
   // Get API response
   const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/h3`+
               `?h3_resolution=${filter.h3niveau}`+
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
               `&end_date=${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}`+
               `&time_periods=${filter.timeframes}`+
-              `&days_of_week=mo,tu,we,tu,fr,sa,su`+
+              `&days_of_week=${filter.weekdays}`+
+              `&modalities=${includedModalities}`+
               (filter.herkomstbestemming === 'bestemming'
                 ? `&origin_cells=88196ba259fffff,88196ba25bfffff`
                 : `&destination_cells=88196ba259fffff,88196ba25bfffff`)
@@ -199,8 +205,6 @@ const renderH3Grid = async (
   hexagons.forEach((x: object) => {
     hexagonsAsArray[x.cell] = x.number_of_trips;
   })
-
-  console.log('hexagonsAsArray', hexagonsAsArray)
 
   renderHexes(map, hexagonsAsArray);
   renderAreas(map, hexagonsAsArray, 0.75);

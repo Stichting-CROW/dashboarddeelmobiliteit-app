@@ -10,6 +10,7 @@ function Button({
   return (
     <button
       className={`
+        ${classes}
         rounded-lg
         inline-block
         border-solid border-2
@@ -22,8 +23,7 @@ function Button({
         mx-2
         my-2
         text-center
-        ${classes}
-        `}
+      `}
       type={type}
       onClick={onClick}
       style={themes[theme]}

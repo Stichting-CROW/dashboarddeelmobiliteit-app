@@ -32,6 +32,13 @@ import {
   fetchPublicZones,
   fetchAdminZones
 } from './MapUtils/zones.js';
+import {
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_ADMIN,
+  DISPLAYMODE_OTHER,
+} from '../../reducers/layers.js';
 
 import './MapComponent.css';
 
@@ -54,6 +61,10 @@ function MapComponent(props) {
     return state.filter ? state.filter.gebied : null;
   });
 
+  const displayMode = useSelector(state => {
+    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
   // Connect to redux store
   const dispatch = useDispatch()
 
@@ -73,7 +84,8 @@ function MapComponent(props) {
     return state.zones_geodata;
   });
   const viewRentals = useSelector(state => state.layers ? state.layers.view_rentals : null);
-  const is_hb_view=viewRentals==='verhuurdata-hb';
+  const isrentals=displayMode===DISPLAYMODE_RENTALS;
+  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
 
   // Define map
   const mapContainer = props.mapContainer;
@@ -230,10 +242,12 @@ function MapComponent(props) {
     registerMapView
   ])
 
+  // If HB view: Show H3 grid, if not: Remove H3 grid
   useEffect(() => {
     // Stop if map didn't load
     if(! didMapLoad) return;
     // Always remove 'old' H3 grid from map first
+    console.log('stateLayers.displaymode', stateLayers.displaymode)
     removeH3Grid(map.current);
     // Don't do anything if we don't view the HB map
     if(! is_hb_view) return;
@@ -242,12 +256,14 @@ function MapComponent(props) {
   }, [
     didMapLoad,
     is_hb_view,
+    stateLayers.displaymode,
     filter.h3niveau,
     filter.ontwikkelingvan,
     filter.ontwikkelingtot,
     filter.timeframes,
     filter.weekdays,
-    filter.herkomstbestemming
+    filter.herkomstbestemming,
+    filter.voertuigtypesexclude
   ])
 
   // If on Zones page and geographyId is in URL -> navigate to zone
