@@ -17,7 +17,7 @@ const TableRow = (user: any, editClickHandler: Function) => {
   // Get username from URL
   const { username } = useParams();
 
-  return <React.Fragment key={user.id}>
+  return <React.Fragment key={user.username}>
     <div className="text-sm">
       {user.username}
     </div>
@@ -41,28 +41,22 @@ const TableRow = (user: any, editClickHandler: Function) => {
   </React.Fragment>
 }
 
-// Mockup for UserList
-export default function UserList({
+// UserList
+const UserList = ({
   showAddUserModule
 }: {
   showAddUserModule?: boolean
-}) {
+}) => {
+  const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
 
-  const navigate = useNavigate();
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
-
-  const fetchOptions = {
-    headers: {
-      "authorization": `Bearer ${token}`,
-      'mode':'no-cors'
-    }
-  }
 
   // Get list of municipalities and providers
   useEffect(() => {
     const getAclFromDatabase = async () => {
-      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/menu/acl', fetchOptions);
+      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/menu/acl', getFetchOptions());
       return await response.json();
     }
 
@@ -76,7 +70,7 @@ export default function UserList({
   // Get user list on component load
   useEffect(() => {
     const getUsersFromDatabase = async () => {
-      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/admin/user/list', fetchOptions);
+      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/admin/user/list', getFetchOptions());
       return await response.json();
     }
 
@@ -88,6 +82,15 @@ export default function UserList({
 
 
   }, []);
+
+  const getFetchOptions = () => {
+    return {
+      headers: {
+        "authorization": `Bearer ${token}`,
+        'mode':'no-cors'
+      }
+    }
+  }
 
   const handleClick = () => {
     navigate('/admin/users/new');
@@ -114,3 +117,5 @@ export default function UserList({
     </div>
   );
 }
+
+export default UserList;
