@@ -29,13 +29,13 @@ const TableRow = (user: any, editClickHandler: Function) => {
         : null}
     </div>
     <div className="text-sm">
-      <button onClick={() => editClickHandler(user)}>Edit</button>
-      {username !== user.username && <button>Delete</button>}
+      <button className='edit-icon' onClick={() => editClickHandler(user)}/>
+      {username !== user.username && <button className='delete-icon'/>}
     </div>
 
     {/*If user clicked edit: Show edit form */}
     <div className="col-span-3">
-      {username === user.username && <EditUser user={user} />}
+      {username === user.username && <EditUser user={user}/>}
     </div>
 
   </React.Fragment>
