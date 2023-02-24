@@ -30,11 +30,18 @@ function EditUser({
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
+  const [municipalitiesOptionList, setMunicipalitiesOptionList] = useState()
+
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
 
   // Get API token
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+  // On component load: Get municipalities and generate autosuggestion list
+  useEffect(() => {
+    buildOptionsValue();
+  }, []);
   
   function getHeaders() {
     return {
@@ -99,21 +106,13 @@ function EditUser({
         label: element.name
       })
     })
-    return optionsList
-
-
+    setMunicipalitiesOptionList(optionsList)
   }
 
-  const optionListResult = buildOptionsValue()
 
-  console.log('optionListResult', optionListResult)
 
  
 
-  useEffect(() => {
-    getAclFromDatabase()
-
-  }, []);
   
 
 
@@ -182,7 +181,7 @@ function EditUser({
           </ul>
         </div>
         {overheid && <Select
-        options={optionsList}
+        options={municipalitiesOptionList}
         placeholder="Please select municipality/ies"
       />}
         <div className="p-2">
