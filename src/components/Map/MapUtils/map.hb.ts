@@ -4,44 +4,44 @@ import geojson2h3 from 'geojson2h3';
 
 type HexagonType = any;
 
+const getColorStops = (maxCount) => {
+  const colorScale = [
+    '#ffffff',
+    '#ffffcc',
+    '#78c679',
+    '#78c679',
+    '#78c679',
+    '#78c679',
+    '#006837',
+    '#006837',
+    '#006837',
+    '#006837'
+  ];
+
+  const getColor = (perc) => {
+    if(perc < 10) return colorScale[0];
+    if(perc < 20) return colorScale[1];
+    if(perc < 30) return colorScale[2];
+    if(perc < 40) return colorScale[3];
+    if(perc < 50) return colorScale[4];
+    if(perc < 60) return colorScale[5];
+    if(perc < 70) return colorScale[6];
+    if(perc < 80) return colorScale[7];
+    if(perc < 90) return colorScale[8];
+    if(perc <= 100) return colorScale[9];
+  }
+
+  let colorStops = [];
+  for(let i: number = 0; i <= maxCount; i+=(maxCount*0.1)) {
+    colorStops.push([i, getColor(i / maxCount * 100)])
+  }
+
+  return colorStops;
+}
+
 const exampleHexagons = {
   '88283082a3fffff': 0.23360022663054658,
-  '88283082a1fffff': 0.5669828486310873,
-  '88283082a7fffff': 0.16348940282992852,
-  '88283080c9fffff': 0.8581650719557958,
-  '88283082b5fffff': 0.9915179087522776,
-  '88283082bdfffff': 0.8601568910953867,
-  '88283082abfffff': 0.9990917286546233,
-  '88283082a9fffff': 0.6936182465426743,
-  '88283082adfffff': 0.22605853878907167,
-  '88283082a5fffff': 0.28965184204722316,
-  '882830801bfffff': 0.9316964882818277,
-  '88283080cdfffff': 0.3395771916473449,
-  '88283080c1fffff': 0.3234869142715635,
-  '88283080cbfffff': 0.7905099160859068,
-  '88283082b7fffff': 0.9543175011653551,
-  '88283082b1fffff': 0.806313865109527,
-  '88283082b9fffff': 0.7731202839924824,
-  '8828308287fffff': 0.252404486346119,
-  '8828308285fffff': 0.2372100026389652,
-  '88283082e3fffff': 0.7680129672955796,
-  '88283082e7fffff': 0.14983712066613175,
-  '882830805bfffff': 0.8470500978290958,
-  '8828308053fffff': 0.030836579112298645,
-  '8828308019fffff': 0.8057595572800851,
-  '8828308011fffff': 0.5645131287768628,
-  '8828308013fffff': 0.28724909913702823,
-  '88283080c5fffff': 0.12399348928854792,
-  '88283080c7fffff': 0.3645083957369952,
-  '88283080c3fffff': 0.07714001150673044,
-  '88283080ddfffff': 0.11198369519444906,
-  '88283080d9fffff': 0.27195397510380626,
-  '88283082b3fffff': 0.051271477750987504,
-  '88283082bbfffff': 0.8370766187806946,
-  '8828308295fffff': 0.6321431969968847,
-  '8828308283fffff': 0.4010713180507681,
-  '8828308281fffff': 0.5682559413869928,
-  '882830828dfffff': 0.1804303945490413
+  '88283082a1fffff': 0.5669828486310873
 }
 
 const config = ({
@@ -116,7 +116,14 @@ function renderHexes(map, hexagons) {
     Object.keys(hexagons),
     hex => ({value: hexagons[hex]})
   );
-  
+
+  let maxCount: number = 0;
+  Object.values(hexagons).forEach((x: number) => {
+    if(x > maxCount) {
+      maxCount = x;
+    }
+  });
+
   const sourceId = 'h3-hexes';
   const layerId = `${sourceId}-layer`;
   let source = map.getSource(sourceId);
@@ -145,11 +152,7 @@ function renderHexes(map, hexagons) {
   // Update the layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
     property: 'value',
-    stops: [
-      [0, config.colorScale[0]],
-      [50, config.colorScale[1]],
-      [100, config.colorScale[2]]
-    ]
+    stops: getColorStops(maxCount)
   });
   
   map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
