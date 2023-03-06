@@ -1,5 +1,5 @@
 import moment from 'moment';
-import h3 from 'h3-js';
+import h3, {latLngToCell} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
 import geojson2h3 from 'geojson2h3';
 
 type HexagonType = any;
@@ -76,8 +76,8 @@ const fetchHexagons = async (token: string, filter: any) => {
               `&days_of_week=${filter.weekdays}`+
               `&modalities=${includedModalities}`+
               (filter.herkomstbestemming === 'bestemming'
-                ? `&origin_cells=88196ba259fffff,88196ba25bfffff`
-                : `&destination_cells=88196ba259fffff,88196ba25bfffff`)
+                ? `&origin_cells=${filter.h3niveau === 7 ? filter.h3hexes7 : filter.h3hexes8}`
+                : `&destination_cells=${filter.h3niveau === 7 ? filter.h3hexes7 : filter.h3hexes8}`)
   );
 
   let response, responseJson;

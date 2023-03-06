@@ -103,6 +103,18 @@ export default function filter(state = initialState, action) {
           h3niveau: action.payload
       };
     }
+    case 'SET_FILTER_H3HEXES_7': {
+      return {
+          ...state,
+          h3hexes7: action.payload
+      };
+    }
+    case 'SET_FILTER_H3HEXES_8': {
+      return {
+          ...state,
+          h3hexes8: action.payload
+      };
+    }
     case 'SET_FILTER_WEEKDAYS': {
       return {
           ...state,

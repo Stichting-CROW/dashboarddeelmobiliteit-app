@@ -13,10 +13,6 @@ import {StateType} from '../../types/StateType';
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {getMapStyles, setMapStyle} from './MapUtils/map.js';
-import {
-  renderH3Grid,
-  removeH3Grid
-} from './MapUtils/map.hb';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -49,6 +45,7 @@ import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
+import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', localization);
@@ -85,7 +82,6 @@ function MapComponent(props) {
   });
   const viewRentals = useSelector(state => state.layers ? state.layers.view_rentals : null);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
 
   // Define map
   const mapContainer = props.mapContainer;
@@ -98,6 +94,7 @@ function MapComponent(props) {
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
+  const [activeLayers, setActiveLayers] = useState([]);
   let map = useRef(null);
 
   const userData = useSelector((state: StateType) => {
@@ -242,29 +239,23 @@ function MapComponent(props) {
     registerMapView
   ])
 
-  // If HB view: Show H3 grid, if not: Remove H3 grid
-  useEffect(() => {
-    // Stop if map didn't load
-    if(! didMapLoad) return;
-    // Always remove 'old' H3 grid from map first
-    console.log('stateLayers.displaymode', stateLayers.displaymode)
-    removeH3Grid(map.current);
-    // Don't do anything if we don't view the HB map
-    if(! is_hb_view) return;
-    // If HB map is active: render hexagons
-    renderH3Grid(map.current, token, filter);
-  }, [
-    didMapLoad,
-    is_hb_view,
-    stateLayers.displaymode,
-    filter.h3niveau,
-    filter.ontwikkelingvan,
-    filter.ontwikkelingtot,
-    filter.timeframes,
-    filter.weekdays,
-    filter.herkomstbestemming,
-    filter.voertuigtypesexclude
-  ])
+  // Recognise if HB view should be loaded
+  // useEffect(() => {
+  //   // Stop if map didn't load
+  //   if(! didMapLoad) return;
+  //   // Set HB status
+  //   let newActiveLayers = activeLayers;
+  //   if(is_hb_view) {
+  //     newActiveLayers.push('hb');
+  //     setActiveLayers(newActiveLayers);
+  //   } else {
+  //     newActiveLayers = newActiveLayers.filter(x => x !== 'hb')
+  //     setActiveLayers(newActiveLayers);
+  //   }
+  // }, [
+  //   didMapLoad,
+  //   is_hb_view
+  // ]);
 
   // If on Zones page and geographyId is in URL -> navigate to zone
   useEffect(() => {
@@ -671,7 +662,10 @@ function MapComponent(props) {
   ]);
 
   // Add map controls for isochrone view
-  return isLoggedIn ? <IsochroneTools /> : null;
+  return <>
+    <DdH3HexagonLayer map={map.current} />
+    {isLoggedIn ? <IsochroneTools /> : null}
+  </>
 }
 
 export {
