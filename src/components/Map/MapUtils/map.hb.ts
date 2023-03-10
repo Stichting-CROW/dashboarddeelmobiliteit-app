@@ -5,6 +5,13 @@ import geojson2h3 from 'geojson2h3';
 type HexagonType = any;
 
 const getColorStops = (maxCount) => {
+  if(! maxCount || maxCount <= 0) {
+    return [
+      [0, '#eee'],
+      [100, '#eee']
+    ];
+  }
+
   const colorScale = [
     '#ffffff',
     '#ffffcc',
@@ -138,7 +145,7 @@ function renderHexes(map, hexagons) {
       id: layerId,
       source: sourceId,
       type: 'fill',
-      interactive: false,
+      interactive: false,// <- What's this?
       paint: {
         'fill-outline-color': 'rgba(0,0,0,0)',
       }
@@ -146,8 +153,21 @@ function renderHexes(map, hexagons) {
     source = map.getSource(sourceId);
   }
 
+  createHoverEffect(map, layerId);
+
   // Update the geojson data
   source.setData(geojson);
+  
+  // Update the layer paint properties, using the current config values
+  map.setPaintProperty(layerId, 'fill-color', {
+    property: 'value',
+    stops: [
+     'case',
+     ['boolean', ['feature-state', 'hover'], true],
+     [[0, '#000'], [1, '#000']],
+      getColorStops(maxCount)
+    ]
+  });
   
   // Update the layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
@@ -210,6 +230,41 @@ const renderH3Grid = async (
 
   renderHexes(map, hexagonsAsArray);
   renderAreas(map, hexagonsAsArray, 0.75);
+}
+
+// https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
+const createHoverEffect = (map, layerId) => {
+  var hoveredStateId = null;
+
+  // When the user moves their mouse over the state-fill layer, we'll update the
+  // feature state for the feature under the mouse.
+  map.on('mousemove', layerId, function (e) {
+    if (e.features.length > 0) {
+      if (hoveredStateId) {
+        map.setFeatureState(
+          { source: 'states', id: hoveredStateId },
+          { hover: false }
+        );
+      }
+      hoveredStateId = e.features[0].id;
+      map.setFeatureState(
+        { source: 'states', id: hoveredStateId },
+        { hover: true }
+      );
+    }
+  });
+   
+  // When the mouse leaves the state-fill layer, update the feature state of the
+  // previously hovered feature.
+  map.on('mouseleave', layerId, function () {
+    if (hoveredStateId) {
+      map.setFeatureState(
+        { source: 'states', id: hoveredStateId },
+        { hover: false }
+      );
+    }
+    hoveredStateId = null;
+  });
 }
 
 export {

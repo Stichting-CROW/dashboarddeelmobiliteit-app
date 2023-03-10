@@ -87,6 +87,7 @@ const DdH3HexagonLayer = ({
   }, [
     map
   ])
+
 }
 
 export default DdH3HexagonLayer;
