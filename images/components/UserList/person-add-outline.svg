@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="17.156" height="16" viewBox="0 0 17.156 16">
-  <g id="person-add-outline" transform="translate(0.5 0.5)">
-    <path id="Path_96" data-name="Path 96" d="M206.074,51.462a3.185,3.185,0,1,1-6.346,0,3.185,3.185,0,1,1,6.346,0Z" transform="translate(-193.67 -48)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-    <path id="Path_97" data-name="Path 97" d="M102.912,304c-3.137,0-6.321,1.731-6.91,5a.605.605,0,0,0,.564.772h12.692a.606.606,0,0,0,.564-.772C109.233,305.731,106.049,304,102.912,304Z" transform="translate(-93.682 -294.769)" fill="none" stroke="#fff" stroke-width="1"/>
-    <path id="Path_98" data-name="Path 98" d="M34.019,176v4.038m2.019-2.019H32" transform="translate(-32 -171.385)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-  </g>
-</svg>
