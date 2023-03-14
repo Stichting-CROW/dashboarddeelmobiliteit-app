@@ -116,14 +116,27 @@ const removeH3Grid = (map: any) => {
   if(layer) map.removeSource(key);
 }
 
-function renderHexes(map, hexagons) {
-  
+const getH3Hexes = (filter) => {
+  return (filter.h3niveau  && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
+}
+
+function renderHexes(map, hexagons, filter) {
+
+  // Get selected h3 hexe(s) from state
+  const selectedH3Hexes = getH3Hexes(filter);
+
   // Transform the current hexagon map into a GeoJSON object
   const geojson = geojson2h3.h3SetToFeatureCollection(
     Object.keys(hexagons),
-    hex => ({value: hexagons[hex]})
+    hex => {
+      return {
+        value: hexagons[hex],
+        selected: hex === selectedH3Hexes ? 1 : 0
+      }
+    }
   );
 
+  // Get highest hex value
   let maxCount: number = 0;
   Object.values(hexagons).forEach((x: number) => {
     if(x > maxCount) {
@@ -132,8 +145,7 @@ function renderHexes(map, hexagons) {
   });
 
   const sourceId = 'h3-hexes';
-  const layerId = `${sourceId}-layer`;
-  let source = map.getSource(sourceId);
+  let layerId, source = map.getSource(sourceId);
   
   // Add the source and layer if we haven't created them yet
   if (!source) {
@@ -141,76 +153,107 @@ function renderHexes(map, hexagons) {
       type: 'geojson',
       data: geojson
     });
+    // Add hexes (fill + 1px outline)
+    layerId = `${sourceId}-layer-fill`;
     map.addLayer({
       id: layerId,
       source: sourceId,
       type: 'fill',
       interactive: false,// <- What's this?
       paint: {
-        'fill-outline-color': 'rgba(0,0,0,0)',
+        // 'fill-outline-color': [
+        //   'match', ['get', 'selected'],
+        //   1, 'rgba(255,0,0,1)',
+        //   'rgba(255,255,255,1)'
+        // ]
       }
     });
+
+    // Set source variable
     source = map.getSource(sourceId);
   }
 
-  createHoverEffect(map, layerId);
+  // createHoverEffect(map, layerId);
 
   // Update the geojson data
   source.setData(geojson);
   
   // Update the layer paint properties, using the current config values
-  map.setPaintProperty(layerId, 'fill-color', {
-    property: 'value',
-    stops: [
-     'case',
-     ['boolean', ['feature-state', 'hover'], true],
-     [[0, '#000'], [1, '#000']],
-      getColorStops(maxCount)
-    ]
-  });
+  // map.setPaintProperty(layerId, 'fill-color', {
+  //   property: 'value',
+  //   stops: [
+  //    'case',
+  //    ['boolean', ['feature-state', 'hover'], true],
+  //    [[0, '#000'], [1, '#000']],
+  //     getColorStops(maxCount)
+  //   ]
+  // });
   
-  // Update the layer paint properties, using the current config values
+  // Update the fill layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
     property: 'value',
     stops: getColorStops(maxCount)
   });
   
   map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
+
+  // Add line layer for wider outline/borders, on top of fill layer
+  // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
+  layerId = `${sourceId}-layer-border`;
+  map.addLayer({
+    id: layerId,
+    source: sourceId,
+    type: 'line',
+    interactive: false,// <- What's this?
+    paint: {
+      'line-color': [
+        'match', ['get', 'selected'],
+        1, '#15aeef',
+        '#fff'
+      ],
+      'line-width': [
+        'match', ['get', 'selected'],
+        1, 5,
+        1
+      ]
+    }
+  });
+
 }
 
-function renderAreas(map, hexagons, threshold) {
+// function renderAreas(map, hexagons, threshold) {
   
-  // Transform the current hexagon map into a GeoJSON object
-  const geojson = geojson2h3.h3SetToFeature(
-    Object.keys(hexagons).filter(hex => hexagons[hex] > threshold)
-  );
+//   // Transform the current hexagon map into a GeoJSON object
+//   const geojson = geojson2h3.h3SetToFeature(
+//     Object.keys(hexagons).filter(hex => hexagons[hex] > threshold)
+//   );
   
-  const sourceId = 'h3-hex-areas';
-  const layerId = `${sourceId}-layer`;
-  let source = map.getSource(sourceId);
+//   const sourceId = 'h3-hex-areas';
+//   const layerId = `${sourceId}-layer`;
+//   let source = map.getSource(sourceId);
 
-  // Add the source and layer if we haven't created them yet
-  if (!source) {
-    map.addSource(sourceId, {
-      type: 'geojson',
-      data: geojson
-    });
-    map.addLayer({
-      id: layerId,
-      source: sourceId,
-      type: 'line',
-      interactive: false,
-      paint: {
-        'line-width': 3,
-        'line-color': config.colorScale[2],
-      }
-    });
-    source = map.getSource(sourceId);
-  }
+//   // Add the source and layer if we haven't created them yet
+//   if (!source) {
+//     map.addSource(sourceId, {
+//       type: 'geojson',
+//       data: geojson
+//     });
+//     map.addLayer({
+//       id: layerId,
+//       source: sourceId,
+//       type: 'line',
+//       interactive: false,
+//       paint: {
+//         'line-width': 3,
+//         'line-color': config.colorScale[2],
+//       }
+//     });
+//     source = map.getSource(sourceId);
+//   }
 
-  // Update the geojson data
-  source.setData(geojson);
-}
+//   // Update the geojson data
+//   source.setData(geojson);
+// }
 
 const renderH3Grid = async (
   map: any,
@@ -228,8 +271,8 @@ const renderH3Grid = async (
     hexagonsAsArray[x.cell] = x.number_of_trips;
   })
 
-  renderHexes(map, hexagonsAsArray);
-  renderAreas(map, hexagonsAsArray, 0.75);
+  renderHexes(map, hexagonsAsArray, filter);
+  // renderAreas(map, hexagonsAsArray, 0.75);
 }
 
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/

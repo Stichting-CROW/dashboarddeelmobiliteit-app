@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {latLngToCell} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
-import DeckGL from '@deck.gl/react';
 
 import {
   DISPLAYMODE_PARK,
@@ -17,8 +16,6 @@ import {
   renderH3Grid,
   removeH3Grid
 } from '../Map/MapUtils/map.hb';
-
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
 const DdH3HexagonLayer = ({
   map
