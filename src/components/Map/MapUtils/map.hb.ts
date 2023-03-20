@@ -115,8 +115,8 @@ const fetchHexagons = async (token: string, filter: any) => {
               `&days_of_week=${filter.weekdays}`+
               `&modalities=${includedModalities}`+
               (filter.herkomstbestemming === 'bestemming'
-                ? `&origin_cells=${filter.h3niveau === 7 ? filter.h3hexes7 : filter.h3hexes8}`
-                : `&destination_cells=${filter.h3niveau === 7 ? filter.h3hexes7 : filter.h3hexes8}`)
+                ? `&origin_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`
+                : `&destination_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`)
   );
 
   let response, responseJson;
@@ -163,7 +163,7 @@ function renderHexes(map, hexagons, filter) {
     hex => {
       return {
         value: hexagons[hex],
-        selected: hex === selectedH3Hexes ? 1 : 0
+        selected: selectedH3Hexes.indexOf(hex) > -1 ? 1 : 0
       }
     }
   );
@@ -329,7 +329,7 @@ const createHoverEffect = (map, layerId) => {
 
     const lngLat = e.lngLat;
     // console.log(e.features[0])
-    // const lngLatCenter = center(e.features[0].geometry.coordinates[0]);
+    // const lngLatCenter = center(e.features[0].geometry.coordinates);
 
     // Populate the popup and set its coordinates
     // based on the feature found.

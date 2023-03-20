@@ -51,8 +51,8 @@ const DdH3HexagonLayer = ({
     is_hb_view,
     stateLayers.displaymode,
     filter.h3niveau,
-    filter.h3hexes7,
-    filter.h3hexes8,
+    filter.h3hexes7.length,
+    filter.h3hexes8.length,
     filter.ontwikkelingvan,
     filter.ontwikkelingtot,
     filter.timeframes,
@@ -73,10 +73,10 @@ const DdH3HexagonLayer = ({
 
       // Set selected h3Index
       if(filter.h3niveau === 7) {
-        dispatch({ type: 'SET_FILTER_H3HEXES_7', payload: h3Index });
+        dispatch({ type: 'TOGGLE_FILTER_H3HEXES_7', payload: h3Index });
       }
       else if(filter.h3niveau === 8) {
-        dispatch({ type: 'SET_FILTER_H3HEXES_8', payload: h3Index });
+        dispatch({ type: 'TOGGLE_FILTER_H3HEXES_8', payload: h3Index });
       }
     }
 

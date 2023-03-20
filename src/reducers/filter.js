@@ -103,6 +103,42 @@ export default function filter(state = initialState, action) {
           h3niveau: action.payload
       };
     }
+    case 'TOGGLE_FILTER_H3HEXES_7': {
+      // Make sure state.h3hexes is an array
+      let newHexes = state.h3hexes7 instanceof Array ? state.h3hexes7 : [];
+
+      // If payload is in array: Remove
+      if(state.h3hexes7 && newHexes.indexOf(action.payload) > -1) {
+        newHexes = newHexes.filter(x => x !== action.payload)
+      }
+      // Otherwise: Add
+      else {
+        newHexes.push(action.payload);
+      }
+
+      return {
+          ...state,
+          h3hexes7: newHexes
+      };
+    }
+    case 'TOGGLE_FILTER_H3HEXES_8': {
+      // Make sure state.h3hexes is an array
+      let newHexes = state.h3hexes8 instanceof Array ? state.h3hexes8 : [];
+
+      // If payload is in array: Remove
+      if(state.h3hexes8 && newHexes.indexOf(action.payload) > -1) {
+        newHexes = newHexes.filter(x => x !== action.payload)
+      }
+      // Otherwise: Add
+      else {
+        newHexes.push(action.payload);
+      }
+
+      return {
+          ...state,
+          h3hexes8: newHexes
+      };
+    }
     case 'SET_FILTER_H3HEXES_7': {
       return {
           ...state,
