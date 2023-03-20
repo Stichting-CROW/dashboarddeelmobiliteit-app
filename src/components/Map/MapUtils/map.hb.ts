@@ -1,10 +1,12 @@
 import moment from 'moment';
 import h3, {latLngToCell} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
 import geojson2h3 from 'geojson2h3';
+import maplibregl from 'maplibre-gl';
+import center from '@turf/center'
 
 type HexagonType = any;
 
-const getColorStops = (maxCount) => {
+const getColorStops = (maxCount, herkomstbestemming) => {
   if(! maxCount || maxCount <= 0) {
     return [
       [0, '#eee'],
@@ -12,30 +14,60 @@ const getColorStops = (maxCount) => {
     ];
   }
 
-  const colorScale = [
-    '#ffffff',
-    '#ffffcc',
-    '#78c679',
-    '#78c679',
-    '#78c679',
-    '#78c679',
-    '#006837',
-    '#006837',
-    '#006837',
-    '#006837'
-  ];
+  // const colorScale = [
+  //   '#ffffff',
+  //   '#ffffcc',
+  //   '#78c679',
+  //   '#78c679',
+  //   '#78c679',
+  //   '#78c679',
+  //   '#006837',
+  //   '#006837',
+  //   '#006837',
+  //   '#006837'
+  // ];
+
+  // https://colorkit.co/color-shades-generator/006837/
+  const colorScale = {
+    green: [
+      '#e7efe9',
+      '#d0e0d4',
+      '#b9d0bf',
+      '#a2c1ab',
+      '#8bb297',
+      '#75a383',
+      '#5e946f',
+      '#46855c',
+      '#2b7649',
+      '#006837'
+    ],
+    red: [
+      '#ffeeec',
+      '#ffddda',
+      '#ffccc8',
+      '#ffbbb5',
+      '#ffa9a3',
+      '#ffa9a3',
+      '#ff847f',
+      '#ff706d',
+      '#ff595b',
+      '#fd3e48'
+    ]
+  }
+
+  const colorKey = herkomstbestemming === 'bestemming' ? 'red' : 'green';
 
   const getColor = (perc) => {
-    if(perc < 10) return colorScale[0];
-    if(perc < 20) return colorScale[1];
-    if(perc < 30) return colorScale[2];
-    if(perc < 40) return colorScale[3];
-    if(perc < 50) return colorScale[4];
-    if(perc < 60) return colorScale[5];
-    if(perc < 70) return colorScale[6];
-    if(perc < 80) return colorScale[7];
-    if(perc < 90) return colorScale[8];
-    if(perc <= 100) return colorScale[9];
+    if(perc < 10) return colorScale[colorKey][0];
+    if(perc < 20) return colorScale[colorKey][1];
+    if(perc < 30) return colorScale[colorKey][2];
+    if(perc < 40) return colorScale[colorKey][3];
+    if(perc < 50) return colorScale[colorKey][4];
+    if(perc < 60) return colorScale[colorKey][5];
+    if(perc < 70) return colorScale[colorKey][6];
+    if(perc < 80) return colorScale[colorKey][7];
+    if(perc < 90) return colorScale[colorKey][8];
+    if(perc <= 100) return colorScale[colorKey][9];
   }
 
   let colorStops = [];
@@ -145,7 +177,7 @@ function renderHexes(map, hexagons, filter) {
   });
 
   const sourceId = 'h3-hexes';
-  let layerId, source = map.getSource(sourceId);
+  let layerId = `${sourceId}-layer-fill`, source = map.getSource(sourceId);
   
   // Add the source and layer if we haven't created them yet
   if (!source) {
@@ -154,7 +186,6 @@ function renderHexes(map, hexagons, filter) {
       data: geojson
     });
     // Add hexes (fill + 1px outline)
-    layerId = `${sourceId}-layer-fill`;
     map.addLayer({
       id: layerId,
       source: sourceId,
@@ -169,14 +200,17 @@ function renderHexes(map, hexagons, filter) {
       }
     });
 
+    // Create hover effect (hovering fills)
+    createHoverEffect(map, layerId);
+
     // Set source variable
     source = map.getSource(sourceId);
   }
-
-  // createHoverEffect(map, layerId);
-
-  // Update the geojson data
-  source.setData(geojson);
+  // If source was already present: Update data
+  else {
+    // Update the geojson data
+    source.setData(geojson);
+  }
   
   // Update the layer paint properties, using the current config values
   // map.setPaintProperty(layerId, 'fill-color', {
@@ -192,7 +226,7 @@ function renderHexes(map, hexagons, filter) {
   // Update the fill layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
     property: 'value',
-    stops: getColorStops(maxCount)
+    stops: getColorStops(maxCount, filter.herkomstbestemming)
   });
   
   map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
@@ -240,38 +274,47 @@ const renderH3Grid = async (
   renderHexes(map, hexagonsAsArray, filter);
 }
 
+// Create a popup to be used on offer
+const popup = new maplibregl.Popup({
+  closeButton: false,
+  closeOnClick: false
+});
+
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
+// https://maplibre.org/maplibre-gl-js-docs/example/popup-on-hover/
 const createHoverEffect = (map, layerId) => {
   var hoveredStateId = null;
 
   // When the user moves their mouse over the state-fill layer, we'll update the
   // feature state for the feature under the mouse.
   map.on('mousemove', layerId, function (e) {
-    if (e.features.length > 0) {
-      if (hoveredStateId) {
-        map.setFeatureState(
-          { source: 'states', id: hoveredStateId },
-          { hover: false }
-        );
-      }
-      hoveredStateId = e.features[0].id;
-      map.setFeatureState(
-        { source: 'states', id: hoveredStateId },
-        { hover: true }
-      );
-    }
+    // Change the cursor style as a UI indicator.
+    map.getCanvas().style.cursor = 'pointer';
+
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var description = e.features[0].properties.value;
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    // }
+
+    const lngLat = e.lngLat;
+    // console.log(e.features[0])
+    // const lngLatCenter = center(e.features[0].geometry.coordinates[0]);
+
+    // Populate the popup and set its coordinates
+    // based on the feature found.
+    popup.setLngLat(lngLat).setHTML(description).addTo(map);
   });
    
   // When the mouse leaves the state-fill layer, update the feature state of the
   // previously hovered feature.
   map.on('mouseleave', layerId, function () {
-    if (hoveredStateId) {
-      map.setFeatureState(
-        { source: 'states', id: hoveredStateId },
-        { hover: false }
-      );
-    }
-    hoveredStateId = null;
+    map.getCanvas().style.cursor = '';
+    popup.remove();
   });
 }
 
