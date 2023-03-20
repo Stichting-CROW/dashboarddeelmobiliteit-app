@@ -81,8 +81,13 @@ const DdH3HexagonLayer = ({
     }
 
     map.on('click', didClick);
+
+    return () => {
+      map.off('click', didClick);
+    }
   }, [
-    map
+    map,
+    filter.h3niveau
   ])
 
 }

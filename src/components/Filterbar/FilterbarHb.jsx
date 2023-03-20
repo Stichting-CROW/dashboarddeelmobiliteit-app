@@ -234,10 +234,10 @@ function FilterbarHb({
         <FilteritemVoertuigTypes />
       </Fieldset>
 
-{/*      <Fieldset title="Detailniveau">
+      <Fieldset title="Detailniveau">
         <FilteritemH3Niveau />
       </Fieldset>
-*/}
+
       <Fieldset title="Herkomst of bestemming?">
         <FilteritemHerkomstBestemming />
       </Fieldset>

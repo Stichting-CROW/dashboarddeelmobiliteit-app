@@ -46,10 +46,10 @@ const getColorStops = (maxCount) => {
   return colorStops;
 }
 
-const exampleHexagons = {
-  '88283082a3fffff': 0.23360022663054658,
-  '88283082a1fffff': 0.5669828486310873
-}
+// const exampleHexagons = {
+//   '88283082a3fffff': 0.23360022663054658,
+//   '88283082a1fffff': 0.5669828486310873
+// }
 
 const config = ({
   lng: -122.4,
@@ -221,40 +221,6 @@ function renderHexes(map, hexagons, filter) {
 
 }
 
-// function renderAreas(map, hexagons, threshold) {
-  
-//   // Transform the current hexagon map into a GeoJSON object
-//   const geojson = geojson2h3.h3SetToFeature(
-//     Object.keys(hexagons).filter(hex => hexagons[hex] > threshold)
-//   );
-  
-//   const sourceId = 'h3-hex-areas';
-//   const layerId = `${sourceId}-layer`;
-//   let source = map.getSource(sourceId);
-
-//   // Add the source and layer if we haven't created them yet
-//   if (!source) {
-//     map.addSource(sourceId, {
-//       type: 'geojson',
-//       data: geojson
-//     });
-//     map.addLayer({
-//       id: layerId,
-//       source: sourceId,
-//       type: 'line',
-//       interactive: false,
-//       paint: {
-//         'line-width': 3,
-//         'line-color': config.colorScale[2],
-//       }
-//     });
-//     source = map.getSource(sourceId);
-//   }
-
-//   // Update the geojson data
-//   source.setData(geojson);
-// }
-
 const renderH3Grid = async (
   map: any,
   token: string,
@@ -272,7 +238,6 @@ const renderH3Grid = async (
   })
 
   renderHexes(map, hexagonsAsArray, filter);
-  // renderAreas(map, hexagonsAsArray, 0.75);
 }
 
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
