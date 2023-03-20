@@ -1,5 +1,5 @@
 import moment from 'moment';
-import h3, {latLngToCell} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
+import h3, {latLngToCell, polygonToCells} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
 import geojson2h3 from 'geojson2h3';
 import maplibregl from 'maplibre-gl';
 import center from '@turf/center'
@@ -30,7 +30,7 @@ const getColorStops = (maxCount, herkomstbestemming) => {
   // https://colorkit.co/color-shades-generator/006837/
   const colorScale = {
     green: [
-      '#e7efe9',
+      'rgba(255, 255, 255, 0)',
       '#d0e0d4',
       '#b9d0bf',
       '#a2c1ab',
@@ -42,7 +42,7 @@ const getColorStops = (maxCount, herkomstbestemming) => {
       '#006837'
     ],
     red: [
-      '#ffeeec',
+      'rgba(255, 255, 255, 0)',
       '#ffddda',
       '#ffccc8',
       '#ffbbb5',
@@ -255,17 +255,43 @@ function renderHexes(map, hexagons, filter) {
 
 }
 
+// Get hexes for map viewport
+const getHexesForViewPort = (map, filter) => {
+  // If zoom level is less than 9, don't render hex grid for viewport
+  // (because otherwise it's to resourcefull)
+  if(map.getZoom() < 9) return [];
+
+  const { _sw: sw, _ne: ne} = map.getBounds();
+  const boundsPolygon =[
+      [ sw.lat, sw.lng ],
+      [ ne.lat, sw.lng ],
+      [ ne.lat, ne.lng ],
+      [ sw.lat, ne.lng ],
+      [ sw.lat, sw.lng ],
+  ];
+  const hexes = polygonToCells(boundsPolygon, filter.h3niveau);
+
+  return hexes;
+}
+
 const renderH3Grid = async (
   map: any,
   token: string,
   filter: any
 ) => {
+  // Create placeholder variable
+  let hexagonsAsArray = [];
 
+  // Render grid for full map
+  const h3HexesForViewport = getHexesForViewPort(map, filter)
+  h3HexesForViewport.forEach((x) => {
+    hexagonsAsArray[x] = 0;
+  });
+
+  // Render grid based on origins/destinations data
   const hexagonsResponse = await fetchHexagons(token, filter);
   if(! hexagonsResponse || ! hexagonsResponse.result) return;
   const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
-
-  let hexagonsAsArray = [];
 
   hexagons.forEach((x: HexagonType) => {
     hexagonsAsArray[x.cell] = x.number_of_trips;
