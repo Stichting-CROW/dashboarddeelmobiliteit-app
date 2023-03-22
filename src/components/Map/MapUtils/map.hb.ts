@@ -6,6 +6,14 @@ import center from '@turf/center'
 
 type HexagonType = any;
 
+const config = ({
+  lng: -122.4,
+  lat: 37.7923539,
+  zoom: 11.5,
+  fillOpacity: 0.6,
+  colorScale: ['#ffffcc', '#78c679', '#006837']
+})
+
 const getColorStops = (maxCount, herkomstbestemming) => {
   if(! maxCount || maxCount <= 0) {
     return [
@@ -14,64 +22,58 @@ const getColorStops = (maxCount, herkomstbestemming) => {
     ];
   }
 
-  // const colorScale = [
-  //   '#ffffff',
-  //   '#ffffcc',
-  //   '#78c679',
-  //   '#78c679',
-  //   '#78c679',
-  //   '#78c679',
-  //   '#006837',
-  //   '#006837',
-  //   '#006837',
-  //   '#006837'
-  // ];
-
   // https://colorkit.co/color-shades-generator/006837/
+  // coolors.co
   const colorScale = {
     green: [
-      'rgba(255, 255, 255, 0)',
-      '#d0e0d4',
-      '#b9d0bf',
-      '#a2c1ab',
-      '#8bb297',
-      '#75a383',
-      '#5e946f',
-      '#46855c',
-      '#2b7649',
-      '#006837'
+      'rgba(255, 255, 255, 0)',// 0%
+      '#78c679',               // 1-10%
+      '#78c679',               // 10%
+      '#6eb36f',               // 20%
+      '#6eb36f',               // 30%
+      '#519351',
+      '#368937',               // 50%
+      '#287929',
+      '#186319',               // 70%
+      '#0e500f',               // 80%
+      '#052d06',               // 90%
+      '#052d06'                // 100%
     ],
     red: [
-      'rgba(255, 255, 255, 0)',
-      '#ffddda',
-      '#ffccc8',
-      '#ffbbb5',
-      '#ffa9a3',
-      '#ffa9a3',
-      '#ff847f',
-      '#ff706d',
-      '#ff595b',
-      '#fd3e48'
+      'rgba(255, 255, 255, 0)',// 0%
+      '#FE7279',
+      '#FD5D65',
+      '#FD4952',
+      '#FD353F',
+      '#FD212C',
+      '#FD0D19',
+      '#F2020E',
+      '#DE020D',
+      '#CA020C',
+      '#B6020B'
     ]
   }
 
   const colorKey = herkomstbestemming === 'bestemming' ? 'red' : 'green';
 
   const getColor = (perc) => {
-    if(perc < 10) return colorScale[colorKey][0];
-    if(perc < 20) return colorScale[colorKey][1];
-    if(perc < 30) return colorScale[colorKey][2];
-    if(perc < 40) return colorScale[colorKey][3];
-    if(perc < 50) return colorScale[colorKey][4];
-    if(perc < 60) return colorScale[colorKey][5];
-    if(perc < 70) return colorScale[colorKey][6];
-    if(perc < 80) return colorScale[colorKey][7];
-    if(perc < 90) return colorScale[colorKey][8];
-    if(perc <= 100) return colorScale[colorKey][9];
+    if(perc < 1) return colorScale[colorKey][0];
+    if(perc < 10) return colorScale[colorKey][1];
+    if(perc < 20) return colorScale[colorKey][2];
+    if(perc < 30) return colorScale[colorKey][3];
+    if(perc < 40) return colorScale[colorKey][4];
+    if(perc < 50) return colorScale[colorKey][5];
+    if(perc < 60) return colorScale[colorKey][6];
+    if(perc < 70) return colorScale[colorKey][7];
+    if(perc < 80) return colorScale[colorKey][8];
+    if(perc < 90) return colorScale[colorKey][9];
+    if(perc <= 100) return colorScale[colorKey][10];
   }
 
-  let colorStops = [];
-  for(let i: number = 0; i <= maxCount; i+=(maxCount*0.1)) {
+  let colorStops = [
+    [0, getColor(0)]
+  ];
+  for(let i: number = (maxCount*0.1); i <= maxCount; i+=(maxCount*0.1)) {
     colorStops.push([i, getColor(i / maxCount * 100)])
   }
 
@@ -82,14 +84,6 @@ const getColorStops = (maxCount, herkomstbestemming) => {
 //   '88283082a3fffff': 0.23360022663054658,
 //   '88283082a1fffff': 0.5669828486310873
 // }
-
-const config = ({
-  lng: -122.4,
-  lat: 37.7923539,
-  zoom: 11.5,
-  fillOpacity: 0.6,
-  colorScale: ['#ffffcc', '#78c679', '#006837']
-})
 
 const fetchHexagons = async (token: string, filter: any) => {
   const getFetchOptions = () => {
@@ -152,6 +146,16 @@ const getH3Hexes = (filter) => {
   return (filter.h3niveau  && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
 }
 
+const getMaxCount = (hexagons: any) => {
+  let maxCount: number = 0;
+  Object.values(hexagons).forEach((x: number) => {
+    if(x > maxCount) {
+      maxCount = x;
+    }
+  });
+  return maxCount;
+} 
+
 function renderHexes(map, hexagons, filter) {
 
   // Get selected h3 hexe(s) from state
@@ -169,12 +173,7 @@ function renderHexes(map, hexagons, filter) {
   );
 
   // Get highest hex value
-  let maxCount: number = 0;
-  Object.values(hexagons).forEach((x: number) => {
-    if(x > maxCount) {
-      maxCount = x;
-    }
-  });
+  const maxCount: number = getMaxCount(hexagons);
 
   const sourceId = 'h3-hexes';
   let layerId = `${sourceId}-layer-fill`, source = map.getSource(sourceId);
@@ -201,7 +200,7 @@ function renderHexes(map, hexagons, filter) {
     });
 
     // Create hover effect (hovering fills)
-    createHoverEffect(map, layerId);
+    createHoverEffect(map, layerId, maxCount);
 
     // Set source variable
     source = map.getSource(sourceId);
@@ -227,6 +226,11 @@ function renderHexes(map, hexagons, filter) {
   map.setPaintProperty(layerId, 'fill-color', {
     property: 'value',
     stops: getColorStops(maxCount, filter.herkomstbestemming)
+    // stops: [
+    //   [0, config.colorScale[0]],
+    //   [50, config.colorScale[1]],
+    //   [100, config.colorScale[2]]
+    // ]
   });
   
   map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
@@ -253,6 +257,40 @@ function renderHexes(map, hexagons, filter) {
     }
   });
 
+}
+
+function renderAreas(map, hexagons, filter, threshold) {
+  
+  // Transform the current hexagon map into a GeoJSON object
+  const geojson = geojson2h3.h3SetToFeature(
+    Object.keys(hexagons).filter(hex => hexagons[hex] > threshold)
+  );
+  
+  const sourceId = 'h3-hex-areas';
+  const layerId = `${sourceId}-layer`;
+  let source = map.getSource(sourceId);
+
+  // Add the source and layer if we haven't created them yet
+  if (!source) {
+    map.addSource(sourceId, {
+      type: 'geojson',
+      data: geojson
+    });
+    map.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'line',
+      interactive: false,
+      paint: {
+        'line-width': 3,
+        'line-color': (filter.herkomstbestemming === 'bestemming' ? '#F4010D' : config.colorScale[2]),
+      }
+    });
+    source = map.getSource(sourceId);
+  }
+
+  // Update the geojson data
+  source.setData(geojson);
 }
 
 // Get hexes for map viewport
@@ -298,6 +336,8 @@ const renderH3Grid = async (
   })
 
   renderHexes(map, hexagonsAsArray, filter);
+  // Render outline border
+  renderAreas(map, hexagonsAsArray, filter, 0.75);
 }
 
 // Create a popup to be used on offer
@@ -308,7 +348,7 @@ const popup = new maplibregl.Popup({
 
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
 // https://maplibre.org/maplibre-gl-js-docs/example/popup-on-hover/
-const createHoverEffect = (map, layerId) => {
+const createHoverEffect = (map, layerId, maxCount) => {
   var hoveredStateId = null;
 
   // When the user moves their mouse over the state-fill layer, we'll update the
@@ -317,8 +357,9 @@ const createHoverEffect = (map, layerId) => {
     // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
 
-    var coordinates = e.features[0].geometry.coordinates.slice();
-    var description = e.features[0].properties.value;
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const percentage: number = e.features[0].properties.value / maxCount * 100;
+    const description = `${e.features[0].properties.value} (${percentage.toFixed(1)}%)`;
 
     // Ensure that if the map is zoomed out such that multiple
     // copies of the feature are visible, the popup appears
@@ -333,7 +374,9 @@ const createHoverEffect = (map, layerId) => {
 
     // Populate the popup and set its coordinates
     // based on the feature found.
-    popup.setLngLat(lngLat).setHTML(description).addTo(map);
+    if(percentage > 0) {
+      popup.setLngLat(lngLat).setHTML(description).addTo(map);
+    }
   });
    
   // When the mouse leaves the state-fill layer, update the feature state of the
