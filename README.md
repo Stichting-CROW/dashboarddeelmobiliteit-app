@@ -124,6 +124,10 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 - https://api.deelfietsdashboard.nl/od-api/openapi.json
 - https://api.deelfietsdashboard.nl/od-api/docs
 
+## Tailwind/craco/react-create-script
+
+https://stackoverflow.com/a/68093779
+
 ## Dashboard Deelmobiliteit in the media
 
 - [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)

@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#vehicles-heatmap,
+#vehicles-point,
+#rentals-origins-point {
+  position: relative;
+  z-index:  100;
+}
