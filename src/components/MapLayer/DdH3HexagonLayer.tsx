@@ -29,6 +29,10 @@ const DdH3HexagonLayer = ({
   const filter = useSelector((state: StateType) => state.filter || null);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
 
+  // Make sure h3hexes7 and h3hexes8 are available as array
+  if(! filter.h3hexes7) filter.h3hexes7 = [];
+  if(! filter.h3hexes8) filter.h3hexes8 = [];
+
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
