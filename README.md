@@ -128,6 +128,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 https://stackoverflow.com/a/68093779
 
+en
+
+https://stackoverflow.com/a/72483401 (craco ^7.0.0-alpha.3)
+
+of TAILWIND_MODE=watch craco start
+
 ## Dashboard Deelmobiliteit in the media
 
 - [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)

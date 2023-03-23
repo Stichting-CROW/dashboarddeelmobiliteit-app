@@ -129,6 +129,14 @@ const removeH3Grid = (map: any) => {
   let layer, key;
   let source, sourceId;
   
+  key = 'h3-hexes-layer-fill';
+  layer = map.getLayer(`${key}`);
+  if(layer) map.removeLayer(`${key}`);
+  
+  key = 'h3-hexes-layer-border';
+  layer = map.getLayer(`${key}`);
+  if(layer) map.removeLayer(`${key}`);
+
   key = 'h3-hexes';
   layer = map.getLayer(`${key}-layer`);
   source = map.getSource(key);
@@ -176,14 +184,21 @@ function renderHexes(map, hexagons, filter) {
   const maxCount: number = getMaxCount(hexagons);
 
   const sourceId = 'h3-hexes';
-  let layerId = `${sourceId}-layer-fill`, source = map.getSource(sourceId);
-  
-  // Add the source and layer if we haven't created them yet
-  if (!source) {
+  let layerId = `${sourceId}-layer-fill`
+    , source = map.getSource(sourceId);
+  const layer = map.getLayer(layerId)
+
+  // Add the source if we haven't created them yet
+  if (! source) {
     map.addSource(sourceId, {
       type: 'geojson',
       data: geojson
     });
+
+    // Set source variable
+    source = map.getSource(sourceId);
+  }
+  if (! layer) {
     // Add hexes (fill + 1px outline)
     map.addLayer({
       id: layerId,
@@ -201,9 +216,6 @@ function renderHexes(map, hexagons, filter) {
 
     // Create hover effect (hovering fills)
     createHoverEffect(map, layerId, maxCount);
-
-    // Set source variable
-    source = map.getSource(sourceId);
   }
   // If source was already present: Update data
   else {
