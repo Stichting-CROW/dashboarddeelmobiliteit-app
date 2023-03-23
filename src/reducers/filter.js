@@ -35,11 +35,16 @@ const initialState = {
   parkeerduurexclude: "",
   voertuigtypesexclude: "",
   afstandexclude: "",
-  herkomstbestemming: "",
+  herkomstbestemming: "herkomstbestemming",
   ontwikkelingvan: moment().subtract(30, 'days').toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
   ontwikkelingaggregatie: "day",
-  ontwikkelingaggregatie_function: 'MAX'
+  ontwikkelingaggregatie_function: 'MAX',
+  h3niveau: 8,
+  weekdays: 'fr,th,mo,tu,we,sa,su',
+  timeframes: '6-10,10-14,14-18,18-22,22-2,2-6',
+  h3hexes7: [],
+  h3hexes8: []
 }
 
 export default function filter(state = initialState, action) {
@@ -142,13 +147,13 @@ export default function filter(state = initialState, action) {
     case 'SET_FILTER_H3HEXES_7': {
       return {
           ...state,
-          h3hexes7: action.payload
+          h3hexes7: [action.payload]
       };
     }
     case 'SET_FILTER_H3HEXES_8': {
       return {
           ...state,
-          h3hexes8: action.payload
+          h3hexes8: [action.payload]
       };
     }
     case 'SET_FILTER_WEEKDAYS': {
