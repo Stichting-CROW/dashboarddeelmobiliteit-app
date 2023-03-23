@@ -102,11 +102,11 @@ const fetchHexagons = async (token: string, filter: any) => {
 
   // Get API response
   const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/h3`+
-              `?h3_resolution=${filter.h3niveau}`+
+              `?h3_resolution=${filter.h3niveau || 8}`+
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
               `&end_date=${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}`+
-              `&time_periods=${filter.timeframes}`+
-              `&days_of_week=${filter.weekdays}`+
+              `&time_periods=${filter.timeframes || '6-10,10-14,14-18,18-22,22-2,2-6'}`+
+              `&days_of_week=${filter.weekdays || 'fr,th,mo,tu,we,sa,su'}`+
               `&modalities=${includedModalities}`+
               (filter.herkomstbestemming === 'bestemming'
                 ? `&origin_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`
