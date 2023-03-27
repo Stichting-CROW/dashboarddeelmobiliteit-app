@@ -65,6 +65,7 @@ function SelectLayer(props) {
 
   const doShowOd = () => {
     const emailAddresses = [
+      'bart+schiedam@tuxion.nl',
       'mail@bartroorda.nl',
       // 'rinse.gorter@denhaag.nl',
       'otto.vanboggelen@crow.nl',

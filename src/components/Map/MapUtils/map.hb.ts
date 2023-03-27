@@ -22,8 +22,7 @@ const getColorStops = (maxCount, herkomstbestemming) => {
     ];
   }
 
-  // https://colorkit.co/color-shades-generator/006837/
-  // coolors.co
+  // Create color gradient: coolors.co
   const colorScale = {
     green: [
       'rgba(255, 255, 255, 0)',// 0%
@@ -324,6 +323,40 @@ const getHexesForViewPort = (map, filter) => {
   return hexes;
 }
 
+// Get hexes for user
+const getHexesForUser = async (map, token, filter) => {
+  // Get hexes user has access to
+  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=8`);
+  let responseJson;
+
+  try {
+    let response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    responseJson = await response.json();
+  } catch(e) {
+    console.error(e);
+  }
+
+  // Validate
+  if(! responseJson || ! responseJson.result) {
+    console.error('No valid response json returned for getting accessible h3 hexes')
+    return;
+  }
+
+  // If user has access to everything: Only get h3 hexes for viewport
+  if(responseJson.result.all_accessible === true) {
+    const h3HexesForViewport = getHexesForViewPort(map, filter);
+    return h3HexesForViewport;
+  }
+
+  // Otherwise: Return all hexes available for user
+  return responseJson.result.accessible_h3_cells;
+}
+
 const renderH3Grid = async (
   map: any,
   token: string,
@@ -333,8 +366,8 @@ const renderH3Grid = async (
   let hexagonsAsArray = [];
 
   // Render grid for full map
-  const h3HexesForViewport = getHexesForViewPort(map, filter)
-  h3HexesForViewport.forEach((x) => {
+  const h3HexesForUser = await getHexesForUser(map, token, filter)
+  h3HexesForUser.forEach((x) => {
     hexagonsAsArray[x] = 0;
   });
 
