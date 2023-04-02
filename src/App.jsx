@@ -9,7 +9,7 @@ import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
-import 'tw-elements';
+import * as te from 'tw-elements';
 
 import {StateType} from './types/StateType';
 

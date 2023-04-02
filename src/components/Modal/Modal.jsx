@@ -10,12 +10,37 @@ const Modal = ({
 }) => {
   return (
     <>
-      <div className={`modal-backdrop fade ${isVisible ? 'show' : ''}`} style={{display: isVisible ? 'block' : 'none'}}></div>
-      <div className={`modal fade ${isVisible ? 'show' : ''} fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto`}
-      style={{'display': isVisible ? 'block' : 'none'}}
-        id="exampleModalCenteredScrollable" tabIndex="-1" aria-labelledby="exampleModalCenteredScrollable" aria-modal="true" role="dialog">
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable relative w-auto pointer-events-none">
-          <div className="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current">
+      <div
+        className={`
+          modal-backdrop fade ${isVisible ? 'show' : ''}
+        `}
+        style={{display: isVisible ? 'block' : 'none'}}
+      />
+      <div className={`
+          modal fade ${isVisible ? 'show' : ''} fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto
+        `}
+        id="exampleModalCenteredScrollable"
+        tabIndex="-1"
+        aria-hidden={{'display': isVisible ? 'false' : 'true'}}
+        aria-labelledby="exampleModalCenteredScrollable"
+        aria-modal="true"
+        style={{
+          'display': isVisible ? 'block' : 'none',
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          zIndex: 100,
+          padding: '50px 0'
+        }}
+        role="dialog"
+      >
+        <div className="
+          modal-dialog modal-dialog-centered modal-dialog-scrollable relative w-auto pointer-events-none
+        ">
+          <div className="
+,            modal-content border-none shadow-lg relative flex flex-col pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current
+            mx-auto max-w-11/12
+          " style={{
+            width: '800px',
+          }}>
             <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">
               <h5 className="text-xl leading-normal text-gray-800 font-semibold" id="exampleModalCenteredScrollableLabel">
                 {title}
