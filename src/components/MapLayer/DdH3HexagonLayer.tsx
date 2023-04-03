@@ -77,7 +77,7 @@ const DdH3HexagonLayer = ({
       // Convert a lat/lng point to a hexagon index at resolution 7
       const h3Index = latLngToCell(coordinates.lat, coordinates.lng, filter.h3niveau);
 
-      const userHoldsCtrl = e.originalEvent.ctrlKey;
+      const userHoldsCtrl = e.originalEvent !== undefined ? e.originalEvent.ctrlKey : false;
 
       // Set selected h3Index
       if(filter.h3niveau === 7) {

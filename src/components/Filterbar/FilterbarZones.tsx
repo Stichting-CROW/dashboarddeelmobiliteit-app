@@ -23,6 +23,7 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import Modal from '../Modal/Modal.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
+import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
 
@@ -297,6 +298,8 @@ function FilterbarZones({
     // Get zone info from database
     const foundZone = getZoneById(adminZones, zoneId);
 
+    console.log('zoneId', zoneId, 'foundZone', foundZone);
+
     if(foundZone) {
       // Change URL
       setAdminZoneUrl(foundZone.geography_id)
@@ -488,6 +491,7 @@ function FilterbarZones({
   }
 
   const saveZone = async () => {
+    console.log('drawedArea', drawedArea)
     if(! activeZone.area && ! drawedArea) {
       window['notify']('Teken eerst een zone voordat je deze opslaat')
       return;
@@ -631,13 +635,17 @@ function FilterbarZones({
   return (
     <div className="filter-bar-inner py-2">
 
-      {! hideLogo && <Link to="/"><Logo /></Link>}
+      <div style={{
+        paddingBottom: '24px'
+      }}>
+        {! hideLogo && <Link to="/"><Logo /></Link>}
+      </div>
       
       <FilteritemDatum disabled={true} />
 
-      <div className="mt-0">
+      <Fieldset title="Plaats">
         <FilteritemGebieden />
-      </div>
+      </Fieldset>
 
       {! filterGebied && false && <div>
         Selecteer een plaats.

@@ -191,7 +191,8 @@ function renderHexes(map, hexagons, filter) {
   if (! source) {
     map.addSource(sourceId, {
       type: 'geojson',
-      data: geojson
+      data: geojson,
+      generateId: true // This ensures that all features have unique IDs
     });
 
     // Set source variable
@@ -203,18 +204,8 @@ function renderHexes(map, hexagons, filter) {
       id: layerId,
       source: sourceId,
       type: 'fill',
-      interactive: false,// <- What's this?
-      paint: {
-        // 'fill-outline-color': [
-        //   'match', ['get', 'selected'],
-        //   1, 'rgba(255,0,0,1)',
-        //   'rgba(255,255,255,1)'
-        // ]
-      }
+      // interactive: false,// <- What's this?
     });
-
-    // Create hover effect (hovering fills)
-    createHoverEffect(map, layerId, maxCount);
   }
   // If source was already present: Update data
   else {
@@ -222,28 +213,13 @@ function renderHexes(map, hexagons, filter) {
     source.setData(geojson);
   }
   
-  // Update the layer paint properties, using the current config values
-  // map.setPaintProperty(layerId, 'fill-color', {
-  //   property: 'value',
-  //   stops: [
-  //    'case',
-  //    ['boolean', ['feature-state', 'hover'], true],
-  //    [[0, '#000'], [1, '#000']],
-  //     getColorStops(maxCount)
-  //   ]
-  // });
-  
   // Update the fill layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
     property: 'value',
     stops: getColorStops(maxCount, filter.herkomstbestemming)
-    // stops: [
-    //   [0, config.colorScale[0]],
-    //   [50, config.colorScale[1]],
-    //   [100, config.colorScale[2]]
-    // ]
   });
   
+  // Set opacity
   map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
 
   // Add line layer for wider outline/borders, on top of fill layer
@@ -253,21 +229,25 @@ function renderHexes(map, hexagons, filter) {
     id: layerId,
     source: sourceId,
     type: 'line',
-    interactive: false,// <- What's this?
+    // interactive: true,// <- What's this?
     paint: {
       'line-color': [
-        'match', ['get', 'selected'],
-        1, '#15aeef',
-        '#fff'
+        "case",
+        ["==", ["get", "selected"], 1], '#15aeef',
+        ["boolean", ["feature-state", "hover"], false], '#666',
+        '#eee'
       ],
       'line-width': [
-        'match', ['get', 'selected'],
-        1, 5,
+        "case",
+        ["==", ["get", "selected"], 1], 5,
+        ["boolean", ["feature-state", "hover"], false], 2,
         1
       ]
     }
   });
 
+  // Create hover effect (hovering fills)
+  createHoverEffect(map, 'h3-hexes-layer-fill', maxCount);
 }
 
 function renderAreas(map, hexagons, filter, threshold) {
@@ -285,16 +265,22 @@ function renderAreas(map, hexagons, filter, threshold) {
   if (!source) {
     map.addSource(sourceId, {
       type: 'geojson',
-      data: geojson
+      data: geojson,
+      generateId: true
     });
     map.addLayer({
       id: layerId,
       source: sourceId,
       type: 'line',
-      interactive: false,
+      // interactive: false,
       paint: {
         'line-width': 3,
-        'line-color': (filter.herkomstbestemming === 'bestemming' ? '#F4010D' : config.colorScale[2]),
+        'line-color': [
+          "case",
+          ["==", ["get", "selected"], 1], '#15aeef',
+          ["boolean", ["feature-state", "hover"], false], '#666',
+          (filter.herkomstbestemming === 'bestemming' ? '#F4010D' : config.colorScale[2])
+        ]
       }
     });
     source = map.getSource(sourceId);
@@ -405,14 +391,6 @@ const createHoverEffect = (map, layerId, maxCount) => {
     const coordinates = e.features[0].geometry.coordinates.slice();
     const percentage: number = e.features[0].properties.value / maxCount * 100;
     const description = `${e.features[0].properties.value} (${percentage.toFixed(1)}%)`;
-
-    // Ensure that if the map is zoomed out such that multiple
-    // copies of the feature are visible, the popup appears
-    // over the copy being pointed to.
-    // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-    // }
-
     const lngLat = e.lngLat;
     // console.log(e.features[0])
     // const lngLatCenter = center(e.features[0].geometry.coordinates);
@@ -422,6 +400,28 @@ const createHoverEffect = (map, layerId, maxCount) => {
     if(percentage > 0) {
       popup.setLngLat(lngLat).setHTML(description).addTo(map);
     }
+
+    if (hoveredStateId) {
+      map.setFeatureState(
+        { source: 'h3-hexes', id: hoveredStateId },
+        { hover: false }
+      );
+      map.setFeatureState(
+        { source: 'h3-hex-areas', sourceLayer: 'h3-hex-areas-layer', id: hoveredStateId },
+        { hover: false }
+      );
+    }
+
+    // Set 'hover' flag
+    hoveredStateId = e.features[0].id;
+    map.setFeatureState(
+      { source: 'h3-hexes', id: hoveredStateId },
+      { hover: true }
+    );
+    map.setFeatureState(
+      { source: 'h3-hex-areas', sourceLayer: 'h3-hex-areas-layer', id: hoveredStateId },
+      { hover: true }
+    );
   });
    
   // When the mouse leaves the state-fill layer, update the feature state of the
@@ -429,6 +429,19 @@ const createHoverEffect = (map, layerId, maxCount) => {
   map.on('mouseleave', layerId, function () {
     map.getCanvas().style.cursor = '';
     popup.remove();
+
+    // Unhover
+    if (hoveredStateId) {
+      map.setFeatureState(
+        { source: 'h3-hexes', id: hoveredStateId },
+        { hover: false }
+      );
+      map.setFeatureState(
+        { source: 'h3-hex-areas', sourceLayer: 'h3-hex-areas-layer', id: hoveredStateId },
+        { hover: false }
+      );
+    }
+    hoveredStateId = null;
   });
 }
 

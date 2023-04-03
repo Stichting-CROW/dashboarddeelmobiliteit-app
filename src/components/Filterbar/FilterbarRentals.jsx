@@ -102,7 +102,7 @@ function Filterbar({
         }}>
           {/* INFO */}
         </div>
-      </div> 
+      </div>
 
       { isLoggedIn && showdatum && <FilteritemDatum /> }
       

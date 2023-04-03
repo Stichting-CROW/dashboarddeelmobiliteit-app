@@ -122,7 +122,9 @@ function Filterbar({
     return (
       <div className="filter-bar-inner py-2">
 
-        <div className="justify-between hidden sm:flex">
+        <div className="justify-between hidden sm:flex" style={{
+          paddingBottom: '24px'
+        }}>
           <div style={{minWidth: '82px'}}>
             {! hideLogo && (
               ispark
@@ -135,7 +137,7 @@ function Filterbar({
           }}>
             {/* INFO */}
           </div>
-        </div> 
+        </div>
 
         { isLoggedIn && showdatum && <FilteritemDatum /> }
         
@@ -152,7 +154,9 @@ function Filterbar({
 
         { isLoggedIn && showduur && <FilteritemDuur /> }
 
-        { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
+        <Fieldset title="Periode">
+          <FilteritemDatumVanTot />
+        </Fieldset>
 
         <Fieldset title="Plaats">
           <FilteritemGebieden />
