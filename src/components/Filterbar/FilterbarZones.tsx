@@ -658,6 +658,9 @@ function FilterbarZones({
           <Link to="/map/zones">
             <Button
               theme="white"
+              style={{
+                borderColor: '#666'
+              }}
             >
               📊
             </Button>
@@ -666,6 +669,7 @@ function FilterbarZones({
           <Link to="/admin/zones">
             <Button
               theme="white"
+              title="Naar zones bewerken"
             >
               ✏️
             </Button>
@@ -679,7 +683,7 @@ function FilterbarZones({
         </div>
         <div>
           {viewMode === 'adminView' && <div className="flex justify-between">
-            <div className="flex">
+            <div className="flex" style={{marginLeft: '-0.5rem'}}>
               <Button
                 theme="white"
                 onClick={newZoneButtonHandler}
@@ -730,6 +734,7 @@ function FilterbarZones({
               <Link to="/map/zones">
                 <Button
                   theme="white"
+                  title="Naar zones bekijken"
                 >
                   📊
                 </Button>
@@ -738,6 +743,9 @@ function FilterbarZones({
               <Link to="/admin/zones">
                 <Button
                   theme="white"
+                  style={{
+                    borderColor: '#666'
+                  }}
                 >
                   ✏️
                 </Button>

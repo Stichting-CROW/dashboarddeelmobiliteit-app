@@ -6,14 +6,16 @@ function Button({
   onClick,
   type,
   title,
-  classes
+  classes,
+  style
 }: {
   theme?: string,
   children?: any,
   onClick?: any,
   title?: any,
   type?: "button" | "reset" | "submit",
-  classes?: string
+  classes?: string,
+  style?: object
 }) {
   return (
     <button
@@ -34,7 +36,7 @@ function Button({
       `}
       type={type}
       onClick={onClick}
-      style={themes[theme]}
+      style={Object.assign({}, themes[theme], style)}
     >
       {children}
     </button>
