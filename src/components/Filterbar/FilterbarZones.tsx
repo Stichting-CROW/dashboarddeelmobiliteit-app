@@ -2,8 +2,7 @@ import './css/FilterbarZones.css';
 import React, {
   useEffect,
   useState,
-  useCallback,
-  // useRef
+  useCallback
 } from 'react';
 import {useLocation} from "react-router-dom";
 import md5 from 'md5';
@@ -15,6 +14,7 @@ import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
+import { useNavigate } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
@@ -45,6 +45,8 @@ import {
   putZone,
   deleteZone
 } from '../../api/zones';
+
+import {ImportZonesModal} from '../ImportZones/ImportZones';
 
 function ModalityRow({
   children,
@@ -93,6 +95,8 @@ function FilterbarZones({
   hideLogo,
   view
 }) {
+  const navigate = useNavigate();
+
   const zoneTemplate = {
     zone_id: undefined,
     stop_id: undefined,
@@ -297,7 +301,7 @@ function FilterbarZones({
     // Get zone info from database
     const foundZone = getZoneById(adminZones, zoneId);
 
-    console.log('zoneId', zoneId, 'foundZone', foundZone);
+    // console.log('zoneId', zoneId, 'foundZone', foundZone);
 
     if(foundZone) {
       // Change URL
@@ -693,7 +697,7 @@ function FilterbarZones({
 
               <Button
                 theme="white"
-                title="Importeer zone vanuit een GIS-bestand"
+                title="Importeer zone vanuit een KML-bestand"
                 onClick={() => {
                   setDoShowImportModal(true)
                 }}
@@ -701,33 +705,17 @@ function FilterbarZones({
                 ⬆️
               </Button>
 
-              <Modal
-                isVisible={doShowImportModal}
-                title="Importeer een GIS-bestand"
-                button1Title={'Annuleer'}
-                button1Handler={(e) => {
-                  setDoShowImportModal(false);
-                }}
-                button2Title={"Importeer"}
-                button2Handler={(e) => {
-                  e.preventDefault();
-                  setTimeout(x => {
-                    // Hide modal
-                    setDoShowImportModal(false);
-                  }, 1500)
-                }}
-                hideModalHandler={() => {
-                  setDoShowImportModal(false);
-                }}
-              >
-                <p className="mb-4">
-                  Importeer een SPH-bestand met zone-polygonen middels onderstaande upload-functie. Tip: importeer niet te veel zones, maar enkel de zones waar je analyses op gaat doen.
-                </p>
-
-                <p className="mt-4">
-                  <input type="file" name="file" accept=".sph" />
-                </p>
-              </Modal>
+              {doShowImportModal && <ImportZonesModal postImportFunc={() => {
+                setDoShowImportModal(false);
+                // Disable drawing enableDrawingPolygons
+                // disableDrawingPolygons();
+                // deleteAllLocalZones();
+                // Reload zones
+                // getAdminZones();
+                // Navigate
+                // navigate('/map/zones');
+                document.location = '/map/zones';
+              }} />}
             </div>
             
             <div className="flex -mr-2">
@@ -766,7 +754,7 @@ function FilterbarZones({
         <div className={labelClassNames}>
           Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
           <Button
             theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
             onClick={saveZone}

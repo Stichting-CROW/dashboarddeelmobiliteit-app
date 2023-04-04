@@ -137,7 +137,7 @@ Start importing KML file:
 
     curl --location 'https://mds.dashboarddeelmobiliteit.nl/admin/kml/pre_import?municipality=GM0014' \
     --header 'Authorization: Bearer TOKEN' \
-    --form 'file=@"/Users/Sven/Downloads/Hubs_fiets-1.kml"'
+    --form 'file=@"/path/to/Hubs_fiets-1.kml"'
 
 Parameters:
 

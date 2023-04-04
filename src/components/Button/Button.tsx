@@ -12,7 +12,7 @@ function Button({
   theme?: string,
   children?: any,
   onClick?: any,
-  title?: any,
+  title?: string,
   type?: "button" | "reset" | "submit",
   classes?: string,
   style?: object
@@ -35,6 +35,7 @@ function Button({
         text-center
       `}
       type={type}
+      title={title}
       onClick={onClick}
       style={Object.assign({}, themes[theme], style)}
     >
