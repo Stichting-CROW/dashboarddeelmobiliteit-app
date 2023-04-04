@@ -31,7 +31,6 @@ import {
   setPublicZoneUrl,
   setAdminZoneUrl,
   getAdminZones,
-  // getPublicZones,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
@@ -95,15 +94,15 @@ function FilterbarZones({
   view
 }) {
   const zoneTemplate = {
-    zone_id: null,
-    stop_id: null,
-    area: null,
-    name: null,
-    municipality: null,
-    geography_id: null,
-    stop: null,
-    description: null,
-    no_parking: null,
+    zone_id: undefined,
+    stop_id: undefined,
+    area: undefined,
+    name: undefined,
+    municipality: undefined,
+    geography_id: undefined,
+    stop: undefined,
+    description: undefined,
+    no_parking: undefined,
     geography_type: 'monitoring',
     zone_availability: 'auto',
     published: true
