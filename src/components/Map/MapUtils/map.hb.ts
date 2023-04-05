@@ -193,7 +193,10 @@ const removeH3Grid = (map: any) => {
 
   key = 'h3-hex-areas';
   layer = map.getLayer(`${key}-layer`);
-  source = map.getSource(key);
+  if(layer) map.removeLayer(`${key}-layer`);
+
+  key = 'h3-hexes-percentageValues';
+  layer = map.getLayer(`${key}-layer`);
   if(layer) map.removeLayer(`${key}-layer`);
 
   removeH3Sources(map);
