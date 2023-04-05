@@ -28,6 +28,7 @@ const getAllCheckboxes = () => {
 const selectAll = () => {
   const checkboxes = getAllCheckboxes();
   checkboxes.forEach(x => {
+    if(x.disabled) return;
     x.checked = true;
   });
 }
@@ -48,6 +49,7 @@ const ZoneToImport = ({
         type="checkbox"
         name={`import_zone_${data.zone.geography_id}`}
         defaultChecked={data.is_within_borders_municipality ? true : false}
+        disabled={! data.is_within_borders_municipality ? true : false}
       />
     </div>
     <div>
@@ -65,13 +67,15 @@ const ZonesToImportConfigurator = ({
   draftZones: any
 }) => {
   return <>
-    <div className="w-full grid grid-cols-3 gap-3">
+    <div className="w-full grid grid-cols-3 gap-3" style={{
+      gridTemplateColumns: '1fr auto 1fr'
+    }}>
 
       <div className="font-bold">
-        Alles <a href="#" className="underline" onClick={selectAll}>
-          selecteren
+        Selecteer <a href="#" className="underline" onClick={selectAll}>
+          alles
         </a> / <a href="#" className="underline" onClick={deselectAll}>
-          deselecteren
+          niets
         </a>
       </div>
       <div className="font-bold">

@@ -15,7 +15,8 @@ import {ZonesToImportConfigurator} from './ZonesToImportConfigurator';
 
 const ImportZones = ({
   notificationText,
-  draftZones
+  draftZones,
+  fileChangedHandler
 }) => {
 
   return <>
@@ -25,7 +26,7 @@ const ImportZones = ({
 
     <form encType="multipart/form-data">
       <p className="mt-4">
-        <input type="file" name="file" id="js-kml-file" accept=".kml" />
+        <input type="file" name="file" id="js-kml-file" accept=".kml" onChange={fileChangedHandler} />
       </p>
     </form>
 
@@ -185,6 +186,11 @@ const ImportZonesModal = ({
       <ImportZones
         notificationText={getNotificationText()}
         draftZones={draftZones}
+        fileChangedHandler={() => {
+          setNotificationText('Je hebt een nieuw bestand geselecteerd. Klik op "Laad zones" om verder te gaan.');
+          setIsProcessingFile(false);
+          setDraftZones([]);
+        }}
       />
     </Modal>
   )
