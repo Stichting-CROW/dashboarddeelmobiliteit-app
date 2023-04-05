@@ -162,7 +162,7 @@ const ImportZonesModal = ({
       button1Handler={(e) => {
         postImportFunc();
       }}
-      button2Title={didPreprocess ? 'Importeer zones' : 'Importeer'}
+      button2Title={didPreprocess ? 'Importeer zones' : 'Laad zones'}
       button2Handler={async (e) => {
         e.preventDefault();
         

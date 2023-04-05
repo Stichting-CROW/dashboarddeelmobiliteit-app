@@ -45,12 +45,18 @@ const Modal = ({
       >
         <div className="
           modal-dialog modal-dialog-centered modal-dialog-scrollable relative w-auto pointer-events-none
-        ">
+          max-w-full
+        " style={{
+          height: '90%'
+        }}>
           <div className="
 ,            modal-content border-none shadow-lg relative flex flex-col pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current
-            mx-auto max-w-11/12
+            mx-auto w-11/12
+            max-w-full
           " style={{
             width: '800px',
+            maxWidth: '98%',
+            maxHeight: '100%'
           }}>
             <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">
               <h5 className="text-xl leading-normal text-gray-800 font-semibold" id="exampleModalCenteredScrollableLabel">
@@ -62,7 +68,11 @@ const Modal = ({
                 onClick={hideModalHandler}
                 ></button>
             </div>
-            {children && <div className="modal-body relative p-4">
+            {children && <div className="
+              modal-body relative p-4
+              overflow-auto
+              flex-1
+            ">
               {children}
             </div>}
             <div
