@@ -1122,8 +1122,8 @@ function FilterbarZones({
         </p>
         <ul className="my-4">
            <li>
-             &raquo; <a href={`https://mds.dashboarddeelmobiliteit.nl/kml/export?municipality=${filterGebied}`} className="font-bold theme-color-blue">
-               Download KML van gemeente {filterGebied}
+             &raquo; <a href={`https://mds.dashboarddeelmobiliteit.nl/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
+               Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
              </a>
            </li>
         </ul>
