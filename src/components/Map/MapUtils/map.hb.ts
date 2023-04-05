@@ -98,6 +98,7 @@ const findSymbolLayer = (map) => {
       break;
     }
   }
+  return '';// Disable
   return firstSymbolId;
 }
 
@@ -106,7 +107,7 @@ const findSymbolLayer = (map) => {
 //   '88283082a1fffff': 0.5669828486310873
 // }
 
-const fetchHexagons = async (token: string, filter: any) => {
+const fetchHbData = async (token: string, filter: any) => {
   // Abort previous fetch
   if(theFetch) {
     theFetch.abort()
@@ -201,13 +202,14 @@ const getH3Hexes = (filter) => {
   return (filter.h3niveau  && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
 }
 
-const getAggregatedStats = (hexagons: any) => {
+const getAggregatedStats = (geojson: any) => {
   let maxCount: number = 0;
   let sumCount: number = 0;
-  Object.values(hexagons).forEach((x: number) => {
-    sumCount += x;
-    if(x > maxCount) {
-      maxCount = x;
+  Object.values(geojson.features).forEach((x: any) => {
+    const value = x.properties.value;
+    sumCount += value;
+    if(value > maxCount) {
+      maxCount = value;
     }
   });
   return {
@@ -216,24 +218,9 @@ const getAggregatedStats = (hexagons: any) => {
   };
 } 
 
-function renderHexes(map, hexagons, filter) {
-
-  // Get selected h3 hexe(s) from state
-  const selectedH3Hexes = getH3Hexes(filter);
-
-  // Transform the current hexagon map into a GeoJSON object
-  const geojson = geojson2h3.h3SetToFeatureCollection(
-    Object.keys(hexagons),
-    hex => {
-      return {
-        value: hexagons[hex],
-        selected: selectedH3Hexes.indexOf(hex) > -1 ? 1 : 0
-      }
-    }
-  );
-
+async function renderPolygons_fill(map, geojson, filter) {
   // Get highest hex value
-  const {maxCount, sumCount} = getAggregatedStats(hexagons);
+  const {maxCount, sumCount} = getAggregatedStats(geojson);
 
   const sourceId = 'h3-hexes';
   let layerId = `${sourceId}-layer-fill`
@@ -303,13 +290,8 @@ function renderHexes(map, hexagons, filter) {
   createHoverEffect(map, 'h3-hexes-layer-fill', maxCount, sumCount);
 }
 
-function renderAreas(map, hexagons, filter, threshold) {
-  
-  // Transform the current hexagon map into a GeoJSON object
-  const geojson = geojson2h3.h3SetToFeature(
-    Object.keys(hexagons).filter(hex => hexagons[hex] > threshold)
-  );
-  
+function renderPolygons_border(map, geojson, filter) {
+ 
   const sourceId = 'h3-hex-areas';
   const layerId = `${sourceId}-layer`;
   let source = map.getSource(sourceId);
@@ -348,11 +330,10 @@ function renderAreas(map, hexagons, filter, threshold) {
     ]);
   }
 
-
   // Update the geojson data
   source.setData(geojson);
 }
-function renderPercentageValues(map, hexagons, filter) {
+function renderPercentageValues(map, geojson, filter) {
   const sourceId = 'h3-hexes';
   const layerId = `${sourceId}-percentageValues-layer`;
 
@@ -360,6 +341,7 @@ function renderPercentageValues(map, hexagons, filter) {
     "id": layerId,
     "type": "symbol",
     "source": sourceId,
+    "minzoom": 11,
     "layout": {
       'text-field': ["case",
         [">", ["get", "value"], 0], ['get', 'value'], ""
@@ -397,7 +379,8 @@ const getHexesForViewPort = (map, filter) => {
 // Get hexes for user
 const getHexesForUser = async (map, token, filter) => {
   // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=8`);
+  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=8${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
+
   let responseJson;
 
   try {
@@ -428,11 +411,7 @@ const getHexesForUser = async (map, token, filter) => {
   return responseJson.result.accessible_h3_cells;
 }
 
-const renderH3Grid = async (
-  map: any,
-  token: string,
-  filter: any
-) => {
+const createFeatureCollection = async (map, token, filter, threshold) => {
   // Create placeholder variable
   let hexagonsAsArray = [];
 
@@ -443,22 +422,57 @@ const renderH3Grid = async (
   });
 
   // Render grid based on origins/destinations data
-  const hexagonsResponse = await fetchHexagons(token, filter);
+  const hexagonsResponse = await fetchHbData(token, filter);
   if(! hexagonsResponse || ! hexagonsResponse.result) return;
   const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
 
   hexagons.forEach((x: HexagonType) => {
     hexagonsAsArray[x.cell] = x.number_of_trips;
-  })
+  });
 
+  // Get selected h3 hexe(s) from state
+  const selectedH3Hexes = getH3Hexes(filter);
+
+  // Transform the current hexagon map into a GeoJSON object
+  const geojson = geojson2h3.h3SetToFeatureCollection(
+    Object.keys(hexagonsAsArray),
+    hex => {
+      return {
+        value: hexagonsAsArray[hex],
+        selected: selectedH3Hexes.indexOf(hex) > -1 ? 1 : 0
+      }
+    }
+  );
+
+  // Transform the current hexagon map into a GeoJSON object
+  const geojsonForOuterBorder = geojson2h3.h3SetToFeature(
+    Object.keys(hexagonsAsArray).filter(hex => hexagonsAsArray[hex] > threshold)
+  );
+
+  return {
+    geojson,
+    geojsonForOuterBorder
+  };
+}
+
+const renderH3Grid = async (
+  map: any,
+  token: string,
+  filter: any
+) => {
   // Remove old H3 sources first
   removeH3Sources(map);
+  // Get feature collection based on OD data
+  const featureCollectionResponse = await createFeatureCollection(map, token, filter, 0.75);
+  const geojson = featureCollectionResponse.geojson;
+  const geojsonForOuterBorder = featureCollectionResponse.geojsonForOuterBorder;
+
   // Render hexes
-  renderHexes(map, hexagonsAsArray, filter);
+  renderPolygons_fill(map, geojson, filter);
   // Render outline border
-  renderAreas(map, hexagonsAsArray, filter, 0.75);
+  renderPolygons_border(map, geojsonForOuterBorder, filter);
   // Render percentages inside the polygons
-  renderPercentageValues(map, hexagonsAsArray, filter);
+  renderPercentageValues(map, geojson, filter);
 }
 
 // Create a popup to be used on offer
@@ -536,6 +550,11 @@ const createHoverEffect = (map, layerId, maxCount, sumCount) => {
 }
 
 export {
+  removeH3Sources,
+  fetchHbData,
   renderH3Grid,
-  removeH3Grid
+  removeH3Grid,
+  renderPolygons_fill,
+  renderPolygons_border,
+  renderPercentageValues
 }

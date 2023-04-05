@@ -19,9 +19,12 @@ export default function FilteritemH3Niveau() {
     dispatch({ type: 'SET_FILTER_H3NIVEAU', payload: value })
   }
   
+  let classNameWijk = 'filter-herkomst-bestemming-button'
   let className7 = 'filter-herkomst-bestemming-button'
   let className8 = 'filter-herkomst-bestemming-button'
-  if(filterHerkomstBestemming===7) {
+  if(filterHerkomstBestemming==='wijk') {
+    classNameWijk+=' filter-herkomst-bestemming-button-active'
+  } else if(filterHerkomstBestemming===7) {
     className7+=' filter-herkomst-bestemming-button-active'
   } else {
     className8+=' filter-herkomst-bestemming-button-active'
@@ -30,8 +33,9 @@ export default function FilteritemH3Niveau() {
   return (
     <div className="filter-herkomst-bestemming-container">
       <div className="filter-herkomst-bestemming-box-row">
-        <div className={className7} onClick={setFilterH3Niveau(7)}>Niveau 7</div>
-        <div className={className8} onClick={setFilterH3Niveau(8)}>Niveau 8</div>
+        <div className={classNameWijk} onClick={setFilterH3Niveau('wijk')}>Wijk</div>
+        <div className={className7} onClick={setFilterH3Niveau(7)}>H3 x7</div>
+        <div className={className8} onClick={setFilterH3Niveau(8)}>H3 x8</div>
       </div>
     </div>
   )

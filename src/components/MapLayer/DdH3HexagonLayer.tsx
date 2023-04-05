@@ -56,6 +56,7 @@ const DdH3HexagonLayer = ({
     map,
     is_hb_view,
     stateLayers.displaymode,
+    filter.gebied,
     filter.h3niveau,
     filter.h3hexes7,
     filter.h3hexes8,
