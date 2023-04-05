@@ -11,6 +11,34 @@ import {StateType} from '../../types/StateType';
 
 import Button from '../Button/Button';
 
+const getAllCheckboxes = () => {
+  const checkboxes = (document.querySelectorAll('input[type=checkbox]') as NodeListOf<Element>);
+  const relevantCheckboxes = [];
+  checkboxes.forEach(x => {
+    // Get input name
+    const name = x['name'];
+    // Check if this is a checkbox we want to check
+    if(name.indexOf('import_zone_') <= -1) return;
+    
+    relevantCheckboxes.push(x);
+  });
+  return relevantCheckboxes;
+}
+
+const selectAll = () => {
+  const checkboxes = getAllCheckboxes();
+  checkboxes.forEach(x => {
+    x.checked = true;
+  });
+}
+
+const deselectAll = () => {
+  const checkboxes = getAllCheckboxes();
+  checkboxes.forEach(x => {
+    x.checked = false;
+  });
+}
+
 const ZoneToImport = ({
   data
 }) => {
@@ -40,7 +68,11 @@ const ZonesToImportConfigurator = ({
     <div className="w-full grid grid-cols-3 gap-3">
 
       <div className="font-bold">
-        
+        Alles <a href="#" className="underline" onClick={selectAll}>
+          selecteren
+        </a> / <a href="#" className="underline" onClick={deselectAll}>
+          deselecteren
+        </a>
       </div>
       <div className="font-bold">
         Naam
