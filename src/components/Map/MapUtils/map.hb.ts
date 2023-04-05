@@ -144,9 +144,21 @@ const fetchHexagons = async (token: string, filter: any) => {
   return responseJson;
 }
 
+const removeH3Sources = (map: any) => {
+  let key, source;
+  
+  key = 'h3-hexes';
+  source = map.getSource(key);
+  if(source) map.removeSource(key);
+
+  key = 'h3-hex-areas';
+  source = map.getSource(key);
+  if(source) map.removeSource(key);
+}
+
 const removeH3Grid = (map: any) => {
   let layer, key;
-  let source, sourceId;
+  let source;
   
   key = 'h3-hexes-layer-fill';
   layer = map.getLayer(`${key}`);
@@ -160,13 +172,13 @@ const removeH3Grid = (map: any) => {
   layer = map.getLayer(`${key}-layer`);
   source = map.getSource(key);
   if(layer) map.removeLayer(`${key}-layer`);
-  if(source) map.removeSource(key);
 
   key = 'h3-hex-areas';
   layer = map.getLayer(`${key}-layer`);
   source = map.getSource(key);
   if(layer) map.removeLayer(`${key}-layer`);
-  if(layer) map.removeSource(key);
+
+  removeH3Sources(map);
 }
 
 const getH3Hexes = (filter) => {
@@ -386,6 +398,9 @@ const renderH3Grid = async (
     hexagonsAsArray[x.cell] = x.number_of_trips;
   })
 
+  // Remove old H3 sources first
+  removeH3Sources(map);
+  // Render hexes
   renderHexes(map, hexagonsAsArray, filter);
   // Render outline border
   renderAreas(map, hexagonsAsArray, filter, 0.75);

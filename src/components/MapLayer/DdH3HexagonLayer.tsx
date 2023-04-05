@@ -44,10 +44,12 @@ const DdH3HexagonLayer = ({
   useEffect(() => {
     // Stop if map didn't load
     if(! map) return;
-    // Always remove 'old' H3 grid from map first
-    removeH3Grid(map);
     // Stop if no HB mode
-    if(! is_hb_view) return;
+    if(! is_hb_view) {
+      // If no HB view: remove remove 'old' H3 grid from map first
+      removeH3Grid(map);
+      return;
+    }
     // If HB map is active: render hexagons
     renderH3Grid(map, token, filter);
   }, [
