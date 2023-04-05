@@ -701,8 +701,13 @@ function FilterbarZones({
                 onClick={() => {
                   setDoShowImportModal(true)
                 }}
+                style={{padding: 0, width: '37px'}}
               >
-                ⬆️
+                <span className="material-symbols-outlined" style={{
+                  // fontSize: '20px'
+                }}>
+                  upload
+                </span>
               </Button>
 
               {doShowImportModal && <ImportZonesModal postImportFunc={() => {
