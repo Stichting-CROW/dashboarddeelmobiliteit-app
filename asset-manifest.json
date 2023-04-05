@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.b5d695c1.css",
-    "main.js": "/static/js/main.a29ecc09.js",
+    "main.js": "/static/js/main.a012ce40.js",
     "static/js/787.8ac7cd06.chunk.js": "/static/js/787.8ac7cd06.chunk.js",
     "static/media/layer-map-style-satelite.png": "/static/media/layer-map-style-satelite.8cd4b63e20e0bd02c788.png",
     "static/media/layer-map-style-default.png": "/static/media/layer-map-style-default.63221e55b463875551bc.png",
@@ -9,9 +9,9 @@
     "static/media/layer-heatmap.png": "/static/media/layer-heatmap.6317acea2067eed6d873.png",
     "static/media/layer-vehicles.png": "/static/media/layer-vehicles.573e323186b034b512a8.png",
     "static/media/layer-clusters.png": "/static/media/layer-clusters.c15743517572fb088054.png",
+    "index.html": "/index.html",
     "static/media/172591_dinghy_icon-active.svg": "/static/media/172591_dinghy_icon-active.1c701975b0d7d9fd66ee.svg",
     "static/media/172591_dinghy_icon.svg": "/static/media/172591_dinghy_icon.070eb7d0534c08664c05.svg",
-    "index.html": "/index.html",
     "static/media/scooter-active.svg": "/static/media/scooter-active.9489c7946163a4c3ee5e.svg",
     "static/media/scooter.svg": "/static/media/scooter.0a9628cb1c4eef5ceda9.svg",
     "static/media/auto-active.svg": "/static/media/auto-active.ef12bb728ffa48a85d4f.svg",
@@ -34,11 +34,11 @@
     "static/media/search-solid.svg": "/static/media/search-solid.6b31fe2388f30dcac021.svg",
     "static/media/controls-zoom-out.svg": "/static/media/controls-zoom-out.b83ce275d7125aca58c8.svg",
     "main.b5d695c1.css.map": "/static/css/main.b5d695c1.css.map",
-    "main.a29ecc09.js.map": "/static/js/main.a29ecc09.js.map",
+    "main.a012ce40.js.map": "/static/js/main.a012ce40.js.map",
     "787.8ac7cd06.chunk.js.map": "/static/js/787.8ac7cd06.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b5d695c1.css",
-    "static/js/main.a29ecc09.js"
+    "static/js/main.a012ce40.js"
   ]
 }
