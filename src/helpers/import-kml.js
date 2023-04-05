@@ -1,9 +1,10 @@
 const preprocessKmlFile = async ({
   token,
+  gm_code,
   body
 }) => {
 
-  const response = await fetch("https://mds.dashboarddeelmobiliteit.nl/admin/kml/pre_import?municipality=GM0014", {
+  const response = await fetch(`https://mds.dashboarddeelmobiliteit.nl/admin/kml/pre_import?municipality=${gm_code}`, {
     method: "POST",
     body,
     headers: {
@@ -20,10 +21,11 @@ const preprocessKmlFile = async ({
 
 const importKmlFile = async ({
   token,
+  gm_code,
   body
 }) => {
 
-  const response = await fetch("https://mds.dashboarddeelmobiliteit.nl/admin/bulk_insert_zones", {
+  const response = await fetch(`https://mds.dashboarddeelmobiliteit.nl/admin/bulk_insert_zones`, {
     method: "POST",
     body: JSON.stringify(body),
     headers: {

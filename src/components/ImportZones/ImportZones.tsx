@@ -47,14 +47,19 @@ const ImportZonesModal = ({
   // Get API token
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
+  // Get gebied / municipality code
+  const gm_code = useSelector((state: StateType) => state.filter.gebied);
+
   // Define state variables
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [importWasSuccesful, setImportWasSuccesful] = useState(false);
   const [notificationText, setNotificationText] = useState('');
   const [draftZones, setDraftZones] = useState([]);
 
   const startProcessingFile = async () => {
     // Set loading=true
+    setImportWasSuccesful(false);
     setNotificationText('Het bestand wordt verwerkt...');
     setIsProcessingFile(true);
     setDraftZones([]);
@@ -70,6 +75,7 @@ const ImportZonesModal = ({
     try {
       responseJson = await preprocessKmlFile({
         token,
+        gm_code,
         body
       });
       setNotificationText('Het bestand is succesvol verwerkt. Selecteer hieronder de zones die je wilt importeren en klik dan op de knop: Importeer zones.');
@@ -102,6 +108,7 @@ const ImportZonesModal = ({
     });
 
     // Set loading=true
+    setImportWasSuccesful(false);
     setNotificationText('De zones worden geimporteerd...');
     setIsProcessingFile(true);
 
@@ -126,6 +133,7 @@ const ImportZonesModal = ({
 
     const response = await importKmlFile({
       token,
+      gm_code,
       body
     });
 
@@ -137,7 +145,8 @@ const ImportZonesModal = ({
     }
     // If no error: show that import was done succesful
     else {
-      setNotificationText('De zones zijn succesvol geimporteerd! Klik op "Annuleer" om de nieuwe zone(s) te bekijken in de filterbalk.');
+      setNotificationText('De zones zijn succesvol geimporteerd! Klik op "Sluiten" om de nieuwe zone(s) te bekijken in de filterbalk.');
+      setImportWasSuccesful(true);
       setIsProcessingFile(false);
       setDraftZones([]);
     }
@@ -163,10 +172,17 @@ const ImportZonesModal = ({
       button1Handler={(e) => {
         postImportFunc();
       }}
-      button2Title={didPreprocess ? 'Importeer zones' : 'Laad zones'}
+      button2Title={
+        importWasSuccesful ? 
+          'Sluiten' :
+          didPreprocess ? 'Importeer zones' : 'Laad zones'
+      }
       button2Handler={async (e) => {
         e.preventDefault();
         
+        if(importWasSuccesful) {
+          postImportFunc();
+        }
         if(didPreprocess) {
           // Import zones
           await startImportingFile();
@@ -187,6 +203,7 @@ const ImportZonesModal = ({
         notificationText={getNotificationText()}
         draftZones={draftZones}
         fileChangedHandler={() => {
+          setImportWasSuccesful(false);
           setNotificationText('Je hebt een nieuw bestand geselecteerd. Klik op "Laad zones" om verder te gaan.');
           setIsProcessingFile(false);
           setDraftZones([]);
