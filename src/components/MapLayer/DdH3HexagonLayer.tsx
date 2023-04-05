@@ -16,6 +16,9 @@ import {
   renderH3Grid,
   removeH3Grid
 } from '../Map/MapUtils/map.hb';
+import {
+  renderGeometriesGrid
+} from '../Map/MapUtils/map.hb.geometries';
 
 const DdH3HexagonLayer = ({
   map
@@ -51,7 +54,11 @@ const DdH3HexagonLayer = ({
       return;
     }
     // If HB map is active: render hexagons
-    renderH3Grid(map, token, filter);
+    if(false && filter.h3niveau === 'wijk') {
+      renderGeometriesGrid(map, token, filter);
+    } else {
+      renderH3Grid(map, token, filter);
+    }
   }, [
     map,
     is_hb_view,

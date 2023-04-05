@@ -128,8 +128,9 @@ const fetchHbData = async (token: string, filter: any) => {
   const includedModalities = allModalities.filter(x => excludedModalities.split(',').indexOf(x) <= -1);
 
   // Get API response
-  const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/h3`+
+  const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
               `?h3_resolution=${filter.h3niveau || 8}`+
+              // destination_stat_refs
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
               `&end_date=${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}`+
               `&time_periods=${filter.timeframes || '6-10,10-14,14-18,18-22,22-2,2-6'}`+
