@@ -131,7 +131,7 @@ Elke rij bevat de volgende waardes:
           `) }}
           />
         </Section>
-        <Section title="Hoe zie ik HB-relaties?">
+        <Section title="Hoe bekijk ik HB-relaties?">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Wil je HB-matrices zien? Ga dan naar de **Verhuringen**-pagina en klik bij lagen op **HB**.
 

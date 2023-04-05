@@ -86,6 +86,21 @@ const getColorStops = (maxCount, herkomstbestemming) => {
   return colorStops;
 }
 
+// Find symbol layer, so we can place layers below it (z-index)
+// Source: https://maplibre.org/maplibre-gl-js-docs/example/geojson-layer-in-stack/
+const findSymbolLayer = (map) => {
+  var layers = map.getStyle().layers;
+  // Find the index of the first symbol layer in the map style
+  var firstSymbolId;
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i].type === 'symbol') {
+      firstSymbolId = layers[i].id;
+      break;
+    }
+  }
+  return firstSymbolId;
+}
+
 // const exampleHexagons = {
 //   '88283082a3fffff': 0.23360022663054658,
 //   '88283082a1fffff': 0.5669828486310873
@@ -145,6 +160,7 @@ const fetchHexagons = async (token: string, filter: any) => {
 }
 
 const removeH3Sources = (map: any) => {
+  let layer;
   let key, source;
   
   key = 'h3-hexes';
@@ -185,14 +201,19 @@ const getH3Hexes = (filter) => {
   return (filter.h3niveau  && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
 }
 
-const getMaxCount = (hexagons: any) => {
+const getAggregatedStats = (hexagons: any) => {
   let maxCount: number = 0;
+  let sumCount: number = 0;
   Object.values(hexagons).forEach((x: number) => {
+    sumCount += x;
     if(x > maxCount) {
       maxCount = x;
     }
   });
-  return maxCount;
+  return {
+    maxCount: maxCount,
+    sumCount: sumCount
+  };
 } 
 
 function renderHexes(map, hexagons, filter) {
@@ -212,7 +233,7 @@ function renderHexes(map, hexagons, filter) {
   );
 
   // Get highest hex value
-  const maxCount: number = getMaxCount(hexagons);
+  const {maxCount, sumCount} = getAggregatedStats(hexagons);
 
   const sourceId = 'h3-hexes';
   let layerId = `${sourceId}-layer-fill`
@@ -237,7 +258,7 @@ function renderHexes(map, hexagons, filter) {
       source: sourceId,
       type: 'fill',
       // interactive: false,// <- What's this?
-    });
+    }, findSymbolLayer(map));
   }
   // If source was already present: Update data
   else {
@@ -267,7 +288,7 @@ function renderHexes(map, hexagons, filter) {
         "case",
         ["==", ["get", "selected"], 1], '#15aeef',
         ["boolean", ["feature-state", "hover"], false], '#666',
-        '#eee'
+        '#DDD'
       ],
       'line-width': [
         "case",
@@ -276,10 +297,10 @@ function renderHexes(map, hexagons, filter) {
         1
       ]
     }
-  });
+  }, findSymbolLayer(map));
 
   // Create hover effect (hovering fills)
-  createHoverEffect(map, 'h3-hexes-layer-fill', maxCount);
+  createHoverEffect(map, 'h3-hexes-layer-fill', maxCount, sumCount);
 }
 
 function renderAreas(map, hexagons, filter, threshold) {
@@ -314,12 +335,44 @@ function renderAreas(map, hexagons, filter, threshold) {
           (filter.herkomstbestemming === 'bestemming' ? '#F4010D' : config.colorScale[2])
         ]
       }
-    });
+    }, findSymbolLayer(map));
     source = map.getSource(sourceId);
   }
+  // Update paint properties as well if source was available already
+  else {
+    map.setPaintProperty(layerId, 'line-color', [
+      "case",
+      ["==", ["get", "selected"], 1], '#15aeef',
+      ["boolean", ["feature-state", "hover"], false], '#666',
+      (filter.herkomstbestemming === 'bestemming' ? '#F4010D' : config.colorScale[2])
+    ]);
+  }
+
 
   // Update the geojson data
   source.setData(geojson);
+}
+function renderPercentageValues(map, hexagons, filter) {
+  const sourceId = 'h3-hexes';
+  const layerId = `${sourceId}-percentageValues-layer`;
+
+  map.addLayer({
+    "id": layerId,
+    "type": "symbol",
+    "source": sourceId,
+    "layout": {
+      'text-field': ["case",
+        [">", ["get", "value"], 0], ['get', 'value'], ""
+      ],
+      "text-font": [
+        "DIN Offc Pro Medium",
+        "Arial Unicode MS Bold"
+      ],
+      "text-size": 12,
+      // 'text-offset': [0, 1.25],
+      // 'text-anchor': 'top'
+    }
+  });
 }
 
 // Get hexes for map viewport
@@ -404,6 +457,8 @@ const renderH3Grid = async (
   renderHexes(map, hexagonsAsArray, filter);
   // Render outline border
   renderAreas(map, hexagonsAsArray, filter, 0.75);
+  // Render percentages inside the polygons
+  renderPercentageValues(map, hexagonsAsArray, filter);
 }
 
 // Create a popup to be used on offer
@@ -414,7 +469,7 @@ const popup = new maplibregl.Popup({
 
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
 // https://maplibre.org/maplibre-gl-js-docs/example/popup-on-hover/
-const createHoverEffect = (map, layerId, maxCount) => {
+const createHoverEffect = (map, layerId, maxCount, sumCount) => {
   var hoveredStateId = null;
 
   // When the user moves their mouse over the state-fill layer, we'll update the
@@ -424,15 +479,15 @@ const createHoverEffect = (map, layerId, maxCount) => {
     map.getCanvas().style.cursor = 'pointer';
 
     const coordinates = e.features[0].geometry.coordinates.slice();
-    const percentage: number = e.features[0].properties.value / maxCount * 100;
-    const description = `${e.features[0].properties.value} (${percentage.toFixed(1)}%)`;
+    const percentageColorFill: number = e.features[0].properties.value / maxCount * 100;
+    const percentageOfTotal: number = e.features[0].properties.value / sumCount * 100;
+    // sumCount
+    const description = `${e.features[0].properties.value} (${percentageOfTotal.toFixed(1)}%)`;
     const lngLat = e.lngLat;
-    // console.log(e.features[0])
-    // const lngLatCenter = center(e.features[0].geometry.coordinates);
 
     // Populate the popup and set its coordinates
     // based on the feature found.
-    if(percentage > 0) {
+    if(percentageColorFill > 0) {
       popup.setLngLat(lngLat).setHTML(description).addTo(map);
     }
 
