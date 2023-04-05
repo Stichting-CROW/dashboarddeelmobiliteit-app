@@ -4,6 +4,10 @@ import geojson2h3 from 'geojson2h3';
 import maplibregl from 'maplibre-gl';
 import center from '@turf/center'
 
+import {
+  abortableFetch
+} from '../../../poll-api/pollTools.js';
+
 type HexagonType = any;
 
 const config = ({
@@ -13,6 +17,9 @@ const config = ({
   fillOpacity: 0.6,
   colorScale: ['#ffffcc', '#78c679', '#006837']
 })
+
+// Variable that will prevent simultaneous loading of fetch requests
+let theFetch = null;
 
 const getColorStops = (maxCount, herkomstbestemming) => {
   if(! maxCount || maxCount <= 0) {
@@ -85,6 +92,11 @@ const getColorStops = (maxCount, herkomstbestemming) => {
 // }
 
 const fetchHexagons = async (token: string, filter: any) => {
+  // Abort previous fetch
+  if(theFetch) {
+    theFetch.abort()
+  }
+
   const getFetchOptions = () => {
     return {
       headers: {
@@ -115,10 +127,18 @@ const fetchHexagons = async (token: string, filter: any) => {
   let response, responseJson;
 
   try {
-    response = await fetch(url, getFetchOptions());
+    // Do a fetch
+    theFetch = abortableFetch(url, getFetchOptions());
+    const response = await theFetch.ready;
+    // Set theFetch to null, so next request is not aborted
+    theFetch = null;
+    // Get response JSON
     responseJson = await response.json();
   } catch(e) {
     console.error(e);
+
+    // Set theFetch to null, so next request is not aborted
+    theFetch = null;
   }
 
   return responseJson;
