@@ -124,6 +124,7 @@ function FilterbarZones({
   const [pathName, setPathName] = useState(document.location.pathname);
   const [doShowModal, setDoShowModal] = useState(false);
   const [doShowImportModal, setDoShowImportModal] = useState(false);
+  const [doShowExportModal, setDoShowExportModal] = useState(false);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -658,26 +659,44 @@ function FilterbarZones({
         <div className={labelClassNames}>
           &nbsp;
         </div>
-        <div className="flex justify-end -mr-2">
-          <Link to="/map/zones">
+        <div className="flex justify-between">
+          <div style={{marginLeft: '-0.5rem'}}>
             <Button
               theme="white"
-              style={{
-                borderColor: '#666'
+              title="Download zones als KML-bestand"
+              onClick={() => {
+                setDoShowExportModal(true)
               }}
+              style={{padding: 0, width: '37px', height: '37px'}}
             >
-              📊
+              <span className="material-symbols-outlined" style={{
+                // fontSize: '20px'
+              }}>
+                download
+              </span>
             </Button>
-          </Link>
-          
-          <Link to="/admin/zones">
-            <Button
-              theme="white"
-              title="Naar zones bewerken"
-            >
-              ✏️
-            </Button>
-          </Link>
+          </div>
+          <div className="flex justify-end -mr-2">
+            <Link to="/map/zones">
+              <Button
+                theme="white"
+                style={{
+                  borderColor: '#666'
+                }}
+              >
+                📊
+              </Button>
+            </Link>
+            
+            <Link to="/admin/zones">
+              <Button
+                theme="white"
+                title="Naar zones bewerken"
+              >
+                ✏️
+              </Button>
+            </Link>
+          </div>
         </div>
       </>}
 
@@ -1073,6 +1092,41 @@ function FilterbarZones({
         <p className="mt-4">
           Je kunt ook <b>Doorgaan</b> zonder op te slaan.
         </p>
+      </Modal>
+
+      <Modal
+        isVisible={doShowExportModal}
+        title="Exporteer KML-bestand"
+        button1Title={false}
+        button1Handler={(e) => {
+          setDoShowExportModal(false);
+        }}
+        button2Title={"Sluiten"}
+        button2Handler={(e) => {
+          e.preventDefault();
+          // Hide modal
+          setDoShowExportModal(false);
+        }}
+        hideModalHandler={() => {
+          setDoShowExportModal(false);
+        }}
+      >
+        <p className="mb-4">
+          Met onderstaande link kun je de ingetekende zones als KML-bestanden downloaden.
+        </p>
+        <p className="mb-4">
+          Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
+        </p>
+        <p className="mb-4">
+          Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
+        </p>
+        <ul className="my-4">
+           <li>
+             &raquo; <a href={`https://mds.dashboarddeelmobiliteit.nl/kml/export?municipality=${filterGebied}`} className="font-bold theme-color-blue">
+               Download KML van gemeente {filterGebied}
+             </a>
+           </li>
+        </ul>
       </Modal>
 
     </div>
