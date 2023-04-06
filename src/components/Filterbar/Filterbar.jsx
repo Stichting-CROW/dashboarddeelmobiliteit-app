@@ -154,9 +154,9 @@ function Filterbar({
 
         { isLoggedIn && showduur && <FilteritemDuur /> }
 
-        <Fieldset title="Periode">
+        {showvantot && <Fieldset title="Periode">
           <FilteritemDatumVanTot />
-        </Fieldset>
+        </Fieldset>}
 
         <Fieldset title="Plaats">
           <FilteritemGebieden />
