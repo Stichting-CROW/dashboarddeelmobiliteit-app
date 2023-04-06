@@ -383,7 +383,7 @@ const getHexesForViewPort = (map, filter) => {
 // Get hexes for user
 const getHexesForUser = async (map, token, filter) => {
   // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=8${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
+  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=${filter.h3niveau}${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
 
   let responseJson;
 
@@ -468,6 +468,13 @@ const renderH3Grid = async (
   removeH3Sources(map);
   // Get feature collection based on OD data
   const featureCollectionResponse = await createFeatureCollection(map, token, filter, 0.75);
+
+  // If no geojson was given: Remove features
+  if(! featureCollectionResponse || ! featureCollectionResponse.geojson) {
+    removeH3Grid(map);
+    return;
+  }
+
   const geojson = featureCollectionResponse.geojson;
   const geojsonForOuterBorder = featureCollectionResponse.geojsonForOuterBorder;
 
