@@ -7,10 +7,10 @@ import {StateType} from '../../types/StateType';
 export default function FilteritemH3Niveau() {
   const dispatch = useDispatch()
 
-  const filterHerkomstBestemming = useSelector((state: StateType) => {
+  const filterHerkomstBestemming = useSelector((state) => {
     let value = 7;
     if(state.filter) {
-      value=state.filter.h3niveau === 7 ? 7 : 8;
+      value = state.filter.h3niveau;
     }
     return value;
   });
@@ -33,7 +33,7 @@ export default function FilteritemH3Niveau() {
   return (
     <div className="filter-herkomst-bestemming-container">
       <div className="filter-herkomst-bestemming-box-row">
-        {/*<div className={classNameWijk} onClick={setFilterH3Niveau('wijk')}>Wijk</div>*/}
+        <div className={classNameWijk} onClick={setFilterH3Niveau('wijk')}>Wijk</div>
         <div className={className7} onClick={setFilterH3Niveau(7)}>H3 x7</div>
         <div className={className8} onClick={setFilterH3Niveau(8)}>H3 x8</div>
       </div>

@@ -13,12 +13,14 @@ import {
 import {StateType} from '../../types/StateType';
 
 import {
-  renderH3Grid,
   removeH3Grid
 } from '../Map/MapUtils/map.hb';
 import {
   renderGeometriesGrid
 } from '../Map/MapUtils/map.hb.geometries';
+import {
+  renderH3Grid
+} from '../Map/MapUtils/map.hb.h3';
 
 const DdH3HexagonLayer = ({
   map
@@ -35,6 +37,7 @@ const DdH3HexagonLayer = ({
   // Make sure h3hexes7 and h3hexes8 are available as array
   if(! filter.h3hexes7) filter.h3hexes7 = [];
   if(! filter.h3hexes8) filter.h3hexes8 = [];
+  if(! filter.h3hexeswijk) filter.h3hexeswijk = [];
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -54,7 +57,7 @@ const DdH3HexagonLayer = ({
       return;
     }
     // If HB map is active: render hexagons
-    if(false && filter.h3niveau === 'wijk') {
+    if(filter.h3niveau === 'wijk') {
       renderGeometriesGrid(map, token, filter);
     } else {
       renderH3Grid(map, token, filter);
@@ -67,8 +70,10 @@ const DdH3HexagonLayer = ({
     filter.h3niveau,
     filter.h3hexes7,
     filter.h3hexes8,
+    filter.h3hexeswijk,
     filter.h3hexes7.length,
     filter.h3hexes8.length,
+    filter.h3hexeswijk.length,
     filter.ontwikkelingvan,
     filter.ontwikkelingtot,
     filter.timeframes,
@@ -83,25 +88,36 @@ const DdH3HexagonLayer = ({
 
     const didClick = (e) => {
       const coordinates = e.lngLat;
+      let valueToSet;
 
-      // Convert a lat/lng point to a hexagon index at resolution 7
-      const h3Index = latLngToCell(coordinates.lat, coordinates.lng, filter.h3niveau);
+      // If clicked on a H3 hex
+      if(filter.h3niveau === 7 || filter.h3niveau === 8) {
+        // Convert a lat/lng point to a hexagon index at resolution 7/8
+        valueToSet = latLngToCell(coordinates.lat, coordinates.lng, filter.h3niveau);        
+      }
+      // If clicked on a CBS wijk:
+      else if(filter.h3niveau === 'wijk') {
+        valueToSet = e.features[0].properties.stats_ref;
+      }
 
       const userHoldsCtrl = e.originalEvent !== undefined ? e.originalEvent.ctrlKey : false;
 
-      // Set selected h3Index
-      if(filter.h3niveau === 7) {
-        dispatch({ type: (userHoldsCtrl ? 'TOGGLE' : 'SET') + '_FILTER_H3HEXES_7', payload: h3Index });
+      // Set valueToSet in state
+      if(filter.h3niveau === 'wijk') {
+        dispatch({ type: (userHoldsCtrl ? 'TOGGLE' : 'SET') + '_FILTER_H3HEXES_WIJK', payload: valueToSet });
+      }
+      else if(filter.h3niveau === 7) {
+        dispatch({ type: (userHoldsCtrl ? 'TOGGLE' : 'SET') + '_FILTER_H3HEXES_7', payload: valueToSet });
       }
       else if(filter.h3niveau === 8) {
-        dispatch({ type: (userHoldsCtrl ? 'TOGGLE' : 'SET') + '_FILTER_H3HEXES_8', payload: h3Index });
+        dispatch({ type: (userHoldsCtrl ? 'TOGGLE' : 'SET') + '_FILTER_H3HEXES_8', payload: valueToSet });
       }
     }
 
-    map.on('click', didClick);
+    map.on('click', 'h3-hexes-layer-fill', didClick);
 
     return () => {
-      map.off('click', didClick);
+      map.off('click', 'h3-hexes-layer-fill', didClick);
     }
   }, [
     map,

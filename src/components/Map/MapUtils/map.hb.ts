@@ -1,14 +1,10 @@
 import moment from 'moment';
-import h3, {latLngToCell, polygonToCells} from 'h3-js';// https://github.com/uber/h3-js/blob/master/README.md#core-functions
-import geojson2h3 from 'geojson2h3';
 import maplibregl from 'maplibre-gl';
 import center from '@turf/center'
 
 import {
   abortableFetch
 } from '../../../poll-api/pollTools.js';
-
-type HexagonType = any;
 
 const config = ({
   lng: -122.4,
@@ -110,7 +106,7 @@ const findSymbolLayer = (map) => {
 const fetchHbData = async (token: string, filter: any) => {
   // Abort previous fetch
   if(theFetch) {
-    theFetch.abort()
+    theFetch.abort();
   }
 
   const getFetchOptions = () => {
@@ -129,8 +125,8 @@ const fetchHbData = async (token: string, filter: any) => {
 
   // Get API response
   const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
-              `?h3_resolution=${filter.h3niveau || 8}`+
-              // destination_stat_refs
+              (filter.h3niveau === 7 || filter.h3niveau === 8 ? `?h3_resolution=${filter.h3niveau || 8}` : '')+
+              (filter.h3niveau === 'wijk' ? `?${filter.herkomstbestemming === 'bestemming' ? 'origin' : 'destination'}_stat_refs=${filter.h3hexeswijk}` : '')+
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
               `&end_date=${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}`+
               `&time_periods=${filter.timeframes || '6-10,10-14,14-18,18-22,22-2,2-6'}`+
@@ -200,10 +196,6 @@ const removeH3Grid = (map: any) => {
   if(layer) map.removeLayer(`${key}-layer`);
 
   removeH3Sources(map);
-}
-
-const getH3Hexes = (filter) => {
-  return (filter.h3niveau  && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
 }
 
 const getAggregatedStats = (geojson: any) => {
@@ -361,131 +353,6 @@ function renderPercentageValues(map, geojson, filter) {
   });
 }
 
-// Get hexes for map viewport
-const getHexesForViewPort = (map, filter) => {
-  // If zoom level is less than 9, don't render hex grid for viewport
-  // (because otherwise it's to resourcefull)
-  if(map.getZoom() < 9) return [];
-
-  const { _sw: sw, _ne: ne} = map.getBounds();
-  const boundsPolygon =[
-      [ sw.lat, sw.lng ],
-      [ ne.lat, sw.lng ],
-      [ ne.lat, ne.lng ],
-      [ sw.lat, ne.lng ],
-      [ sw.lat, sw.lng ],
-  ];
-  const hexes = polygonToCells(boundsPolygon, filter.h3niveau);
-
-  return hexes;
-}
-
-// Get hexes for user
-const getHexesForUser = async (map, token, filter) => {
-  // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=${filter.h3niveau}${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
-
-  let responseJson;
-
-  try {
-    let response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Authorization": `Bearer ${token}`
-      }
-    });
-    responseJson = await response.json();
-  } catch(e) {
-    console.error(e);
-  }
-
-  // Validate
-  if(! responseJson || ! responseJson.result) {
-    console.error('No valid response json returned for getting accessible h3 hexes')
-    return;
-  }
-
-  // If user has access to everything: Only get h3 hexes for viewport
-  if(responseJson.result.all_accessible === true) {
-    const h3HexesForViewport = getHexesForViewPort(map, filter);
-    return h3HexesForViewport;
-  }
-
-  // Otherwise: Return all hexes available for user
-  return responseJson.result.accessible_h3_cells;
-}
-
-const createFeatureCollection = async (map, token, filter, threshold) => {
-  // Create placeholder variable
-  let hexagonsAsArray = [];
-
-  // Render grid for full map
-  const h3HexesForUser = await getHexesForUser(map, token, filter)
-  h3HexesForUser.forEach((x) => {
-    hexagonsAsArray[x] = 0;
-  });
-
-  // Render grid based on origins/destinations data
-  const hexagonsResponse = await fetchHbData(token, filter);
-  if(! hexagonsResponse || ! hexagonsResponse.result) return;
-  const hexagons = hexagonsResponse.result.destinations || hexagonsResponse.result.origins;
-
-  hexagons.forEach((x: HexagonType) => {
-    hexagonsAsArray[x.cell] = x.number_of_trips;
-  });
-
-  // Get selected h3 hexe(s) from state
-  const selectedH3Hexes = getH3Hexes(filter);
-
-  // Transform the current hexagon map into a GeoJSON object
-  const geojson = geojson2h3.h3SetToFeatureCollection(
-    Object.keys(hexagonsAsArray),
-    hex => {
-      return {
-        value: hexagonsAsArray[hex],
-        selected: selectedH3Hexes.indexOf(hex) > -1 ? 1 : 0
-      }
-    }
-  );
-
-  // Transform the current hexagon map into a GeoJSON object
-  const geojsonForOuterBorder = geojson2h3.h3SetToFeature(
-    Object.keys(hexagonsAsArray).filter(hex => hexagonsAsArray[hex] > threshold)
-  );
-
-  return {
-    geojson,
-    geojsonForOuterBorder
-  };
-}
-
-const renderH3Grid = async (
-  map: any,
-  token: string,
-  filter: any
-) => {
-  // Remove old H3 sources first
-  removeH3Sources(map);
-  // Get feature collection based on OD data
-  const featureCollectionResponse = await createFeatureCollection(map, token, filter, 0.75);
-
-  // If no geojson was given: Remove features
-  if(! featureCollectionResponse || ! featureCollectionResponse.geojson) {
-    removeH3Grid(map);
-    return;
-  }
-
-  const geojson = featureCollectionResponse.geojson;
-  const geojsonForOuterBorder = featureCollectionResponse.geojsonForOuterBorder;
-
-  // Render hexes
-  renderPolygons_fill(map, geojson, filter);
-  // Render outline border
-  renderPolygons_border(map, geojsonForOuterBorder, filter);
-  // Render percentages inside the polygons
-  renderPercentageValues(map, geojson, filter);
-}
-
 // Create a popup to be used on offer
 const popup = new maplibregl.Popup({
   closeButton: false,
@@ -563,7 +430,6 @@ const createHoverEffect = (map, layerId, maxCount, sumCount) => {
 export {
   removeH3Sources,
   fetchHbData,
-  renderH3Grid,
   removeH3Grid,
   renderPolygons_fill,
   renderPolygons_border,
