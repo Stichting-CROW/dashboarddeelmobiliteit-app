@@ -37,6 +37,11 @@ const Weekdays = () => {
   const dispatch = useDispatch();
 
   const activeWeekdays = useSelector((state: StateType) => {
+    // 2023-04-12 Make sure no comma (,) is at the beginning of the string
+    if(state.filter && state.filter.weekdays && state.filter.weekdays[0] === ',') {
+      return 'mo,tu,we,th,fr,sa,su';
+    }
+    // Return
     return (state.filter && state.filter.weekdays) ? state.filter.weekdays : '';
   });
 
@@ -94,6 +99,11 @@ const Timeframes = () => {
   const dispatch = useDispatch();
 
   const activeTimeframes = useSelector((state: StateType) => {
+    // 2023-04-12 Make sure no comma (,) is at the beginning of the string
+    if(state.filter && state.filter.timeframes && state.filter.timeframes[0] === ',') {
+      return '2-6,6-10,10-14,14-18,18-22,22-2';
+    }
+    // Return
     return (state.filter && state.filter.timeframes) ? state.filter.timeframes : '';
   });
 
