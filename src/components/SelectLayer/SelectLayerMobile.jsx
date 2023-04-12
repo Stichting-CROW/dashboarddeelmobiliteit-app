@@ -64,19 +64,6 @@ function SelectLayerMobile(props) {
     })
   }
 
-  const doShowOd = () => {
-    return true;
-
-    const emailAddresses = [
-      'mail@bartroorda.nl',
-      'bart+schiedam@tuxion.nl',
-      // 'rinse.gorter@denhaag.nl',
-      'otto.vanboggelen@crow.nl',
-      'sven.boor@gmail.com'
-    ]
-    return userData && userData.user && emailAddresses.indexOf(userData.user.email) > -1;
-  }
-
   return (
     <MobileSlideBox
       title="Lagen"
@@ -117,7 +104,7 @@ function SelectLayerMobile(props) {
           </span>
         </div> : null }
 
-      { (displayMode===DISPLAYMODE_RENTALS && doShowOd()) ?
+      { (displayMode===DISPLAYMODE_RENTALS) ?
         <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
           onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
           <span className="layer-title">
