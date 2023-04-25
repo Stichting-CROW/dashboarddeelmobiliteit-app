@@ -28,6 +28,7 @@ function Export() {
   const [succesfullRawDataRequest, setSuccesfullRawDataRequest] = useState(false);
   const [succesfullRawDataRequestEmail, setSuccesfullRawDataRequestEmail] = useState("");
   const [succesfullRawDataRequestNumberOfTasks, setSuccesfullRawDataRequestNumberOfTasks] = useState(0);
+  const [filterOperator, setFilterOperator] = useState([]);
 
   const places = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
@@ -63,10 +64,11 @@ function Export() {
       response.json().then((acl) => {
         const isAdmin = acl.is_admin === true;
         const isContactPerson = acl.is_contact_person_municipality === true;
-
+        
         if(isAdmin || isContactPerson) {
           setIsVerified(true);
         }
+        setFilterOperator(acl.operators);
       });
     });
   }, [token])
@@ -87,7 +89,8 @@ function Export() {
     await downloadReport(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD'),
-      gm_code: municipalityCode
+      gm_code: municipalityCode,
+      filter_operators: filterOperator.map(operator => operator.system_id)
     });
   }
 

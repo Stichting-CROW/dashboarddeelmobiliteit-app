@@ -53,7 +53,15 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
 }
 
 export const downloadReport = async (token, options) => {
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats/generate_report?start_time=${options.startDate}&end_time=${options.endDate}&gm_code=${options.gm_code}`;
+  const searchParams = new URLSearchParams();
+  searchParams.append("start_time", options.startDate);
+  searchParams.append("end_time", options.endDate);
+  searchParams.append("gm_code", options.gm_code);
+  if (options.filter_operators.length > 0) {
+    searchParams.append("operators", options.filter_operators.join(","));
+  }
+  
+  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats/generate_report?${searchParams.toString()}`;
 
   // Get API response  
   const fetchOptions = getFetchOptions(token)
