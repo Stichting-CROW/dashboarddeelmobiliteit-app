@@ -2,7 +2,13 @@
 
 import './CustomizedTooltip.css';
 
-const CustomizedTooltip = ({ active, payload, label }) => {
+const CustomizedTooltip = ({
+  active, payload, label
+}: {
+  active?: any,
+  payload?: any,
+  label?: any
+}) => {
   if (active && payload && payload.length) {
 
     const arrayReverseObj = obj => Object.keys(obj).sort().reverse().map(key=> ({ ...obj[key], key }) );

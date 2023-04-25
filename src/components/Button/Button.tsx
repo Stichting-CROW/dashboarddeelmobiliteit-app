@@ -3,11 +3,24 @@ import {themes} from '../../themes';
 function Button({
   theme,
   children,
-  onClick
+  onClick,
+  type,
+  title,
+  classes,
+  style
+}: {
+  theme?: string,
+  children?: any,
+  onClick?: any,
+  title?: string,
+  type?: "button" | "reset" | "submit",
+  classes?: string,
+  style?: object
 }) {
   return (
-    <div
-      className="
+    <button
+      className={`
+        ${classes}
         rounded-lg
         inline-block
         border-solid border-2
@@ -17,12 +30,17 @@ function Button({
         mb-2
         text-sm
         cursor-pointer
-      "
+        mx-2
+        my-2
+        text-center
+      `}
+      type={type}
+      title={title}
       onClick={onClick}
-      style={themes[theme]}
+      style={Object.assign({}, themes[theme], style)}
     >
       {children}
-    </div>
+    </button>
   )
 }
 

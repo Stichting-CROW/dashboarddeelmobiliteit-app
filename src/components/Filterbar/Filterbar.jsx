@@ -1,13 +1,7 @@
 import './css/Filterbar.css';
-// import {
-//   useEffect,
-//   useState,
-//   useRef
-// } from 'react';
 import { Link } from "react-router-dom";
 import {useSelector} from 'react-redux';
 import moment from 'moment';
-// import * as R from 'ramda';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
@@ -21,9 +15,13 @@ import {
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
+import Fieldset from '../Fieldset/Fieldset';
+
+import {StateType} from '../../types/StateType';
 
 import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
+import FilterbarHb from './FilterbarHb';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -42,16 +40,20 @@ function Filterbar({
   hideLogo
 }) {
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
+  });
+
+  const viewRentals = useSelector((state: StateType) => {
+    return state.layers ? state.layers.view_rentals : null;
   });
 
   const ispark=displayMode===DISPLAYMODE_PARK;
@@ -67,6 +69,7 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
+  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
 
   // Show custom zones if >= 2022-11
   // We have detailled aggregated stats from 2022-11
@@ -97,6 +100,15 @@ function Filterbar({
     />
   }
 
+  // HB
+  else if(is_hb_view) {
+    return <FilterbarHb
+      hideLogo={hideLogo}
+      displayMode={displayMode}
+      visible={visible}
+    />
+  }
+
   // Verhuringen
   else if (isrentals) {
     return <FilterbarRentals
@@ -110,7 +122,9 @@ function Filterbar({
     return (
       <div className="filter-bar-inner py-2">
 
-        <div className="justify-between hidden sm:flex">
+        <div className="justify-between hidden sm:flex" style={{
+          paddingBottom: '24px'
+        }}>
           <div style={{minWidth: '82px'}}>
             {! hideLogo && (
               ispark
@@ -123,7 +137,7 @@ function Filterbar({
           }}>
             {/* INFO */}
           </div>
-        </div> 
+        </div>
 
         { isLoggedIn && showdatum && <FilteritemDatum /> }
         
@@ -140,21 +154,35 @@ function Filterbar({
 
         { isLoggedIn && showduur && <FilteritemDuur /> }
 
-        { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
+        {showvantot && <Fieldset title="Periode">
+          <FilteritemDatumVanTot />
+        </Fieldset>}
 
-        {<FilteritemGebieden />}
+        <Fieldset title="Plaats">
+          <FilteritemGebieden />
+        </Fieldset>
 
-        {<FilteritemZones 
-          zonesToShow={zonesToShow}
-          />}
+        <Fieldset title="Zones">
+          <FilteritemZones
+            zonesToShow={zonesToShow}
+          />
+        </Fieldset>
 
-        {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
+        {isLoggedIn && showparkeerduur && (
+          <Fieldset title="Parkeerduur">
+            <FilteritemMarkersParkeerduur />
+          </Fieldset>
+        )}
 
         {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
 
         {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
 
-        {showvervoerstype && <FilteritemVoertuigTypes />}
+        {showvervoerstype && (
+          <Fieldset title="Voertuigtype">
+            <FilteritemVoertuigTypes />
+          </Fieldset>
+        )}
 
         {<FilteritemAanbieders />}
 

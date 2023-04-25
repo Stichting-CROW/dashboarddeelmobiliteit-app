@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react'
 // import {marked} from 'marked'
-import { Redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Fade } from 'react-slideshow-image';
 
 import Logo from '../Logo.jsx';
@@ -26,7 +26,7 @@ const sliderProperties = {
 }
 
 const Tour = () => {
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
+  const navigate = useNavigate();
 
   let slideRef = useRef(null);
 
@@ -47,16 +47,6 @@ const Tour = () => {
     }
   }, [])
 
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
- 
-  if (doRenderRedirect) {
-    return renderRedirect();
-  }
-
   return (
     <div className="
       min-h-screen
@@ -65,7 +55,7 @@ const Tour = () => {
       w-full
     ">
       <IconButtonClose
-        onClick={() => setDoRenderRedirect(true)}
+        onClick={() => navigate('/')}
         style={{position: 'absolute', right: '30px', top: '18px'}}
       />
       <div className="mx-auto py-8 w-full justify-between flex-col flex">

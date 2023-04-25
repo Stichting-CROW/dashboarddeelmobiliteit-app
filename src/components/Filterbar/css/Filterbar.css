@@ -36,7 +36,17 @@
 }
 
 .form-item {
-  @apply inline-block py-1 px-2 mr-2 mb-2 text-xs cursor-pointer;
+  display: inline-block;
+  padding-top: 0.25rem; /* 4px */
+  padding-bottom: 0.25rem; /* 4px */
+  padding-left: 0.5rem; /* 8px */
+  padding-right: 0.5rem; /* 8px */
+  margin-right: 0.5rem; /* 8px */
+  margin-bottom: 0.5rem; /* 8px */
+  font-size: 0.75rem; /* 12px */
+  line-height: 1rem; /* 16px */
+  cursor: pointer;
+
   background: #FFFFFF 0% 0% no-repeat padding-box;
   border: 1px solid #707070;
   border-radius: 3px;

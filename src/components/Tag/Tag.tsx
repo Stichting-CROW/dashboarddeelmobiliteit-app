@@ -4,14 +4,15 @@ import {
   getNumVehiclesAvailable,
   getNumPlacesAvailable
 } from '../Map/MapUtils/zones.js';
-import {motion} from 'framer-motion/dist/framer-motion'
+import {motion} from 'framer-motion'
 
 function Tag({
   title,
   backgroundColor,
   beforeHtml,
   onClick,
-  isActive
+  isActive,
+  children
 }) {
   return (
     <motion.div
@@ -30,12 +31,12 @@ function Tag({
       `}
       style={{
         backgroundColor: isActive ? '#fff' : backgroundColor,
-        color: isActive ? '#000' : false,
+        color: isActive ? '#000' : null,
         borderBottom: isActive ? 'solid #000 3px' : 'solid transparent 3px',
         boxShadow: isActive ? '0px -3px 0px #003' : 'none',
         opacity: isActive ? '0.8' : '1',
-        borderRadius: isActive ? 0 : false,
-        top: isActive ? '2px' : false
+        borderRadius: isActive ? 0 : null,
+        top: isActive ? '2px' : null
       }}
       onClick={onClick}
       whileHover={{ scale: 1.05 }}

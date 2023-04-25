@@ -8,7 +8,9 @@
   background: #F6F5F4;
   width: 100%;
   overflow-x: hidden;
-  @apply px-4 pb-8;
+  padding-left: 1rem; /* 16px */
+  padding-right: 1rem; /* 16px */
+  padding-bottom: 2rem; /* 32px */
 }
 .FilterbarExtended h1.title {
   padding: 15px 0;
@@ -24,7 +26,8 @@
     position: absolute;
     left: 320px;
     width: 300px;
-    @apply px-1
+    padding-left: 0.25rem; /* 4px */
+    padding-right: 0.25rem; /* 4px */
   }  
   .FilterbarExtended-close-button-wrapper {
     padding: 5px 5px;

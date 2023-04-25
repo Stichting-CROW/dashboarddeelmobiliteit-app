@@ -12,6 +12,18 @@ function FormInput({
   autoComplete,
   classes,
   onChange,
+}: {
+  type?: any,
+  name?: any,
+  defaultValue?: any,
+  value?: any,
+  placeholder?: any,
+  min?: any,
+  disabled?: any,
+  id?: any,
+  autoComplete?: any,
+  classes?: any,
+  onChange?: any,
 }, ref) {
   return <div className="FormInput">
     <input

@@ -18,7 +18,9 @@ import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
 import Logo from '../Logo.jsx';
 // import Button from '../Button/Button';
 // import FormInput from '../FormInput/FormInput';
-import FilterbarZones from './FilterbarZones';
+import Fieldset from '../Fieldset/Fieldset';
+
+import {StateType} from '../../types/StateType';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -37,15 +39,15 @@ function Filterbar({
   hideLogo
 }) {
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     return state.filter && state.filter.datum ? state.filter.datum : new Date().toISOString();
   });
 
@@ -100,7 +102,7 @@ function Filterbar({
         }}>
           {/* INFO */}
         </div>
-      </div> 
+      </div>
 
       { isLoggedIn && showdatum && <FilteritemDatum /> }
       
@@ -119,19 +121,35 @@ function Filterbar({
 
       { isLoggedIn && showvantot && <FilteritemDatumVanTot /> }
 
-      {<FilteritemGebieden />}
+      <Fieldset title="Plaats">
+        <FilteritemGebieden />
+      </Fieldset>
 
-      {<FilteritemZones 
-        zonesToShow={zonesToShow}
-        />}
+      <Fieldset title="Zones">
+        <FilteritemZones 
+          zonesToShow={zonesToShow}
+        />
+      </Fieldset>
 
       {isLoggedIn && showparkeerduur && <FilteritemMarkersParkeerduur />}
 
-      {isLoggedIn && showafstand && <FilteritemMarkersAfstand />}
+      {isLoggedIn && showafstand && (
+        <Fieldset title="Afstand">
+          <FilteritemMarkersAfstand />
+        </Fieldset>
+      )}
 
-      {isLoggedIn && showherkomstbestemming && <FilteritemHerkomstBestemming />}
+      {isLoggedIn && showherkomstbestemming && (
+        <Fieldset title="Herkomst of bestemming?">
+          <FilteritemHerkomstBestemming />
+        </Fieldset>
+      )}
 
-      {showvervoerstype && <FilteritemVoertuigTypes />}
+      {showvervoerstype && (
+        <Fieldset title="Voertuigtype">
+          <FilteritemVoertuigTypes />
+        </Fieldset>
+      )}
 
       {<FilteritemAanbieders />}
 

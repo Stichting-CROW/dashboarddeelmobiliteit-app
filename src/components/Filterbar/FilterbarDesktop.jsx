@@ -5,11 +5,11 @@ import {
 import SlideBox from '../SlideBox/SlideBox.jsx';
 import Filterbar from '../Filterbar/Filterbar.jsx';
 
-// import './FilterbarDesktop.css';
+import {StateType} from '../../types/StateType';
 
 function FilterbarDesktop({isVisible, displayMode}) {
 
-  const isFilterBarExtendedVisible = useSelector(state => {
+  const isFilterBarExtendedVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
   });
 

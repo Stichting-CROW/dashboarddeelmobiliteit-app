@@ -2,12 +2,14 @@ import './css/Filterbar.css';
 import './css/FilteritemDuur.css';
 import { useDispatch, useSelector } from 'react-redux';
 
+import {StateType} from '../../types/StateType';
+
 const c1Hour = 60 * 60 * 1000;
 
 function FilterItemInterval() {
   const dispatch = useDispatch()
   
-  const filterDuration = useSelector(state => {
+  const filterDuration = useSelector((state: StateType) => {
     return state.filter ? state.filter.intervalduur : c1Hour;
   });
   

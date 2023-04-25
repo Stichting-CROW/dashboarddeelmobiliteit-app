@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { setUser } from '../actions/authentication';
 import { useDispatch } from 'react-redux';
-import { Redirect } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import Logo from '../components/Logo.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
   const [recoverPassword, setRecoverPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useDispatch();
 
@@ -169,7 +169,7 @@ const Login = () => {
                 Login
               </button>
               <button className="px-6 py-2 mt-4 text-white bg-gray-300 rounded-lg hover:bg-gray-400" onClick={() => {
-                setDoRenderRedirect(true)
+                navigate('/')
               }}>
                 Annuleer
               </button>
@@ -233,14 +233,8 @@ const Login = () => {
       </div>
     )
   }
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
- 
-  if (loggedIn || doRenderRedirect) {
-    return renderRedirect();
+  if (loggedIn) {
+    navigate('/');
   }
 
   return (
@@ -256,7 +250,7 @@ const Login = () => {
       }}>
 
         <IconButtonClose
-          onClick={() => setDoRenderRedirect(true)}
+          onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 

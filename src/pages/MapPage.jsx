@@ -17,26 +17,28 @@ import {
   DISPLAYMODE_ZONES_ADMIN,
 } from '../reducers/layers.js';
 
+import {StateType} from '../types/StateType';
+
 import './MapPage.css';
 
 function Map({mode, mapContainer}) {
-  const showZones = useSelector(state => {
+  const showZones = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const viewPark = useSelector(state => {
+  const viewPark = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
 
-  const viewRentals = useSelector(state => {
+  const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
   

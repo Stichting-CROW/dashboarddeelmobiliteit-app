@@ -1,28 +1,44 @@
 .Overlay {
-  @apply z-20
+  z-index: 20;
 }
 .Overlay h1 {
-  @apply text-4xl my-4
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  font-size: 2.25rem; /* 36px */
+  line-height: 2.5rem; /* 40px */
 }
 
 .Overlay h2 {
-  @apply text-2xl my-4 font-bold;
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem; /* 32px */
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  font-weight: bold;
 }
 
 .Overlay h3 {
-  @apply text-xl my-4
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
 }
 
 .Overlay ul {
-  @apply list-disc ml-4 my-4
+  list-style-type: disc;
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  margin-left: 1rem; /* 16px */
 }
 
 .Overlay ol {
-  @apply list-decimal ml-4 my-4
+  list-style-type: decimal;
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  margin-left: 1rem; /* 16px */
 }
 
 .Overlay p {
-  @apply mb-4;
+  margin-bottom: 1rem; /* 16px */
 }
 
 .Overlay a {

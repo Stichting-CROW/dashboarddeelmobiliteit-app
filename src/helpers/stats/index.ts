@@ -99,7 +99,9 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
 
     // For rental data: sum modality counts for every provider
     if(theKey === 'rental_stats') {
-      let newProviderObject = {};
+      let newProviderObject: {
+        time?: any
+      } = {};
       // Loop all providers for this item
       Object.keys(item).forEach(providerKey => {
         if(providerKey === 'time') {
@@ -180,9 +182,7 @@ export const prepareDataForCsv = (data: any) => {
     csvRows.push(values.join(','));
   };
 
-  csvRows = csvRows.join("\n");
-
-  return csvRows;
+  return csvRows.join("\n");
 }
 
 export const downloadCsv = (data: any, filename?: string) => {

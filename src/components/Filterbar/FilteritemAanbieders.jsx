@@ -6,14 +6,16 @@ import {
   DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
+import {StateType} from '../../types/StateType';
+
 function FilteritemAanbieders() {
   const dispatch = useDispatch()
   
-  const aanbieders = useSelector(state => {
+  const aanbieders = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
   
-  const operatorstats = useSelector(state => {
+  const operatorstats = useSelector((state: StateType) => {
     let stats = undefined;
 
     if(state.layers) {
@@ -53,7 +55,7 @@ function FilteritemAanbieders() {
     return stats;
   });
 
-  const filterAanbiedersExclude = useSelector(state => {
+  const filterAanbiedersExclude = useSelector((state: StateType) => {
     return state.filter ? state.filter.aanbiedersexclude : [];
   });
   

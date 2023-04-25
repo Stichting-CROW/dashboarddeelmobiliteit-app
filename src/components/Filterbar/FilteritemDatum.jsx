@@ -6,6 +6,8 @@ import './css/FilteritemDatum-Timepicker.css';
 import './css/FilteritemDatum-Calendar.css';
 import './css/FilteritemDatum-Clock.css';
 
+import {StateType} from '../../types/StateType';
+
 // using https://github.com/wojtekmaj/react-datetime-picker with custom styling
 import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle'; //
 import calendarIcon from '../../images/calendar.svg';
@@ -16,7 +18,7 @@ function FilterItemDatum({disabled}) {
   // Variable that stores timeout for delaying setting date 
   let TO_date = useRef(null), TIMEOUT_IN_MS = 0;
 
-  const filterDatum = useSelector(state => {
+  const filterDatum = useSelector((state: StateType) => {
     if(state.layers.displaymode === 'displaymode-rentals') {
       return state.filter && state.filter.intervalend ? state.filter.intervalend : new Date().toISOString();
     } else {
@@ -24,7 +26,7 @@ function FilterItemDatum({disabled}) {
     }
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : null;
   });
 

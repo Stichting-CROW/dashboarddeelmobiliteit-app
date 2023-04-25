@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
-// import { setUser } from '../actions/authentication';
-// import { useDispatch } from 'react-redux';
-import { Redirect } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import Logo from '../components/Logo.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 
 const SetPassword = () => {
+  const navigate = useNavigate();
   const { changePasswordCode } = useParams();
 
-  // const [emailaddress, setEmailaddress] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
-  // const [newPassword, setNewPassword] = useState(null);
-  // const [loggedIn, setLoggedIn] = useState(false);
-  const [doRenderRedirect, setDoRenderRedirect] = useState(false);
-  // const dispatch = useDispatch();
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -49,16 +42,6 @@ const SetPassword = () => {
     })
   }
 
-  const renderRedirect = () => {
-    return (
-      <Redirect to="/" />
-    );
-  }
- 
-  if (doRenderRedirect) {
-    return renderRedirect();
-  }
-
   return (
     <div className="
       px-4
@@ -72,7 +55,7 @@ const SetPassword = () => {
       }}>
 
         <IconButtonClose
-          onClick={() => setDoRenderRedirect(true)}
+          onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
@@ -110,7 +93,7 @@ const SetPassword = () => {
                 Wachtwoord opslaan
               </button>
               <button className="px-6 py-2 mt-4 text-white bg-gray-300 rounded-lg hover:bg-gray-400" onClick={() => {
-                setDoRenderRedirect(true)
+                navigate('/')
               }}>
                 Annuleer
               </button>

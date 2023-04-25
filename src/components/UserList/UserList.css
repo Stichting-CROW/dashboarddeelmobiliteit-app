@@ -1,0 +1,20 @@
+.grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.download::before {
+    content: url('../../images/UserList/download-outline.svg');
+    margin-right: 8px;
+    margin-left: 5px;
+
+}
+
+
+.add-new::before {
+    content: url('../../images/UserList/person-add-outline.svg');
+    margin-right: 8px;
+    margin-left: 5px;
+
+}
+
+

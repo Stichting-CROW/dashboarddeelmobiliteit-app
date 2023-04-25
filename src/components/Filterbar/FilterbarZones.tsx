@@ -2,8 +2,7 @@ import './css/FilterbarZones.css';
 import React, {
   useEffect,
   useState,
-  useCallback,
-  // useRef
+  useCallback
 } from 'react';
 import {useLocation} from "react-router-dom";
 import md5 from 'md5';
@@ -15,7 +14,7 @@ import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-// import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import { useNavigate } from "react-router-dom";
 
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
@@ -24,12 +23,14 @@ import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import Modal from '../Modal/Modal.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
+import Fieldset from '../Fieldset/Fieldset';
+
+import {StateType} from '../../types/StateType';
 
 import {
   setPublicZoneUrl,
   setAdminZoneUrl,
   getAdminZones,
-  // getPublicZones,
   getZoneById,
   sortZonesInPreferedOrder,
   getLocalDrawsOnly,
@@ -45,12 +46,20 @@ import {
   deleteZone
 } from '../../api/zones';
 
+import {ImportZonesModal} from '../ImportZones/ImportZones';
+
 function ModalityRow({
   children,
   imageUrl,
   onChange,
   name,
   value
+}: {
+  children?: any,
+  imageUrl?: any,
+  onChange?: any,
+  name?: any,
+  value?: any
 }) {
   return <div className="
     bg-no-repeat
@@ -86,7 +95,18 @@ function FilterbarZones({
   hideLogo,
   view
 }) {
+  const navigate = useNavigate();
+
   const zoneTemplate = {
+    zone_id: undefined,
+    stop_id: undefined,
+    area: undefined,
+    name: undefined,
+    municipality: undefined,
+    geography_id: undefined,
+    stop: undefined,
+    description: undefined,
+    no_parking: undefined,
     geography_type: 'monitoring',
     zone_availability: 'auto',
     published: true
@@ -104,14 +124,15 @@ function FilterbarZones({
   const [pathName, setPathName] = useState(document.location.pathname);
   const [doShowModal, setDoShowModal] = useState(false);
   const [doShowImportModal, setDoShowImportModal] = useState(false);
+  const [doShowExportModal, setDoShowExportModal] = useState(false);
 
   const labelClassNames = 'mb-2 text-sm';
 
-  const filterGebied = useSelector(state => {
-    return state.filter ? state.filter.gebied : null;
+  const filterGebied = useSelector((state: StateType) => {
+    return state.filter ? state.filter.gebied : null
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
     }
@@ -137,32 +158,34 @@ function FilterbarZones({
 
   // Set map event handlers
   useEffect(() => {
-    if(! window.ddMap) {
+    if(! window['ddMap']) {
       return;
     }
     if(didInitEventHandlers) {
       return;
     }
 
-    window.ddMap.on('draw.create', function (e) {
+    window['ddMap'].on('draw.create', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
       setDidChangeZoneConfig(true);
     });
 
-    window.ddMap.on('draw.update', function (e) {
+    window['ddMap'].on('draw.update', function (e) {
       if(! e.features || ! e.features[0]) return;
       setDrawedArea(e.features[0]);
       setDidChangeZoneConfig(true);
     });
 
     setDidInitEventHandlers(true);
-  }, [window.ddMap])
+  }, [window['ddMap']])
 
   // Call function if polygon is selected (for editting zones)
   useEffect(() => {
+    // @ts-ignore
     window.addEventListener('setSelectedZone', eventHandler)
     return () => {
+      // @ts-ignore
       window.removeEventListener('setSelectedZone', eventHandler);
     }
   }, [
@@ -177,14 +200,14 @@ function FilterbarZones({
 
   const selectMapFeature = (zoneId) => {
     // Check if dependencies are present
-    if(! window.ddMap || ! zoneId) return;
+    if(! window['ddMap'] || ! zoneId) return;
     // Get feature
-    const feature = window.CROW_DD.theDraw.get(zoneId);
+    const feature = window['CROW_DD'].theDraw.get(zoneId);
     // Check if feature was found
     if(! feature) return;
     // Select after a few milliseconds
     // setTimeout(() => {
-      window.CROW_DD.theDraw.changeMode('direct_select', {
+      window['CROW_DD'].theDraw.changeMode('direct_select', {
         featureId: zoneId
       });
     // }, 5)
@@ -218,7 +241,7 @@ function FilterbarZones({
     setDidChangeZoneConfig(false);
 
     // Don't do anything if zone was selected already
-    if(zoneId === activeZone.zone_id && window.CROW_DD.theDraw.getMode() === 'direct_select') {
+    if(zoneId === activeZone.zone_id && window['CROW_DD'].theDraw.getMode() === 'direct_select') {
       console.log('Stopped executing as zone was selected already')
       return;
     }
@@ -279,6 +302,8 @@ function FilterbarZones({
     // Get zone info from database
     const foundZone = getZoneById(adminZones, zoneId);
 
+    // console.log('zoneId', zoneId, 'foundZone', foundZone);
+
     if(foundZone) {
       // Change URL
       setAdminZoneUrl(foundZone.geography_id)
@@ -323,11 +348,11 @@ function FilterbarZones({
   }
 
   const selectFeature = (zoneId) => {
-    if(window.ddMap && zoneId) {
-      const feature = window.CROW_DD.theDraw.get(zoneId);
+    if(window['ddMap'] && zoneId) {
+      const feature = window['CROW_DD'].theDraw.get(zoneId);
       if(feature) {
         // Select
-        window.CROW_DD.theDraw.changeMode('direct_select', {
+        window['CROW_DD'].theDraw.changeMode('direct_select', {
           featureId: zoneId
         });
       }
@@ -336,9 +361,9 @@ function FilterbarZones({
 
   const enableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
-    if(! window.CROW_DD.theDraw) return;
+    if(! window['CROW_DD'].theDraw) return;
     // Change mode to 'draw polygon'
-    window.CROW_DD.theDraw.changeMode('draw_polygon');
+    window['CROW_DD'].theDraw.changeMode('draw_polygon');
     // Clear data
     setActiveZone(zoneTemplate);
     // Set view mode to 'adminEdit'
@@ -347,10 +372,10 @@ function FilterbarZones({
 
   const disableDrawingPolygons = () => {
     // Check if the map is initiated and draw is available
-    if(! window.CROW_DD.theDraw) return;
+    if(! window['CROW_DD'].theDraw) return;
     // Change mode to 'draw polygon'
-    // window.CROW_DD.theDraw.changeMode('static', []);
-    window.CROW_DD.theDraw.changeMode('simple_select', []);
+    // window['CROW_DD'].theDraw.changeMode('static', []);
+    window['CROW_DD'].theDraw.changeMode('simple_select', []);
     // Set view mode to 'adminView'
     setViewMode('adminView');
   }
@@ -373,6 +398,8 @@ function FilterbarZones({
     // If zone has been updated:
     if(activeZone.geography_id) {
       return {
+        stop: null,
+        no_parking: null,
         geography_id: activeZone.geography_id,
         geography_type: activeZone.geography_type,
         municipality: activeZone.municipality,
@@ -387,6 +414,8 @@ function FilterbarZones({
     // If zone is newly created:
     else {
       return Object.assign({
+        stop: null,
+        no_parking: null,
         geography_id: activeZone.geography_id,
         geography_type: activeZone.geography_type,
         name: activeZone.name,
@@ -426,7 +455,14 @@ function FilterbarZones({
           "combined": parseInt(activeZone['vehicles-limit.combined'])
         }
       }
-      let capacity = {};
+      let capacity: {
+        cargo_bicycle?: any
+        scooter?: any
+        bicycle?: any
+        car?: any
+        other?: any
+        moped?: any
+      } = {};
       if(parseInt(activeZone['vehicles-limit.cargo_bicycle']) > 0) capacity.cargo_bicycle = parseInt(activeZone['vehicles-limit.cargo_bicycle']);
       if(parseInt(activeZone['vehicles-limit.scooter']) > 0) capacity.scooter = parseInt(activeZone['vehicles-limit.scooter']);
       if(parseInt(activeZone['vehicles-limit.bicycle']) > 0) capacity.bicycle = parseInt(activeZone['vehicles-limit.bicycle']);
@@ -459,8 +495,9 @@ function FilterbarZones({
   }
 
   const saveZone = async () => {
+    console.log('drawedArea', drawedArea)
     if(! activeZone.area && ! drawedArea) {
-      notify('Teken eerst een zone voordat je deze opslaat')
+      window['notify']('Teken eerst een zone voordat je deze opslaat')
       return;
     }
 
@@ -481,7 +518,7 @@ function FilterbarZones({
       // Set updated zone in states
       setActiveZone(updatedZone);
       // Remove old drawed area
-      window.CROW_DD.theDraw.delete(activeZone.zone_id);
+      window['CROW_DD'].theDraw.delete(activeZone.zone_id);
       // Add new drawed area
       var feature = {
         id: updatedZone.zone_id,
@@ -491,7 +528,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: updatedZone.area.geometry.coordinates }
       };
-      var featureIds = window.CROW_DD.theDraw.add(feature);
+      var featureIds = window['CROW_DD'].theDraw.add(feature);
       // After updating zone: reload adminZones
       getAdminZones();
     }
@@ -510,7 +547,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: createdZone.area.geometry.coordinates }
       };
-      const featureIds = window.CROW_DD.theDraw.add(feature);
+      const featureIds = window['CROW_DD'].theDraw.add(feature);
     }
 
     // Set map to normal again
@@ -542,16 +579,16 @@ function FilterbarZones({
     getAdminZones();
 
     // Delete polygon from map
-    window.CROW_DD.theDraw.delete(activeZone.zone_id);
+    window['CROW_DD'].theDraw.delete(activeZone.zone_id);
 
     // Set map to normal again
     disableDrawingPolygons();
   }
   
   const deleteAllLocalZones = () => {
-    const allDraws = window.CROW_DD.theDraw.getAll();
+    const allDraws = window['CROW_DD'].theDraw.getAll();
     getLocalDrawsOnly(allDraws.features).map(x => {
-      window.CROW_DD.theDraw.delete(x.id);
+      window['CROW_DD'].theDraw.delete(x.id);
     })
   }
 
@@ -565,7 +602,7 @@ function FilterbarZones({
     }
     // Cleanup
     // - Revert changes to existing polygons
-    window.CROW_DD.theDraw.trash();
+    window['CROW_DD'].theDraw.trash();
     setDrawedArea(null);
     // - Delete local polygons
     deleteAllLocalZones();
@@ -591,7 +628,7 @@ function FilterbarZones({
         },
         geometry: { type: 'Polygon', coordinates: originalZone.area.geometry.coordinates }
       };
-      const featureIds = window.CROW_DD.theDraw.add(feature);
+      const featureIds = window['CROW_DD'].theDraw.add(feature);
     }
     //
     setDidChangeZoneConfig(false);
@@ -602,13 +639,17 @@ function FilterbarZones({
   return (
     <div className="filter-bar-inner py-2">
 
-      {! hideLogo && <Link to="/"><Logo /></Link>}
+      <div style={{
+        paddingBottom: '24px'
+      }}>
+        {! hideLogo && <Link to="/"><Logo /></Link>}
+      </div>
       
       <FilteritemDatum disabled={true} />
 
-      <div className="mt-0">
+      <Fieldset title="Plaats">
         <FilteritemGebieden />
-      </div>
+      </Fieldset>
 
       {! filterGebied && false && <div>
         Selecteer een plaats.
@@ -618,22 +659,44 @@ function FilterbarZones({
         <div className={labelClassNames}>
           &nbsp;
         </div>
-        <div className="flex justify-end -mr-2">
-          <Link to="/map/zones">
+        <div className="flex justify-between">
+          <div style={{marginLeft: '-0.5rem'}}>
             <Button
               theme="white"
+              title="Download zones als KML-bestand"
+              onClick={() => {
+                setDoShowExportModal(true)
+              }}
+              style={{padding: 0, width: '37px', height: '37px'}}
             >
-              📊
+              <span className="material-symbols-outlined" style={{
+                // fontSize: '20px'
+              }}>
+                download
+              </span>
             </Button>
-          </Link>
-          
-          <Link to="/admin/zones">
-            <Button
-              theme="white"
-            >
-              ✏️
-            </Button>
-          </Link>
+          </div>
+          <div className="flex justify-end -mr-2">
+            <Link to="/map/zones">
+              <Button
+                theme="white"
+                style={{
+                  borderColor: '#666'
+                }}
+              >
+                📊
+              </Button>
+            </Link>
+            
+            <Link to="/admin/zones">
+              <Button
+                theme="white"
+                title="Naar zones bewerken"
+              >
+                ✏️
+              </Button>
+            </Link>
+          </div>
         </div>
       </>}
 
@@ -643,7 +706,7 @@ function FilterbarZones({
         </div>
         <div>
           {viewMode === 'adminView' && <div className="flex justify-between">
-            <div className="flex">
+            <div className="flex" style={{marginLeft: '-0.5rem'}}>
               <Button
                 theme="white"
                 onClick={newZoneButtonHandler}
@@ -653,47 +716,37 @@ function FilterbarZones({
 
               <Button
                 theme="white"
-                title="Importeer zone vanuit een GIS-bestand"
+                title="Importeer zone vanuit een KML-bestand"
                 onClick={() => {
                   setDoShowImportModal(true)
                 }}
+                style={{padding: 0, width: '37px'}}
               >
-                ⬆️
+                <span className="material-symbols-outlined" style={{
+                  // fontSize: '20px'
+                }}>
+                  upload
+                </span>
               </Button>
 
-              <Modal
-                isVisible={doShowImportModal}
-                title="Importeer een GIS-bestand"
-                button1Title={'Annuleer'}
-                button1Handler={(e) => {
-                  setDoShowImportModal(false);
-                }}
-                button2Title={"Importeer"}
-                button2Handler={(e) => {
-                  e.preventDefault();
-                  setTimeout(x => {
-                    // Hide modal
-                    setDoShowImportModal(false);
-                  }, 1500)
-                }}
-                hideModalHandler={() => {
-                  setDoShowImportModal(false);
-                }}
-              >
-                <p className="mb-4">
-                  Importeer een SPH-bestand met zone-polygonen middels onderstaande upload-functie. Tip: importeer niet te veel zones, maar enkel de zones waar je analyses op gaat doen.
-                </p>
-
-                <p className="mt-4">
-                  <input type="file" name="file" accept=".sph" />
-                </p>
-              </Modal>
+              {doShowImportModal && <ImportZonesModal postImportFunc={() => {
+                setDoShowImportModal(false);
+                // Disable drawing enableDrawingPolygons
+                // disableDrawingPolygons();
+                // deleteAllLocalZones();
+                // Reload zones
+                // getAdminZones();
+                // Navigate
+                // navigate('/map/zones');
+                document.location = '/map/zones';
+              }} />}
             </div>
             
             <div className="flex -mr-2">
               <Link to="/map/zones">
                 <Button
                   theme="white"
+                  title="Naar zones bekijken"
                 >
                   📊
                 </Button>
@@ -702,6 +755,9 @@ function FilterbarZones({
               <Link to="/admin/zones">
                 <Button
                   theme="white"
+                  style={{
+                    borderColor: '#666'
+                  }}
                 >
                   ✏️
                 </Button>
@@ -722,7 +778,7 @@ function FilterbarZones({
         <div className={labelClassNames}>
           Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
           <Button
             theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
             onClick={saveZone}
@@ -808,10 +864,10 @@ function FilterbarZones({
                 if(zoneId) {
                   // Force rerender of Draw, so that polygon color updates
                   const forceMapRerenderForFeature = (featureId) => {
-                    window.CROW_DD.theDraw.changeMode('simple_select', []);
+                    window['CROW_DD'].theDraw.changeMode('simple_select', []);
                     // NOTE: This had a side effect which is re-calling eventHandler()
                     // NOTE: The side effect is that if creating new zone: name is discarted
-                    window.CROW_DD.theDraw.changeMode('direct_select', {
+                    window['CROW_DD'].theDraw.changeMode('direct_select', {
                       featureId: featureId
                     });
                   }
@@ -968,10 +1024,10 @@ function FilterbarZones({
                 window.dispatchEvent(event);
                 // Zoom in into zone
                 if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
+                  if(! window['ddMap']) return;
                   // Get extent
                   const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
+                  window['ddMap'].fitBounds(extent, {
                     padding: {top: 25, bottom: 25, left: 350, right: 25},
                     duration: 1.4*1000 // in ms
                   });
@@ -984,10 +1040,10 @@ function FilterbarZones({
               x.onClick = () => {
                 // Zoom in into zone
                 if(x.area && x.area.geometry && x.area.geometry.coordinates && x.area.geometry.coordinates[0]) {
-                  if(! window.ddMap) return;
+                  if(! window['ddMap']) return;
                   // Get extent
                   const extent = st.extent(x.area)
-                  window.ddMap.fitBounds(extent, {
+                  window['ddMap'].fitBounds(extent, {
                     padding: {top: 25, bottom: 25, left: 350, right: 25},
                     duration: 1.4*1000 // in ms
                   });
@@ -1022,15 +1078,6 @@ function FilterbarZones({
             skipConfirmation: true
           })
         }}
-        saveHandlerUNEXISTING={async (e) => {
-          e.preventDefault();
-          // Hide modal
-          setDoShowModal(false);
-          // Wait until zone is saved
-          await saveZone();
-          // Click zone that was clicked by user
-          selectMapFeature(lastClickedZone);
-        }}
         hideModalHandler={() => {
           setDoShowModal(false);
           selectMapFeature(activeZone.zone_id);
@@ -1045,6 +1092,41 @@ function FilterbarZones({
         <p className="mt-4">
           Je kunt ook <b>Doorgaan</b> zonder op te slaan.
         </p>
+      </Modal>
+
+      <Modal
+        isVisible={doShowExportModal}
+        title="Exporteer KML-bestand"
+        button1Title={false}
+        button1Handler={(e) => {
+          setDoShowExportModal(false);
+        }}
+        button2Title={"Sluiten"}
+        button2Handler={(e) => {
+          e.preventDefault();
+          // Hide modal
+          setDoShowExportModal(false);
+        }}
+        hideModalHandler={() => {
+          setDoShowExportModal(false);
+        }}
+      >
+        <p className="mb-4">
+          Met onderstaande link kun je de ingetekende zones als KML-bestanden downloaden.
+        </p>
+        <p className="mb-4">
+          Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
+        </p>
+        <p className="mb-4">
+          Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
+        </p>
+        <ul className="my-4">
+           <li>
+             &raquo; <a href={`https://mds.dashboarddeelmobiliteit.nl/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
+               Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
+             </a>
+           </li>
+        </ul>
       </Modal>
 
     </div>

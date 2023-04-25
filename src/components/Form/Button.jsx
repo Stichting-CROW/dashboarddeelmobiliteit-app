@@ -4,6 +4,14 @@ export default function Button({
   onClick,
   color,
   children,
+  title
+}: {
+  classes?: string,
+  href?: any,
+  onClick?: Function,
+  color?: string,
+  children?: string,
+  title?: string
 }) {
   return <button className={`
     px-6 py-2 my-4 rounded-lg

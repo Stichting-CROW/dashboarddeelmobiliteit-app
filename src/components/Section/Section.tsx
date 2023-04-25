@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
-import {motion} from 'framer-motion/dist/framer-motion'
+import {motion} from 'framer-motion'
 
-const variants = {
+const variants: any = {
   open: {
     opacity: 1,
     // x: 0,

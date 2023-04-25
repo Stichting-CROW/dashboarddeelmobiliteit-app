@@ -2,6 +2,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 
+import {StateType} from '../../types/StateType';
+
 import './SelectLayer.css';
 
 import {
@@ -13,6 +15,7 @@ import {
   DISPLAYMODE_PARKEERDATA_HEATMAP,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA_HB,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
@@ -24,38 +27,42 @@ function SelectLayer(props) {
   // const {setLayers, setActiveSource} = props;
   const dispatch = useDispatch()
   
-  const showZoneOnOff = useSelector(state => {
+  const showZoneOnOff = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied!=='' : false;
   });
 
-  const zonesVisible = useSelector(state => {
+  const zonesVisible = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
   });
   
-  const layers = useSelector(state => {
+  const layers = useSelector((state: StateType) => {
     return state.layers ? state.layers : null;
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const viewPark = useSelector(state => {
+  const viewPark = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
 
-  const viewRentals = useSelector(state => {
+  const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
+  const userData = useSelector((state: StateType) => {
+    return state.authentication.user_data;
+  });
+
   if(displayMode===DISPLAYMODE_OTHER) {
     return null; // no layer selection
   }
-  
+
   const mapStyles = getMapStyles();
 
   return (
@@ -91,6 +98,14 @@ function SelectLayer(props) {
               Voertuigen
             </span>
           </div> : null }
+
+        { (displayMode===DISPLAYMODE_RENTALS) ?
+          <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
+            onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
+            <span className="layer-title">
+              HB
+            </span>
+          </div>: null }
 
         { displayMode===DISPLAYMODE_RENTALS ?
           <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}

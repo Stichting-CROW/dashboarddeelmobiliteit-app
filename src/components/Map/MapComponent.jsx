@@ -6,6 +6,8 @@ import localization from 'moment/locale/nl'
 import {useLocation} from "react-router-dom";
 import center from '@turf/center'
 
+import {StateType} from '../../types/StateType';
+
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
@@ -28,6 +30,13 @@ import {
   fetchPublicZones,
   fetchAdminZones
 } from './MapUtils/zones.js';
+import {
+  DISPLAYMODE_PARK,
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_ZONES_ADMIN,
+  DISPLAYMODE_OTHER,
+} from '../../reducers/layers.js';
 
 import './MapComponent.css';
 
@@ -36,18 +45,21 @@ import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
+import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', localization);
 
 function MapComponent(props) {
-  if(process && process.env.DEBUG) console.log('Map component')
-
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null;
+  });
+
+  const displayMode = useSelector((state: StateType) => {
+    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
   // Connect to redux store
@@ -62,12 +74,14 @@ function MapComponent(props) {
   const providers = useSelector(state => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
   const extent/* map boundaries */ = useSelector(state => state.layers ? state.layers.extent : null);
   const [counter, setCounter] = useState(0);
-  const zones_geodata = useSelector(state => {
+  const zones_geodata = useSelector((state: StateType) => {
     if(!state||!state.zones_geodata) {
       return null;
     }
     return state.zones_geodata;
   });
+  const viewRentals = useSelector(state => state.layers ? state.layers.view_rentals : null);
+  const isrentals=displayMode===DISPLAYMODE_RENTALS;
 
   // Define map
   const mapContainer = props.mapContainer;
@@ -80,13 +94,14 @@ function MapComponent(props) {
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
+  const [activeLayers, setActiveLayers] = useState([]);
   let map = useRef(null);
 
-  const userData = useSelector(state => {
+  const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
     }
@@ -200,7 +215,7 @@ function MapComponent(props) {
       map.current.on('load', function() {
 
         // Store map in a global variable
-        window.ddMap = map.current;
+        window['ddMap'] = map.current;
 
         setDidMapLoad(true)
 
@@ -223,6 +238,24 @@ function MapComponent(props) {
     // dispatch,
     registerMapView
   ])
+
+  // Recognise if HB view should be loaded
+  // useEffect(() => {
+  //   // Stop if map didn't load
+  //   if(! didMapLoad) return;
+  //   // Set HB status
+  //   let newActiveLayers = activeLayers;
+  //   if(is_hb_view) {
+  //     newActiveLayers.push('hb');
+  //     setActiveLayers(newActiveLayers);
+  //   } else {
+  //     newActiveLayers = newActiveLayers.filter(x => x !== 'hb')
+  //     setActiveLayers(newActiveLayers);
+  //   }
+  // }, [
+  //   didMapLoad,
+  //   is_hb_view
+  // ]);
 
   // If on Zones page and geographyId is in URL -> navigate to zone
   useEffect(() => {
@@ -283,7 +316,7 @@ function MapComponent(props) {
     // Switch to satelite view
     setTimeout(() => {
       const mapStyles = getMapStyles();
-      setMapStyle(window.ddMap, mapStyles.satelite);
+      setMapStyle(window['ddMap'], mapStyles.satelite);
     }, 5);
 
     setDidAddAdminZones(true);
@@ -305,7 +338,7 @@ function MapComponent(props) {
       // Switch to base map
       setTimeout(() => {
         const mapStyles = getMapStyles();
-        setMapStyle(window.ddMap, mapStyles.base);
+        setMapStyle(window['ddMap'], mapStyles.base);
       }, 5);
     } else {
       // REMOVE zone layers
@@ -337,7 +370,7 @@ function MapComponent(props) {
   useEffect(x => {
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
-    if(! window.ddMap.isStyleLoaded()) return;
+    if(! window['ddMap'].isStyleLoaded()) return;
 
     const mapStyles = getMapStyles();
 
@@ -345,7 +378,7 @@ function MapComponent(props) {
     let TO_local;
     if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
       TO_local = setTimeout(() => {
-        setMapStyle(window.ddMap, mapStyles.base);
+        setMapStyle(window['ddMap'], mapStyles.base);
       }, 100);
     }
     return () => {
@@ -378,7 +411,7 @@ function MapComponent(props) {
         }, 500);
       }
       // Also, hide isochrones layer
-      window.ddMap.U.hide('zones-isochrones')
+      window['ddMap'].U.hide('zones-isochrones')
       return;
     }
 
@@ -629,7 +662,10 @@ function MapComponent(props) {
   ]);
 
   // Add map controls for isochrone view
-  return isLoggedIn ? <IsochroneTools /> : null;
+  return <>
+    <DdH3HexagonLayer map={map.current} />
+    {isLoggedIn ? <IsochroneTools /> : null}
+  </>
 }
 
 export {

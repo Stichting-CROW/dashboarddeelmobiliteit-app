@@ -6,8 +6,6 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 24px;
-  padding-bottom: 24px;
 }
 
 .filter-datum-van-tot-title {

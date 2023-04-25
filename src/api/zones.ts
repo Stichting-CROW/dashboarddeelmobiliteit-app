@@ -2,7 +2,7 @@ import { createFilterparameters } from '../poll-api/pollTools.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 const didFetchSucceed = (response) => response.status >= 200 && response.status <= 299;
 
-const getFetchOptions = (token) => {
+const getFetchOptions = (token?) => {
   if(token) {
     return {
       headers: {

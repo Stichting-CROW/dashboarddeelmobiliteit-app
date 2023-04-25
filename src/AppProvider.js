@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
- BrowserRouter as Router,
+ BrowserRouter
 } from "react-router-dom";
 // import { bindActionCreators } from 'redux';
 import { Provider } from 'react-redux'
@@ -11,7 +11,7 @@ import moment from 'moment';
 import thunk from 'redux-thunk';
 
 import appReducer from './reducers';
-import App from './App';
+import App from './App.jsx';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -20,6 +20,8 @@ const md5 = require('md5');
 // Get persistentState from localStorage
 const theState = localStorage.getItem('CROWDD_reduxState')
 const persistedState = theState ? JSON.parse(theState) : {};
+
+window.process = { ...window.process }
 
 export const store = createStore(
   appReducer,
@@ -58,9 +60,9 @@ class AppProvider extends Component {
   render() {
     return (
       <Provider store={store}>
-        <Router>
-        <App content={this.props.content} />
-        </Router>
+        <BrowserRouter>
+          <App content={this.props.content} />
+        </BrowserRouter>
       </Provider>
     )
   }

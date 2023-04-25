@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { clearUser } from '../../actions/authentication.js';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import {StateType} from '../../types/StateType';
 
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
@@ -19,8 +21,9 @@ import Section from '../Section/Section';
 
 function Profile() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const user = useSelector(state => {
+  const user = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
       return state.authentication.user_data.user
     } else {
@@ -33,7 +36,7 @@ function Profile() {
       dispatch( clearUser() );
       dispatch( { type: "LOGOUT", payload: null });
     }
-    setDoRenderRedirect(true);
+    navigate('/');
   }
 
   return (
