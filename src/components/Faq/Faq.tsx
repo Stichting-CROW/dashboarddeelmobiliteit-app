@@ -204,12 +204,12 @@ Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones
 1. Zet alvast een KML-bestand klaar met een losse polygon per zone, en metadata zoals de naam van de zone
 2. Ga naar [Zones](/zones)
 3. Klik links op het potlood-icoon
-4. Klik op de upload-knop, ⬆️. Een popup verschijnt<br />
-![Importeer/Upload-knop](https://i.imgur.com/nKKEOhs.png)
-5. Selecteer het KML-bestand en klik op **Laad zones**<br />
-![Importeer-popup](https://i.imgur.com/2NgFyPv.png)
-6. Selecteer welke zones je wilt importeren<br />
-![Zone-overzicht met checkboxes](https://i.imgur.com/8iYb3Qe.png)
+4. Klik op de upload-knop, ⬆️. Een popup verschijnt<br /><br />
+![Importeer/Upload-knop](https://i.imgur.com/nKKEOhs.png)<br />
+5. Selecteer het KML-bestand en klik op **Laad zones**<br /><br />
+![Importeer-popup](https://i.imgur.com/2NgFyPv.png)<br />
+6. Selecteer welke zones je wilt importeren<br /><br />
+![Zone-overzicht met checkboxes](https://i.imgur.com/8iYb3Qe.png)<br />
 7. Klik op **Importeer zones**
 8. De zones zijn nu geimporteerd!
 
@@ -228,10 +228,10 @@ De maatwerkzones die aanwezig zijn in het Dashboard Deelmobiliteit kun je export
 ## Zones exporteren als KML
 
 1. Ga naar [Zones](/zones)
-2. Klik op de download-knop<br />
-![img](https://i.imgur.com/oqIFBKv.png)
-3. Klik op **Download zones als KML, van gemeente X**<br />
-![Popup[]](https://i.imgur.com/FrDmnlJ.png)
+2. Klik op de download-knop<br /><br />
+![img](https://i.imgur.com/oqIFBKv.png)<br />
+3. Klik op **Download zones als KML, van gemeente X**<br /><br />
+![Popup[]](https://i.imgur.com/FrDmnlJ.png)<br />
 4. Je hebt nu een ZIP gedownload met 3 KML-bestanden
 
 ## Wat zit er in de geexporteerde ZIP
