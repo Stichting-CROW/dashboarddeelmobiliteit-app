@@ -15,7 +15,7 @@ function Faq() {
       </h1>
 
       <div className="my-5">
-        <Section title="Wat zijn de mogelijkheden met maatwerkzones?">
+        <Section title="Mogelijkheden met maatwerkzones?">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Maatwerkzones, soms ook microhubs genoemd, zijn zelf-ingetekende zones. Deze zones kun je gebruiken voor het inzien van statistische data. Ook kun je de waardes instellen voor deze zones, zoals een maximum aantal voertuigen, en kun je op de hoogte gehouden worden als deze waardes overschreden worden.
 
@@ -40,7 +40,7 @@ Vanaf het moment dat je nieuwe maatwerkzone intekent in **Zones**, wordt er van 
           `) }}
           />
         </Section>
-        <Section title="Hoe beheer ik zones?">
+        <Section title="Zones beheren">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Op de pagina **Zones** is het mogelijk om zones te beheren en bekijken.
 
@@ -66,7 +66,7 @@ Wil je zones toevoegen, aanpassen of verwijderen? Doe dit als volgt:
           `) }}
           />
         </Section>
-        <Section title="Hoe download ik ruwe data?">
+        <Section title="Ruwe data downloaden">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Via het Dashboard Deelmobiliteit kun je data inzien, en ook de ruwe data downloaden. Hierdoor kun je zelf analyses doen op de data, of eigen visualisaties maken.
 
@@ -131,7 +131,7 @@ Elke rij bevat de volgende waardes:
           `) }}
           />
         </Section>
-        <Section title="Hoe bekijk ik HB-relaties?">
+        <Section title="De HB-kaart">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Wil je HB-matrices zien? Ga dan naar de **Verhuringen**-pagina en klik bij lagen op **HB**.
 
@@ -192,6 +192,57 @@ ____
 <br />
 
 &raquo; **[Verhuringen](/map/rentals)**
+          `) }}
+          />
+        </Section>
+        <Section title="Zones importeren middels een KML-bestand">
+          <div dangerouslySetInnerHTML={{ __html: marked.parse(`
+Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones en verbodszones. Je kunt zones handmatig toevoegen of importeren middels een KML-bestand. Hieronder lees je hoe dit werkt.
+
+## Zones importeren
+
+1. Zet alvast een KML-bestand klaar met een losse polygon per zone, en metadata zoals de naam van de zone
+2. Ga naar [Zones](/zones)
+3. Klik links op het potlood-icoon
+4. Klik op de upload-knop, ⬆️. Een popup verschijnt<br />
+![Importeer/Upload-knop](https://i.imgur.com/nKKEOhs.png)
+5. Selecteer het KML-bestand en klik op **Laad zones**<br />
+![Importeer-popup](https://i.imgur.com/2NgFyPv.png)
+6. Selecteer welke zones je wilt importeren<br />
+![Zone-overzicht met checkboxes](https://i.imgur.com/8iYb3Qe.png)
+7. Klik op **Importeer zones**
+8. De zones zijn nu geimporteerd!
+
+## Tips bij het importeren van zones
+
+- Zorg dat elke zone een losse polygon is
+- Zorg dat elke zone een naam is, dan is die gemakkelijk herkanbaar
+
+          `) }}
+          />
+        </Section>
+        <Section title="Zones exporteren als KML">
+          <div dangerouslySetInnerHTML={{ __html: marked.parse(`
+De maatwerkzones die aanwezig zijn in het Dashboard Deelmobiliteit kun je exporteren als KML-bestand. KML is een standaard voor uitwisseling van geografische informatie.
+
+## Zones exporteren als KML
+
+1. Ga naar [Zones](/zones)
+2. Klik op de download-knop<br />
+![img](https://i.imgur.com/oqIFBKv.png)
+3. Klik op **Download zones als KML, van gemeente X**<br />
+![Popup[]](https://i.imgur.com/FrDmnlJ.png)
+4. Je hebt nu een ZIP gedownload met 3 KML-bestanden
+
+## Wat zit er in de geexporteerde ZIP
+
+Je downloadt 3 KML-bestanden:
+
+1. De analyse-zones
+2. De parkeerzones
+3. De verbodszones
+
+In de praktijk zul je vooral de verbodszones met aanbieders willen uitwisselen, alsook de parkeerzones, gezien dit zones (kunnen) zijn met een maximale bezettingsgraad.
           `) }}
           />
         </Section>
