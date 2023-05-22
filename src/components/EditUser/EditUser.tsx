@@ -22,7 +22,7 @@ function EditUser({
   user: object
 }) {
   // Get userId from URL
-  const { username } = useParams();
+  const {username} = useParams();
   const [message, setMessage] = useState('')
   const [messageDesign, setMessageDesign] = useState('')
   const [email, setEmail] = useState('')
@@ -49,7 +49,7 @@ function EditUser({
   function getHeaders(): any {
     return {
       headers: {
-        "Authorization":  `Bearer ${token}`
+        "Authorization": `Bearer ${token}`
       }
     };
   }
@@ -72,11 +72,11 @@ function EditUser({
     options.headers['Content-Type'] = 'application/json';
     return fetch(url, options)
         .then((response) => {
-            if (response.status == 401) {
-              console.error(response)
-                // errorNoPermission(response);
-            }
-            return response.status;
+          if (response.status == 401) {
+            console.error(response)
+              // errorNoPermission(response);
+          }
+          return response.status;
         });
 
   }
@@ -84,7 +84,6 @@ function EditUser({
   const handleClose = () => {
     navigate('/admin/users');
   }
-
 
   const fetchOptions = {
     headers: {
@@ -117,7 +116,9 @@ function EditUser({
     <div>
     <form onSubmit={handleSubmit} className='add-user-form'>
         <div className="email">
-          <FormLabel classes="mt-2 mb-4">Wijzig emailadres</FormLabel>
+          <FormLabel classes="mt-2 mb-4 font-bold">
+            Wijzig emailadres
+          </FormLabel>
           <input 
             type="email" 
             disabled
@@ -127,7 +128,7 @@ function EditUser({
           />
         </div>
         <div>
-          <FormLabel classes="mt-2 mb-4">Wijzig rollen</FormLabel>
+          <FormLabel classes="mt-2 mb-4 font-bold">Wijzig rollen</FormLabel>
           <ul className='rollen flex'>
             <li>
               <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
@@ -144,7 +145,7 @@ function EditUser({
                 }}
               />
             </li>
-            <li >
+            <li>
               <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${overheid ? "active" : ""}`}
                 htmlFor="overheid">Overheid</label>
               <input 
@@ -181,16 +182,36 @@ function EditUser({
           options={municipalitiesOptionList}
           placeholder="Selecteer 1 of meerdere overheden"
         />}
-        <div className="my-2">
+        <div className="my-2 flex">
           <input 
-            type="checkbox" 
+            type="checkbox"
+            id="send-welcome-email" 
             value={sendEmail ? 'true' : 'false'}
             onChange={(event) => setSendEmail(event.target.value ? true : false)}
           />
-          <H5Title classes="p-3">Stuur welkomstmail</H5Title>
+          <FormLabel htmlFor="send-welcome-email" classes="py-3 px-2">
+            Stuur welkomstmail
+          </FormLabel>
         </div>
       
-        <Button classes={'w-40 save'} type="submit" theme="primary">Opslaan</Button>
+        <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
+          <Button classes={'w-40 save'} type="submit" theme="primary">
+            Opslaan
+          </Button>
+          {<div
+            className="flex flex-col justify-center cursor-pointer"
+            style={{color: '#B2B2B2'}}
+            onClick={(e) => {
+              e.preventDefault();
+              alert('Binnenkort wordt verwijderen van gebruikers mogelijk.');
+            }}
+          >
+            <div className="flex">
+              <div className="inline-block underline">Verwijder gebruiker</div>
+              <button className='ml-2 delete-icon' style={{height: '100%'}} />
+            </div>
+          </div>}
+        </div>
       </form>
       {message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}
 
