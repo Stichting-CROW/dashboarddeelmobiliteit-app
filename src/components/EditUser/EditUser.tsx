@@ -7,6 +7,8 @@ import {
 import { useParams } from 'react-router';
 import { useLocation, useNavigate } from "react-router-dom";
 
+import {StateType} from '../../types/StateType';
+
 // Styles
 import './EditUser.css'; 
 
@@ -36,7 +38,7 @@ function EditUser({
   const navigate = useNavigate();
 
   // Get API token
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // On component load: Get municipalities and generate autosuggestion list
   useEffect(() => {

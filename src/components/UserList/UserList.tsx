@@ -7,6 +7,9 @@ import {
   useSelector
 } from 'react-redux';
 
+import {UserType} from '../../types/UserType';
+import {StateType} from '../../types/StateType';
+
 import Button from '../Button/Button';
 import AddUser from '../AddUser/AddUser';
 import EditUser from '../EditUser/EditUser';
@@ -51,7 +54,8 @@ const UserList = ({
 
   const [users, setUsers] = useState([]);
 
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const navigate = useNavigate();
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // Get list of municipalities and providers
   useEffect(() => {
@@ -96,7 +100,7 @@ const UserList = ({
     navigate('/admin/users/new');
   }
 
-  const editClickHandler = (user: object) => {
+  const editClickHandler = (user: UserType) => {
     navigate(`/admin/users/${user.username}`)
   }
 

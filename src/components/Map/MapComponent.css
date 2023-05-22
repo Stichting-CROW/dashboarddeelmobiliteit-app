@@ -1,5 +1,15 @@
 .map {
-  @apply absolute h-screen w-screen inset-0 box-border border-2 border-white bg-blue-500
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  box-sizing: border-box;
+  border-width: 2px;
+  border-color: rgb(255 255 255);
+  background-color: rgb(59 130 246);
 }
 
 .Map-popup-title {

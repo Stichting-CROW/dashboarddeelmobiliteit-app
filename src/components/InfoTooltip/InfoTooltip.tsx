@@ -13,7 +13,7 @@ function InfoTooltip({
 
   const [counter, setCounter] = useState(0)
 
-  useEffect(x => {
+  useEffect(() => {
 
     let mouseMoved = false;
     // let button = document.querySelector('.infoButton');

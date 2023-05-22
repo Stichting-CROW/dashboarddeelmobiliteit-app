@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
 
+import {StateType} from '../../types/StateType';
+
 const setQueryParam = (key, val) => {
   let searchParams = new URLSearchParams(window.location.search);
   if(! val) {
@@ -23,15 +25,15 @@ const setQueryParam = (key, val) => {
 function FilteritemGebieden() {
   const dispatch = useDispatch()
 
-  const gebieden = useSelector(state => {
+  const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
   
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : "";
   });
 
-  const filterBarExtendedView = useSelector(state => {
+  const filterBarExtendedView = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
   });
 
@@ -138,7 +140,6 @@ function FilteritemGebieden() {
   if(gebieden.length===1) {
     return (
       <div className="filter-plaats-container filter-plaats-not-active">
-        <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
         <div className="filter-plaats-box-row flex flex-col justify-center">
           <div className="filter-plaats-value " >{value===""?"Alle plaatsen":value.name}</div>
         </div>
@@ -148,7 +149,6 @@ function FilteritemGebieden() {
   
   return (
     <div className="filter-plaats-container">
-      <div className="filter-plaats-title" onClick={e=>{toggleGebieden('places')}}>Plaats</div>
       <div className="filter-plaats-box-row flex flex-col justify-center">
         <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{toggleGebieden('places')}}>
           {value === "" ? "Alle plaatsen" : value.name}

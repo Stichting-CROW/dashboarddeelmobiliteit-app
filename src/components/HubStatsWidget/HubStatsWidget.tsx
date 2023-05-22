@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 import {useLocation} from "react-router-dom";
 
+import {StateType} from '../../types/StateType';
+
 import moment from 'moment';
 
 import BeschikbareVoertuigenChart from '../Chart/BeschikbareVoertuigenChart.jsx';
@@ -32,7 +34,7 @@ function HubStatsWidget(props) {
   const [ontwikkelingVan, setOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
   const [ontwikkelingTot, setOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
 
-  const filterGebied = useSelector(state => {
+  const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : 0;
   });
 
@@ -46,9 +48,9 @@ function HubStatsWidget(props) {
     setPathName(location.pathname);
   }, [location.pathname]);
 
-  const filter = useSelector(state => state.filter);
+  const filter = useSelector((state: StateType) => state.filter);
 
-  useEffect(x => {
+  useEffect(() => {
     getPublicZones();
   }, [filterGebied])
 

@@ -2,6 +2,8 @@ import React, {useEffect, useState } from 'react';
 
 import { getOperatorStatsForChart } from './chartTools.js';
 
+import {StateType} from '../../types/StateType';
+
 import {
   useDispatch,
   useSelector
@@ -50,12 +52,12 @@ import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
 function VerhuringenChart(props) {
   const dispatch = useDispatch()
 
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
-  const filter = useSelector(state => state.filter)
-  const metadata = useSelector(state => state.metadata)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const filter = useSelector((state: StateType) => state.filter)
+  const metadata = useSelector((state: StateType) => state.metadata)
 
   // Get all zones
-  const zones = useSelector(state => {
+  const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 

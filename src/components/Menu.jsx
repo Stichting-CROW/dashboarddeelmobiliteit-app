@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 // import moment from 'moment';
 import { Link } from "react-router-dom";
+import {StateType} from '../types/StateType';
 
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
@@ -123,15 +124,15 @@ function Menu({pathName}) {
   const dispatch = useDispatch();
   // let dateToShow = moment(moment().format('2021-11-06 06:00'));
   
-  const userData = useSelector(state => {
+  const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
   });
   
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const exportState = useSelector(state => {
+  const exportState = useSelector((state: StateType) => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
 

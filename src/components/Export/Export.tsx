@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
 import { Link } from "react-router-dom";
 
+import {StateType} from '../../types/StateType';
+
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
 import Logo from '../Logo.jsx';
@@ -26,12 +28,13 @@ function Export() {
   const [succesfullRawDataRequest, setSuccesfullRawDataRequest] = useState(false);
   const [succesfullRawDataRequestEmail, setSuccesfullRawDataRequestEmail] = useState("");
   const [succesfullRawDataRequestNumberOfTasks, setSuccesfullRawDataRequestNumberOfTasks] = useState(0);
+  const [filterOperator, setFilterOperator] = useState([]);
 
-  const places = useSelector(state => {
+  const places = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
 
-  const token = useSelector(state => {
+  const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token
     } else {
@@ -39,7 +42,7 @@ function Export() {
     }
   })
 
-  const user = useSelector(state => {
+  const user = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
       return state.authentication.user_data.user
     } else {
@@ -47,7 +50,7 @@ function Export() {
     }
   });
 
-  useEffect(x => {
+  useEffect(() => {
     if(! token) return;
 
     let url = "https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
@@ -61,31 +64,33 @@ function Export() {
       response.json().then((acl) => {
         const isAdmin = acl.is_admin === true;
         const isContactPerson = acl.is_contact_person_municipality === true;
-
+        
         if(isAdmin || isContactPerson) {
           setIsVerified(true);
         }
+        setFilterOperator(acl.operators);
       });
     });
   }, [token])
 
   const handleDownloadReportClick = async () => {
     if(! startDate) {
-      window.notify('Selecteer een startdatum');
+      window['notify']('Selecteer een startdatum');
       return;
     }
     if(! endDate) {
-      window.notify('Selecteer een einddatum');
+      window['notify']('Selecteer een einddatum');
       return;
     }
     if(! municipalityCode) {
-      window.notify('Selecteer de gemeente');
+      window['notify']('Selecteer de gemeente');
       return;
     }
     await downloadReport(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
       endDate: moment(endDate).format('YYYY-MM-DD'),
-      gm_code: municipalityCode
+      gm_code: municipalityCode,
+      filter_operators: filterOperator.map(operator => operator.system_id)
     });
   }
 

@@ -21,6 +21,8 @@ const md5 = require('md5');
 const theState = localStorage.getItem('CROWDD_reduxState')
 const persistedState = theState ? JSON.parse(theState) : {};
 
+window.process = { ...window.process }
+
 export const store = createStore(
   appReducer,
   persistedState,

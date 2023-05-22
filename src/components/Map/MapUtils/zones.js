@@ -723,13 +723,13 @@ const navigateToGeography = (geographyId, allZones) => {
 
   // Navigate to zone / Zoom in into zone
   if(foundZone.area && foundZone.area.geometry && foundZone.area.geometry.coordinates && foundZone.area.geometry.coordinates[0]) {
-    if(! window.ddMap) return;
+    if(! window['ddMap']) return;
     // Get extent
     const extent = st.extent(foundZone.area)
     // Delay it a little bit, so it comes after the
     // 'zoom in to extent' on filterGebied change/load
     setTimeout(x => {
-      window.ddMap.fitBounds(extent, {
+      window['ddMap'].fitBounds(extent, {
         padding: {
           top: 25,
           bottom: 25,
@@ -740,7 +740,7 @@ const navigateToGeography = (geographyId, allZones) => {
       });
       // Open popup for this polygon automatically
       setTimeout(() => {
-        openPopup(window.ddMap, foundZone);
+        openPopup(window['ddMap'], foundZone);
       }, 1500);
     }, 100);
   }

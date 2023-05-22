@@ -13,7 +13,12 @@
   background-size: cover;
   cursor: pointer;
   
-  @apply relative inline-block my-3 mx-1;
+  position: relative;
+  display: inline-block;
+  margin-top: 0.75rem; /* 12px */
+  margin-bottom: 0.75rem; /* 12px */
+  margin-left: 0.25rem; /* 4px */
+  margin-right: 0.25rem; /* 4px */
   border: 4px solid #15AEEF;
 }
 .SelectLayerMobile .layer-inactive {
@@ -25,6 +30,9 @@
 }
 .SelectLayerMobile .layer[data-type="heat-map"] {
   background-image: url('../../images/SelectLayer/layer-heatmap.png')
+}
+.SelectLayerMobile .layer[data-type="od"] {
+  background-image: url('../../images/SelectLayer/layer-od.png')
 }
 .SelectLayerMobile .layer[data-type="pointers"] {
   background-image: url('../../images/SelectLayer/layer-clusters.png')

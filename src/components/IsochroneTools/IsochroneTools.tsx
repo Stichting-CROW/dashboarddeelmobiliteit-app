@@ -5,6 +5,8 @@ import {
   getIsochronesForFootWalking
 } from '../../api/isochrones';
 
+import {StateType} from '../../types/StateType';
+
 import './IsochroneTools.css';
 
 const addIsochronesToMap = (theMap, featureCollection) => {
@@ -37,8 +39,8 @@ const IsochroneTools = () => {
 
   const dispatch = useDispatch();
 
-  const exportState = useSelector(state => {
-    return { filter: state.filter, layers: state.layers, ui:state.ui };
+  const exportState = useSelector((state: StateType) => {
+    return { filter: state.filter, layers: state.layers, ui: state.ui };
   });
 
   const isFilterbarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
@@ -105,7 +107,7 @@ const IsochroneTools = () => {
     theMap.U.hide('zones-isochrones')
   }
 
-  const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
+  const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
 
   return (
     <>
@@ -116,7 +118,7 @@ const IsochroneTools = () => {
             <div 
             className="IsochroneTools-ctrl IsochroneTools-ctrl-start cursor-pointer flex justify-center flex-col text-center"
             onClick={() => {
-              addIsochroneMarker(window.ddMap)
+              addIsochroneMarker(window['ddMap'])
             }}
             title="Voeg punt voor isochronenweergave toe"
           />
@@ -125,12 +127,12 @@ const IsochroneTools = () => {
         {(isochroneMarkers && isochroneMarkers.length > 0) && <div className="IsochroneTools-ctrl-group">
           <div 
             className="IsochroneTools-ctrl IsochroneTools-ctrl-add cursor-pointer flex justify-center flex-col text-center"
-            onClick={() => {addIsochroneMarker(window.ddMap)}}
+            onClick={() => {addIsochroneMarker(window['ddMap'])}}
             title="Voeg nieuw punt toe"
           />
           <div 
             className="IsochroneTools-ctrl IsochroneTools-ctrl-close cursor-pointer flex justify-center flex-col text-center"
-            onClick={() => {removeIsochroneMarker(window.ddMap)}}
+            onClick={() => {removeIsochroneMarker(window['ddMap'])}}
             title="Stop isochronenweergave"
           />
         </div>}

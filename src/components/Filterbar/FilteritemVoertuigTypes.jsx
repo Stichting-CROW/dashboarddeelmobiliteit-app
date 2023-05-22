@@ -2,14 +2,16 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemVoertuigTypes.css';
 
+import {StateType} from '../../types/StateType';
+
 function FilteritemVoertuigTypes() {
   const dispatch = useDispatch()
 
-  const voertuigtypes = useSelector(state => {
+  const voertuigtypes = useSelector((state: StateType) => {
     return state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : [];
   });
   
-  const filterVoertuigTypesExclude = useSelector(state => {
+  const filterVoertuigTypesExclude = useSelector((state: StateType) => {
     if(Array.isArray(state.filter.voertuigtypesexclude)) {
       return '';
     }
@@ -57,17 +59,12 @@ function FilteritemVoertuigTypes() {
   }
   
   return (
-    <div className="filter-voertuigtypes-container">
-      <div className="filter-voertuigtypes-title-row">
-        <div className="filter-voertuigtypes-title">Vervoerstype</div>
-        { filterVoertuigTypesExclude!==''?
-            <div className="filter-voertuigtypes-reset cursor-pointer" onClick={clearFilterVoertuigTypesExclude}>
-              reset
-            </div>
-            :
-            null
-        }
-      </div>
+    <div className="w-full filter-voertuigtypes-container">
+      {filterVoertuigTypesExclude!=='' ? <div className="filter-voertuigtypes-title-row">
+        <div className="text-right filter-voertuigtypes-reset cursor-pointer" onClick={clearFilterVoertuigTypesExclude}>
+          reset
+        </div>
+      </div> : ''}
       <div className="filter-voertuigtypes-box-row">
         {
           voertuigtypes.map((voertuigtype,idx) => {
@@ -90,7 +87,7 @@ function FilteritemVoertuigTypes() {
             }
                 
             return (
-              <div className={`${baseClassName}${idx===voertuigtypes.length-1?' filter-voertuigtypes-item-last':''}`} key={voertuigtype.id} onClick={handler}>
+              <div className={`flex-1 ${baseClassName}${idx===voertuigtypes.length-1?' filter-voertuigtypes-item-last':''}`} key={voertuigtype.id} onClick={handler}>
                 <div className={`filter-voertuigtypes-icon ${extraclass}`} onClick={handler} />
                 <div className="filter-voertuigtypes-itemlabel">
                   { voertuigtype.name }

@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from "react-router-dom";
 
+import {StateType} from '../../types/StateType';
+
 import './MenuSecondaryItem.css';
-// import { IconButtonFilter } from './IconButtons.jsx';
-// import { clearUser } from '../actions/authentication';
 
 function MenuSecondaryItem(props) {
   return (
@@ -21,7 +21,7 @@ function MenuSecondaryItem(props) {
 function MenuSecondary() {
   const dispatch = useDispatch()
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : null;
   });
 

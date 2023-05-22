@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
 
+import {StateType} from '../../types/StateType';
+
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
 import Logo from '../Logo.jsx';
@@ -21,7 +23,7 @@ function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const user = useSelector(state => {
+  const user = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data && state.authentication.user_data.user) {
       return state.authentication.user_data.user
     } else {

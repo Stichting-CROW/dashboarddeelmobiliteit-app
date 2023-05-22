@@ -2,6 +2,8 @@ import React, {useEffect, useState } from 'react';
 
 import { getOperatorStatsForChart } from './chartTools.js';
 
+import {StateType} from '../../types/StateType';
+
 import {
   useDispatch,
   useSelector
@@ -47,7 +49,13 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisT
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
 
-function BeschikbareVoertuigenChart({filter, config, title}) {
+function BeschikbareVoertuigenChart({
+  filter, config, title
+}: {
+  filter: any,
+  config: any,
+  title?: string
+}) {
   const dispatch = useDispatch()
 
   // Get authentication token
@@ -57,7 +65,7 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
   const metadata = useSelector(state => state.metadata)
 
   // Get all zones
-  const zones = useSelector(state => {
+  const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
@@ -161,7 +169,8 @@ function BeschikbareVoertuigenChart({filter, config, title}) {
               stackId="1"
               type="monotone"
               dataKey={x}
-              stroke={providerColor}
+              stroke="#fff"
+              strokeWidth={2}
               fill={providerColor}
               isAnimationActive={false}
             />

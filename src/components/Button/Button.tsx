@@ -5,11 +5,22 @@ function Button({
   children,
   onClick,
   type,
-  classes
+  title,
+  classes,
+  style
+}: {
+  theme?: string,
+  children?: any,
+  onClick?: any,
+  title?: string,
+  type?: "button" | "reset" | "submit",
+  classes?: string,
+  style?: object
 }) {
   return (
     <button
       className={`
+        ${classes}
         rounded-lg
         inline-block
         border-solid border-2
@@ -22,11 +33,11 @@ function Button({
         mx-2
         my-2
         text-center
-        ${classes}
-        `}
+      `}
       type={type}
+      title={title}
       onClick={onClick}
-      style={themes[theme]}
+      style={Object.assign({}, themes[theme], style)}
     >
       {children}
     </button>

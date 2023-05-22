@@ -5,6 +5,9 @@ import {
 } from 'react-redux';
 import { useLocation, useNavigate } from "react-router-dom";
 
+// 
+import {StateType} from '../../types/StateType';
+
 // Styles
 import './AddUser.css'; 
 
@@ -16,7 +19,7 @@ function AddUser(props) {
   const navigate = useNavigate();
 
   // Get API token
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // State variables
   const [message, setMessage] = useState('')
@@ -53,7 +56,11 @@ let userRoles = ""
     createUser(email, userRoles)
   }
   
-  function getHeaders() {
+  function getHeaders(): {
+    method?: any,
+    body?: any,
+    headers: any
+  } {
     return {
       headers: {
         "Authorization":  `Bearer ${token}`
@@ -127,7 +134,7 @@ let userRoles = ""
                 type="radio" 
                 id="admin"
                 name="rollen"
-                value={admin}
+                value={admin ? 'true' : null}
                 onClick={() =>{
                   setAdmin(true)
                   setAanbieder(false)
@@ -142,7 +149,7 @@ let userRoles = ""
                 type="radio" 
                 id="overheid"
                 name="rollen"
-                value={overheid}
+                value={overheid ? 'true' : null}
                 onClick={() => {
                   setOverheid(true)
                   setAanbieder(false)
@@ -157,7 +164,7 @@ let userRoles = ""
                 type="radio" 
                 id="aanbieder"
                 name="rollen"
-                value={aanbieder}
+                value={aanbieder ? 'true' : null}
                 onClick={() => {
                   setAanbieder(true); 
                   setAdmin(false)
@@ -170,10 +177,10 @@ let userRoles = ""
         <div className="p-2">
           <input 
             type="checkbox" 
-            value={sendEmail}
-            onChange={(event) => setSendEmail(event.target.value)}
+            value={sendEmail ? 'true' : null}
+            onChange={(event) => setSendEmail(event.target.value ? true : false)}
           />
-          <H5Title className="p-3">Stuur welkomstmail</H5Title>
+          <H5Title>Stuur welkomstmail</H5Title>
         </div>
       
         <Button classes={'w-40 save'} type="submit" theme="primary">Opslaan</Button>

@@ -8,8 +8,10 @@ import {
 import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
-import {AnimatePresence, motion} from 'framer-motion/dist/framer-motion'
-import 'tw-elements';
+import {AnimatePresence, motion} from 'framer-motion'
+import * as te from 'tw-elements';
+
+import {StateType} from './types/StateType';
 
 import Menu from './components/Menu.jsx';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
@@ -82,7 +84,7 @@ const Notification = ({ doShowNotification, setDoShowNotification, isFilterBarOp
         }}
         onClick={() => setDoShowNotification(false)}
       >
-        <h1 className="text-xl text-slate-700 font-medium text-center">
+        <h1 className="text-lg text-slate-700 font-medium text-center">
           {doShowNotification}
         </h1>
         <div className="flex justify-between items-center">
@@ -109,7 +111,7 @@ function App() {
 
   let DELAY_TIMEOUT_IN_MS = 250;
 
-  const exportState = useSelector(state => {
+  const exportState = useSelector((state: StateType) => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
   const isFilterBarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
@@ -165,11 +167,11 @@ function App() {
 
   }, [pathName, uriParams]);
 
-  const isLoggedIn = useSelector(state => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const isAdmin = useSelector(state => {
+  const isAdmin = useSelector((state: StateType) => {
     if(! state.authentication) return false;
     if(! state.authentication.user_data) return false;
     let userIsAdmin = false;
@@ -180,31 +182,31 @@ function App() {
     return userIsAdmin;
   });
   
-  const filterDate = useSelector(state => {
+  const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
   });
 
-  const isLayersMobileVisible = useSelector(state => {
+  const isLayersMobileVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['MenuSecondary.layers'] : false;
   });
 
-  const isFilterBarVisible = useSelector(state => {
+  const isFilterBarVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR'] : false;
   });
 
-  const filter = useSelector(state => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
   
-  const layers = useSelector(state => {
+  const layers = useSelector((state: StateType) => {
     return state.layers;
   });
 
-  const displayMode = useSelector(state => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
-  const metadata = useSelector(state => {
+  const metadata = useSelector((state: StateType) => {
     return state.metadata;
   });
 
@@ -334,10 +336,6 @@ function App() {
 
       <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
 
-      {process && process.env.DEBUG && <div className="DEBUG fixed bottom-10 right-16 z-100 bg-white opacity-50" style={{zIndex: 9999}}>
-        {layers.displaymode}
-      </div>}
-
       <LoadingIndicator  />
 
       <div className="gui-layer">
@@ -440,6 +438,32 @@ function App() {
           :
           null
         }
+
+        { ! isLoggedIn ? <>
+          <Route exact path="/" element={renderMapElements()} />
+          <Route exact path="/map/park" element={renderMapElements()} />
+          <Route exact path="/map/rentals" element={renderMapElements()} />
+          <Route path="/map/zones" element={renderMapElements()} />
+          <Route exact path="/misc" element={
+            <Overlay>
+              <Misc />
+            </Overlay>
+          } />
+          <Route exact path="/profile" element={
+            <Overlay>
+              <Misc>
+                <Profile />
+              </Misc>
+            </Overlay>
+          } />
+          <Route exact path="/faq" element={
+            <Overlay>
+              <Misc>
+                <Faq />
+              </Misc>
+            </Overlay>
+          } />
+        </> : '' }
 
         <Route exact path="/over" element={
           <Overlay>

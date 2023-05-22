@@ -25,7 +25,13 @@
   }
 
   .Menu-inner {
-    @apply px-4 shadow-lg m-4 mb-0 rounded-3xl;
+    padding-left: 1rem; /* 16px */
+    padding-right: 1rem; /* 16px */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    margin: 1rem; /* 16px */
+    margin-bottom: 0px;
+    border-radius: 1.5rem; /* 24px */
+
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     display: inline-block;
@@ -51,11 +57,18 @@
 }
 
 .text-menu {
-  @apply relative text-black hover:text-blue-800 px-3 sm:px-4 inline-block;
+  position: relative;
+  color: #000;
+  padding-left: 0.75rem; /* 12px */
+  padding-right: 0.75rem; /* 12px */
+  display:inline-block;
   font-size: 14px;
   line-height: 60px;
   height: 60px;
   white-space: nowrap;
+}
+.text-menu:hover {
+  color: rgb(30 64 175);;
 }
 
 .text-menu::after {
@@ -64,7 +77,9 @@
   width: 1px;
   height: 28px;
   top: 16px;
-  @apply border-r border-black absolute right-0;
+  border-right: solid 1px #000;
+  position: absolute;
+  right: 0;
 }
 .text-menu:hover,
 .text-menu.is-active {
@@ -73,17 +88,20 @@
 
 .text-menu img {
   height: 25px;
-  @apply inline-block mx-1;
+  display: inline-block;
+  margin-left: 0.25rem; /* 4px */
+  margin-right: 0.25rem; /* 4px */
 }
 .text-menu:last-child::after {
-  @apply border-r-0;
+  border-right: none;
 }
 
 .Menu-subMenu {
   bottom: 68px;
   background: white;
   right: 0;
-  @apply py-1;
+  padding-top: 0.25rem; /* 4px */
+  padding-bottom: 0.25rem; /* 4px */
 }
 @media (min-width: 640px) {
   .Menu-subMenu {
@@ -92,10 +110,20 @@
 }
 
 .text-link {
-  @apply relative text-black hover:text-blue-800 px-4 py-2 block;
+  position: relative;
+  color: #000;
+  padding-left: 1rem; /* 16px */
+  padding-right: 1rem; /* 16px */
+  padding-top: 0.5rem; /* 8px */
+  padding-bottom: 0.5rem; /* 8px */
+  display: block;
+
   font-size: 14px;
   border-radius: 17px;
   white-space: nowrap;
+}
+.text-link:hover {
+  color: rgb(30 64 175);;
 }
 .text-link:hover,
 .text-link.is-active {

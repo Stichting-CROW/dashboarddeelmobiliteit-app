@@ -18,13 +18,22 @@
 }
 
 .ContentPage h1 {
-  @apply text-4xl my-4
+  font-size: 2.25rem; /* 36px */
+  line-height: 2.5rem; /* 40px */
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
 }
 
 .ContentPage h2 {
-  @apply text-2xl my-4
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem; /* 32px */
 }
 
 .ContentPage ul {
-  @apply list-disc ml-4 my-4
+  margin-top: 1rem; /* 16px */
+  margin-bottom: 1rem; /* 16px */
+  margin-left: 1rem; /* 16px */
+  list-style-type: disc;
 }

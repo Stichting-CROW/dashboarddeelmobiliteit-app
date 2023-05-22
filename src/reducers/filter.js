@@ -35,11 +35,17 @@ const initialState = {
   parkeerduurexclude: "",
   voertuigtypesexclude: "",
   afstandexclude: "",
-  herkomstbestemming: "",
+  herkomstbestemming: "herkomstbestemming",
   ontwikkelingvan: moment().subtract(30, 'days').toISOString(),
   ontwikkelingtot: (new Date()).toISOString(),
   ontwikkelingaggregatie: "day",
-  ontwikkelingaggregatie_function: 'MAX'
+  ontwikkelingaggregatie_function: 'MAX',
+  h3niveau: 8,
+  weekdays: 'fr,th,mo,tu,we,sa,su',
+  timeframes: '6-10,10-14,14-18,18-22,22-2,2-6',
+  h3hexes7: [],
+  h3hexes8: [],
+  h3hexeswijk: []
 }
 
 export default function filter(state = initialState, action) {
@@ -95,6 +101,96 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           herkomstbestemming: action.payload
+      };
+    }
+    case 'SET_FILTER_H3NIVEAU': {
+      return {
+          ...state,
+          h3niveau: action.payload
+      };
+    }
+    case 'TOGGLE_FILTER_H3HEXES_7': {
+      // Make sure state.h3hexes is an array
+      let newHexes = state.h3hexes7 instanceof Array ? state.h3hexes7 : [];
+
+      // If payload is in array: Remove
+      if(state.h3hexes7 && newHexes.indexOf(action.payload) > -1) {
+        newHexes = newHexes.filter(x => x !== action.payload)
+      }
+      // Otherwise: Add
+      else {
+        newHexes.push(action.payload);
+      }
+
+      return {
+          ...state,
+          h3hexes7: newHexes
+      };
+    }
+    case 'TOGGLE_FILTER_H3HEXES_8': {
+      // Make sure state.h3hexes is an array
+      let newHexes = state.h3hexes8 instanceof Array ? state.h3hexes8 : [];
+
+      // If payload is in array: Remove
+      if(state.h3hexes8 && newHexes.indexOf(action.payload) > -1) {
+        newHexes = newHexes.filter(x => x !== action.payload)
+      }
+      // Otherwise: Add
+      else {
+        newHexes.push(action.payload);
+      }
+
+      return {
+          ...state,
+          h3hexes8: newHexes
+      };
+    }
+    case 'TOGGLE_FILTER_H3HEXES_WIJK': {
+      // Make sure state.h3hexes is an array
+      let newValue = state.h3hexes8 instanceof Array ? state.h3hexeswijk : [];
+
+      // If payload is in array: Remove
+      if(state.h3hexeswijk && newValue.indexOf(action.payload) > -1) {
+        newValue = newValue.filter(x => x !== action.payload)
+      }
+      // Otherwise: Add
+      else {
+        newValue.push(action.payload);
+      }
+
+      return {
+          ...state,
+          h3hexeswijk: newValue
+      };
+    }
+    case 'SET_FILTER_H3HEXES_7': {
+      return {
+          ...state,
+          h3hexes7: [action.payload]
+      };
+    }
+    case 'SET_FILTER_H3HEXES_8': {
+      return {
+          ...state,
+          h3hexes8: [action.payload]
+      };
+    }
+    case 'SET_FILTER_H3HEXES_WIJK': {
+      return {
+          ...state,
+          h3hexeswijk: [action.payload]
+      };
+    }
+    case 'SET_FILTER_WEEKDAYS': {
+      return {
+          ...state,
+          weekdays: action.payload
+      };
+    }
+    case 'SET_FILTER_TIMEFRAMES': {
+      return {
+          ...state,
+          timeframes: action.payload
       };
     }
     case 'ADD_TO_FILTER_ZONES': {
