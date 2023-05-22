@@ -1,10 +1,16 @@
 import React from 'react'
 
 function H5Title({
-  children
+  children,
+  className
+}: {
+  children: any,
+  className?: string
 }) {
   return (
-    <h5 className='text-sm text-dark-blue font-medium'>{children}</h5>
+    <h5 className={`text-sm text-dark-blue font-medium ${className}`}>
+      {children}
+    </h5>
   )
 }
 

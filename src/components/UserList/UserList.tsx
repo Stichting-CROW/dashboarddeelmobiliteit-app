@@ -51,11 +51,9 @@ const UserList = ({
   showAddUserModule?: boolean
 }) => {
   const navigate = useNavigate();
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   const [users, setUsers] = useState([]);
-
-  const navigate = useNavigate();
-  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // Get list of municipalities and providers
   useEffect(() => {

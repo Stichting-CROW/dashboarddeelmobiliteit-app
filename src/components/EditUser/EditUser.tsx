@@ -32,7 +32,7 @@ function EditUser({
   const [overigBedrijf, setOverigBedrijf] = useState(false)
   const [kernteam, setKernteam] = useState(false)
   const [downloadrechten, setDownloadrechten] = useState(false)
-  const [municipalitiesOptionList, setMunicipalitiesOptionList] = useState()
+  const [municipalitiesOptionList, setMunicipalitiesOptionList] = useState([])
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ function EditUser({
     buildOptionsValue();
   }, []);
   
-  function getHeaders() {
+  function getHeaders(): any {
     return {
       headers: {
         "Authorization":  `Bearer ${token}`
@@ -72,7 +72,8 @@ function EditUser({
     return fetch(url, options)
         .then((response) => {
             if (response.status == 401) {
-                errorNoPermission(response);
+              console.error(response)
+                // errorNoPermission(response);
             }
             return response.status;
         });
@@ -111,14 +112,6 @@ function EditUser({
     setMunicipalitiesOptionList(optionsList)
   }
 
-
-
- 
-
-  
-
-
-
   return (
     <div>
     <form onSubmit={handleSubmit} className='add-user-form'>
@@ -142,7 +135,7 @@ function EditUser({
                 type="radio" 
                 id="admin"
                 name="rollen"
-                value={admin}
+                // value={admin}
                 onClick={() =>{
                   setAdmin(true)
                   setAanbieder(false)
@@ -157,7 +150,7 @@ function EditUser({
                 type="radio" 
                 id="overheid"
                 name="rollen"
-                value={overheid}
+                // value={overheid}
                 onClick={() => {
                   setOverheid(true)
                   setAanbieder(false)
@@ -172,7 +165,7 @@ function EditUser({
                 type="radio" 
                 id="aanbieder"
                 name="rollen"
-                value={aanbieder}
+                // value={aanbieder}
                 onClick={() => {
                   setAanbieder(true); 
                   setAdmin(false)
@@ -189,8 +182,8 @@ function EditUser({
         <div className="p-2">
           <input 
             type="checkbox" 
-            value={sendEmail}
-            onChange={(event) => setSendEmail(event.target.value)}
+            value={sendEmail ? 'true' : 'false'}
+            onChange={(event) => setSendEmail(event.target.value ? true : false)}
           />
           <H5Title className="p-3">Stuur welkomstmail</H5Title>
         </div>
