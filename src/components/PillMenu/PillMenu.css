@@ -17,7 +17,8 @@
   display: block;
   color: #343E47;
 }
-.PillMenu li.is-active a {
+.PillMenu li.is-active a,
+.PillMenu li a.active {
   color: #15AEEF;
 }
 .PillMenu a:after {

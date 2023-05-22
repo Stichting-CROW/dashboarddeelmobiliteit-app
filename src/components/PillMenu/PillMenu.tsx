@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 import './PillMenu.css';
 
@@ -16,6 +16,9 @@ interface PillMenuProps {
 function PillMenu({
   items,
 }: PillMenuProps) {
+  // const location = useLocation();
+  // const pathname = location.pathname;
+
   return (
     <div className="PillMenu px-5">
       <ul className="flex">
@@ -24,9 +27,9 @@ function PillMenu({
             <li key={x.title}>
               {typeof x.link === 'function' ? <div onClick={x.link}>
                 {x.title}
-              </div> : <Link to={x.link}>
+              </div> : <NavLink to={x.link}>
                 {x.title}
-              </Link>}
+              </NavLink>}
             </li>
           )
         })}
