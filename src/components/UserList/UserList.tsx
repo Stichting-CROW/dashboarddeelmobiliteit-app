@@ -21,10 +21,10 @@ const TableRow = (user: any, editClickHandler: Function) => {
   const { username } = useParams();
 
   return <React.Fragment key={user.username}>
-    <div className="text-sm">
+    <div className="text-sm flex flex-col justify-center">
       {user.username}
     </div>
-    <div className="text-sm">
+    <div className="text-sm flex flex-col justify-center">
       {user && 
         user.filter_municipality ? "Overheid" 
         : user.filter_operator ? "Aanbieder"
@@ -32,12 +32,19 @@ const TableRow = (user: any, editClickHandler: Function) => {
         : null}
     </div>
     <div className="text-sm">
-      <button className='edit-icon' onClick={() => editClickHandler(user)}/>
-      {username !== user.username && <button className='delete-icon'/>}
+      <button className='edit-icon' onClick={() => editClickHandler(user)} style={{height: '100%'}} />
+      {username !== user.username && <button className='ml-1 delete-icon'  style={{height: '100%'}} />}
+    </div>
+
+    {/*Horizontal line*/}
+    <div className="col-span-3" style={{
+      height: '1px',
+      backgroundColor: '#CCCCCC'
+    }}>
     </div>
 
     {/*If user clicked edit: Show edit form */}
-    <div className="col-span-3">
+    <div className="col-span-3" hidden={username !== user.username}>
       {username === user.username && <EditUser user={user}/>}
     </div>
 
@@ -64,7 +71,7 @@ const UserList = ({
 
     (async () => {
       const acl = await getAclFromDatabase();
-      console.log('acl', acl);
+      // console.log('acl', acl);
     })();
 
   }, []);
@@ -78,7 +85,7 @@ const UserList = ({
 
     (async () => {
       const actualUsersFromDatabase = await getUsersFromDatabase();
-      console.log('actualUsersFromDatabase', actualUsersFromDatabase);
+      // console.log('actualUsersFromDatabase', actualUsersFromDatabase);
       setUsers(actualUsersFromDatabase);
     })();
 
@@ -105,12 +112,15 @@ const UserList = ({
   return (
     <div className="">
       <H1Title>Gebruikers</H1Title>
-      <div className='pb-4'>
+      <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={handleClick}>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
       </div>
       <AddUser showModule={showAddUserModule} /> 
-      <div className="grid gap-4 grid-cols-3 grid-container">
+      <div className="grid gap-x-4 grid-container" style={{
+        rowGap: '0.75rem',
+        gridTemplateColumns: 'minmax(100px, 1fr) 100px 50px'
+      }}>
         <H4Title>Email</H4Title>
         <H4Title>Rol</H4Title>
         <H4Title></H4Title>
