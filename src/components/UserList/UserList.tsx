@@ -10,6 +10,10 @@ import {
 import {UserType} from '../../types/UserType';
 import {StateType} from '../../types/StateType';
 
+// Import API methods
+import {getUserList} from '../../api/users';
+
+// Import components
 import Button from '../Button/Button';
 import AddUser from '../AddUser/AddUser';
 import EditUser from '../EditUser/EditUser';
@@ -35,7 +39,7 @@ const TableRow = (user: any, editClickHandler: Function) => {
         : user.is_admin ? "Admin"
         : null}
     </div>
-    <div className="text-sm">
+    <div className="text-sm flex justify-end">
       <button className='edit-icon' style={{height: '100%'}} />
       {username !== user.username && <button className='ml-1 delete-icon' style={{height: '100%'}} />}
     </div>
@@ -75,15 +79,17 @@ const UserList = ({
 
   // Get user list on component load
   useEffect(() => {
+
     const getUsersFromDatabase = async () => {
       const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/admin/user/list', getFetchOptions());
       return await response.json();
     }
 
     (async () => {
-      const actualUsersFromDatabase = await getUsersFromDatabase();
-      // console.log('actualUsersFromDatabase', actualUsersFromDatabase);
-      setUsers(actualUsersFromDatabase);
+      // const users = await getUserList();
+      // console.log('users', users);
+      const users = await getUsersFromDatabase();
+      setUsers(users);
     })();
 
 
