@@ -20,7 +20,11 @@ const TableRow = (user: any, editClickHandler: Function) => {
   // Get username from URL
   const { username } = useParams();
 
-  return <React.Fragment key={user.username}>
+  return <div
+    key={user.username}
+    className={`TableRow ${username === user.username ? 'no-hover' : ''}`}
+    onClick={() => editClickHandler(user)}
+  >
     <div className="text-sm flex flex-col justify-center">
       {user.username}
     </div>
@@ -32,15 +36,8 @@ const TableRow = (user: any, editClickHandler: Function) => {
         : null}
     </div>
     <div className="text-sm">
-      <button className='edit-icon' onClick={() => editClickHandler(user)} style={{height: '100%'}} />
-      {username !== user.username && <button className='ml-1 delete-icon'  style={{height: '100%'}} />}
-    </div>
-
-    {/*Horizontal line*/}
-    <div className="col-span-3" style={{
-      height: '1px',
-      backgroundColor: '#CCCCCC'
-    }}>
+      <button className='edit-icon' style={{height: '100%'}} />
+      {username !== user.username && <button className='ml-1 delete-icon' style={{height: '100%'}} />}
     </div>
 
     {/*If user clicked edit: Show edit form */}
@@ -48,7 +45,7 @@ const TableRow = (user: any, editClickHandler: Function) => {
       {username === user.username && <EditUser user={user}/>}
     </div>
 
-  </React.Fragment>
+  </div>
 }
 
 // UserList
@@ -118,12 +115,13 @@ const UserList = ({
       </div>
       <AddUser showModule={showAddUserModule} /> 
       <div className="grid gap-x-4 grid-container" style={{
-        rowGap: '0.75rem',
         gridTemplateColumns: 'minmax(100px, 1fr) 100px 50px'
       }}>
-        <H4Title>Email</H4Title>
-        <H4Title>Rol</H4Title>
-        <H4Title></H4Title>
+        <div className="TableRow no-hover">
+          <H4Title>Email</H4Title>
+          <H4Title>Rol</H4Title>
+          <H4Title></H4Title>
+        </div>
         {users.map(user => TableRow(user, editClickHandler))}
       </div>
     </div>
