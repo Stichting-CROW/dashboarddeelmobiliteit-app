@@ -126,7 +126,7 @@ let userRoles = ""
         </div>
         <div className="p-2">
           <H5Title>Rollen</H5Title>
-          <ul className='rollen'>
+          <ul className='rollen flex'>
             <li>
               <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
                 htmlFor="admin">Admin</label>

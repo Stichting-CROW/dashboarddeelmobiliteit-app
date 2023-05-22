@@ -14,6 +14,7 @@ import './EditUser.css';
 
 // Components
 import H5Title from '../H5Title/H5Title';
+import FormLabel from '../FormLabel/FormLabel';
 
 function EditUser({
   user
@@ -115,19 +116,19 @@ function EditUser({
   return (
     <div>
     <form onSubmit={handleSubmit} className='add-user-form'>
-        <div className="email p-2">
-          <H5Title>Wijzig emailadres</H5Title>
+        <div className="email">
+          <FormLabel classes="mt-2 mb-4">Wijzig emailadres</FormLabel>
           <input 
             type="email" 
             disabled
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer w-80"
-            value={email}
+            value={username}
             onChange={(event) => setEmail(event.target.value)}
           />
         </div>
-        <div className="p-2">
-          <H5Title>Wijzig rollen</H5Title>
-          <ul className='rollen'>
+        <div>
+          <FormLabel classes="mt-2 mb-4">Wijzig rollen</FormLabel>
+          <ul className='rollen flex'>
             <li>
               <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
                 htmlFor="admin">Admin</label>
@@ -135,7 +136,7 @@ function EditUser({
                 type="radio" 
                 id="admin"
                 name="rollen"
-                // value={admin}
+                className="hidden"
                 onClick={() =>{
                   setAdmin(true)
                   setAanbieder(false)
@@ -150,7 +151,7 @@ function EditUser({
                 type="radio" 
                 id="overheid"
                 name="rollen"
-                // value={overheid}
+                className="hidden"
                 onClick={() => {
                   setOverheid(true)
                   setAanbieder(false)
@@ -165,7 +166,7 @@ function EditUser({
                 type="radio" 
                 id="aanbieder"
                 name="rollen"
-                // value={aanbieder}
+                className="hidden"
                 onClick={() => {
                   setAanbieder(true); 
                   setAdmin(false)
@@ -176,16 +177,17 @@ function EditUser({
           </ul>
         </div>
         {overheid && <Select
-        options={municipalitiesOptionList}
-        placeholder="Please select municipality/ies"
-      />}
-        <div className="p-2">
+          className="mt-2"
+          options={municipalitiesOptionList}
+          placeholder="Selecteer 1 of meerdere overheden"
+        />}
+        <div className="my-2">
           <input 
             type="checkbox" 
             value={sendEmail ? 'true' : 'false'}
             onChange={(event) => setSendEmail(event.target.value ? true : false)}
           />
-          <H5Title className="p-3">Stuur welkomstmail</H5Title>
+          <H5Title classes="p-3">Stuur welkomstmail</H5Title>
         </div>
       
         <Button classes={'w-40 save'} type="submit" theme="primary">Opslaan</Button>

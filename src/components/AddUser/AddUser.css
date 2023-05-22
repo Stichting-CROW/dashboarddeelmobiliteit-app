@@ -2,7 +2,7 @@
 .add-user-form {
     display: flex;
     flex-direction: column;
-    margin: 2% 0 4% 0;
+/*    margin: 2% 0 4% 0;*/
 }
 
 .rollen {
@@ -17,8 +17,6 @@
 }
 
 .rollen li {
-    float: left;
-    position: relative;
 }
 
 .rollen input[type="radio"] {
