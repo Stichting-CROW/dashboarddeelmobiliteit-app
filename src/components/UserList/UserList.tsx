@@ -20,33 +20,50 @@ import EditUser from '../EditUser/EditUser';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
 
+const readablePrivilege = (privilegeKey) => {
+  switch(privilegeKey) {
+    case 'CORE_GROUP':
+      return 'Kernteam';
+    case 'MICROHUB_EDIT':
+      return 'Microhub bewerken';
+    case 'DOWNLOAD_RAW_DATA':
+      return 'Ruwe data download';
+    case 'ORGANISATION_ADMIN':
+      return 'Organisatie-admin';
+  }
+}
+
 const TableRow = (user: any, editClickHandler: Function) => {
   // Get username from URL
   const { username } = useParams();
-
+  console.log('user.privileges', user.privileges);
   return <div
-    key={user.username}
-    className={`TableRow ${username === user.username ? 'no-hover' : ''}`}
+    key={user.user_id}
+    className={`TableRow ${username === user.user_id ? 'no-hover' : ''}`}
     onClick={() => editClickHandler(user)}
   >
-    <div className="text-sm flex flex-col justify-center">
-      {user.username}
-    </div>
-    <div className="text-sm flex flex-col justify-center">
-      {user && 
-        user.filter_municipality ? "Overheid" 
-        : user.filter_operator ? "Aanbieder"
-        : user.is_admin ? "Admin"
-        : null}
-    </div>
-    <div className="text-sm flex justify-end">
-      <button className='edit-icon' style={{height: '100%'}} />
-      {username !== user.username && <button className='ml-1 delete-icon' style={{height: '100%'}} />}
+    <div className="flex">
+      <div className="col-email text-sm">
+        {user.is_admin ? '👑' : ''} {user.user_id}
+      </div>
+      <div className="col-organisation text-sm">
+        {user.organisation_name}
+      </div>
+      <div className="col-privileges text-sm">
+        {user.privileges.map(x => {
+          return <div>{readablePrivilege(x)}</div>
+        })}
+        {user.privileges.length === 0 && user.is_admin ? 'Super-admin' : ''}
+      </div>
+      <div className="col-actions text-sm flex justify-end">
+        <button className='edit-icon' style={{height: '100%'}} />
+        {username !== user.user_id && <button className='ml-1 delete-icon' style={{height: '100%'}} />}
+      </div>
     </div>
 
     {/*If user clicked edit: Show edit form */}
-    <div className="col-span-3" hidden={username !== user.username}>
-      {username === user.username && <EditUser user={user}/>}
+    <div className="col-span-3" hidden={username !== user.user_id}>
+      {username === user.user_id && <EditUser user={user}/>}
     </div>
 
   </div>
@@ -79,20 +96,11 @@ const UserList = ({
 
   // Get user list on component load
   useEffect(() => {
-
-    const getUsersFromDatabase = async () => {
-      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/admin/user/list', getFetchOptions());
-      return await response.json();
-    }
-
     (async () => {
-      // const users = await getUserList();
-      // console.log('users', users);
-      const users = await getUsersFromDatabase();
+      const users = await getUserList(token);
+      console.log('users', users);
       setUsers(users);
     })();
-
-
   }, []);
 
   const getFetchOptions = () => {
@@ -109,24 +117,25 @@ const UserList = ({
   }
 
   const editClickHandler = (user: UserType) => {
-    navigate(`/admin/users/${user.username}`)
+    navigate(`/admin/users/${user.user_id}`)
   }
 
   return (
-    <div className="">
+    <div className="" style={{maxWidth: '800px'}}>
       <H1Title>Gebruikers</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={handleClick}>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
       </div>
       <AddUser showModule={showAddUserModule} /> 
-      <div className="grid gap-x-4 grid-container" style={{
-        gridTemplateColumns: 'minmax(100px, 1fr) 100px 50px'
-      }}>
-        <div className="TableRow no-hover">
-          <H4Title>Email</H4Title>
-          <H4Title>Rol</H4Title>
-          <H4Title></H4Title>
+      <div className="
+        Table
+      ">
+        <div className="TableRow flex justify-between no-hover">
+          <H4Title className="col-email">Email</H4Title>
+          <H4Title className="col-organisation">Organisatie</H4Title>
+          <H4Title className="col-privileges">Privileges</H4Title>
+          <H4Title className="col-actions"></H4Title>
         </div>
         {users.map(user => TableRow(user, editClickHandler))}
       </div>

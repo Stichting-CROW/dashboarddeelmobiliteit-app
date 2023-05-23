@@ -96,7 +96,7 @@ function EditUser({
     const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/menu/acl', fetchOptions);
     const parsed = await response.json();
 
-    return parsed 
+    return parsed;
   }
 
 
@@ -122,7 +122,7 @@ function EditUser({
           <input 
             type="email" 
             disabled
-            className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer w-80"
+            className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
             value={username}
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -203,7 +203,7 @@ function EditUser({
             style={{color: '#B2B2B2'}}
             onClick={(e) => {
               e.preventDefault();
-              alert('Binnenkort wordt verwijderen van gebruikers mogelijk.');
+              alert('Verwijderen van gebruikers wordt binnenkort mogelijk');
             }}
           >
             <div className="flex">

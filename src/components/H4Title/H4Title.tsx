@@ -1,12 +1,14 @@
 import React from 'react'
 
 function H4Title({
-  children
+  children,
+  className
 }: {
-  children?: any
+  children?: any,
+  className?: any
 }) {
   return (
-    <h4 className='text-sm text-dark-blue font-semibold'>{children}</h4>
+    <h4 className={`text-sm text-dark-blue font-semibold ${className}`}>{children}</h4>
   )
 }
 
