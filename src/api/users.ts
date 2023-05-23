@@ -8,7 +8,6 @@ const getHeaders = (token): {
 } => {
   return {
     method: "GET",
-    mode: "no-cors",
     headers: {
       "Authorization":  `Bearer ${token}`,
       "Content-Type": 'application/json'
@@ -22,7 +21,14 @@ export const getUserList = async (token) => {
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
-  return await response.json();
+  let json;
+  try {
+    json = await response.json();
+    return json;
+  } catch(e) {
+    console.error('Error getting user list');
+    return [];
+  }
 }
 
 // GET /user/list?organisation_id=1
@@ -53,12 +59,14 @@ export const createUser = async (token, userObject) => {
 // Example data:
 // {
 //     "user_id":         "example@example.com",
- //     "privileges":      ["DOWNLOAD_RAW_DATA", "ORGANISATION_ADMIN"],
+//     "privileges":      ["DOWNLOAD_RAW_DATA", "ORGANISATION_ADMIN"],
 //     "organisation_id": 9
 // }
 export const updateUser = async (token, userObject) => {
   const url = `${admin_api_url}/user/update`;
-  const options = getHeaders(token); options.method = 'PUT';
+  const options = getHeaders(token);
+  options.method = 'PUT';
+  options.body = JSON.stringify(userObject);
   const response = await fetch(url, options);
 
   return await response.json();

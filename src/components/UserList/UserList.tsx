@@ -33,10 +33,14 @@ const readablePrivilege = (privilegeKey) => {
   }
 }
 
-const TableRow = (user: any, editClickHandler: Function) => {
+const TableRow = (
+  user: any,
+  editClickHandler: Function,
+  onSaveHandler: Function
+) => {
   // Get username from URL
   const { username } = useParams();
-  console.log('user.privileges', user.privileges);
+
   return <div
     key={user.user_id}
     className={`TableRow ${username === user.user_id ? 'no-hover' : ''}`}
@@ -51,7 +55,7 @@ const TableRow = (user: any, editClickHandler: Function) => {
       </div>
       <div className="col-privileges text-sm">
         {user.privileges.map(x => {
-          return <div>{readablePrivilege(x)}</div>
+          return <div key={`x_${user.user_id}_${x}`}>{readablePrivilege(x)}</div>
         })}
         {user.privileges.length === 0 && user.is_admin ? 'Super-admin' : ''}
       </div>
@@ -63,7 +67,7 @@ const TableRow = (user: any, editClickHandler: Function) => {
 
     {/*If user clicked edit: Show edit form */}
     <div className="col-span-3" hidden={username !== user.user_id}>
-      {username === user.user_id && <EditUser user={user}/>}
+      {username === user.user_id && <EditUser user={user} onSaveHandler={onSaveHandler} />}
     </div>
 
   </div>
@@ -96,12 +100,13 @@ const UserList = ({
 
   // Get user list on component load
   useEffect(() => {
-    (async () => {
-      const users = await getUserList(token);
-      console.log('users', users);
-      setUsers(users);
-    })();
+    fetchUserList();
   }, []);
+
+  const fetchUserList = async () => {
+    const users = await getUserList(token);
+    setUsers(users);
+  }
 
   const getFetchOptions = () => {
     return {
@@ -124,7 +129,7 @@ const UserList = ({
     <div className="" style={{maxWidth: '800px'}}>
       <H1Title>Gebruikers</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new' onClick={handleClick}>Nieuwe gebruiker</Button>
+        <Button theme='primary' classes='add-new'>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
       </div>
       <AddUser showModule={showAddUserModule} /> 
@@ -137,7 +142,7 @@ const UserList = ({
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        {users.map(user => TableRow(user, editClickHandler))}
+        {users.map(user => TableRow(user, editClickHandler, fetchUserList))}
       </div>
     </div>
   );

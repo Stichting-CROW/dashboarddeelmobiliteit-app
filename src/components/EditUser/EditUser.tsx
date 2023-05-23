@@ -9,6 +9,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import {StateType} from '../../types/StateType';
 
+// Import API methods
+import {updateUser} from '../../api/users';
+import {getOrganisationList} from '../../api/organisations';
+
+// Models
+import {UserType} from '../../types/UserType';
+
 // Styles
 import './EditUser.css'; 
 
@@ -17,23 +24,29 @@ import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
 
 function EditUser({
-  user
+  user,
+  onSaveHandler
 }: {
-  user: object
+  user: UserType,
+  onSaveHandler: Function
 }) {
   // Get userId from URL
+  const [organisations, setOrganisations] = useState([]);
+  const [organisationOptionList, setOrganisationOptionList] = useState([])
+
   const {username} = useParams();
+
   const [message, setMessage] = useState('')
   const [messageDesign, setMessageDesign] = useState('')
-  const [email, setEmail] = useState('')
+
+  const [organisationId, setOrganisationId] = useState(user.organisation_id);
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(user.privileges && user.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+  const [isCoreGroup, setIsCoreGroup] = useState(user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
+  const [canEditMicrohubs, setCanEditMicrohubs] = useState(user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
+  const [canDownloadRawData, setCanDownloadRawData] = useState(user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(user.is_admin);
+
   const [sendEmail, setSendEmail] = useState(false)
-  const [admin, setAdmin] = useState(true)
-  const [overheid, setOverheid] = useState(false)
-  const [aanbieder, setAanbieder] = useState(false)
-  const [overigBedrijf, setOverigBedrijf] = useState(false)
-  const [kernteam, setKernteam] = useState(false)
-  const [downloadrechten, setDownloadrechten] = useState(false)
-  const [municipalitiesOptionList, setMunicipalitiesOptionList] = useState([])
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -44,7 +57,7 @@ function EditUser({
   // On component load: Get municipalities and generate autosuggestion list
   useEffect(() => {
     buildOptionsValue();
-  }, []);
+  }, [organisations]);
   
   function getHeaders(): any {
     return {
@@ -54,62 +67,50 @@ function EditUser({
     };
   }
 
-  const data = {
-    filter_municipality: overheid ? true : false,
-    filter_operator: aanbieder ? true : false,
-    is_admin: admin ? true : false,
-    is_contact_person_municipality: false,
-    municipalities: [],
-    operators: [],
-    username: email
-  }
+  const fetchOrganisations = async () => {
+    const users = await getOrganisationList(token);
+    setOrganisations(users);
+  };
 
-  const handleSubmit = (event: object) => {
-    let url = 'https://api.deelfietsdashboard.nl/dashboard-api/admin/user/permission';
-    let options =  getHeaders();
-    options.method = "PUT";
-    options.body = JSON.stringify(data);
-    options.headers['Content-Type'] = 'application/json';
-    return fetch(url, options)
-        .then((response) => {
-          if (response.status == 401) {
-            console.error(response)
-              // errorNoPermission(response);
-          }
-          return response.status;
-        });
+  // Get user list on component load
+  useEffect(() => {
+    fetchOrganisations();
+  }, []);
 
+  const handleSubmit = async (e) => {
+    if(e) e.preventDefault();
+
+    // Build privileges
+    const privileges = [];
+    if(isOrganisationAdmin) privileges.push('ORGANISATION_ADMIN');
+    if(isCoreGroup) privileges.push('CORE_GROUP');
+    if(canEditMicrohubs) privileges.push('MICROHUB_EDIT');
+    if(canDownloadRawData) privileges.push('DOWNLOAD_RAW_DATA');
+
+    await updateUser(token, {
+      "user_id": username,
+      "privileges": privileges,
+      "organisation_id": organisationId,
+      "is_admin": isSuperAdmin
+    });
+    
+    handleClose();
+    onSaveHandler();
   }
   
   const handleClose = () => {
     navigate('/admin/users');
   }
 
-  const fetchOptions = {
-    headers: {
-      "authorization": `Bearer ${token}`,
-      'mode':'no-cors'
-    }
-  }
-
-  const getAclFromDatabase = async () => {
-    const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/menu/acl', fetchOptions);
-    const parsed = await response.json();
-
-    return parsed;
-  }
-
-
   const buildOptionsValue = async () => {
-    const acl = await getAclFromDatabase();
     const optionsList = []
-    acl.municipalities.forEach(element => {
+    organisations.forEach(x => {
       optionsList.push({
-        value: element.name,
-        label: element.name
+        value: x.organisation_id,
+        label: x.name
       })
     })
-    setMunicipalitiesOptionList(optionsList)
+    setOrganisationOptionList(optionsList)
   }
 
   return (
@@ -117,72 +118,98 @@ function EditUser({
     <form onSubmit={handleSubmit} className='add-user-form'>
         <div className="email">
           <FormLabel classes="mt-2 mb-4 font-bold">
-            Wijzig emailadres
+            E-mailadres
           </FormLabel>
           <input 
             type="email" 
             disabled
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
             value={username}
-            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
-        <div>
-          <FormLabel classes="mt-2 mb-4 font-bold">Wijzig rollen</FormLabel>
-          <ul className='rollen flex'>
-            <li>
-              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${admin ? "active" : ""}`}
-                htmlFor="admin">Admin</label>
-              <input 
-                type="radio" 
-                id="admin"
-                name="rollen"
-                className="hidden"
-                onClick={() =>{
-                  setAdmin(true)
-                  setAanbieder(false)
-                  setOverheid(false)
-                }}
-              />
-            </li>
-            <li>
-              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${overheid ? "active" : ""}`}
-                htmlFor="overheid">Overheid</label>
-              <input 
-                type="radio" 
-                id="overheid"
-                name="rollen"
-                className="hidden"
-                onClick={() => {
-                  setOverheid(true)
-                  setAanbieder(false)
-                  setAdmin(false)
-                }}
-              />
-            </li>
-            <li>
-              <label className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm cursor-pointer ${aanbieder ? "active" : ""}`}
-                htmlFor="aanbieder">Aanbieder</label>
-              <input 
-                type="radio" 
-                id="aanbieder"
-                name="rollen"
-                className="hidden"
-                onClick={() => {
-                  setAanbieder(true); 
-                  setAdmin(false)
-                  setOverheid(false)
-                }}
-              />
-            </li>
-          </ul>
+
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Organisatie
+        </FormLabel>
+        <div className="w-80">
+          <Select
+            className="my-2"
+            options={organisationOptionList}
+            defaultValue={{ label: user.organisation_name, value: user.organisation_id }}
+            placeholder="Selecteer de organisatie"
+            onChange={(choice: any) => {
+              setOrganisationId(choice.value);
+            }}
+          />
         </div>
-        {overheid && <Select
-          className="mt-2"
-          options={municipalitiesOptionList}
-          placeholder="Selecteer 1 of meerdere overheden"
-        />}
-        <div className="my-2 flex">
+
+        <div className="mt-2 flex">
+          <input 
+            type="checkbox"
+            id="is-organisation-admin" 
+            checked={isOrganisationAdmin}
+            value="true"
+            onChange={(event) => setIsOrganisationAdmin(event.target.checked ? true : false)}
+          />
+          <FormLabel htmlFor="is-organisation-admin" classes="py-3 px-2">
+            Organisatie-admin
+          </FormLabel>
+        </div>
+
+        <div className=" flex">
+          <input 
+            type="checkbox"
+            id="kernteam" 
+            checked={isCoreGroup}
+            value="true"
+            onChange={(event) => setIsCoreGroup(event.target.checked ? true : false)}
+          />
+          <FormLabel htmlFor="kernteam" classes="py-3 px-2">
+            Onderdeel van het kernteam
+          </FormLabel>
+        </div>
+
+        <div className=" flex">
+          <input 
+            type="checkbox"
+            id="microhub-edit" 
+            checked={canEditMicrohubs}
+            value="true"
+            onChange={(event) => setCanEditMicrohubs(event.target.checked ? true : false)}
+          />
+          <FormLabel htmlFor="microhub-edit" classes="py-3 px-2">
+            Kan microhubs beheren
+          </FormLabel>
+        </div>
+
+        <div className=" flex">
+          <input 
+            type="checkbox"
+            id="raw-data-download" 
+            checked={canDownloadRawData}
+            value="true"
+            onChange={(event) => setCanDownloadRawData(event.target.checked ? true : false)}
+          />
+          <FormLabel htmlFor="raw-data-download" classes="py-3 px-2">
+            Kan ruwe data downloaden
+          </FormLabel>
+        </div>
+
+        <div className=" flex">
+          <input 
+            type="checkbox"
+            id="is-super-admin" 
+            checked={isSuperAdmin}
+            value="true"
+            onChange={(event) => setIsSuperAdmin(event.target.checked ? true : false)}
+          />
+          <FormLabel htmlFor="is-super-admin" classes="py-3 px-2">
+            Super-admin
+          </FormLabel>
+        </div>
+
+        {/*
+        <div className="mb-2 flex">
           <input 
             type="checkbox"
             id="send-welcome-email" 
@@ -193,6 +220,7 @@ function EditUser({
             Stuur welkomstmail
           </FormLabel>
         </div>
+        */}
       
         <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
           <Button classes={'w-40 save'} type="submit" theme="primary">
