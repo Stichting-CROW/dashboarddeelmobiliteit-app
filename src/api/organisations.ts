@@ -23,7 +23,9 @@ const getHeaders = (token): {
 // }
 export const createOrganisation = async (token, organisationObject) => {
   const url = `${admin_api_url}/organisation/create`;
-  const options = getHeaders(token); options.method = 'POST';
+  const options = getHeaders(token);
+  options.method = 'POST';
+  options.body = JSON.stringify(organisationObject);
   const response = await fetch(url, options);
 
   let json;

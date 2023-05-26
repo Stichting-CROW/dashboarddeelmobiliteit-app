@@ -385,7 +385,7 @@ function App() {
                 <Route exact path="/admin/organisations/new" element={
                   <Overlay>
                     <Admin>
-                      <OrganisationList showAddUserModule={true} />
+                      <OrganisationList showAddOrganisationModule={true} />
                     </Admin>
                   </Overlay>
                 } />

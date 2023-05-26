@@ -137,15 +137,16 @@ function EditOrganisation({
       });
     }
     // Or add
-    // else {
-    //   await createUser(token, {
-    //     "organisation_id": emailAddress,
-    //     "privileges": privileges,
-    //     "organisation_id": organisationId,
-    //     "is_admin": isSuperAdmin
-    //   });
-    // }
-    
+    else {
+      await createOrganisation(token, {
+        "name": organisationName,
+        "type_of_organisation": organisationType,
+        "data_owner_of_municipalities": data_owner_of_municipalities,
+        "organisation_details": null,
+        "data_owner_of_operators": data_owner_of_operators
+      });
+    }
+
     handleClose();
     onSaveHandler();
   }
@@ -203,6 +204,7 @@ function EditOrganisation({
             value={organisationType}
             onChange={(event) => setOrganisationType(event.target.value)}
           >
+            <option value=""></option>
             <option value="MUNICIPALITY">Gemeente</option>
             <option value="OPERATOR">Aanbieder</option>
             <option value="ADMIN">Admin</option>
