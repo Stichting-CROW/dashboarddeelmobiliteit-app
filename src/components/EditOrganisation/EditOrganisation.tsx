@@ -35,7 +35,8 @@ function EditOrganisation({
   const [municipalities, setMunicipalities] = useState([]);
   const [municipalityOptionList, setMunicipalityOptionList] = useState([])
 
-  // const {organisationname} = useParams();
+  const [operators, setOperators] = useState([]);
+  const [operatorOptionList, setOperatorOptionList] = useState([])
 
   // const [message, setMessage] = useState('')
   // const [messageDesign, setMessageDesign] = useState('')
@@ -44,6 +45,8 @@ function EditOrganisation({
   const [organisationType, setOrganisationType] = useState(organisation ? organisation.type_of_organisation : null);
   const [selectedMunicipalities, setSelectedMunicipalities] = useState([]);
   const [dataOwnerOfMunicipalities, setDataOwnerOfMunicipalities] = useState(organisation && organisation.data_owner_of_municipalities ? organisation.data_owner_of_municipalities : null);
+  const [selectedOperators, setSelectedOperators] = useState([]);
+  const [dataOwnerOfOperators, setDataOwnerOfOperators] = useState(organisation && organisation.data_owner_of_operators ? organisation.data_owner_of_operators : null);
   // const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('ORGANISATION_ADMIN') > -1);
   // const [isCoreGroup, setIsCoreGroup] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('CORE_GROUP') > -1);
   // const [canEditMicrohubs, setCanEditMicrohubs] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('MICROHUB_EDIT') > -1);
@@ -60,8 +63,18 @@ function EditOrganisation({
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // On component load: Get municipalities and generate autosuggestion list
+  const fetchMunicipalitiesAndOperators = async () => {
+    const acl = await getAcl(token);
+    if(! acl || ! acl.municipalities || ! acl.operators) return;
+    setMunicipalities(acl.municipalities);
+    setOperators(acl.operators);
+  };
   useEffect(() => {
-    buildOptionsValue();
+    fetchMunicipalitiesAndOperators();
+  }, [token]);
+
+  useEffect(() => {
+    buildMunicipalityOptionsValue();
     prepareDefaultSelectedMunicipalities();
   }, [municipalities]);
   
@@ -77,6 +90,24 @@ function EditOrganisation({
     setSelectedMunicipalities(currentUserMunicipalities);
   }
 
+  // On component load: Get operators and generate autosuggestion list
+  useEffect(() => {
+    buildOperatorOptionsValue();
+    prepareDefaultSelectedOperators();
+  }, [operators]);
+  
+  const prepareDefaultSelectedOperators = () => {
+    if(! organisation || ! organisation.data_owner_of_operators) return;
+    let currentUserOperators = [];
+    organisation.data_owner_of_operators.forEach(system_id => {
+      let relatedOperator: any = operators.filter(x => x.system_id === system_id);
+      if(relatedOperator && relatedOperator.length > 0) {
+        currentUserOperators.push({ label: relatedOperator[0].name, value: relatedOperator[0].system_id });
+      }
+    })
+    setSelectedOperators(currentUserOperators);
+  }
+
   function getHeaders(): any {
     return {
       headers: {
@@ -85,22 +116,14 @@ function EditOrganisation({
     };
   }
 
-  const fetchMunicipalities = async () => {
-    const acl = await getAcl(token);
-    if(! acl || ! acl.municipalities) return;
-    setMunicipalities(acl.municipalities);
-  };
-
-  // Get organisation list on component load
-  useEffect(() => {
-    fetchMunicipalities();
-  }, [token]);
-
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
 
     // Build municipalityCodeArray
     let data_owner_of_municipalities = selectedMunicipalities.map(x => x.value);
+
+    // Build operatorArray
+    let data_owner_of_operators = selectedOperators.map(x => x.value);
 
     // Update
     if(organisation && organisation.organisation_id) {
@@ -110,7 +133,7 @@ function EditOrganisation({
         "type_of_organisation": organisationType,
         "data_owner_of_municipalities": data_owner_of_municipalities,
         "organisation_details": organisation.organisation_details,
-        "data_owner_of_operators": organisation.data_owner_of_operators
+        "data_owner_of_operators": data_owner_of_operators
       });
     }
     // Or add
@@ -131,7 +154,7 @@ function EditOrganisation({
     navigate('/admin/organisations');
   }
 
-  const buildOptionsValue = async () => {
+  const buildMunicipalityOptionsValue = async () => {
     const optionsList = []
     municipalities.forEach(x => {
       optionsList.push({
@@ -140,6 +163,17 @@ function EditOrganisation({
       })
     })
     setMunicipalityOptionList(optionsList)
+  }
+
+  const buildOperatorOptionsValue = async () => {
+    const optionsList = []
+    operators.forEach(x => {
+      optionsList.push({
+        value: x.system_id,
+        label: x.name
+      })
+    })
+    setOperatorOptionList(optionsList)
   }
 
   return (
@@ -187,6 +221,22 @@ function EditOrganisation({
             value={selectedMunicipalities}
             onChange={(choices: any) => {
               setSelectedMunicipalities(choices);
+            }}
+          />
+        </div>}
+
+        {organisationType === 'OPERATOR' && <div>
+          <FormLabel classes="mt-2 mb-4 font-bold">
+            Data-eigenaar van de volgende aanbieder(s)
+          </FormLabel>
+          <Select
+            className="my-2 w-80"
+            isMulti={true}
+            options={operatorOptionList}
+            defaultValue={selectedOperators}
+            value={selectedOperators}
+            onChange={(choices: any) => {
+              setSelectedOperators(choices);
             }}
           />
         </div>}

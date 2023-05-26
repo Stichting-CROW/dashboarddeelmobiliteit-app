@@ -94,7 +94,6 @@ const OrganisationList = ({
 
   const fetchOrganisationList = async () => {
     const organisations = await getOrganisationList(token);
-    console.log('organisations', organisations)
     setOrganisations(organisations);
   }
 
