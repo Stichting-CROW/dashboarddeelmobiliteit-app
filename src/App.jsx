@@ -36,6 +36,8 @@ import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
 import EditUser from './components/EditUser/EditUser';
+import OrganisationList from './components/OrganisationList/OrganisationList';
+import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -370,6 +372,27 @@ function App() {
                   <Overlay>
                     <Admin>
                       <UserList />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations/new" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList showAddUserModule={true} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations/:organisationId" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList />
                     </Admin>
                   </Overlay>
                 } />

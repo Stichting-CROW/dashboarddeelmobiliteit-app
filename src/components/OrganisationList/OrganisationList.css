@@ -1,0 +1,7 @@
+.OrganisationList .col-name,
+.OrganisationList .col-actions {
+  width: 100px;
+}
+.OrganisationList .col-name { flex: 1; }
+.OrganisationList .col-type { width: 100px; }
+.OrganisationList .col-actions { width: 50px; }

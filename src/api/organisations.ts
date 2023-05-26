@@ -72,9 +72,11 @@ export const getOrganisationDetailHistory = async (token, organisationId) => {
 //     "data_owner_of_municipalities": ["GM0599"],
 //     "organisation_details": {"factuuradres": "gvdL 5C", "test": 1223, "test2": {"test43": 5}}
 // }
-export const updateOrganisation = async (token, organisationId) => {
+export const updateOrganisation = async (token, organisationObject) => {
   const url = `${admin_api_url}/organisation/update`;
-  const options = getHeaders(token); options.method = 'PUT';
+  const options = getHeaders(token);
+  options.method = 'PUT';
+  options.body = JSON.stringify(organisationObject);
   const response = await fetch(url, options);
 
   return await response.json();

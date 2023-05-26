@@ -15,7 +15,6 @@ import {getUserList} from '../../api/users';
 
 // Import components
 import Button from '../Button/Button';
-import AddUser from '../AddUser/AddUser';
 import EditUser from '../EditUser/EditUser';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
