@@ -49,7 +49,9 @@ export const getUserListForOrganisation = async (token, organisationId) => {
 // }
 export const createUser = async (token, userObject) => {
   const url = `${admin_api_url}/user/create`;
-  const options = getHeaders(token); options.method = 'POST';
+  const options = getHeaders(token);
+  options.method = 'POST';
+  options.body = JSON.stringify(userObject);
   const response = await fetch(url, options);
 
   return await response.json();

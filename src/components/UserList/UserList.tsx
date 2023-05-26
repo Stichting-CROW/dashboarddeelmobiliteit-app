@@ -84,20 +84,6 @@ const UserList = ({
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-  // Get list of municipalities and providers
-  useEffect(() => {
-    const getAclFromDatabase = async () => {
-      const response = await fetch('https://api.deelfietsdashboard.nl/dashboard-api/menu/acl', getFetchOptions());
-      return await response.json();
-    }
-
-    (async () => {
-      const acl = await getAclFromDatabase();
-      // console.log('acl', acl);
-    })();
-
-  }, []);
-
   // Get user list on component load
   useEffect(() => {
     fetchUserList();
@@ -129,10 +115,12 @@ const UserList = ({
     <div className="" style={{maxWidth: '800px'}}>
       <H1Title>Gebruikers</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new'>Nieuwe gebruiker</Button>
+        <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
       </div>
-      <AddUser showModule={showAddUserModule} /> 
+      {showAddUserModule && <div className="mb-6">
+        <EditUser onSaveHandler={fetchUserList} />
+      </div>}
       <div className="
         Table
       ">

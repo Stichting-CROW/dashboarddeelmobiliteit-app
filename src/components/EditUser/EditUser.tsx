@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {StateType} from '../../types/StateType';
 
 // Import API methods
-import {updateUser} from '../../api/users';
+import {createUser, updateUser} from '../../api/users';
 import {getOrganisationList} from '../../api/organisations';
 
 // Models
@@ -27,10 +27,9 @@ function EditUser({
   user,
   onSaveHandler
 }: {
-  user: UserType,
+  user?: UserType,// User can be optional as this component is also used for adding new users
   onSaveHandler: Function
 }) {
-  // Get userId from URL
   const [organisations, setOrganisations] = useState([]);
   const [organisationOptionList, setOrganisationOptionList] = useState([])
 
@@ -39,12 +38,13 @@ function EditUser({
   const [message, setMessage] = useState('')
   const [messageDesign, setMessageDesign] = useState('')
 
-  const [organisationId, setOrganisationId] = useState(user.organisation_id);
-  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(user.privileges && user.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-  const [isCoreGroup, setIsCoreGroup] = useState(user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
-  const [canEditMicrohubs, setCanEditMicrohubs] = useState(user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
-  const [canDownloadRawData, setCanDownloadRawData] = useState(user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(user.is_admin);
+  const [emailAddress, setEmailAddress] = useState(user ? user.user_id : null);
+  const [organisationId, setOrganisationId] = useState(user ? user.organisation_id : null);
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(user && user.privileges && user.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+  const [isCoreGroup, setIsCoreGroup] = useState(user && user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
+  const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
+  const [canDownloadRawData, setCanDownloadRawData] = useState(user && user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(user && user.is_admin);
 
   const [sendEmail, setSendEmail] = useState(false)
 
@@ -87,12 +87,24 @@ function EditUser({
     if(canEditMicrohubs) privileges.push('MICROHUB_EDIT');
     if(canDownloadRawData) privileges.push('DOWNLOAD_RAW_DATA');
 
-    await updateUser(token, {
-      "user_id": username,
-      "privileges": privileges,
-      "organisation_id": organisationId,
-      "is_admin": isSuperAdmin
-    });
+    // Update
+    if(user && user.user_id) {
+      await updateUser(token, {
+        "user_id": encodeURIComponent(emailAddress),
+        "privileges": privileges,
+        "organisation_id": organisationId,
+        "is_admin": isSuperAdmin
+      });
+    }
+    // Or add
+    else {
+      await createUser(token, {
+        "user_id": encodeURIComponent(emailAddress),
+        "privileges": privileges,
+        "organisation_id": organisationId,
+        "is_admin": isSuperAdmin
+      });
+    }
     
     handleClose();
     onSaveHandler();
@@ -115,16 +127,18 @@ function EditUser({
 
   return (
     <div>
-    <form onSubmit={handleSubmit} className='add-user-form'>
+      <form onSubmit={handleSubmit} className='add-user-form'>
         <div className="email">
           <FormLabel classes="mt-2 mb-4 font-bold">
             E-mailadres
           </FormLabel>
           <input 
             type="email" 
-            disabled
+            disabled={user && user.user_id ? true : false}
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
-            value={username}
+            value={emailAddress}
+            placeholder="Vul het mailadres in"
+            onChange={(event) => setEmailAddress(event.target.value)}
           />
         </div>
 
@@ -135,7 +149,7 @@ function EditUser({
           <Select
             className="my-2"
             options={organisationOptionList}
-            defaultValue={{ label: user.organisation_name, value: user.organisation_id }}
+            defaultValue={{ label: user ? user.organisation_name : null, value: user ? user.organisation_id : null }}
             placeholder="Selecteer de organisatie"
             onChange={(choice: any) => {
               setOrganisationId(choice.value);
