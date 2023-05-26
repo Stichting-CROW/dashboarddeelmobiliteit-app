@@ -61,7 +61,7 @@ const TableRow = (
       </div>
       <div className="col-actions text-sm flex justify-end">
         <button className='edit-icon' style={{height: '100%'}} />
-        {username !== user.user_id && <button className='ml-1 delete-icon' style={{height: '100%'}} />}
+        {/*{username !== user.user_id && <button className='ml-1 delete-icon' style={{height: '100%'}} />}*/}
       </div>
     </div>
 

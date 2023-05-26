@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {StateType} from '../../types/StateType';
 
 // Import API methods
-import {createUser, updateUser} from '../../api/users';
+import {createUser, updateUser, deleteUser} from '../../api/users';
 import {getOrganisationList} from '../../api/organisations';
 
 // Models
@@ -22,6 +22,7 @@ import './EditUser.css';
 // Components
 import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
+import Modal from '../Modal/Modal.jsx';
 
 function EditUser({
   user,
@@ -45,8 +46,9 @@ function EditUser({
   const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
   const [canDownloadRawData, setCanDownloadRawData] = useState(user && user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
   const [isSuperAdmin, setIsSuperAdmin] = useState(user && user.is_admin);
-
   const [sendEmail, setSendEmail] = useState(false)
+
+  const [doShowModal, setDoShowModal] = useState(false);
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -90,7 +92,7 @@ function EditUser({
     // Update
     if(user && user.user_id) {
       await updateUser(token, {
-        "user_id": encodeURIComponent(emailAddress),
+        "user_id": emailAddress,
         "privileges": privileges,
         "organisation_id": organisationId,
         "is_admin": isSuperAdmin
@@ -99,7 +101,7 @@ function EditUser({
     // Or add
     else {
       await createUser(token, {
-        "user_id": encodeURIComponent(emailAddress),
+        "user_id": emailAddress,
         "privileges": privileges,
         "organisation_id": organisationId,
         "is_admin": isSuperAdmin
@@ -240,25 +242,53 @@ function EditUser({
           <Button classes={'w-40 save'} type="submit" theme="primary">
             Opslaan
           </Button>
-          {<div
+          {(user && user.user_id) && <div
             className="flex flex-col justify-center cursor-pointer"
             style={{color: '#B2B2B2'}}
-            onClick={(e) => {
-              e.preventDefault();
-              alert('Verwijderen van gebruikers wordt binnenkort mogelijk');
-            }}
+            onClick={() => setDoShowModal(true)}
           >
             <div className="flex">
-              <div className="inline-block underline">Verwijder gebruiker</div>
+              <div
+                className="inline-block underline"
+              >Verwijder gebruiker</div>
               <button className='ml-2 delete-icon' style={{height: '100%'}} />
             </div>
           </div>}
         </div>
       </form>
+
       {message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}
 
+      <Modal
+        isVisible={doShowModal}
+        title="Weet je het zeker?"
+        button1Title={'Nee, annuleer'}
+        button1Handler={(e) => {
+          setDoShowModal(false);
+        }}
+        button2Title={"Ja, verwijder gebruiker"}
+        button2Handler={async (e) => {
+          e.preventDefault();
+          // Hide modal
+          setDoShowModal(false);
+          // Delete user
+          await deleteUser(token, encodeURIComponent(user.user_id));
+          // Post save action
+          onSaveHandler();
+        }}
+        hideModalHandler={() => {
+          setDoShowModal(false);
+        }}
+      >
+        <p className="mb-4">
+          Weet je zeker dat je deze gebruiker, {user ? user.user_id : ''}, wilt verwijderen?
+        </p>
+        <p className="my-4">
+          Dit kan niet ongedaan gemaakt worden.
+        </p>
+      </Modal>
 
-      </div>
+    </div>
   )
 }
 

@@ -80,7 +80,7 @@ export const deleteUser = async (token, userId) => {
   const options = getHeaders(token); options.method = 'DELETE';
   const response = await fetch(url, options);
 
-  return await response.json();
+  return response;
 }
 
 // GET /user/acl
