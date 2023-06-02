@@ -62,7 +62,6 @@ function Export() {
         return false
       }
       response.json().then((acl) => {
-        console.log('acl', acl)
         const isAdmin = acl.is_admin === true;
         const isContactPerson = (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
         const canDownload = (acl.privileges && acl.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);

@@ -15,6 +15,7 @@ import * as R from 'ramda';
 import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
+import {getAcl} from '../../api/acl';
 
 import Logo from '../Logo.jsx';
 import {renderZoneTag} from '../Tag/Tag';
@@ -125,6 +126,7 @@ function FilterbarZones({
   const [doShowModal, setDoShowModal] = useState(false);
   const [doShowImportModal, setDoShowImportModal] = useState(false);
   const [doShowExportModal, setDoShowExportModal] = useState(false);
+  const [canEditMicrohubs, setCanEditMicrohubs] = useState(false);
 
   const labelClassNames = 'mb-2 text-sm';
 
@@ -155,6 +157,16 @@ function FilterbarZones({
   useEffect(() => {
     setViewMode(view);
   }, [view]);
+
+  // Get ACL
+  useEffect(() => {
+    if(! token) return;
+    (async () => {
+      const acl: any = await getAcl(token);
+      setCanEditMicrohubs(acl.is_admin || (acl.privileges && acl.privileges.indexOf('MICROHUB_EDIT') > -1));
+    })();
+  }, [token])
+
 
   // Set map event handlers
   useEffect(() => {
@@ -676,27 +688,30 @@ function FilterbarZones({
               </span>
             </Button>
           </div>
-          <div className="flex justify-end -mr-2">
-            <Link to="/map/zones">
-              <Button
-                theme="white"
-                style={{
-                  borderColor: '#666'
-                }}
-              >
-                📊
-              </Button>
-            </Link>
-            
-            <Link to="/admin/zones">
-              <Button
-                theme="white"
-                title="Naar zones bewerken"
-              >
-                ✏️
-              </Button>
-            </Link>
-          </div>
+          
+          {canEditMicrohubs && <>
+            <div className="flex justify-end -mr-2">
+              <Link to="/map/zones">
+                <Button
+                  theme="white"
+                  style={{
+                    borderColor: '#666'
+                  }}
+                >
+                  📊
+                </Button>
+              </Link>
+              
+              <Link to="/admin/zones">
+                <Button
+                  theme="white"
+                  title="Naar zones bewerken"
+                >
+                  ✏️
+                </Button>
+              </Link>
+            </div>
+          </>}
         </div>
       </>}
 
