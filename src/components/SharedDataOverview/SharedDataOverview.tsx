@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
-// import './OrganisationList.css'; 
+import './SharedDataOverview.css'; 
 import {
   // useDispatch,
   useSelector
@@ -15,7 +15,7 @@ import {getOrganisationList} from '../../api/organisations';
 
 // Import components
 import Button from '../Button/Button';
-import EditOrganisation from '../EditOrganisation/EditOrganisation';
+import GrantUser from './GrantUser';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
 
@@ -70,7 +70,7 @@ const TableRow = (
 
     {/*If organisation clicked edit: Show edit form */}
     <div className="col-span-3" hidden={organisationId != organisation.organisation_id}>
-      {organisationId == organisation.organisation_id && <EditOrganisation organisation={organisation} onSaveHandler={onSaveHandler} />}
+      {organisationId == organisation.organisation_id && <GrantUser organisation={organisation} onSaveHandler={onSaveHandler} />}
     </div>
 
   </div>
@@ -83,6 +83,7 @@ const SharedDataOverview = ({
   showAddOrganisationModule?: boolean
 }) => {
   const [organisations, setOrganisations] = useState([]);
+  const [showGrantUserForm, setShowGrantUserForm] = useState(false);
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -122,17 +123,14 @@ const SharedDataOverview = ({
       <p>
         Jouw organisatie heeft toegang tot alle data van Gemeente Rotterdam.
       </p>
-      <H4Title>
-        Beheer datatoegang
-      </H4Title>
       <p>
-        Stel in welke organisaties en personen toegang hebben tot jouw organisatie.
+        Stel hieronder in welke organisaties en personen toegang hebben tot de data van jouw organisatie.
       </p>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe organisatie</Button>
+        <Button theme='primary' classes='add-new' onClick={() => setShowGrantUserForm(true)}>Deel met gebruiker</Button>
       </div>
-      {showAddOrganisationModule && <div className="mb-6">
-        <EditOrganisation onSaveHandler={fetchOrganisationList} />
+      {showGrantUserForm && <div className="mb-6">
+        <GrantUser onSaveHandler={() => setShowGrantUserForm(false)} />
       </div>}
       <div className="
         Table

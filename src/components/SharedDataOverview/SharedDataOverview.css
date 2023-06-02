@@ -1,0 +1,7 @@
+.ShareDataOverview .col-name,
+.ShareDataOverview .col-actions {
+  width: 100px;
+}
+.ShareDataOverview .col-name { flex: 1; }
+.ShareDataOverview .col-type { width: 100px; }
+.ShareDataOverview .col-actions { width: 50px; }
