@@ -21,7 +21,7 @@ import Section from '../Section/Section';
 function Export() {
   const dispatch = useDispatch();
 
-  const [isVerified, setIsVerified] = useState(false);
+  const [canDownloadRawData, setCanDownloadRawData] = useState(false);
   const [startDate, setStartDate] = useState(moment(moment().subtract(1, 'month')).format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [municipalityCode, setMunicipalityCode] = useState('');
@@ -62,11 +62,13 @@ function Export() {
         return false
       }
       response.json().then((acl) => {
+        console.log('acl', acl)
         const isAdmin = acl.is_admin === true;
-        const isContactPerson = acl.is_contact_person_municipality === true;
-        
-        if(isAdmin || isContactPerson) {
-          setIsVerified(true);
+        const isContactPerson = (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+        const canDownload = (acl.privileges && acl.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
+
+        if(isAdmin || canDownload) {
+          setCanDownloadRawData(true);
         }
         setFilterOperator(acl.operators);
       });
@@ -152,7 +154,7 @@ function Export() {
           </Button>
         </Section>
 
-        {isVerified && <Section title="Download ruwe data">
+        {canDownloadRawData && <Section title="Download ruwe data">
           <div className="lg:w-72">
             <DateFromTo
               label="Periode"
