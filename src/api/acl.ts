@@ -1,4 +1,4 @@
-const acl_api_url: string = 'https://api.deelfietsdashboard.nl/dashboard-api';
+const acl_api_url: string = 'https://api.dashboarddeelmobiliteit.nl/admin';
 
 const getHeaders = (token): {
   method?: any,
@@ -17,7 +17,7 @@ const getHeaders = (token): {
 
 // GET /menu/acl
 export const getAcl = async (token) => {
-  const url = `${acl_api_url}/menu/acl`;
+  const url = `${acl_api_url}/user/acl`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
@@ -26,7 +26,7 @@ export const getAcl = async (token) => {
     json = await response.json();
     return json;
   } catch(e) {
-    console.error('Error getting user list');
+    console.error('Error getting ACL');
     return [];
   }
 }
