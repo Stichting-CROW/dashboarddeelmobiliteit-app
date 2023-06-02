@@ -11,26 +11,19 @@ import {OrganisationType} from '../../types/OrganisationType';
 import {StateType} from '../../types/StateType';
 
 // Import API methods
-import {getOrganisationList} from '../../api/organisations';
+import {
+  getOrganisationList
+} from '../../api/organisations';
+
+import {
+  getDataAccessReceived
+} from '../../api/dataAccess';
 
 // Import components
 import Button from '../Button/Button';
 import GrantUser from './GrantUser';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
-
-const readablePrivilege = (privilegeKey) => {
-  switch(privilegeKey) {
-    case 'CORE_GROUP':
-      return 'Kernteam';
-    case 'MICROHUB_EDIT':
-      return 'Microhub bewerken';
-    case 'DOWNLOAD_RAW_DATA':
-      return 'Ruwe data download';
-    case 'ORGANISATION_ADMIN':
-      return 'Organisatie-admin';
-  }
-}
 
 const TableRow = (
   organisation: any,
@@ -60,17 +53,9 @@ const TableRow = (
       <div className="col-name text-sm">
         {organisation.name}
       </div>
-      <div className="col-type text-sm">
-        {organisation_type}
-      </div>
       <div className="col-actions text-sm flex justify-end">
         <button className='edit-icon' style={{height: '100%'}} />
       </div>
-    </div>
-
-    {/*If organisation clicked edit: Show edit form */}
-    <div className="col-span-3" hidden={organisationId != organisation.organisation_id}>
-      {organisationId == organisation.organisation_id && <GrantUser organisation={organisation} onSaveHandler={onSaveHandler} />}
     </div>
 
   </div>
@@ -83,14 +68,16 @@ const SharedDataOverview = ({
   showAddOrganisationModule?: boolean
 }) => {
   const [organisations, setOrganisations] = useState([]);
+  const [dataAccessReceived, setDataAccessReceived] = useState([]);
   const [showGrantUserForm, setShowGrantUserForm] = useState(false);
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-  // Get organisation list on component load
+  // Get data on component load
   useEffect(() => {
     fetchOrganisationList();
+    fetchDataAccessReceived();
   }, []);
 
   const fetchOrganisationList = async () => {
@@ -98,12 +85,28 @@ const SharedDataOverview = ({
     setOrganisations(organisations);
   }
 
-  const getFetchOptions = () => {
-    return {
-      headers: {
-        "authorization": `Bearer ${token}`,
-        'mode':'no-cors'
+  const fetchDataAccessReceived = async () => {
+    const result = await getDataAccessReceived(token);
+    setDataAccessReceived(result);
+  }
+
+  const getDataAccessReceivedString = (data) => {
+    if(! data || data.length === 0) return;
+    let organisationsString = '';
+    data.forEach(x => {
+      // Only add if this _organisation_ was granted
+      if(! x.granted_organisation_id) return;
+      // Add 'en' between the organisations
+      if(organisationsString.length > 0) {
+        organisationsString += `en `;
       }
+      // Append the organisation name
+      organisationsString += `${x.owner_organisation_name}`;
+    });
+    if(organisationsString && organisationsString.length > 0) {
+      return `Jouw organisatie heeft toegang tot alle data van ${organisationsString}.`;
+    } else {
+      return '';
     }
   }
 
@@ -115,14 +118,16 @@ const SharedDataOverview = ({
     navigate(`/admin/organisations/${organisation.organisation_id}`)
   }
 
+  console.log('dataAccessReceived', dataAccessReceived)
+
   return (
     <div className="SharedDataOverview" style={{maxWidth: '800px'}}>
       <H1Title>
         Data delen
       </H1Title>
-      <p>
-        Jouw organisatie heeft toegang tot alle data van Gemeente Rotterdam.
-      </p>
+      {(dataAccessReceived && dataAccessReceived.filter(x => x.granted_organisation_id !== null).length > 0) && <p>
+        {getDataAccessReceivedString(dataAccessReceived)}
+      </p>}
       <p>
         Stel hieronder in welke organisaties en personen toegang hebben tot de data van jouw organisatie.
       </p>
@@ -136,9 +141,8 @@ const SharedDataOverview = ({
         Table
       ">
         <div className="TableRow flex justify-between no-hover">
-          <H4Title className="col-name">Naam</H4Title>
-          <H4Title className="col-type">Type</H4Title>
-          <H4Title className="col-actions"></H4Title>
+          <H4Title className="col-name">Gedeeld met</H4Title>
+          <H4Title className="col-actions">Intrekken</H4Title>
         </div>
         {organisations ? organisations.map(org => TableRow(org, editClickHandler, fetchOrganisationList)) : <></>}
       </div>
