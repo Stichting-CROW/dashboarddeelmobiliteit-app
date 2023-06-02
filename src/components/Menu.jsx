@@ -118,7 +118,9 @@ function SubMenuItem(props) {
   </>
 }
 
-function Menu({pathName}) {
+function Menu({
+  pathName, acl
+}) {
   const [subMenuIsActive, setSubMenuIsActive] = useState(false);
 
   const dispatch = useDispatch();
@@ -237,7 +239,7 @@ function Menu({pathName}) {
               icon={'/images/components/Menu/ontwikkeling.svg'}
             />
 
-            <MenuItem
+            {/*<MenuItem
               title="Kopieer link"
               text={''}
               icon={'/images/components/Menu/share.svg'}
@@ -245,7 +247,14 @@ function Menu({pathName}) {
                 e.preventDefault();
                 exportStateToClipboard();
               }}
-            />
+            />*/}
+
+            {(acl && (acl.is_admin || (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1))) && <MenuItem
+              pathName={pathName}
+              path={'/admin'}
+              text={''}
+              icon={'/images/components/Menu/admin.svg'}
+            />}
 
             <MenuItem
               pathName={pathName}

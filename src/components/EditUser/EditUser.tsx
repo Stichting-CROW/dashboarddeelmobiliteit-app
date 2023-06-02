@@ -45,7 +45,6 @@ function EditUser({
   const [isCoreGroup, setIsCoreGroup] = useState(user && user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
   const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
   const [canDownloadRawData, setCanDownloadRawData] = useState(user && user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(user && user.is_admin);
   const [sendEmail, setSendEmail] = useState(false)
 
   const [doShowModal, setDoShowModal] = useState(false);
@@ -94,8 +93,7 @@ function EditUser({
       await updateUser(token, {
         "user_id": emailAddress,
         "privileges": privileges,
-        "organisation_id": organisationId,
-        "is_admin": isSuperAdmin
+        "organisation_id": organisationId
       });
     }
     // Or add
@@ -103,8 +101,7 @@ function EditUser({
       await createUser(token, {
         "user_id": emailAddress,
         "privileges": privileges,
-        "organisation_id": organisationId,
-        "is_admin": isSuperAdmin
+        "organisation_id": organisationId
       });
     }
     
@@ -208,19 +205,6 @@ function EditUser({
           />
           <FormLabel htmlFor="raw-data-download" classes="py-3 px-2">
             Kan ruwe data downloaden
-          </FormLabel>
-        </div>
-
-        <div className=" flex">
-          <input 
-            type="checkbox"
-            id="is-super-admin" 
-            checked={isSuperAdmin}
-            value="true"
-            onChange={(event) => setIsSuperAdmin(event.target.checked ? true : false)}
-          />
-          <FormLabel htmlFor="is-super-admin" classes="py-3 px-2">
-            Super-admin
           </FormLabel>
         </div>
 

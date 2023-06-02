@@ -11,7 +11,10 @@ import {UserType} from '../../types/UserType';
 import {StateType} from '../../types/StateType';
 
 // Import API methods
-import {getUserList} from '../../api/users';
+import {
+  getUserList,
+  getUserListForOrganisation
+} from '../../api/users';
 
 // Import components
 import Button from '../Button/Button';
@@ -56,7 +59,7 @@ const TableRow = (
         {user.privileges.map(x => {
           return <div key={`x_${user.user_id}_${x}`}>{readablePrivilege(x)}</div>
         })}
-        {user.privileges.length === 0 && user.is_admin ? 'Super-admin' : ''}
+        {user.is_admin ? 'Super-admin' : ''}
       </div>
       <div className="col-actions text-sm flex justify-end">
         <button className='edit-icon' style={{height: '100%'}} />
@@ -74,9 +77,11 @@ const TableRow = (
 
 // UserList
 const UserList = ({
-  showAddUserModule
+  showAddUserModule,
+  acl
 }: {
   showAddUserModule?: boolean
+  acl: any
 }) => {
   const [users, setUsers] = useState([]);
 
@@ -86,10 +91,15 @@ const UserList = ({
   // Get user list on component load
   useEffect(() => {
     fetchUserList();
-  }, []);
+  }, [acl]);
 
   const fetchUserList = async () => {
-    const users = await getUserList(token);
+    let users;
+    if(isOrganisationAdmin()) {
+      users = await getUserListForOrganisation(token, acl.part_of_organisation);
+    } else {
+      users = await getUserList(token);
+    }
     setUsers(users);
   }
 
@@ -108,6 +118,10 @@ const UserList = ({
 
   const editClickHandler = (user: UserType) => {
     navigate(`/admin/users/${user.user_id}`)
+  }
+
+  const isOrganisationAdmin = () => {
+    return acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;
   }
 
   return (
@@ -129,7 +143,7 @@ const UserList = ({
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        {users.map(user => TableRow(user, editClickHandler, fetchUserList))}
+        {users ? users.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
       </div>
     </div>
   );

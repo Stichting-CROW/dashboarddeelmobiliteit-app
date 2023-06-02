@@ -10,6 +10,7 @@ import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
 import * as te from 'tw-elements';
+import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
 
@@ -38,6 +39,7 @@ import UserList from './components/UserList/UserList';
 import EditUser from './components/EditUser/EditUser';
 import OrganisationList from './components/OrganisationList/OrganisationList';
 import EditOrganisation from './components/EditOrganisation/EditOrganisation';
+import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -106,8 +108,13 @@ function App() {
   const [uriParams, setUriParams] = useState(document.location.search);
   const [delayTimeout, setDelayTimeout] = useState(null);
   const [doShowNotification, setDoShowNotification] = useState('');
-  
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [acl, setAcl] = useState({});
+
   const dispatch = useDispatch()
+
+  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
   
   const mapContainer = useRef(null);
 
@@ -169,20 +176,29 @@ function App() {
 
   }, [pathName, uriParams]);
 
+  useEffect(() => {
+    (async () => {
+      const theAcl = await getAcl(token);
+      setAcl(theAcl);
+      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+      setIsAdmin(theAcl.is_admin);
+    })();
+  }, [token])
+
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const isAdmin = useSelector((state: StateType) => {
-    if(! state.authentication) return false;
-    if(! state.authentication.user_data) return false;
-    let userIsAdmin = false;
-    state.authentication.user_data.user.registrations.forEach(x => {
-      if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
-      if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
-    });
-    return userIsAdmin;
-  });
+  // const isAdmin = useSelector((state: StateType) => {
+  //   if(! state.authentication) return false;
+  //   if(! state.authentication.user_data) return false;
+  //   let userIsAdmin = false;
+  //   state.authentication.user_data.user.registrations.forEach(x => {
+  //     if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
+  //     if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
+  //   });
+  //   return userIsAdmin;
+  // });
   
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
@@ -345,33 +361,42 @@ function App() {
       <Routes>
         { isLoggedIn ?
           <>
-            { isAdmin ?
+            { (isAdmin || isOrganisationAdmin) ?
               <>
                 <Route exact path="/admin" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users/new" element={
                   <Overlay>
                     <Admin>
-                      <UserList showAddUserModule={true} />
+                      <UserList
+                        acl={acl}
+                        showAddUserModule={true} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users/:username" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/shared" element={
+                  <Overlay>
+                    <Admin>
+                      <SharedDataOverview acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
@@ -513,7 +538,7 @@ function App() {
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MapPage mapContainer={mapContainer} />
-      <Menu pathName={pathName} />
+      <Menu acl={acl} pathName={pathName} />
 
      </div>
     </div>
