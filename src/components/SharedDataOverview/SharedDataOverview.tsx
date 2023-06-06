@@ -27,58 +27,63 @@ import {
 // Import components
 import Button from '../Button/Button';
 import GrantUser from './GrantUser';
+import GrantOrganisation from './GrantOrganisation';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
 
-const TableRow = (
+const TableRow = ({
+  entry,
+  onRevokeHandler
+}, {
   entry: any,
   onRevokeHandler: Function
-) => {
-  // const [doShowModal, setDoShowModal] = useState(false);
+}) => {
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
 
-  return <div>dfs</div>
+  return (
+    <>
+      <div
+        key={entry.grant_view_data_id}
+        className={`TableRow no-hover`}
+      >
+        <div className="flex">
+          <div className="col-name text-sm">
+            {entry.granted_user_id ? entry.granted_user_id : ''}
+            {entry.granted_organisation_name ? entry.granted_organisation_name : ''}
+          </div>
+          <div className="col-actions text-sm flex justify-end">
+            <button className='delete-icon' style={{height: '100%'}} onClick={() => setShowRevokeModal(true)} />
+          </div>
 
-  // return <div
-  //   key={entry.grant_view_data_id}
-  //   className={`TableRow no-hover`}
-  // >
-  //   <div className="flex">
-  //     <div className="col-name text-sm">
-  //       {entry.granted_user_id ? entry.granted_user_id : ''}
-  //       {entry.granted_organisation_name ? entry.granted_organisation_name : ''}
-  //     </div>
-  //     <div className="col-actions text-sm flex justify-end">
-  //       <button className='delete-icon' style={{height: '100%'}} onClick={() => setDoShowModal(true)} />
-  //     </div>
-  //   </div>
-
-  //   {doShowModal ? (
-  //     <Modal
-  //       isVisible={doShowModal}
-  //       title="Weet je het zeker?"
-  //       button1Title={'Nee, annuleer'}
-  //       button1Handler={(e) => {
-  //         setDoShowModal(false);
-  //       }}
-  //       button2Title={"Ja, stop met delen"}
-  //       button2Handler={async (e) => {
-  //         e.preventDefault();
-  //         // Hide modal
-  //         setDoShowModal(false);
-  //         // Revoke action
-  //         onRevokeHandler(entry);
-  //       }}
-  //       hideModalHandler={() => {
-  //         setDoShowModal(false);
-  //       }}
-  //     >
-  //       <p className="mb-4">
-  //         Weet je zeker dat je wilt stoppen met delen met deze organisatie/persoon?
-  //       </p>
-  //     </Modal>
-  //   ): <></>}
-
-  // </div>
+          {showRevokeModal ? (
+            <Modal
+              isVisible={showRevokeModal}
+              title="Weet je het zeker?"
+              button1Title={'Nee, annuleer'}
+              button1Handler={(e) => {
+                setShowRevokeModal(false);
+              }}
+              button2Title={"Ja, stop met delen"}
+              button2Handler={async (e) => {
+                e.preventDefault();
+                // Hide modal
+                setShowRevokeModal(false);
+                // Revoke action
+                onRevokeHandler(entry);
+              }}
+              hideModalHandler={() => {
+                setShowRevokeModal(false);
+              }}
+            >
+              <p className="mb-4">
+                Weet je zeker dat je wilt stoppen met delen met deze organisatie/persoon?
+              </p>
+            </Modal>
+          ): <></>}
+        </div>
+      </div>
+    </>
+  )
 }
 
 // SharedDataOverview
@@ -92,6 +97,7 @@ const SharedDataOverview = ({
   const [dataAccessReceived, setDataAccessReceived] = useState([]);
   const [dataAccessGranted, setDataAccessGranted] = useState([]);
   const [showGrantUserForm, setShowGrantUserForm] = useState(false);
+  const [showGrantOrganisationForm, setShowGrantOrganisationForm] = useState(false);
 
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
@@ -156,6 +162,7 @@ const SharedDataOverview = ({
 
   const onRevokeHandler = async (entry) => {
     await revokeDataAccess(token, entry.grant_view_data_id);
+    await fetchDataAccessGranted(acl.part_of_organisation);
   }
 
   return (
@@ -170,10 +177,30 @@ const SharedDataOverview = ({
         Stel hieronder in welke organisaties en personen toegang hebben tot de data van jouw organisatie.
       </p>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new' onClick={() => setShowGrantUserForm(true)}>Deel met gebruiker</Button>
+        <Button theme='primary' classes='add-new' onClick={() => {
+          setShowGrantUserForm(true);
+          setShowGrantOrganisationForm(false);
+        }}>
+          Deel met gebruiker
+        </Button>
+        <Button theme='primary' classes='add-new' onClick={() => {
+          setShowGrantUserForm(false);
+          setShowGrantOrganisationForm(true);
+        }}>
+          Deel met organisatie
+        </Button>
       </div>
       {showGrantUserForm && <div className="mb-6">
-        <GrantUser onSaveHandler={() => setShowGrantUserForm(false)} />
+        <GrantUser onSaveHandler={() => {
+          setShowGrantUserForm(false);
+          fetchDataAccessGranted(acl.part_of_organisation);
+        }} />
+      </div>}
+      {showGrantOrganisationForm && <div className="mb-6">
+        <GrantOrganisation onSaveHandler={() => {
+          setShowGrantOrganisationForm(false);
+          fetchDataAccessGranted(acl.part_of_organisation);
+        }} />
       </div>}
       <div className="
         Table
@@ -182,7 +209,9 @@ const SharedDataOverview = ({
           <H4Title className="col-name">Gedeeld met</H4Title>
           <H4Title className="col-actions">Intrekken</H4Title>
         </div>
-        {dataAccessGranted ? dataAccessGranted.map(entry => TableRow(entry, onRevokeHandler)) : <></>}
+        {(dataAccessGranted && dataAccessGranted.length > 0) ? dataAccessGranted.map(entry => {
+          return <TableRow entry={entry} onRevokeHandler={onRevokeHandler} />
+        }) : <></>}
       </div>
     </div>
   );

@@ -98,46 +98,19 @@ function GrantUser({
         </div>
 
         <div style={{marginLeft: '-0.5rem'}}>
-          <Button classes={'w-40 save'} type="submit" theme="primary">
-            Opslaan
-          </Button>
+          <div className="flex">
+            <Button classes={'w-40 save'} type="submit" theme="primary">
+              Opslaan
+            </Button>
+            <a className="ml-4 flex flex-col justify-center cursor-pointer" onClick={() => onSaveHandler()} style={{color: '#999'}}>
+              Annuleren
+            </a>
+          </div>
           {submitError ? <p className="font-bold text-red-500 text-sm" style={{marginTop: '0.5rem', marginLeft: '0.5rem'}}>
             {submitError}
           </p>: <></>}
         </div>
       </form>
-
-      {/*{message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}*/}
-
-      <Modal
-        isVisible={doShowModal}
-        title="Weet je het zeker?"
-        button1Title={'Nee, annuleer'}
-        button1Handler={(e) => {
-          setDoShowModal(false);
-        }}
-        button2Title={"Ja, verwijder organisatie"}
-        button2Handler={async (e) => {
-          e.preventDefault();
-          // Hide modal
-          setDoShowModal(false);
-          // Delete organisation
-          // await deleteOrganisation(token, encodeURIComponent(organisation.organisation_id));
-          // Post save action
-          onSaveHandler();
-        }}
-        hideModalHandler={() => {
-          setDoShowModal(false);
-        }}
-      >
-        <p className="mb-4">
-          Weet je zeker dat je deze organisatie, <b>{organisation ? organisation.name : ''}</b>, wilt verwijderen?
-        </p>
-        <p className="my-4">
-          Dit kan niet ongedaan gemaakt worden.
-        </p>
-      </Modal>
-
     </div>
   )
 }

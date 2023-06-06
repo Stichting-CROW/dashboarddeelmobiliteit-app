@@ -47,12 +47,6 @@ function EditOrganisation({
   const [dataOwnerOfMunicipalities, setDataOwnerOfMunicipalities] = useState(organisation && organisation.data_owner_of_municipalities ? organisation.data_owner_of_municipalities : null);
   const [selectedOperators, setSelectedOperators] = useState([]);
   const [dataOwnerOfOperators, setDataOwnerOfOperators] = useState(organisation && organisation.data_owner_of_operators ? organisation.data_owner_of_operators : null);
-  // const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-  // const [isCoreGroup, setIsCoreGroup] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('CORE_GROUP') > -1);
-  // const [canEditMicrohubs, setCanEditMicrohubs] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('MICROHUB_EDIT') > -1);
-  // const [canDownloadRawData, setCanDownloadRawData] = useState(organisation && organisation.privileges && organisation.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
-  // const [isSuperAdmin, setIsSuperAdmin] = useState(organisation && organisation.is_admin);
-  // const [sendEmail, setSendEmail] = useState(false)
 
   const [doShowModal, setDoShowModal] = useState(false);
 
@@ -174,6 +168,7 @@ function EditOrganisation({
         label: x.name
       })
     })
+    console.log('operators', operators, optionsList)
     setOperatorOptionList(optionsList)
   }
 

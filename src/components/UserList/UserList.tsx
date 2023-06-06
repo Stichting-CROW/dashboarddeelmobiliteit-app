@@ -95,10 +95,18 @@ const UserList = ({
 
   const fetchUserList = async () => {
     let users;
-    if(isOrganisationAdmin()) {
+    // Get users for organisation
+    if(isOrganisationAdmin() && ! isAdmin()) {
       users = await getUserListForOrganisation(token, acl.part_of_organisation);
-    } else {
+    }
+    // Or get all users if user is an admin
+    else if(isAdmin()) {
       users = await getUserList(token);
+    }
+    // Otherwise just redirect to home, as the user doesn't have rights to see the user list
+    else {
+      navigate('/');
+      return;
     }
     setUsers(users);
   }
@@ -119,6 +127,8 @@ const UserList = ({
   const editClickHandler = (user: UserType) => {
     navigate(`/admin/users/${user.user_id}`)
   }
+
+  const isAdmin = () => acl.is_admin === true;
 
   const isOrganisationAdmin = () => {
     return acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;

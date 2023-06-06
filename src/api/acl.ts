@@ -15,9 +15,25 @@ const getHeaders = (token): {
   };
 }
 
-// GET /menu/acl
+// GET /user/acl
 export const getAcl = async (token) => {
   const url = `${acl_api_url}/user/acl`;
+  const options = getHeaders(token);
+  const response = await fetch(url, options);
+
+  let json;
+  try {
+    json = await response.json();
+    return json;
+  } catch(e) {
+    console.error('Error getting ACL');
+    return [];
+  }
+}
+
+// GET /menu/acl
+export const getMenuAcl = async (token) => {
+  const url = `https://api.deelfietsdashboard.nl/dashboard-api/menu/acl`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
