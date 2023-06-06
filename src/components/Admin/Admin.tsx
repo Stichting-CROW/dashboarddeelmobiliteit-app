@@ -18,7 +18,7 @@ export default function Admin({
   // Define menu items for this Admin page
   const pillMenuItems = [
     {title: 'Gebruikers', link: '/admin/users'},
-    {title: 'Data delen', link: '/admin/shared'},
+    // {title: 'Data delen', link: '/admin/shared'},
     {title: 'Organisaties', link: '/admin/organisations'},
     {title: 'Statistieken', link: '/admin/stats'},
   ]

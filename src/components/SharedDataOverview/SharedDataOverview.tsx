@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
 import './SharedDataOverview.css'; 
+import Modal from '../Modal/Modal.jsx';
 import {
   // useDispatch,
   useSelector
@@ -9,14 +10,18 @@ import {
 
 import {OrganisationType} from '../../types/OrganisationType';
 import {StateType} from '../../types/StateType';
+import {AclType} from '../../types/AclType';
 
 // Import API methods
 import {
   getOrganisationList
 } from '../../api/organisations';
+import {getAcl} from '../../api/acl';
 
 import {
-  getDataAccessReceived
+  getDataAccessReceived,
+  getDataAccessGranted,
+  revokeDataAccess
 } from '../../api/dataAccess';
 
 // Import components
@@ -26,39 +31,54 @@ import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
 
 const TableRow = (
-  organisation: any,
-  editClickHandler: Function,
-  onSaveHandler: Function
+  entry: any,
+  onRevokeHandler: Function
 ) => {
-  // Get organisationId from URL
-  const { organisationId } = useParams();
+  // const [doShowModal, setDoShowModal] = useState(false);
 
-  let organisation_type;
-  if(organisation.type_of_organisation === 'OPERATOR') {
-    organisation_type = 'Aanbieder';
-  }
-  else if(organisation.type_of_organisation === 'MUNICIPALITY') {
-    organisation_type = 'Gemeente';
-  }
-  else if(organisation.type_of_organisation === 'ADMIN') {
-    organisation_type = 'Admin';
-  }
+  return <div>dfs</div>
 
-  return <div
-    key={organisation.organisation_id}
-    className={`TableRow ${organisationId == organisation.organisation_id ? 'no-hover' : ''}`}
-    onClick={() => editClickHandler(organisation)}
-  >
-    <div className="flex">
-      <div className="col-name text-sm">
-        {organisation.name}
-      </div>
-      <div className="col-actions text-sm flex justify-end">
-        <button className='edit-icon' style={{height: '100%'}} />
-      </div>
-    </div>
+  // return <div
+  //   key={entry.grant_view_data_id}
+  //   className={`TableRow no-hover`}
+  // >
+  //   <div className="flex">
+  //     <div className="col-name text-sm">
+  //       {entry.granted_user_id ? entry.granted_user_id : ''}
+  //       {entry.granted_organisation_name ? entry.granted_organisation_name : ''}
+  //     </div>
+  //     <div className="col-actions text-sm flex justify-end">
+  //       <button className='delete-icon' style={{height: '100%'}} onClick={() => setDoShowModal(true)} />
+  //     </div>
+  //   </div>
 
-  </div>
+  //   {doShowModal ? (
+  //     <Modal
+  //       isVisible={doShowModal}
+  //       title="Weet je het zeker?"
+  //       button1Title={'Nee, annuleer'}
+  //       button1Handler={(e) => {
+  //         setDoShowModal(false);
+  //       }}
+  //       button2Title={"Ja, stop met delen"}
+  //       button2Handler={async (e) => {
+  //         e.preventDefault();
+  //         // Hide modal
+  //         setDoShowModal(false);
+  //         // Revoke action
+  //         onRevokeHandler(entry);
+  //       }}
+  //       hideModalHandler={() => {
+  //         setDoShowModal(false);
+  //       }}
+  //     >
+  //       <p className="mb-4">
+  //         Weet je zeker dat je wilt stoppen met delen met deze organisatie/persoon?
+  //       </p>
+  //     </Modal>
+  //   ): <></>}
+
+  // </div>
 }
 
 // SharedDataOverview
@@ -68,17 +88,32 @@ const SharedDataOverview = ({
   showAddOrganisationModule?: boolean
 }) => {
   const [organisations, setOrganisations] = useState([]);
+  const [acl, setAcl] = useState<AclType>  ({});
   const [dataAccessReceived, setDataAccessReceived] = useState([]);
+  const [dataAccessGranted, setDataAccessGranted] = useState([]);
   const [showGrantUserForm, setShowGrantUserForm] = useState(false);
 
-  const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // Get data on component load
   useEffect(() => {
+    fetchAcl();
     fetchOrganisationList();
     fetchDataAccessReceived();
   }, []);
+  useEffect(() => {
+    if(! acl || ! acl.part_of_organisation) return;
+    fetchDataAccessGranted(acl.part_of_organisation);
+  }, [
+    acl
+  ]);
+
+  const navigate = useNavigate();
+
+  const fetchAcl = async () => {
+    const theAcl = await getAcl(token);
+    setAcl(theAcl);
+  }
 
   const fetchOrganisationList = async () => {
     const organisations = await getOrganisationList(token);
@@ -88,6 +123,11 @@ const SharedDataOverview = ({
   const fetchDataAccessReceived = async () => {
     const result = await getDataAccessReceived(token);
     setDataAccessReceived(result);
+  }
+
+  const fetchDataAccessGranted = async (part_of_organisation) => {
+    const result = await getDataAccessGranted(token, part_of_organisation);
+    setDataAccessGranted(result);
   }
 
   const getDataAccessReceivedString = (data) => {
@@ -114,11 +154,9 @@ const SharedDataOverview = ({
     navigate('/admin/organisations/new');
   }
 
-  const editClickHandler = (organisation: OrganisationType) => {
-    navigate(`/admin/organisations/${organisation.organisation_id}`)
+  const onRevokeHandler = async (entry) => {
+    await revokeDataAccess(token, entry.grant_view_data_id);
   }
-
-  console.log('dataAccessReceived', dataAccessReceived)
 
   return (
     <div className="SharedDataOverview" style={{maxWidth: '800px'}}>
@@ -144,7 +182,7 @@ const SharedDataOverview = ({
           <H4Title className="col-name">Gedeeld met</H4Title>
           <H4Title className="col-actions">Intrekken</H4Title>
         </div>
-        {organisations ? organisations.map(org => TableRow(org, editClickHandler, fetchOrganisationList)) : <></>}
+        {dataAccessGranted ? dataAccessGranted.map(entry => TableRow(entry, onRevokeHandler)) : <></>}
       </div>
     </div>
   );
