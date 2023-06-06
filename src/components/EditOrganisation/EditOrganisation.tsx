@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {StateType} from '../../types/StateType';
 
 // Import API methods
-import {getAcl} from '../../api/acl';
+import {getMenuAcl} from '../../api/acl';
 import {createOrganisation, updateOrganisation, deleteOrganisation} from '../../api/organisations';
 import {getOrganisationList} from '../../api/organisations';
 
@@ -58,7 +58,7 @@ function EditOrganisation({
 
   // On component load: Get municipalities and generate autosuggestion list
   const fetchMunicipalitiesAndOperators = async () => {
-    const acl = await getAcl(token);
+    const acl = await getMenuAcl(token);
     if(! acl || ! acl.municipalities || ! acl.operators) return;
     setMunicipalities(acl.municipalities);
     setOperators(acl.operators);
@@ -168,7 +168,6 @@ function EditOrganisation({
         label: x.name
       })
     })
-    console.log('operators', operators, optionsList)
     setOperatorOptionList(optionsList)
   }
 
@@ -248,8 +247,9 @@ function EditOrganisation({
             onClick={() => setDoShowModal(true)}
           >
             <div className="flex">
-              <div
-                className="inline-block underline"
+              <div className="
+                inline-block underline
+              "
               >Verwijder organisatie</div>
               <button className='ml-2 delete-icon' style={{height: '100%'}} />
             </div>

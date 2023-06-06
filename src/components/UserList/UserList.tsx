@@ -49,19 +49,19 @@ const TableRow = (
     onClick={() => editClickHandler(user)}
   >
     <div className="flex">
-      <div className="col-email text-sm">
+      <div className="px-2 col-email text-sm whitespace-nowrap text-ellipsis overflow-hidden" title={user.user_id}>
         {user.is_admin ? '👑' : ''} {user.user_id}
       </div>
-      <div className="col-organisation text-sm">
+      <div className="px-2 col-organisation text-sm whitespace-nowrap text-ellipsis overflow-hidden">
         {user.organisation_name}
       </div>
-      <div className="col-privileges text-sm">
+      <div className="px-2 col-privileges text-sm">
         {user.privileges.map(x => {
           return <div key={`x_${user.user_id}_${x}`}>{readablePrivilege(x)}</div>
         })}
         {user.is_admin ? 'Super-admin' : ''}
       </div>
-      <div className="col-actions text-sm flex justify-end">
+      <div className="px-2 col-actions text-sm flex justify-end">
         <button className='edit-icon' style={{height: '100%'}} />
         {/*{username !== user.user_id && <button className='ml-1 delete-icon' style={{height: '100%'}} />}*/}
       </div>
@@ -84,6 +84,7 @@ const UserList = ({
   acl: any
 }) => {
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -134,6 +135,11 @@ const UserList = ({
     return acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;
   }
 
+  const filteredUsers = users.filter(x => {
+    return x.user_id.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1
+            || x.organisation_name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1;
+  });
+
   return (
     <div className="" style={{maxWidth: '800px'}}>
       <H1Title>Gebruikers</H1Title>
@@ -148,12 +154,22 @@ const UserList = ({
         Table
       ">
         <div className="TableRow flex justify-between no-hover">
-          <H4Title className="col-email">Email</H4Title>
+          <H4Title className="col-email">E-mail</H4Title>
           <H4Title className="col-organisation">Organisatie</H4Title>
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        {users ? users.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
+        <div className="TableRow flex justify-between no-hover">
+          <div className="w-full">
+            <input
+              type="search"
+              placeholder="Zoek.."
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm"
+            />
+          </div>
+        </div>
+        {users ? filteredUsers.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
       </div>
     </div>
   );

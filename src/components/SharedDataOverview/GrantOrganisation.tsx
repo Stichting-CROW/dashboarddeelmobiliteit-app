@@ -94,7 +94,6 @@ function GrantOrganisation({
     if(! grantedOrganisation || ! grantedOrganisation.value) return;
 
     try {
-      console.log('grantedOrganisation', grantedOrganisation)
       const response = await grantOrganisation(token, {
         "owner_organisation_id": ownerOrganisationId,
         "granted_organisation_id": grantedOrganisation.value

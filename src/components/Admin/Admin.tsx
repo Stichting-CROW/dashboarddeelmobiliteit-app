@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, useLocation,  } from "react-router-dom";
+import {getAcl} from '../../api/acl';
+import {StateType} from '../../types/StateType';
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
@@ -15,13 +18,32 @@ export default function Admin({
 }) {
   const navigate = useNavigate();
 
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+  const [acl, setAcl] = useState({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const theAcl = await getAcl(token);
+      setAcl(theAcl);
+      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+      setIsAdmin(theAcl.is_admin);
+    })();
+  }, [token])
+
   // Define menu items for this Admin page
   const pillMenuItems = [
-    {title: 'Gebruikers', link: '/admin/users'},
-    {title: 'Data delen', link: '/admin/shared'},
-    {title: 'Organisaties', link: '/admin/organisations'},
     // {title: 'Statistieken', link: '/admin/stats'},
-  ]
+  ];
+  if(isAdmin || isOrganisationAdmin) {
+    pillMenuItems.push({title: 'Gebruikers', link: '/admin/users'})
+    if(isAdmin) {
+      pillMenuItems.push({title: 'Organisaties', link: '/admin/organisations'})
+    }
+    pillMenuItems.push({title: 'Data delen', link: '/admin/shared'})
+  }
 
   return (
     <div className="
