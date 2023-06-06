@@ -176,7 +176,7 @@ const UserList = ({
         Table
       ">
         <div className="TableRow flex justify-between no-hover">
-          <H4Title className="col-email">E-mail</H4Title>
+          <H4Title className="col-email whitespace-nowrap overflow-hidden">E-mail</H4Title>
           <H4Title className="col-organisation">Organisatie</H4Title>
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>

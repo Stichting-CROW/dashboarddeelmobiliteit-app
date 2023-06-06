@@ -26,20 +26,16 @@ import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 
 function EditOrganisation({
+  organisations,
   organisation,
   onSaveHandler
 }: {
+  organisations: any,
   organisation?: OrganisationType,// User can be optional as this component is also used for adding new organisations
   onSaveHandler: Function
 }) {
-  const [municipalities, setMunicipalities] = useState([]);
   const [municipalityOptionList, setMunicipalityOptionList] = useState([])
-
-  const [operators, setOperators] = useState([]);
   const [operatorOptionList, setOperatorOptionList] = useState([])
-
-  // const [message, setMessage] = useState('')
-  // const [messageDesign, setMessageDesign] = useState('')
 
   const [organisationName, setOrganisationName] = useState(organisation ? organisation.name : null);
   const [organisationType, setOrganisationType] = useState(organisation ? organisation.type_of_organisation : null);
@@ -56,49 +52,35 @@ function EditOrganisation({
   // Get API token
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-  // On component load: Get municipalities and generate autosuggestion list
-  const fetchMunicipalitiesAndOperators = async () => {
-    const acl = await getMenuAcl(token);
-    if(! acl || ! acl.municipalities || ! acl.operators) return;
-    setMunicipalities(acl.municipalities);
-    setOperators(acl.operators);
-  };
-  useEffect(() => {
-    fetchMunicipalitiesAndOperators();
-  }, [token]);
-
   useEffect(() => {
     buildMunicipalityOptionsValue();
     prepareDefaultSelectedMunicipalities();
-  }, [municipalities]);
-  
+
+    buildOperatorOptionsValue();
+    prepareDefaultSelectedOperators();
+  }, [token]);
+
   const prepareDefaultSelectedMunicipalities = () => {
-    if(! organisation || ! organisation.data_owner_of_municipalities) return;
+    if(! organisations || ! organisation || ! organisation.data_owner_of_municipalities) return;
     let currentUserMunicipalities = [];
     organisation.data_owner_of_municipalities.forEach(gm_code => {
-      let relatedMunicipality: any = municipalities.filter(x => x.gm_code === gm_code);
+      let relatedMunicipality: any = organisations.filter(x => x.data_owner_of_municipalities && x.data_owner_of_municipalities[0] === gm_code);
       if(relatedMunicipality && relatedMunicipality.length > 0) {
-        currentUserMunicipalities.push({ label: relatedMunicipality[0].name, value: relatedMunicipality[0].gm_code });
+        currentUserMunicipalities.push({ label: relatedMunicipality[0].name, value: gm_code });
       }
     })
     setSelectedMunicipalities(currentUserMunicipalities);
   }
-
-  // On component load: Get operators and generate autosuggestion list
-  useEffect(() => {
-    buildOperatorOptionsValue();
-    prepareDefaultSelectedOperators();
-  }, [operators]);
   
   const prepareDefaultSelectedOperators = () => {
-    if(! organisation || ! organisation.data_owner_of_operators) return;
+    if(! organisations || ! organisation || ! organisation.data_owner_of_operators) return;
     let currentUserOperators = [];
     organisation.data_owner_of_operators.forEach(system_id => {
-      let relatedOperator: any = operators.filter(x => x.system_id === system_id);
+      let relatedOperator: any = organisations.filter(x => x.data_owner_of_operators && x.data_owner_of_operators[0] === system_id);
       if(relatedOperator && relatedOperator.length > 0) {
-        currentUserOperators.push({ label: relatedOperator[0].name, value: relatedOperator[0].system_id });
+        currentUserOperators.push({ label: relatedOperator[0].name, value: system_id });
       }
-    })
+    });
     setSelectedOperators(currentUserOperators);
   }
 
@@ -115,9 +97,15 @@ function EditOrganisation({
 
     // Build municipalityCodeArray
     let data_owner_of_municipalities = selectedMunicipalities.map(x => x.value);
+    console.log('municipalityOptionList', municipalityOptionList)
+    console.log('selectedMunicipalities', selectedMunicipalities)
 
     // Build operatorArray
     let data_owner_of_operators = selectedOperators.map(x => x.value);
+
+    console.log('handleSubmit')
+    console.log('data_owner_of_municipalities', data_owner_of_municipalities)
+    console.log('data_owner_of_operators', data_owner_of_operators)
 
     // Update
     if(organisation && organisation.organisation_id) {
@@ -150,10 +138,11 @@ function EditOrganisation({
   }
 
   const buildMunicipalityOptionsValue = async () => {
-    const optionsList = []
+    const optionsList = [];
+    const municipalities = organisations.filter(x => x.type_of_organisation === 'MUNICIPALITY');
     municipalities.forEach(x => {
       optionsList.push({
-        value: x.gm_code,
+        value: x.data_owner_of_municipalities[0],
         label: x.name
       })
     })
@@ -161,10 +150,11 @@ function EditOrganisation({
   }
 
   const buildOperatorOptionsValue = async () => {
-    const optionsList = []
+    const optionsList = [];
+    const operators = organisations.filter(x => x.type_of_organisation === 'OPERATOR');
     operators.forEach(x => {
       optionsList.push({
-        value: x.system_id,
+        value: x.data_owner_of_operators[0],
         label: x.name
       })
     })

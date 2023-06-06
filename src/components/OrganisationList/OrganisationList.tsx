@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
 import './OrganisationList.css'; 
 import {
-  // useDispatch,
   useSelector
 } from 'react-redux';
 
@@ -32,11 +31,17 @@ const readablePrivilege = (privilegeKey) => {
   }
 }
 
-const TableRow = (
+const TableRow = ({
+  organisations,
+  organisation,
+  editClickHandler,
+  onSaveHandler
+}: {
+  organisations: any,
   organisation: any,
   editClickHandler: Function,
   onSaveHandler: Function
-) => {
+}) => {
   // Get organisationId from URL
   const { organisationId } = useParams();
 
@@ -70,7 +75,11 @@ const TableRow = (
 
     {/*If organisation clicked edit: Show edit form */}
     <div className="col-span-3" hidden={organisationId != organisation.organisation_id}>
-      {organisationId == organisation.organisation_id && <EditOrganisation organisation={organisation} onSaveHandler={onSaveHandler} />}
+      {organisationId == organisation.organisation_id && <EditOrganisation
+        organisations={organisations}
+        organisation={organisation}
+        onSaveHandler={onSaveHandler}
+      />}
     </div>
 
   </div>
@@ -78,11 +87,12 @@ const TableRow = (
 
 // OrganisationList
 const OrganisationList = ({
-  showAddOrganisationModule
+  showAddOrganisationModule,
 }: {
-  showAddOrganisationModule?: boolean
+  showAddOrganisationModule?: boolean,
 }) => {
   const [organisations, setOrganisations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -114,6 +124,11 @@ const OrganisationList = ({
     navigate(`/admin/organisations/${organisation.organisation_id}`)
   }
 
+  const filteredOrganisations = organisations.filter(x => {
+    return (x.name && x.name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)
+            || x.type_of_organisation.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1;
+  });
+
   return (
     <div className="OrganisationList" style={{maxWidth: '800px'}}>
       <H1Title>Organisaties</H1Title>
@@ -121,7 +136,9 @@ const OrganisationList = ({
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe organisatie</Button>
       </div>
       {showAddOrganisationModule && <div className="mb-6">
-        <EditOrganisation onSaveHandler={fetchOrganisationList} />
+        <EditOrganisation
+          organisations={organisations}
+          onSaveHandler={fetchOrganisationList} />
       </div>}
       <div className="
         Table
@@ -131,7 +148,19 @@ const OrganisationList = ({
           <H4Title className="col-type">Type</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        {organisations ? organisations.map(org => TableRow(org, editClickHandler, fetchOrganisationList)) : <></>}
+        <div className="TableRow flex justify-between no-hover">
+          <div className="w-full">
+            <input
+              type="search"
+              placeholder="Zoek.."
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm"
+            />
+          </div>
+        </div>
+        {organisations ? filteredOrganisations.map(org => {
+          return <TableRow organisations={organisations} organisation={org} editClickHandler={editClickHandler} onSaveHandler={fetchOrganisationList} />;
+        }) : <></>}
       </div>
     </div>
   );
