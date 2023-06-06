@@ -6,6 +6,9 @@ import {
   // useDispatch,
   useSelector
 } from 'react-redux';
+import {
+  downloadCsv,
+} from '../../helpers/stats/index';
 
 import {UserType} from '../../types/UserType';
 import {StateType} from '../../types/StateType';
@@ -140,12 +143,31 @@ const UserList = ({
             || x.organisation_name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1;
   });
 
+  const prepareDataForCsv = (data: any) => {
+    if(! data || data.length <= 0) return;
+    if(  typeof data !== 'object') return;
+
+    let csvRows = [];
+
+    // Get headers
+    const headers = ['E-mail', 'Organisatie'];
+    csvRows.push(headers.join(','));
+
+    // Loop over the rows
+    for (const x of data) {
+      const values = [x.user_id, x.organisation_name];
+      csvRows.push(values.join(','));
+    };
+
+    return csvRows.join("\n");
+  }
+
   return (
     <div className="" style={{maxWidth: '800px'}}>
       <H1Title>Gebruikers</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe gebruiker</Button>
-        <Button theme='primary' classes='download'>Exporteer gebruikers als spreadsheet</Button>
+        <Button theme='primary' classes='download' onClick={() => downloadCsv(prepareDataForCsv(filteredUsers))}>Exporteer gebruikers als spreadsheet</Button>
       </div>
       {showAddUserModule && <div className="mb-6">
         <EditUser onSaveHandler={fetchUserList} />
