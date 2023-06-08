@@ -101,3 +101,21 @@ export const getOrganisationList = async (token) => {
 
   return await response.json();
 }
+
+// GET /organisation/yearly_cost_overview?reference_date=YYYY-MM-DD
+export const getYearlyCostOverview = async (token, referenceDate) => {
+  if(! referenceDate) return;
+
+  const url = `${admin_api_url}/organisation/yearly_cost_overview?reference_date=${referenceDate}`;
+  const options = getHeaders(token);
+  const response = await fetch(url, options);
+
+  return await response.blob().then( blob => {
+    // var file = window.URL.createObjectURL(blob);
+    // window.location.assign(file);
+    var a = document.createElement("a");
+    a.href = window.URL.createObjectURL(blob);
+    a.download = `crow-dd-jaarbijdrage-${referenceDate}.xlsx`;
+    a.click();
+  });
+}

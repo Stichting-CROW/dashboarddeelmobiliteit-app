@@ -39,10 +39,9 @@ export default function Admin({
   ];
   if(isAdmin || isOrganisationAdmin) {
     pillMenuItems.push({title: 'Gebruikers', link: '/admin/users'})
-    if(isAdmin) {
-      pillMenuItems.push({title: 'Organisaties', link: '/admin/organisations'})
-    }
+    if(isAdmin) pillMenuItems.push({title: 'Organisaties', link: '/admin/organisations'})
     pillMenuItems.push({title: 'Data delen', link: '/admin/shared'})
+    if(isAdmin) pillMenuItems.push({title: 'Jaarbijdrage', link: '/admin/yearly-costs'})
   }
 
   return (

@@ -40,6 +40,7 @@ import EditUser from './components/EditUser/EditUser';
 import OrganisationList from './components/OrganisationList/OrganisationList';
 import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
+import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -425,6 +426,13 @@ function App() {
                   <Overlay>
                     <Admin>
                       <LoginStats />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/yearly-costs" element={
+                  <Overlay>
+                    <Admin>
+                      <YearlyCostsExport acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
