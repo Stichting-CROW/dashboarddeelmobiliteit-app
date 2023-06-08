@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select'
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
 import './SharedDataOverview.css'; 
@@ -92,7 +93,11 @@ const SharedDataOverview = ({
 }: {
   showAddOrganisationModule?: boolean
 }) => {
+  const [organisationOptionList, setOrganisationOptionList] = useState([])
   const [organisations, setOrganisations] = useState([]);
+  const [organisationId, setOrganisationId] = useState();
+  const [defaultSelectedOrganisation, setDefaultSelectedOrganisation] = useState({});
+
   const [acl, setAcl] = useState<AclType>  ({});
   const [dataAccessReceived, setDataAccessReceived] = useState([]);
   const [dataAccessGranted, setDataAccessGranted] = useState([]);
@@ -114,16 +119,60 @@ const SharedDataOverview = ({
     acl
   ]);
 
+  // If organisations array is in state:
+  useEffect(() => {
+    // Generate autosuggestion list
+    buildOptionsValue();
+  }, [organisations]);
+
+  // If organisationId is set:
+  useEffect(() => {
+    if(! organisationId) return;
+
+    // Set default organisation to show in the organisation select list
+    const userOrganisation = getOrganisationBasedOnId(organisationId);
+    setDefaultSelectedOrganisation({
+      label: userOrganisation.name,
+      value: acl.part_of_organisation
+    });
+
+    fetchDataAccessGranted(organisationId);
+  }, [organisationId]);
+
   const navigate = useNavigate();
+
+  const buildOptionsValue = async () => {
+    const optionsList = []
+    organisations.forEach(x => {
+      optionsList.push({
+        value: x.organisation_id,
+        label: x.name
+      })
+    })
+    setOrganisationOptionList(optionsList)
+  }
 
   const fetchAcl = async () => {
     const theAcl = await getAcl(token);
     setAcl(theAcl);
+    if(theAcl.part_of_organisation) setOrganisationId(theAcl.part_of_organisation);
   }
 
   const fetchOrganisationList = async () => {
+    // Fetch organisations and set in state
     const organisations = await getOrganisationList(token);
     setOrganisations(organisations);
+  }
+
+  const getOrganisationBasedOnId = (id) => {
+    if(! organisations || organisations.length <= 0) return {
+      name: 'Loading'
+    };
+    const foundOrg = organisations.filter(x => x.organisation_id === id);
+    if(foundOrg && foundOrg.length > 0) return foundOrg[0];
+    return {
+      name: 'Not found'
+    };
   }
 
   const fetchDataAccessReceived = async () => {
@@ -162,14 +211,29 @@ const SharedDataOverview = ({
 
   const onRevokeHandler = async (entry) => {
     await revokeDataAccess(token, entry.grant_view_data_id);
-    await fetchDataAccessGranted(acl.part_of_organisation);
+    await fetchDataAccessGranted(organisationId);
   }
 
   return (
     <div className="SharedDataOverview" style={{maxWidth: '800px'}}>
-      <H1Title>
-        Data delen
-      </H1Title>
+      <div className="flex justify-between flex-wrap">
+        <H1Title>
+          Data delen
+        </H1Title>
+        <div>
+          <Select
+            className="my-2 w-80"
+            isMulti={false}
+            options={organisationOptionList}
+            defaultValue={defaultSelectedOrganisation}
+            value={defaultSelectedOrganisation}
+            placeholder="Organisatie"
+            onChange={(choice: any) => {
+              setOrganisationId(choice.value);
+            }}
+          />
+        </div>
+      </div>
       {(dataAccessReceived && dataAccessReceived.filter(x => x.granted_organisation_id !== null).length > 0) && <p>
         {getDataAccessReceivedString(dataAccessReceived)}
       </p>}
