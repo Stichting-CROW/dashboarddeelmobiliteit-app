@@ -166,7 +166,7 @@ const SharedDataOverview = ({
 
   const getOrganisationBasedOnId = (id) => {
     if(! organisations || organisations.length <= 0) return {
-      name: 'Loading'
+      name: ''
     };
     const foundOrg = organisations.filter(x => x.organisation_id === id);
     if(foundOrg && foundOrg.length > 0) return foundOrg[0];

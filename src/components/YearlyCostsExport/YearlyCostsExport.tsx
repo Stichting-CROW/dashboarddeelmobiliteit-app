@@ -57,7 +57,7 @@ const YearlyCostsExport = ({
         </FormLabel>
         <FormInput type="date" name="referenceDate" onChange={(e) => setDate(e.target.value)} />
         <Button type="submit" theme='primary' style={{marginRight: '0rem', marginLeft: '0rem'}}>
-          Exporteer CSV
+          Download CSV
         </Button>
       </form>
     </div>

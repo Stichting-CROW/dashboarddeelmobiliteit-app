@@ -24,6 +24,41 @@ import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  
+  // Avoid scrolling to bottom
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+function copyTextToClipboard(text) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(function() {
+    console.log('Async: Copying to clipboard was successful!');
+  }, function(err) {
+    console.error('Async: Could not copy text: ', err);
+  });
+}
+
 function EditUser({
   user,
   onSaveHandler
@@ -46,8 +81,10 @@ function EditUser({
   const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
   const [canDownloadRawData, setCanDownloadRawData] = useState(user && user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
   const [sendEmail, setSendEmail] = useState(false)
+  const [credentials, setCredentials] = useState({username: '', password: ''})
 
-  const [doShowModal, setDoShowModal] = useState(false);
+  const [doShowDeleteModal, setDoShowDeleteModal] = useState(false);
+  const [doShowCredentialsModal, setDoShowCredentialsModal] = useState(false);
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -95,18 +132,23 @@ function EditUser({
         "privileges": privileges,
         "organisation_id": organisationId
       });
+      handleClose();
+      onSaveHandler();
     }
     // Or add
     else {
-      await createUser(token, {
+      const createdUser = await createUser(token, {
         "user_id": emailAddress,
         "privileges": privileges,
         "organisation_id": organisationId
       });
+      console.log('createdUser', createdUser);
+      setDoShowCredentialsModal(true);
+      setCredentials({
+        username: createdUser.user_account.user_id,
+        password: createdUser.generated_password
+      })
     }
-    
-    handleClose();
-    onSaveHandler();
   }
   
   const handleClose = () => {
@@ -229,7 +271,7 @@ function EditUser({
           {(user && user.user_id) && <div
             className="flex flex-col justify-center cursor-pointer"
             style={{color: '#B2B2B2'}}
-            onClick={() => setDoShowModal(true)}
+            onClick={() => setDoShowDeleteModal(true)}
           >
             <div className="flex">
               <div
@@ -244,24 +286,24 @@ function EditUser({
       {message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}
 
       <Modal
-        isVisible={doShowModal}
+        isVisible={doShowDeleteModal}
         title="Weet je het zeker?"
         button1Title={'Nee, annuleer'}
         button1Handler={(e) => {
-          setDoShowModal(false);
+          setDoShowDeleteModal(false);
         }}
         button2Title={"Ja, verwijder gebruiker"}
         button2Handler={async (e) => {
           e.preventDefault();
           // Hide modal
-          setDoShowModal(false);
+          setDoShowDeleteModal(false);
           // Delete user
           await deleteUser(token, encodeURIComponent(user.user_id));
           // Post save action
           onSaveHandler();
         }}
         hideModalHandler={() => {
-          setDoShowModal(false);
+          setDoShowDeleteModal(false);
         }}
       >
         <p className="mb-4">
@@ -269,6 +311,55 @@ function EditUser({
         </p>
         <p className="my-4">
           Dit kan niet ongedaan gemaakt worden.
+        </p>
+      </Modal>
+
+      <Modal
+        isVisible={doShowCredentialsModal}
+        title="Gebruiker toegevoegd"
+        button2Title={"Sluiten"}
+        button2Handler={async (e) => {
+          // Hide modal
+          setDoShowCredentialsModal(false);
+          handleClose();
+          onSaveHandler();
+        }}
+        hideModalHandler={() => {
+          setDoShowCredentialsModal(false);
+          handleClose();
+          onSaveHandler();
+        }}
+      >
+        <p className="mb-4">
+          <small style={{color: '#f00', fontStyle: 'italic'}}>
+            Kopieer de tekst hieronder en plak dit in een email aan: {credentials.username} <span title="Kopieer e-mailadres naar klembord" onClick={() => copyTextToClipboard(credentials.username)} className="cursor-pointer">📋</span>
+          </small>
+        </p>
+        <p>
+          Leuk dat je aan de slag gaat met het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
+        </p>
+        <p className="mb-4">
+          Hierbij stuur ik je inloggegevens voor <a href="https://dashboarddeelmobiliteit.nl/login" target="_blank">https://dashboarddeelmobiliteit.nl/login</a>
+        </p>
+        <p className="mb-4">
+          <b>Gebruikersnaam:</b><br />
+          {credentials.username}
+        </p>
+        <p className="mb-4">
+          <b>Wachtwoord:</b><br />
+          {credentials.password}
+        </p>
+        <br />
+        <p className="mb-4">
+          Handige links:
+        </p>
+        <ul className="mb-4">
+          <li><a href="https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard" target="_blank">Afspraken over openbaarheid</a></li>
+          <li><a href="https://dashboarddeelmobiliteit.nl/rondleiding">Korte rondleiding door het dashboard</a></li>
+          <li><a href="https://dashboarddeelmobiliteit.nl/faq">Veelgestelde vragen</a></li>
+        </ul>
+        <p className="mb-4">
+          Bij vragen, opmerkingen of feedback horen we graag van je!
         </p>
       </Modal>
 
