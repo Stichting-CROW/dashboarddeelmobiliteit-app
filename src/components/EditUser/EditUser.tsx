@@ -142,7 +142,6 @@ function EditUser({
         "privileges": privileges,
         "organisation_id": organisationId
       });
-      console.log('createdUser', createdUser);
       setDoShowCredentialsModal(true);
       setCredentials({
         username: createdUser.user_account.user_id,
