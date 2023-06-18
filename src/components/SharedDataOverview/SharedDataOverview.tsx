@@ -93,7 +93,7 @@ const SharedDataOverview = ({
 }) => {
   const [organisationOptionList, setOrganisationOptionList] = useState([])
   const [organisations, setOrganisations] = useState([]);
-  const [organisationId, setOrganisationId] = useState();
+  const [organisationId, setOrganisationId] = useState(null);
   const [defaultSelectedOrganisation, setDefaultSelectedOrganisation] = useState({});
 
   const [acl, setAcl] = useState<AclType> (null);
@@ -153,7 +153,7 @@ const SharedDataOverview = ({
   const fetchAcl = async () => {
     const theAcl = await getAcl(token);
     setAcl(theAcl);
-    if(organisationId == null && theAcl.part_of_organisation) setOrganisationId(theAcl.part_of_organisation);
+    if(theAcl.part_of_organisation) setOrganisationId(theAcl.part_of_organisation);
   }
 
   const fetchOrganisationList = async () => {
