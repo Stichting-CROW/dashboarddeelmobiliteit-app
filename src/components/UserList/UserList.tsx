@@ -187,9 +187,6 @@ const UserList = ({
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        
-        <div className="TableRow flex justify-between no-hover">
-        </div>
         {users ? filteredUsers.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
       </div>
     </div>

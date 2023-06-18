@@ -98,7 +98,7 @@ const SharedDataOverview = ({
   const [organisationId, setOrganisationId] = useState();
   const [defaultSelectedOrganisation, setDefaultSelectedOrganisation] = useState({});
 
-  const [acl, setAcl] = useState<AclType>  ({});
+  const [acl, setAcl] = useState<AclType> (null);
   const [dataAccessReceived, setDataAccessReceived] = useState([]);
   const [dataAccessGranted, setDataAccessGranted] = useState([]);
   const [showGrantUserForm, setShowGrantUserForm] = useState(false);
@@ -113,7 +113,7 @@ const SharedDataOverview = ({
     fetchDataAccessReceived();
   }, []);
   useEffect(() => {
-    if(! acl || ! acl.part_of_organisation) return;
+    if(!acl) return;
     fetchDataAccessGranted(acl.part_of_organisation);
   }, [
     acl
@@ -220,19 +220,21 @@ const SharedDataOverview = ({
         <H1Title>
           Data delen
         </H1Title>
-        <div>
-          <Select
-            className="my-2 w-80"
-            isMulti={false}
-            options={organisationOptionList}
-            defaultValue={defaultSelectedOrganisation}
-            value={defaultSelectedOrganisation}
-            placeholder="Organisatie"
-            onChange={(choice: any) => {
-              setOrganisationId(choice.value);
-            }}
-          />
-        </div>
+        {acl && acl.is_admin &&
+          <div>
+            <Select
+              className="my-2 w-80"
+              isMulti={false}
+              options={organisationOptionList}
+              defaultValue={defaultSelectedOrganisation}
+              value={defaultSelectedOrganisation}
+              placeholder="Organisatie"
+              onChange={(choice: any) => {
+                setOrganisationId(choice.value);
+              }}
+            />
+          </div>
+        }
       </div>
       {(dataAccessReceived && dataAccessReceived.filter(x => x.granted_organisation_id !== null).length > 0) && <p>
         {getDataAccessReceivedString(dataAccessReceived)}
