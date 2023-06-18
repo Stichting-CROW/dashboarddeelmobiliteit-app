@@ -42,7 +42,6 @@ const TableRow = ({
   const [showRevokeModal, setShowRevokeModal] = useState(false);
 
   return (
-    <>
       <div
         key={entry.grant_view_data_id}
         className={`TableRow no-hover`}
@@ -83,7 +82,6 @@ const TableRow = ({
           ): <></>}
         </div>
       </div>
-    </>
   )
 }
 
@@ -276,7 +274,7 @@ const SharedDataOverview = ({
           <H4Title className="col-actions">Intrekken</H4Title>
         </div>
         {(dataAccessGranted && dataAccessGranted.length > 0) ? dataAccessGranted.map(entry => {
-          return <TableRow entry={entry} onRevokeHandler={onRevokeHandler} />
+          return <TableRow key={entry.grant_view_data_id} entry={entry} onRevokeHandler={onRevokeHandler} />
         }) : <></>}
       </div>
     </div>

@@ -21,12 +21,6 @@ const Modal = ({
 }) => {
   return (
     <>
-      <div
-        className={`
-          modal-backdrop fade ${isVisible ? 'show' : ''}
-        `}
-        style={{display: isVisible ? 'block' : 'none'}}
-      />
       <div className={`
           modal fade ${isVisible ? 'show' : ''} fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto
         `}
