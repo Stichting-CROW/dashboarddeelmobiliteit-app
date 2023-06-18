@@ -26,10 +26,10 @@ import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 
 function GrantOrganisation({
-  organisation,
+  organisationToGrantDataFrom,
   onSaveHandler
 }: {
-  organisation?: OrganisationType,// User can be optional as this component is also used for adding new organisations
+  organisationToGrantDataFrom: number,
   onSaveHandler: Function
 }) {
   const [organisations, setOrganisations] = useState([]);
@@ -38,22 +38,13 @@ function GrantOrganisation({
     value: 0,
     label: ''
   })
-  const [ownerOrganisationId, setOwnerOrganisationId] = useState();
   const [submitError, setSubmitError] = useState('');
-  const [doShowModal, setDoShowModal] = useState(false);
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
 
   // Get API token
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
-
-  useEffect(() => {
-    (async () => {
-      const acl = await getAcl(token);
-      setOwnerOrganisationId(acl.part_of_organisation);
-    })();
-  }, [token])
 
   // On component load: Get municipalities and generate autosuggestion list
   const fetchOrganisations = async () => {
@@ -90,12 +81,12 @@ function GrantOrganisation({
 
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
-    if(! ownerOrganisationId) return;
+    if(! organisationToGrantDataFrom) return;
     if(! grantedOrganisation || ! grantedOrganisation.value) return;
 
     try {
       const response = await grantOrganisation(token, {
-        "owner_organisation_id": ownerOrganisationId,
+        "owner_organisation_id": organisationToGrantDataFrom,
         "granted_organisation_id": grantedOrganisation.value
       });
       const isOrganisationError = response && response.detail && response.detail === "granted_organisation_id doesn't exist";

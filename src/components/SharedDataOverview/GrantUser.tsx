@@ -26,14 +26,13 @@ import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 
 function GrantUser({
-  organisation,
+  organisationToGrantDataFrom,
   onSaveHandler
 }: {
-  organisation?: OrganisationType,// User can be optional as this component is also used for adding new organisations
+  organisationToGrantDataFrom: number,
   onSaveHandler: Function
 }) {
   const [grantedUserId, setGrantedUserId] = useState('');
-  const [ownerOrganisationId, setOwnerOrganisationId] = useState();
   const [submitError, setSubmitError] = useState('');
   const [doShowModal, setDoShowModal] = useState(false);
 
@@ -43,20 +42,14 @@ function GrantUser({
   // Get API token
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-  useEffect(() => {
-    (async () => {
-      const acl = await getAcl(token);
-      setOwnerOrganisationId(acl.part_of_organisation);
-    })();
-  }, [token])
 
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
-    if(! ownerOrganisationId) return;
+    if(! organisationToGrantDataFrom) return;
 
     try {
       const response = await grantUser(token, {
-        "owner_organisation_id": ownerOrganisationId,
+        "owner_organisation_id": organisationToGrantDataFrom,
         "granted_user_id": grantedUserId
       });
       const isUserError = response && response.detail && response.detail === "granted_user_id doesn't exist";

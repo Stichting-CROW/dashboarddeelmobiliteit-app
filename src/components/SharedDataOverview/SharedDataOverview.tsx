@@ -153,7 +153,7 @@ const SharedDataOverview = ({
   const fetchAcl = async () => {
     const theAcl = await getAcl(token);
     setAcl(theAcl);
-    if(theAcl.part_of_organisation) setOrganisationId(theAcl.part_of_organisation);
+    if(organisationId == null && theAcl.part_of_organisation) setOrganisationId(theAcl.part_of_organisation);
   }
 
   const fetchOrganisationList = async () => {
@@ -255,15 +255,15 @@ const SharedDataOverview = ({
         </Button>
       </div>
       {showGrantUserForm && <div className="mb-6">
-        <GrantUser onSaveHandler={() => {
+        <GrantUser organisationToGrantDataFrom={organisationId} onSaveHandler={() => {
           setShowGrantUserForm(false);
-          fetchDataAccessGranted(acl.part_of_organisation);
+          fetchDataAccessGranted(organisationId);
         }} />
       </div>}
       {showGrantOrganisationForm && <div className="mb-6">
-        <GrantOrganisation onSaveHandler={() => {
+        <GrantOrganisation organisationToGrantDataFrom={organisationId} onSaveHandler={() => {
           setShowGrantOrganisationForm(false);
-          fetchDataAccessGranted(acl.part_of_organisation);
+          fetchDataAccessGranted(organisationId);
         }} />
       </div>}
       <div className="
