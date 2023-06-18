@@ -175,21 +175,20 @@ const UserList = ({
       <div className="
         Table
       ">
+        <input
+              type="search"
+              placeholder="Zoek gebruiker.."
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-80 rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm"
+         />
         <div className="TableRow flex justify-between no-hover">
           <H4Title className="col-email whitespace-nowrap overflow-hidden">E-mail</H4Title>
           <H4Title className="col-organisation">Organisatie</H4Title>
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
+        
         <div className="TableRow flex justify-between no-hover">
-          <div className="w-full">
-            <input
-              type="search"
-              placeholder="Zoek.."
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm"
-            />
-          </div>
         </div>
         {users ? filteredUsers.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
       </div>
