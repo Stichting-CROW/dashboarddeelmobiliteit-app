@@ -61,9 +61,11 @@ function copyTextToClipboard(text) {
 }
 
 function EditUser({
+  acl,
   user,
   onSaveHandler
 }: {
+  acl: any
   user?: UserType,// User can be optional as this component is also used for adding new users
   onSaveHandler: Function
 }) {
@@ -75,7 +77,14 @@ function EditUser({
   const [message, setMessage] = useState('')
 
   const [emailAddress, setEmailAddress] = useState(user ? user.user_id : null);
-  const [organisationId, setOrganisationId] = useState(user ? user.organisation_id : null);
+  const [organisationId, setOrganisationId] = useState(
+    user
+    ? user.organisation_id // If user exists: Load organisation for the user that is edited
+    : (acl
+        ? acl.part_of_organisation // If user doesn't exist: Load organisation the logged in user is part of
+        : null
+      )
+  );
   const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(user && user.privileges && user.privileges.indexOf('ORGANISATION_ADMIN') > -1);
   const [isCoreGroup, setIsCoreGroup] = useState(user && user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
   const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
@@ -96,6 +105,13 @@ function EditUser({
   useEffect(() => {
     buildOptionsValue();
   }, [organisations]);
+
+  // Get user list on component load
+  useEffect(() => {
+    fetchOrganisations();
+  }, []);
+
+  const isAdmin = () => acl.is_admin === true;
   
   function getHeaders(): any {
     return {
@@ -110,13 +126,11 @@ function EditUser({
     setOrganisations(users);
   };
 
-  // Get user list on component load
-  useEffect(() => {
-    fetchOrganisations();
-  }, []);
-
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
+
+    console.log('acl', acl);
+    console.log('organisation_id', organisationId);
 
     // Build privileges
     const privileges = [];
@@ -195,20 +209,22 @@ function EditUser({
           />
         </div>
 
-        <FormLabel classes="mt-2 mb-4 font-bold">
-          Organisatie
-        </FormLabel>
-        <div className="w-80">
-          <Select
-            className="my-2"
-            options={organisationOptionList}
-            defaultValue={{ label: user ? user.organisation_name : null, value: user ? user.organisation_id : null }}
-            placeholder="Selecteer de organisatie"
-            onChange={(choice: any) => {
-              setOrganisationId(choice.value);
-            }}
-          />
-        </div>
+        {isAdmin() && <>
+          <FormLabel classes="mt-2 mb-4 font-bold">
+            Organisatie
+          </FormLabel>
+          <div className="w-80">
+            <Select
+              className="my-2"
+              options={organisationOptionList}
+              defaultValue={{ label: user ? user.organisation_name : null, value: user ? user.organisation_id : null }}
+              placeholder="Selecteer de organisatie"
+              onChange={(choice: any) => {
+                setOrganisationId(choice.value);
+              }}
+            />
+          </div>
+        </>}
 
         <div className="mt-2 flex">
           <input 

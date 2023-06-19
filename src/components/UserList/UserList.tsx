@@ -38,11 +38,19 @@ const readablePrivilege = (privilegeKey) => {
   }
 }
 
-const TableRow = (
+const TableRow = ({
+  isAdmin,
+  acl,
+  user,
+  editClickHandler,
+  onSaveHandler
+}: {
+  isAdmin: boolean,
+  acl,
   user: any,
   editClickHandler: Function,
   onSaveHandler: Function
-) => {
+}) => {
   // Get username from URL
   const { username } = useParams();
 
@@ -55,9 +63,9 @@ const TableRow = (
       <div className="px-2 col-email text-sm whitespace-nowrap text-ellipsis overflow-hidden" title={user.user_id}>
         {user.is_admin ? '👑' : ''} {user.user_id}
       </div>
-      <div className="px-2 col-organisation text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+      {isAdmin && <div className="px-2 col-organisation text-sm whitespace-nowrap text-ellipsis overflow-hidden">
         {user.organisation_name}
-      </div>
+      </div>}
       <div className="px-2 col-privileges text-sm">
         {user.privileges.map(x => {
           return <div key={`x_${user.user_id}_${x}`}>{readablePrivilege(x)}</div>
@@ -72,7 +80,7 @@ const TableRow = (
 
     {/*If user clicked edit: Show edit form */}
     <div className="col-span-3" hidden={username !== user.user_id}>
-      {username === user.user_id && <EditUser user={user} onSaveHandler={onSaveHandler} />}
+      {username === user.user_id && <EditUser acl={acl} user={user} onSaveHandler={onSaveHandler} />}
     </div>
 
   </div>
@@ -170,24 +178,26 @@ const UserList = ({
         <Button theme='primary' classes='download' onClick={() => downloadCsv(prepareDataForCsv(filteredUsers))}>Exporteer gebruikers als spreadsheet</Button>
       </div>
       {showAddUserModule && <div className="mb-6">
-        <EditUser onSaveHandler={fetchUserList} />
+        <EditUser acl={acl} onSaveHandler={fetchUserList} />
       </div>}
       <div className="
         Table
       ">
         <input
-              type="search"
-              placeholder="Zoek gebruiker.."
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-80 rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm"
+          type="search"
+          placeholder="Zoek gebruiker.."
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-80 rounded-lg inline-block border-solid border-2 px-2 py-2 text-sm mb-2"
          />
         <div className="TableRow flex justify-between no-hover">
-          <H4Title className="col-email whitespace-nowrap overflow-hidden">E-mail</H4Title>
-          <H4Title className="col-organisation">Organisatie</H4Title>
+          <H4Title className="col-email whitespace-nowrap overflow-hidden pl-2">E-mail</H4Title>
+          {isAdmin() && <H4Title className="col-organisation">Organisatie</H4Title>}
           <H4Title className="col-privileges">Privileges</H4Title>
           <H4Title className="col-actions"></H4Title>
         </div>
-        {users ? filteredUsers.map(user => TableRow(user, editClickHandler, fetchUserList)) : ''}
+        {users ? filteredUsers.map(user =>
+          <TableRow acl={acl} isAdmin={isAdmin()} user={user} editClickHandler={editClickHandler} onSaveHandler={fetchUserList} />) : ''
+        }
       </div>
     </div>
   );

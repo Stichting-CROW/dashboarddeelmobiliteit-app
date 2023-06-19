@@ -215,7 +215,7 @@ const SharedDataOverview = ({
   return (
     <div className="SharedDataOverview" style={{maxWidth: '800px'}}>
       <div className="flex justify-between flex-wrap">
-        <H1Title>
+        <H1Title style={{marginTop: 0}}>
           Data delen
         </H1Title>
         {acl && acl.is_admin &&
@@ -242,16 +242,16 @@ const SharedDataOverview = ({
       </p>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => {
-          setShowGrantUserForm(true);
-          setShowGrantOrganisationForm(false);
-        }}>
-          Deel met gebruiker
-        </Button>
-        <Button theme='primary' classes='add-new' onClick={() => {
           setShowGrantUserForm(false);
           setShowGrantOrganisationForm(true);
         }}>
           Deel met organisatie
+        </Button>
+        <Button theme='primary' classes='add-new' onClick={() => {
+          setShowGrantUserForm(true);
+          setShowGrantOrganisationForm(false);
+        }}>
+          Deel met gebruiker
         </Button>
       </div>
       {showGrantUserForm && <div className="mb-6">
