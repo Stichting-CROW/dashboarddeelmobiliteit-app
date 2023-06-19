@@ -23,6 +23,7 @@ import './EditUser.css';
 import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
+import ErrorMessage from '../NotificationMessage/ErrorMessage';
 
 function fallbackCopyTextToClipboard(text) {
   var textArea = document.createElement("textarea");
@@ -72,7 +73,6 @@ function EditUser({
   const {username} = useParams();
 
   const [message, setMessage] = useState('')
-  const [messageDesign, setMessageDesign] = useState('')
 
   const [emailAddress, setEmailAddress] = useState(user ? user.user_id : null);
   const [organisationId, setOrganisationId] = useState(user ? user.organisation_id : null);
@@ -142,6 +142,19 @@ function EditUser({
         "privileges": privileges,
         "organisation_id": organisationId
       });
+      // Check if there were errors
+      let error;
+      if(createdUser.detail) {
+        if(typeof createdUser.detail === 'string' && createdUser.detail === 'user already exists in fusionauth') {
+          error = `De gebruiker kan niet gecreëerd worden, want er bestaat al een gebruikersaccount met e-mailadres ${emailAddress}`;
+        }
+        else if(createdUser.detail[0].type === 'type_error.none.not_allowed' && createdUser.detail[0].loc[1] === 'organisation_id') {
+          error = 'Organisatie is een verplicht veld';
+        }
+        setMessage(error);
+        return;
+      }
+      // If no errors:
       setDoShowCredentialsModal(true);
       setCredentials({
         username: createdUser.user_account.user_id,
@@ -282,7 +295,7 @@ function EditUser({
         </div>
       </form>
 
-      {message && <p className={`rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm ${(messageDesign == "red") ? "error-message" : "success-message"}`}>{message} </p>}
+      {message && <ErrorMessage title="Fout" message={message} />}
 
       <Modal
         isVisible={doShowDeleteModal}
