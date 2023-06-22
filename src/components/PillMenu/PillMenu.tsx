@@ -24,7 +24,7 @@ function PillMenu({
       <ul className="flex">
         {items.map(x => {
           return (
-            <li key={x.title}>
+            <li key={x.title} className="whitespace-nowrap">
               {typeof x.link === 'function' ? <div onClick={x.link}>
                 {x.title}
               </div> : <NavLink to={x.link}>

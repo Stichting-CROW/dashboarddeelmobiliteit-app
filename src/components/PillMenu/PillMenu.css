@@ -3,6 +3,7 @@
   box-shadow: 0px 3px 6px #00000029;
   border-radius: 70px;
   min-height: 45px;
+  overflow-x: auto;
 }
 .PillMenu ul,
 .PillMenu li {
