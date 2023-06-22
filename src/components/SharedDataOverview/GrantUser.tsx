@@ -63,7 +63,7 @@ function GrantUser({
         const createdUser = await createUser(token, {
           "user_id": grantedUserId,
           "privileges": [],// No special privileges
-          "organisation_id": 645// Default organisation: "Onbekend"
+          "organisation_id": 2// Default organisation: "Onbekend"
         });
 
         // Now that user is created, try granting again:
