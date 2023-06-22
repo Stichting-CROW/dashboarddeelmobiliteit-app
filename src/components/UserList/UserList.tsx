@@ -196,7 +196,7 @@ const UserList = ({
           <H4Title className="col-actions"></H4Title>
         </div>
         {users ? filteredUsers.map(user =>
-          <TableRow acl={acl} isAdmin={isAdmin()} user={user} editClickHandler={editClickHandler} onSaveHandler={fetchUserList} />) : ''
+          <TableRow key={user.user_id} acl={acl} isAdmin={isAdmin()} user={user} editClickHandler={editClickHandler} onSaveHandler={fetchUserList} />) : ''
         }
       </div>
     </div>

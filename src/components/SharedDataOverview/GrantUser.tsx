@@ -11,6 +11,7 @@ import {StateType} from '../../types/StateType';
 
 // Import API methods
 import {getAcl} from '../../api/acl';
+import {createUser} from '../../api/users';
 import {grantUser} from '../../api/dataAccess';
 import {getOrganisationList} from '../../api/organisations';
 
@@ -48,14 +49,29 @@ function GrantUser({
     if(! organisationToGrantDataFrom) return;
 
     try {
+      // Grant user
       const response = await grantUser(token, {
         "owner_organisation_id": organisationToGrantDataFrom,
         "granted_user_id": grantedUserId
       });
-      const isUserError = response && response.detail && response.detail === "granted_user_id doesn't exist";
-      if(isUserError) {
-        setSubmitError('Deze gebruiker bestaat nog niet in het Dashboard Deelmobiliteit. Controleer of je het juiste e-mailadres hebt ingevuld of stuur je verzoek aan info@dashboarddeelmobiliteit.nl');
-        return;
+
+      // Check if there was an error, like: User doesn't exist yet
+      const userDoesntExist = response && response.detail && response.detail === "granted_user_id doesn't exist";
+      if(userDoesntExist) {
+        // setSubmitError('Deze gebruiker bestaat nog niet in het Dashboard Deelmobiliteit. Controleer of je het juiste e-mailadres hebt ingevuld of stuur je verzoek aan info@dashboarddeelmobiliteit.nl');
+        // Create user
+        const createdUser = await createUser(token, {
+          "user_id": grantedUserId,
+          "privileges": [],// No special privileges
+          "organisation_id": 645// Default organisation: "Onbekend"
+        });
+
+        // Now that user is created, try granting again:
+        // Grant user
+        const retry_granting_response = await grantUser(token, {
+          "owner_organisation_id": organisationToGrantDataFrom,
+          "granted_user_id": grantedUserId
+        });
       }
       handleClose();
       onSaveHandler();
