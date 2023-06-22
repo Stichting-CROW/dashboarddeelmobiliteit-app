@@ -190,7 +190,9 @@ function EditOrganisation({
           >
             <option value=""></option>
             <option value="MUNICIPALITY">Gemeente</option>
+            <option value="OTHER_GOVERNEMENT">Andere overheid</option>
             <option value="OPERATOR">Aanbieder</option>
+            <option value="OTHER_COMPANY">Ander bedrijf</option>
             <option value="ADMIN">Admin</option>
           </select>
         </div>
