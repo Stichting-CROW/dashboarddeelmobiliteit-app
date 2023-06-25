@@ -14,14 +14,13 @@ import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
 
-import Menu from './components/Menu.jsx';
-import MenuSecondary from './components/Menu/MenuSecondary.jsx';
-import MapPage from './pages/MapPage.jsx';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
+
+import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
@@ -31,7 +30,10 @@ import Misc from './components/Misc/Misc.jsx';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
-import Admin from './components/Admin/Admin';
+import MailTemplateList from './components/MailTemplateList/MailTemplateList';
+import MapPage from './pages/MapPage.jsx';
+import Menu from './components/Menu.jsx';
+import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
@@ -433,6 +435,20 @@ function App() {
                   <Overlay>
                     <Admin>
                       <YearlyCostsExport acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/mail-templates" element={
+                  <Overlay>
+                    <Admin>
+                      <MailTemplateList acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/mail-templates/new" element={
+                  <Overlay>
+                    <Admin>
+                      <MailTemplateList acl={acl} showAddMailTemplateModule={true}  />
                     </Admin>
                   </Overlay>
                 } />
