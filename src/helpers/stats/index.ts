@@ -155,6 +155,28 @@ export const aggregationFunctionButtonsToRender = [
   {name: 'MAX', title: 'max'},
 ];
 
+// Function get gets all column headers based on the dataset
+const getHeadersBasedOnData = (data: any) => {
+  // Define placeholder variable that'll contain all unique keys/headers
+  let uniqueHeaders = ['time'];
+  // Loop all rows
+  data.map((x, index) => {
+    // Get unique keys for this object row
+    const objectKeys = Object.keys(data[index]);
+    // For every key:
+    objectKeys.forEach(key => {
+      // If key wasn't present in the dataset yet:
+      if(uniqueHeaders.indexOf(key) <= -1) {
+        // Add key to uniqueHeaders array
+        uniqueHeaders.push(key);
+      }
+    })
+  });
+
+  console.log('uniqueHeaders', uniqueHeaders)
+  return uniqueHeaders;
+}
+
 export const prepareDataForCsv = (data: any) => {
   if(! data || data.length <= 0) return;
   if(  typeof data !== 'object') return;
@@ -162,13 +184,14 @@ export const prepareDataForCsv = (data: any) => {
   let csvRows = [];
 
   // Get headers
-  const headers = Object.keys(data[0])
+  const headers = getHeadersBasedOnData(data);
   csvRows.push(headers.join(','));
 
   // Loop over the rows
   for (const row of data) {
     const values = headers.map(header => {
       let value = row[header];
+      if(! value) return '"0"';
 
       // If this is the name (date) field: convert it to YYYY-MM-DD
       if(header === 'name') {
