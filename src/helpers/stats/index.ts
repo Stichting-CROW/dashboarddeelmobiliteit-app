@@ -99,7 +99,7 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
     // Inspiration from https://stackoverflow.com/a/51764389
     let item = {...rest, ...{ time: moment.tz(
       time,
-      "YYYY-MM-DDTHH:mm:ss+00:00Z",
+      time.indexOf('+') > -1 ? "YYYY-MM-DDTHH:mm:ss+00:00Z" : "YYYY-MM-DDTHH:mm:ssZ",
       true,
       'Europe/Amsterdam'
     ).format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
