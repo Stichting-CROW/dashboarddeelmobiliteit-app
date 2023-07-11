@@ -95,7 +95,14 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
   const dateFormat = getDateFormat(aggregationLevel);
   return data[theKey].values.map(x => {
     const { time, ...rest } = x;
-    let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    // let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    // Inspiration from https://stackoverflow.com/a/51764389
+    let item = {...rest, ...{ time: moment.tz(
+      time,
+      "YYYY-MM-DDTHH:mm:ss+00:00Z",
+      true,
+      'Europe/Amsterdam'
+    ).format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
 
     // For rental data: sum modality counts for every provider
     if(theKey === 'rental_stats') {
@@ -128,6 +135,7 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
       const exclude = providersToRemoveFromData;
       Object.keys(item).forEach(key=>{if(exclude.includes(key)) {delete item[key]}});
     }
+
     return item;
   });
 }
@@ -173,7 +181,6 @@ const getHeadersBasedOnData = (data: any) => {
     })
   });
 
-  console.log('uniqueHeaders', uniqueHeaders)
   return uniqueHeaders;
 }
 
@@ -194,9 +201,16 @@ export const prepareDataForCsv = (data: any) => {
       if(! value) return '"0"';
 
       // If this is the name (date) field: convert it to YYYY-MM-DD
+      // Old way of aggregating data (on daily basis) ->
       if(header === 'name') {
         value = moment(row[header]).format('YYYY-MM-DD');
       }
+      // // If this is the name (date) field: convert it to YYYY-MM-DD
+      // // New way of aggregating data (on hourly basis etc) ->
+      // else if(header === 'time') {
+      //   value = moment(row[header]).format('YYYY-MM-DD');
+      // }
+
       // Escape it: Replace " with \"
       value = (''+value).replace(/"/g, '\\"');
       // Return
