@@ -365,13 +365,6 @@ function App() {
       <Routes>
         { isLoggedIn ?
           <>
-            <Route exact path="/admin/api" element={
-              <Overlay>
-                <Admin>
-                  <ApiKeys />
-                </Admin>
-              </Overlay>
-            } />
             { (isAdmin || isOrganisationAdmin) ?
               <>
                 <Route exact path="/admin" element={
@@ -497,6 +490,13 @@ function App() {
               <Overlay>
                 <Misc>
                   <Profile />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/profile/api" element={
+              <Overlay>
+                <Misc>
+                  <ApiKeys />
                 </Misc>
               </Overlay>
             } />

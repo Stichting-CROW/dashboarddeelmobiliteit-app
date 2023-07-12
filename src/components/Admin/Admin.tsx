@@ -41,7 +41,6 @@ export default function Admin({
     if(isAdmin) pillMenuItems.push({title: 'Mail-templates', link: '/admin/mail-templates'})
     if(isAdmin) pillMenuItems.push({title: 'Jaarbijdrage', link: '/admin/yearly-costs'})
   }
-  pillMenuItems.push({title: 'API keys', link: '/admin/api'})
 
   return (
     <div className="

@@ -117,10 +117,10 @@ const ApiKeys = ({
   //   navigate('/admin/organisations/new');
   // }
 
-  const onRevokeHandler = (id: string) => {
+  const onRevokeHandler = async (id: string) => {
     if(! id) return;
 
-    deleteApiKey(token, id);
+    await deleteApiKey(token, id);
     fetchApiKeyList();
   }
 
@@ -132,8 +132,8 @@ const ApiKeys = ({
         </H1Title>
       </div>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new' onClick={() => {
-          createApiKey(token);
+        <Button theme='primary' classes='add-new' onClick={async () => {
+          await createApiKey(token);
           fetchApiKeyList();
         }}>
           Nieuwe API key
