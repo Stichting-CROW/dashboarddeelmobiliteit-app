@@ -8,9 +8,6 @@ import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
-import LoginStats from '../LoginStats/LoginStats';
-import UserList from '../UserList/UserList';
-
 export default function Admin({
   children
 }: {
@@ -44,6 +41,7 @@ export default function Admin({
     if(isAdmin) pillMenuItems.push({title: 'Mail-templates', link: '/admin/mail-templates'})
     if(isAdmin) pillMenuItems.push({title: 'Jaarbijdrage', link: '/admin/yearly-costs'})
   }
+  pillMenuItems.push({title: 'API keys', link: '/admin/api'})
 
   return (
     <div className="

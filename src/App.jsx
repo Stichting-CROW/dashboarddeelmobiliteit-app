@@ -43,6 +43,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
+import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -364,6 +365,13 @@ function App() {
       <Routes>
         { isLoggedIn ?
           <>
+            <Route exact path="/admin/api" element={
+              <Overlay>
+                <Admin>
+                  <ApiKeys />
+                </Admin>
+              </Overlay>
+            } />
             { (isAdmin || isOrganisationAdmin) ?
               <>
                 <Route exact path="/admin" element={
