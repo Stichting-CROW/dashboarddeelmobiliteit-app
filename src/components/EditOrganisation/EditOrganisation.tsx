@@ -229,6 +229,74 @@ function EditOrganisation({
           />
         </div>}
 
+        {/*Nieuw
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Status overeenkomst
+        </FormLabel>
+        <Select
+          className="my-2 w-80"
+          isMulti={false}
+          options={[{
+            value: 'Geen',
+            label: 'Geen'
+          }, {
+            value: 'Voorlopig',
+            label: 'Voorlopig'
+          }, {
+            value: 'Ondertekend',
+            label: 'Ondertekend'
+          }]}
+          onChange={(choices: any) => {
+          }}
+        />
+
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Datum overeenkomst
+        </FormLabel>
+        <input 
+          type="date"
+          name="name" 
+          className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
+          value=""
+          placeholder=""
+          onChange={(event) => {}}
+        />
+
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Betalingskenmerk
+        </FormLabel>
+        <input 
+          type="text"
+          name="name" 
+          className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
+          value=""
+          placeholder=""
+          onChange={(event) => {}}
+        />
+
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Adressering factuur
+        </FormLabel>
+        <textarea
+          name="name" 
+          className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
+          placeholder=""
+          onChange={(event) => {}}
+        ></textarea>
+
+        <FormLabel classes="mt-2 mb-4 font-bold">
+          Mailadres factuur
+        </FormLabel>
+        <input 
+          type="email"
+          name="name" 
+          className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
+          value=""
+          placeholder=""
+          onChange={(event) => {}}
+        />
+        End nieuw*/}
+
         <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
           <Button classes={'w-40 save'} type="submit" theme="primary">
             Opslaan
