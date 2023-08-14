@@ -8,9 +8,6 @@ import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
-import LoginStats from '../LoginStats/LoginStats';
-import UserList from '../UserList/UserList';
-
 export default function Admin({
   children
 }: {

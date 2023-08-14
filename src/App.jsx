@@ -43,6 +43,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
+import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -489,6 +490,13 @@ function App() {
               <Overlay>
                 <Misc>
                   <Profile />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/profile/api" element={
+              <Overlay>
+                <Misc>
+                  <ApiKeys />
                 </Misc>
               </Overlay>
             } />
