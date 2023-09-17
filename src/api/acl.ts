@@ -1,4 +1,4 @@
-const acl_api_url: string = 'https://api.dashboarddeelmobiliteit.nl/admin';
+const acl_api_url: string = `${process.env.REACT_APP_MAIN_API_URL}/admin`;
 
 const getHeaders = (token): {
   method?: any,
@@ -33,7 +33,7 @@ export const getAcl = async (token) => {
 
 // GET /menu/acl
 export const getMenuAcl = async (token) => {
-  const url = `https://api.deelfietsdashboard.nl/dashboard-api/menu/acl`;
+  const url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/menu/acl`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
 

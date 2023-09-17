@@ -12,7 +12,7 @@ let existingFilter;
 
 export const getParkEventsStats = async (token, options) => {
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/v2/park_events/stats?timestamp=2022-01-19T23:00:00Z&operators=cykl,flickbike,donkey,mobike,htm,gosharing,check,felyx,deelfietsnederland,keobike,lime,baqme,cargoroo,uwdeelfiets,hely,tier&zone_ids=34234`;
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/v2/park_events/stats?x=1`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/park_events/stats?x=1`;
 
   // Should we (re)fetch vehicles?
   const doFetchVehicles = shouldFetchVehicleStats(options.filter, existingFilter);

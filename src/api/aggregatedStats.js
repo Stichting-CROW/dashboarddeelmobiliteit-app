@@ -13,7 +13,7 @@ const getFetchOptions = (token) => {
 
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
@@ -33,7 +33,7 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
   //
   // curl --location --request GET 'https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/availability_stats?aggregation_level=5m&group_by=operator&start_time=2022-11-07T00:00:00&end_time=2022-11-09T00:00:00&zone_ids=51856' \
   // --header 'Authorization: Bearer TOKEN'
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats_v2/${key === 'available_vehicles' ? 'availability_stats' : 'rental_stats'}?`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/stats_v2/${key === 'available_vehicles' ? 'availability_stats' : 'rental_stats'}?`;
   url += `aggregation_level=${options.aggregationLevel}`
   url += `&group_by=operator`;
   url += `&aggregation_function=${options.aggregationFunction || 'MAX'}`;
@@ -61,7 +61,7 @@ export const downloadReport = async (token, options) => {
     searchParams.append("operators", options.filter_operators.join(","));
   }
   
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/stats/generate_report?${searchParams.toString()}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/stats/generate_report?${searchParams.toString()}`;
 
   // Get API response  
   const fetchOptions = getFetchOptions(token)
@@ -72,7 +72,7 @@ export const downloadReport = async (token, options) => {
 }
 
 export const downloadRawData = async (token, options) => {
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/raw_data?start_time=${options.startDate}&end_time=${options.endDate}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/raw_data?start_time=${options.startDate}&end_time=${options.endDate}`;
 
   // Get API response      
   const fetchOptions = getFetchOptions(token)

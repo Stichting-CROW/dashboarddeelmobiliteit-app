@@ -18,7 +18,7 @@ const SetPassword = () => {
     // Clear error message
     setErrorMessage(null);
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + `/user/change-password/${changePasswordCode}`
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + `/api/user/change-password/${changePasswordCode}`
     var data = {
       password: password,
     };

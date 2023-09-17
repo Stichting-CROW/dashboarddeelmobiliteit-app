@@ -104,7 +104,7 @@ const doApiCall = (
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
 
   // Set API URL
-  let url = "https://api.deelfietsdashboard.nl/dashboard-api/public/vehicles_in_public_space";
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
 
   let options = {};
   let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
@@ -119,7 +119,7 @@ const doApiCall = (
   // Set query params for logged in users
   else {
     if(null!==state.filter&&null!==state.authenticationdata) {
-      url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events";
+      url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`;
       if(filterparams.length>0) {
         url += "?" + filterparams.join("&");
       }

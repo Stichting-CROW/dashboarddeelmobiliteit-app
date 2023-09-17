@@ -1,4 +1,4 @@
-const admin_api_url: string = 'https://api.dashboarddeelmobiliteit.nl/admin';
+const admin_api_url: string = `${process.env.REACT_APP_MAIN_API_URL}/admin`;
 
 const getHeaders = (token): {
   method?: any,
