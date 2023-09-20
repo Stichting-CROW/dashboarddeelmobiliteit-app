@@ -53,7 +53,7 @@ function Export() {
   useEffect(() => {
     if(! token) return;
 
-    let url = "https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
+    let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/menu/acl`;
     let options = { headers : { "authorization": "Bearer " + token }}
     
     fetch(url, options).then((response) => {

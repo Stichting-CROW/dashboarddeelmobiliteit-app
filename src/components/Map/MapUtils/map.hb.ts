@@ -124,7 +124,7 @@ const fetchHbData = async (token: string, filter: any) => {
   const includedModalities = allModalities.filter(x => excludedModalities.split(',').indexOf(x) <= -1);
 
   // Get API response
-  const url = encodeURI(`https://api.deelfietsdashboard.nl/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
+  const url = encodeURI(`${process.env.REACT_APP_MAIN_API_URL}/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
               (filter.h3niveau === 7 || filter.h3niveau === 8 ? `?h3_resolution=${filter.h3niveau || 8}` : '')+
               (filter.h3niveau === 'wijk' ? `?${filter.herkomstbestemming === 'bestemming' ? 'origin' : 'destination'}_stat_refs=${filter.h3hexeswijk}` : '')+
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+

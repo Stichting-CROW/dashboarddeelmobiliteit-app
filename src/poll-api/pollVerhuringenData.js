@@ -101,10 +101,10 @@ const doApiCall = (
     return;
   }
 
-  let url = `https://api.deelfietsdashboard.nl/dashboard-api/v2/trips/${type}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
   let options = {};
   if(null!==state.filter&&null!==state.authenticationdata) {
-    url = `https://api.deelfietsdashboard.nl/dashboard-api/v2/trips/${type}`;
+    url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
     let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
     if(filterparams.length>0) {
       url += "?" + filterparams.join("&");

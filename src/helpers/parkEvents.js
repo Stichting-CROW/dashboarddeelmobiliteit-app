@@ -9,7 +9,7 @@ export const fetchParkEvents = async (authentication, provider, dateTime) => {
   }
 
   const formattedDateTime = moment(dateTime).format('YYYY-MM-DDTHH:mm:ss[Z]');
-  let url = "https://api.deelfietsdashboard.nl/dashboard-api/park_events?timestamp="+formattedDateTime+"&operators="+provider;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events?timestamp=`+formattedDateTime+"&operators="+provider;
   let options = { headers : { "authorization": "Bearer " + authentication.user_data.token }}
 
   const response = await fetch(url, options);

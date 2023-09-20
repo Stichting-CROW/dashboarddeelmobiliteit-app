@@ -1,4 +1,4 @@
-const admin_api_url: string = 'https://api.dashboarddeelmobiliteit.nl/admin';
+const admin_api_url: string = `${process.env.REACT_APP_MAIN_API_URL}/admin`;
 
 const getHeaders = (token): {
   method?: any,
@@ -45,6 +45,7 @@ export const getDataAccessReceived = async (token) => {
   const url = `${admin_api_url}/data_access/list_received`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
+
 
   return await response.json();
 }

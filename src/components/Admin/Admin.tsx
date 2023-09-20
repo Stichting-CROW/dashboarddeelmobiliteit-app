@@ -38,7 +38,7 @@ export default function Admin({
     pillMenuItems.push({title: 'Gebruikers', link: '/admin/users'})
     pillMenuItems.push({title: 'Data delen', link: '/admin/shared'})
     if(isAdmin) pillMenuItems.push({title: 'Organisaties', link: '/admin/organisations'})
-    if(isAdmin) pillMenuItems.push({title: 'Mail-templates', link: '/admin/mail-templates'})
+    // if(isAdmin) pillMenuItems.push({title: 'Mail-templates', link: '/admin/mail-templates'})
     if(isAdmin) pillMenuItems.push({title: 'Jaarbijdrage', link: '/admin/yearly-costs'})
   }
 

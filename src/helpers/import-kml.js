@@ -4,7 +4,7 @@ const preprocessKmlFile = async ({
   body
 }) => {
 
-  const response = await fetch(`https://mds.dashboarddeelmobiliteit.nl/admin/kml/pre_import?municipality=${gm_code}`, {
+  const response = await fetch(`${process.env.REACT_APP_MDS_URL}/admin/kml/pre_import?municipality=${gm_code}`, {
     method: "POST",
     body,
     headers: {
@@ -25,7 +25,7 @@ const importKmlFile = async ({
   body
 }) => {
 
-  const response = await fetch(`https://mds.dashboarddeelmobiliteit.nl/admin/bulk_insert_zones`, {
+  const response = await fetch(`${process.env.REACT_APP_MDS_URL}/admin/bulk_insert_zones`, {
     method: "POST",
     body: JSON.stringify(body),
     headers: {

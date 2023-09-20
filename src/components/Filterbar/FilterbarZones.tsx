@@ -1137,7 +1137,7 @@ function FilterbarZones({
         </p>
         <ul className="my-4">
            <li>
-             &raquo; <a href={`https://mds.dashboarddeelmobiliteit.nl/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
+             &raquo; <a href={`${process.env.REACT_APP_MDS_URL}/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
                Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
              </a>
            </li>
