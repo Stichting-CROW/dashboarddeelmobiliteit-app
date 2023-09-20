@@ -68,10 +68,3 @@ export const deleteZone = async (token, geography_id) => {
   if (! didFetchSucceed(response)) return;
   return response;
 }
-
-export const getMunicipalities = async () => {
-  const url = `https://mds.dashboarddeelmobiliteit.nl/public/zones?${filterParams}`;
-  const response = await fetch(url, getFetchOptions());
-  if (! didFetchSucceed(response)) return;
-  return await response.json();
-}
