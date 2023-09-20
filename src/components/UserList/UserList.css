@@ -1,20 +1,63 @@
 .grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .download::before {
-    content: url('../../images/UserList/download-outline.svg');
-    margin-right: 8px;
-    margin-left: 5px;
+  content: url('../../images/UserList/download-outline.svg');
+  margin-right: 8px;
+  margin-left: 5px;
 
 }
-
 
 .add-new::before {
-    content: url('../../images/UserList/person-add-outline.svg');
-    margin-right: 8px;
-    margin-left: 5px;
+  content: url('../../images/UserList/person-add-outline.svg');
+  margin-right: 8px;
+  margin-left: 5px;
 
 }
 
+.TableRow {
+}
+  .TableRow > * {
+    border-bottom: solid 1px #ccc;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  .TableRow:hover > div {
+    background-color: #eee;
+    cursor: pointer;
+  }
+  .TableRow.no-hover:hover > div {
+    background-color: transparent;
+    cursor: auto;
+  }
+  .edit-icon {
+    background: center center url('../../images/UserList/noun-edit-684936.svg');
+    height: 20px;
+    width: 20px;
+    background-repeat: no-repeat;
+    display: inline-block;
+  }
 
+  .delete-icon {
+    background: center center url('../../images/UserList/delete-object.svg');
+    background-repeat: no-repeat;
+    height: 20px;
+    width: 20px;
+    display: inline-block;
+  }
+
+.UserList-grid {
+  grid-template-columns: minmax(100px, 1fr) 100px 50px;
+}
+
+.col-email,
+.col-organisation,
+.col-privileges,
+.col-actions {
+  width: 100px;
+}
+.col-email { flex: 1; }
+.col-organisation { width: 160px; }
+.col-privileges { width: 200px; }
+.col-actions { width: 50px; }

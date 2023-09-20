@@ -20,6 +20,10 @@ export default function Misc({children}) {
     {
       title: 'Exporteer',
       link: '/export'
+    },
+    {
+      title: 'API keys',
+      link: '/profile/api'
     }
   ];
 

@@ -69,8 +69,7 @@ export const getSummedTotalsPerWeekdayAndHour = (data: object) => {
   // Loop all data rows and group per weekday and time
   for(let key in data) {
     // Get weekday: 0 = Sunday, 1 = Monday
-    // TODO Fix Z timezone
-    let weekDay = moment(data[key].time.replace('Z', '')).day();
+    let weekDay = moment.tz(data[key].time, 'Europe/Amsterdam').day();
     // Transfer Sunday=0 to Sunday=7
     if(weekDay === 0) {
       weekDay = 7;
@@ -79,7 +78,7 @@ export const getSummedTotalsPerWeekdayAndHour = (data: object) => {
     // console.log('countedDays for ', weekDay, countedDays['day-'+weekDay])
     countedDays['day-'+weekDay] = countedDays['day-'+weekDay] ? countedDays['day-'+weekDay]+1 : 1;
     // Get hour
-    const hour = moment(data[key].time.replace('Z', '')).hour();
+    const hour = moment.tz(data[key].time, 'Europe/Amsterdam').hour();
     // Store in array
     if(aggregatedTotals[`day-${weekDay}`] === undefined) {
       aggregatedTotals[`day-${weekDay}`] = [];

@@ -136,6 +136,7 @@ of TAILWIND_MODE=watch craco start
 
 ## Dashboard Deelmobiliteit in the media
 
+- Juli 2023: [Data deelauto's en OV-fietsen nodig in Dashboard Deelmobiliteit](https://www.verkeersnet.nl/actueel/48898/crow-data-deelautos-en-ov-fietsen-nodig-in-dashboard-deelmobiliteit/) ([LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7082639797185335296/))
 - [Januari 2023: The state of shared mobility: Bike sharing in 2023 - fresk.digital](https://fresk.digital/en/shared-mobility-report)
 - [October 2022: Nieuwe tool helpt overlast deelvoertuigen te beperken](https://www.verkeersnet.nl/actueel/44883/nieuwe-tool-helpt-overlast-deelvoertuigen-te-beperken/)
 - [July 2022: Alle scooters naar het SMÈRRIG Zomerfestival](https://observablehq.com/@geodan/data-uit-deelmobiliteit-en-evenementen)
