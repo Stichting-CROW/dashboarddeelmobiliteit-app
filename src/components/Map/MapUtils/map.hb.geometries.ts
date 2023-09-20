@@ -9,7 +9,7 @@ import {
 // Get geometries for user
 const getGeometriesForUser = async (map, token, filter) => {
   // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/geometry?${filter.gebied ? 'filter_municipalities=' + filter.gebied : ''}`);
+  const url = encodeURI(`${process.env.REACT_APP_MAIN_API_URL}/od-api/accessible/geometry?${filter.gebied ? 'filter_municipalities=' + filter.gebied : ''}`);
 
   let responseJson;
 

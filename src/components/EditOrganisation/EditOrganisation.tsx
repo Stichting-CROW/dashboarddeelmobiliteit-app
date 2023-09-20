@@ -13,7 +13,6 @@ import {StateType} from '../../types/StateType';
 import {getMenuAcl} from '../../api/acl';
 import {createOrganisation, updateOrganisation, deleteOrganisation} from '../../api/organisations';
 import {getOrganisationList} from '../../api/organisations';
-import {getMunicipalities} from '../../api/zones';
 
 // Models
 import {OrganisationType} from '../../types/OrganisationType';
@@ -35,7 +34,6 @@ function EditOrganisation({
   organisation?: OrganisationType,// User can be optional as this component is also used for adding new organisations
   onSaveHandler: Function
 }) {
-  const [municipalities, setMunicipalities] = useState([])
   const [municipalityOptionList, setMunicipalityOptionList] = useState([])
   const [operatorOptionList, setOperatorOptionList] = useState([])
 
@@ -55,21 +53,12 @@ function EditOrganisation({
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   useEffect(() => {
-    if(municipalities && municipalities.length > 0) {
-      buildMunicipalityOptionsValue();
-      prepareDefaultSelectedMunicipalities();
-    }
+    buildMunicipalityOptionsValue();
+    prepareDefaultSelectedMunicipalities();
 
     buildOperatorOptionsValue();
     prepareDefaultSelectedOperators();
-  }, [
-    municipalities
-  ]);
-
-  useEffect(async () => {
-    await response = fetchMunicipalities();
-    setMunicipalities(response);
-  }, []);
+  }, [token]);
 
   const prepareDefaultSelectedMunicipalities = () => {
     if(! organisations || ! organisation || ! organisation.data_owner_of_municipalities) return;
@@ -151,7 +140,6 @@ function EditOrganisation({
   const buildMunicipalityOptionsValue = async () => {
     const optionsList = [];
     const municipalities = organisations.filter(x => x.type_of_organisation === 'MUNICIPALITY');
-    console.log('municipalities', municipalities)
     municipalities.forEach(x => {
       optionsList.push({
         value: x.data_owner_of_municipalities[0],

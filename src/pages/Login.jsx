@@ -36,7 +36,7 @@ const Login = () => {
       return;
     }
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/login";
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + "/api/login";
     var data = {
       loginId: emailaddress,
       password: password,
@@ -69,7 +69,7 @@ const Login = () => {
     // Clear error message
     setErrorMessage(null);
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/user/forgot-password"
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + "/api/user/forgot-password"
     var data = {
       loginId: emailaddress,
     };
@@ -115,11 +115,12 @@ const Login = () => {
         </p>
 
         <form className="mt-8 mb-4">
-          <label className="block" htmlFor="emailaddress">Email</label>
+          <label className="block" htmlFor="emailaddress">E-mail</label>
           <input
             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+            autoFocus
             autoCapitalize="off"
-            placeholder="email"
+            placeholder="E-mailadres"
             name="emailaddress"
             required
             onChange={e => setEmailaddress(e.target.value.trim())}
@@ -205,6 +206,7 @@ const Login = () => {
             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
             autoCapitalize="off"
             placeholder="E-mailadres"
+            autoFocus
             name="emailaddress"
             required
             onChange={e => setEmailaddress(e.target.value.trim())}

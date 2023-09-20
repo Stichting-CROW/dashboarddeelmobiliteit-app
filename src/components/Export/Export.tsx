@@ -21,7 +21,7 @@ import Section from '../Section/Section';
 function Export() {
   const dispatch = useDispatch();
 
-  const [isVerified, setIsVerified] = useState(false);
+  const [canDownloadRawData, setCanDownloadRawData] = useState(false);
   const [startDate, setStartDate] = useState(moment(moment().subtract(1, 'month')).format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [municipalityCode, setMunicipalityCode] = useState('');
@@ -53,7 +53,7 @@ function Export() {
   useEffect(() => {
     if(! token) return;
 
-    let url = "https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
+    let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/menu/acl`;
     let options = { headers : { "authorization": "Bearer " + token }}
     
     fetch(url, options).then((response) => {
@@ -63,10 +63,11 @@ function Export() {
       }
       response.json().then((acl) => {
         const isAdmin = acl.is_admin === true;
-        const isContactPerson = acl.is_contact_person_municipality === true;
-        
-        if(isAdmin || isContactPerson) {
-          setIsVerified(true);
+        const isContactPerson = (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+        const canDownload = (acl.privileges && acl.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
+
+        if(isAdmin || canDownload) {
+          setCanDownloadRawData(true);
         }
         setFilterOperator(acl.operators);
       });
@@ -152,7 +153,7 @@ function Export() {
           </Button>
         </Section>
 
-        {isVerified && <Section title="Download ruwe data">
+        {canDownloadRawData && <Section title="Download ruwe data">
           <div className="lg:w-72">
             <DateFromTo
               label="Periode"

@@ -95,7 +95,14 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
   const dateFormat = getDateFormat(aggregationLevel);
   return data[theKey].values.map(x => {
     const { time, ...rest } = x;
-    let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    // let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    // Inspiration from https://stackoverflow.com/a/51764389
+    let item = {...rest, ...{ time: moment.tz(
+      time,
+      time.indexOf('+') > -1 ? "YYYY-MM-DDTHH:mm:ss+00:00Z" : "YYYY-MM-DDTHH:mm:ssZ",
+      true,
+      'Europe/Amsterdam'
+    ).format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
 
     // For rental data: sum modality counts for every provider
     if(theKey === 'rental_stats') {
@@ -128,6 +135,7 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
       const exclude = providersToRemoveFromData;
       Object.keys(item).forEach(key=>{if(exclude.includes(key)) {delete item[key]}});
     }
+
     return item;
   });
 }
@@ -155,6 +163,27 @@ export const aggregationFunctionButtonsToRender = [
   {name: 'MAX', title: 'max'},
 ];
 
+// Function get gets all column headers based on the dataset
+const getHeadersBasedOnData = (data: any) => {
+  // Define placeholder variable that'll contain all unique keys/headers
+  let uniqueHeaders = ['time'];
+  // Loop all rows
+  data.map((x, index) => {
+    // Get unique keys for this object row
+    const objectKeys = Object.keys(data[index]);
+    // For every key:
+    objectKeys.forEach(key => {
+      // If key wasn't present in the dataset yet:
+      if(uniqueHeaders.indexOf(key) <= -1) {
+        // Add key to uniqueHeaders array
+        uniqueHeaders.push(key);
+      }
+    })
+  });
+
+  return uniqueHeaders;
+}
+
 export const prepareDataForCsv = (data: any) => {
   if(! data || data.length <= 0) return;
   if(  typeof data !== 'object') return;
@@ -162,18 +191,26 @@ export const prepareDataForCsv = (data: any) => {
   let csvRows = [];
 
   // Get headers
-  const headers = Object.keys(data[0])
+  const headers = getHeadersBasedOnData(data);
   csvRows.push(headers.join(','));
 
   // Loop over the rows
   for (const row of data) {
     const values = headers.map(header => {
       let value = row[header];
+      if(! value) return '"0"';
 
       // If this is the name (date) field: convert it to YYYY-MM-DD
+      // Old way of aggregating data (on daily basis) ->
       if(header === 'name') {
         value = moment(row[header]).format('YYYY-MM-DD');
       }
+      // // If this is the name (date) field: convert it to YYYY-MM-DD
+      // // New way of aggregating data (on hourly basis etc) ->
+      // else if(header === 'time') {
+      //   value = moment(row[header]).format('YYYY-MM-DD');
+      // }
+
       // Escape it: Replace " with \"
       value = (''+value).replace(/"/g, '\\"');
       // Return

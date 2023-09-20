@@ -67,3 +67,7 @@
 .agg-button-active {
   cursor: initial;
 }
+
+.font-inter {
+  font-family: Inter, sans-serif;
+}

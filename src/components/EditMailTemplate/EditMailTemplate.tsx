@@ -23,14 +23,6 @@ import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 
-function nl2br (str, is_xhtml) {
-  if (typeof str === 'undefined' || str === null) {
-      return '';
-  }
-  var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
-  return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
-}
-
 function EditOrganisation({
   mailTemplates,
   mailTemplate,
@@ -41,8 +33,7 @@ function EditOrganisation({
   onSaveHandler: Function
 }) {
   const [formName, setFormName] = useState(mailTemplate ? mailTemplate.name : null);
-  const [formSubject, setFormSubject] = useState(mailTemplate ? mailTemplate.defaultSubject : null);
-  const [formMessage, setFormMessage] = useState(mailTemplate ? mailTemplate.defaultTextTemplate : null);
+  const [formDefaultTemplate, setFormDefaultTemplate] = useState(mailTemplate ? mailTemplate.name : null);
 
   const [doShowModal, setDoShowModal] = useState(false);
 
@@ -69,10 +60,8 @@ function EditOrganisation({
     // // Or add
     // else {
       await createTemplate(token, {
-        name: formName,
-        defaultHtmlTemplate: nl2br(formMessage, false),
-        defaultSubject: formSubject,
-        defaultTextTemplate: formMessage,
+        "name": formName,
+        "defaultTemplate": formDefaultTemplate
       });
     // }
 
@@ -96,24 +85,8 @@ function EditOrganisation({
             name="name" 
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
             value={formName}
-            required
             placeholder="Bijvoorbeeld: Registratie-mail"
             onChange={(event) => setFormName(event.target.value)}
-          />
-        </div>
-
-        <div>
-          <FormLabel classes="mt-2 mb-4 font-bold">
-            Mailonderwerp
-          </FormLabel>
-          <input 
-            type="text"
-            name="subject" 
-            className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80"
-            value={formSubject}
-            required
-            placeholder="Bijvoorbeeld: Welkom bij het Dashboard Deelmobiliteit"
-            onChange={(event) => setFormSubject(event.target.value)}
           />
         </div>
 
@@ -122,11 +95,10 @@ function EditOrganisation({
             Mailtekst
           </FormLabel>
           <textarea
-            name="message"
-            required
+            name="defaultTemplate"
             className="rounded-lg inline-block border-solid border-2 px-2 py-2 mr-2 mb-2 text-sm w-80 w-full"
             style={{height: '200px'}}
-            onChange={(event) => setFormMessage(event.target.value)}
+            onChange={(event) => setFormDefaultTemplate(event.target.value)}
           ></textarea>
         </div>
 

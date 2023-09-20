@@ -10,17 +10,17 @@ import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
 import * as te from 'tw-elements';
+import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
 
-import Menu from './components/Menu.jsx';
-import MenuSecondary from './components/Menu/MenuSecondary.jsx';
-import MapPage from './pages/MapPage.jsx';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
+
+import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
@@ -30,12 +30,20 @@ import Misc from './components/Misc/Misc.jsx';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
-import Admin from './components/Admin/Admin';
+import MailTemplateList from './components/MailTemplateList/MailTemplateList';
+import MapPage from './pages/MapPage.jsx';
+import Menu from './components/Menu.jsx';
+import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
 import EditUser from './components/EditUser/EditUser';
+import OrganisationList from './components/OrganisationList/OrganisationList';
+import EditOrganisation from './components/EditOrganisation/EditOrganisation';
+import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
+import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
+import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -104,8 +112,13 @@ function App() {
   const [uriParams, setUriParams] = useState(document.location.search);
   const [delayTimeout, setDelayTimeout] = useState(null);
   const [doShowNotification, setDoShowNotification] = useState('');
-  
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [acl, setAcl] = useState({});
+
   const dispatch = useDispatch()
+
+  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
   
   const mapContainer = useRef(null);
 
@@ -167,20 +180,29 @@ function App() {
 
   }, [pathName, uriParams]);
 
+  useEffect(() => {
+    (async () => {
+      const theAcl = await getAcl(token);
+      setAcl(theAcl);
+      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+      setIsAdmin(theAcl.is_admin);
+    })();
+  }, [token])
+
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const isAdmin = useSelector((state: StateType) => {
-    if(! state.authentication) return false;
-    if(! state.authentication.user_data) return false;
-    let userIsAdmin = false;
-    state.authentication.user_data.user.registrations.forEach(x => {
-      if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
-      if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
-    });
-    return userIsAdmin;
-  });
+  // const isAdmin = useSelector((state: StateType) => {
+  //   if(! state.authentication) return false;
+  //   if(! state.authentication.user_data) return false;
+  //   let userIsAdmin = false;
+  //   state.authentication.user_data.user.registrations.forEach(x => {
+  //     if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
+  //     if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
+  //   });
+  //   return userIsAdmin;
+  // });
   
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
@@ -343,33 +365,63 @@ function App() {
       <Routes>
         { isLoggedIn ?
           <>
-            { isAdmin ?
+            { (isAdmin || isOrganisationAdmin) ?
               <>
                 <Route exact path="/admin" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users/new" element={
                   <Overlay>
                     <Admin>
-                      <UserList showAddUserModule={true} />
+                      <UserList
+                        acl={acl}
+                        showAddUserModule={true} />
                     </Admin>
                   </Overlay>
                 } />
                 <Route exact path="/admin/users/:username" element={
                   <Overlay>
                     <Admin>
-                      <UserList />
+                      <UserList acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/shared" element={
+                  <Overlay>
+                    <Admin>
+                      <SharedDataOverview acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations/new" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList showAddOrganisationModule={true} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/organisations/:organisationId" element={
+                  <Overlay>
+                    <Admin>
+                      <OrganisationList />
                     </Admin>
                   </Overlay>
                 } />
@@ -377,6 +429,27 @@ function App() {
                   <Overlay>
                     <Admin>
                       <LoginStats />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/yearly-costs" element={
+                  <Overlay>
+                    <Admin>
+                      <YearlyCostsExport acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/mail-templates" element={
+                  <Overlay>
+                    <Admin>
+                      <MailTemplateList acl={acl} />
+                    </Admin>
+                  </Overlay>
+                } />
+                <Route exact path="/admin/mail-templates/new" element={
+                  <Overlay>
+                    <Admin>
+                      <MailTemplateList acl={acl} showAddMailTemplateModule={true}  />
                     </Admin>
                   </Overlay>
                 } />
@@ -417,6 +490,13 @@ function App() {
               <Overlay>
                 <Misc>
                   <Profile />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/profile/api" element={
+              <Overlay>
+                <Misc>
+                  <ApiKeys />
                 </Misc>
               </Overlay>
             } />
@@ -490,7 +570,7 @@ function App() {
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
       <MapPage mapContainer={mapContainer} />
-      <Menu pathName={pathName} />
+      <Menu acl={acl} pathName={pathName} />
 
      </div>
     </div>

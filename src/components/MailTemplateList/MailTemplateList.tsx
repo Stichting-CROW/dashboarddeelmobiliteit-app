@@ -92,9 +92,6 @@ const MailTemplateList = ({
 
   const fetchMailTemplatesList = async () => {
     const mailTemplates = await getMailTemplateList(token);
-    // On error: do nothing
-    if(! mailTemplates || mailTemplates.fieldErrors) return;
-    // On result: set state variable
     setMailTemplates(mailTemplates);
   }
 

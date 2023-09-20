@@ -100,7 +100,8 @@ const DdH3HexagonLayer = ({
         valueToSet = e.features[0].properties.stats_ref;
       }
 
-      const userHoldsCtrl = e.originalEvent !== undefined ? e.originalEvent.ctrlKey : false;
+      // Check if user holds ctrl (or Command on MacOS)
+      const userHoldsCtrl = (e.originalEvent !== undefined ? (e.originalEvent.metaKey || e.originalEvent.ctrlKey) : false);
 
       // Set valueToSet in state
       if(filter.h3niveau === 'wijk') {

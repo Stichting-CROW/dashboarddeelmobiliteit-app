@@ -62,7 +62,7 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     } else {
       // console.log("initialize ACL Data (logged in)")
-      let url="https://api.deelfietsdashboard.nl/dashboard-api/menu/acl";
+      let url=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/menu/acl`;
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
       store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: true});

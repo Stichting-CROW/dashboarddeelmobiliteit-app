@@ -1,4 +1,4 @@
-const admin_api_url: string = 'https://auth.deelfietsdashboard.nl/api';
+const admin_api_url: string = `${process.env.REACT_APP_FUSIONAUTH_URL}/api`;
 
 const getHeaders = (token): {
   method?: any,
@@ -17,51 +17,39 @@ const getHeaders = (token): {
 
 // GET /getMailTemplateList
 export const getMailTemplateList = async (token) => {
-  const url = `${admin_api_url}/email/template`;
+  const url = `${admin_api_url}/message/template`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
   return await response.json();
 }
 
-// GET /email/template/{messageTemplateId}
+// GET /message/template/{messageTemplateId}
 export const getMailTemplateById = async (token, mailTemplateId) => {
-  const url = `${admin_api_url}/email/template/${mailTemplateId}`;
+  const url = `${admin_api_url}/message/template/${mailTemplateId}`;
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
   return await response.json();
 }
 
-// POST /email/template
+// POST /message/template
 // {
-//   "emailTemplate": {
-//     "defaultFromName": "Administrator",
-//     "defaultHtmlTemplate": "<p>Hello ${user.username}</p><p>Welcome To FusionAuth!</p>",
-//     "defaultSubject": "Hello World",
-//     "defaultTextTemplate": "Hello ${user.username},\nWelcome To FusionAuth!",
-//     "fromEmail": "email@example.com",
-//     "localizedFromNames": {
-//       "de": "Verwalter",
-//       "fr": "Administrateur"
+//   "messageTemplate": {
+//     "data": {
+//       "updatedBy": "richard@fusionauth.io"
 //     },
-//     "localizedHtmlTemplates": {
-//       "de": "<p>Hallo ${user.username}</p><p>Willkommen auf der FusionAuth!<p>",
-//       "fr": "<p>Bonjour ${user.username}</p><p>Bienvenue à FusionAuth!<p>"
+//     "defaultTemplate": "Here's your Two Factor Code: ${code}",
+//     "localizedTemplates": {
+//       "de": "Hier ist Ihr Zwei-Faktoren-Code: ${code}",
+//       "es": "Este es su código de dos factores: ${code}"
 //     },
-//     "localizedSubjects": {
-//       "de": "Hallo Welt",
-//       "fr": "Bonjour le monde"
-//     },
-//     "localizedTextTemplates": {
-//       "de": "Hallo ${user.username},\nWillkommen auf der FusionAuth!",
-//       "fr": "Bonjour ${user.username},\nBienvenue à FusionAuth!"
-//     },
-//     "name": "Hello World"
+//     "name": "Default Two Factor Request",
+//     "type": "SMS"
 //   }
 // }
 export const createTemplate = async (token, templateObject) => {
-  const url = `${admin_api_url}/email/template`;
+  const url = `${admin_api_url}/message/template`;
   const options = getHeaders(token);
   options.method = 'POST';
   options.body = JSON.stringify(templateObject);

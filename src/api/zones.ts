@@ -25,7 +25,7 @@ export const getAdminZones = async (token, filter) => {
   if(! filter.municipality) return [];
 
   let filterParams = `municipality=${filter.municipality}&geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
-  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zones?${filterParams}`;
+  const url = `${process.env.REACT_APP_MDS_URL}/admin/zones?${filterParams}`;
   const response = await fetch(url, getFetchOptions(token));
   if (! didFetchSucceed(response)) return;
   return await response.json();
@@ -34,14 +34,14 @@ export const getAdminZones = async (token, filter) => {
 export const getPublicZones = async (filter) => {
   let filterParams = (filter && filter.municipality) ? `municipality=${filter.municipality}&` : '';
   filterParams += `geography_types=no_parking&geography_types=stop&geography_types=monitoring`;
-  const url = `https://mds.dashboarddeelmobiliteit.nl/public/zones?${filterParams}`;
+  const url = `${process.env.REACT_APP_MDS_URL}/public/zones?${filterParams}`;
   const response = await fetch(url, getFetchOptions());
   if (! didFetchSucceed(response)) return;
   return await response.json();
 }
 
 export const postZone = async (token, data) => {
-  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone`;
+  const url = `${process.env.REACT_APP_MDS_URL}/admin/zone`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'POST',
     body: JSON.stringify(data)
@@ -51,7 +51,7 @@ export const postZone = async (token, data) => {
 }
 
 export const putZone = async (token, data) => {
-  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone`;
+  const url = `${process.env.REACT_APP_MDS_URL}/admin/zone`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'PUT',
     body: JSON.stringify(data)
@@ -61,7 +61,7 @@ export const putZone = async (token, data) => {
 }
 
 export const deleteZone = async (token, geography_id) => {
-  const url = `https://mds.dashboarddeelmobiliteit.nl/admin/zone/${geography_id}`;
+  const url = `${process.env.REACT_APP_MDS_URL}/admin/zone/${geography_id}`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'DELETE'
   }));
