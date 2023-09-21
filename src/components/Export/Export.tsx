@@ -17,10 +17,12 @@ import FormSelect from '../FormSelect/FormSelect.jsx';
 import Button from '../Form/Button.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import Section from '../Section/Section';
+import ExportParkeertelling from './ExportParkeertelling';
 
 function Export() {
   const dispatch = useDispatch();
 
+  const [isAdmin, setIsAdmin] = useState(false);
   const [canDownloadRawData, setCanDownloadRawData] = useState(false);
   const [startDate, setStartDate] = useState(moment(moment().subtract(1, 'month')).format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
@@ -62,11 +64,13 @@ function Export() {
         return false
       }
       response.json().then((acl) => {
-        const isAdmin = acl.is_admin === true;
+        const isAnAdmin = acl.is_admin === true;
         const isContactPerson = (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
         const canDownload = (acl.privileges && acl.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
 
-        if(isAdmin || canDownload) {
+        setIsAdmin(isAnAdmin);
+
+        if(isAnAdmin || canDownload) {
           setCanDownloadRawData(true);
         }
         setFilterOperator(acl.operators);
@@ -152,6 +156,10 @@ function Export() {
             Download rapportage
           </Button>
         </Section>
+
+        {isAdmin && <Section title="Download parkeertelling">
+          <ExportParkeertelling />
+        </Section>}
 
         {canDownloadRawData && <Section title="Download ruwe data">
           <div className="lg:w-72">

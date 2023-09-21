@@ -225,7 +225,7 @@ export const prepareDataForCsv = (data: any) => {
 export const downloadCsv = (data: any, filename?: string) => {
   // Create blob
   const blob = new Blob([data], { type: 'text/csv' });
-  // Send blog to the browser
+  // Send blob to the browser
   const url = window.URL.createObjectURL(blob);
   // Create an a-tag
   const a = document.createElement('a');
