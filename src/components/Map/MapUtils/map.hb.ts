@@ -119,7 +119,7 @@ const fetchHbData = async (token: string, filter: any) => {
   }
 
   // Get the modalities that are active
-  const allModalities = ['cargo_bicycle', 'moped', 'bicycle', 'car', 'unknown'];
+  const allModalities = ['cargo_bicycle', 'moped', 'bicycle', 'car', 'scooter', 'unknown'];
   const excludedModalities = filter.voertuigtypesexclude;
   const includedModalities = allModalities.filter(x => excludedModalities.split(',').indexOf(x) <= -1);
 
