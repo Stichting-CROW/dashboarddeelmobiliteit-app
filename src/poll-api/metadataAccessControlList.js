@@ -21,7 +21,8 @@ const cPublicAanbieders = [
 ];
   
 const cPublicGebieden = [
-  { gm_code:"", name:"Alle plaatsen" }, { gm_code:"cnis5:44021", name:"Gent" }
+  { gm_code:"cnis5:44021", name:"Gent" },
+  { gm_code:"cnis5:21001", name:"Anderlecht" }
 ]
 
 // id should correspond to the api filter values

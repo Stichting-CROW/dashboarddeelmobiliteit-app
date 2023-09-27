@@ -95,12 +95,11 @@ export const getProviderColors = () => {
     'moveyou': '#13D6A6',
     'hely': '#fd645c',
     'tier': '#0d123f',
-    'dott': '#00a8e9'
+    'dott': '#00a8e9',
   }
 }
 
 // These archived providers will not be included in charts etc
+// We should reconsider this.
 export const archivedProviders = [
-  'dott',
-  'jump'
 ]

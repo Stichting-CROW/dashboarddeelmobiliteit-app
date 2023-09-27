@@ -57,7 +57,7 @@ function BeschikbareVoertuigenChart({
   title?: string
 }) {
   const dispatch = useDispatch()
-
+  console.log(filter);
   // Get authentication token
   const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
