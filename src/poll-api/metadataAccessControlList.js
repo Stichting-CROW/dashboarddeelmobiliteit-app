@@ -19,9 +19,14 @@ const cPublicAanbieders = [
   { value:"dott", system_id:"dott", name:"Dott" },
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
 ];
-  
+
+// We should receive this list dynamically
 const cPublicGebieden = [
-  { gm_code:"", name:"Alle plaatsen" }, { gm_code:"cnis5:44021", name:"Gent" }
+  { gm_code:"cnis5:21001", name:"Anderlecht" },
+  { gm_code:"cnis5:44021", name:"Gent" },
+  { gm_code:"cnis5:21016", name:"Ukkel" },
+  { gm_code:"cnis5:23088", name:"Vilvoorde " },
+
 ]
 
 // id should correspond to the api filter values
