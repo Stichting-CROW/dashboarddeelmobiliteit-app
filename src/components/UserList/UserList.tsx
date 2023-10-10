@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
+import moment from 'moment';
 import './UserList.css'; 
 import {
   // useDispatch,
@@ -24,6 +25,8 @@ import Button from '../Button/Button';
 import EditUser from '../EditUser/EditUser';
 import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
+
+const DELIMITER  = ';';
 
 const readablePrivilege = (privilegeKey) => {
   switch(privilegeKey) {
@@ -154,17 +157,38 @@ const UserList = ({
   const prepareDataForCsv = (data: any) => {
     if(! data || data.length <= 0) return;
     if(  typeof data !== 'object') return;
+    console.log('data', data);
 
     let csvRows = [];
 
+    const privileges = [
+      'ORGANISATION_ADMIN',
+      'CORE_GROUP',
+      'MICROHUB_EDIT',
+      'DOWNLOAD_RAW_DATA'
+    ];
+
     // Get headers
-    const headers = ['E-mail', 'Organisatie'];
-    csvRows.push(headers.join(','));
+    const headers = ['E-mail', 'Organisatie', 'Super-admin'];
+    privileges.forEach((key) => {
+      headers.push(readablePrivilege(key));
+    });
+    csvRows.push(headers.join(DELIMITER));
 
     // Loop over the rows
     for (const x of data) {
-      const values = [x.user_id, x.organisation_name];
-      csvRows.push(values.join(','));
+      // Add standard columns
+      const values = [x.user_id, x.organisation_name, (x.is_admin ? 'Ja' : '')];
+      // Add privilege columns
+      privileges.forEach((key) => {
+        if(x.privileges && x.privileges.indexOf(key) > -1) {
+          values.push('Ja');
+        } else {
+          values.push('');
+        }
+      });
+      // Add columns to spreadsheet
+      csvRows.push(values.join(DELIMITER));
     };
 
     return csvRows.join("\n");
@@ -175,7 +199,10 @@ const UserList = ({
       <H1Title>Gebruikers</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe gebruiker</Button>
-        <Button theme='primary' classes='download' onClick={() => downloadCsv(prepareDataForCsv(filteredUsers))}>Exporteer gebruikers als spreadsheet</Button>
+        <Button theme='primary' classes='download' onClick={() => downloadCsv(
+          prepareDataForCsv(filteredUsers),
+          `Dashboard Deelmobiliteit gebruikers - ${moment().format('YYYY-MM-DD HH_mm')}.csv`
+        )}>Exporteer gebruikers als spreadsheet</Button>
       </div>
       {showAddUserModule && <div className="mb-6">
         <EditUser acl={acl} onSaveHandler={fetchUserList} />
