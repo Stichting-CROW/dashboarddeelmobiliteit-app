@@ -15,7 +15,7 @@ type HexagonType = any;
 // Get geometries for user
 const getGeometriesForUser = async (map, token, filter) => {
   // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/geometry?${filter.gebied ? 'filter_municipalities=' + filter.gebied : ''}`);
+  const url = encodeURI(`${process.env.REACT_APP_MAIN_API_URL}/od-api/accessible/geometry?${filter.gebied ? 'filter_municipalities=' + filter.gebied : ''}`);
 
   let responseJson;
 
@@ -108,7 +108,7 @@ const getHexesForViewPort = (map, filter) => {
 // Get hexes for user
 const getHexesForUser = async (map, token, filter) => {
   // Get hexes user has access to
-  const url = encodeURI(`https://api.dashboarddeelmobiliteit.nl/od-api/accessible/h3?h3_resolution=${filter.h3niveau}${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
+  const url = encodeURI(`${process.env.REACT_APP_MAIN_API_URL}/od-api/accessible/h3?h3_resolution=${filter.h3niveau}${filter.gebied ? '&filter_municipalities=' + filter.gebied : ''}`);
 
   let responseJson;
 

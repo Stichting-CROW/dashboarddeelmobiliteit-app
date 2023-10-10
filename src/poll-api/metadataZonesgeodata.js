@@ -54,8 +54,8 @@ export const updateZonesgeodata = (store)  => {
 
     // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
     let url_zonesgeodata = isLoggedIn(state) 
-      ? "https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_ids="+zone_ids+"&include_geojson=true"
-      : "https://api.deelfietsdashboard.nl/dashboard-api/public/zones?zone_ids="+zone_ids+"&include_geojson=true";
+      ? `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?zone_ids=`+zone_ids+"&include_geojson=true"
+      : `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/zones?zone_ids=`+zone_ids+"&include_geojson=true";
 
     let options = isLoggedIn(state) ? { headers : { "authorization": "Bearer " + state.authentication.user_data.token }} : {}
 

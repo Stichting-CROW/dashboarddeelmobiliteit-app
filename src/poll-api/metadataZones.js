@@ -34,7 +34,7 @@ export const updateZones = async (store_zones) => {
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
 
       const gm_code = state.filter.gebied;
-      let url = `https://api.deelfietsdashboard.nl/dashboard-api/public/filters?gm_code=${gm_code}`;
+      let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/filters?gm_code=${gm_code}`;
       const zonesGeoDataResult = await fetch(url);
       const zonesGeoDataJson = await zonesGeoDataResult.json();
 
@@ -70,7 +70,7 @@ export const updateZones = async (store_zones) => {
       // url_zones="https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_type=municipality";
     } else {
       // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
-      url_zones="https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code="+state.filter.gebied;
+      url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?gm_code=`+state.filter.gebied;
 
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});

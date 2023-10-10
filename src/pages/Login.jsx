@@ -36,7 +36,7 @@ const Login = () => {
       return;
     }
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/login";
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + "/api/login";
     var data = {
       loginId: emailaddress,
       password: password,
@@ -69,7 +69,7 @@ const Login = () => {
     // Clear error message
     setErrorMessage(null);
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_SERVER : '') + "/user/forgot-password"
+    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + "/api/user/forgot-password"
     var data = {
       loginId: emailaddress,
     };

@@ -1,4 +1,4 @@
-const admin_api_url: string = 'https://auth.deelfietsdashboard.nl/api';
+const admin_api_url: string = `${process.env.REACT_APP_FUSIONAUTH_URL}/api`;
 
 const getHeaders = (token): {
   method?: any,
