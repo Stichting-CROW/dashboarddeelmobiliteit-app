@@ -48,3 +48,7 @@
 .Overlay a:hover {
   text-decoration: underline;
 }
+
+.Overlay pre {
+  overflow-x:auto;
+}

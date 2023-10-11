@@ -42,7 +42,7 @@ Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid o
 
 ## Hoe werkt het?
 
-Het Dashboard Deelmobiliteit verzamelt elke halve minuut positie van  meer dan 15.000 geparkeerde deelvoertuigen in Nederland (januari 2022).
+Het Dashboard Deelmobiliteit verzamelt elke halve minuut positie van  meer dan 19.000 geparkeerde deelvoertuigen in Nederland (oktober 2023).
 
 Op basis van deze informatie genereert het dashboard zogenaamde parkeergebeurtenissen en verhuringen, die opgeslagen worden in een centrale database.
 
@@ -82,9 +82,33 @@ Overheden hebben alleen toegang tot de informatie over deelvoertuigen in hun eig
 
 Via het CROW of via info@dashboarddeelmobiliteit.nl kun je een login aanvragen. Afhankelijk van je taak en de afspraken over de data kun je vervolgens toegang krijgen tot de dashboard informatie voor gebieden en/of van aanbieders. Zo kunnen gemeente medewerkers over het algemeen toegang krijgen voor het dashboard in hun gemeente. Aanbieders van deelfietsen kunnen uiteraard toegang krijgen tot alle informatie van hun deelfietsen. Neem voor vragen over de rechten ook contact op met het CROW of info@dashboarddeelmobiliteit.nl.
 
+### Wat is de datakwaliteit?
+
+Op de pagina [dashboarddeelmobiliteit-datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit#dashboard-deelmobiliteit-data-quality) houden wij bij wat de datakwaliteit is per aanbieder. Voor elke aanbieder staat er in het totaaloverzicht een score op 5 kwaliteitseigenschappen. Als alle 5 eigenschappen goed zijn, is de datakwaliteit van de aanbieder 🟢 Perfect.
+
+Het is mogelijk om per aanbieder de datakwaliteit-geschiedenis in te zien door te klikken op de aanbieder.
+
+Per jaar is er een overzicht van de belangrijkste datakwaliteit-issues, zie jaaroverzicht [2022](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/blob/main/year-overview/2022.md) en [2023](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/blob/main/year-overview/2023.md).
+
 ### Welke datastandaarden worden ondersteund?
 
 Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
+
+Voor analyses gebruiken we:
+
+\`\`\`
+MDS  /vehicles         | Voor registreren van het aanbod
+MDS  /trips            | Voor registreren van verhuringen
+GBFS /geofencing_zones | Voor registreren van verhuringen
+\`\`\`
+
+<br />Voor sturing gebruiken we:
+
+\`\`\`
+MDS  /stops            | De microhubs inclusief metadata
+MDS  /policies         | Ingestelde regels per microhub
+MDS  /geographies      | Geografische randen per microhub
+\`\`\`
 
 ### Wat zijn de afspraken over data en financiering?
 
@@ -92,7 +116,7 @@ Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, g
 
 ### Is de software open source?
 
-Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) en [Gitlab](https://gitlab.com/bikedashboard) kun de laatste versie van de broncode bekijken.
+Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) kun de laatste versie van de broncode bekijken.
 
 Velen handen maken licht werk. We zijn daarom blij als je wilt helpen. Gemeenten of andere overheden kunnen helpen bij het specificeren van handige overzichten. Deelmobiliteitbedrijven kunnen meebouwen aan open source tools. Ontwikkelaars kunnen bijdragen aan de code. Ontwerpers kunnen de look & feel verbeteren. Mail ons als je wilt weten hoe je mee kunt helpen!
 
