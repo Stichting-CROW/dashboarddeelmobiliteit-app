@@ -20,9 +20,7 @@ const cPublicAanbieders = [
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
 ];
 
-const isDutchDashboardDeelmobiliteit = process
-  && process.env.REACT_APP_MAIN_API_URL
-  && process.env.REACT_APP_MAIN_API_URL.indexOf('dashboarddeelmobiliteit.nl') > -1;
+const isDutchDashboardDeelmobiliteit = document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
 const cPublicGebieden = isDutchDashboardDeelmobiliteit
   ? [
