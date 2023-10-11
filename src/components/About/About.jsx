@@ -99,7 +99,7 @@ Voor analyses gebruiken we:
 \`\`\`
 MDS  /vehicles         | Voor registreren van het aanbod
 MDS  /trips            | Voor registreren van verhuringen
-GBFS /geofencing_zones | Voor registreren van verhuringen
+GBFS /geofencing_zones | Voor registreren van servicegebieden
 \`\`\`
 
 <br />Voor sturing gebruiken we:
