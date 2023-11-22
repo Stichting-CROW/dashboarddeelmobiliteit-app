@@ -157,7 +157,7 @@ function Export() {
           </Button>
         </Section>
 
-        {isAdmin && <Section title="Download parkeertelling">
+        {canDownloadRawData && <Section title="Download parkeertelling">
           <ExportParkeertelling />
         </Section>}
 
