@@ -162,6 +162,12 @@ function Export() {
         </Section>}
 
         {canDownloadRawData && <Section title="Download ruwe data">
+
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Tijdelijk niet beschikbaar</strong><br /><br />
+            <span className="block sm:inline">Het is tijdelijk niet mogelijk om een ruwe data export te maken.<br /><br />Mail naar <a href="mailto:info@dashboarddeelmobiliteit.nl?subject=Ruwe data export&body=Startdatum:  | Eindatum:  ">info@dashboarddeelmobiliteit.nl</a> om nu een ruwe data export op te vragen</span>
+          </div><br />
+
           <div className="lg:w-72">
             <DateFromTo
               label="Periode"
