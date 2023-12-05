@@ -26,23 +26,21 @@ export const getUniqueProviderNames = (objects) => {
 export const getPrettyProviderName = (system_id) => {
   const providerPrettyNames = {
     'baqme': 'BAQME',
-    'bird': 'Bird',
     'bondi': 'bondi',
+    'bolt': 'Bolt',
     'cykl': 'Cykl',
     'check': 'Check',
     'cargoroo': 'Cargoroo',
     'deelfietsnederland': 'Deelfiets Nederland',
     'donkey': 'Donkey Republic',
     'felyx': 'Felyx',
-    'flickbike': 'FlickBike',
     'gosharing': 'GO Sharing',
     'hely': 'Hely',
     'htm': 'HTM Fiets',
-    'moveyou': 'MoveYou',
     'keobike': 'KeoBike',
     'lime': 'Lime',
+    'moveyou': 'GoAbout',
     'tier': 'TIER',
-    'dott': 'Dott',
     'uwdeelfiets': 'Uw Deelfiets'
   }
   return providerPrettyNames[system_id]
@@ -55,6 +53,7 @@ export const getProviderWebsiteUrl = (system_id) => {
     'baqme': 'https://www.baqme.com/',
     'bird': 'https://www.bird.co/',
     'bondi': 'https://www.bondi.city/',
+    'bolt': 'https://bolt.eu/',
     'cykl': 'https://www.cykl.nl/',
     'check': 'https://ridecheck.app/',
     'cargoroo': 'https://cargoroo.nl/',
@@ -69,7 +68,6 @@ export const getProviderWebsiteUrl = (system_id) => {
     'keobike': 'https://keobike.nl/',
     'lime': 'https://www.li.me/',
     'tier': 'https://www.tier.app/',
-    'dott': 'https://ridedott.com/',
     'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
   }
   return providerWebsiteUrls[system_id]
@@ -95,7 +93,7 @@ export const getProviderColors = () => {
     'moveyou': '#13D6A6',
     'hely': '#fd645c',
     'tier': '#0d123f',
-    'dott': '#00a8e9',
+    'bolt': '#34D186',
   }
 }
 

@@ -16,8 +16,7 @@ const cPublicAanbieders = [
   { value:"bird", system_id:"bird", name:"Bird" },
   { value:"bolt", system_id:"bolt", name:"Bolt" },
   { value:"bondi", system_id:"bondi", name:"Bondi" },
-  { value:"dott", system_id:"dott", name:"Dott" },
-  { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
+  { value:"moveyou", system_id:"moveyou", name:"GoAboout" },
 ];
 
 const isDutchDashboardDeelmobiliteit = document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
