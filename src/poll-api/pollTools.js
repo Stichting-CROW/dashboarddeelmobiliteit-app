@@ -137,13 +137,16 @@ export const convertDurationToBin = (duration) => {
   if (duration <= 60) {
     return 0;
   }
-  if (duration <= 24 * 60) {
+  else if (duration <= 24 * 60) {
     return 1;
   }
-  if (duration <= 24 * 60 * 4) {
+  else if (duration <= 24 * 60 * 4) {
     return 2;
   }
-  return 3;
+  else if (duration <= 24 * 60 * 30) {
+    return 3;
+  }
+  return 4;
 }
 
 export const convertDistanceToBin = (distance_in_meters) => {
