@@ -2,9 +2,13 @@
 
 ## Release 2023-12-06
 
+**Algemeen**
+
+- 🪄 Toon voertuig-id aan _iedere_ ingelogde gebruiker (bijvoorbeeld in voertuig-popup)
+
 **Exporteer**
 
-- 🪄 Gebruikers met 'download ruwe data' rechten kunnen nu Parkeertelling gebruiken - eerder konden alleen admins dit
+- 🪄 Maak Parkeertelling beschikbaar voor alle gebruikers met 'download ruwe data' rechten (niet meer alleen voor admins)
 
 ## Release 2023-12-05
 

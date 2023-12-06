@@ -72,7 +72,7 @@ function MetaStats(props) {
     { id: 1, color: '#48E248', fillcolor: '#48E248', name: '< 24 uur'},
     { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '< 4 d'},
     { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '< 30 d'},
-    { id: 5, color: '#9158DE', fillcolor: '#9158DE', name: '> 30 d'}
+    { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '> 30 d'}
   ];
 
   if(displayMode===DISPLAYMODE_OTHER || displayMode===DISPLAYMODE_RENTALS) {
