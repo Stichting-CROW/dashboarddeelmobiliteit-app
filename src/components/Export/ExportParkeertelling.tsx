@@ -96,10 +96,6 @@ function Export() {
     return csvRows.join("\n");
   }
 
-  if(! isAdmin) {
-    return <div />
-  }
-
   return (
     <>
       <div className="lg:w-72">
