@@ -10,28 +10,16 @@ const About = () => {
 
   return (
     <div className="
-      px-4
-      min-h-screen
-      sm:flex sm:justify-center
-      sm:px-0
     ">
-      <div className="mx-auto py-8">
-
-        <IconButtonClose
-          onClick={() => navigate('/')}
-          style={{position: 'absolute', right: '30px', top: '18px'}}
-        />
-
-        <Logo />
-
+      <h1 className="
+        text-4xl
+        font-bold
+      ">
+        Over het Dashboard Deelmobiliteit
+      </h1>
+      <div className="mx-auto pb-8">
         <div
-          style={{
-            maxWidth: '100%',
-            width: '616px'
-          }}
           dangerouslySetInnerHTML={{ __html: marked.parse(`
-# Over het Dashboard Deelmobiliteit
-
 ## Algemeen
 
 Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen.
@@ -92,7 +80,7 @@ Per jaar is er een overzicht van de belangrijkste datakwaliteit-issues, zie jaar
 
 ### Welke datastandaarden worden ondersteund?
 
-Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
+Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.dashboarddeelmobiliteit.nl/data_feeds/for_monitoring/).
 
 Voor analyses gebruiken we:
 
