@@ -114,9 +114,13 @@ MDS  /geographies      | Geografische randen per microhub
 
 [Op deze pagina](https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard) vind je de afspraken over openbaarheid data en de financiering.
 
+### Welke API's biedt het Dashboard?
+
+Op [docs.dashboarddeelmobiliteit.nl](https://docs.dashboarddeelmobiliteit.nl/) vind je informatie over de diverse API's die worden aangeboden door het Dashboard Deelmobiliteit. Zo is er een microhubs API die bezettingsdata teruggeeft van de hubs. Er zijn diverse gemeenten die de API's geintegreerd hebben in intern gebruikte software en eigen dashboards. Mis je informatie? Vul de documentatie aan of stuur je vragen aan [info@dashboarddeelmobiliteit.nl](mailto:info@dashboarddeelmobiliteit.nl).
+
 ### Is de software open source?
 
-Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) kun de laatste versie van de broncode bekijken.
+Ja, de software is open source. [Op de documentatie-site](https://docs.dashboarddeelmobiliteit.nl/start/how_to_install/) vind je instructies over hoe je de software zelf kunt installeren als een 'kloon' op je eigen server.
 
 Velen handen maken licht werk. We zijn daarom blij als je wilt helpen. Gemeenten of andere overheden kunnen helpen bij het specificeren van handige overzichten. Deelmobiliteitbedrijven kunnen meebouwen aan open source tools. Ontwikkelaars kunnen bijdragen aan de code. Ontwerpers kunnen de look & feel verbeteren. Mail ons als je wilt weten hoe je mee kunt helpen!
 
