@@ -27,10 +27,12 @@ import Modal from '../Modal/Modal.jsx';
 
 function EditOrganisation({
   organisations,
+  municipalities,
   organisation,
   onSaveHandler
 }: {
   organisations: any,
+  municipalities?: any,
   organisation?: OrganisationType,// User can be optional as this component is also used for adding new organisations
   onSaveHandler: Function
 }) {
@@ -58,13 +60,19 @@ function EditOrganisation({
 
     buildOperatorOptionsValue();
     prepareDefaultSelectedOperators();
-  }, [token]);
+  }, [
+    token,
+    municipalities,
+    organisations
+  ]);
 
   const prepareDefaultSelectedMunicipalities = () => {
     if(! organisations || ! organisation || ! organisation.data_owner_of_municipalities) return;
+    if(! municipalities) return;
+
     let currentUserMunicipalities = [];
     organisation.data_owner_of_municipalities.forEach(gm_code => {
-      let relatedMunicipality: any = organisations.filter(x => x.data_owner_of_municipalities && x.data_owner_of_municipalities[0] === gm_code);
+      let relatedMunicipality: any = municipalities.filter(x => x.municipality === gm_code);
       if(relatedMunicipality && relatedMunicipality.length > 0) {
         currentUserMunicipalities.push({ label: relatedMunicipality[0].name, value: gm_code });
       }
@@ -97,15 +105,9 @@ function EditOrganisation({
 
     // Build municipalityCodeArray
     let data_owner_of_municipalities = selectedMunicipalities.map(x => x.value);
-    console.log('municipalityOptionList', municipalityOptionList)
-    console.log('selectedMunicipalities', selectedMunicipalities)
 
     // Build operatorArray
     let data_owner_of_operators = selectedOperators.map(x => x.value);
-
-    console.log('handleSubmit')
-    console.log('data_owner_of_municipalities', data_owner_of_municipalities)
-    console.log('data_owner_of_operators', data_owner_of_operators)
 
     // Update
     if(organisation && organisation.organisation_id) {
@@ -139,10 +141,10 @@ function EditOrganisation({
 
   const buildMunicipalityOptionsValue = async () => {
     const optionsList = [];
-    const municipalities = organisations.filter(x => x.type_of_organisation === 'MUNICIPALITY');
+    if(! municipalities) return;
     municipalities.forEach(x => {
       optionsList.push({
-        value: x.data_owner_of_municipalities[0],
+        value: x.municipality,
         label: x.name
       })
     })

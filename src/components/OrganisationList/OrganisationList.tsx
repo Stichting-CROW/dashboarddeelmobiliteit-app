@@ -11,6 +11,7 @@ import {StateType} from '../../types/StateType';
 
 // Import API methods
 import {getOrganisationList} from '../../api/organisations';
+import {getMunicipalityList} from '../../api/municipalities';
 
 // Import components
 import Button from '../Button/Button';
@@ -33,11 +34,13 @@ const readablePrivilege = (privilegeKey) => {
 
 const TableRow = ({
   organisations,
+  municipalities,
   organisation,
   editClickHandler,
   onSaveHandler
 }: {
   organisations: any,
+  municipalities: any,
   organisation: any,
   editClickHandler: Function,
   onSaveHandler: Function
@@ -76,6 +79,7 @@ const TableRow = ({
     {/*If organisation clicked edit: Show edit form */}
     <div className="col-span-3" hidden={organisationId != organisation.organisation_id}>
       {organisationId == organisation.organisation_id && <EditOrganisation
+        municipalities={municipalities}
         organisations={organisations}
         organisation={organisation}
         onSaveHandler={onSaveHandler}
@@ -92,19 +96,27 @@ const OrganisationList = ({
   showAddOrganisationModule?: boolean,
 }) => {
   const [organisations, setOrganisations] = useState([]);
+  const [municipalities, setMunicipalities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-  // Get organisation list on component load
+  // Get organisation list and municipality list on component load
   useEffect(() => {
     fetchOrganisationList();
+    fetchMunicipalityList();
   }, []);
 
   const fetchOrganisationList = async () => {
     const organisations = await getOrganisationList(token);
     setOrganisations(organisations);
+  }
+
+  const fetchMunicipalityList = async () => {
+    const result = await getMunicipalityList(token);
+    if(! result.municipalities) return;
+    setMunicipalities(result.municipalities);
   }
 
   const getFetchOptions = () => {
@@ -137,6 +149,8 @@ const OrganisationList = ({
       </div>
       {showAddOrganisationModule && <div className="mb-6">
         <EditOrganisation
+          key="EditOrganistion"
+          municipalities={municipalities}
           organisations={organisations}
           onSaveHandler={fetchOrganisationList} />
       </div>}
@@ -159,7 +173,13 @@ const OrganisationList = ({
           </div>
         </div>
         {organisations ? filteredOrganisations.map(org => {
-          return <TableRow organisations={organisations} organisation={org} editClickHandler={editClickHandler} onSaveHandler={fetchOrganisationList} />;
+          return <TableRow
+            organisations={organisations}
+            organisation={org}
+            municipalities={municipalities}
+            editClickHandler={editClickHandler}
+            onSaveHandler={fetchOrganisationList}
+          />;
         }) : <></>}
       </div>
     </div>
