@@ -14,6 +14,10 @@ export default function Misc({children}) {
       link: '/profile'
     },
     {
+      title: 'Over',
+      link: '/over'
+    },
+    {
       title: 'FAQ',
       link: '/faq'
     },

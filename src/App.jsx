@@ -471,11 +471,6 @@ function App() {
                 <Monitoring />
               </ContentPage>
             } />
-            <Route exact path="/over" element={
-              <Overlay>
-                <About />
-              </Overlay>
-            } />
             <Route exact path="/rondleiding" element={
               <ContentPage forceFullWidth={true}>
                 <Tour />
@@ -497,6 +492,13 @@ function App() {
               <Overlay>
                 <Misc>
                   <ApiKeys />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/over" element={
+              <Overlay>
+                <Misc>
+                  <About />
                 </Misc>
               </Overlay>
             } />

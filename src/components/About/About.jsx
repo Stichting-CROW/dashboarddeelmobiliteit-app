@@ -10,28 +10,16 @@ const About = () => {
 
   return (
     <div className="
-      px-4
-      min-h-screen
-      sm:flex sm:justify-center
-      sm:px-0
     ">
-      <div className="mx-auto py-8">
-
-        <IconButtonClose
-          onClick={() => navigate('/')}
-          style={{position: 'absolute', right: '30px', top: '18px'}}
-        />
-
-        <Logo />
-
+      <h1 className="
+        text-4xl
+        font-bold
+      ">
+        Over het Dashboard Deelmobiliteit
+      </h1>
+      <div className="mx-auto pb-8">
         <div
-          style={{
-            maxWidth: '100%',
-            width: '616px'
-          }}
           dangerouslySetInnerHTML={{ __html: marked.parse(`
-# Over het Dashboard Deelmobiliteit
-
 ## Algemeen
 
 Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen.
@@ -92,7 +80,7 @@ Per jaar is er een overzicht van de belangrijkste datakwaliteit-issues, zie jaar
 
 ### Welke datastandaarden worden ondersteund?
 
-Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/).
+Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun data aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.dashboarddeelmobiliteit.nl/data_feeds/for_monitoring/).
 
 Voor analyses gebruiken we:
 
@@ -114,9 +102,13 @@ MDS  /geographies      | Geografische randen per microhub
 
 [Op deze pagina](https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard) vind je de afspraken over openbaarheid data en de financiering.
 
+### Welke API's biedt het Dashboard?
+
+Op [docs.dashboarddeelmobiliteit.nl](https://docs.dashboarddeelmobiliteit.nl/) vind je informatie over de diverse API's die worden aangeboden door het Dashboard Deelmobiliteit. Zo is er een microhubs API die bezettingsdata teruggeeft van de hubs. Er zijn diverse gemeenten die de API's geintegreerd hebben in intern gebruikte software en eigen dashboards. Mis je informatie? Vul de documentatie aan of stuur je vragen aan [info@dashboarddeelmobiliteit.nl](mailto:info@dashboarddeelmobiliteit.nl).
+
 ### Is de software open source?
 
-Ja, de software is open source. Via [GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app) kun de laatste versie van de broncode bekijken.
+Ja, de software is open source. [Op de documentatie-site](https://docs.dashboarddeelmobiliteit.nl/start/how_to_install/) vind je instructies over hoe je de software zelf kunt installeren als een 'kloon' op je eigen server.
 
 Velen handen maken licht werk. We zijn daarom blij als je wilt helpen. Gemeenten of andere overheden kunnen helpen bij het specificeren van handige overzichten. Deelmobiliteitbedrijven kunnen meebouwen aan open source tools. Ontwikkelaars kunnen bijdragen aan de code. Ontwerpers kunnen de look & feel verbeteren. Mail ons als je wilt weten hoe je mee kunt helpen!
 

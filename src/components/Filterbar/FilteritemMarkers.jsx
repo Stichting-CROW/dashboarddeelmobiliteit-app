@@ -10,7 +10,8 @@ export function FilteritemMarkersParkeerduur() {
       { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 uur'},
       { id: 1, color: '#48E248', fillcolor: '#48E248', name: '< 24 uur'},
       { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '< 4 d'},
-      { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '> 4 d'}
+      { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '< 30 d'},
+      { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '> 30 d'}
     ];
   });
   
@@ -109,7 +110,7 @@ function FilteritemMarkers({label, filtername, markers, addmarker, removemarker,
             return (
               <div className={className} key={marker.id}>
                 <div className="filter-markers-marker" onClick={handler}>
-                  <svg viewBox='0 0 30 30' >
+                  <svg viewBox='0 0 30 30'>
                     <circle cx={'50%'} cy={'50%'} r={'40%'} fill={marker.color} />
                     <circle cx={'50%'} cy={'50%'} r={'34%'} fill={marker.fillcolor} />
                   </svg>

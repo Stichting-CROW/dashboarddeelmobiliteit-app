@@ -132,6 +132,19 @@ const ApiKeys = ({
         </H1Title>
       </div>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 pt-4 pb-4 rounded relative" role="alert">
+          <strong className="font-bold">
+            Let op: houd API keys geheim
+          </strong><br /><br />
+          <p className="block">
+            Op deze pagina kun je API-keys aanmaken die toestemming geven om data uit het Dashboard Deelmobiliteit te downloaden met behulp van API's. 
+          </p>
+          <p className="block" style={{marginBottom: 0}}>
+            Jij bent eigenaar van de API-keys die je hier aanmaakt. Daarmee ben je verantwoordelijk voor het gebruik van de data die met jouw API-keys worden gedownload. De <a href="https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard" target="_blank">afspraken over openbaarheid</a> zijn hierop van toepassing.
+          </p>
+        </div>
+      </div>
+      <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={async () => {
           await createApiKey(token);
           fetchApiKeyList();

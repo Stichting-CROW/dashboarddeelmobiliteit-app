@@ -615,8 +615,10 @@ function MapComponent(props) {
       if(! userData || ! userData.user) {
         return false;
       }
+      // Return true if user is logged in
+      return true;
       // Return if user can see vehicle ID
-      return isAnalyst(userData.user.email) || isProvider(userData.user);
+      // return isAnalyst(userData.user.email) || isProvider(userData.user);
     }
 
     initPopupLogic(map.current, providers, canSeeVehicleId(), filter.datum)

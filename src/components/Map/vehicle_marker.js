@@ -11,7 +11,7 @@
 //     `;
 
 async function getVehicleMarkers(operatorColor) {
-    var gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48'];
+    var gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48', '#9158DE'];
     var markers = [];
     for (const durationIndicationColor of gradients) {
         var marker = await styleVehicleMarker(operatorColor, durationIndicationColor);
@@ -23,8 +23,8 @@ async function getVehicleMarkers(operatorColor) {
 async function getVehicleMarkers_rentals(operatorColor) {
     var gradients = ['#48E248', '#44BD48', '#3B7747', '#343E47'];
     var markers = [];
-    for (const durationIndicationColor of gradients) {
-        var marker = await styleVehicleMarker(operatorColor, durationIndicationColor);
+    for (const distanceIndicationColor of gradients) {
+        var marker = await styleVehicleMarker(operatorColor, distanceIndicationColor);
         markers.push(marker);
     }
     return markers;
