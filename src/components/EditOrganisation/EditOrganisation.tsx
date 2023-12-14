@@ -199,7 +199,7 @@ function EditOrganisation({
           </select>
         </div>
 
-        {organisationType === 'MUNICIPALITY' && <div>
+        {(organisationType === 'MUNICIPALITY' || organisationType === 'OTHER_GOVERNMENT') && <div>
           <FormLabel classes="mt-2 mb-4 font-bold">
             Data-eigenaar van de volgende gemeentes
           </FormLabel>
