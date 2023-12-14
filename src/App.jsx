@@ -549,7 +549,9 @@ function App() {
 
         <Route exact path="/over" element={
           <Overlay>
-            <About />
+            <Misc>
+              <About />
+            </Misc>
           </Overlay>
         } />
         <Route exact path="/rondleiding" element={
