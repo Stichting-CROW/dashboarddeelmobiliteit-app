@@ -8,6 +8,7 @@
     "@babel/preset-env": "^7.20.2",
     "@mapbox/mapbox-gl-draw": "1.4.3",
     "@mapbox/mapbox-gl-draw-static-mode": "1.0.1",
+    "@radix-ui/react-checkbox": "^1.0.4",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
