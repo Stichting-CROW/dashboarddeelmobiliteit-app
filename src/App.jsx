@@ -64,6 +64,7 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
+  DISPLAYMODE_SERVICE_AREAS,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -173,6 +174,8 @@ function App() {
       payload=DISPLAYMODE_ZONES_PUBLIC;
     } else if(pathName.includes("/admin/zones")) {
       payload=DISPLAYMODE_ZONES_ADMIN;
+    } else if(pathName.includes("/map/servicegebieden")) {
+      payload=DISPLAYMODE_SERVICE_AREAS;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -458,6 +461,7 @@ function App() {
             <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
+            <Route exact path="/map/servicegebieden" element={renderMapElements()} />
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
             <Route exact path="/stats/overview" element={<>
@@ -525,6 +529,7 @@ function App() {
           <Route exact path="/" element={renderMapElements()} />
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
+          <Route exact path="/map/servicegebieden" element={renderMapElements()} />
           <Route path="/map/zones" element={renderMapElements()} />
           <Route exact path="/misc" element={
             <Overlay>

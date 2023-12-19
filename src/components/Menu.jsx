@@ -218,19 +218,20 @@ function Menu({
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
-            {false && doShowZones && <MenuItem
-              pathName={pathName}
-              text={'Zones'}
-              path={'/map/zones'}
-              icon={'https://i.imgur.com/GrF8KBA.png'}
-            />}
-
             {doShowZones && <MenuItem
               pathName={pathName}
               text={'Zones'}
               path={'/map/zones'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />}
+
+            <MenuItem
+              pathName={pathName}
+              text={'Servicegebieden'}
+              path={'/map/servicegebieden'}
+              icon={'/images/components/Menu/ontwikkeling.svg'}
+            />
+
 
             <MenuItem
               pathName={pathName}
