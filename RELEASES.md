@@ -6,6 +6,7 @@
 
 - 🪄 Voeg datakwaliteit-info toe aan Over-pagina [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/180)
 - 🪄 Voeg link naar docs toe aan Over-pagina [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/181)
+- "[Over](https://dashboarddeelmobiliteit.nl/over)" pagina toegevoegd aan top menu (daardoor Over en FAQ gemakkelijker vindbaar)
 
 **API key beheer**
 
