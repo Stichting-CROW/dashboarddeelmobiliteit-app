@@ -45,16 +45,17 @@ const TableRow = ({
   // Get organisationId from URL
   const { organisationId } = useParams();
 
-  let organisation_type;
-  if(organisation.type_of_organisation === 'OPERATOR') {
-    organisation_type = 'Aanbieder';
+  const readableOrganisationType = (type_of_organisation: string) => {
+    const conversionTable = [];
+    conversionTable['MUNICIPALITY'] = 'Gemeente';
+    conversionTable['OTHER_GOVERNMENT'] = 'Andere overheid';
+    conversionTable['OPERATOR'] = 'Aanbieder';
+    conversionTable['OTHER_COMPANY'] = 'Ander bedrijf';
+    conversionTable['ADMIN'] = 'Admin';
+    return conversionTable[type_of_organisation];
   }
-  else if(organisation.type_of_organisation === 'MUNICIPALITY') {
-    organisation_type = 'Gemeente';
-  }
-  else if(organisation.type_of_organisation === 'ADMIN') {
-    organisation_type = 'Admin';
-  }
+
+  const organisation_type = readableOrganisationType(organisation.type_of_organisation);
 
   return <div
     key={organisation.organisation_id}
