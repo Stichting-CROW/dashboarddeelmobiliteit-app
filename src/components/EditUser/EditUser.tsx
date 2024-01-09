@@ -364,7 +364,7 @@ function EditUser({
           </small>
         </p>
         <p>
-          Leuk dat je aan de slag gaat met het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
+          Welkom bij het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
         </p>
         <p className="mb-4">
           Hierbij stuur ik je inloggegevens voor <a href="https://dashboarddeelmobiliteit.nl/login" target="_blank">https://dashboarddeelmobiliteit.nl/login</a>
