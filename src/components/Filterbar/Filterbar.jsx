@@ -71,6 +71,10 @@ function Filterbar({
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
   const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
 
+  const filterGebied = useSelector((state: StateType) => {
+    return state.filter ? state.filter.gebied : null
+  });
+
   // Show custom zones if >= 2022-11
   // We have detailled aggregated stats from 2022-11
   const doShowCustomZones =
@@ -162,11 +166,11 @@ function Filterbar({
           <FilteritemGebieden />
         </Fieldset>
 
-        <Fieldset title="Zones">
+        {filterGebied && <Fieldset title="Zones">
           <FilteritemZones
             zonesToShow={zonesToShow}
           />
-        </Fieldset>
+        </Fieldset>}
 
         {isLoggedIn && showparkeerduur && (
           <Fieldset title="Parkeerduur">
