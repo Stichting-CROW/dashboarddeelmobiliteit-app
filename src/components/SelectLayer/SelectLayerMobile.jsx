@@ -138,7 +138,7 @@ function SelectLayerMobile(props) {
         </div> : null
       }
 
-      { isLoggedIn && showZoneOnOff ?
+      { isLoggedIn ?
           <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
           }}>
