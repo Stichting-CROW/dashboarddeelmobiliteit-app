@@ -59,15 +59,16 @@ export const updateZones = async (store_zones) => {
       return;
     }
 
+    // If no gebied is selected:
     if(state.filter.gebied==="") {
-      store_zones.dispatch({ type: 'SET_ZONES', payload: []});
-      store_zones.dispatch({ type: 'SET_ZONES_GEODATA', payload: getEmptyZonesGeodataPayload()});
-      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+      // Get all zones of all municipalities this user has access to
+      const municipality_codes = state.metadata.gebieden.map(x => x.gm_code);
+      const municipality_codes_as_string = municipality_codes.join(',');
+      // Create URL for getting all zones for all municipality codes
+      url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
 
-      return;
-      
-      // later: show outlines for all municipalities
-      // url_zones="https://api.deelfietsdashboard.nl/dashboard-api/zones?zone_type=municipality";
+      store_zones.dispatch({ type: 'SET_ZONES', payload: []});
+      store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
     } else {
       // https://api.deelfietsdashboard.nl/dashboard-api/zones?gm_code=GM0518
       url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?gm_code=`+state.filter.gebied;

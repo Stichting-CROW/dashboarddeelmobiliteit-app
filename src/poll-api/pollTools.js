@@ -17,6 +17,10 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     includeOperators: false
   }
 
+  const hasAccessToFilterGebied = metadata.gebieden && metadata.gebieden.filter(gebied => gebied.gm_code === filter.gebied) >= 1;
+  const hasAccessToMultipleGebieden = metadata.gebieden && metadata.gebieden.length >= 1;
+  const municipalityCodesAsArray = metadata.gebieden.map(x => x.gm_code)
+
   // ADD ZONES
   let filterparams = [];
   // If zones are explicity asked: add these to the request query
@@ -24,7 +28,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     filterparams.push("zone_ids="+filter.zones);
   }
   // If a place is selected, get all zones for this place
-  else if(filter.gebied!=="") {
+  else if(filter.gebied!=="" && hasAccessToFilterGebied) {
     // create zone filter
     let candidates = [];
     let municipality = metadata.gebieden.find(gebied => gebied.gm_code===filter.gebied);
@@ -40,10 +44,24 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
       // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
   }
+  // If no place is set, but the user is no admin: Set all places user has access to
+  // If amount of gebieden this user has access to exeeds 100, assume this is an admin user and continue
+  else if(hasAccessToMultipleGebieden && (metadata.gebieden && metadata.gebieden.length <= 100)) {
+    // Get zone IDs as array
+    const allowed_zone_ids = metadata.zones.filter(zone => {
+      return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';
+    });
+    // Get zone IDs as array
+    const zone_ids_as_array = allowed_zone_ids.map(zone => {
+      return zone.zone_id;
+    });
+    filterparams.push(`zone_ids=${zone_ids_as_array.join(',')}`);
+  }
   // If no place is set: Get NL data (NL 'zone')
   // Only providers and admins are allowed to see this info
   else {
-    filterparams.push("zone_ids=51233");
+    // Nevermind: we don't filter on country, we show everything
+    // filterparams.push("zone_ids=51233");
   }
 
   if(options.includeOperators === true) {

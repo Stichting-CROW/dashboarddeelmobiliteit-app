@@ -1,13 +1,30 @@
 import {isLoggedIn} from '../helpers/authentication.js';
 
 export const getEmptyZonesGeodataPayload = () => {
-  return  {
+  return {
     "data": {
       "type":"FeatureCollection",
       "features":[]
     },
     "filter": ""
   }
+}
+
+// Checks if user is admin
+const isAdmin = (state) => {
+  console.log('isAdmin', state)
+  if(! state) return;
+  if(! state.authentication) return;
+  if(! state.authentication.user_data.user.registrations) return;
+
+  let admin = false;
+  state.authentication.user_data.user.registrations.forEach(x => {
+    if(x.roles.includes('admin')) {
+      admin = true;
+    }
+  });
+
+  return admin;
 }
 
 export const updateZonesgeodata = (store)  => {
@@ -24,11 +41,15 @@ export const updateZonesgeodata = (store)  => {
     }
 
     let zone_ids="";
-    // if((!isLoggedIn(state))||!state) {
     if(!state) {
       // no filter data available
       zone_ids = "";
-    } else if (state.filter.gebied==="") {
+    }
+    // If admin and no place is selected:
+    // Don't show all zone boundaries, as it's a heavy API call
+    else if (state.filter.gebied==="" && isAdmin(state)) {
+    }
+    else if (state.filter.gebied==="") {
       // get bounds of all municipalities
       // console.log("set empty zones payload (gebied leeg)")
       zone_ids = state.metadata.zones.filter(zone=>(zone.zone_type==="municipality")).map(zone=>zone.zone_id).join(",");

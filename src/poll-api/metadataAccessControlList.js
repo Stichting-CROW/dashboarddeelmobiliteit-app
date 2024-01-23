@@ -85,6 +85,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
             if(metadata.municipalities.length===1) {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});
+            } else {
+              // Reset filterGebied if user has access to no or multiple gebieden
+              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
             }
             
             // items -> {"name": "Cykl","system_id": "cykl"}
