@@ -12,7 +12,6 @@ export const getEmptyZonesGeodataPayload = () => {
 
 // Checks if user is admin
 const isAdmin = (state) => {
-  console.log('isAdmin', state)
   if(! state) return;
   if(! state.authentication) return;
   if(! state.authentication.user_data.user.registrations) return;
