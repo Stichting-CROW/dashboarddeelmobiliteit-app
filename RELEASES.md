@@ -1,5 +1,23 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-02-13
+
+Vandaag hebben we serveraanpassingen gedaan gerelateerd aan het gebruikersbeheer:
+
+- FusionAuth (gebruikersbeheer-software) is geupgrade van versie 1.03 naar 1.48. Hierdoor heeft het meer mogelijkheden en is de software helemaal up to date.
+- Er is een nieuwe databaseserver met meer capaciteit
+- Er is een nieuwe applicatie-container voor FusionAuth
+- Domeinnaam auth.deelfietsdashboard.nl is uitgefaseerd
+- Domeinnaam auth.dashboarddeelmobiliteit.nl is de nieuwe URL voor FusionAuth
+
+Het resultaat hiervan is:
+- We gebruiken verouderde domeinnaam deelfietsdashboard.nl niet meer
+- De database-server is sneller: daardoor binnenkort een snellere site ivm meer werkgeheugen + we kunnen doorgroeien ivm meer schijfruimte
+- FusionAuth en de database zijn gescheiden van elkaar: daardoor een meer modulaire opzet, dat heeft voordelen
+- FusionAuth heeft nieuwe mogelijkheden, die we mogelijk in de toekomst gaan gebruiken
+
+De gebruiker merkt nog niets van deze update. Binnenkort kan de gebruiker het merken, als we de snellere databaseserver in gebruik gaan maken. FusionAuth (login-systeem) maakt hier al gebruik van.
+
 ## Release 2023-01-23
 
 **Kaart**
@@ -25,7 +43,7 @@
 
 **Gebruikersbeheer**
 
-- Update welkomsmailmail-tekst: "Leuk dat je aan de slag gaat met het Dashboard Deelmobiliteit!" -> "Welkom bij het Dashboard Deelmobiliteit!"
+- Update welkomsmailtekst: "Leuk dat je aan de slag gaat met het Dashboard Deelmobiliteit!" -> "Welkom bij het Dashboard Deelmobiliteit!"
 
 **Servicegebieden**
 
