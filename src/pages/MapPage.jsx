@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {MapComponent} from '../components/Map/MapComponent.jsx';
+import {MapComponent} from '../components/Map/MapComponent.tsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
 import {HubStatsWidget} from '../components/HubStatsWidget/HubStatsWidget';
@@ -18,6 +18,7 @@ import {
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
+
 
 import './MapPage.css';
 

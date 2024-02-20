@@ -24,7 +24,7 @@ import {
 
 const DdH3HexagonLayer = ({
   map
-}) => {
+}): JSX.Element => {
   const dispatch = useDispatch()
 
   const displayMode = useSelector((state: StateType) => state.layers ? state.layers.displaymode : DISPLAYMODE_PARK);
@@ -125,6 +125,7 @@ const DdH3HexagonLayer = ({
     filter.h3niveau
   ])
 
+  return <></>
 }
 
 export default DdH3HexagonLayer;

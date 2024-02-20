@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import moment from 'moment';
-import localization from 'moment/locale/nl'
+import 'moment/min/locales';
 import {useLocation} from "react-router-dom";
 import center from '@turf/center'
 
@@ -42,15 +42,15 @@ import './MapComponent.css';
 
 import {layers} from './layers';
 import {sources} from './sources.js';
-import {getVehicleMarkers, getVehicleMarkers_rentals} from './../Map/vehicle_marker.js';
+import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js';
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
 import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 
 // Set language for momentJS
-moment.updateLocale('nl', localization);
+moment.updateLocale('nl', moment.locale);
 
-function MapComponent(props) {
+const MapComponent = (props): JSX.Element => {
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
@@ -66,13 +66,13 @@ function MapComponent(props) {
   const dispatch = useDispatch()
 
   // Get data from store
-  const vehicles = useSelector(state => state.vehicles || null);
-  const filter = useSelector(state => state.filter || null);
-  const rentals = useSelector(state => state.rentals || null);
-  const stateLayers = useSelector(state => state.layers || null);
-  const isLoggedIn = useSelector(state => state.authentication.user_data ? true : false);
-  const providers = useSelector(state => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
-  const extent/* map boundaries */ = useSelector(state => state.layers ? state.layers.extent : null);
+  const vehicles = useSelector((state: StateType) => state.vehicles || null);
+  const filter = useSelector((state: StateType) => state.filter || null);
+  const rentals = useSelector((state: StateType) => state.rentals || null);
+  const stateLayers = useSelector((state: StateType) => state.layers || null);
+  const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
+  const providers = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+  const extent/* map boundaries */ = useSelector((state: StateType) => state.layers ? state.layers.extent : null);
   const [counter, setCounter] = useState(0);
   const zones_geodata = useSelector((state: StateType) => {
     if(!state||!state.zones_geodata) {
@@ -80,11 +80,12 @@ function MapComponent(props) {
     }
     return state.zones_geodata;
   });
-  const viewRentals = useSelector(state => state.layers ? state.layers.view_rentals : null);
+  const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
 
-  // Define map
-  const mapContainer = props.mapContainer;
+  const mapContainer = useRef(null);
+
+  // Define mapStateTypeainer;
   const [publicZones, setPublicZones] = useState(null);
   const [didMapLoad, setDidMapLoad] = useState(false);
   const [didMapDrawLoad, setDidMapDrawLoad] = useState(false);
@@ -115,7 +116,7 @@ function MapComponent(props) {
   }, [location]);
 
   // Get public zones on component load
-  useEffect(x => {
+  useEffect(() => {
     // Decide on the function to call (admin or public)
     const getZonesFunc = token ? getAdminZones : getPublicZones;
     // Get zones
@@ -181,6 +182,7 @@ function MapComponent(props) {
 
       map.current = new maplibregl.Map({
         container: mapContainer.current,
+        // @ts-ignore
         style: mapStyles.base,
         accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
         center: [lng, lat],
@@ -367,7 +369,7 @@ function MapComponent(props) {
 
   // Switch to satelite -> view automatically
   // let TO_local;
-  useEffect(x => {
+  useEffect(() => {
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
     if(! window['ddMap'].isStyleLoaded()) return;
@@ -395,19 +397,19 @@ function MapComponent(props) {
    * 
    * Load zones onto the map
   */
-  useEffect(x => {
+  useEffect(() => {
     if(! didMapLoad) return;
 
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
       // Delete draws
-      if(window.CROW_DD && window.CROW_DD.theDraw) {
-        window.CROW_DD.theDraw.deleteAll();
+      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+        window['CROW_DD'].theDraw.deleteAll();
         // #TODO Not sure why this is needed.
         // If the timeout is not here, the draw polygons keep visible
         // if you switch from zones-admin to zones-public
         setTimeout(() => {
-          window.CROW_DD.theDraw.deleteAll();
+          window['CROW_DD'].theDraw.deleteAll();
         }, 500);
       }
       // Also, hide isochrones layer
@@ -417,7 +419,7 @@ function MapComponent(props) {
 
     (async () => {
       // Remove existing zones first
-      window.CROW_DD.theDraw.deleteAll();
+      window['CROW_DD'].theDraw.deleteAll();
       const filter = {
         municipality: filterGebied
       }
@@ -439,23 +441,23 @@ function MapComponent(props) {
    * 
    * Load zones onto the map
   */
-  useEffect(x => {
+  useEffect(() => {
     // Make sure map loaded
     if(! didMapLoad) return;
     // Make sure mapDraw loaded
-    if(! window.CROW_DD || ! window.CROW_DD.theDraw) return;
+    if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
 
     // If we are not on zones page: remove all drawed zones from the map
     if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
-      if(window.CROW_DD && window.CROW_DD.theDraw) {
-        window.CROW_DD.theDraw.deleteAll();
+      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+        window['CROW_DD'].theDraw.deleteAll();
       }
       return;
     }
     // If on zones page: add zones to map
     (async () => {
       // Remove existing zones fist
-      window.CROW_DD.theDraw.deleteAll();
+      window['CROW_DD'].theDraw.deleteAll();
       const filter = {
         municipality: filterGebied
       }
@@ -473,7 +475,7 @@ function MapComponent(props) {
   */
 
   // Set active source
-  useEffect(x => {
+  useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
     const activateSources = () => {
@@ -496,7 +498,7 @@ function MapComponent(props) {
   ])
 
   // Set active layers
-  useEffect(x => {
+  useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     // if(! map.current.isStyleLoaded()) return;
 
@@ -507,7 +509,7 @@ function MapComponent(props) {
   ])
 
   // Set vehicles sources
-  useEffect(x => {
+  useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
@@ -524,7 +526,7 @@ function MapComponent(props) {
   ]);
 
   // Set zones source
-  useEffect(x => {
+  useEffect(()   => {
     if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
 
@@ -536,7 +538,7 @@ function MapComponent(props) {
   ]);
 
   // Set rentals origins source
-  useEffect(x => {
+  useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.origins || Object.keys(rentals.origins).length <= 0) return;
 
@@ -549,7 +551,7 @@ function MapComponent(props) {
   ]);
 
   // Set rentals destinations source
-  useEffect(x => {
+  useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.destinations || Object.keys(rentals.destinations).length <= 0) return;
 
@@ -663,8 +665,8 @@ function MapComponent(props) {
     stateLayers.displaymode
   ]);
 
-  // Add map controls for isochrone view
   return <>
+    <div ref={mapContainer} className="map" />
     <DdH3HexagonLayer map={map.current} />
     {isLoggedIn ? <IsochroneTools /> : null}
   </>
