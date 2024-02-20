@@ -46,6 +46,7 @@ import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js'
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
 import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
+import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -666,9 +667,14 @@ const MapComponent = (props): JSX.Element => {
   ]);
 
   return <>
+    {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map" />
+    {/* H3 layer */}
     <DdH3HexagonLayer map={map.current} />
+    {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
+    {/* Service areas layer */}
+    <DdServiceAreasLayer map={map.current} />
   </>
 }
 
