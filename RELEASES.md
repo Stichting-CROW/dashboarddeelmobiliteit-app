@@ -1,5 +1,45 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-02-20: Sneller dashboard en nieuwe servicegebieden-API
+
+**Infrastructuur**
+
+We hebben een nieuwe databaseserver ingericht en de oude databases daarnaartoe verhuisd. Dit resulteert in:
+
+- **Meer database-mogelijkheden** met PostgreSQL en postgis (gewenst voor de nieuwe servicegebieden-API)
+- Sneller bevragen van de database = **een sneller Dashboard Deelmobiliteit**
+
+De server die we hadden was 5 jaar oud. Er is nu een nieuwe server bij DigitalOcean met:
+- Verdubbeling geheugen, schijfruimte en CPU: nu 16G geheugen, 320G schijfruimte en 8 core CPU
+- Nieuwe versie van Python (versie 3.11). Python is veel sneller geworden de laatste tijd
+- Nieuwe versie van Postgres: Postgres 15
+
+De totale server-inrichting is nu als volgt:
+
+1. Er is een database-server bij DigitalOcean, die draait:
+- hoofddatabase met 'park events', verhuringen, organisaties, etc
+- FusionAuth-database met gebruikeraccounts
+- Redis, een in-memory database voor razendsnel opvragen data
+- tel38, de Geospatial Database & Geofencing Server
+
+2. Er is een database-server bij DigitalOcean voor TimescaleDB:
+- timescaleDB is de PostgreSQL database specifiek voor 'time series and events'
+- (later verplaatsen we deze database naar de andere database-server, voor kostenbesparing)
+
+2. Er zijn 2 Kubernetes clusters met een load balancer ervoor:
+- 2 nodes van elk 4G memory met 80G disk
+- alle Dashboard Deelmobiliteit apps, API's en data-importscripts draaien hier
+- (later zetten we Kubernetes clusters om naar Docker containers)
+
+3. Bij Hetzner staat een dedicated server voor de loopafstandenfunctionaliteit en -API
+
+4. Zowel bij DigitalOcean als Hetzner hebben we enkele testservers
+
+**Servicegebieden**
+
+- 🪄 Nieuwe servicegebieden-API is nu actief
+  - Voorbeeld: `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=GM0518&municipalities=GM0599&operators=check`
+
 ## Release 2024-02-13
 
 Vandaag hebben we serveraanpassingen gedaan gerelateerd aan het gebruikersbeheer:
