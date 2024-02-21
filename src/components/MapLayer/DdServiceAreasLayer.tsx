@@ -6,6 +6,8 @@ import {
   DISPLAYMODE_RENTALS,
 } from '../../reducers/layers.js';
 
+import {renderServiceAreas} from '../Map/MapUtils/map.service_areas';
+
 import {StateType} from '../../types/StateType.js';
 
 const DdServiceAreasLayer = ({
@@ -37,6 +39,8 @@ const DdServiceAreasLayer = ({
 
       setServiceAreas(res);
       console.log('The service areas are: ', res);
+      if(! res || ! res[0]) return;
+      renderServiceAreas(map, res[0].geometries);
     })();
 
     // onComponentUnLoad

@@ -9,7 +9,7 @@ const EventsTimeline = () => {
                     '1 jan 2023',
                     '3 jun 2023',
                     '8 jul 2023'
-                ].map(date => <div className="event dot-label">
+                ].map(date => <div className="event dot-label" key={date}>
                     <span className="event-title">
                         {date}
                     </span>
