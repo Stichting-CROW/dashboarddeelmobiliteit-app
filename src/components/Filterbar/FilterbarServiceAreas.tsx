@@ -26,7 +26,6 @@ import Modal from '../Modal/Modal.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
-import EventsTimeline from '../EventsTimeline/EventsTimeline';
 
 import {StateType} from '../../types/StateType';
 
@@ -668,7 +667,7 @@ function FilterbarServiceAreas({
         Selecteer een plaats.
       </div>}
 
-      <Fieldset title="Zonelagen">
+      {/* <Fieldset title="Zonelagen">
         {[
             'Microhubs',
             'Verbodszones',
@@ -687,18 +686,18 @@ function FilterbarServiceAreas({
                 {x}
             </label>
         </div>)}
-    </Fieldset>
+    </Fieldset> */}
 
-    <Fieldset title="Aanbieders`">
+    <Fieldset title="Aanbieders">
         {[
             'CHECK',
-            'TIER',
+            // 'TIER',
             // 'Donkey Republic'
         ].map(x => <div className="
             flex items-center space-x-2
             my-2
         ">
-            <Checkbox id={`aanbieder-${x}`} />
+            <Checkbox id={`aanbieder-${x}`} checked />
             <label
                 htmlFor={`aanbieder-${x}`}
                 className="
@@ -1054,14 +1053,6 @@ function FilterbarServiceAreas({
         </div>
 
       </div>}
-
-      <div style={{
-        position: 'fixed',
-        bottom: '100px',
-        left: '360px'
-      }}>
-        <EventsTimeline></EventsTimeline>
-      </div>
 
     </div>
   )

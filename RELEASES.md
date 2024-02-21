@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-02-21: Servicegebieden-pagina online
+
+**Servicegebieden**
+
+- 🪄 De nieuwe Servicegebieden-pagina staat online voor testgebruikers
+
 ## Release 2024-02-20: Sneller dashboard en nieuwe servicegebieden-API
 
 **Infrastructuur**
@@ -26,14 +32,14 @@ De totale server-inrichting is nu als volgt:
 - timescaleDB is de PostgreSQL database specifiek voor 'time series and events'
 - (later verplaatsen we deze database naar de andere database-server, voor kostenbesparing)
 
-2. Er zijn 2 Kubernetes clusters met een load balancer ervoor:
+3. Er zijn 2 Kubernetes clusters met een load balancer ervoor:
 - 2 nodes van elk 4G memory met 80G disk
 - alle Dashboard Deelmobiliteit apps, API's en data-importscripts draaien hier
 - (later zetten we Kubernetes clusters om naar Docker containers)
 
-3. Bij Hetzner staat een dedicated server voor de loopafstandenfunctionaliteit en -API
+4. Bij Hetzner staat een dedicated server voor de loopafstandenfunctionaliteit en -API
 
-4. Zowel bij DigitalOcean als Hetzner hebben we enkele testservers
+5. Zowel bij DigitalOcean als Hetzner hebben we enkele testservers
 
 **Servicegebieden**
 
