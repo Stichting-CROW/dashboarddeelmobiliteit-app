@@ -75,6 +75,8 @@ const createFeatureCollection = (filter, allHexes, geometriesHbData) => {
 }
 
 const removeServiceAreaSources = (map: any) => {
+    if(! map) return;
+
     let key, source;
     
     key = 'service_areas';
@@ -83,6 +85,8 @@ const removeServiceAreaSources = (map: any) => {
 }
 
 const removeServiceAreasFromMap = (map: any) => {
+    if(! map) return;
+
     let layer, key;
     let source;
     
@@ -177,5 +181,6 @@ const renderServiceAreas = async (
 }
 
 export {
-    renderServiceAreas
+    renderServiceAreas,
+    removeServiceAreasFromMap
 }

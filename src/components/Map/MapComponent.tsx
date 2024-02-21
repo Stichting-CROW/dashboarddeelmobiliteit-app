@@ -674,7 +674,7 @@ const MapComponent = (props): JSX.Element => {
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
-    <DdServiceAreasLayer map={map.current} />
+    {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
   </>
 }
 

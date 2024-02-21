@@ -7,7 +7,10 @@ import {
   DISPLAYMODE_RENTALS,
 } from '../../reducers/layers.js';
 
-import {renderServiceAreas} from '../Map/MapUtils/map.service_areas';
+import {
+  renderServiceAreas,
+  removeServiceAreasFromMap
+} from '../Map/MapUtils/map.service_areas';
 
 import {StateType} from '../../types/StateType.js';
 
@@ -47,13 +50,17 @@ const DdServiceAreasLayer = ({
       setServiceAreasHistory(res);
       console.log('serviceAreasHistory', res)
     })();
-
-    // onComponentUnLoad
-    return () => {
-
-    };
   }, [
     filter.gebied
+  ]);
+
+  // onComponentUnLoad
+  useEffect(() => {
+    return () => {
+      console.log('sure');
+      removeServiceAreasFromMap(map);
+    };
+  }, [
   ]);
 
   // Do things if 'serviceAreas' change
