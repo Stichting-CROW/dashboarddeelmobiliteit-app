@@ -1,0 +1,51 @@
+/* Inspiration from http://sherubthakur.github.io/react-horizontal-timeline/ */
+
+.EventsTimeline {
+    display: block;
+    background: #fff;
+    width: calc(100vw - 360px - 90px);
+    height: 100px;
+}
+.EventsTimeline .inner {
+    position: absolute;
+    left: 0px;
+    top: 49px;
+    height: 2px;
+    width: 100%;
+    transform: translate3d(0px, 0px, 0px);
+}
+.EventsTimeline .line {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    background-color: rgb(223, 223, 223);
+}
+.EventsTimeline .events-wrapper {
+    display:flex;
+    justify-content:space-around;
+}
+.EventsTimeline .event {
+    text-align: center;
+    padding-bottom: 15px;
+    cursor: pointer;
+}
+.EventsTimeline .event-title {
+    margin-top: -35px;
+    display: block;
+}
+.EventsTimeline .dot-label {
+    color: #383838;
+}
+.EventsTimeline .dot {
+    position: absolute;
+    bottom: -5px;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease 0s, border-color 0.3s ease 0s;
+    background-color: #15AEEF;
+    border: 2px solid #15AEEF;
+}

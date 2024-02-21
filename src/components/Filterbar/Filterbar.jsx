@@ -19,6 +19,7 @@ import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
 
+import FilterbarServiceAreas from './FilterbarServiceAreas';
 import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
@@ -31,6 +32,7 @@ import {
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_ZONES_PUBLIC,
+  DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -60,6 +62,7 @@ function Filterbar({
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
   const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
+  const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
   
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -100,6 +103,13 @@ function Filterbar({
   if(iszonespublic || iszonesadmin) {
     return <FilterbarZones
       view={iszonespublic ? 'readonly' : 'adminView'}
+      hideLogo={hideLogo}
+    />
+  }
+
+  // Zones
+  if(isservicegebieden) {
+    return <FilterbarServiceAreas
       hideLogo={hideLogo}
     />
   }

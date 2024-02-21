@@ -1,5 +1,45 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-02-20: Sneller dashboard en nieuwe servicegebieden-API
+
+**Infrastructuur**
+
+We hebben een nieuwe databaseserver ingericht en de oude databases daarnaartoe verhuisd. Dit resulteert in:
+
+- **Meer database-mogelijkheden** met PostgreSQL en postgis (gewenst voor de nieuwe servicegebieden-API)
+- Sneller bevragen van de database = **een sneller Dashboard Deelmobiliteit**
+
+De server die we hadden was 5 jaar oud. Er is nu een nieuwe server bij DigitalOcean met:
+- Verdubbeling geheugen, schijfruimte en CPU: nu 16G geheugen, 320G schijfruimte en 8 core CPU
+- Nieuwe versie van Python (versie 3.11). Python is veel sneller geworden de laatste tijd
+- Nieuwe versie van Postgres: Postgres 15
+
+De totale server-inrichting is nu als volgt:
+
+1. Er is een database-server bij DigitalOcean, die draait:
+- hoofddatabase met 'park events', verhuringen, organisaties, etc
+- FusionAuth-database met gebruikeraccounts
+- Redis, een in-memory database voor razendsnel opvragen data
+- tel38, de Geospatial Database & Geofencing Server
+
+2. Er is een database-server bij DigitalOcean voor TimescaleDB:
+- timescaleDB is de PostgreSQL database specifiek voor 'time series and events'
+- (later verplaatsen we deze database naar de andere database-server, voor kostenbesparing)
+
+2. Er zijn 2 Kubernetes clusters met een load balancer ervoor:
+- 2 nodes van elk 4G memory met 80G disk
+- alle Dashboard Deelmobiliteit apps, API's en data-importscripts draaien hier
+- (later zetten we Kubernetes clusters om naar Docker containers)
+
+3. Bij Hetzner staat een dedicated server voor de loopafstandenfunctionaliteit en -API
+
+4. Zowel bij DigitalOcean als Hetzner hebben we enkele testservers
+
+**Servicegebieden**
+
+- 🪄 Nieuwe servicegebieden-API is nu actief
+  - Voorbeeld: `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=GM0518&municipalities=GM0599&operators=check`
+
 ## Release 2024-02-13
 
 Vandaag hebben we serveraanpassingen gedaan gerelateerd aan het gebruikersbeheer:
@@ -54,6 +94,28 @@ De gebruiker merkt nog niets van deze update. Binnenkort kan de gebruiker het me
 
 - ✨ Nieuw database installatiescript, waardoor je afzonderlijk van elkaar de database en de Dashboard Deelmobiliteit app kunt initialiseren ([commit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-docs/commit/e0b0d9922b7ddf475df9391c6b56f2d87d153499))
 - 🐛 Fix: Redis database laadde geen bestaande data in als je de databaseserver zou stoppen, weggooien en opnieuw zou installeren ([commit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-docs/commit/e0b0d9922b7ddf475df9391c6b56f2d87d153499#diff-7e126862da612efb636354ce53c9b23e7c390e68a5057b7642b3bb10c4be0720))
+
+## Release 2023-12-14
+
+**Over**
+
+- 🪄 Voeg datakwaliteit-info toe aan Over-pagina [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/180)
+- 🪄 Voeg link naar docs toe aan Over-pagina [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/181)
+- "[Over](https://dashboarddeelmobiliteit.nl/over)" pagina toegevoegd aan top menu (daardoor Over en FAQ gemakkelijker vindbaar)
+
+**API key beheer**
+
+- 🪄 Voeg waarschuwing-tekst toe aan API-key beheer: Delen van API-key geeft toegang tot data [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/182)
+
+**Organisatiebeheer**
+
+- 🪄 Beheerder kan nu elke gemeente als datagebied toekennen aan een organisatie (Voorheen konden alleen gemeenten met aanbod van voertuigen worden toegoegd) [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/177)
+- 🪄 Beheerder kan nu datagebieden toekennen aan organisatietype "ANDERE OVERHEID"
+
+**Documentatie-site**
+
+- 🪄 Nieuwe documentatiepagina: '[How to add a feed](https://docs.dashboarddeelmobiliteit.nl/start/how_to_add_a_feed/)' (We hebben de [hr-data docs](https://docs.crow.nl/deelfietsdashboard/hr-dataspec/#how-to-offer-vehicle-type-in-gbfs-deprecated) toegevoegd aan de nieuwe documentatie-site) [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-docs/issues/2)
+- 🪄 In data feed docs, maak onderscheid tussen data voor monitoring en sturen van aanbieders [link](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-docs/issues/3)
 
 ## Release 2023-12-06
 

@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
+import {StateType} from '../../types/StateType';
 
 import Logo from '../Logo.jsx';
 import PillMenu from '../PillMenu/PillMenu';
@@ -8,18 +10,24 @@ import { IconButtonClose } from '../IconButtons.jsx';
 export default function Misc({children}) {
   const navigate = useNavigate();
 
+  const isLoggedIn = useSelector((state: StateType) => {
+    return state.authentication.user_data ? true : false;
+  });
+
   const pillMenuItems = [
     {
       title: 'Profiel',
-      link: '/profile'
+      link: '/profile',
     },
     {
       title: 'Over',
-      link: '/over'
+      link: '/over',
+      public: true
     },
     {
       title: 'FAQ',
-      link: '/faq'
+      link: '/faq',
+      public: true
     },
     {
       title: 'Exporteer',
@@ -30,6 +38,12 @@ export default function Misc({children}) {
       link: '/profile/api'
     }
   ];
+
+  // Only show pill items user has access to
+  const allowedPillMenuItems = pillMenuItems.filter(x => {
+    if(isLoggedIn) return true;
+    return x.public === true;
+  });
 
   return (
     <div className="
@@ -51,7 +65,7 @@ export default function Misc({children}) {
         <Logo title="Extra" />
 
         <div className="mt-8">
-          <PillMenu items={pillMenuItems} />
+          <PillMenu items={allowedPillMenuItems} />
         </div>
 
         <div className="
