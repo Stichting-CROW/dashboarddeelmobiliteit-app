@@ -138,9 +138,7 @@ function Menu({
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
 
-  const doShowZones = () => {
-    return true;
-
+  const doShowServiceGebieden = () => {
     const validEmailAddresses = [
       'mail@bartroorda.nl',
       'rinse.gorter@denhaag.nl',
@@ -218,20 +216,19 @@ function Menu({
               icon={'/images/components/Menu/verhuringen.svg'}
             />
 
-            {doShowZones && <MenuItem
+            <MenuItem
               pathName={pathName}
               text={'Zones'}
               path={'/map/zones'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
-            />}
+            />
 
-            <MenuItem
+            {doShowServiceGebieden && <MenuItem
               pathName={pathName}
               text={'Servicegebieden'}
               path={'/map/servicegebieden'}
               icon={'/images/components/Menu/ontwikkeling.svg'}
-            />
-
+            />}
 
             <MenuItem
               pathName={pathName}
