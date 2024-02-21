@@ -37,10 +37,9 @@ const DdServiceAreasLayer = ({
     (async () => {
       const res = await fetchServiceAreas();
 
+      // Set service areas in state
       setServiceAreas(res);
       console.log('The service areas are: ', res);
-      if(! res || ! res[0]) return;
-      renderServiceAreas(map, res[0].geometries);
     })();
 
     // onComponentUnLoad
@@ -48,13 +47,33 @@ const DdServiceAreasLayer = ({
 
     };
   }, [
-    filter.gebied,
+    filter.gebied
+  ]);
+
+  // onComponentLoad
+  useEffect(() => {
+    // Return if no service areas were found
+    if(! serviceAreas || ! serviceAreas[0]) return;
     
+    // Get the service area of the selected municipality
+    const serviceAreasForMunicipality = serviceAreas.filter(x => x.municipality === filter.gebied).pop();
+
+    // Return if no service areas were found for this municipality
+    if(! serviceAreasForMunicipality) return;
+
+    renderServiceAreas(map, serviceAreasForMunicipality.geometries);
+
+    // onComponentUnLoad
+    return () => {
+
+    };
+  }, [
+    serviceAreas
   ]);
 
   // Function that gets service areas
   const fetchServiceAreas = async () => {
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=GM0518&municipalities=GM0599&operators=check`;
+    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=check`;
     const response = await fetch(url);
     const json = await response.json();
 

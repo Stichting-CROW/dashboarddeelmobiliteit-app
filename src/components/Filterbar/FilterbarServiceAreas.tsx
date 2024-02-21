@@ -668,7 +668,7 @@ function FilterbarServiceAreas({
         Selecteer een plaats.
       </div>}
 
-      <Fieldset title="Zonelagen">
+      {/* <Fieldset title="Zonelagen">
         {[
             'Microhubs',
             'Verbodszones',
@@ -687,18 +687,18 @@ function FilterbarServiceAreas({
                 {x}
             </label>
         </div>)}
-    </Fieldset>
+    </Fieldset> */}
 
-    <Fieldset title="Aanbieders`">
+    <Fieldset title="Aanbieders">
         {[
             'CHECK',
-            'TIER',
+            // 'TIER',
             // 'Donkey Republic'
         ].map(x => <div className="
             flex items-center space-x-2
             my-2
         ">
-            <Checkbox id={`aanbieder-${x}`} />
+            <Checkbox id={`aanbieder-${x}`} checked />
             <label
                 htmlFor={`aanbieder-${x}`}
                 className="
