@@ -46,7 +46,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   }
   // If no place is set, but the user is no admin: Set all places user has access to
   // If amount of gebieden this user has access to exeeds 100, assume this is an admin user and continue
-  else if(hasAccessToMultipleGebieden && (metadata.gebieden && metadata.gebieden.length <= 100)) {
+  else if(hasAccessToMultipleGebieden && ! options.show_global) {
     // Get zone IDs as array
     const allowed_zone_ids = metadata.zones.filter(zone => {
       return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';

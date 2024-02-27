@@ -105,7 +105,9 @@ const doApiCall = (
   let options = {};
   if(null!==state.filter&&null!==state.authenticationdata) {
     url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
-    let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
+    let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata, {
+      show_global: true
+    });
     if(filterparams.length>0) {
       url += "?" + filterparams.join("&");
     }

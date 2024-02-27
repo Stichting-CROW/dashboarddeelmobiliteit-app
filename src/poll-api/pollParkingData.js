@@ -107,7 +107,9 @@ const doApiCall = (
   let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
 
   let options = {};
-  let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
+  let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
+    show_global: true
+  });
 
   // Set query params for guests
   if(! canfetchdata) {
