@@ -1,10 +1,20 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-02-27
+
+**Aanbod / Verhuringen**
+
+- 🐛 Fix: Admin users zagen altijd alle voertuigen op de kaart, ook als 1 specifieke plaats geselecteerd was
+
+**Ontwikkeling**
+
+- 🐛 Fix: Admin users zagen 2x te veel voertuigen bij Beschikbare voertuigen en Verhuringen, omdat niet gefilterd werd op 'Alleen Nederland' [#194](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/194)
+
 ## Release 2024-02-21: Servicegebieden-pagina online
 
 **Servicegebieden**
 
-- 🪄 De nieuwe Servicegebieden-pagina staat online voor testgebruikers
+- 🪄 De nieuwe Servicegebieden-pagina staat online, met de live servicegebieden van CHECK
 
 ## Release 2024-02-20: Sneller dashboard en nieuwe servicegebieden-API
 
