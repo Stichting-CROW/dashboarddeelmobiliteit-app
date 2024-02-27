@@ -17,7 +17,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     includeOperators: false
   }
 
-  const hasAccessToFilterGebied = metadata.gebieden && metadata.gebieden.filter(gebied => gebied.gm_code === filter.gebied) >= 1;
+  const hasAccessToFilterGebied = metadata.gebieden && metadata.gebieden.filter(gebied => gebied.gm_code === filter.gebied).length >= 1;
   const hasAccessToMultipleGebieden = metadata.gebieden && metadata.gebieden.length >= 1;
   const municipalityCodesAsArray = metadata.gebieden.map(x => x.gm_code)
 
