@@ -103,7 +103,7 @@ function Export() {
     setSuccesfullRawDataRequest(false);
     let result = await downloadRawData(token, {
       startDate: moment(startDate).format('YYYY-MM-DD'),
-      endDate: moment(endDate).format('YYYY-MM-DD')
+      endDate: moment(endDate).format('YYYY-MM-DD 23:59:59')
     });
     if ("email" in result) {
       setSuccesfullRawDataRequest(true);

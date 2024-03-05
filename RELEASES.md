@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-03-05
+
+**Ruwe data export**
+
+- 🐛 Fix: Ruwe data export exporteerde _tot_ de einddatum ipv _t/m_ de opgegeven einddatum [#186](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/186)
+
 ## Release 2024-02-27
 
 **Aanbod / Verhuringen**
@@ -9,6 +15,7 @@
 **Ontwikkeling**
 
 - 🐛 Fix: Admin users zagen 2x te veel voertuigen bij Beschikbare voertuigen en Verhuringen, omdat niet gefilterd werd op 'Alleen Nederland' [#194](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues/194)
+- 🐛 Fix: Verhuringen-per-dag misten per 20 februari (de databasemigratie). Dit is opgelost en grafiekdata is met terugwerkende kracht hergenereerd
 
 ## Release 2024-02-21: Servicegebieden-pagina online
 
