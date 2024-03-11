@@ -57,9 +57,14 @@
 .EventsTimeline .dot-label:hover .event-title {
     z-index: 1;
 }
-.EventsTimeline:hover .dot-label .event-title {
+.EventsTimeline:hover .dot-label.is-active .event-title {
+    transform: scale(1);
+}
+.EventsTimeline:hover .dot-label .event-title,
+.EventsTimeline:hover .dot-label:hover.is-active .event-title {
     transform: scale(1.4);
 }
+
 .EventsTimeline .dot-label.is-active .event-title {
     background-color: #fff;
     color: #000;
