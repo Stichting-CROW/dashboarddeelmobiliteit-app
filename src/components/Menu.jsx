@@ -223,12 +223,12 @@ function Menu({
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />
 
-            {doShowServiceGebieden && <MenuItem
+            <MenuItem
               pathName={pathName}
               text={'Servicegebieden'}
               path={'/map/servicegebieden'}
               icon={'/images/components/Menu/ontwikkeling.svg'}
-            />}
+            />
 
             <MenuItem
               pathName={pathName}

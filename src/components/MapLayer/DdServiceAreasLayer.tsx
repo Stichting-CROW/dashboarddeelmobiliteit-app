@@ -84,21 +84,6 @@ const DdServiceAreasLayer = ({
     serviceAreas
   ]);
 
-  // Do things if 'serviceAreasHistory' changes
-  useEffect(() => {
-    // Return if no service areas were found
-    if(! serviceAreasHistory) return;
-    
-    populateHistoryTimeline(serviceAreasHistory);
-
-    // onComponentUnLoad
-    return () => {
-
-    };
-  }, [
-    serviceAreasHistory
-  ]);
-
   // Function that gets service areas
   const fetchServiceAreas = async () => {
     const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=check`;
@@ -110,20 +95,14 @@ const DdServiceAreasLayer = ({
 
   // Function that gets service areas
   const fetchServiceAreasHistory = async () => {
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=check&start_date=2024-01-01&end_date=2024-03-01`;
+    const startDate = '2024-01-01';
+    const endDate = '2024-12-31';
+
+    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=check&start_date=${startDate}&end_date=${endDate}`;
     const response = await fetch(url);
     const json = await response.json();
 
     return json;
-  }
-
-  const populateHistoryTimeline = (history: any) => {
-    if(! history || history.constructor !== Array) return;
-
-    const uniqueDates = history.map(x => x.valid_from);
-    
-    // setHistoryEventDates()
-    // TODO: Remove this function & pass history to EventsTimeline component
   }
 
   return <>
@@ -132,7 +111,7 @@ const DdServiceAreasLayer = ({
         bottom: '100px',
         left: '360px'
       }}>
-        {/* <EventsTimeline></EventsTimeline> */}
+        <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>
       </div>
   </>
 }

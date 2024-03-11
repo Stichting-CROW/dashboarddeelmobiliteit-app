@@ -32,16 +32,27 @@
     padding-bottom: 15px;
     cursor: pointer;
 }
-.EventsTimeline .event-title {
-    margin-top: -35px;
-    display: block;
-}
 .EventsTimeline .dot-label {
+    position:relative;
     color: #383838;
+}
+.EventsTimeline .dot-label .event-title {
+    display: none;
+}
+.EventsTimeline .dot-label:hover .event-title {
+    position: absolute;
+    right:-40px;
+    top:-39px;
+    white-space: nowrap;
+    background-color: #15AEEF;
+    padding: 2px 5px ;
+    display: block;
+    color: #fff;
+    font-weight: bold;
 }
 .EventsTimeline .dot {
     position: absolute;
-    bottom: -5px;
+    bottom: 8px;
     height: 12px;
     width: 12px;
     border-radius: 50%;
@@ -49,3 +60,5 @@
     background-color: #15AEEF;
     border: 2px solid #15AEEF;
 }
+
+

@@ -696,7 +696,7 @@ function FilterbarServiceAreas({
         ].map(x => <div className="
             flex items-center space-x-2
             my-2
-        ">
+        " key={x}>
             <Checkbox id={`aanbieder-${x}`} checked />
             <label
                 htmlFor={`aanbieder-${x}`}
