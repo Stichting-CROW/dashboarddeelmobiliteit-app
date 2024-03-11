@@ -27,7 +27,7 @@ const EventsTimeline = ({
         const events = changeHistory.map((x) => {
             return {
                 ...x,
-                valid_from_formatted: new Date(x.valid_from).toLocaleDateString('nl-NL')
+                valid_from_formatted: new Date(x.valid_from).toLocaleString('nl-NL').slice(0, -3)
             }
         }).slice(changeHistory.length-10, changeHistory.length);
 
@@ -38,11 +38,20 @@ const EventsTimeline = ({
         <div className="inner">
             <div className="line" />
             <div className="events-wrapper">
-                {events.map(x => <div className="event dot-label" key={`${x.operator}-${x.service_area_version_id}`}>
+                {events.map(x => <div className={`
+                    event dot-label
+                    text-xs
+                    ${searchParams.get('version') == x.service_area_version_id ? 'is-active' : ''}
+                `}
+                key={`${x.operator}-${x.service_area_version_id}`}
+            >
                     <span className="event-title">
                         {x.valid_from_formatted}
                     </span>
-                    <span className="dot" onClick={() => {
+                    <span className={`
+                        dot
+                        ${searchParams.get('version') == x.service_area_version_id ? 'is-active' : ''}
+                    `} onClick={() => {
                         searchParams.set('version', x.service_area_version_id);
                         setSearchParams(searchParams);
                     }} />
