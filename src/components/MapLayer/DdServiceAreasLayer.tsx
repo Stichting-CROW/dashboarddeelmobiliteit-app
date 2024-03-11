@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom'
 import EventsTimeline from '../EventsTimeline/EventsTimeline';
 
 import {
@@ -9,8 +10,13 @@ import {
 
 import {
   renderServiceAreas,
-  removeServiceAreasFromMap
+  removeServiceAreasFromMap,
 } from '../Map/MapUtils/map.service_areas';
+
+import {
+  renderServiceAreaDelta,
+  removeServiceAreaDeltaFromMap
+} from '../Map/MapUtils/map.service_area_delta';
 
 import {StateType} from '../../types/StateType.js';
 
@@ -19,6 +25,8 @@ const DdServiceAreasLayer = ({
 }): JSX.Element => {
   const [serviceAreas, setServiceAreas] = useState([]);
   const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
+  const [serviceAreaDelta, setServiceAreaDelta] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useDispatch()
 
@@ -48,7 +56,6 @@ const DdServiceAreasLayer = ({
     (async () => {
       const res = await fetchServiceAreasHistory();
       setServiceAreasHistory(res);
-      console.log('serviceAreasHistory', res)
     })();
   }, [
     filter.gebied
@@ -57,10 +64,20 @@ const DdServiceAreasLayer = ({
   // onComponentUnLoad
   useEffect(() => {
     return () => {
-      console.log('sure');
       removeServiceAreasFromMap(map);
     };
   }, [
+  ]);
+
+  // Load 'delta' if if version_id changes
+  useEffect(() => {
+    (async () => {
+      const deltaResponse = await fetchServiceAreaDelta(searchParams.get('version'));
+      removeServiceAreasFromMap(map);
+      setServiceAreaDelta(deltaResponse);
+    })();
+  }, [
+    searchParams.get('version')
   ]);
 
   // Do things if 'serviceAreas' change
@@ -84,6 +101,21 @@ const DdServiceAreasLayer = ({
     serviceAreas
   ]);
 
+  // Do things if 'serviceAreaDelta' change
+  useEffect(() => {
+    // Return if no service areas were found
+    if(! serviceAreaDelta || serviceAreaDelta.length === 0) return;
+    
+    // Render service area delta
+    renderServiceAreaDelta(map, serviceAreaDelta);
+
+    // onComponentUnLoad
+    return () => {
+    };
+  }, [
+    serviceAreaDelta
+  ]);
+
   // Function that gets service areas
   const fetchServiceAreas = async () => {
     const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=check`;
@@ -93,12 +125,21 @@ const DdServiceAreasLayer = ({
     return json;
   }
 
-  // Function that gets service areas
+  // Function that gets service areas history
   const fetchServiceAreasHistory = async () => {
     const startDate = '2024-01-01';
     const endDate = '2024-12-31';
 
     const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=check&start_date=${startDate}&end_date=${endDate}`;
+    const response = await fetch(url);
+    const json = await response.json();
+
+    return json;
+  }
+
+  // Function that gets one specific version with its changes
+  const fetchServiceAreaDelta = async (service_area_version_id) => {
+    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/delta/${service_area_version_id}`;
     const response = await fetch(url);
     const json = await response.json();
 

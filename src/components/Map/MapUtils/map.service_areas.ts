@@ -29,51 +29,6 @@ const getGeometriesForUser = async (map, token, filter) => {
   return responseJson;
 }
 
-const createFeatureCollection = (filter, allHexes, geometriesHbData) => {
-  let features = [];
-
-//   /*
-//    * Create geojson for all empty hexes
-//    */
-//   // Create hexagon feature set
-//   let hexagonsAsArray = [];
-//   allHexes.forEach((x) => {
-//     hexagonsAsArray[x] = 0;
-//   });
-
-//   /*
-//    * Create geojson for all filled hexes
-//    */
-//   // Get selected h3 hexe(s) from state
-//   const selectedH3Hexes = (filter.h3niveau && filter.h3niveau === 8) ? filter.h3hexes8 : filter.h3hexes7;
-
-//   // Add data value to hexes
-//   geometriesHbData.forEach((x: HexagonType) => {
-//     hexagonsAsArray[x.cell] = x.number_of_trips;
-//   });
-//   // Transform the hexagons into a GeoJSON object
-//   const geojson = geojson2h3.h3SetToFeatureCollection(
-//     Object.keys(hexagonsAsArray),
-//     hex => {
-//       return {
-//         value: hexagonsAsArray[hex],
-//         selected: selectedH3Hexes.indexOf(hex) > -1 ? 1 : 0
-//       }
-//     }
-//   );
-
-//   // Create a geojson polygon for the outline border
-//   const threshold = 0.75;
-//   const geojsonForOuterBorder = geojson2h3.h3SetToFeature(
-//     Object.keys(hexagonsAsArray).filter(hex => hexagonsAsArray[hex] > threshold)
-//   );
-
-  return {
-    // geojson,
-    // geojsonForOuterBorder
-  }
-}
-
 const removeServiceAreaSources = (map: any) => {
     if(! map) return;
 

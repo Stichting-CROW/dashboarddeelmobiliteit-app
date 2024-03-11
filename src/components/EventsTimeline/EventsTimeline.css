@@ -4,12 +4,12 @@
     display: block;
     background: #fff;
     width: calc(100vw - 360px - 90px);
-    height: 100px;
+    height: 40px;
 }
 .EventsTimeline .inner {
     position: absolute;
     left: 0px;
-    top: 49px;
+    top: 20px;
     height: 2px;
     width: 100%;
     transform: translate3d(0px, 0px, 0px);

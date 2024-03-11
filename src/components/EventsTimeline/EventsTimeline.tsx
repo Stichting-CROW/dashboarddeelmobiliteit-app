@@ -1,5 +1,8 @@
 import {useEffect, useState} from 'react';
 
+// Import components
+import { useSearchParams } from 'react-router-dom'
+
 import './EventsTimeline.css';
 
 // https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=GM0599&operators=check&start_date=2024-01-21&end_date=2024-02-28
@@ -10,6 +13,7 @@ const EventsTimeline = ({
     changeHistory: any
 }) => {
     const [events, setEvents] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         populateHistoryTimeline();
@@ -18,7 +22,6 @@ const EventsTimeline = ({
     ])
 
     const populateHistoryTimeline = () => {
-        console.log('changeHistory', changeHistory)
         if(! changeHistory) return;
 
         const events = changeHistory.map((x) => {
@@ -27,8 +30,6 @@ const EventsTimeline = ({
                 valid_from_formatted: new Date(x.valid_from).toLocaleDateString('nl-NL')
             }
         }).slice(changeHistory.length-10, changeHistory.length);
-
-        console.log('events', events);
 
         setEvents(events)
     }
@@ -41,7 +42,10 @@ const EventsTimeline = ({
                     <span className="event-title">
                         {x.valid_from_formatted}
                     </span>
-                    <span className="dot" />
+                    <span className="dot" onClick={() => {
+                        searchParams.set('version', x.service_area_version_id);
+                        setSearchParams(searchParams);
+                    }} />
                 </div>)}
             </div>
         </div>
