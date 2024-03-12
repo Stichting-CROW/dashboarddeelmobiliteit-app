@@ -1,5 +1,26 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-03-11
+
+**Servicegebieden**
+
+- 🪄 Toon laatste servicegebiedwijzigingen in tijdlijn
+- 🪄 Toon in de tijdlijn welke historische versie op de kaart zichtbaar is
+- 🪄 Klik door de versies in de tijdlijn heen
+- 🪄 Zie op de kaart wat is veranderd (grijs=ongewijzigd, groen=toegevoegd, rood=verwijderd)
+
+**Ontwikkeling** 
+
+- 🪄 [Aggregeer](https://github.com/Stichting-CROW/dd-zone-stats-aggregator/commit/b2ccbdb9895db825796b976edbc58b7a404fefe0) ook microhubs-statistieken van hubs groter dan 100 voertuigen
+
+**Ruwe data export**
+
+- 🐛 Fix: [Exporteer](https://github.com/Stichting-CROW/dd-raw-data-exporter/commit/33d9f27ba853b8906bb3f67045e2be8d327005cd) ook parkeringen en verhuringen als geen voertuigtype bekend is
+
+**Documentatie**
+
+- 🪄 Nieuwe [API-documentatie 'Service Areas'](https://docs.dashboarddeelmobiliteit.nl/api_docs/service_areas/)
+
 ## Release 2024-03-05
 
 **Ruwe data export**
