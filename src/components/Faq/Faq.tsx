@@ -15,6 +15,13 @@ function Faq() {
       </h1>
 
       <div className="my-5">
+        <Section title="Wat zijn de nieuwste functionaliteiten?">
+          <div dangerouslySetInnerHTML={{ __html: marked.parse(`
+De nieuwste functionaliteiten vind je hier:
+- **[Dashboard Deelmobiliteit app Releases](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases)**
+          `) }}
+          />
+        </Section>
         <Section title="Mogelijkheden met maatwerkzones?">
           <div dangerouslySetInnerHTML={{ __html: marked.parse(`
 Maatwerkzones, soms ook microhubs genoemd, zijn zelf-ingetekende zones. Deze zones kun je gebruiken voor het inzien van statistische data. Ook kun je de waardes instellen voor deze zones, zoals een maximum aantal voertuigen, en kun je op de hoogte gehouden worden als deze waardes overschreden worden.
