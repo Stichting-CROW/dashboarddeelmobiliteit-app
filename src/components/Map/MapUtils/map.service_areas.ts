@@ -43,7 +43,6 @@ const removeServiceAreasFromMap = (map: any) => {
     if(! map) return;
 
     let layer, key;
-    let source;
     
     key = 'service_areas-layer-fill';
     layer = map.getLayer(`${key}`);

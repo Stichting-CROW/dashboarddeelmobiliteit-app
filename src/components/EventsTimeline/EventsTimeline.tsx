@@ -114,7 +114,7 @@ const EventsTimeline = ({
     }
 
     const shrinkTimeline = () => {
-        if(! visJsRef) return;
+        if(! visJsRef || ! visJsRef.current) return;
         if(! timeline) return;
 
         timeline.setOptions(Object.assign({}, timelineOptions, {height:"125px"}));

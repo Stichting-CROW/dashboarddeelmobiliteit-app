@@ -64,6 +64,7 @@ const DdServiceAreasLayer = ({
   // onComponentUnLoad
   useEffect(() => {
     return () => {
+      console.log('removeServiceAreasFromMap')
       removeServiceAreasFromMap(map);
     };
   }, [
