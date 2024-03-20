@@ -4,7 +4,11 @@
     display: block;
     background: #fff;
     width: calc(100vw - 360px - 90px);
-    height: 40px;
+    height: 125px;
+    overflow-y: hidden;
+}
+.EventsTimeline .vis-timeline {
+    border-radius: 1.5rem;
 }
 .EventsTimeline .inner {
     position: absolute;

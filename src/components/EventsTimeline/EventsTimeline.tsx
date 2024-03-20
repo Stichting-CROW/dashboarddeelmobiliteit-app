@@ -1,12 +1,16 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
+import { Timeline } from "vis-timeline";
+import { DataSet } from "vis-data";
 
 // Import components
 import { useSearchParams } from 'react-router-dom'
 
 import './EventsTimeline.css';
+import './visjs-timeline.css';
+
+let timeline;
 
 // https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=GM0599&operators=check&start_date=2024-01-21&end_date=2024-02-28
-
 const EventsTimeline = ({
     changeHistory
 }: {
@@ -21,22 +25,112 @@ const EventsTimeline = ({
         changeHistory
     ])
 
+    let TO_toggleTimeline;
+
+	// Create a ref to provide DOM access
+	const visJsRef = useRef<HTMLDivElement>(null);
+
+    // Set timeline options
+    var timelineOptions = {
+        height: '125px',
+        min: new Date(2023, 0, 1),                // lower limit of visible range
+        // max: new Date(2013, 0, 1),                // upper limit of visible range
+        zoomMin: 1000 * 60 * 60 * 12,             // half a day in milliseconds
+        zoomMax: 1000 * 60 * 60 * 24 * 31 * 3     // about three months in milliseconds
+    };
+    var clusterOpts = {
+        // cluster: {
+        //     titleTemplate: "{count} updates: zoom in om deze te bekijken",
+        //     showStipes: true,
+        // }
+    };
+    Object.assign(timelineOptions, clusterOpts);
+
+    // Once the ref is created, we'll be able to use vis
+	useEffect(() => {
+        if(! visJsRef) return;
+        if(! events || events.length <= 0) return;
+        
+        // If timeline was already initiated: Don't initialize again
+        // if(timeline) {
+        //     console.warn('Timeline was already initiated - Not initating again. Got properties:', visJsRef, events)
+        //     return;
+        // }
+        // Solved by clearing div
+
+        // Set timeline items
+        var items = new DataSet(events);
+
+        // Clear timeline div
+        visJsRef.current.innerHTML = '';
+
+        // Init timeline
+        timeline = new Timeline(visJsRef.current, items, timelineOptions);
+        console.log('Init timeline')
+
+        timeline.on('click', function (properties) {
+            console.log('properties', properties)
+            if(! properties || ! properties.item) return;
+
+            // Get service_area_version_id from item name:
+            const version = properties.item.split('-')[properties.item.split('-').length-1];
+            if(! version) return;
+
+            searchParams.set('version', version);
+            setSearchParams(searchParams);
+          });
+    }, [
+        visJsRef,
+        events
+    ]);
+
     const populateHistoryTimeline = () => {
         if(! changeHistory) return;
 
         const events = changeHistory.map((x) => {
+            const dateObj = new Date(x.valid_from);
+            const month   = dateObj.getUTCMonth(); // months from 0-11
+            const day     = dateObj.getUTCDate();
+            const year    = dateObj.getUTCFullYear();
+            const date = new Date(year, month, day);
+
             return {
-                ...x,
-                valid_from_formatted: new Date(x.valid_from).toLocaleString('nl-NL').slice(0, -3)
+                id: `${x.municipality}-${x.operator}-${x.service_area_version_id}`,
+                start: date,
+                content: new Date(x.valid_from).toLocaleString('nl-NL').slice(0, -3)
             }
         }).slice(changeHistory.length-10, changeHistory.length);
 
         setEvents(events)
     }
     
-    return <div className="EventsTimeline sm:rounded-3xl">
-        <div className="inner">
-            <div className="line" />
+    const enlargeTimeline = () => {
+        if(! visJsRef) return;
+        if(! timeline) return;
+
+        timeline.setOptions(Object.assign({}, timelineOptions, {height:"225px"}));
+        visJsRef.current.style.height = '225px';
+    }
+
+    const shrinkTimeline = () => {
+        if(! visJsRef) return;
+        if(! timeline) return;
+
+        timeline.setOptions(Object.assign({}, timelineOptions, {height:"125px"}));
+        visJsRef.current.style.height = '125px';
+    }
+
+    return <div ref={visJsRef} className="EventsTimeline sm:rounded-3xl" onMouseOver={() => {
+        clearTimeout(TO_toggleTimeline);
+        enlargeTimeline();
+    }}
+    onMouseOut={() => {
+        clearTimeout(TO_toggleTimeline);
+        TO_toggleTimeline = setTimeout(() => {
+            shrinkTimeline();
+        }, 500);
+    }}>
+            {/* <div className="line" />
             <div className="events-wrapper">
                 {events.map(x => <div className={`
                     event dot-label
@@ -46,7 +140,7 @@ const EventsTimeline = ({
                 key={`${x.operator}-${x.service_area_version_id}`}
             >
                     <span className="event-title">
-                        {x.valid_from_formatted}
+                        {x.validjalf_from_formatted}
                     </span>
                     <span className={`
                         dot
@@ -56,8 +150,7 @@ const EventsTimeline = ({
                         setSearchParams(searchParams);
                     }} />
                 </div>)}
-            </div>
-        </div>
+            </div> */}
     </div>
 }
 
