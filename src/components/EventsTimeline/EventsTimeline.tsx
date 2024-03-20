@@ -2,6 +2,8 @@ import {useEffect, useState, useRef} from 'react';
 import { Timeline } from "vis-timeline";
 import { DataSet } from "vis-data";
 
+import {getProviderColor, getProviderColors} from '../../helpers/providers.js';
+
 // Import components
 import { useSearchParams } from 'react-router-dom'
 
@@ -18,6 +20,11 @@ const EventsTimeline = ({
 }) => {
     const [events, setEvents] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
+    const [providerColors, setProviderColors] = useState({});
+
+    useEffect(() => {
+        setProviderColors(getProviderColors())
+    }, []);
 
     useEffect(() => {
         populateHistoryTimeline();
@@ -50,13 +57,6 @@ const EventsTimeline = ({
 	useEffect(() => {
         if(! visJsRef) return;
         if(! events || events.length <= 0) return;
-        
-        // If timeline was already initiated: Don't initialize again
-        // if(timeline) {
-        //     console.warn('Timeline was already initiated - Not initating again. Got properties:', visJsRef, events)
-        //     return;
-        // }
-        // Solved by clearing div
 
         // Set timeline items
         var items = new DataSet(events);
@@ -99,13 +99,14 @@ const EventsTimeline = ({
                 start: date,
                 content: new Date(x.valid_from).toLocaleString('nl-NL').slice(0, -3)
             }
-        }).slice(changeHistory.length-10, changeHistory.length);
+        });
+        // .slice(changeHistory.length-10, changeHistory.length);
 
         setEvents(events)
     }
     
     const enlargeTimeline = () => {
-        if(! visJsRef) return;
+        if(! visJsRef || ! visJsRef.current) return;
         if(! timeline) return;
 
         timeline.setOptions(Object.assign({}, timelineOptions, {height:"225px"}));
@@ -120,16 +121,23 @@ const EventsTimeline = ({
         visJsRef.current.style.height = '125px';
     }
 
-    return <div ref={visJsRef} className="EventsTimeline sm:rounded-3xl" onMouseOver={() => {
-        clearTimeout(TO_toggleTimeline);
-        enlargeTimeline();
-    }}
-    onMouseOut={() => {
-        clearTimeout(TO_toggleTimeline);
-        TO_toggleTimeline = setTimeout(() => {
-            shrinkTimeline();
-        }, 500);
-    }}>
+    if(! changeHistory || changeHistory.length <= 0) {
+        return <div />
+    }
+
+    return <div
+        ref={visJsRef}
+        className="EventsTimeline sm:rounded-3xl"
+        onMouseOver={() => {
+            clearTimeout(TO_toggleTimeline);
+            enlargeTimeline();
+        }}
+        onMouseOut={() => {
+            clearTimeout(TO_toggleTimeline);
+            TO_toggleTimeline = setTimeout(() => {
+                shrinkTimeline();
+            }, 500);
+        }}>
             {/* <div className="line" />
             <div className="events-wrapper">
                 {events.map(x => <div className={`
