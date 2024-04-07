@@ -465,8 +465,11 @@ function App() {
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+            <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
+
             <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
@@ -533,6 +536,7 @@ function App() {
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+          <Route exact path="/map/beleidshubs" element={renderMapElements()} />
           <Route path="/map/zones" element={renderMapElements()} />
           <Route exact path="/misc" element={
             <Overlay>
