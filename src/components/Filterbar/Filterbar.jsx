@@ -67,7 +67,6 @@ function Filterbar({
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
-  console.log('isPolicyHubs', isPolicyHubs)
 
   const showdatum=isrentals||ispark||!isLoggedIn;
   const showduur=isrentals;

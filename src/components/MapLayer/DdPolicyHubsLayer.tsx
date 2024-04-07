@@ -18,6 +18,10 @@ import {
   removeServiceAreaDeltaFromMap
 } from '../Map/MapUtils/map.service_area_delta';
 
+import {
+  get_phases
+} from '../../helpers/policy-hubs/get-phases'
+
 import {StateType} from '../../types/StateType.js';
 
 const DdPolicyHubsLayer = ({
@@ -70,14 +74,45 @@ const DdPolicyHubsLayer = ({
   // }, [
   // ]);
 
+  const policyHubPhases = get_phases();
+
   return <>
     <div style={{
-        position: 'fixed',
-        bottom: '100px',
-        left: '360px'
-      }}>
-        OK
+      position: 'fixed',
+      bottom: '100px',
+      left: '360px',
+      width: 'calc(100% - 360px - 70px)',
+      borderRadius: '0.5rem'
+    }}>
+      <div className="
+        bg-white w-full py-2 px-2
+        flex justify-between
+      ">
+        {Object.keys(policyHubPhases).map((name, i) => {
+          // Get phase title
+          const title = policyHubPhases[name].title;
+
+          // Don't show 'Archief'
+          if(title === 'Archief') {
+            return;
+          }
+
+          // Show phase title
+          return <>
+
+            <a className="cursor-pointer">
+              {title}
+            </a>
+
+            {/* Show 'arrow right' divided */}
+            {i != Object.keys(policyHubPhases).length-2 && <span>
+              -&gt;
+            </span>}
+
+          </>
+        })}
       </div>
+    </div>
   </>
 }
 
