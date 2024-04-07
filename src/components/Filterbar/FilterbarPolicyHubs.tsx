@@ -18,12 +18,9 @@ import { Checkbox } from "../ui/checkbox"
 
 import {StateType} from '../../types/StateType';
 
-// Import API functions
 import {
-  postZone,
-  putZone,
-  deleteZone
-} from '../../api/zones';
+  get_phases
+} from '../../helpers/policy-hubs/get-phases'
 
 const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
   {children}
@@ -59,20 +56,22 @@ function FilterbarPolicyHubs({
     return null;
   });
 
-//   // Store window location in a local variable
-//   let location = useLocation();
-//   useEffect(() => {
-//     setPathName(location ? location.pathname : null);
-//   }, [location]);
+  //   // Store window location in a local variable
+  //   let location = useLocation();
+  //   useEffect(() => {
+  //     setPathName(location ? location.pathname : null);
+  //   }, [location]);
 
-//   // Get ACL
-//   useEffect(() => {
-//     if(! token) return;
-//     (async () => {
-//       const acl: any = await getAcl(token);
-//       setCanEditMicrohubs(acl.is_admin || (acl.privileges && acl.privileges.indexOf('MICROHUB_EDIT') > -1));
-//     })();
-//   }, [token])
+  //   // Get ACL
+  //   useEffect(() => {
+  //     if(! token) return;
+  //     (async () => {
+  //       const acl: any = await getAcl(token);
+  //       setCanEditMicrohubs(acl.is_admin || (acl.privileges && acl.privileges.indexOf('MICROHUB_EDIT') > -1));
+  //     })();
+  //   }, [token])
+
+  const policyHubPhases = get_phases();
 
   return (
     <div className="filter-bar-inner py-2">
@@ -89,29 +88,23 @@ function FilterbarPolicyHubs({
 
       <Fieldset title="Hubs">
         <CheckboxesWrapper>
-          {[
-            'Concept',
-            'Vastgesteld concept',
-            'Definitief (gepland)',
-            'Definitief (actief)',
-            'Archief'
-          ].map(x => <CheckboxWithLabel id={`hub-${x}`}>
-            {x}
-          </CheckboxWithLabel>)}
+          {Object.keys(policyHubPhases).map(key => {
+            const title = policyHubPhases[key].title;
+            return <CheckboxWithLabel key={title} id={`hub-${key}`}>
+              {title}
+            </CheckboxWithLabel>
+          })}
         </CheckboxesWrapper>
       </Fieldset>
 
       <Fieldset title="Verbodsgebieden">
         <CheckboxesWrapper>
-          {[
-            'Concept',
-            'Vastgesteld concept',
-            'Definitief (gepland)',
-            'Definitief (actief)',
-            'Archief'
-          ].map(x => <CheckboxWithLabel id={`verbodsgebied-${x}`}>
-            {x}
-          </CheckboxWithLabel>)}
+          {Object.keys(policyHubPhases).map(key => {
+            const title = policyHubPhases[key].title;
+            return <CheckboxWithLabel key={title} id={`verbodsgebied-${key}`}>
+              {title}
+            </CheckboxWithLabel>
+          })}
         </CheckboxesWrapper>
       </Fieldset>
     </div>
