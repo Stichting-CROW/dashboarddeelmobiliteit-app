@@ -47,6 +47,7 @@ import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js'
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
 import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
+import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -241,24 +242,6 @@ const MapComponent = (props): JSX.Element => {
     // dispatch,
     registerMapView
   ])
-
-  // Recognise if HB view should be loaded
-  // useEffect(() => {
-  //   // Stop if map didn't load
-  //   if(! didMapLoad) return;
-  //   // Set HB status
-  //   let newActiveLayers = activeLayers;
-  //   if(is_hb_view) {
-  //     newActiveLayers.push('hb');
-  //     setActiveLayers(newActiveLayers);
-  //   } else {
-  //     newActiveLayers = newActiveLayers.filter(x => x !== 'hb')
-  //     setActiveLayers(newActiveLayers);
-  //   }
-  // }, [
-  //   didMapLoad,
-  //   is_hb_view
-  // ]);
 
   // If on Zones page and geographyId is in URL -> navigate to zone
   useEffect(() => {
@@ -675,6 +658,7 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
+    {stateLayers.displaymode === 'displaymode-policy-hubs' && <DdPolicyHubsLayer map={map.current} />}
   </>
 }
 

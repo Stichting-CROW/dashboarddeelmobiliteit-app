@@ -65,6 +65,7 @@ import {
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -176,6 +177,8 @@ function App() {
       payload=DISPLAYMODE_ZONES_ADMIN;
     } else if(pathName.includes("/map/servicegebieden")) {
       payload=DISPLAYMODE_SERVICE_AREAS;
+    } else if(pathName.includes("/map/beleidshubs")) {
+      payload=DISPLAYMODE_POLICY_HUBS;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
