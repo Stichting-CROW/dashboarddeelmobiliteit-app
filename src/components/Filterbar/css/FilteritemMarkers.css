@@ -88,4 +88,5 @@
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
+  min-height: 24px;/* 2 lines */
 }
