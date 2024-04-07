@@ -4,12 +4,8 @@ import React, {
   useState,
   useCallback
 } from 'react';
-import {useLocation} from "react-router-dom";
 import {useSelector} from 'react-redux';
-import st from 'geojson-bounds';
 import { Link } from "react-router-dom";
-import * as R from 'ramda';
-import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
 import {getAcl} from '../../api/acl';
@@ -28,6 +24,21 @@ import {
   putZone,
   deleteZone
 } from '../../api/zones';
+
+const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
+  {children}
+</div>
+
+const CheckboxWithLabel = ({id, children}) => {
+  return <div className="flex justify-start cursor-pointer my-2">
+    <div className="flex flex-col justify-center">
+      <Checkbox id={`${id}`} defaultChecked />
+    </div>
+    <label htmlFor={`${id}`} className="ml-2 flex-1 cursor-pointer">
+      {children}
+    </label>
+  </div>;
+}
 
 function FilterbarPolicyHubs({
   hideLogo,
@@ -76,10 +87,33 @@ function FilterbarPolicyHubs({
           <FilteritemGebieden />
       </Fieldset>
 
-      {! filterGebied && false && <div>
-        Selecteer een plaats.
-      </div>}
+      <Fieldset title="Hubs">
+        <CheckboxesWrapper>
+          {[
+            'Concept',
+            'Vastgesteld concept',
+            'Definitief (gepland)',
+            'Definitief (actief)',
+            'Archief'
+          ].map(x => <CheckboxWithLabel id={`hub-${x}`}>
+            {x}
+          </CheckboxWithLabel>)}
+        </CheckboxesWrapper>
+      </Fieldset>
 
+      <Fieldset title="Verbodsgebieden">
+        <CheckboxesWrapper>
+          {[
+            'Concept',
+            'Vastgesteld concept',
+            'Definitief (gepland)',
+            'Definitief (actief)',
+            'Archief'
+          ].map(x => <CheckboxWithLabel id={`verbodsgebied-${x}`}>
+            {x}
+          </CheckboxWithLabel>)}
+        </CheckboxesWrapper>
+      </Fieldset>
     </div>
   )
 }
