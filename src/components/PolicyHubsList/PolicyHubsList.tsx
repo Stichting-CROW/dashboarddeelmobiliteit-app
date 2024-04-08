@@ -1,6 +1,6 @@
 import Button from "../Button/Button"
 
-import { Payment, columns } from "./columns"
+import { Hub, columns } from "./columns"
 import { DataTable } from "../ui/data-table"
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
@@ -12,7 +12,7 @@ import { X } from "lucide-react"
 function populateTableData(policyHubs) {
     console.log('policyHubs', policyHubs);
 
-    return policyHubs.map(hub => {
+    return policyHubs.map((hub) => {
         return {
             id: hub.zone_id,
             name: hub.name,

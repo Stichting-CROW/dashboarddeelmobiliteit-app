@@ -75,6 +75,10 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+      <div className="py-2 px-5 flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} van de {" "}
+          {table.getFilteredRowModel().rows.length} rij(en) geselecteerd
+      </div>
     </div>
   )
 }
