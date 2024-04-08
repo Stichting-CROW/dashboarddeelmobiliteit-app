@@ -58,7 +58,7 @@ async function renderPolygons_fill(map, geojson) {
     }
     
     // Set fill color
-    map.setPaintProperty(layerId, 'fill-color', '#8f3af8');
+    map.setPaintProperty(layerId, 'fill-color', '#666');
 
     // Set opacity
     map.setPaintProperty(layerId, 'fill-opacity', 0.6);
