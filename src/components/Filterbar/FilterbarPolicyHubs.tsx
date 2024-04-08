@@ -26,6 +26,8 @@ import {StateType} from '../../types/StateType';
 import {
   get_phases
 } from '../../helpers/policy-hubs/get-phases'
+import Modal from '../Modal/Modal';
+import PolicyHubsList from '../PolicyHubsList/PolicyHubsList';
 
 const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
   {children}
@@ -93,66 +95,87 @@ function FilterbarPolicyHubs({
     lastActivePhase = active_phase;
   }, [active_phase])
 
-  //   // Store window location in a local variable
-  //   let location = useLocation();
-  //   useEffect(() => {
-  //     setPathName(location ? location.pathname : null);
-  //   }, [location]);
-
-  //   // Get ACL
-  //   useEffect(() => {
-  //     if(! token) return;
-  //     (async () => {
-  //       const acl: any = await getAcl(token);
-  //       setCanEditMicrohubs(acl.is_admin || (acl.privileges && acl.privileges.indexOf('MICROHUB_EDIT') > -1));
-  //     })();
-  //   }, [token])
-
   return (
-    <div className="filter-bar-inner py-2">
+    <>
+      <div className="filter-bar-inner py-2">
 
-      <div style={{
-        paddingBottom: '24px'
-      }}>
-        {! hideLogo && <Link to="/">
-          <Logo />
-        </Link>}
+        <div style={{
+          paddingBottom: '24px'
+        }}>
+          {! hideLogo && <Link to="/">
+            <Logo />
+          </Link>}
+        </div>
+
+        <div className="py-2 flex justify-between">
+          <Button onClick={() => {
+            // toggleTable();
+          }} theme="white">
+            📄 Tabel openen
+          </Button>
+          <Button onClick={() => {
+            // toggleTable();
+          }} theme="white">
+            👥 Delen
+          </Button>
+        </div>
+
+        <Fieldset title="Plaats">
+            <FilteritemGebieden />
+        </Fieldset>
+
+        <Fieldset title="Hubs">
+          <CheckboxesWrapper>
+            {Object.keys(policyHubPhases).map(key => {
+              const id = `hub-${key}`;
+              const title = policyHubPhases[key].title;
+              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                e.preventDefault();
+                dispatch(toggleVisibleLayer(id));
+              }}>
+                {title}
+              </CheckboxWithLabel>
+            })}
+          </CheckboxesWrapper>
+        </Fieldset>
+
+        <Fieldset title="Verbodsgebieden">
+          <CheckboxesWrapper>
+            {Object.keys(policyHubPhases).map(key => {
+              const id = `verbodsgebied-${key}`;
+              const title = policyHubPhases[key].title;
+              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                e.preventDefault();
+                dispatch(toggleVisibleLayer(id));
+              }}>
+                {title}
+              </CheckboxWithLabel>
+            })}
+          </CheckboxesWrapper>
+        </Fieldset>
       </div>
-
-      <Fieldset title="Plaats">
-          <FilteritemGebieden />
-      </Fieldset>
-
-      <Fieldset title="Hubs">
-        <CheckboxesWrapper>
-          {Object.keys(policyHubPhases).map(key => {
-            const id = `hub-${key}`;
-            const title = policyHubPhases[key].title;
-            return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-              e.preventDefault();
-              dispatch(toggleVisibleLayer(id));
-            }}>
-              {title}
-            </CheckboxWithLabel>
-          })}
-        </CheckboxesWrapper>
-      </Fieldset>
-
-      <Fieldset title="Verbodsgebieden">
-        <CheckboxesWrapper>
-          {Object.keys(policyHubPhases).map(key => {
-            const id = `verbodsgebied-${key}`;
-            const title = policyHubPhases[key].title;
-            return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-              e.preventDefault();
-              dispatch(toggleVisibleLayer(id));
-            }}>
-              {title}
-            </CheckboxWithLabel>
-          })}
-        </CheckboxesWrapper>
-      </Fieldset>
-    </div>
+      <Modal
+        isVisible={true}
+        title=""
+        // button1Title={'Terug naar de kaart'}
+        // button1Handler={(e) => {
+        //   // setShowRevokeModal(false);
+        // }}
+        button2Title={"Sluiten"}
+        button2Handler={async (e) => {
+          // e.preventDefault();
+          // // Hide modal
+          // setShowRevokeModal(false);
+          // // Revoke action
+          // onRevokeHandler(apiKey.id);
+        }}
+        hideModalHandler={() => {
+          // setShowRevokeModal(false);
+        }}
+      >
+        <PolicyHubsList />
+      </Modal>
+    </>
   )
 }
 

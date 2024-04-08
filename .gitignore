@@ -29,4 +29,5 @@ package-lock.json
 .angular/
 
 NOTES.md
+NOTES-policy-hubs.md
 yarn.lock
