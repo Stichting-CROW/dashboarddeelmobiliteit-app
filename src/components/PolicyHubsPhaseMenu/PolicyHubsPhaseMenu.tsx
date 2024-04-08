@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { useDispatch, useSelector } from 'react-redux';
 import {StateType} from '../../types/StateType';
@@ -42,7 +42,11 @@ const PolicyHubsPhaseMenu = () => {
                     <a className={`
                         cursor-pointer
                         ${active_phase === name ? 'font-bold' : ''}
-                    `} onClick={(e) => {
+                    `}
+                    style={{
+                        color: active_phase === name ? '#15AEEF' : '#000'
+                    }}
+                    onClick={(e) => {
                         e.preventDefault();
                         dispatch(setActivePhase(name));
                     }}>

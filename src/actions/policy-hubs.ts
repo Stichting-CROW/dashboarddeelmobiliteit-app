@@ -1,6 +1,24 @@
-import { SET_ACTIVE_PHASE } from "./actionTypes";
+import {
+  SET_ACTIVE_PHASE,
+  TOGGLE_VISIBLE_LAYER,
+  UNSET_VISIBLE_LAYER,
+  SET_VISIBLE_LAYER
+} from "./actionTypes";
 
 export const setActivePhase = (phase) => ({
   type: SET_ACTIVE_PHASE,
   payload: phase
+})
+
+export const toggleVisibleLayer = (layer) => ({
+  type: TOGGLE_VISIBLE_LAYER,
+  payload: layer
+})
+export const unsetVisibleLayer = (layer) => ({
+  type: UNSET_VISIBLE_LAYER,
+  payload: layer
+})
+export const setVisibleLayer = (layer) => ({
+  type: SET_VISIBLE_LAYER,
+  payload: layer
 })
