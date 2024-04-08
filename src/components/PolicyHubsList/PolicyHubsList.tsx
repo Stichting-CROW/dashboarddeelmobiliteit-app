@@ -8,38 +8,26 @@ import { StateType } from "@/src/types/StateType"
 import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
 import { X } from "lucide-react"
 
+const readable_phase = (name: string) => {
+    if(name === 'concept') return 'Concept';
+    else if(name === 'active') return 'Actief';
+}
+
 // async function getData(): Promise<Payment[]> {
 function populateTableData(policyHubs) {
-    console.log('policyHubs', policyHubs);
+    if(! policyHubs || policyHubs.detail) return [];// .detail means there was an errors
 
     return policyHubs.map((hub) => {
         return {
             id: hub.zone_id,
             name: hub.name,
             type: hub.geography_type === 'stop' ? 'Hub' : hub.geography_type,
-            fase: hub.phase,
+            fase: readable_phase(hub.phase),
             // interne_id: 0,
             // vervangt_zone: 0,
 
         }
     });
-
-    // [
-    //   {
-    //     id: "728ed52f",
-    //     naam,
-    //     type,
-    //     capaciteit,
-    //     fase,
-    //     interne ID,
-    //     vervangt zone
-
-    //     amount: 100,
-    //     status: "pending",
-    //     email: "m@example.com",
-    //   },
-    //   // ...
-    // ]
 }
 
 const ActionHeader = () => {

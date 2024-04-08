@@ -4,6 +4,8 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "../ui/checkbox"
 import { CheckedState } from "@radix-ui/react-checkbox"
 
+import { DataTableColumnHeader } from "./column-headers";
+
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Hub = {
@@ -34,19 +36,25 @@ export const columns: ColumnDef<Hub>[] = [
         aria-label="Select row"
       />
     ),
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
   },
   {
     accessorKey: "name",
-    header: "Naam",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Naam" />
+    ),
   },
   {
     accessorKey: "type",
-    header: "Type",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
   },
   {
     accessorKey: "fase",
-    header: "Fase",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Fase" />
+    ),
   },
 ]

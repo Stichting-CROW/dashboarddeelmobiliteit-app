@@ -49,6 +49,8 @@ function FilterbarPolicyHubs({
   hideLogo,
   view
 }) {
+  const [isTableVisible, setIsTableVisible] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -109,7 +111,7 @@ function FilterbarPolicyHubs({
 
         <div className="py-2 flex justify-between">
           <Button onClick={() => {
-            // toggleTable();
+            setIsTableVisible(! isTableVisible);
           }} theme="white">
             📄 Tabel openen
           </Button>
@@ -155,22 +157,16 @@ function FilterbarPolicyHubs({
         </Fieldset>
       </div>
       <Modal
-        isVisible={true}
-        title=""
-        // button1Title={'Terug naar de kaart'}
-        // button1Handler={(e) => {
-        //   // setShowRevokeModal(false);
-        // }}
+        isVisible={isTableVisible}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
-          // e.preventDefault();
-          // // Hide modal
-          // setShowRevokeModal(false);
-          // // Revoke action
-          // onRevokeHandler(apiKey.id);
+          e.preventDefault();
+          // Hide modal
+          setIsTableVisible(false);
         }}
         hideModalHandler={() => {
-          // setShowRevokeModal(false);
+          // Hide modal
+          setIsTableVisible(false);
         }}
       >
         <PolicyHubsList />
