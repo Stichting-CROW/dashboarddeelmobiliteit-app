@@ -11,6 +11,10 @@ import {
 
 import {StateType} from '../../types/StateType.js';
 
+import {
+  fetch_hubs
+} from '../../helpers/policy-hubs/fetch-hubs'
+
 const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
@@ -35,13 +39,23 @@ const DdPolicyHubsLayer = ({
     return null;
   });
 
-  // // onComponentLoad
-  // useEffect(() => {
-  //   // Fetch service areas and store in state
-  //   (async () => {
-  //     const res = await fetchServiceAreas();
-  //     setServiceAreas(res);
-  //   })();
+  const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+
+  // If gebied or visible_layers is updated:
+  useEffect(() => {
+    if(! filter.gebied) return;
+    if(! visible_layers || visible_layers.length === 0) return;
+
+    // Fetch hubs
+    fetch_hubs({
+      token: token,
+      municipality: filter.gebied,
+      visible_layers: visible_layers
+    })
+  }, [
+    filter.gebied,
+    visible_layers.length
+  ]);
 
   //   // Fetch service areas history and store in state
   //   (async () => {

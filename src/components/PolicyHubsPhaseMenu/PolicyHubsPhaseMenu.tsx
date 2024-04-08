@@ -6,7 +6,7 @@ import {StateType} from '../../types/StateType';
 import {
     get_phases
 } from '../../helpers/policy-hubs/get-phases'
-  
+
 const PolicyHubsPhaseMenu = () => {
     const dispatch = useDispatch();
 
