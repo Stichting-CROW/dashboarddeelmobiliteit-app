@@ -9,6 +9,11 @@ import {
   DISPLAYMODE_RENTALS,
 } from '../../reducers/layers.js';
 
+import {
+  renderHubs,
+  removeHubsFromMap
+} from '../Map/MapUtils/map.policy_hubs';
+
 import {StateType} from '../../types/StateType.js';
 
 import {
@@ -18,19 +23,9 @@ import {
 const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
-  const [serviceAreas, setServiceAreas] = useState([]);
-  const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
-  const [serviceAreaDelta, setServiceAreaDelta] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [policyHubs, setPolicyHubs] = useState([]);
 
-  const dispatch = useDispatch()
-
-  const displayMode = useSelector((state: StateType) => state.layers ? state.layers.displaymode : DISPLAYMODE_PARK);
-  const isrentals=displayMode===DISPLAYMODE_RENTALS;
-  const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
   const filter = useSelector((state: StateType) => state.filter || null);
-  const stateLayers = useSelector((state: StateType) => state.layers || null);
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -39,6 +34,7 @@ const DdPolicyHubsLayer = ({
     return null;
   });
 
+  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   // If gebied or visible_layers is updated:
@@ -47,15 +43,41 @@ const DdPolicyHubsLayer = ({
     if(! visible_layers || visible_layers.length === 0) return;
 
     // Fetch hubs
-    fetch_hubs({
-      token: token,
-      municipality: filter.gebied,
-      visible_layers: visible_layers
-    })
+    (async () => {
+      const res = await fetch_hubs({
+        token: token,
+        municipality: filter.gebied,
+        visible_layers: visible_layers
+      });
+      setPolicyHubs(res);
+    })();
   }, [
     filter.gebied,
+    visible_layers,
     visible_layers.length
   ]);
+
+  // Do things if 'policyHubs' change
+  useEffect(() => {
+    // Return
+    if(! map) return;
+    if(! policyHubs) return;
+    
+    renderHubs(map, policyHubs);
+
+    // onComponentUnLoad
+    return () => {
+
+    };
+  }, [
+    policyHubs
+  ]);
+  // onComponentUnLoad
+  useEffect(() => {
+    return () => {
+      removeHubsFromMap(map);
+    };
+  }, []);
 
   //   // Fetch service areas history and store in state
   //   (async () => {
