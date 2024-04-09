@@ -18,7 +18,8 @@ import {
   DISPLAYMODE_VERHUURDATA_HB,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
-  DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_POLICY_HUBS
 } from '../../reducers/layers.js';
 
 import {getMapStyles, setMapStyle} from '../Map/MapUtils/map.js';
@@ -131,7 +132,7 @@ function SelectLayer(props) {
           </span>
         </div> : null }
 
-        {displayMode===DISPLAYMODE_ZONES_ADMIN && <>
+        {(displayMode===DISPLAYMODE_ZONES_ADMIN || DISPLAYMODE_POLICY_HUBS) && <>
           <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
             setMapStyle(window.ddMap, mapStyles.base)
