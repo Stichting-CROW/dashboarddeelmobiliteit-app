@@ -1,18 +1,21 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom'
-import EventsTimeline from '../EventsTimeline/EventsTimeline';
+// import { useSearchParams } from 'react-router-dom'
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 
-import {
-  DISPLAYMODE_PARK,
-  DISPLAYMODE_RENTALS,
-} from '../../reducers/layers.js';
+// import {
+//   DISPLAYMODE_PARK,
+//   DISPLAYMODE_RENTALS,
+// } from '../../reducers/layers.js';
 
 import {
   renderHubs,
   removeHubsFromMap
 } from '../Map/MapUtils/map.policy_hubs';
+
+import {
+  initPopupLogic,
+} from '../Map/MapUtils/map.policy_hubs.popups';
 
 import {StateType} from '../../types/StateType.js';
 
@@ -34,8 +37,15 @@ const DdPolicyHubsLayer = ({
     return null;
   });
 
-  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+  // const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+
+  // onComponentUnLoad
+  useEffect(() => {
+    return () => {
+      removeHubsFromMap(map);
+    };
+  }, []);
 
   // If gebied or visible_layers is updated:
   useEffect(() => {
@@ -57,13 +67,15 @@ const DdPolicyHubsLayer = ({
     visible_layers.length
   ]);
 
-  // Do things if 'policyHubs' change
+  // Render hubs if 'policyHubs' change
   useEffect(() => {
     // Return
     if(! map) return;
     if(! policyHubs) return;
     
     renderHubs(map, policyHubs);
+
+    initPopupLogic(map);
 
     // onComponentUnLoad
     return () => {
@@ -72,12 +84,6 @@ const DdPolicyHubsLayer = ({
   }, [
     policyHubs
   ]);
-  // onComponentUnLoad
-  useEffect(() => {
-    return () => {
-      removeHubsFromMap(map);
-    };
-  }, []);
 
   //   // Fetch service areas history and store in state
   //   (async () => {
