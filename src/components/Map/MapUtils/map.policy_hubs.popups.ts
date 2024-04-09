@@ -16,7 +16,7 @@ const providerColor = '#000';
 const createPopupContent = (event, props) => {
   const popupContent = [];
 
-  const labelClasses = ``;
+  const labelClasses = `block`;
   const inputClasses = `h-8 my-2 border border-solid px-2`;
   const buttonClasses = `rounded-lg border-solid border-2 px-2 py-2`;
 
@@ -44,8 +44,8 @@ const createPopupContent = (event, props) => {
     </div>
   `;
 
-  popupContent['concept'] = document.createElement('div');
-  popupContent['concept'].innerHTML =`
+  popupContent['stelvast'] = document.createElement('div');
+  popupContent['stelvast'].innerHTML =`
     <h1 class="mb-2">
       <span
         class="rounded-full inline-block w-4 h-4"
@@ -79,6 +79,124 @@ const createPopupContent = (event, props) => {
     </div>
   `;
 
+  popupContent['concept'] = document.createElement('div');
+  popupContent['concept'].innerHTML =`
+    <h1 class="mb-2">
+      <span
+        class="rounded-full inline-block w-4 h-4"
+        style="background-color: ${providerColor};position: relative;top: 2px"
+        onClick="window.showConfetti()"
+        >
+      </span>
+      <span class="Map-popup-title ml-1" style="color: ${providerColor};">
+        ${props.name}
+        <small>(${props.phase})</small>
+      </span>
+    </h1>
+    <div class="Map-popup-body">
+      <div class="my-2">
+      </div>
+      <div class="my-4">
+        <label class="${labelClasses}"><b>Naam</b></label>
+        <input type="text" value="${props.name}" placeholder="Hub 28 Binnenstad: Korte Voorhout" class="${inputClasses} w-full" />
+      </div>
+      <div class="my-4">
+        <label class="${labelClasses}"><b>Type zone</b></label>
+        <div class=" flex rounded-lg bg-white border-solid border border-gray-400 text-sm ">
+          <div class="
+            Button-orange
+            cursor-pointer
+            flex-1
+            
+            rounded-lg
+            text-gray-500
+            text-center
+            h-10
+            flex
+            flex-col
+            justify-center
+          " style="background-color: rgb(253, 134, 46);">
+            Parking
+          </div>
+          <div class="
+            cursor-pointer
+            flex-1
+            
+            rounded-lg
+            text-gray-500
+            text-center
+            h-10
+            flex
+            flex-col
+            justify-center
+          ">
+            No parking
+          </div>
+        </div>
+      </div>
+      <div class="my-4">
+        <label class="${labelClasses}"><b>Bepaal beschikbaarheid</b></label>
+        <div class="flex rounded-lg bg-white border-solid border border-gray-400 text-sm ">
+          <div class="
+            Button-blue
+            cursor-pointer
+            flex-1
+            rounded-lg
+            text-gray-500
+            text-center
+            border-gray-500
+            h-10
+            flex
+            flex-col
+            justify-center
+          ">
+            Automatisch
+          </div>
+          <div class="
+            cursor-pointer
+            flex-1
+            rounded-lg
+            text-gray-500
+            text-center
+            border-gray-500
+            h-10
+            flex
+            flex-col
+            justify-center
+          ">Open</div>
+          <div class="
+            cursor-pointer
+            flex-1
+            rounded-lg
+            text-gray-500
+            text-center
+            border-gray-500
+            h-10
+            flex
+            flex-col
+            justify-center
+          ">Gesloten</div>
+        </div>
+      </div>
+      <div class="my-4">
+        <div class="visible"><p class="mb-2 text-sm"><b>Limiet</b> <a class="
+                
+        cursor-pointer
+        ">per modaliteit</a> | <a class="
+          underline
+          cursor-pointer
+        ">totaal</a></p><div class=" rounded-lg bg-white border-solid border border-gray-400 p-4 "><div class=" bg-no-repeat pl-12 h-8 flex w-full " style="background-image: url(&quot;&quot;); background-size: 30px; background-position: left center;"><input name="vehicles-limit.combined" class="flex-1" width="100%" type="range" min="0" max="250" step="1" value="100" style="width: calc(100% - 48px);"><div class="text-xs ml-2 h-8 flex justify-center flex-col">100</div></div></div></div>
+      </div>
+      <div class="my-4 flex justify-between">
+        <button type="submit" class="${buttonClasses}">Stel vast</button>
+        <button type="submit" class="${buttonClasses}">Opslaan</button>
+      </div>
+      ${(event.features && event.features.length > 1) ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
+          Let op: er staan hier meerdere hubs over elkaar heen. Je ziet hiervan nu slechts 1 hub. Gebruik de tabelweergave om de verschillende hubs op deze plek te zien.
+      </div>` : ''}
+    </div>
+  `;
+
   popupContent['committed_concept'] = document.createElement('div');
   popupContent['committed_concept'].innerHTML =`
     <h1 class="mb-2">
@@ -90,7 +208,7 @@ const createPopupContent = (event, props) => {
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
         ${props.name}
-        <small>(${props.phase})</small>
+        <small>(vastgesteld concept)</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -129,7 +247,7 @@ const createPopupContent = (event, props) => {
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
         ${props.name}
-        <small>(${props.phase})</small>
+        <small>(definitief gepland)</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -168,7 +286,7 @@ const createPopupContent = (event, props) => {
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
         ${props.name}
-        <small>(${props.phase})</small>
+        <small>(definitief actief)</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -193,7 +311,9 @@ const createPopupContent = (event, props) => {
     </div>
   `;
 
-  return popupContent['published'] || popupContent['default'];
+  return popupContent['active'] || popupContent['default'];
+  // return popupContent['committed_concept'] || popupContent['default'];
+
   // return popupContent[props.phase] || popupContent['default'];
 }
 
