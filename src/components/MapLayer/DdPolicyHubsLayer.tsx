@@ -13,19 +13,23 @@ import {
   removeHubsFromMap
 } from '../Map/MapUtils/map.policy_hubs';
 
-import {
-  initPopupLogic,
-} from '../Map/MapUtils/map.policy_hubs.popups';
+// import {
+//   initPopupLogic,
+// } from '../Map/MapUtils/map.policy_hubs.popups';
 
 import {StateType} from '../../types/StateType.js';
 
 import {
   fetch_hubs
 } from '../../helpers/policy-hubs/fetch-hubs'
+import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
+import ActionModule from '../ActionModule/ActionModule';
 
 const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
+  const dispatch = useDispatch()
+
   const [policyHubs, setPolicyHubs] = useState([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
@@ -35,6 +39,10 @@ const DdPolicyHubsLayer = ({
       return state.authentication.user_data.token;
     }
     return null;
+  });
+
+  const selected_policy_hubs = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : false;
   });
 
   // const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
@@ -47,7 +55,7 @@ const DdPolicyHubsLayer = ({
     };
   }, []);
 
-  // If gebied or visible_layers is updated:
+  // If 'gebied' or 'visible_layers' is updated:
   useEffect(() => {
     if(! filter.gebied) return;
     if(! visible_layers || visible_layers.length === 0) return;
@@ -75,8 +83,6 @@ const DdPolicyHubsLayer = ({
     
     renderHubs(map, policyHubs);
 
-    initPopupLogic(map);
-
     // onComponentUnLoad
     return () => {
 
@@ -84,6 +90,43 @@ const DdPolicyHubsLayer = ({
   }, [
     policyHubs
   ]);
+
+  // Init hub click handlers
+  useEffect(() => {
+    if(! map) return;
+
+    const layerName = 'policy_hubs-layer-fill';
+
+    map.on('touchend', layerName, clickHandler);
+    map.on('click', layerName, clickHandler);
+
+    return () => {
+      map.off('touchend', layerName, clickHandler);
+      map.off('click', layerName, clickHandler);
+    }
+  }, [
+    map
+  ]);
+
+  const clickHandler = (e) => {
+    if(! map) return;
+  
+    // Stop if no features were found
+    if(! e.features || ! e.features[0]) {
+      return;
+    }
+
+    const coordinates = e.lngLat;
+    const props = e.features[0].properties;
+
+    // Store active hub ID in redux state
+    dispatch({
+      type: 'SET_SELECTED_POLICY_HUBS',
+      payload: [props.id]
+    })
+
+    console.log('props', props)
+  }
 
   //   // Fetch service areas history and store in state
   //   (async () => {
@@ -103,7 +146,12 @@ const DdPolicyHubsLayer = ({
   // }, [
   // ]);
 
-  return <PolicyHubsPhaseMenu />
+  return <>
+    <PolicyHubsPhaseMenu />
+    {true && <ActionModule>
+      <PolicyHubsEdit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
+    </ActionModule>}
+  </>
 }
 
 export default DdPolicyHubsLayer;

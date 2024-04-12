@@ -651,7 +651,7 @@ const MapComponent = (props): JSX.Element => {
 
   return <>
     {/* The map container (HTML element) */}
-    <div ref={mapContainer} className="map" />
+    <div ref={mapContainer} className="map flex-1" />
     {/* H3 layer */}
     <DdH3HexagonLayer map={map.current} />
     {/* Isochrone layer */}

@@ -54,6 +54,13 @@ export default function policy_hubs(state = initialState, action) {
           visible_layers: new_visible_layers
       };
     }
+    case 'SET_SELECTED_POLICY_HUBS': {
+      // action.payload is an array with IDs
+      return {
+          ...state,
+          selected_policy_hubs: action.payload
+      };
+    }
     default:
       return state;
   }

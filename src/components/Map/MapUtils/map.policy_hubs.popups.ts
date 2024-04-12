@@ -21,7 +21,7 @@ const createPopupContent = (event, props) => {
   const buttonClasses = `rounded-lg border-solid border-2 px-2 py-2`;
 
   popupContent['default'] = document.createElement('div');
-  popupContent['default'].innerHTML =`
+  popupContent['default'].innerHTML = `
     <h1 class="mb-2">
       <span
         class="rounded-full inline-block w-4 h-4"
@@ -311,10 +311,7 @@ const createPopupContent = (event, props) => {
     </div>
   `;
 
-  return popupContent['active'] || popupContent['default'];
-  // return popupContent['committed_concept'] || popupContent['default'];
-
-  // return popupContent[props.phase] || popupContent['default'];
+  return popupContent[props.phase] || popupContent['default'];
 }
 
 

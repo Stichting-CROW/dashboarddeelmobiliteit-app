@@ -2,7 +2,8 @@ import {
   SET_ACTIVE_PHASE,
   TOGGLE_VISIBLE_LAYER,
   UNSET_VISIBLE_LAYER,
-  SET_VISIBLE_LAYER
+  SET_VISIBLE_LAYER,
+  SET_SELECTED_POLICY_HUBS,
 } from "./actionTypes";
 
 export const setActivePhase = (phase) => ({
@@ -21,4 +22,8 @@ export const unsetVisibleLayer = (layer) => ({
 export const setVisibleLayer = (layer) => ({
   type: SET_VISIBLE_LAYER,
   payload: layer
+})
+export const setSelectedPolicyHubs = (ids) => ({
+  type: SET_SELECTED_POLICY_HUBS,
+  payload: ids
 })
