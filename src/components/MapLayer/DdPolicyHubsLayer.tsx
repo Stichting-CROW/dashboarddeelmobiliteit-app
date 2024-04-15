@@ -19,11 +19,13 @@ import {
 
 import {StateType} from '../../types/StateType.js';
 
-import {
-  fetch_hubs
-} from '../../helpers/policy-hubs/fetch-hubs'
+import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
+import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept'
 import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
 import ActionModule from '../ActionModule/ActionModule';
+import { ActionButtons } from '../ActionButtons/ActionButtons';
+import Button from '../Button/Button';
+import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 
 const DdPolicyHubsLayer = ({
   map
@@ -43,6 +45,10 @@ const DdPolicyHubsLayer = ({
 
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : false;
+  });
+
+  const show_commit_form = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
   });
 
   // const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
@@ -128,28 +134,47 @@ const DdPolicyHubsLayer = ({
     console.log('props', props)
   }
 
-  //   // Fetch service areas history and store in state
-  //   (async () => {
-  //     const res = await fetchServiceAreasHistory();
-  //     setServiceAreasHistory(res);
-  //   })();
-  // }, [
-  //   filter.gebied
-  // ]);
+  const didSelectOneHub = () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
+      return false;
+    }
+    // Check if only 1 hub was selected
+    const didSelectOneHub = selected_policy_hubs.length === 1;
+    if(! didSelectOneHub) return false;
 
-  // // onComponentUnLoad
-  // useEffect(() => {
-  //   return () => {
-  //     console.log('removeServiceAreasFromMap')
-  //     removeServiceAreasFromMap(map);
-  //   };
-  // }, [
-  // ]);
+    return true;
+  }
+
+  const didSelectConceptHub = () => {
+    if(! didSelectOneHub) return;
+
+    // Get extra hub info
+    const selected_hub = policyHubs.find(x => x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if hub is a concept hub
+    return selected_hub.phase === 'concept';
+  }
+
+  const commitToConcept = (zone_id) => {
+    dispatch({
+      type: 'SET_SHOW_COMMIT_FORM',
+      payload: true
+    });
+  }
 
   return <>
     <PolicyHubsPhaseMenu />
-    {true && <ActionModule>
+    {(didSelectConceptHub() && ! show_commit_form) && <ActionButtons>
+      <Button theme="primary" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
+        Vaststellen
+      </Button>
+    </ActionButtons>}
+    {(didSelectConceptHub() && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
+    </ActionModule>}
+    {(didSelectOneHub() && show_commit_form) && <ActionModule>
+      <PolicyHubsCommit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
     </ActionModule>}
   </>
 }

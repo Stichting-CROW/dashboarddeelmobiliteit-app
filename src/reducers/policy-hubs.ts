@@ -61,6 +61,12 @@ export default function policy_hubs(state = initialState, action) {
           selected_policy_hubs: action.payload
       };
     }
+    case 'SET_SHOW_COMMIT_FORM': {
+      return {
+          ...state,
+          show_commit_form: action.payload
+      };
+    }
     default:
       return state;
   }

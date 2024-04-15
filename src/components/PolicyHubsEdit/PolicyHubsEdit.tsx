@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import {
     fetch_hubs
 } from '../../helpers/policy-hubs/fetch-hubs'
-  
+
+import {HubType} from '../../types/HubType';
+
 // Import API functions
 import {
     putZone,
@@ -15,13 +17,6 @@ import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
 import { useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
-
-type HubType = {
-    stop: any;
-    geography_type: string;
-    name: string;
-    zone_availability: any;
-}
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
@@ -80,10 +75,7 @@ const PolicyHubsEdit = ({
     }
 
     const saveZone = async () => {
-        const updatedZone = await putZone(token, {
-            ...hubData,
-            published: 'sa'
-        });
+        const updatedZone = await putZone(token, hubData);
     }
     const deleteZoneHandler = saveZone;
     const cancelButtonHandler = saveZone;
@@ -210,37 +202,12 @@ const PolicyHubsEdit = ({
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
 
-    console.log('hubData', hubData)
-
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
     return (
         <div>
             <div className={labelClassNames}>
                 Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
-            </div>
-            <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
-                <Button
-                    theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
-                    onClick={saveZone}
-                >
-                    Opslaan
-                </Button>
-
-                <div className="-mr-2">
-                    {! isNewZone && <Button
-                        onClick={deleteZoneHandler}
-                    >
-                        🗑️
-                    </Button>}
-
-                    <Button
-                        theme="white"
-                        onClick={cancelButtonHandler}
-                    >
-                        Annuleer
-                    </Button>
-                </div>
             </div>
             <div>
                 <FormInput
@@ -414,6 +381,29 @@ const PolicyHubsEdit = ({
                Verwijder zone
             </Text>
         </div>}
+        <div className="flex w-full justify-between">
+
+            <Button
+                theme="white"
+                style={{marginLeft: 0}}
+                onClick={cancelButtonHandler}
+            >
+                Annuleer
+            </Button>
+            {! isNewZone && <Button
+                onClick={deleteZoneHandler}
+            >
+                🗑️
+            </Button>}
+            <Button
+                theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
+                style={{marginRight: 0}}
+                onClick={saveZone}
+            >
+                Opslaan
+            </Button>
+
+            </div>
         </div>
     )
 }

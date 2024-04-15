@@ -138,27 +138,6 @@ function Menu({
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
 
-  const doShowServiceGebieden = () => {
-    const validEmailAddresses = [
-      'mail@bartroorda.nl',
-      'rinse.gorter@denhaag.nl',
-      'otto.vanboggelen@crow.nl',
-      'sven.boor@gmail.com'
-    ]
-    return userData && userData.user && validEmailAddresses.indexOf(userData.user.email) > -1;
-  }
-  
-  const logOut = () => {
-    try {
-      if (isLoggedIn) {
-        dispatch( clearUser() );
-        dispatch( { type: "LOGOUT", payload: null });
-      }
-    } catch(ex) {
-      console.error("Menu.logout - error ", ex);
-    }
-  }
-  
   const exportStateToClipboard = () => {
     // creates a url that recreates the exact view
     const l = window.location;
