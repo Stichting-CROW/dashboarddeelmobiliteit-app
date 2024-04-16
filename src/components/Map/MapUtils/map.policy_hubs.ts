@@ -45,11 +45,18 @@ async function renderPolygons_fill(map, geojson) {
       source = map.getSource(sourceId);
     }
     if (! layer) {
-      // Add hexes (fill + 1px outline)
+      // Add polygons (fill + 1px outline)
       map.addLayer({
         id: layerId,
         source: sourceId,
-        type: 'fill'
+        type: 'fill',
+        paint: {
+          'fill-opacity': [
+            'case',
+              ['==', ['get', 'is_in_drawing_mode'], 1], 0,
+              0.6
+          ]
+        }
       });
     }
     // If source was already present: Update data
@@ -61,9 +68,6 @@ async function renderPolygons_fill(map, geojson) {
     // Set fill color
     map.setPaintProperty(layerId, 'fill-color', '#FD862E');
 
-    // Set opacity
-    map.setPaintProperty(layerId, 'fill-opacity', 0.6);
-  
     // Add line layer for wider outline/borders, on top of fill layer
     // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
     layerId = `${sourceId}-layer-border`;
@@ -83,12 +87,28 @@ async function renderPolygons_fill(map, geojson) {
           ["==", ["get", "is_selected"], 1], 5,
           ["boolean", ["feature-state", "hover"], false], 2,
           1
+        ],
+        'line-opacity': [
+          ['==', ['get', 'is_in_drawing_mode'], 1], 0,
+          1
         ]
+        // 'line-opacity': [
+        //   "case",
+        //     ["all",
+        //       ["==", ["get", "is_selected"], 1],
+        //       ["==", ["get", "phase"], 'concept'],
+        //     ], 0,
+        //     1
+        // ]
       }
     });
 }
 
-const generateGeojson = (hubs, selected_policy_hubs) => {
+const generateGeojson = (
+  hubs,
+  selected_policy_hubs,
+  hubs_in_drawing_mode
+) => {
     let geoJson = {
         type: "FeatureCollection",
         features: []
@@ -105,7 +125,8 @@ const generateGeojson = (hubs, selected_policy_hubs) => {
                 "name": x.name,
                 "phase": x.phase,
                 "created_at": x.created_at,
-                "is_selected": selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0
+                "is_selected": selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0,
+                "is_in_drawing_mode": hubs_in_drawing_mode.indexOf(x.zone_id) > -1 ? 1 : 0
             },
             "geometry": x.area.geometry
         }
@@ -118,12 +139,17 @@ const generateGeojson = (hubs, selected_policy_hubs) => {
 const renderHubs = async (
   map: any,
   hubs: any,
-  selected_policy_hubs: any
+  selected_policy_hubs: any,
+  hubs_in_drawing_mode: any
 ) => {
   if(! map) return;
 
   // Generate feature collection from hubs
-  const featureCollection = generateGeojson(hubs, selected_policy_hubs);
+  const featureCollection = generateGeojson(
+    hubs,
+    selected_policy_hubs,
+    hubs_in_drawing_mode
+  );
 
   // Remove old polygons first
   removeHubsFromMap(map);

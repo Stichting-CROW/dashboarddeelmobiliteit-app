@@ -48,5 +48,5 @@ export {
     initMapboxDraw,
     initEventHandlers,
     updateArea,
-    enableDrawingPolygon
+    enableDrawingPolygon,
 }

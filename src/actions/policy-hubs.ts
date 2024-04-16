@@ -4,7 +4,8 @@ import {
   UNSET_VISIBLE_LAYER,
   SET_VISIBLE_LAYER,
   SET_SELECTED_POLICY_HUBS,
-  SET_SHOW_COMMIT_FORM
+  SET_SHOW_COMMIT_FORM,
+  SET_HUBS_IN_DRAWING_MODE
 } from "./actionTypes";
 
 export const setActivePhase = (phase) => ({
@@ -31,4 +32,8 @@ export const setSelectedPolicyHubs = (ids) => ({
 export const setShowCommitForm = (boolValue) => ({
   type: SET_SHOW_COMMIT_FORM,
   payload: boolValue
+})
+export const setHubsInDrawingMode = (ids) => ({
+  type: SET_HUBS_IN_DRAWING_MODE,
+  payload: ids
 })

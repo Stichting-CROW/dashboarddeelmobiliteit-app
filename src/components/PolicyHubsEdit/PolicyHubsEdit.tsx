@@ -20,24 +20,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
-import { setSelectedPolicyHubs } from '../../actions/policy-hubs';
+import { setHubsInDrawingMode, setSelectedPolicyHubs } from '../../actions/policy-hubs';
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
     selected_policy_hubs,
     drawed_area,
-    cancelHandler
+    cancelHandler,
 }: {
     all_policy_hubs: any,
     selected_policy_hubs: any,
     drawed_area: DrawedAreaType,
-    cancelHandler: Function
+    cancelHandler: Function,
 }) => {
     const dispatch = useDispatch()
 
     // Get gebied / municipality code
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
 
+    const [counter, setCounter] = useState<number>(0);
     const [hubData, setHubData] = useState<HubType>({
         stop: {
             is_virtual: true,
@@ -63,9 +64,18 @@ const PolicyHubsEdit = ({
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
         if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+        const zone_id = selected_policy_hubs[0];
+
+        // Don't do anything if we changed to the same hub
+        if(hubData.zone_id === zone_id) {
+            return;
+        }
+
+        // Stop being in drawing mode
+        dispatch(setHubsInDrawingMode([]));
 
         // Load hub data
-        loadHubData(selected_policy_hubs[0]);
+        loadHubData(zone_id);
     }, [
         selected_policy_hubs,
         selected_policy_hubs.length
@@ -92,7 +102,10 @@ const PolicyHubsEdit = ({
     // Find hub data in array with all policy hubs
     const loadHubData = async (hub_id) => {
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
-        if(foundHub) setHubData(foundHub);
+        if(foundHub) {
+            // Set hub data in local state
+            setHubData(foundHub);
+        }
     }
 
     const getZoneAvailability = () => {
@@ -294,6 +307,11 @@ const PolicyHubsEdit = ({
         });
     }
 
+    const enableDrawingForHub = () => {
+        if(! hubData.zone_id) return;
+        dispatch(setHubsInDrawingMode([hubData.zone_id]))
+    }
+
     const labelClassNames = 'mb-2 text-sm';
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
@@ -308,6 +326,7 @@ const PolicyHubsEdit = ({
             <div>
                 <FormInput
                     type="text"
+                    autofocus
                     placeholder="Naam van de zone"
                     name="name"
                     autoComplete="off"
@@ -487,6 +506,11 @@ const PolicyHubsEdit = ({
             >
                 Annuleer
             </Button>
+            {! isNewZone && <Button
+                onClick={enableDrawingForHub}
+            >
+                ✒️
+            </Button>}
             {! isNewZone && <Button
                 onClick={deleteZoneHandler}
             >

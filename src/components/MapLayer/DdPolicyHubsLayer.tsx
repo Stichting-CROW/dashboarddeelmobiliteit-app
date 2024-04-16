@@ -35,6 +35,7 @@ import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
+import { SET_HUBS_IN_DRAWING_MODE } from '@/src/actions/actionTypes';
 
 const DdPolicyHubsLayer = ({
   map
@@ -57,8 +58,13 @@ const DdPolicyHubsLayer = ({
   });
 
   const selected_policy_hubs = useSelector((state: StateType) => {
-    return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : false;
+    return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
   });
+
+  const hubs_in_drawing_mode = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.hubs_in_drawing_mode : [];
+  });
+  console.log('hubs_in_drawing_mode', hubs_in_drawing_mode)
 
   const show_commit_form = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
@@ -108,13 +114,18 @@ const DdPolicyHubsLayer = ({
     visible_layers.length
   ]);
 
-  // Render hubs if 'policyHubs' or 'selected_policy_hubs' change
+  // Render hubs if 'policyHubs' or 'selected_policy_hubs' or 'hubs_in_drawing_mode' change
   useEffect(() => {
     // Return
     if(! map) return;
     if(! policyHubs) return;
     
-    renderHubs(map, policyHubs, selected_policy_hubs);
+    renderHubs(
+      map,
+      policyHubs,
+      selected_policy_hubs,
+      hubs_in_drawing_mode
+    );
 
     // onComponentUnLoad
     return () => {
@@ -122,7 +133,8 @@ const DdPolicyHubsLayer = ({
     };
   }, [
     policyHubs,
-    selected_policy_hubs
+    selected_policy_hubs,
+    hubs_in_drawing_mode
   ]);
 
   // If mapStyle changes: re-render after a short delay
@@ -132,7 +144,12 @@ const DdPolicyHubsLayer = ({
     if(! policyHubs) return;
     
     setTimeout(() => {
-      renderHubs(map, policyHubs, selected_policy_hubs);
+      renderHubs(
+        map,
+        policyHubs,
+        selected_policy_hubs,
+        hubs_in_drawing_mode
+      );
     }, 50);
   }, [mapStyle]);
 
@@ -263,7 +280,10 @@ const DdPolicyHubsLayer = ({
 
     {/* Hub 'commit to concept' form */}
     {(didSelectOneHub() && show_commit_form) && <ActionModule>
-      <PolicyHubsCommit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
+      <PolicyHubsCommit
+        all_policy_hubs={policyHubs}
+        selected_policy_hubs={selected_policy_hubs}
+      />
     </ActionModule>}
   </>
 }
