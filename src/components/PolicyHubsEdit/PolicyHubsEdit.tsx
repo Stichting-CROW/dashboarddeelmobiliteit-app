@@ -38,7 +38,7 @@ const PolicyHubsEdit = ({
     // Get gebied / municipality code
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
 
-    const [counter, setCounter] = useState<number>(0);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
     const [hubData, setHubData] = useState<HubType>({
         stop: {
             is_virtual: true,
@@ -60,6 +60,10 @@ const PolicyHubsEdit = ({
     });
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+    // On unload
+    // useEffect(() => {
+    // }, [])
 
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
@@ -96,6 +100,7 @@ const PolicyHubsEdit = ({
                 location: drawedAreaCenter
             }
         });
+        setHasUnsavedChanges(true);
     }, [drawed_area])
 
     const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
@@ -156,7 +161,9 @@ const PolicyHubsEdit = ({
                 callback(updatedZone.zone_id);
             }
         }
+        setHasUnsavedChanges(false);
     }
+
     const deleteZoneHandler = async (e) => {
         if(! hubData || ! hubData.geography_id) return;
         if(! window.confirm('Weet je zeker dat je deze hub wilt verwijderen?')) {
@@ -183,6 +190,12 @@ const PolicyHubsEdit = ({
     };
 
     const cancelButtonHandler = () => {
+        if(hasUnsavedChanges) {
+            if(! window.confirm('Je hebt onopgeslagen wijzigen. Weet je zeker dat je door wilt gaan?')) {
+                return;
+            }
+        }
+
         dispatch({
             type: 'SET_SELECTED_POLICY_HUBS',
             payload: []
@@ -205,9 +218,12 @@ const PolicyHubsEdit = ({
             geography_type: type,
             description: (type === 'no_parking' ? 'Verbodsgebied' : 'Zone')
         });
+        setHasUnsavedChanges(true);
     }
 
     const updateZoneAvailability = (name: string) => {
+        setHasUnsavedChanges(true);
+
         if(name === 'auto') {
             setHubData({
                 ...hubData,
@@ -263,6 +279,8 @@ const PolicyHubsEdit = ({
     }
 
     const updateCapacityType = (name: string) => {
+        setHasUnsavedChanges(true);
+
         if(name === 'combined') {
             setHubData({
                 ...hubData,
@@ -295,6 +313,8 @@ const PolicyHubsEdit = ({
     const updateCapacityValue = (key: string, value: number) => {
         if(! key) return;
         if(! value) return;
+
+        setHasUnsavedChanges(true);
 
         setHubData({
             ...hubData,
