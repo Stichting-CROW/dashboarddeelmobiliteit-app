@@ -9,3 +9,7 @@ export const showNotification = (msg, setStateFunc) => {
     setStateFunc(false);
   }, 4000)
 }
+
+export const notify = (msg) => {
+  alert(msg);
+}

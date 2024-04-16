@@ -11,4 +11,5 @@ export type HubType = {
     area?: any;
     internal_id?: string;
     phase?: string;
+    zone_id?: number;
 }

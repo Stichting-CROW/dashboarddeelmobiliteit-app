@@ -42,7 +42,7 @@ const DdPolicyHubsLayer = ({
   const dispatch = useDispatch()
 
   const [policyHubs, setPolicyHubs] = useState([]);
-  const [drawingEnabled, setDrawingEnabled] = useState('');
+  const [drawingEnabled, setDrawingEnabled] = useState<any>();
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType>();
 
@@ -156,17 +156,19 @@ const DdPolicyHubsLayer = ({
   // If drawingEnabled changes: Do things
   useEffect(() => {
     if(! map) return;
-    // If drawing isn't enabled: Stop
-    if(! drawingEnabled) return;
+    // If drawing isn't enabled: Remove draw tools
+    if(! drawingEnabled) {
+        // Remove all drawed zones from the map
+        if(draw) draw.deleteAll();
+        return;
+    }
     // Initialize draw
     let Draw = draw;
-    (() => {
-      if(draw && draw.remove) draw.remove();
-
+    if(! draw) {
       Draw = initMapboxDraw(map)
       setDraw(Draw);
       initEventHandlers(map, changeAreaHandler);
-    })();
+    };
     // Enable drawing polygons
     enableDrawingPolygon(Draw);
   }, [
@@ -197,7 +199,7 @@ const DdPolicyHubsLayer = ({
     const props = e.features[0].properties;
 
     // Store active hub ID in redux state
-    dispatch(setSelectedPolicyHubs([props.ids]))
+    dispatch(setSelectedPolicyHubs([props.id]))
   }
 
   const didSelectOneHub = () => {
@@ -253,6 +255,9 @@ const DdPolicyHubsLayer = ({
         all_policy_hubs={policyHubs}
         selected_policy_hubs={selected_policy_hubs}
         drawed_area={drawedArea}
+        cancelHandler={() => {
+          setDrawingEnabled(false);
+        }}
       />
     </ActionModule>}
 

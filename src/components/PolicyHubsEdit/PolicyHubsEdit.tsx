@@ -18,15 +18,19 @@ import ModalityRow from './ModalityRow';
 import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
+import { notify } from '../../helpers/notify';
+import { setSelectedPolicyHubs } from '../../actions/policy-hubs';
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
     selected_policy_hubs,
-    drawed_area
+    drawed_area,
+    cancelHandler
 }: {
     all_policy_hubs: any,
     selected_policy_hubs: any,
-    drawed_area: DrawedAreaType
+    drawed_area: DrawedAreaType,
+    cancelHandler: Function
 }) => {
     const dispatch = useDispatch()
 
@@ -51,6 +55,7 @@ const PolicyHubsEdit = ({
 
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
+        console.log('selected_policy_hubs', selected_policy_hubs)
         if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
 
         // Load hub data
@@ -81,6 +86,7 @@ const PolicyHubsEdit = ({
     // Find hub data in array with all policy hubs
     const loadHubData = async (hub_id) => {
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
+        console.log('foundHub')
         if(foundHub) setHubData(foundHub);
     }
 
@@ -111,11 +117,25 @@ const PolicyHubsEdit = ({
     }
 
     const saveZone = async () => {
+        const callback = (zone_id) => {
+            notify('Hub toegevoegd');
+            dispatch(setSelectedPolicyHubs([zone_id]))
+        }
         if(isNewZone) {
-            const updatedZone = await postHub(token, hubData);
+            const addedZone = await postHub(token, hubData);
+            if(addedZone && addedZone.zone_id) {
+                callback(addedZone.zone_id);
+                setHubData({
+                    ...hubData,
+                    zone_id: addedZone.zone_id
+                })
+            }
         }
         else {
-            const addedZone = await putHub(token, hubData);
+            const updatedZone = await putHub(token, hubData);
+            if(updatedZone && updatedZone.zone_id) {
+                callback(updatedZone.zone_id);
+            }
         }
     }
     const deleteZoneHandler = saveZone;
@@ -124,7 +144,8 @@ const PolicyHubsEdit = ({
         dispatch({
             type: 'SET_SELECTED_POLICY_HUBS',
             payload: []
-        })
+        });
+        cancelHandler();
     };
 
     const changeHandler = (e) => {
@@ -247,70 +268,6 @@ const PolicyHubsEdit = ({
     const labelClassNames = 'mb-2 text-sm';
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
-
-    console.log('hubData', hubData);
-
-
-    console.log('drawed_area', drawed_area);
-    // "stop": {
-    //     "location": {
-    //         "type": "Feature",
-    //         "properties": {},
-    //         "geometry": {
-    //             "type": "Point",
-    //             "coordinates": [
-    //                 4.467403699996012,
-    //                 51.923060960934194
-    //             ]
-    //         }
-    //     },
-    //     "status": {
-    //         "control_automatic": true,
-    //         "is_returning": true,
-    //         "is_installed": false,
-    //         "is_renting": false
-    //     },
-    //     "capacity": {}
-    // },
-    // "no_parking": null,
-    // "geography_type": "stop",
-    // "name": "Test",
-    // "published": true,
-    // "zone_availability": "auto",
-    // "municipality": "GM0599",
-    // "area": {
-    //     "id": "0045f9d13af9b791c08934c6ade49ce3",
-    //     "type": "Feature",
-    //     "properties": {},
-    //     "geometry": {
-    //         "coordinates": [[
-    //             [
-    //                 [
-    //                     4.462803174665822,
-    //                     51.923364972522876
-    //                 ],
-    //                 [
-    //                     4.471200958998395,
-    //                     51.924513353404535
-    //                 ],
-    //                 [
-    //                     4.472004225326202,
-    //                     51.92302720784866
-    //                 ],
-    //                 [
-    //                     4.4633508562522195,
-    //                     51.92160856846385
-    //                 ],
-    //                 [
-    //                     4.462803174665822,
-    //                     51.923364972522876
-    //                 ]
-    //             ]
-    //         ]],
-    //         "type": "MultiPolygon"
-    //     }
-    // },
-    // "description": "Zone"
 
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
