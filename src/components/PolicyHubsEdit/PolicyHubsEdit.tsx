@@ -10,6 +10,7 @@ import { DrawedAreaType } from '../../types/DrawedAreaType';
 // Import API functions
 import { putHub } from '../../helpers/policy-hubs/put-hub';
 import { postHub } from '../../helpers/policy-hubs/post-hub';
+import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -39,10 +40,16 @@ const PolicyHubsEdit = ({
 
     const [hubData, setHubData] = useState<HubType>({
         stop: {
-            is_virtual: true
+            is_virtual: true,
+            status: {
+                control_automatic: true
+            },
+            capacity: {
+                combined: 0
+            }
         },
         name: '',
-        geography_type: '',
+        geography_type: 'stop',
         zone_availability: '',
         municipality: gm_code,
         description: 'Zone',
@@ -55,7 +62,6 @@ const PolicyHubsEdit = ({
 
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
-        console.log('selected_policy_hubs', selected_policy_hubs)
         if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
 
         // Load hub data
@@ -86,7 +92,6 @@ const PolicyHubsEdit = ({
     // Find hub data in array with all policy hubs
     const loadHubData = async (hub_id) => {
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
-        console.log('foundHub')
         if(foundHub) setHubData(foundHub);
     }
 
@@ -138,7 +143,30 @@ const PolicyHubsEdit = ({
             }
         }
     }
-    const deleteZoneHandler = saveZone;
+    const deleteZoneHandler = async (e) => {
+        if(! hubData || ! hubData.geography_id) return;
+        if(! window.confirm('Weet je zeker dat je deze hub wilt verwijderen?')) {
+            alert('Verwijderen geannuleerd');
+            return;
+        }
+
+        try {
+            const response = await deleteHub(token, hubData.geography_id);
+            console.log('Delete reponse', response);
+    
+            if(response && response.detail) {
+                // Give error if something went wrong
+                notify('Er ging iets fout bij het verwijderen');
+            }
+            else {
+                notify('Hub verwijderd');
+                // Hide edit form
+                dispatch(setSelectedPolicyHubs([]))
+            }
+        } catch(err) {
+            console.error('Delete error', err);
+        }
+    };
 
     const cancelButtonHandler = () => {
         dispatch({
@@ -160,7 +188,8 @@ const PolicyHubsEdit = ({
     const updateGeographyType = (type: string) => {
         setHubData({
             ...hubData,
-            geography_type: type
+            geography_type: type,
+            description: (type === 'no_parking' ? 'Verbodsgebied' : 'Zone')
         });
     }
 
@@ -380,19 +409,19 @@ const PolicyHubsEdit = ({
             <div className={hubData.geography_type === 'stop' ? 'visible' : 'invisible'}>
             <p className="mb-2 text-sm">
                 Limiet <a onClick={() => {
-                    updateCapacityType('modality');
-                }} className={`
-                    ${getCapacityType() === 'modality' ? 'underline' : ''}
-                    cursor-pointer
-                `}>
-                per modaliteit
-                </a> | <a onClick={() => {
                     updateCapacityType('combined');
                 }} className={`
                     ${getCapacityType() === 'combined' ? 'underline' : ''}
                     cursor-pointer
                 `}>
                 totaal
+                </a> | <a onClick={() => {
+                    updateCapacityType('modality');
+                }} className={`
+                    ${getCapacityType() === 'modality' ? 'underline' : ''}
+                    cursor-pointer
+                `}>
+                per modaliteit
                 </a>
             </p>
 
