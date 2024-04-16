@@ -15,13 +15,15 @@ import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
     selected_policy_hubs
 }) => {
+    const dispatch = useDispatch()
+    
     const [hubData, setHubData] = useState<HubType>({
         stop: {},
         name: '',
@@ -78,7 +80,13 @@ const PolicyHubsEdit = ({
         const updatedZone = await putZone(token, hubData);
     }
     const deleteZoneHandler = saveZone;
-    const cancelButtonHandler = saveZone;
+
+    const cancelButtonHandler = () => {
+        dispatch({
+            type: 'SET_SELECTED_POLICY_HUBS',
+            payload: []
+        })
+    };
 
     const changeHandler = (e) => {
         if(! e) return;
@@ -340,32 +348,32 @@ const PolicyHubsEdit = ({
                 {getCapacityType() === 'combined' && <ModalityRow
                     imageUrl=""
                     name="vehicles-limit.combined"
-                    value={hubData['vehicles-limit.combined']}
+                    value={hubData?.stop?.capacity?.combined}
                     onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
                 />}
                 {getCapacityType() === 'modality' && <>
                 <ModalityRow
                     imageUrl="https://i.imgur.com/IF05O8u.png"
                     name="vehicles-limit.bicycle"
-                    value={hubData['vehicles-limit.bicycle']}
+                    value={hubData?.stop?.capacity?.bicycle}
                     onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
                 />
                 <ModalityRow
                     imageUrl="https://i.imgur.com/FdVBJaZ.png"
                     name="vehicles-limit.cargo_bicycle"
-                    value={hubData['vehicles-limit.cargo_bicycle']}
+                    value={hubData?.stop?.capacity?.cargo_bicycle}
                     onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
                 />
                 <ModalityRow
                     imageUrl="https://i.imgur.com/h264sb2.png"
                     name="vehicles-limit.moped"
-                    value={hubData['vehicles-limit.moped']}
+                    value={hubData?.stop?.capacity?.moped}
                     onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
                 />
                 <ModalityRow
                     imageUrl="https://i.imgur.com/7Y2PYpv.png"
                     name="vehicles-limit.car"
-                    value={hubData['vehicles-limit.car']}
+                    value={hubData?.stop?.capacity?.car}
                     onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
                 />
                 </>}
@@ -381,6 +389,7 @@ const PolicyHubsEdit = ({
                Verwijder zone
             </Text>
         </div>}
+
         <div className="flex w-full justify-between">
 
             <Button
@@ -403,8 +412,8 @@ const PolicyHubsEdit = ({
                 Opslaan
             </Button>
 
-            </div>
         </div>
+    </div>
     )
 }
 

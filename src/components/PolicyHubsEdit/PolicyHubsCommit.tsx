@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
     fetch_hubs
@@ -15,7 +16,6 @@ import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
-import { useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
@@ -30,6 +30,8 @@ const PolicyHubsCommit = ({
     all_policy_hubs,
     selected_policy_hubs
 }) => {
+    const dispatch = useDispatch()
+
     const [hubData, setHubData] = useState<HubType>({
         stop: {},
         name: '',
@@ -82,6 +84,13 @@ const PolicyHubsCommit = ({
         });
     }
 
+    const hideCommitForm = () => {
+        dispatch({
+            type: 'SET_SHOW_COMMIT_FORM',
+            payload: false
+        });
+    }
+
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
     return (
@@ -118,7 +127,7 @@ const PolicyHubsCommit = ({
                 <Button
                     theme="white"
                     style={{marginLeft: 0}}
-                    onClick={onChange}
+                    onClick={hideCommitForm}
                 >
                     Annuleer
                 </Button>

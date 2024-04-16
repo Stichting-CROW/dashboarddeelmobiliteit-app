@@ -72,13 +72,13 @@ async function renderPolygons_fill(map, geojson) {
       paint: {
         'line-color': [
           "case",
-          ["==", ["get", "selected"], 1], '#15aeef',
+          ["==", ["get", "is_selected"], 1], '#ff0',
           ["boolean", ["feature-state", "hover"], false], '#666',
           '#DDD'
         ],
         'line-width': [
           "case",
-          ["==", ["get", "selected"], 1], 5,
+          ["==", ["get", "is_selected"], 1], 5,
           ["boolean", ["feature-state", "hover"], false], 2,
           1
         ]
@@ -86,7 +86,7 @@ async function renderPolygons_fill(map, geojson) {
     });
 }
 
-const generateGeojson = (hubs) => {
+const generateGeojson = (hubs, selected_policy_hubs) => {
     let geoJson = {
         type: "FeatureCollection",
         features: []
@@ -102,7 +102,8 @@ const generateGeojson = (hubs) => {
                 "id": x.zone_id,
                 "name": x.name,
                 "phase": x.phase,
-                "created_at": x.created_at
+                "created_at": x.created_at,
+                "is_selected": selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0
             },
             "geometry": x.area.geometry
         }
@@ -114,10 +115,11 @@ const generateGeojson = (hubs) => {
 
 const renderHubs = async (
   map: any,
-  hubs: any
+  hubs: any,
+  selected_policy_hubs: any
 ) => {
   // Generate feature collection from hubs
-  const featureCollection = generateGeojson(hubs);
+  const featureCollection = generateGeojson(hubs, selected_policy_hubs);
 
   // Remove old polygons first
   removeHubsFromMap(map);

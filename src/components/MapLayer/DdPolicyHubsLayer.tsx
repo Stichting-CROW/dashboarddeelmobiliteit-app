@@ -81,20 +81,21 @@ const DdPolicyHubsLayer = ({
     visible_layers.length
   ]);
 
-  // Render hubs if 'policyHubs' change
+  // Render hubs if 'policyHubs' or 'selected_policy_hubs' change
   useEffect(() => {
     // Return
     if(! map) return;
     if(! policyHubs) return;
     
-    renderHubs(map, policyHubs);
+    renderHubs(map, policyHubs, selected_policy_hubs);
 
     // onComponentUnLoad
     return () => {
 
     };
   }, [
-    policyHubs
+    policyHubs,
+    selected_policy_hubs
   ]);
 
   // Init hub click handlers
