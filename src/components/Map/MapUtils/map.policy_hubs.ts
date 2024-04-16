@@ -26,6 +26,8 @@ const removeHubsFromMap = (map: any) => {
 }
 
 async function renderPolygons_fill(map, geojson) {
+    if(! map) return;
+    
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`
       , source = map.getSource(sourceId);
@@ -57,7 +59,7 @@ async function renderPolygons_fill(map, geojson) {
     }
     
     // Set fill color
-    map.setPaintProperty(layerId, 'fill-color', '#666');
+    map.setPaintProperty(layerId, 'fill-color', '#FD862E');
 
     // Set opacity
     map.setPaintProperty(layerId, 'fill-opacity', 0.6);
@@ -118,6 +120,8 @@ const renderHubs = async (
   hubs: any,
   selected_policy_hubs: any
 ) => {
+  if(! map) return;
+
   // Generate feature collection from hubs
   const featureCollection = generateGeojson(hubs, selected_policy_hubs);
 

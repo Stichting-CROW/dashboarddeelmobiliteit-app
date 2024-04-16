@@ -26,6 +26,7 @@ import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
+import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
 
 const DdPolicyHubsLayer = ({
   map
@@ -35,7 +36,8 @@ const DdPolicyHubsLayer = ({
   const [policyHubs, setPolicyHubs] = useState([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
-
+  const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
+  
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
       return state.authentication.user_data.token;
@@ -53,6 +55,19 @@ const DdPolicyHubsLayer = ({
 
   // const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+
+  // On component load: Set satelite view
+  const mapStyles = getMapStyles();
+  useEffect(() => {
+    if(! map) return;
+    // Wait until map has been loaded
+    map.on('load', function() {
+      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
+      setMapStyle(map, mapStyles.satelite)
+    });
+  }, [
+    map
+  ]);
 
   // onComponentUnLoad
   useEffect(() => {
@@ -97,6 +112,17 @@ const DdPolicyHubsLayer = ({
     policyHubs,
     selected_policy_hubs
   ]);
+
+  // If mapStyle changes: re-render after a short delay
+  useEffect(() => {
+    // Return
+    if(! map) return;
+    if(! policyHubs) return;
+    
+    setTimeout(() => {
+      renderHubs(map, policyHubs, selected_policy_hubs);
+    }, 50);
+  }, [mapStyle]);
 
   // Init hub click handlers
   useEffect(() => {
@@ -150,6 +176,7 @@ const DdPolicyHubsLayer = ({
     if(! didSelectOneHub) return;
 
     // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
     const selected_hub = policyHubs.find(x => x.zone_id === selected_policy_hubs[0]);
     if(! selected_hub) return false;
     
