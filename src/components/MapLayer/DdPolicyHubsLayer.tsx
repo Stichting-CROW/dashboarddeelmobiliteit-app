@@ -18,7 +18,8 @@ import {
   initMapboxDraw,
   initEventHandlers,
   enableDrawingPolygon,
-  selectDrawPolygon
+  selectDrawPolygon,
+  removeDrawedPolygons
 } from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
@@ -97,15 +98,7 @@ const DdPolicyHubsLayer = ({
     if(! filter.gebied) return;
     if(! visible_layers || visible_layers.length === 0) return;
 
-    // Fetch hubs
-    (async () => {
-      const res = await fetch_hubs({
-        token: token,
-        municipality: filter.gebied,
-        visible_layers: visible_layers
-      });
-      setPolicyHubs(res);
-    })();
+    fetchHubs()
   }, [
     filter.gebied,
     visible_layers,
@@ -117,7 +110,7 @@ const DdPolicyHubsLayer = ({
     // Return
     if(! map) return;
     if(! policyHubs) return;
-    
+
     renderHubs(
       map,
       policyHubs,
@@ -136,12 +129,27 @@ const DdPolicyHubsLayer = ({
   ]);
 
   useEffect(() => {
-    drawEditablePolygon();
+    if(hubs_in_drawing_mode && hubs_in_drawing_mode.length > 0) {
+      drawEditablePolygon();
+    }
+    else {
+      removeDrawedPolygons(draw);
+    }
   }, [
     draw,
     is_drawing_enabled,
     hubs_in_drawing_mode
   ]);
+
+  // Fetch hubs
+  const fetchHubs = async () => {
+    const res = await fetch_hubs({
+      token: token,
+      municipality: filter.gebied,
+      visible_layers: visible_layers
+    });
+    setPolicyHubs(res);
+  };
 
   const drawEditablePolygon = () => {
     if(! map) return;
@@ -200,8 +208,7 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
     // If drawing isn't enabled: Remove draw tools
     if(! is_drawing_enabled) {
-        // Remove all drawed zones from the map
-        if(draw) draw.deleteAll();
+        removeDrawedPolygons(draw);
         return;
     }
     // Initialize draw
@@ -212,10 +219,12 @@ const DdPolicyHubsLayer = ({
       initEventHandlers(map, changeAreaHandler);
     };
     if(is_drawing_enabled === 'new') {
-      // Enable drawing polygons
-      enableDrawingPolygon(Draw);
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
+      // Enable drawing polygons
+      setTimeout(() => {
+        enableDrawingPolygon(Draw);
+      }, 25);
     }
     else if(is_drawing_enabled) {
       setTimeout(() => {
@@ -267,7 +276,7 @@ const DdPolicyHubsLayer = ({
 
     // Get extra hub info
     if(! policyHubs || ! policyHubs[0]) return;
-    const selected_hub = policyHubs.find(x => x.zone_id === selected_policy_hubs[0]);
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
     if(! selected_hub) return false;
     
     // Return if hub is a concept hub
@@ -301,6 +310,7 @@ const DdPolicyHubsLayer = ({
     {/* Hub edit form */}
     {(didSelectOneHub() && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit
+        fetchHubs={fetchHubs}
         all_policy_hubs={policyHubs}
         selected_policy_hubs={selected_policy_hubs}
         drawed_area={drawedArea}

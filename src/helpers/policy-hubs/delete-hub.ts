@@ -7,5 +7,11 @@ export const deleteHub = async (token, geography_id: string) => {
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'DELETE'
   }));
-  return await response.json();
+  let json;
+  try {
+    json = await response.json();
+  } catch(err) {
+    // Couldn't convert to json - is no problem
+  }
+  return json;
 }

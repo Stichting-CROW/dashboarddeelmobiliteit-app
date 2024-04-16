@@ -126,7 +126,7 @@ const generateGeojson = (
                 "name": x.name,
                 "phase": x.phase,
                 "created_at": x.created_at,
-                "is_selected": selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0,
+                "is_selected": selected_policy_hubs && selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0,
                 "is_in_drawing_mode": hubs_in_drawing_mode.indexOf(x.zone_id) > -1 ? 1 : 0
             },
             "geometry": x.area.geometry

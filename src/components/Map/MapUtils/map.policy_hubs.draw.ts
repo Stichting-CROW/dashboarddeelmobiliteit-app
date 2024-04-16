@@ -42,9 +42,15 @@ const selectDrawPolygon = (draw, id) => {
     });
 }
 
+const removeDrawedPolygons = (draw) => {
+    // Remove all drawed zones from the map
+    if(draw) draw.deleteAll();
+}
+
 export {
     initMapboxDraw,
     initEventHandlers,
     enableDrawingPolygon,
-    selectDrawPolygon
+    selectDrawPolygon,
+    removeDrawedPolygons
 }

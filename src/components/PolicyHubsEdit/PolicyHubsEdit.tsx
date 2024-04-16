@@ -8,8 +8,8 @@ import {HubType} from '../../types/HubType';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 
 // Import API functions
-import { putHub } from '../../helpers/policy-hubs/put-hub';
 import { postHub } from '../../helpers/policy-hubs/post-hub';
+import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
 
 import Button from '../Button/Button';
@@ -23,11 +23,13 @@ import { notify } from '../../helpers/notify';
 import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs } from '../../actions/policy-hubs';
 
 const PolicyHubsEdit = ({
+    fetchHubs,
     all_policy_hubs,
     selected_policy_hubs,
     drawed_area,
     cancelHandler,
 }: {
+    fetchHubs?: Function,
     all_policy_hubs: any,
     selected_policy_hubs: any,
     drawed_area: DrawedAreaType,
@@ -146,15 +148,19 @@ const PolicyHubsEdit = ({
         }
     }
 
+    const postSaveOrDeleteCallback = (zone_id?: number) => {
+        dispatch(setSelectedPolicyHubs(zone_id ? [zone_id] : []))
+        dispatch(setHubsInDrawingMode([]));
+        dispatch(setIsDrawingEnabled(false));
+        fetchHubs();
+    }
+
     const saveZone = async () => {
-        const callback = (zone_id) => {
-            notify('Hub toegevoegd');
-            dispatch(setSelectedPolicyHubs([zone_id]))
-        }
         if(isNewZone) {
             const addedZone = await postHub(token, hubData);
             if(addedZone && addedZone.zone_id) {
-                callback(addedZone.zone_id);
+                notify('Hub toegevoegd');
+                postSaveOrDeleteCallback(addedZone.zone_id);
                 setHubData({
                     ...hubData,
                     zone_id: addedZone.zone_id
@@ -162,9 +168,9 @@ const PolicyHubsEdit = ({
             }
         }
         else {
-            const updatedZone = await putHub(token, hubData);
+            const updatedZone = await patchHub(token, hubData);
             if(updatedZone && updatedZone.zone_id) {
-                callback(updatedZone.zone_id);
+                postSaveOrDeleteCallback(updatedZone.zone_id);
             }
         }
         setHasUnsavedChanges(false);
@@ -189,6 +195,7 @@ const PolicyHubsEdit = ({
                 notify('Hub verwijderd');
                 // Hide edit form
                 dispatch(setSelectedPolicyHubs([]))
+                postSaveOrDeleteCallback();
             }
         } catch(err) {
             console.error('Delete error', err);
@@ -272,7 +279,7 @@ const PolicyHubsEdit = ({
             });
         }
 
-        const status = hubData.stop.status;
+        const status = hubData?.stop?.status;
 
         if(status?.control_automatic === true) {
             return 'auto';
@@ -391,6 +398,7 @@ const PolicyHubsEdit = ({
                     text-sm
                 ">
                     {[
+                        {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
                         {name: 'stop', title: 'Parking', color: '#fd862e'},
                         {name: 'no_parking', title: 'Verbodsgebied', color: '#fd3e48'}
                     ].map(x => {
