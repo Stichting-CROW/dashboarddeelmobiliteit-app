@@ -305,7 +305,7 @@ const initAdminView = (theMap) => {
   // Add custom draw mode: 'StaticMode'
   // https://github.com/mapbox/mapbox-gl-draw-static-mode
   let modes = MapboxDraw.modes;
-  modes = MapboxDrawWaypoint.enable(modes);// Di`sable moving features
+  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
   modes.static = StaticMode;
 
   const publicStyles = [

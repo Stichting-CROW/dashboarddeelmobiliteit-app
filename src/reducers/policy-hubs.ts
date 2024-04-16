@@ -67,6 +67,12 @@ export default function policy_hubs(state = initialState, action) {
           hubs_in_drawing_mode: action.payload
       };
     }
+    case 'SET_IS_DRAWING_ENABLED': {
+      return {
+          ...state,
+          is_drawing_enabled: action.payload
+      };
+    }
     case 'SET_SHOW_COMMIT_FORM': {
       return {
           ...state,

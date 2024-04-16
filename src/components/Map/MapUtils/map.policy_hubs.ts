@@ -84,11 +84,12 @@ async function renderPolygons_fill(map, geojson) {
         ],
         'line-width': [
           "case",
-          ["==", ["get", "is_selected"], 1], 5,
+          ["==", ["get", "is_selected"], 1], 3,
           ["boolean", ["feature-state", "hover"], false], 2,
           1
         ],
         'line-opacity': [
+          'case',
           ['==', ['get', 'is_in_drawing_mode'], 1], 0,
           1
         ]

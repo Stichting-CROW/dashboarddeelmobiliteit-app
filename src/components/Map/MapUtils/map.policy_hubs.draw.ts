@@ -10,7 +10,7 @@ const initMapboxDraw = (map) => {
         },
         // Set mapbox-gl-draw to draw by default.
         // The user does not have to click the polygon control button first.
-        defaultMode: 'draw_polygon'
+        defaultMode: 'simple_select'
     });
     map.addControl(draw);
 
@@ -29,24 +29,23 @@ const enableDrawingPolygon = (draw) => {
     draw.changeMode('draw_polygon');
 }
 
-function updateArea(e, draw) {
-    // const data = draw.getAll();
-    // const answer = document.getElementById('calculated-area');
-    // if (data.features.length > 0) {
-    //     const area = turfArea(data);
-    //     // Restrict the area to 2 decimal points.
-    //     const rounded_area = Math.round(area * 100) / 100;
-    //     answer.innerHTML = `<p><strong>${rounded_area}</strong></p><p>square meters</p>`;
-    // } else {
-    //     answer.innerHTML = '';
-    //     if (e.type !== 'draw.delete')
-    //         alert('Click the map to draw a polygon.');
-    // }
+const selectDrawPolygon = (draw, id) => {
+    if(! draw) return;
+
+    const drawed = draw.getAll();
+    drawed.features.map(x => {
+      console.log('x', x)
+    })
+
+    console.log(`changeMode('direct_select'`, id)
+    draw.changeMode('direct_select', {
+        featureId: id
+    });
 }
 
 export {
     initMapboxDraw,
     initEventHandlers,
-    updateArea,
     enableDrawingPolygon,
+    selectDrawPolygon
 }

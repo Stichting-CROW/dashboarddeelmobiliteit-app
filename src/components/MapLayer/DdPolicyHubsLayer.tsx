@@ -3,13 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 // import { useSearchParams } from 'react-router-dom'
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 
-// import {
-//   DISPLAYMODE_PARK,
-//   DISPLAYMODE_RENTALS,
-// } from '../../reducers/layers.js';
-
 import {
-  setSelectedPolicyHubs
+  setHubsInDrawingMode,
+  setSelectedPolicyHubs,
+  setIsDrawingEnabled
 } from '../../actions/policy-hubs'
 
 import {
@@ -20,8 +17,8 @@ import {
 import {
   initMapboxDraw,
   initEventHandlers,
-  updateArea,
-  enableDrawingPolygon
+  enableDrawingPolygon,
+  selectDrawPolygon
 } from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
@@ -35,7 +32,6 @@ import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
-import { SET_HUBS_IN_DRAWING_MODE } from '@/src/actions/actionTypes';
 
 const DdPolicyHubsLayer = ({
   map
@@ -43,7 +39,6 @@ const DdPolicyHubsLayer = ({
   const dispatch = useDispatch()
 
   const [policyHubs, setPolicyHubs] = useState([]);
-  const [drawingEnabled, setDrawingEnabled] = useState<any>();
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType>();
 
@@ -64,8 +59,11 @@ const DdPolicyHubsLayer = ({
   const hubs_in_drawing_mode = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.hubs_in_drawing_mode : [];
   });
-  console.log('hubs_in_drawing_mode', hubs_in_drawing_mode)
 
+  const is_drawing_enabled = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.is_drawing_enabled : [];
+  });
+  
   const show_commit_form = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
   });
@@ -137,6 +135,33 @@ const DdPolicyHubsLayer = ({
     hubs_in_drawing_mode
   ]);
 
+  useEffect(() => {
+    drawEditablePolygon();
+  }, [
+    draw,
+    is_drawing_enabled,
+    hubs_in_drawing_mode
+  ]);
+
+  const drawEditablePolygon = () => {
+    if(! map) return;
+    if(! draw) return;
+    if(! hubs_in_drawing_mode || ! hubs_in_drawing_mode[0]) return;
+
+    const selected_hub = policyHubs.find(x => x.zone_id === hubs_in_drawing_mode[0]);
+    if(! selected_hub || ! selected_hub.area) return;
+
+    // Add editable feature to the map
+    draw.add({
+      ...selected_hub.area,
+      id: hubs_in_drawing_mode[0]
+    });
+    // Select the polygon, so it is editable
+    setTimeout(() => {
+      selectDrawPolygon(draw, hubs_in_drawing_mode[0]);
+    }, 25);
+  }
+
   // If mapStyle changes: re-render after a short delay
   useEffect(() => {
     // Return
@@ -170,11 +195,11 @@ const DdPolicyHubsLayer = ({
     map
   ]);
 
-  // If drawingEnabled changes: Do things
+  // If is_drawing_enabled changes: Do things
   useEffect(() => {
     if(! map) return;
     // If drawing isn't enabled: Remove draw tools
-    if(! drawingEnabled) {
+    if(! is_drawing_enabled) {
         // Remove all drawed zones from the map
         if(draw) draw.deleteAll();
         return;
@@ -186,22 +211,29 @@ const DdPolicyHubsLayer = ({
       setDraw(Draw);
       initEventHandlers(map, changeAreaHandler);
     };
-    // Enable drawing polygons
-    enableDrawingPolygon(Draw);
+    if(is_drawing_enabled === 'new') {
+      // Enable drawing polygons
+      enableDrawingPolygon(Draw);
+      // Show edit window
+      dispatch(setSelectedPolicyHubs(['new']))
+    }
+    else if(is_drawing_enabled) {
+      setTimeout(() => {
+        selectDrawPolygon(Draw, is_drawing_enabled);
+      }, 25);
+    }
   }, [
     map,
-    drawingEnabled
+    is_drawing_enabled
   ])
 
   const changeAreaHandler = (e) => {
-    console.log(e)
+    console.log('changeAreaHandler', e)
     // Set drawedArea
     setDrawedArea({
       type: e.type,
       features: e.features
     });
-    // Show edit window
-    dispatch(setSelectedPolicyHubs(['new']))
   }
 
   const clickHandler = (e) => {
@@ -260,8 +292,8 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Teken hub button */}
-    {(! didSelectOneHub() && ! drawingEnabled) && <ActionButtons>
-      <Button theme="primary" onClick={() => setDrawingEnabled('new')}>
+    {(! didSelectOneHub() && ! is_drawing_enabled) && <ActionButtons>
+      <Button theme="primary" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
         Teken nieuwe hub
       </Button>
     </ActionButtons>}
@@ -273,7 +305,8 @@ const DdPolicyHubsLayer = ({
         selected_policy_hubs={selected_policy_hubs}
         drawed_area={drawedArea}
         cancelHandler={() => {
-          setDrawingEnabled(false);
+          dispatch(setHubsInDrawingMode([]));
+          dispatch(setIsDrawingEnabled(false));
         }}
       />
     </ActionModule>}

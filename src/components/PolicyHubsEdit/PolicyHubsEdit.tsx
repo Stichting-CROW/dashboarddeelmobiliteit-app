@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
-import { setHubsInDrawingMode, setSelectedPolicyHubs } from '../../actions/policy-hubs';
+import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs } from '../../actions/policy-hubs';
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
@@ -73,6 +73,7 @@ const PolicyHubsEdit = ({
 
         // Stop being in drawing mode
         dispatch(setHubsInDrawingMode([]));
+        dispatch(setIsDrawingEnabled(false));
 
         // Load hub data
         loadHubData(zone_id);
@@ -310,6 +311,7 @@ const PolicyHubsEdit = ({
     const enableDrawingForHub = () => {
         if(! hubData.zone_id) return;
         dispatch(setHubsInDrawingMode([hubData.zone_id]))
+        dispatch(setIsDrawingEnabled(hubData.zone_id));
     }
 
     const labelClassNames = 'mb-2 text-sm';
