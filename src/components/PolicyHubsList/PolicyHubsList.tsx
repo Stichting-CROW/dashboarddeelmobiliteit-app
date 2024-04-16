@@ -74,18 +74,11 @@ const PolicyHubsList = () => {
   
     // Fetch hubs
     useEffect(() => {
-      if(! filter.gebied) return;
-      if(! visible_layers || visible_layers.length === 0) return;
+        if(! filter.gebied) return;
+        if(! visible_layers || visible_layers.length === 0) return;
   
-      // Fetch hubs
-      (async () => {
-        const res = await fetch_hubs({
-          token: token,
-          municipality: filter.gebied,
-          visible_layers: visible_layers
-        });
-        setPolicyHubs(res);
-      })();
+        // Fetch hubs
+        fetchHubs();
     }, [
       filter.gebied,
       visible_layers,
@@ -102,6 +95,16 @@ const PolicyHubsList = () => {
     }, [
         policyHubs
     ]);
+
+    // Fetch hubs
+    const fetchHubs = async () => {
+        const res = await fetch_hubs({
+            token: token,
+            municipality: filter.gebied,
+            visible_layers: visible_layers
+        });
+        setPolicyHubs(res);
+    };
 
     return (
         <div>

@@ -102,11 +102,15 @@ const PolicyHubsEdit = ({
 
         setHubData({
             ...hubData,
-            area: drawed_area.features[0],
-            stop: {
+            area: {
+                geometry: drawed_area.features[0]?.geometry,
+                properties: drawed_area.features[0]?.properties,
+                type: drawed_area.features[0]?.type
+            },
+            stop: hubData.geography_type === 'stop' ? {
                 ...hubData.stop,
                 location: drawedAreaCenter
-            }
+            } : null
         });
         setHasUnsavedChanges(true);
     }, [drawed_area])
@@ -168,6 +172,7 @@ const PolicyHubsEdit = ({
             }
         }
         else {
+            console.log('patching hub', hubData)
             const updatedZone = await patchHub(token, hubData);
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
@@ -232,6 +237,27 @@ const PolicyHubsEdit = ({
             description: (type === 'no_parking' ? 'Verbodsgebied' : 'Zone')
         });
         setHasUnsavedChanges(true);
+    }
+
+    const updateIsVirtual = (key: string) => {
+        if(key === 'is_virtual') {
+            setHubData({
+                ...hubData,
+                stop: {
+                    ...hubData.stop,
+                    is_virtual: true
+                }
+            });
+        }
+        else {
+            setHubData({
+                ...hubData,
+                stop: {
+                    ...hubData.stop,
+                    is_virtual: false
+                }
+            });
+        }
     }
 
     const updateZoneAvailability = (name: string) => {
@@ -421,6 +447,50 @@ const PolicyHubsEdit = ({
                         key={x.name}
                         onClick={() => {
                             updateGeographyType(x.name);
+                        }}
+                        >
+                            {x.title}
+                        </div>
+                    })}
+                </div>
+            </div>
+
+            <div className={`
+                mt-2
+                ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
+            `}>
+                <div className="
+                    flex
+                    rounded-lg bg-white
+                    border-solid
+                    border
+                    border-gray-400
+                    text-sm
+                ">
+                    {[
+                        {name: 'is_virtual', title: 'Virtuele hub', color: '#15aeef'},
+                        {name: 'is_not_virtual', title: 'Fysieke hub', color: '#15aeef'}
+                    ].map(x => {
+                        return <div className={`
+                            ${(hubData?.stop?.is_virtual === true && x.name === 'is_virtual') ? 'Button-orange' : ''}
+                            ${(hubData?.stop?.is_virtual === false && x.name === 'is_not_virtual') ? 'Button-orange' : ''}
+                            cursor-pointer
+                            flex-1
+                            
+                            rounded-lg
+                            text-gray-500
+                            text-center
+                            h-10
+                            flex
+                            flex-col
+                            justify-center
+                        `}
+                        style={{
+                            backgroundColor: `${hubData.geography_type === x.name ? x.color : ''}`
+                        }}
+                        key={x.name}
+                        onClick={() => {
+                            updateIsVirtual(x.name);
                         }}
                         >
                             {x.title}

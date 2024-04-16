@@ -120,7 +120,6 @@ const DdPolicyHubsLayer = ({
 
     // onComponentUnLoad
     return () => {
-
     };
   }, [
     policyHubs,

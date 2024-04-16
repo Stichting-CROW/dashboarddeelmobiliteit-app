@@ -1,3 +1,7 @@
+import {
+  polygonLineStyle,
+  polygonFillStyle
+} from './map.policy_hubs.styles'
 
 const removeHubSources = (map: any) => {
     if(! map) return;
@@ -50,13 +54,7 @@ async function renderPolygons_fill(map, geojson) {
         id: layerId,
         source: sourceId,
         type: 'fill',
-        paint: {
-          'fill-opacity': [
-            'case',
-              ['==', ['get', 'is_in_drawing_mode'], 1], 0,
-              0.6
-          ]
-        }
+        paint: polygonFillStyle
       });
     }
     // If source was already present: Update data
@@ -66,7 +64,7 @@ async function renderPolygons_fill(map, geojson) {
     }
     
     // Set fill color
-    map.setPaintProperty(layerId, 'fill-color', '#FD862E');
+    // map.setPaintProperty(layerId, 'fill-color', '#FD862E');
 
     // Add line layer for wider outline/borders, on top of fill layer
     // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
@@ -75,33 +73,7 @@ async function renderPolygons_fill(map, geojson) {
       id: layerId,
       source: sourceId,
       type: 'line',
-      paint: {
-        'line-color': [
-          "case",
-          ["==", ["get", "is_selected"], 1], '#ff0',
-          ["boolean", ["feature-state", "hover"], false], '#666',
-          '#DDD'
-        ],
-        'line-width': [
-          "case",
-          ["==", ["get", "is_selected"], 1], 3,
-          ["boolean", ["feature-state", "hover"], false], 2,
-          1
-        ],
-        'line-opacity': [
-          'case',
-          ['==', ['get', 'is_in_drawing_mode'], 1], 0,
-          1
-        ]
-        // 'line-opacity': [
-        //   "case",
-        //     ["all",
-        //       ["==", ["get", "is_selected"], 1],
-        //       ["==", ["get", "phase"], 'concept'],
-        //     ], 0,
-        //     1
-        // ]
-      }
+      paint: polygonLineStyle
     });
 }
 
@@ -119,11 +91,13 @@ const generateGeojson = (
         return geoJson;
     }
     hubs.forEach(x => {
+      console.log(x)
         let feature = {
             "type":"Feature",
             "properties":{
                 "id": x.zone_id,
                 "name": x.name,
+                "geography_type": x.geography_type,
                 "phase": x.phase,
                 "created_at": x.created_at,
                 "is_selected": selected_policy_hubs && selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0,
