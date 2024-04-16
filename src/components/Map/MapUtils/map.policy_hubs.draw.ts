@@ -32,12 +32,11 @@ const enableDrawingPolygon = (draw) => {
 const selectDrawPolygon = (draw, id) => {
     if(! draw) return;
 
-    const drawed = draw.getAll();
-    drawed.features.map(x => {
-      console.log('x', x)
-    })
+    // const drawed = draw.getAll();
+    // drawed.features.map(x => {
+    //   console.log('x', x)
+    // })
 
-    console.log(`changeMode('direct_select'`, id)
     draw.changeMode('direct_select', {
         featureId: id
     });

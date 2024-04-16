@@ -228,7 +228,7 @@ const DdPolicyHubsLayer = ({
   ])
 
   const changeAreaHandler = (e) => {
-    console.log('changeAreaHandler', e)
+    // console.log('changeAreaHandler', e)
     // Set drawedArea
     setDrawedArea({
       type: e.type,

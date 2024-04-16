@@ -38,6 +38,10 @@ const PolicyHubsEdit = ({
     // Get gebied / municipality code
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
 
+    const is_drawing_enabled = useSelector((state: StateType) => {
+        return state.policy_hubs ? state.policy_hubs.is_drawing_enabled : [];
+    });
+    
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
     const [hubData, setHubData] = useState<HubType>({
         stop: {
@@ -80,7 +84,9 @@ const PolicyHubsEdit = ({
         dispatch(setIsDrawingEnabled(false));
 
         // Load hub data
-        loadHubData(zone_id);
+        setTimeout(() => {
+           loadHubData(zone_id);
+        }, 25);
     }, [
         selected_policy_hubs,
         selected_policy_hubs.length
@@ -328,10 +334,24 @@ const PolicyHubsEdit = ({
         });
     }
 
-    const enableDrawingForHub = () => {
+    const toggleDrawingForHub = () => {
         if(! hubData.zone_id) return;
-        dispatch(setHubsInDrawingMode([hubData.zone_id]))
-        dispatch(setIsDrawingEnabled(hubData.zone_id));
+        
+        // Enable
+        if(! is_drawing_enabled) {
+            dispatch(setHubsInDrawingMode([hubData.zone_id]))
+            dispatch(setIsDrawingEnabled(hubData.zone_id));
+        }
+        // Or disable drawing
+        else {
+            // Alert if there're unsaved changes
+            if(! window.confirm('Klik op OK om het bewerken van de contouren te annuleren.')) {
+                return;
+            }
+
+            dispatch(setHubsInDrawingMode([]));
+            dispatch(setIsDrawingEnabled(false));
+        }
     }
 
     const labelClassNames = 'mb-2 text-sm';
@@ -529,7 +549,8 @@ const PolicyHubsEdit = ({
                 Annuleer
             </Button>
             {! isNewZone && <Button
-                onClick={enableDrawingForHub}
+                onClick={toggleDrawingForHub}
+                theme={is_drawing_enabled ? `greenHighlighted` : ''}
             >
                 ✒️
             </Button>}
