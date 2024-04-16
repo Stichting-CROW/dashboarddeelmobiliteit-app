@@ -155,6 +155,22 @@ function FilterbarPolicyHubs({
             })}
           </CheckboxesWrapper>
         </Fieldset>
+
+        <Fieldset title="Analysegebieden">
+          <CheckboxesWrapper>
+            {Object.keys(policyHubPhases).map(key => {
+              const id = `analyse-${key}`;
+              const title = policyHubPhases[key].title;
+              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                e.preventDefault();
+                dispatch(toggleVisibleLayer(id));
+              }}>
+                {title}
+              </CheckboxWithLabel>
+            })}
+          </CheckboxesWrapper>
+        </Fieldset>
+        
       </div>
       <Modal
         isVisible={isTableVisible}
