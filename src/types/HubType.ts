@@ -6,4 +6,9 @@ export type HubType = {
     geography_id?: string;
     published_date?: any;
     effective_date?: any;
+    municipality?: string;
+    description?: string;
+    area?: any;
+    internal_id?: string;
+    phase?: string;
 }

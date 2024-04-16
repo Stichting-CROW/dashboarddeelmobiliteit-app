@@ -9,13 +9,20 @@ import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 // } from '../../reducers/layers.js';
 
 import {
+  setSelectedPolicyHubs
+} from '../../actions/policy-hubs'
+
+import {
   renderHubs,
   removeHubsFromMap
 } from '../Map/MapUtils/map.policy_hubs';
 
-// import {
-//   initPopupLogic,
-// } from '../Map/MapUtils/map.policy_hubs.popups';
+import {
+  initMapboxDraw,
+  initEventHandlers,
+  updateArea,
+  enableDrawingPolygon
+} from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
 
@@ -27,6 +34,7 @@ import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
+import { DrawedAreaType } from '../../types/DrawedAreaType';
 
 const DdPolicyHubsLayer = ({
   map
@@ -34,6 +42,9 @@ const DdPolicyHubsLayer = ({
   const dispatch = useDispatch()
 
   const [policyHubs, setPolicyHubs] = useState([]);
+  const [drawingEnabled, setDrawingEnabled] = useState('');
+  const [draw, setDraw] = useState<any>();
+  const [drawedArea, setDrawedArea] = useState<DrawedAreaType>();
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -60,6 +71,7 @@ const DdPolicyHubsLayer = ({
   const mapStyles = getMapStyles();
   useEffect(() => {
     if(! map) return;
+
     // Wait until map has been loaded
     map.on('load', function() {
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
@@ -141,6 +153,38 @@ const DdPolicyHubsLayer = ({
     map
   ]);
 
+  // If drawingEnabled changes: Do things
+  useEffect(() => {
+    if(! map) return;
+    // If drawing isn't enabled: Stop
+    if(! drawingEnabled) return;
+    // Initialize draw
+    let Draw = draw;
+    (() => {
+      if(draw && draw.remove) draw.remove();
+
+      Draw = initMapboxDraw(map)
+      setDraw(Draw);
+      initEventHandlers(map, changeAreaHandler);
+    })();
+    // Enable drawing polygons
+    enableDrawingPolygon(Draw);
+  }, [
+    map,
+    drawingEnabled
+  ])
+
+  const changeAreaHandler = (e) => {
+    console.log(e)
+    // Set drawedArea
+    setDrawedArea({
+      type: e.type,
+      features: e.features
+    });
+    // Show edit window
+    dispatch(setSelectedPolicyHubs(['new']))
+  }
+
   const clickHandler = (e) => {
     if(! map) return;
   
@@ -153,12 +197,7 @@ const DdPolicyHubsLayer = ({
     const props = e.features[0].properties;
 
     // Store active hub ID in redux state
-    dispatch({
-      type: 'SET_SELECTED_POLICY_HUBS',
-      payload: [props.id]
-    })
-
-    console.log('props', props)
+    dispatch(setSelectedPolicyHubs([props.ids]))
   }
 
   const didSelectOneHub = () => {
@@ -193,14 +232,31 @@ const DdPolicyHubsLayer = ({
 
   return <>
     <PolicyHubsPhaseMenu />
+
+    {/* Vaststellen button */}
     {(didSelectConceptHub() && ! show_commit_form) && <ActionButtons>
       <Button theme="primary" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
         Vaststellen
       </Button>
     </ActionButtons>}
-    {(didSelectConceptHub() && ! show_commit_form) && <ActionModule>
-      <PolicyHubsEdit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
+
+    {/* Teken hub button */}
+    {(! didSelectOneHub() && ! drawingEnabled) && <ActionButtons>
+      <Button theme="primary" onClick={() => setDrawingEnabled('new')}>
+        Teken nieuwe hub
+      </Button>
+    </ActionButtons>}
+
+    {/* Hub edit form */}
+    {(didSelectOneHub() && ! show_commit_form) && <ActionModule>
+      <PolicyHubsEdit
+        all_policy_hubs={policyHubs}
+        selected_policy_hubs={selected_policy_hubs}
+        drawed_area={drawedArea}
+      />
     </ActionModule>}
+
+    {/* Hub 'commit to concept' form */}
     {(didSelectOneHub() && show_commit_form) && <ActionModule>
       <PolicyHubsCommit all_policy_hubs={policyHubs} selected_policy_hubs={selected_policy_hubs} />
     </ActionModule>}

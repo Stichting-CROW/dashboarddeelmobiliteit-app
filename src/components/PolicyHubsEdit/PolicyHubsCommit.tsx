@@ -7,11 +7,6 @@ import {
 
 import {HubType} from '../../types/HubType';
 
-// Import API functions
-import {
-    putZone,
-} from '../../helpers/policy-hubs/put-hub';
-
 import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';

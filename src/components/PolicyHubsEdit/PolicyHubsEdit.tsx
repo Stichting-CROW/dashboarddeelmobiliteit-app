@@ -5,11 +5,11 @@ import {
 } from '../../helpers/policy-hubs/fetch-hubs'
 
 import {HubType} from '../../types/HubType';
+import { DrawedAreaType } from '../../types/DrawedAreaType';
 
 // Import API functions
-import {
-    putZone,
-} from '../../helpers/policy-hubs/put-hub';
+import { putHub } from '../../helpers/policy-hubs/put-hub';
+import { postHub } from '../../helpers/policy-hubs/post-hub';
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -17,18 +17,34 @@ import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
 import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
+import center from '@turf/center';
 
 const PolicyHubsEdit = ({
     all_policy_hubs,
-    selected_policy_hubs
+    selected_policy_hubs,
+    drawed_area
+}: {
+    all_policy_hubs: any,
+    selected_policy_hubs: any,
+    drawed_area: DrawedAreaType
 }) => {
     const dispatch = useDispatch()
-    
+
+    // Get gebied / municipality code
+    const gm_code = useSelector((state: StateType) => state.filter.gebied);
+
     const [hubData, setHubData] = useState<HubType>({
-        stop: {},
+        stop: {
+            is_virtual: true
+        },
         name: '',
         geography_type: '',
         zone_availability: '',
+        municipality: gm_code,
+        description: 'Zone',
+        internal_id: '',
+        area: {},
+        phase: 'concept'
     });
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -44,6 +60,24 @@ const PolicyHubsEdit = ({
         selected_policy_hubs.length
     ]);
 
+    // If draw is done: Update feature geometry in hubData
+    useEffect(() => {
+        if(! drawed_area || ! drawed_area.features) return;
+
+        const drawedAreaCenter = center(drawed_area.features[0]);
+
+        setHubData({
+            ...hubData,
+            area: drawed_area.features[0],
+            stop: {
+                ...hubData.stop,
+                location: drawedAreaCenter
+            }
+        });
+    }, [drawed_area])
+
+    const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
+
     // Find hub data in array with all policy hubs
     const loadHubData = async (hub_id) => {
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
@@ -55,11 +89,11 @@ const PolicyHubsEdit = ({
 
         const status = hubData.stop.status;
 
-        if(status.control_automatic === true) {
+        if(status?.control_automatic === true) {
             return 'auto';
-        } else if(! status.control_automatic && status.is_returning === true) {
+        } else if(! status?.control_automatic && status?.is_returning === true) {
             return 'open';
-        } else if(! status.control_automatic && status.is_returning === false) {
+        } else if(! status?.control_automatic && status?.is_returning === false) {
             return 'closed';
         }
     }
@@ -69,7 +103,7 @@ const PolicyHubsEdit = ({
 
         const capacity = hubData.stop.capacity;
 
-        if(capacity.combined !== undefined) {
+        if(capacity?.combined !== undefined) {
             return 'combined';
         } else {
             return 'modality';
@@ -77,7 +111,12 @@ const PolicyHubsEdit = ({
     }
 
     const saveZone = async () => {
-        const updatedZone = await putZone(token, hubData);
+        if(isNewZone) {
+            const updatedZone = await postHub(token, hubData);
+        }
+        else {
+            const addedZone = await putHub(token, hubData);
+        }
     }
     const deleteZoneHandler = saveZone;
 
@@ -149,11 +188,11 @@ const PolicyHubsEdit = ({
 
         const status = hubData.stop.status;
 
-        if(status.control_automatic === true) {
+        if(status?.control_automatic === true) {
             return 'auto';
-        } else if(! status.control_automatic && status.is_returning === true) {
+        } else if(! status?.control_automatic && status?.is_returning === true) {
             return 'open';
-        } else if(! status.control_automatic && status.is_returning === false) {
+        } else if(! status?.control_automatic && status?.is_returning === false) {
             return 'closed';
         }
 
@@ -166,7 +205,7 @@ const PolicyHubsEdit = ({
                 stop: {
                     ...hubData.stop,
                     capacity: {
-                        combined: hubData.stop.capacity.combined || 0
+                        combined: hubData?.stop?.capacity?.combined || 0
                     }
                 }
             });
@@ -177,12 +216,12 @@ const PolicyHubsEdit = ({
                 stop: {
                     ...hubData.stop,
                     capacity: {
-                        bicycle: hubData.stop.capacity.bicycle || 0,
-                        moped: hubData.stop.capacity.moped || 0,
-                        scooter: hubData.stop.capacity.scooter || 0,
-                        cargo_bicycle: hubData.stop.capacity.cargo_bicycle || 0,
-                        car: hubData.stop.capacity.car || 0,
-                        other: hubData.stop.capacity.other || 0
+                        bicycle: hubData?.stop?.capacity?.bicycle || 0,
+                        moped: hubData?.stop?.capacity?.moped || 0,
+                        scooter: hubData?.stop?.capacity?.scooter || 0,
+                        cargo_bicycle: hubData?.stop?.capacity?.cargo_bicycle || 0,
+                        car: hubData?.stop?.capacity?.car || 0,
+                        other: hubData?.stop?.capacity?.other || 0
                     }
                 }
             });
@@ -206,9 +245,72 @@ const PolicyHubsEdit = ({
     }
 
     const labelClassNames = 'mb-2 text-sm';
-    const isNewZone = false;
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
+
+    console.log('hubData', hubData);
+
+
+    console.log('drawed_area', drawed_area);
+    // "stop": {
+    //     "location": {
+    //         "type": "Feature",
+    //         "properties": {},
+    //         "geometry": {
+    //             "type": "Point",
+    //             "coordinates": [
+    //                 4.467403699996012,
+    //                 51.923060960934194
+    //             ]
+    //         }
+    //     },
+    //     "status": {
+    //         "control_automatic": true,
+    //         "is_returning": true,
+    //         "is_installed": false,
+    //         "is_renting": false
+    //     },
+    //     "capacity": {}
+    // },
+    // "no_parking": null,
+    // "geography_type": "stop",
+    // "name": "Test",
+    // "published": true,
+    // "zone_availability": "auto",
+    // "municipality": "GM0599",
+    // "area": {
+    //     "id": "0045f9d13af9b791c08934c6ade49ce3",
+    //     "type": "Feature",
+    //     "properties": {},
+    //     "geometry": {
+    //         "coordinates": [[
+    //             [
+    //                 [
+    //                     4.462803174665822,
+    //                     51.923364972522876
+    //                 ],
+    //                 [
+    //                     4.471200958998395,
+    //                     51.924513353404535
+    //                 ],
+    //                 [
+    //                     4.472004225326202,
+    //                     51.92302720784866
+    //                 ],
+    //                 [
+    //                     4.4633508562522195,
+    //                     51.92160856846385
+    //                 ],
+    //                 [
+    //                     4.462803174665822,
+    //                     51.923364972522876
+    //                 ]
+    //             ]
+    //         ]],
+    //         "type": "MultiPolygon"
+    //     }
+    // },
+    // "description": "Zone"
 
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
