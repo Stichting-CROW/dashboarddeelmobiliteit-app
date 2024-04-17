@@ -41,7 +41,7 @@ const DdPolicyHubsLayer = ({
 
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
-  const [drawedArea, setDrawedArea] = useState<DrawedAreaType>();
+  const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -237,12 +237,12 @@ const DdPolicyHubsLayer = ({
   ])
 
   const changeAreaHandler = (e) => {
-    // console.log('changeAreaHandler', e)
     // Set drawedArea
     setDrawedArea({
       type: e.type,
       features: e.features
     });
+    // console.log('changeAreaHandler', e)
   }
 
   const clickHandler = (e) => {
@@ -320,6 +320,7 @@ const DdPolicyHubsLayer = ({
         cancelHandler={() => {
           dispatch(setHubsInDrawingMode([]));
           dispatch(setIsDrawingEnabled(false));
+          setDrawedArea(undefined);
         }}
       />
     </ActionModule>}

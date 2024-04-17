@@ -188,8 +188,8 @@ const PolicyHubsEdit = ({
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
             }
+            notify('Hub opgeslagen')
         }
-        notify('Hub opgeslagen')
         setHasUnsavedChanges(false);
     }
 
@@ -414,6 +414,31 @@ const PolicyHubsEdit = ({
 
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
+
+    console.log('drawed_area', drawed_area)
+    if(! drawed_area) {
+        return (
+            <div>
+                <div className={`${labelClassNames} font-bold`}>
+                    Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
+                </div>
+                <p className="my-2">
+                    Teken een gebied op de kaart 
+                </p>
+                <div className="flex w-full justify-between">
+
+                <Button
+                    theme="white"
+                    style={{marginLeft: 0}}
+                    onClick={cancelButtonHandler}
+                >
+                    Sluiten
+                </Button>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
