@@ -7,25 +7,24 @@ import {
     get_phases
 } from '../../helpers/policy-hubs/get-phases'
 
+import arrowRight from './arrow-right.svg';
+import './PolicyHubsPhaseMenu.css'
+
 const PolicyHubsPhaseMenu = () => {
     const dispatch = useDispatch();
 
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+    const isFilterbarOpen = useSelector((state: StateType) => {
+      return state.ui && state.ui.FILTERBAR || false;
+    });
 
     const policyHubPhases = get_phases();
 
     return <>
-        <div style={{
-            position: 'fixed',
-            bottom: '100px',
-            left: '360px',
-            width: 'calc(100% - 360px - 70px)',
-            borderRadius: '0.5rem',
-            // maxWidth: '844px'
-        }}>
+        <div className={`PhaseMenu ${isFilterbarOpen ? 'filter-open' : ''}`}>
             <div className="
-                bg-white w-full py-2 px-2
-                flex justify-between
+                PhaseMenu-inner
+                px-0 mx-auto bg-white box-border w-full flex justify-center sm:px-4 sm:shadow-lg sm:m-4 sm:mb-1 sm:rounded-3xl 
             ">
             {Object.keys(policyHubPhases).map((name, i) => {
                 // Get phase title
@@ -55,7 +54,7 @@ const PolicyHubsPhaseMenu = () => {
 
                     {/* Show 'arrow right' divided */}
                     {i != Object.keys(policyHubPhases).length-2 && <span>
-                        -&gt;
+                        <img src={arrowRight} alt="Pijl naar rechts" className="inline-block" />
                     </span>}
 
                 </React.Fragment>
