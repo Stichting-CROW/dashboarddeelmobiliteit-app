@@ -128,7 +128,8 @@ function FilterbarPolicyHubs({
         </div>
 
         <div className="py-2 flex justify-between" style={{
-          visibility: filterGebied ? 'visible' : 'hidden'
+          visibility: filterGebied ? 'visible' : 'hidden',
+          marginLeft: '-0.5rem'
         }}>
           <Button onClick={() => {
             setIsTableVisible(! isTableVisible);
@@ -137,7 +138,11 @@ function FilterbarPolicyHubs({
           </Button>
           <Button onClick={() => {
             // toggleTable();
-          }} theme="white">
+          }} theme="white"
+          style={{
+            marginRight: '0rem'
+          }}
+          >
             👥 Delen
           </Button>
         </div>
@@ -241,6 +246,9 @@ function FilterbarPolicyHubs({
         hideModalHandler={() => {
           // Hide modal
           setIsTableVisible(false);
+        }}
+        config={{
+          fullWidth: true
         }}
       >
         <PolicyHubsList />

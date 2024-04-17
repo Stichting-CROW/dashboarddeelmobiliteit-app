@@ -44,8 +44,8 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border" style={{width: 'fit-content'}}>
+      <Table style={{width: 'fit-content'}}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

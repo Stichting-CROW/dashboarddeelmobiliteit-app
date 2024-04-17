@@ -8,6 +8,7 @@ const Modal = ({
   button2Handler,
   button2Options,
   hideModalHandler,
+  config
 }: {
   isVisible?: any,
   title?: any,
@@ -17,7 +18,8 @@ const Modal = ({
   button2Title?: any,
   button2Handler?: any,
   button2Options?: any,
-  hideModalHandler?: any
+  hideModalHandler?: any,
+  config?: any
 }) => {
   return (
     <>
@@ -48,8 +50,8 @@ const Modal = ({
             mx-auto w-11/12
             max-w-full
           " style={{
-            width: '800px',
-            maxWidth: '98%',
+            width: config && config.fullWidth ? 'fit-content' : '800px',
+            maxWidth: '96%',
             maxHeight: '100%'
           }}>
             <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">

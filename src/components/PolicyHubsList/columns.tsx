@@ -46,6 +46,12 @@ export const columns: ColumnDef<Hub>[] = [
     ),
   },
   {
+    accessorKey: "internal_id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Lokale ID" />
+    ),
+  },
+  {
     accessorKey: "type",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
@@ -55,6 +61,36 @@ export const columns: ColumnDef<Hub>[] = [
     accessorKey: "fase",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Fase" />
+    ),
+  },
+  {
+    accessorKey: "is_virtual",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Virtueel / Fysiek" />
+    ),
+  },
+  {
+    accessorKey: "created_by",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Gemaakt door" />
+    ),
+  },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Aangepast door" />
+    ),
+  },
+  {
+    accessorKey: "modified_by",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Aangepast door" />
+    ),
+  },
+  {
+    accessorKey: "modified_at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Aangepast door" />
     ),
   },
 ]

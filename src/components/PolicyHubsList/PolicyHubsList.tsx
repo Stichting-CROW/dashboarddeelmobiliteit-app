@@ -8,10 +8,17 @@ import { StateType } from "@/src/types/StateType"
 import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
 import { X } from "lucide-react"
 import { readable_geotype } from "../../helpers/policy-hubs/common"
+import moment from "moment"
 
 const readable_phase = (name: string) => {
     if(name === 'concept') return 'Concept';
     else if(name === 'active') return 'Actief';
+    else if(name === 'retirement_concept') return 'Concept';
+    else if(name === 'committed_concept') return 'Voorgesteld concept';
+    else if(name === 'retirement_committed_concept') return 'Voorgesteld concept';
+    else if(name === 'published') return 'Definitief gepland';
+    else if(name === 'active') return 'Definitief Actief';
+    return name;
 }
 
 // async function getData(): Promise<Payment[]> {
@@ -20,10 +27,16 @@ function populateTableData(policyHubs) {
 
     return policyHubs.map((hub) => {
         return {
+            fase: readable_phase(hub.phase),
             id: hub.zone_id,
+            internal_id: hub.internal_id,
             name: hub.name,
             type: readable_geotype(hub.geography_type),
-            fase: readable_phase(hub.phase),
+            created_by: hub.created_by,
+            created_at: moment(hub.created_at).format('YYYY-MM-DD HH:mm'),
+            modified_by: hub.modified_by,
+            modified_at: moment(hub.modified_at).format('YYYY-MM-DD HH:mm'),
+            is_virtual: hub.stop?.is_virtual ? 'Virtueel' : 'Fysiek',
             // interne_id: 0,
             // vervangt_zone: 0,
 
@@ -110,7 +123,7 @@ const PolicyHubsList = () => {
     return (
         <div>
             <ActionHeader />
-            <div data-name="body" className="p-4">
+            <div data-name="body" className="p-4" style={{}}>
                 <DataTable columns={columns} data={tableData} />
             </div>
         </div>
