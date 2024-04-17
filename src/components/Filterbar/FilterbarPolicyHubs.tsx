@@ -29,6 +29,9 @@ import {
 import Modal from '../Modal/Modal';
 import PolicyHubsList from '../PolicyHubsList/PolicyHubsList';
 
+import eyeOpen from './img/icon_eye_open.svg';
+import eyeClosed from './img/icon_eye_closed.svg';
+
 const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
   {children}
 </div>
@@ -38,6 +41,18 @@ const CheckboxWithLabel = ({id, checked, onClick, children}) => {
   return <div className="flex justify-start cursor-pointer my-2" onClick={onClick}>
     <div className="flex flex-col justify-center">
       <Checkbox id={`${id}`} checked={checked} />
+    </div>
+    <label htmlFor={`${id}`} className="ml-2 flex-1 cursor-pointer">
+      {children}
+    </label>
+  </div>;
+}
+
+const EyeWithLabel = ({id, checked, onClick, children}) => {
+  // console.log('id checked', id, checked)
+  return <div className="flex justify-start cursor-pointer my-2" onClick={onClick}>
+    <div className="flex flex-col justify-center">
+      {checked ? <img src={eyeOpen} width="15" alt="Oog open" /> : <img src={eyeClosed} width="15" alt="Oog gesloten" />}
     </div>
     <label htmlFor={`${id}`} className="ml-2 flex-1 cursor-pointer">
       {children}
@@ -137,12 +152,23 @@ function FilterbarPolicyHubs({
               {Object.keys(policyHubPhases).map(key => {
                 const id = `hub-${key}`;
                 const title = policyHubPhases[key].title;
-                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(toggleVisibleLayer(id));
-                }}>
-                  {title}
-                </CheckboxWithLabel>
+                
+                if(key === active_phase) {
+                  return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </CheckboxWithLabel>
+                }
+                else {
+                  return <EyeWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </EyeWithLabel>
+                }
               })}
             </CheckboxesWrapper>
           </Fieldset>

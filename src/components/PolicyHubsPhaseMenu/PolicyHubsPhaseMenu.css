@@ -2,7 +2,7 @@
     position: fixed;
     bottom: 100px;
     border-radius: 0.5rem;
-    width: calc(100% - 215px + 70px);
+    width: calc(100% - 215px + 100px);
     text-align: center;
     transition: width 1s;
     transition-timing-function: ease-out;
