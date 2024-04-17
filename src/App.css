@@ -71,3 +71,13 @@
 .font-inter {
   font-family: Inter, sans-serif;
 }
+
+.pl-8 {
+  padding-left: 2rem; /* 32px */
+}
+.relative {
+  position: relative;
+}
+.left-2 {
+  left: 0.5rem; /* 8px */
+}

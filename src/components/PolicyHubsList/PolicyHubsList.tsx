@@ -60,10 +60,10 @@ const ActionHeader = () => {
             </div>
             <div className="flex justify-end">
                <Button theme="white">
-                    Filter
+                    Importeer
                 </Button>
                 <Button theme="white">
-                    Download
+                    Exporteer
                 </Button>
             </div>
         </div>

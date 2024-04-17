@@ -40,15 +40,9 @@ export const columns: ColumnDef<Hub>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "fase",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Naam" />
-    ),
-  },
-  {
-    accessorKey: "internal_id",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Lokale ID" />
+      <DataTableColumnHeader column={column} title="Fase" />
     ),
   },
   {
@@ -58,9 +52,15 @@ export const columns: ColumnDef<Hub>[] = [
     ),
   },
   {
-    accessorKey: "fase",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Fase" />
+      <DataTableColumnHeader column={column} title="Naam" />
+    ),
+  },
+  {
+    accessorKey: "internal_id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Lokale ID" />
     ),
   },
   {
