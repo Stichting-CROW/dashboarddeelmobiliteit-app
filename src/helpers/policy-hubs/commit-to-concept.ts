@@ -15,5 +15,12 @@ export const commit_to_concept = async (token, data) => {
       "effective_on": data.effective_on
     })
   }));
-  return response;
+  let json;
+  try {
+    json = await response.json();
+  } catch(err) {
+    // If it couldn't be converted to JSON: no problem
+    return await response;
+  }
+  return json;
 }

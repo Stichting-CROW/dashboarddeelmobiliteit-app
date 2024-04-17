@@ -55,6 +55,8 @@ const DdPolicyHubsLayer = ({
     return null;
   });
 
+  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
   });
@@ -71,7 +73,6 @@ const DdPolicyHubsLayer = ({
     return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
   });
 
-  // const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   // On component load: Set satelite view
@@ -345,7 +346,7 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Teken hub button */}
-    {(! didSelectOneHub() && ! is_drawing_enabled) && <ActionButtons>
+    {(! didSelectOneHub() && ! is_drawing_enabled && active_phase === 'concept') && <ActionButtons>
       <Button theme="primary" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
         Teken nieuwe hub
       </Button>

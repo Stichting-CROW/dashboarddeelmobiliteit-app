@@ -187,7 +187,11 @@ const PolicyHubsEdit = ({
     const saveZone = async () => {
         // Remove certain properties based on the hub phase
         let fiteredHubData = Object.assign({}, hubData);
-        if(hubData.phase === 'committed_concept') {
+        if(hubData.phase === 'published'
+            || hubData.phase === 'committed_concept'
+            || hubData.phase === 'published'
+            || hubData.phase === 'active'
+        ) {
             delete fiteredHubData.area;
             delete fiteredHubData.name;
             delete fiteredHubData.description;
@@ -439,7 +443,10 @@ const PolicyHubsEdit = ({
             </div>
 
             {/* Committed concept data */}
-            {hubData.phase === 'committed_concept' && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
+            {(hubData.phase === 'committed_concept'
+                || hubData.phase === 'published'
+                || hubData.phase === 'active'
+            ) && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
                 <table className="w-full">
                     <tr>
                         <th align="left" style={{verticalAlign: 'top'}}>
@@ -470,7 +477,7 @@ const PolicyHubsEdit = ({
                             Publicatie op:
                         </th>
                         <td>
-                            {moment(hubData.published_date).format('DD-MM-YYYY')}
+                            {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
                         </td>
                     </tr>
                     <tr>
@@ -478,10 +485,10 @@ const PolicyHubsEdit = ({
                             Actief op:
                         </th>
                         <td>
-                            {moment(hubData.effective_date).format('DD-MM-YYYY')}
+                            {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
                         </td>
                     </tr>
-                    <tr>
+                    <tr title={`Gemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
                         <th align="left" style={{verticalAlign: 'top'}}>
                             Gemaakt door
                         </th>
@@ -489,7 +496,7 @@ const PolicyHubsEdit = ({
                             {hubData.created_by}
                         </td>
                     </tr>
-                    <tr>
+                    <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
                         <th align="left" style={{verticalAlign: 'top'}}>
                             Laatst gewijzigd
                         </th>

@@ -14,4 +14,6 @@ export type HubType = {
     zone_id?: number;
     created_by?: string;
     last_modified_by?: string;
+    created_at?: any;
+    modified_at?: any;
 }

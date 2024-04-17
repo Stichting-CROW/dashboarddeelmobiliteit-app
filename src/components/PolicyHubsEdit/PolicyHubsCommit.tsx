@@ -40,8 +40,8 @@ const PolicyHubsCommit = ({
         effective_date: ''
     });
     const [formData, setFormData] = useState<FormDataType>({
-        publish_on: moment().add(7, 'days').format('YYYY-MM-DD'),
-        effective_on: moment().add(14, 'days').format('YYYY-MM-DD')
+        publish_on: moment().add(7, 'days').format('YYYY-MM-DD 04:00'),
+        effective_on: moment().add(14, 'days').format('YYYY-MM-DD 04:00')
     });
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -75,11 +75,17 @@ const PolicyHubsCommit = ({
         if(! formData.publish_on) return;
         if(! formData.effective_on) return;
 
-        await commit_to_concept(token, {
+        const result = await commit_to_concept(token, {
             "geography_ids": [hubData.geography_id],
-            "publish_on": moment(`${formData.publish_on} 04:00:00`).format(),
-            "effective_on": moment(`${formData.effective_on} 04:00:00`).format()
+            "publish_on": moment(`${formData.publish_on}`).format(),
+            "effective_on": moment(`${formData.effective_on}`).format()
         });
+
+        // If error: Show error
+        if(result && result?.detail) {
+            notify('Opslaan mislukt: ' + result?.detail);
+            return;
+        }
 
         notify('De hub is vastgesteld en omgezet naar fase: Vastgesteld concept');
 
@@ -114,10 +120,10 @@ const PolicyHubsCommit = ({
                     Publicatiedatum (standaard +7 dagen)
                 </FormLabel>
                 <FormInput
-                    type="date"
+                    type="datetime-local"
                     name="publish_on"
                     value={formData.publish_on}
-                    onChange={() => {}}
+                    onChange={onChange}
                     classes="w-full"
                 />
             </div>
@@ -126,7 +132,7 @@ const PolicyHubsCommit = ({
                     Startdatum (standaard +14 dagen)
                 </FormLabel>
                 <FormInput
-                    type="date"
+                    type="datetime-local"
                     name="effective_on"
                     value={formData.effective_on}
                     onChange={onChange}
