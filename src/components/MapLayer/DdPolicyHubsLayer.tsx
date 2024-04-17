@@ -148,6 +148,8 @@ const DdPolicyHubsLayer = ({
       visible_layers: visible_layers
     });
     setPolicyHubs(res);
+
+    return res;
   };
 
   const drawEditablePolygon = () => {

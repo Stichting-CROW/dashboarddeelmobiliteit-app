@@ -84,9 +84,12 @@ const PolicyHubsEdit = ({
             return;
         }
 
-        // Stop being in drawing mode
-        dispatch(setHubsInDrawingMode([]));
-        dispatch(setIsDrawingEnabled(false));
+        // If we selected an existing hub: Stop being in drawing mode 
+        if(zone_id !== 'new') {
+            // Stop being in drawing mode
+            dispatch(setHubsInDrawingMode([]));
+            dispatch(setIsDrawingEnabled(false));
+        }
 
         // Load hub data
         setTimeout(() => {
@@ -95,6 +98,20 @@ const PolicyHubsEdit = ({
     }, [
         selected_policy_hubs,
         selected_policy_hubs.length
+    ]);
+
+    // If amount of policy hubs changes: (Re)load data of hub
+    useEffect(() => {
+        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+        const zone_id = selected_policy_hubs[0];
+        
+        if(! zone_id) return;
+        if(zone_id === 'new') return;
+
+        // Load hub data
+        loadHubData(zone_id);
+    }, [
+        all_policy_hubs.length// If there's a new hub added
     ]);
 
     // If draw is done: Update feature geometry in hubData
@@ -159,6 +176,7 @@ const PolicyHubsEdit = ({
         dispatch(setSelectedPolicyHubs(zone_id ? [zone_id] : []))
         dispatch(setHubsInDrawingMode([]));
         dispatch(setIsDrawingEnabled(false));
+        // Fetch hubs from API
         fetchHubs();
     }
 
@@ -415,8 +433,7 @@ const PolicyHubsEdit = ({
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) return <></>;
 
-    console.log('drawed_area', drawed_area)
-    if(! drawed_area) {
+    if(is_drawing_enabled && ! drawed_area) {
         return (
             <div>
                 <div className={`${labelClassNames} font-bold`}>
@@ -460,7 +477,6 @@ const PolicyHubsEdit = ({
             <div>
                 <FormInput
                     type="text"
-                    autofocus
                     placeholder="Lokale ID (niet publiek)"
                     name="internal_id"
                     autoComplete="off"
