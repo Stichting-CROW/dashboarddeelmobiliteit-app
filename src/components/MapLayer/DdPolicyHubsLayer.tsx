@@ -313,6 +313,30 @@ const DdPolicyHubsLayer = ({
     return selected_hub.phase === 'committed_concept';
   }
 
+  const didSelectPublishedHub = () => {
+    if(! didSelectOneHub()) return;
+
+    // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if hub is a concept hub
+    return selected_hub.phase === 'published';
+  }
+
+  const didSelectActiveHub = () => {
+    if(! didSelectOneHub()) return;
+
+    // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if hub is a concept hub
+    return selected_hub.phase === 'active';
+  }
+
   const commitToConcept = (zone_id) => {
     dispatch({
       type: 'SET_SHOW_COMMIT_FORM',
@@ -342,6 +366,21 @@ const DdPolicyHubsLayer = ({
         fetchHubs();
       }}>
         Terugzetten naar concept
+      </Button>
+    </ActionButtons>}
+
+    {/* 'Nieuw concept op basis van' button */}
+    {(didSelectPublishedHub() || didSelectActiveHub()) && <ActionButtons>
+      <Button theme="white" onClick={async () => {
+        await makeConcept(token, [getSelectedHub()?.geography_id]);
+        if(! window.confirm('Wil je een wijziging aanbrengen in deze definitieve hub d.w.z. een nieuwe concepthub maken? Klik dan op OK')) {
+          return;
+        }
+        notify('De hub is omgezet naar een nieuw concept');
+        dispatch(setSelectedPolicyHubs([]));
+        fetchHubs();
+      }}>
+        Omzetten naar nieuw concept
       </Button>
     </ActionButtons>}
 

@@ -16,4 +16,5 @@ export type HubType = {
     last_modified_by?: string;
     created_at?: any;
     modified_at?: any;
+    prev_geographies?: any;
 }

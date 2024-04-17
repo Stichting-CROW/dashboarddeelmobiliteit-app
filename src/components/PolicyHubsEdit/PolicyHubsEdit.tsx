@@ -442,68 +442,74 @@ const PolicyHubsEdit = ({
                 Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
             </div>
 
+            {hubData?.prev_geographies?.[0] && <div className="my-4">
+                Deze hub is een nieuwe versie van hub {hubData?.prev_geographies?.[0]} / <u>deze hub</u>
+            </div>}
+
             {/* Committed concept data */}
             {(hubData.phase === 'committed_concept'
                 || hubData.phase === 'published'
                 || hubData.phase === 'active'
             ) && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
                 <table className="w-full">
-                    <tr>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Naam:
-                        </th>
-                        <td valign="top">
-                            {hubData.name}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Type:
-                        </th>
-                        <td>
-                            {readable_geotype(hubData.geography_type)}
-                        </td>
-                    </tr>
-                    {hubData.stop && <tr>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Fysiek of virtueel?
-                        </th>
-                        <td>
-                            {hubData.stop?.is_virtual ? 'Virtueel' : 'Fysiek'}
-                        </td>
-                    </tr>}
-                    <tr>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Publicatie op:
-                        </th>
-                        <td>
-                            {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Actief op:
-                        </th>
-                        <td>
-                            {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
-                        </td>
-                    </tr>
-                    <tr title={`Gemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Gemaakt door
-                        </th>
-                        <td>
-                            {hubData.created_by}
-                        </td>
-                    </tr>
-                    <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
-                        <th align="left" style={{verticalAlign: 'top'}}>
-                            Laatst gewijzigd
-                        </th>
-                        <td>
-                            {hubData.last_modified_by}
-                        </td>
-                    </tr>
+                    <tbody>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Naam:
+                            </th>
+                            <td valign="top">
+                                {hubData.name}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Type:
+                            </th>
+                            <td>
+                                {readable_geotype(hubData.geography_type)}
+                            </td>
+                        </tr>
+                        {hubData.stop && <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Fysiek of virtueel?
+                            </th>
+                            <td>
+                                {hubData.stop?.is_virtual ? 'Virtueel' : 'Fysiek'}
+                            </td>
+                        </tr>}
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Publicatie op:
+                            </th>
+                            <td>
+                                {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Actief op:
+                            </th>
+                            <td>
+                                {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
+                            </td>
+                        </tr>
+                        <tr title={`Gemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Gemaakt door
+                            </th>
+                            <td>
+                                {hubData.created_by}
+                            </td>
+                        </tr>
+                        <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Laatst gewijzigd
+                            </th>
+                            <td>
+                                {hubData.last_modified_by}
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>}
 

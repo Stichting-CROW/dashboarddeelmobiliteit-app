@@ -28,6 +28,7 @@ export const fetch_hubs = async ({
     // Add phase to URL
     url += `&phases=${layer.split('-')[1]}`;
   });
+  url += visible_layers.indexOf('concept') ? '&phases=retirement_concept' : '';
   const options = getHeaders(token);
   const response = await fetch(url, options);
   const json = await response.json();
