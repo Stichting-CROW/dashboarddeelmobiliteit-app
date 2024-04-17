@@ -178,12 +178,23 @@ function FilterbarPolicyHubs({
               {Object.keys(policyHubPhases).map(key => {
                 const id = `verbodsgebied-${key}`;
                 const title = policyHubPhases[key].title;
-                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(toggleVisibleLayer(id));
-                }}>
-                  {title}
-                </CheckboxWithLabel>
+
+                if(key === active_phase) {
+                  return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </CheckboxWithLabel>
+                }
+                else {
+                  return <EyeWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </EyeWithLabel>
+                }
               })}
             </CheckboxesWrapper>
           </Fieldset>
@@ -195,18 +206,29 @@ function FilterbarPolicyHubs({
 
                 const id = `analyse-${key}`;
                 const title = policyHubPhases[key].title;
-                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(toggleVisibleLayer(id));
-                }}>
-                  {title}
-                </CheckboxWithLabel>
+
+                if(key === active_phase) {
+                  return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </CheckboxWithLabel>
+                }
+                else {
+                  return <EyeWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(toggleVisibleLayer(id));
+                  }}>
+                    {title}
+                  </EyeWithLabel>
+                }
               })}
             </CheckboxesWrapper>
           </Fieldset>
         </>
       )}
-        
+      
       </div>
       <Modal
         isVisible={isTableVisible}

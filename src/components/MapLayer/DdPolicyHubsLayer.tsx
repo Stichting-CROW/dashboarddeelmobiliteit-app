@@ -116,7 +116,7 @@ const DdPolicyHubsLayer = ({
 
     renderHubs(
       map,
-      policyHubs,
+      filterPolicyHubs(policyHubs, visible_layers),
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
@@ -142,6 +142,64 @@ const DdPolicyHubsLayer = ({
     is_drawing_enabled,
     hubs_in_drawing_mode
   ]);
+
+  // Function that filters hubs based on the selected phases in the Filterbar
+  const filterPolicyHubs = (hubs: any, visible_layers: any) => {
+    // If there was an error or no hubs were found: Return empty array
+    if(! hubs || hubs.detail) {
+      return [];
+    }
+
+    let hubsToKeep = [];
+
+    visible_layers.forEach((x) => {
+      // Hub
+      if(x === 'hub-concept') {
+        hubsToKeep.push({geo_type: 'stop', phase: 'concept'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_concept'});
+      }
+      else if(x === 'hub-committed_concept') {
+        hubsToKeep.push({geo_type: 'stop', phase: 'committed_concept'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_committed_concept'});
+      }
+      else if(x === 'hub-published') {
+        hubsToKeep.push({geo_type: 'stop', phase: 'published'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_published'});
+      }
+      else if(x === 'hub-active') {
+        hubsToKeep.push({geo_type: 'stop', phase: 'active'});
+      }
+      // No parking
+      else if(x === 'verbodsgebied-concept') {
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'concept'});
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_concept'});
+      }
+      else if(x === 'verbodsgebied-committed_concept') {
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'committed_concept'});
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_committed_concept'});
+      }
+      else if(x === 'verbodsgebied-published') {
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'published'});
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_published'});
+      }
+      else if(x === 'verbodsgebied-active') {
+        hubsToKeep.push({geo_type: 'no_parking', phase: 'active'});
+      }
+      // Monitoring
+      else if(x === 'analyse-concept') {
+        hubsToKeep.push({geo_type: 'monitoring', phase: 'concept'});
+      }
+    });
+
+    const filteredHubs = hubs.filter((x) => {
+      const wannaSee = hubsToKeep.find(keep => 
+        keep.geo_type === x.geography_type && keep.phase === x.phase
+      );
+      return wannaSee;
+    })
+
+    return filteredHubs;
+  }
 
   // Fetch hubs
   const fetchHubs = async () => {
@@ -183,7 +241,7 @@ const DdPolicyHubsLayer = ({
     setTimeout(() => {
       renderHubs(
         map,
-        policyHubs,
+        filterPolicyHubs(policyHubs, visible_layers),
         selected_policy_hubs,
         hubs_in_drawing_mode
       );
@@ -207,6 +265,8 @@ const DdPolicyHubsLayer = ({
     map,
     is_drawing_enabled
   ]);
+
+  // If active phase changes: unselect all 
 
   // If is_drawing_enabled changes: Do things
   useEffect(() => {
