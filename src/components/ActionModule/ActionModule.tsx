@@ -10,7 +10,7 @@ const ActionModule = ({
     " style={{
         top: '8px',
         zIndex: 100,
-        background: '#FFFFFF 0% 0% no-repeat padding-box',
+        background: '#f6f5f4',
         boxShadow: '-2px 1px 3px #00000029',
         width: '300px'
     }}>

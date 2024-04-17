@@ -199,7 +199,8 @@ const DdPolicyHubsLayer = ({
       map.off('click', layerName, clickHandler);
     }
   }, [
-    map
+    map,
+    is_drawing_enabled
   ]);
 
   // If is_drawing_enabled changes: Do things
@@ -246,6 +247,9 @@ const DdPolicyHubsLayer = ({
 
   const clickHandler = (e) => {
     if(! map) return;
+    
+    // Don't do anything if the drawing tool is enabled
+    if(is_drawing_enabled) return;
   
     // Stop if no features were found
     if(! e.features || ! e.features[0]) {
@@ -271,7 +275,7 @@ const DdPolicyHubsLayer = ({
   }
 
   const didSelectConceptHub = () => {
-    if(! didSelectOneHub) return;
+    if(! didSelectOneHub()) return;
 
     // Get extra hub info
     if(! policyHubs || ! policyHubs[0]) return;

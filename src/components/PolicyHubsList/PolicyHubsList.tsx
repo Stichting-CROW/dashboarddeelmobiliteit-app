@@ -13,6 +13,13 @@ const readable_phase = (name: string) => {
     else if(name === 'active') return 'Actief';
 }
 
+const readable_geotype = (name: string) => {
+    if(name === 'stop') return 'Hub';
+    if(name === 'no_parking') return 'Verbodsgebied';
+    if(name === 'monitoring') return 'Analysegebied';
+    return '';
+}
+
 // async function getData(): Promise<Payment[]> {
 function populateTableData(policyHubs) {
     if(! policyHubs || policyHubs.detail) return [];// .detail means there was an errors
@@ -21,7 +28,7 @@ function populateTableData(policyHubs) {
         return {
             id: hub.zone_id,
             name: hub.name,
-            type: hub.geography_type === 'stop' ? 'Hub' : hub.geography_type,
+            type: readable_geotype(hub.geography_type),
             fase: readable_phase(hub.phase),
             // interne_id: 0,
             // vervangt_zone: 0,

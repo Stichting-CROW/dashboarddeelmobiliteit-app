@@ -44,22 +44,25 @@ const PolicyHubsEdit = ({
         return state.policy_hubs ? state.policy_hubs.is_drawing_enabled : [];
     });
     
+    const defaultStopProperties = {
+        location: {},
+        is_virtual: true,
+        status: {
+            control_automatic: true
+        },
+        capacity: {
+            combined: 50
+        }
+    }
+
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
     const [hubData, setHubData] = useState<HubType>({
-        stop: {
-            is_virtual: true,
-            status: {
-                control_automatic: true
-            },
-            capacity: {
-                combined: 0
-            }
-        },
+        stop: defaultStopProperties,
         name: '',
         geography_type: 'stop',
         zone_availability: '',
         municipality: gm_code,
-        description: 'Zone',
+        description: 'Hub',
         internal_id: '',
         area: {},
         phase: 'concept'
@@ -162,6 +165,11 @@ const PolicyHubsEdit = ({
     const saveZone = async () => {
         if(isNewZone) {
             const addedZone = await postHub(token, hubData);
+            // Notify if something went wrong
+            if(addedZone && addedZone.detail) {
+                notify('Er ging iets fout bij het opslaan: ' + addedZone?.detail)
+                return;
+            }
             if(addedZone && addedZone.zone_id) {
                 notify('Hub toegevoegd');
                 postSaveOrDeleteCallback(addedZone.zone_id);
@@ -172,12 +180,16 @@ const PolicyHubsEdit = ({
             }
         }
         else {
-            console.log('patching hub', hubData)
             const updatedZone = await patchHub(token, hubData);
+            if(updatedZone && updatedZone.detail) {
+                notify('Er ging iets fout bij het opslaan: ' + updatedZone?.detail)
+                return;
+            }
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
             }
         }
+        notify('Hub opgeslagen')
         setHasUnsavedChanges(false);
     }
 
@@ -231,10 +243,19 @@ const PolicyHubsEdit = ({
     };
 
     const updateGeographyType = (type: string) => {
+        const polygonCenter = center(hubData?.area);
+
         setHubData({
             ...hubData,
             geography_type: type,
-            description: (type === 'no_parking' ? 'Verbodsgebied' : 'Zone')
+            description: (type === 'no_parking' ? 'Verbodsgebied' : 'Hub'),
+            stop: type === 'stop' ? {
+                ...hubData.stop,
+                is_virtual: hubData.stop?.is_virtual || defaultStopProperties.is_virtual,
+                status: hubData.stop?.status || defaultStopProperties.status,
+                capacity: hubData.stop?.capacity || defaultStopProperties.capacity,
+                location: polygonCenter
+            } : null
         });
         setHasUnsavedChanges(true);
     }
@@ -395,8 +416,8 @@ const PolicyHubsEdit = ({
     if(selected_policy_hubs.length > 1) return <></>;
     return (
         <div>
-            <div className={labelClassNames}>
-                Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
+            <div className={`${labelClassNames} font-bold`}>
+                Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
             </div>
             <div>
                 <FormInput
@@ -407,6 +428,19 @@ const PolicyHubsEdit = ({
                     autoComplete="off"
                     id="js-FilterbarZones-name-input"
                     value={hubData.name || ""}
+                    onChange={changeHandler}
+                    classes="w-full"
+                />
+            </div>
+            <div>
+                <FormInput
+                    type="text"
+                    autofocus
+                    placeholder="Lokale ID (niet publiek)"
+                    name="internal_id"
+                    autoComplete="off"
+                    id="js-FilterbarZones-internal_id-input"
+                    value={hubData.internal_id || ""}
                     onChange={changeHandler}
                     classes="w-full"
                 />
@@ -425,7 +459,7 @@ const PolicyHubsEdit = ({
                 ">
                     {[
                         {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
-                        {name: 'stop', title: 'Parking', color: '#fd862e'},
+                        {name: 'stop', title: 'Hub', color: '#fd862e'},
                         {name: 'no_parking', title: 'Verbodsgebied', color: '#fd3e48'}
                     ].map(x => {
                         return <div className={`
@@ -442,7 +476,8 @@ const PolicyHubsEdit = ({
                             justify-center
                         `}
                         style={{
-                            backgroundColor: `${hubData.geography_type === x.name ? x.color : ''}`
+                            backgroundColor: `${hubData.geography_type === x.name ? x.color : ''}`,
+                            flex: x.name === 'no_parking' ?  '2' : '1'
                         }}
                         key={x.name}
                         onClick={() => {
@@ -613,7 +648,7 @@ const PolicyHubsEdit = ({
                 onClick={deleteZoneHandler}
                 classes="text-xs"
             >
-               Verwijder zone
+               Verwijder hub
             </Text>
         </div>}
 
@@ -624,7 +659,7 @@ const PolicyHubsEdit = ({
                 style={{marginLeft: 0}}
                 onClick={cancelButtonHandler}
             >
-                Annuleer
+                Sluiten
             </Button>
             {! isNewZone && <Button
                 onClick={toggleDrawingForHub}

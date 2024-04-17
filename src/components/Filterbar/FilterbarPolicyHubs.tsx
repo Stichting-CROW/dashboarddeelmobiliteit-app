@@ -88,11 +88,14 @@ function FilterbarPolicyHubs({
       dispatch(unsetVisibleLayer(id));
       id = `verbodsgebied-${key}`;
       dispatch(unsetVisibleLayer(id));
+      id = `analyse-${key}`;
+      dispatch(unsetVisibleLayer(id));
     });
     
     // Only check active phase
     dispatch(setVisibleLayer(`hub-${active_phase}`));
     dispatch(setVisibleLayer(`verbodsgebied-${active_phase}`));
+    dispatch(setVisibleLayer(`analyse-${active_phase}`));
     
     lastActivePhase = active_phase;
   }, [active_phase])
@@ -159,6 +162,8 @@ function FilterbarPolicyHubs({
         <Fieldset title="Analysegebieden">
           <CheckboxesWrapper>
             {Object.keys(policyHubPhases).map(key => {
+              if(key !== 'concept') return;
+
               const id = `analyse-${key}`;
               const title = policyHubPhases[key].title;
               return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {

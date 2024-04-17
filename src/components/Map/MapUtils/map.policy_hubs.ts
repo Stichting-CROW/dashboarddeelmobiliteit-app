@@ -91,7 +91,6 @@ const generateGeojson = (
         return geoJson;
     }
     hubs.forEach(x => {
-      console.log(x)
         let feature = {
             "type":"Feature",
             "properties":{
