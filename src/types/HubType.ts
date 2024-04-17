@@ -12,4 +12,6 @@ export type HubType = {
     internal_id?: string;
     phase?: string;
     zone_id?: number;
+    created_by?: string;
+    last_modified_by?: string;
 }

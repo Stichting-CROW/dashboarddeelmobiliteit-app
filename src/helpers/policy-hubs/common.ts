@@ -16,3 +16,10 @@ export const getFetchOptions = (token?) => {
       }
     }
 }
+
+export const readable_geotype = (name: string) => {
+  if(name === 'stop') return 'Hub';
+  if(name === 'no_parking') return 'Verbodsgebied';
+  if(name === 'monitoring') return 'Analysegebied';
+  return '';
+}

@@ -11,6 +11,7 @@ import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { postHub } from '../../helpers/policy-hubs/post-hub';
 import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
+import { readable_geotype } from "../../helpers/policy-hubs/common"
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -21,6 +22,9 @@ import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
 import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs } from '../../actions/policy-hubs';
+import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
+import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
+import moment from 'moment';
 
 const PolicyHubsEdit = ({
     fetchHubs,
@@ -181,8 +185,19 @@ const PolicyHubsEdit = ({
     }
 
     const saveZone = async () => {
+        // Remove certain properties based on the hub phase
+        let fiteredHubData = Object.assign({}, hubData);
+        if(hubData.phase === 'committed_concept') {
+            delete fiteredHubData.area;
+            delete fiteredHubData.name;
+            delete fiteredHubData.description;
+            delete fiteredHubData.geography_type;
+            delete fiteredHubData.stop?.is_virtual;
+            delete fiteredHubData.stop?.location;
+        }
+        
         if(isNewZone) {
-            const addedZone = await postHub(token, hubData);
+            const addedZone = await postHub(token, fiteredHubData);
             // Notify if something went wrong
             if(addedZone && addedZone.detail) {
                 notify('Er ging iets fout bij het opslaan: ' + addedZone?.detail)
@@ -192,13 +207,13 @@ const PolicyHubsEdit = ({
                 notify('Hub toegevoegd');
                 postSaveOrDeleteCallback(addedZone.zone_id);
                 setHubData({
-                    ...hubData,
+                    ...fiteredHubData,
                     zone_id: addedZone.zone_id
                 })
             }
         }
         else {
-            const updatedZone = await patchHub(token, hubData);
+            const updatedZone = await patchHub(token, fiteredHubData);
             if(updatedZone && updatedZone.detail) {
                 notify('Er ging iets fout bij het opslaan: ' + updatedZone?.detail)
                 return;
@@ -259,45 +274,6 @@ const PolicyHubsEdit = ({
             [e.target.name]: e.target.value
         });
     };
-
-    const updateGeographyType = (type: string) => {
-        const polygonCenter = center(hubData?.area);
-
-        setHubData({
-            ...hubData,
-            geography_type: type,
-            description: (type === 'no_parking' ? 'Verbodsgebied' : 'Hub'),
-            stop: type === 'stop' ? {
-                ...hubData.stop,
-                is_virtual: hubData.stop?.is_virtual || defaultStopProperties.is_virtual,
-                status: hubData.stop?.status || defaultStopProperties.status,
-                capacity: hubData.stop?.capacity || defaultStopProperties.capacity,
-                location: polygonCenter
-            } : null
-        });
-        setHasUnsavedChanges(true);
-    }
-
-    const updateIsVirtual = (key: string) => {
-        if(key === 'is_virtual') {
-            setHubData({
-                ...hubData,
-                stop: {
-                    ...hubData.stop,
-                    is_virtual: true
-                }
-            });
-        }
-        else {
-            setHubData({
-                ...hubData,
-                stop: {
-                    ...hubData.stop,
-                    is_virtual: false
-                }
-            });
-        }
-    }
 
     const updateZoneAvailability = (name: string) => {
         setHasUnsavedChanges(true);
@@ -461,7 +437,70 @@ const PolicyHubsEdit = ({
             <div className={`${labelClassNames} font-bold`}>
                 Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
             </div>
-            <div>
+
+            {/* Committed concept data */}
+            {hubData.phase === 'committed_concept' && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
+                <table className="w-full">
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Naam:
+                        </th>
+                        <td valign="top">
+                            {hubData.name}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Type:
+                        </th>
+                        <td>
+                            {readable_geotype(hubData.geography_type)}
+                        </td>
+                    </tr>
+                    {hubData.stop && <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Fysiek of virtueel?
+                        </th>
+                        <td>
+                            {hubData.stop?.is_virtual ? 'Virtueel' : 'Fysiek'}
+                        </td>
+                    </tr>}
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Publicatie op:
+                        </th>
+                        <td>
+                            {moment(hubData.published_date).format('DD-MM-YYYY')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Actief op:
+                        </th>
+                        <td>
+                            {moment(hubData.effective_date).format('DD-MM-YYYY')}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Gemaakt door
+                        </th>
+                        <td>
+                            {hubData.created_by}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="left" style={{verticalAlign: 'top'}}>
+                            Laatst gewijzigd
+                        </th>
+                        <td>
+                            {hubData.last_modified_by}
+                        </td>
+                    </tr>
+                </table>
+            </div>}
+
+            {hubData.phase === 'concept' && <div>
                 <FormInput
                     type="text"
                     autofocus
@@ -473,7 +512,8 @@ const PolicyHubsEdit = ({
                     onChange={changeHandler}
                     classes="w-full"
                 />
-            </div>
+            </div>}
+
             <div>
                 <FormInput
                     type="text"
@@ -487,93 +527,17 @@ const PolicyHubsEdit = ({
                 />
             </div>
 
-            <div className="
-                mt-0
-            ">
-                <div className="
-                    flex
-                    rounded-lg bg-white
-                    border-solid
-                    border
-                    border-gray-400
-                    text-sm
-                ">
-                    {[
-                        {name: 'monitoring', title: 'Analyse', color: '#15aeef'},
-                        {name: 'stop', title: 'Hub', color: '#fd862e'},
-                        {name: 'no_parking', title: 'Verbodsgebied', color: '#fd3e48'}
-                    ].map(x => {
-                        return <div className={`
-                            ${hubData.geography_type === x.name ? 'Button-orange' : ''}
-                            cursor-pointer
-                            flex-1
-                            
-                            rounded-lg
-                            text-gray-500
-                            text-center
-                            h-10
-                            flex
-                            flex-col
-                            justify-center
-                        `}
-                        style={{
-                            backgroundColor: `${hubData.geography_type === x.name ? x.color : ''}`,
-                            flex: x.name === 'no_parking' ?  '2' : '1'
-                        }}
-                        key={x.name}
-                        onClick={() => {
-                            updateGeographyType(x.name);
-                        }}
-                        >
-                            {x.title}
-                        </div>
-                    })}
-                </div>
-            </div>
-
-            <div className={`
-                mt-2
-                ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
-            `}>
-                <div className="
-                    flex
-                    rounded-lg bg-white
-                    border-solid
-                    border
-                    border-gray-400
-                    text-sm
-                ">
-                    {[
-                        {name: 'is_virtual', title: 'Virtuele hub', color: '#15aeef'},
-                        {name: 'is_not_virtual', title: 'Fysieke hub', color: '#15aeef'}
-                    ].map(x => {
-                        return <div className={`
-                            ${(hubData?.stop?.is_virtual === true && x.name === 'is_virtual') ? 'Button-orange' : ''}
-                            ${(hubData?.stop?.is_virtual === false && x.name === 'is_not_virtual') ? 'Button-orange' : ''}
-                            cursor-pointer
-                            flex-1
-                            
-                            rounded-lg
-                            text-gray-500
-                            text-center
-                            h-10
-                            flex
-                            flex-col
-                            justify-center
-                        `}
-                        style={{
-                            backgroundColor: `${hubData.geography_type === x.name ? x.color : ''}`
-                        }}
-                        key={x.name}
-                        onClick={() => {
-                            updateIsVirtual(x.name);
-                        }}
-                        >
-                            {x.title}
-                        </div>
-                    })}
-                </div>
-            </div>
+            {hubData.phase === 'concept' && <PolicyHubsEdit_geographyType
+                defaultStopProperties={defaultStopProperties}
+                hubData={hubData}
+                setHubData={setHubData}
+                setHasUnsavedChanges={setHasUnsavedChanges}
+            />}
+            
+            {hubData.phase === 'concept' && <PolicyHubsEdit_isVirtual
+                hubData={hubData}
+                setHubData={setHubData}
+            />}
 
             <div className={`
                 py-2
@@ -597,23 +561,23 @@ const PolicyHubsEdit = ({
                         {name: 'open', title: 'Open'},
                         {name: 'closed', title: 'Gesloten'}
                     ].map(x => {
-                    return <div className={`
-                        ${getZoneAvailability() === x.name ? 'Button-blue' : ''}
-                        cursor-pointer
-                        flex-1
-                        rounded-lg
-                        text-gray-500
-                        text-center
-                        border-gray-500
-                        h-10
-                        flex
-                        flex-col
-                        justify-center
-                    `}
-                    key={x.name}
-                    onClick={() => {
-                        updateZoneAvailability(x.name)
-                    }}
+                        return <div className={`
+                            ${getZoneAvailability() === x.name ? 'Button-blue' : ''}
+                            cursor-pointer
+                            flex-1
+                            rounded-lg
+                            text-gray-500
+                            text-center
+                            border-gray-500
+                            h-10
+                            flex
+                            flex-col
+                            justify-center
+                        `}
+                        key={x.name}
+                        onClick={() => {
+                            updateZoneAvailability(x.name)
+                        }}
                     >
                         {x.title}
                     </div>
@@ -655,30 +619,30 @@ const PolicyHubsEdit = ({
                     onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
                 />}
                 {getCapacityType() === 'modality' && <>
-                <ModalityRow
-                    imageUrl="https://i.imgur.com/IF05O8u.png"
-                    name="vehicles-limit.bicycle"
-                    value={hubData?.stop?.capacity?.bicycle}
-                    onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
-                />
-                <ModalityRow
-                    imageUrl="https://i.imgur.com/FdVBJaZ.png"
-                    name="vehicles-limit.cargo_bicycle"
-                    value={hubData?.stop?.capacity?.cargo_bicycle}
-                    onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
-                />
-                <ModalityRow
-                    imageUrl="https://i.imgur.com/h264sb2.png"
-                    name="vehicles-limit.moped"
-                    value={hubData?.stop?.capacity?.moped}
-                    onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
-                />
-                <ModalityRow
-                    imageUrl="https://i.imgur.com/7Y2PYpv.png"
-                    name="vehicles-limit.car"
-                    value={hubData?.stop?.capacity?.car}
-                    onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
-                />
+                    <ModalityRow
+                        imageUrl="https://i.imgur.com/IF05O8u.png"
+                        name="vehicles-limit.bicycle"
+                        value={hubData?.stop?.capacity?.bicycle}
+                        onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
+                    />
+                    <ModalityRow
+                        imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                        name="vehicles-limit.cargo_bicycle"
+                        value={hubData?.stop?.capacity?.cargo_bicycle}
+                        onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
+                    />
+                    <ModalityRow
+                        imageUrl="https://i.imgur.com/h264sb2.png"
+                        name="vehicles-limit.moped"
+                        value={hubData?.stop?.capacity?.moped}
+                        onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
+                    />
+                    <ModalityRow
+                        imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                        name="vehicles-limit.car"
+                        value={hubData?.stop?.capacity?.car}
+                        onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
+                    />
                 </>}
             </div>
         </div>
@@ -702,17 +666,21 @@ const PolicyHubsEdit = ({
             >
                 Sluiten
             </Button>
-            {! isNewZone && <Button
-                onClick={toggleDrawingForHub}
-                theme={is_drawing_enabled ? `greenHighlighted` : ''}
-            >
-                ✒️
-            </Button>}
-            {! isNewZone && <Button
-                onClick={deleteZoneHandler}
-            >
-                🗑️
-            </Button>}
+
+            {hubData.phase === 'concept' && <>
+                {(! isNewZone) && <Button
+                    onClick={toggleDrawingForHub}
+                    theme={is_drawing_enabled ? `greenHighlighted` : ''}
+                >
+                    ✒️
+                </Button>}
+                {! isNewZone && <Button
+                    onClick={deleteZoneHandler}
+                >
+                    🗑️
+                </Button>}
+            </>}
+
             <Button
                 theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
                 style={{marginRight: 0}}

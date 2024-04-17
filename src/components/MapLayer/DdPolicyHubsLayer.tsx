@@ -33,6 +33,8 @@ import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
+import { makeConcept } from '../../helpers/policy-hubs/make-concept';
+import { notify } from '../../helpers/notify';
 
 const DdPolicyHubsLayer = ({
   map
@@ -265,6 +267,16 @@ const DdPolicyHubsLayer = ({
     dispatch(setSelectedPolicyHubs([props.id]))
   }
 
+  const getSelectedHub = () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
+      return false;
+    }
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+
+    return selected_hub;
+  }
+
   const didSelectOneHub = () => {
     if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
       return false;
@@ -288,6 +300,18 @@ const DdPolicyHubsLayer = ({
     return selected_hub.phase === 'concept';
   }
 
+  const didSelectCommittedConceptHub = () => {
+    if(! didSelectOneHub()) return;
+
+    // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if hub is a concept hub
+    return selected_hub.phase === 'committed_concept';
+  }
+
   const commitToConcept = (zone_id) => {
     dispatch({
       type: 'SET_SHOW_COMMIT_FORM',
@@ -299,9 +323,24 @@ const DdPolicyHubsLayer = ({
     <PolicyHubsPhaseMenu />
 
     {/* Vaststellen button */}
-    {(didSelectConceptHub() && ! show_commit_form) && <ActionButtons>
+    {(didSelectConceptHub() && getSelectedHub()?.geography_type !== 'monitoring' && ! show_commit_form) && <ActionButtons>
       <Button theme="primary" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
         Vaststellen
+      </Button>
+    </ActionButtons>}
+
+    {/* Terug naar concept button */}
+    {(didSelectCommittedConceptHub() && ! show_commit_form) && <ActionButtons>
+      <Button theme="red" onClick={async () => {
+        await makeConcept(token, [getSelectedHub()?.geography_id]);
+        if(! window.confirm('Wil je de vastgestelde hub terugzetten naar de conceptfase?')) {
+          return;
+        }
+        notify('De hub is teruggezet naar de conceptfase');
+        dispatch(setSelectedPolicyHubs([]));
+        fetchHubs();
+      }}>
+        Terugzetten naar concept
       </Button>
     </ActionButtons>}
 
@@ -332,6 +371,7 @@ const DdPolicyHubsLayer = ({
       <PolicyHubsCommit
         all_policy_hubs={policyHubs}
         selected_policy_hubs={selected_policy_hubs}
+        fetchHubs={fetchHubs}
       />
     </ActionModule>}
   </>

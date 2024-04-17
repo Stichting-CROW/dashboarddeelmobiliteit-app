@@ -112,7 +112,9 @@ function FilterbarPolicyHubs({
           </Link>}
         </div>
 
-        <div className="py-2 flex justify-between">
+        <div className="py-2 flex justify-between" style={{
+          visibility: filterGebied ? 'visible' : 'hidden'
+        }}>
           <Button onClick={() => {
             setIsTableVisible(! isTableVisible);
           }} theme="white">
@@ -129,52 +131,55 @@ function FilterbarPolicyHubs({
             <FilteritemGebieden />
         </Fieldset>
 
-        <Fieldset title="Hubs">
-          <CheckboxesWrapper>
-            {Object.keys(policyHubPhases).map(key => {
-              const id = `hub-${key}`;
-              const title = policyHubPhases[key].title;
-              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                e.preventDefault();
-                dispatch(toggleVisibleLayer(id));
-              }}>
-                {title}
-              </CheckboxWithLabel>
-            })}
-          </CheckboxesWrapper>
-        </Fieldset>
+        {filterGebied && (<>
+          <Fieldset title="Hubs">
+            <CheckboxesWrapper>
+              {Object.keys(policyHubPhases).map(key => {
+                const id = `hub-${key}`;
+                const title = policyHubPhases[key].title;
+                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(toggleVisibleLayer(id));
+                }}>
+                  {title}
+                </CheckboxWithLabel>
+              })}
+            </CheckboxesWrapper>
+          </Fieldset>
 
-        <Fieldset title="Verbodsgebieden">
-          <CheckboxesWrapper>
-            {Object.keys(policyHubPhases).map(key => {
-              const id = `verbodsgebied-${key}`;
-              const title = policyHubPhases[key].title;
-              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                e.preventDefault();
-                dispatch(toggleVisibleLayer(id));
-              }}>
-                {title}
-              </CheckboxWithLabel>
-            })}
-          </CheckboxesWrapper>
-        </Fieldset>
+          <Fieldset title="Verbodsgebieden">
+            <CheckboxesWrapper>
+              {Object.keys(policyHubPhases).map(key => {
+                const id = `verbodsgebied-${key}`;
+                const title = policyHubPhases[key].title;
+                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(toggleVisibleLayer(id));
+                }}>
+                  {title}
+                </CheckboxWithLabel>
+              })}
+            </CheckboxesWrapper>
+          </Fieldset>
 
-        <Fieldset title="Analysegebieden">
-          <CheckboxesWrapper>
-            {Object.keys(policyHubPhases).map(key => {
-              if(key !== 'concept') return;
+          <Fieldset title="Analysegebieden">
+            <CheckboxesWrapper>
+              {Object.keys(policyHubPhases).map(key => {
+                if(key !== 'concept') return;
 
-              const id = `analyse-${key}`;
-              const title = policyHubPhases[key].title;
-              return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
-                e.preventDefault();
-                dispatch(toggleVisibleLayer(id));
-              }}>
-                {title}
-              </CheckboxWithLabel>
-            })}
-          </CheckboxesWrapper>
-        </Fieldset>
+                const id = `analyse-${key}`;
+                const title = policyHubPhases[key].title;
+                return <CheckboxWithLabel key={title} id={id} checked={visible_layers.indexOf(id) > -1} onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(toggleVisibleLayer(id));
+                }}>
+                  {title}
+                </CheckboxWithLabel>
+              })}
+            </CheckboxesWrapper>
+          </Fieldset>
+        </>
+      )}
         
       </div>
       <Modal

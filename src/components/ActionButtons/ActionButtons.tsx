@@ -13,7 +13,7 @@ export const ActionButtons = ({
   return <div className={`
     ActionButtons
     fixed top-0
-    p-3
+    pl-1
     ${filterbarOpen ? 'filter-open' : ''}
   `}>
     {children}

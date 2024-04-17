@@ -15,6 +15,8 @@ import { StateType } from '@/src/types/StateType';
 import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
 import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept';
+import { notify } from '../../helpers/notify';
+import { setSelectedPolicyHubs, setShowCommitForm } from '../../actions/policy-hubs';
 
 type FormDataType = {
     publish_on: any,
@@ -23,7 +25,8 @@ type FormDataType = {
 
 const PolicyHubsCommit = ({
     all_policy_hubs,
-    selected_policy_hubs
+    selected_policy_hubs,
+    fetchHubs
 }) => {
     const dispatch = useDispatch()
 
@@ -60,16 +63,29 @@ const PolicyHubsCommit = ({
         if(foundHub) setHubData(foundHub);
     }
 
-    const commitToConcept = () => {
+    const postCommitCallback = (zone_id?: number) => {
+        // Deselect hub (close action modal)
+        dispatch(setSelectedPolicyHubs([]));
+        // Refetch hubs (for removing the changed hub from the map)
+        fetchHubs();
+    }
+
+    const commitToConcept = async () => {
         if(! hubData) return;
         if(! formData.publish_on) return;
         if(! formData.effective_on) return;
 
-        commit_to_concept(token, {
+        await commit_to_concept(token, {
             "geography_ids": [hubData.geography_id],
             "publish_on": moment(`${formData.publish_on} 04:00:00`).format(),
             "effective_on": moment(`${formData.effective_on} 04:00:00`).format()
-        })
+        });
+
+        notify('De hub is vastgesteld en omgezet naar fase: Vastgesteld concept');
+
+        dispatch(setShowCommitForm(false));
+
+        postCommitCallback();
     }
 
     const onChange = (e) => {
@@ -90,7 +106,7 @@ const PolicyHubsCommit = ({
     if(selected_policy_hubs.length > 1) return <></>;
     return (
         <div>
-            <div>
+            <div className="mb-8">
                 Je staat op het punt een concept vast te stellen. Stel nu de publicatie- en startdatum in.
             </div>
             <div>
@@ -124,14 +140,14 @@ const PolicyHubsCommit = ({
                     style={{marginLeft: 0}}
                     onClick={hideCommitForm}
                 >
-                    Annuleer
+                    Sluiten
                 </Button>
                 <Button
                     theme={`greenHighlighted`}
                     style={{marginRight: 0}}
                     onClick={commitToConcept}
                 >
-                    Opslaan
+                    Stel vast
                 </Button>
 
             </div>

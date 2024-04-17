@@ -7,17 +7,11 @@ import { useSelector } from "react-redux"
 import { StateType } from "@/src/types/StateType"
 import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
 import { X } from "lucide-react"
+import { readable_geotype } from "../../helpers/policy-hubs/common"
 
 const readable_phase = (name: string) => {
     if(name === 'concept') return 'Concept';
     else if(name === 'active') return 'Actief';
-}
-
-const readable_geotype = (name: string) => {
-    if(name === 'stop') return 'Hub';
-    if(name === 'no_parking') return 'Verbodsgebied';
-    if(name === 'monitoring') return 'Analysegebied';
-    return '';
 }
 
 // async function getData(): Promise<Payment[]> {
