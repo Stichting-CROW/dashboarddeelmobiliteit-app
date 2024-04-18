@@ -45,7 +45,7 @@
 .IsochroneTools-legend-container {
   width: 100%;
   position: fixed;
-  bottom:  78px;
+  bottom:  146px;
   transition: width 1s;
   transition-timing-function: ease-out;
   display: none;
