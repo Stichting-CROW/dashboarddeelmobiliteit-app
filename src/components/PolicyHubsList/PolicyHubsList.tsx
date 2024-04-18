@@ -10,6 +10,7 @@ import { X } from "lucide-react"
 import { readable_geotype } from "../../helpers/policy-hubs/common"
 import moment from "moment"
 import Modal from "../Modal/Modal"
+import { ImportZonesModal } from "../ImportZones/ImportZones"
 
 const readable_phase = (name: string) => {
     if(name === 'concept') return 'Concept';
@@ -46,6 +47,7 @@ function populateTableData(policyHubs) {
 
 const ActionHeader = () => {
     const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
+    const [doShowImportModal, setDoShowImportModal] = useState<Boolean>(false);
 
     const filterGebied = useSelector((state: StateType) => {
       return state.filter ? state.filter.gebied : null
@@ -65,7 +67,9 @@ const ActionHeader = () => {
                 </Button>
             </div>
             <div className="flex justify-end">
-               <Button theme="white">
+               <Button theme="white"  onClick={() => {
+                    setDoShowImportModal(true);
+                }}>
                     Importeer
                 </Button>
                 <Button theme="white" onClick={() => {
@@ -110,6 +114,11 @@ const ActionHeader = () => {
             </li>
             </ul>
         </Modal>
+
+        {doShowImportModal && <ImportZonesModal postImportFunc={() => {
+            setDoShowImportModal(false);
+            // document.location = '/map/beleidshubs';
+        }} />}
     </>;
 }
 
