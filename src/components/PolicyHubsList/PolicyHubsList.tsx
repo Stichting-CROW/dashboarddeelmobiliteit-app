@@ -37,7 +37,6 @@ function populateTableData(policyHubs) {
             modified_by: hub.modified_by,
             modified_at: moment(hub.modified_at).format('YYYY-MM-DD HH:mm'),
             is_virtual: hub.stop?.is_virtual ? 'Virtueel' : 'Fysiek',
-            // interne_id: 0,
             // vervangt_zone: 0,
 
         }

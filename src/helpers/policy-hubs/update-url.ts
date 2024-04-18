@@ -12,5 +12,11 @@ export const update_url = (params) => {
             url.searchParams.append('visible', x);
         })
     }
+    if(params.selected) {
+        url.searchParams.delete('selected');
+        params.selected.forEach((x) => {
+            url.searchParams.append('selected', x);
+        })
+    }
     window.history.pushState({}, '', url.href)
 }

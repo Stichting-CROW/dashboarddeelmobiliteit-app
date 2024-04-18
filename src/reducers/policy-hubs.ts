@@ -40,6 +40,12 @@ export default function policy_hubs(state = initialState, action) {
           visible_layers: new_visible_layers
       };
     }
+    case 'SET_VISIBLE_LAYERS': {
+      return {
+          ...state,
+          visible_layers: action.payload
+      };
+    }
     case 'SET_VISIBLE_LAYER': {
       let new_visible_layers = state.visible_layers;
 

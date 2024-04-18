@@ -6,7 +6,8 @@ import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import {
   setHubsInDrawingMode,
   setSelectedPolicyHubs,
-  setIsDrawingEnabled
+  setIsDrawingEnabled,
+  setVisibleLayers
 } from '../../actions/policy-hubs'
 
 import {
@@ -35,6 +36,7 @@ import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
+import { update_url } from '../../helpers/policy-hubs/update-url';
 
 const DdPolicyHubsLayer = ({
   map
@@ -75,6 +77,8 @@ const DdPolicyHubsLayer = ({
 
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
+  const queryParams = new URLSearchParams(window.location.search);
+
   // On component load: Set satelite view
   const mapStyles = getMapStyles();
   useEffect(() => {
@@ -95,6 +99,32 @@ const DdPolicyHubsLayer = ({
       removeHubsFromMap(map);
     };
   }, []);
+
+  // Load state based on query params
+  useEffect(() => {
+    const gm_code = queryParams.get('gm_code');
+    if(gm_code) {
+      dispatch({
+        type: 'SET_FILTER_GEBIED',
+        payload: gm_code
+      })
+    }
+    const visible = queryParams.getAll('visible');
+    if(visible) {
+      dispatch(setVisibleLayers(visible));
+    }
+    const selected = queryParams.getAll('selected');
+    if(selected) {
+      dispatch(setSelectedPolicyHubs(selected.map(x => Number(x))));
+    }
+  }, [])
+
+  // If selected_policy_hubs changes -> update URL
+  useEffect(() => {
+    update_url({
+      selected: selected_policy_hubs
+    });
+  }, [selected_policy_hubs])
 
   // If 'gebied' or 'visible_layers' is updated:
   useEffect(() => {

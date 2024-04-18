@@ -260,7 +260,7 @@ function FilterbarPolicyHubs({
       
       </div>
 
-      <Modal
+      {isTableVisible && <Modal
         isVisible={isTableVisible}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
@@ -277,9 +277,9 @@ function FilterbarPolicyHubs({
         }}
       >
         <PolicyHubsList />
-      </Modal>
+      </Modal>}
 
-      <Modal
+      {showShareModal && <Modal
         isVisible={showShareModal}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
@@ -296,7 +296,7 @@ function FilterbarPolicyHubs({
         }}
       >
         <SharePermalink />
-      </Modal>
+      </Modal>}
 
     </>
   )

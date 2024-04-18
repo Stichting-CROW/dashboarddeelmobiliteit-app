@@ -3,6 +3,7 @@ import {
   TOGGLE_VISIBLE_LAYER,
   UNSET_VISIBLE_LAYER,
   SET_VISIBLE_LAYER,
+  SET_VISIBLE_LAYERS,
   SET_SELECTED_POLICY_HUBS,
   SET_SHOW_COMMIT_FORM,
   SET_HUBS_IN_DRAWING_MODE,
@@ -25,6 +26,10 @@ export const unsetVisibleLayer = (layer) => ({
 export const setVisibleLayer = (layer) => ({
   type: SET_VISIBLE_LAYER,
   payload: layer
+})
+export const setVisibleLayers = (layers) => ({
+  type: SET_VISIBLE_LAYERS,
+  payload: layers
 })
 export const setSelectedPolicyHubs = (ids) => ({
   type: SET_SELECTED_POLICY_HUBS,
