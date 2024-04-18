@@ -48,13 +48,13 @@ const ActionHeader = () => {
     return (
         <div className="flex justify-between">
             <div className="flex justify-start">
-                <Button theme="white">
+                <Button theme="white" disabled={true}>
                     Stel vast
                 </Button>
-                <Button theme="white">
+                <Button theme="white" disabled={true}>
                     Bewerk
                 </Button>
-                <Button theme="white">
+                <Button theme="white" disabled={true}>
                     Verwijder
                 </Button>
             </div>

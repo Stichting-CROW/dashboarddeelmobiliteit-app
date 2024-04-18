@@ -40,7 +40,7 @@ const PolicyHubsPhaseMenu = () => {
 
                     <a className={`
                         cursor-pointer
-                        ${active_phase === name ? 'font-bold' : ''}
+                        ${active_phase === name ? '' : ''}
                     `}
                     style={{
                         color: active_phase === name ? '#15AEEF' : '#000'

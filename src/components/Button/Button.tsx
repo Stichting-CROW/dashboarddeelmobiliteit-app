@@ -6,6 +6,7 @@ function Button({
   onClick,
   type,
   title,
+  disabled,
   classes,
   style
 }: {
@@ -15,6 +16,7 @@ function Button({
   title?: string,
   type?: "button" | "reset" | "submit",
   classes?: string,
+  disabled?: any,
   style?: object
 }) {
   return (
@@ -34,6 +36,7 @@ function Button({
         my-2
         text-center
       `}
+      disabled={disabled}
       type={type}
       title={title}
       onClick={onClick}

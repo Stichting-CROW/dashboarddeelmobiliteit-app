@@ -197,8 +197,8 @@ function Menu({
 
             <MenuItem
               pathName={pathName}
-              text={'Zones'}
-              path={'/map/zones'}
+              text={'Hubs'}
+              path={'/map/beleidshubs'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />
 

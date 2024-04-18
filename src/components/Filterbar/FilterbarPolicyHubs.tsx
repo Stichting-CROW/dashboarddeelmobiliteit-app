@@ -25,9 +25,15 @@ import {StateType} from '../../types/StateType';
 
 import {
   get_phases
-} from '../../helpers/policy-hubs/get-phases'
+} from '../../helpers/policy-hubs/get-phases';
+
+import {
+  update_url
+} from '../../helpers/policy-hubs/update-url'
+
 import Modal from '../Modal/Modal';
 import PolicyHubsList from '../PolicyHubsList/PolicyHubsList';
+import SharePermalink from '../SharePermalink/SharePermalink';
 
 import eyeOpen from './img/icon_eye_open.svg';
 import eyeClosed from './img/icon_eye_closed.svg';
@@ -65,6 +71,7 @@ function FilterbarPolicyHubs({
   view
 }) {
   const [isTableVisible, setIsTableVisible] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -94,6 +101,23 @@ function FilterbarPolicyHubs({
 
   // If active_phase changes ->
   useEffect(() => {
+    enableRelevantPhases();
+    update_url({
+      phase: active_phase
+    });
+  }, [active_phase])
+
+    // If visible_layers changes ->
+    useEffect(() => {
+      update_url({
+        visible_layers: visible_layers
+      });
+    }, [
+      visible_layers,
+      visible_layers?.length
+    ])
+  
+  const enableRelevantPhases = () => {
     // Only continue if state changd
     if(lastActivePhase === active_phase) return;
 
@@ -113,7 +137,7 @@ function FilterbarPolicyHubs({
     dispatch(setVisibleLayer(`analyse-${active_phase}`));
     
     lastActivePhase = active_phase;
-  }, [active_phase])
+  }
 
   return (
     <>
@@ -137,7 +161,7 @@ function FilterbarPolicyHubs({
             📄 Tabel openen
           </Button>
           <Button onClick={() => {
-            // toggleTable();
+             setShowShareModal(true);
           }} theme="white"
           style={{
             marginRight: '0rem'
@@ -235,6 +259,7 @@ function FilterbarPolicyHubs({
       )}
       
       </div>
+
       <Modal
         isVisible={isTableVisible}
         button2Title={"Sluiten"}
@@ -253,6 +278,26 @@ function FilterbarPolicyHubs({
       >
         <PolicyHubsList />
       </Modal>
+
+      <Modal
+        isVisible={showShareModal}
+        button2Title={"Sluiten"}
+        button2Handler={async (e) => {
+          e.preventDefault();
+          // Hide modal
+          setShowShareModal(false);
+        }}
+        hideModalHandler={() => {
+          // Hide modal
+          setShowShareModal(false);
+        }}
+        config={{
+          // fullWidth: true
+        }}
+      >
+        <SharePermalink />
+      </Modal>
+
     </>
   )
 }

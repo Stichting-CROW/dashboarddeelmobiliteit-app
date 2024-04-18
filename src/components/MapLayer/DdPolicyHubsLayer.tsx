@@ -442,6 +442,15 @@ const DdPolicyHubsLayer = ({
       }}>
         Omzetten naar nieuw concept
       </Button>
+      <Button theme="white" onClick={async () => {
+        await makeConcept(token, [getSelectedHub()?.geography_id]);
+        if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
+          return;
+        }
+        notify('Deze functionaliteit is in ontwikkeling');
+      }}>
+        Voorstel tot verwijderen
+      </Button>
     </ActionButtons>}
 
     {/* Teken hub button */}
