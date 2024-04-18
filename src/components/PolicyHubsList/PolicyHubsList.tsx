@@ -9,6 +9,7 @@ import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
 import { X } from "lucide-react"
 import { readable_geotype } from "../../helpers/policy-hubs/common"
 import moment from "moment"
+import Modal from "../Modal/Modal"
 
 const readable_phase = (name: string) => {
     if(name === 'concept') return 'Concept';
@@ -44,7 +45,13 @@ function populateTableData(policyHubs) {
 }
 
 const ActionHeader = () => {
-    return (
+    const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
+
+    const filterGebied = useSelector((state: StateType) => {
+      return state.filter ? state.filter.gebied : null
+    });
+
+    return <>
         <div className="flex justify-between">
             <div className="flex justify-start">
                 <Button theme="white" disabled={true}>
@@ -61,17 +68,55 @@ const ActionHeader = () => {
                <Button theme="white">
                     Importeer
                 </Button>
-                <Button theme="white">
+                <Button theme="white" onClick={() => {
+                    setDoShowExportModal(true);
+                }}>
                     Exporteer
                 </Button>
             </div>
         </div>
-    );
+
+        <Modal
+            isVisible={doShowExportModal}
+            title="Exporteer KML-bestand"
+            button1Title={false}
+            button1Handler={(e) => {
+                setDoShowExportModal(false);
+            }}
+            button2Title={"Sluiten"}
+            button2Handler={(e) => {
+            e.preventDefault();
+                // Hide modal
+                setDoShowExportModal(false);
+            }}
+            hideModalHandler={() => {
+                setDoShowExportModal(false);
+            }}
+        >
+            <p className="mb-4">
+            Met onderstaande link kun je de ingetekende zones als KML-bestanden downloaden.
+            </p>
+            <p className="mb-4">
+            Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
+            </p>
+            <p className="mb-4">
+            Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
+            </p>
+            <ul className="my-4">
+            <li>
+                &raquo; <a href={`${process.env.REACT_APP_MDS_URL}/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
+                Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
+                </a>
+            </li>
+            </ul>
+        </Modal>
+    </>;
 }
 
 const PolicyHubsList = () => {
     const [policyHubs, setPolicyHubs] = useState([]);
     const [tableData, setTableData] = useState([]);
+    const [doShowExportModal, setDoShowExportModal] = useState(false);
 
     const filter = useSelector((state: StateType) => state.filter || null);
   
@@ -84,7 +129,8 @@ const PolicyHubsList = () => {
   
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
-  
+
+
     // Fetch hubs
     useEffect(() => {
         if(! filter.gebied) return;
@@ -120,12 +166,14 @@ const PolicyHubsList = () => {
     };
 
     return (
-        <div>
-            <ActionHeader />
-            <div data-name="body" className="p-4" style={{}}>
-                <DataTable columns={columns} data={tableData} />
+        <>
+            <div>
+                <ActionHeader />
+                <div data-name="body" className="p-4" style={{}}>
+                    <DataTable columns={columns} data={tableData} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
