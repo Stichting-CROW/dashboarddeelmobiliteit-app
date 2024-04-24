@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
-import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs } from '../../actions/policy-hubs';
+import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs, setShowEditForm } from '../../actions/policy-hubs';
 import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
 import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
 import moment from 'moment';
@@ -178,6 +178,8 @@ const PolicyHubsEdit = ({
 
     const postSaveOrDeleteCallback = (zone_id?: number) => {
         dispatch(setSelectedPolicyHubs(zone_id ? [zone_id] : []))
+        dispatch(setShowEditForm(zone_id ? true : false));
+
         dispatch(setHubsInDrawingMode([]));
         dispatch(setIsDrawingEnabled(false));
         // Fetch hubs from API
@@ -249,6 +251,8 @@ const PolicyHubsEdit = ({
                 notify('Hub verwijderd');
                 // Hide edit form
                 dispatch(setSelectedPolicyHubs([]))
+                dispatch(setShowEditForm(false));
+
                 postSaveOrDeleteCallback();
             }
         } catch(err) {
@@ -263,10 +267,9 @@ const PolicyHubsEdit = ({
             }
         }
 
-        dispatch({
-            type: 'SET_SELECTED_POLICY_HUBS',
-            payload: []
-        });
+        dispatch(setSelectedPolicyHubs([]));
+        dispatch(setShowEditForm(false));
+
         cancelHandler();
     };
 
@@ -443,7 +446,7 @@ const PolicyHubsEdit = ({
             </div>
 
             {hubData?.prev_geographies?.[0] && <div className="my-4">
-                Deze hub is een nieuwe versie van hub {hubData?.prev_geographies?.[0]} / <u>deze hub</u>
+                Deze hub is een nieuwe versie van hub <u className="cursor-pointer" title={hubData?.prev_geographies?.[0]}>deze hub</u>.
             </div>}
 
             {/* Committed concept data */}

@@ -102,13 +102,16 @@ function FilterbarPolicyHubs({
   // If active_phase changes ->
   useEffect(() => {
     enableRelevantPhases();
-    update_url({
-      phase: active_phase
-    });
+    if(active_phase) {
+      update_url({
+        phase: active_phase
+      });
+    }
   }, [active_phase])
 
     // If visible_layers changes ->
     useEffect(() => {
+      if(! visible_layers) return;
       update_url({
         visible_layers: visible_layers
       });

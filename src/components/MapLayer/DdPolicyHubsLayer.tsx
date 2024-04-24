@@ -7,7 +7,8 @@ import {
   setHubsInDrawingMode,
   setSelectedPolicyHubs,
   setIsDrawingEnabled,
-  setVisibleLayers
+  setVisibleLayers,
+  setShowEditForm
 } from '../../actions/policy-hubs'
 
 import {
@@ -75,6 +76,10 @@ const DdPolicyHubsLayer = ({
     return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
   });
 
+  const show_edit_form = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.show_edit_form : false;
+  });
+
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   const queryParams = new URLSearchParams(window.location.search);
@@ -115,7 +120,9 @@ const DdPolicyHubsLayer = ({
     }
     const selected = queryParams.getAll('selected');
     if(selected) {
-      dispatch(setSelectedPolicyHubs(selected.map(x => Number(x))));
+      const selectedIds = selected.map(x => Number(x));
+      dispatch(setSelectedPolicyHubs(selectedIds));
+      dispatch(setShowEditForm(true));
     }
   }, [])
 
@@ -202,7 +209,7 @@ const DdPolicyHubsLayer = ({
       // No parking
       else if(x === 'verbodsgebied-concept') {
         hubsToKeep.push({geo_type: 'no_parking', phase: 'concept'});
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_concept'});
+        // hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_concept'});
       }
       else if(x === 'verbodsgebied-committed_concept') {
         hubsToKeep.push({geo_type: 'no_parking', phase: 'committed_concept'});
@@ -316,6 +323,7 @@ const DdPolicyHubsLayer = ({
     if(is_drawing_enabled === 'new') {
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
+      dispatch(setShowEditForm(true));
       // Enable drawing polygons
       setTimeout(() => {
         enableDrawingPolygon(Draw);
@@ -355,7 +363,8 @@ const DdPolicyHubsLayer = ({
     const props = e.features[0].properties;
 
     // Store active hub ID in redux state
-    dispatch(setSelectedPolicyHubs([props.id]))
+    dispatch(setSelectedPolicyHubs([props.id]));
+    dispatch(setShowEditForm(true));
   }
 
   const getSelectedHub = () => {
@@ -439,7 +448,7 @@ const DdPolicyHubsLayer = ({
 
     {/* Vaststellen button */}
     {(didSelectConceptHub() && getSelectedHub()?.geography_type !== 'monitoring' && ! show_commit_form) && <ActionButtons>
-      <Button theme="primary" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
+      <Button theme="white" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
         Vaststellen
       </Button>
     </ActionButtons>}
@@ -453,6 +462,7 @@ const DdPolicyHubsLayer = ({
         }
         notify('De hub is teruggezet naar de conceptfase');
         dispatch(setSelectedPolicyHubs([]));
+        dispatch(setShowEditForm(false));
         fetchHubs();
       }}>
         Terugzetten naar concept
@@ -462,18 +472,18 @@ const DdPolicyHubsLayer = ({
     {/* 'Nieuw concept op basis van' button */}
     {(didSelectPublishedHub() || didSelectActiveHub()) && <ActionButtons>
       <Button theme="white" onClick={async () => {
-        await makeConcept(token, [getSelectedHub()?.geography_id]);
         if(! window.confirm('Wil je een wijziging aanbrengen in deze definitieve hub d.w.z. een nieuwe concepthub maken? Klik dan op OK')) {
           return;
         }
+        await makeConcept(token, [getSelectedHub()?.geography_id]);
         notify('De hub is omgezet naar een nieuw concept');
         dispatch(setSelectedPolicyHubs([]));
+        dispatch(setShowEditForm(false));
         fetchHubs();
       }}>
         Omzetten naar nieuw concept
       </Button>
       <Button theme="white" onClick={async () => {
-        await makeConcept(token, [getSelectedHub()?.geography_id]);
         if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
           return;
         }
@@ -485,13 +495,13 @@ const DdPolicyHubsLayer = ({
 
     {/* Teken hub button */}
     {(! didSelectOneHub() && ! is_drawing_enabled && active_phase === 'concept') && <ActionButtons>
-      <Button theme="primary" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
+      <Button theme="white" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
         Teken nieuwe hub
       </Button>
     </ActionButtons>}
 
     {/* Hub edit form */}
-    {(didSelectOneHub() && ! show_commit_form) && <ActionModule>
+    {(show_edit_form && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit
         fetchHubs={fetchHubs}
         all_policy_hubs={policyHubs}

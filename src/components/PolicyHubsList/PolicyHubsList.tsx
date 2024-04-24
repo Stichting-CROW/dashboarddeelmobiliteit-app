@@ -49,6 +49,7 @@ const ActionHeader = () => {
     const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
     const [doShowImportModal, setDoShowImportModal] = useState<Boolean>(false);
 
+    const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const filterGebied = useSelector((state: StateType) => {
       return state.filter ? state.filter.gebied : null
     });
@@ -65,6 +66,9 @@ const ActionHeader = () => {
                 <Button theme="white" disabled={true}>
                     Verwijder
                 </Button>
+            </div>
+            <div className="flex flex-col justify-center">
+              <h1 className="font-bold text-lg">Hubs in fase: {readable_phase(active_phase)}</h1>
             </div>
             <div className="flex justify-end">
                <Button theme="white"  onClick={() => {
@@ -157,8 +161,13 @@ const PolicyHubsList = () => {
     useEffect(() => {
         if(! policyHubs) return;
 
+        // Only keep hubs in active phase
+        const filteredHubs = (policyHubs) => {
+            return policyHubs.filter((x) => x.phase === active_phase)
+        }
+
         (() => {
-            setTableData(populateTableData(policyHubs));
+            setTableData(populateTableData(filteredHubs(policyHubs)));
         })();
     }, [
         policyHubs
