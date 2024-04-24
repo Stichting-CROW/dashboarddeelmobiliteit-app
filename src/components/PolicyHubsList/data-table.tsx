@@ -13,6 +13,16 @@ import {
   VisibilityState
 } from "@tanstack/react-table"
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination"
+
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "../ui/button"
@@ -126,7 +136,7 @@ export function DataTable<TData, TValue>({
   }, [
     table.getFilteredSelectedRowModel()
   ]);
-console.log('table.getRowModel()', table.getRowModel())
+
   return (
     <>
       <div className="flex items-center py-4 mb-4">
@@ -215,10 +225,26 @@ console.log('table.getRowModel()', table.getRowModel())
             )}
           </TableBody>
         </Table>
-        <div className="py-2 px-5 flex-1 text-sm text-muted-foreground">
+        <div className="py-2 px-5 text-sm text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} van de {" "}
             {table.getFilteredRowModel().rows.length} rij(en) geselecteerd
         </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious href="#" />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext href="#" />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </>
   )
