@@ -300,6 +300,7 @@ const DdPolicyHubsLayer = ({
     }
   }, [
     map,
+    selected_policy_hubs,
     is_drawing_enabled
   ]);
 
@@ -359,11 +360,26 @@ const DdPolicyHubsLayer = ({
       return;
     }
 
+    // Get coordinates and props
     const coordinates = e.lngLat;
     const props = e.features[0].properties;
 
+    // Check if user holds ctrl (or Command on MacOS)
+    const userHoldsCtrl = (e.originalEvent !== undefined ? (e.originalEvent.metaKey || e.originalEvent.ctrlKey) : false);
+
+    // Define new selected hub ids
+    const newHubIds = userHoldsCtrl
+      // If control is down:
+      ? (selected_policy_hubs.indexOf(props.id) > -1
+          // Remove hub from selection if it was selected
+          ? selected_policy_hubs.filter(x => x != props.id)
+          // Otherwise add hub to selection
+          : [...selected_policy_hubs, props.id]
+      // If control key was not held down: Just set hub ID as selected hub
+      ) : [props.id];
+
     // Store active hub ID in redux state
-    dispatch(setSelectedPolicyHubs([props.id]));
+    dispatch(setSelectedPolicyHubs(newHubIds));
     dispatch(setShowEditForm(true));
   }
 
