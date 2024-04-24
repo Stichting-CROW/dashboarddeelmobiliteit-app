@@ -47,6 +47,7 @@ import React, { useEffect } from "react"
 import { useDispatch, useSelector } from 'react-redux';
 
 import './data-table.css';
+import { StateType } from "../../types/StateType"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -58,6 +59,8 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const dispatch = useDispatch()
+
+  const selected_policy_hubs = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.selected_policy_hubs : []);
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -85,14 +88,45 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // On component load: Select selected hubs
+  useEffect(() => {
+    const rowIdsToSelect = [];
+    const allRows = table.getRowModel().rowsById;
+    Object.keys(allRows).map((key) => {
+      const row: any = allRows[key];
+      // index: 0/1/2
+      // zone_id: row.original.id
+
+      // Check if row should be selected
+      if(selected_policy_hubs.indexOf(row.original?.id) > -1) {
+        // If so: Add to rowIdsToSelect array
+        rowIdsToSelect.push(row.index);
+      }
+    });
+    // Set row selection
+    // Should look like this: {0: true, 1: true, 3: true}
+    const newRowSelectionObject = {};
+    rowIdsToSelect.forEach(indexId => {
+      newRowSelectionObject[indexId] = true;
+    });
+    setRowSelection(newRowSelectionObject);
+  }, [
+    table.getRowModel()
+  ]);
+
   // If selection changes: Update selected hubs
   useEffect(() => {
+    // Only continue if there are any rows
+    if(table.getFilteredSelectedRowModel()?.rows?.length < 1) {
+      return;
+    }
+    
     const hubIds = table.getFilteredSelectedRowModel()?.rows.map((x: any) => x.original?.id);
     dispatch(setSelectedPolicyHubs(hubIds));
   }, [
     table.getFilteredSelectedRowModel()
   ]);
-
+console.log('table.getRowModel()', table.getRowModel())
   return (
     <>
       <div className="flex items-center py-4 mb-4">
