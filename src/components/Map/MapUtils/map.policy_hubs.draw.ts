@@ -44,7 +44,10 @@ const selectDrawPolygon = (draw, id) => {
 
 const removeDrawedPolygons = (draw) => {
     // Remove all drawed zones from the map
-    if(draw) draw.deleteAll();
+    if(draw) {
+        draw.deleteAll();
+        draw.changeMode('simple_select');
+    }
 }
 
 export {

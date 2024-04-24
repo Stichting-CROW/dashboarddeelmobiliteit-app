@@ -16,7 +16,7 @@ import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
 import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept';
 import { notify } from '../../helpers/notify';
-import { setSelectedPolicyHubs, setShowCommitForm } from '../../actions/policy-hubs';
+import { setSelectedPolicyHubs, setShowCommitForm, setShowEditForm } from '../../actions/policy-hubs';
 
 type FormDataType = {
     publish_on: any,
@@ -106,6 +106,7 @@ const PolicyHubsCommit = ({
             type: 'SET_SHOW_COMMIT_FORM',
             payload: false
         });
+        dispatch(setShowEditForm(false));
     }
 
     if(! selected_policy_hubs) return <></>;

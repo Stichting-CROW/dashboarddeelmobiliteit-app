@@ -30,7 +30,7 @@ const ActionHeader = () => {
     }
 
     return <>
-        <div className="flex justify-between">
+        <div className="flex justify-between sticky left-0">
             <div className="flex justify-start">
                 {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" disabled={true}>
                     Stel vast
@@ -41,9 +41,6 @@ const ActionHeader = () => {
                 {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" disabled={true}>
                     Verwijder
                 </Button>}
-            </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="font-bold text-lg">Hubs in fase: {readable_phase(active_phase)}</h1>
             </div>
             <div className="flex justify-end">
                <Button theme="white"  onClick={() => {

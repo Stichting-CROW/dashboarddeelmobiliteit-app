@@ -38,6 +38,7 @@ import SharePermalink from '../SharePermalink/SharePermalink';
 
 import eyeOpen from './img/icon_eye_open.svg';
 import eyeClosed from './img/icon_eye_closed.svg';
+import { readable_phase } from '../../helpers/policy-hubs/common';
 
 const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
   {children}
@@ -267,6 +268,7 @@ function FilterbarPolicyHubs({
 
       {showList && <Modal
         isVisible={showList}
+        title={`Hubs in fase: ${readable_phase(active_phase)}`}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
           e.preventDefault();

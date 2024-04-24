@@ -258,9 +258,6 @@ const PolicyHubsEdit = ({
             }
         }
 
-        dispatch(setSelectedPolicyHubs([]));
-        dispatch(setShowEditForm(false));
-
         cancelHandler();
     };
 

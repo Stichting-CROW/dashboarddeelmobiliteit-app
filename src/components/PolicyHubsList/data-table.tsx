@@ -48,6 +48,7 @@ import {
 } from "../ui/table"
 
 import ActionHeader from './action-header';
+import Paginator from './paginator';
 
 import {
   setSelectedPolicyHubs,
@@ -95,11 +96,18 @@ export function DataTable<TData, TValue>({
       columnFilters,
       rowSelection,
       columnVisibility,
+      pagination: {
+        pageIndex: 0,
+        pageSize: 100
+      }
     },
   });
 
   // On component load: Select selected hubs
   useEffect(() => {
+    // Don't do anything if rowSelection was already set
+    if(Object.keys(rowSelection).length >= 1) return;
+    
     const rowIdsToSelect = [];
     const allRows = table.getRowModel().rowsById;
     Object.keys(allRows).map((key) => {
@@ -124,8 +132,6 @@ export function DataTable<TData, TValue>({
     table.getRowModel()
   ]);
 
-  console.log(table.getPaginationRowModel());
-
   // If selection changes: Update selected hubs
   useEffect(() => {
     // Only continue if there are any rows
@@ -141,7 +147,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex items-center py-4 mb-4">
+      <div className="flex items-center py-4 sticky left-0">
         <Input
           placeholder="Filter"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -227,28 +233,22 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="mt-2 flex justify-between sticky left-0">
         <div className="py-2 px-5 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} van de {" "}
-            {table.getFilteredRowModel().rows.length} rij(en) geselecteerd
+          {table.getFilteredSelectedRowModel().rows.length} van de {" "}
+          {table.getFilteredRowModel().rows.length} rij(en) geselecteerd
         </div>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+          <div>
+          <Paginator
+              currentPage={table.getState().pagination.pageIndex + 1}
+              totalPages={table.getPageCount()}
+              onPageChange={(pageNumber) => table.setPageIndex(pageNumber - 1)}
+              showPreviousNext
+          />
+        </div>
       </div>
     </>
   )
 }
-

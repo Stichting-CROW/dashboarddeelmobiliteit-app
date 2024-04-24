@@ -101,11 +101,9 @@ const PolicyHubsList = () => {
 
     return (
         <>
-            <div>
-                <ActionHeader />
-                <div data-name="body" className="p-4" style={{}}>
-                    <DataTable columns={columns} data={tableData} />
-                </div>
+            <ActionHeader />
+            <div data-name="body" className="p-4" style={{}}>
+                <DataTable columns={columns} data={tableData} />
             </div>
         </>
     );

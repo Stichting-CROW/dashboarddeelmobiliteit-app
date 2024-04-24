@@ -380,7 +380,8 @@ const DdPolicyHubsLayer = ({
 
     // Store active hub ID in redux state
     dispatch(setSelectedPolicyHubs(newHubIds));
-    dispatch(setShowEditForm(true));
+    // Show edit form if user selected 1 hub
+    dispatch(setShowEditForm(newHubIds.length === 1));
   }
 
   const getSelectedHub = () => {
@@ -392,6 +393,8 @@ const DdPolicyHubsLayer = ({
 
     return selected_hub;
   }
+
+  const didSelectHub = () => getSelectedHub() ? true : false;
 
   const didSelectOneHub = () => {
     if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
@@ -405,10 +408,12 @@ const DdPolicyHubsLayer = ({
   }
 
   const didSelectConceptHub = () => {
-    if(! didSelectOneHub()) return;
+    if(! didSelectHub()) return;
 
     // Get extra hub info
-    if(! policyHubs || ! policyHubs[0]) return;
+    if(! policyHubs || policyHubs.length <= 0) return;
+
+    // Get hub info
     const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
     if(! selected_hub) return false;
     
@@ -510,7 +515,7 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Teken hub button */}
-    {(! didSelectOneHub() && ! is_drawing_enabled && active_phase === 'concept') && <ActionButtons>
+    {(! didSelectHub() && ! show_edit_form && ! is_drawing_enabled && active_phase === 'concept') && <ActionButtons>
       <Button theme="white" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
         Teken nieuwe hub
       </Button>
@@ -526,13 +531,14 @@ const DdPolicyHubsLayer = ({
         cancelHandler={() => {
           dispatch(setHubsInDrawingMode([]));
           dispatch(setIsDrawingEnabled(false));
+          dispatch(setShowEditForm(false));
           setDrawedArea(undefined);
         }}
       />
     </ActionModule>}
 
     {/* Hub 'commit to concept' form */}
-    {(didSelectOneHub() && show_commit_form) && <ActionModule>
+    {(didSelectHub() && show_commit_form) && <ActionModule>
       <PolicyHubsCommit
         all_policy_hubs={policyHubs}
         selected_policy_hubs={selected_policy_hubs}
