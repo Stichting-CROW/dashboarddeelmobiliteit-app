@@ -11,12 +11,13 @@ import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { postHub } from '../../helpers/policy-hubs/post-hub';
 import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
-import { readable_geotype } from "../../helpers/policy-hubs/common"
+import { readable_geotype, defaultStopProperties } from "../../helpers/policy-hubs/common"
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
+import PolicyHubsEdit_bulk from './PolicyHubsEdit_bulk';
 import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
 import center from '@turf/center';
@@ -48,17 +49,6 @@ const PolicyHubsEdit = ({
         return state.policy_hubs ? state.policy_hubs.is_drawing_enabled : [];
     });
     
-    const defaultStopProperties = {
-        location: {},
-        is_virtual: true,
-        status: {
-            control_automatic: true
-        },
-        capacity: {
-            combined: 50
-        }
-    }
-
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
     const [hubData, setHubData] = useState<HubType>({
         stop: defaultStopProperties,
@@ -182,6 +172,7 @@ const PolicyHubsEdit = ({
 
         dispatch(setHubsInDrawingMode([]));
         dispatch(setIsDrawingEnabled(false));
+
         // Fetch hubs from API
         fetchHubs();
     }
@@ -414,7 +405,15 @@ const PolicyHubsEdit = ({
     const viewMode = 'adminEdit';
 
     if(! selected_policy_hubs) return <></>;
-    // if(selected_policy_hubs.length > 1) return <></>;
+    if(selected_policy_hubs.length > 1) {
+        return <PolicyHubsEdit_bulk
+            fetchHubs={fetchHubs}
+            all_policy_hubs={all_policy_hubs}
+            selected_policy_hubs={selected_policy_hubs}
+            cancelHandler={cancelHandler}
+            postSaveOrDeleteCallback={postSaveOrDeleteCallback}
+        />
+    };
 
     if(is_drawing_enabled && ! drawed_area) {
         return (

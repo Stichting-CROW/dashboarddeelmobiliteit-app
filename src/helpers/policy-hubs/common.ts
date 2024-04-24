@@ -34,3 +34,14 @@ export const readable_phase = (name: string) => {
   else if(name === 'active') return 'Definitief Actief';
   return name;
 }
+
+export const defaultStopProperties = {
+  location: {},
+  is_virtual: true,
+  status: {
+      control_automatic: true
+  },
+  capacity: {
+      combined: 50
+  }
+}

@@ -11,7 +11,7 @@ import { readable_geotype, readable_phase } from "../../helpers/policy-hubs/comm
 import moment from "moment"
 import Modal from "../Modal/Modal"
 import { ImportZonesModal } from "../ImportZones/ImportZones"
-import { setSelectedPolicyHubs, setShowList } from "../../actions/policy-hubs"
+import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actions/policy-hubs"
 import ActionHeader from './action-header';
 
 // async function getData(): Promise<Payment[]> {
@@ -37,6 +37,8 @@ function populateTableData(policyHubs) {
 }
 
 const PolicyHubsList = () => {
+    const dispatch = useDispatch();
+    
     const [policyHubs, setPolicyHubs] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [doShowExportModal, setDoShowExportModal] = useState(false);
@@ -52,6 +54,11 @@ const PolicyHubsList = () => {
   
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+
+    // On load: Hide edit modal
+    useEffect(() => {
+        dispatch(setShowEditForm(false));
+    }, [])
     
     // Fetch hubs
     useEffect(() => {
