@@ -124,6 +124,8 @@ export function DataTable<TData, TValue>({
     table.getRowModel()
   ]);
 
+  console.log(table.getPaginationRowModel());
+
   // If selection changes: Update selected hubs
   useEffect(() => {
     // Only continue if there are any rows
