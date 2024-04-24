@@ -7,6 +7,7 @@ import {
   SET_SELECTED_POLICY_HUBS,
   SET_SHOW_COMMIT_FORM,
   SET_SHOW_EDIT_FORM,
+  SET_SHOW_LIST,
   SET_HUBS_IN_DRAWING_MODE,
   SET_IS_DRAWING_ENABLED
 } from "./actionTypes";
@@ -23,15 +24,15 @@ export const toggleVisibleLayer = (layer) => ({
 export const unsetVisibleLayer = (layer) => ({
   type: UNSET_VISIBLE_LAYER,
   payload: layer
-})
+});
 export const setVisibleLayer = (layer) => ({
   type: SET_VISIBLE_LAYER,
   payload: layer
-})
+});
 export const setVisibleLayers = (layers) => ({
   type: SET_VISIBLE_LAYERS,
   payload: layers
-})
+});
 export const setSelectedPolicyHubs = (ids) => ({
   type: SET_SELECTED_POLICY_HUBS,
   payload: ids
@@ -42,6 +43,10 @@ export const setShowCommitForm = (boolValue) => ({
 });
 export const setShowEditForm = (boolValue) => ({
   type: SET_SHOW_EDIT_FORM,
+  payload: boolValue
+});
+export const setShowList = (boolValue) => ({
+  type: SET_SHOW_LIST,
   payload: boolValue
 });
 export const setHubsInDrawingMode = (ids) => ({

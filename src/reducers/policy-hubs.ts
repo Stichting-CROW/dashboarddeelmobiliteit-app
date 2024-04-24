@@ -91,6 +91,12 @@ export default function policy_hubs(state = initialState, action) {
           show_edit_form: action.payload
       };
     }
+    case 'SET_SHOW_LIST': {
+      return {
+          ...state,
+          show_list: action.payload
+      };
+    }
     default:
       return state;
   }

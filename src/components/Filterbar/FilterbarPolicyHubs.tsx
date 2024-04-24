@@ -7,7 +7,8 @@ import React, {
 import {
   toggleVisibleLayer,
   unsetVisibleLayer,
-  setVisibleLayer
+  setVisibleLayer,
+  setShowList
 } from '../../actions/policy-hubs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
@@ -70,7 +71,6 @@ function FilterbarPolicyHubs({
   hideLogo,
   view
 }) {
-  const [isTableVisible, setIsTableVisible] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
   const dispatch = useDispatch();
@@ -81,6 +81,8 @@ function FilterbarPolicyHubs({
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null
   });
+
+  const showList = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.show_list : false);
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -159,7 +161,7 @@ function FilterbarPolicyHubs({
           marginLeft: '-0.5rem'
         }}>
           <Button onClick={() => {
-            setIsTableVisible(! isTableVisible);
+            dispatch(setShowList(true));
           }} theme="white">
             📄 Tabel openen
           </Button>
@@ -263,17 +265,17 @@ function FilterbarPolicyHubs({
       
       </div>
 
-      {isTableVisible && <Modal
-        isVisible={isTableVisible}
+      {showList && <Modal
+        isVisible={showList}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
           e.preventDefault();
           // Hide modal
-          setIsTableVisible(false);
+          dispatch(setShowList(false));
         }}
         hideModalHandler={() => {
           // Hide modal
-          setIsTableVisible(false);
+          dispatch(setShowList(false));
         }}
         config={{
           fullWidth: true

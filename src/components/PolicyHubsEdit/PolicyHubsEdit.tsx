@@ -414,7 +414,7 @@ const PolicyHubsEdit = ({
     const viewMode = 'adminEdit';
 
     if(! selected_policy_hubs) return <></>;
-    if(selected_policy_hubs.length > 1) return <></>;
+    // if(selected_policy_hubs.length > 1) return <></>;
 
     if(is_drawing_enabled && ! drawed_area) {
         return (
