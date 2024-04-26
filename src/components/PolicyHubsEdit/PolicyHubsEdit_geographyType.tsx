@@ -42,12 +42,11 @@ export const PolicyHubsEdit_geographyType = ({
                     {name: 'no_parking', title: 'Verbodsgebied', color: '#fd3e48'}
                 ].map(x => {
                     return <div className={`
-                        ${hubData.geography_type === x.name ? 'Button-orange' : ''}
+                        ${hubData.geography_type === x.name ? 'Button-orange' : 'text-gray-500'}
                         cursor-pointer
                         flex-1
                         
                         rounded-lg
-                        text-gray-500
                         text-center
                         h-10
                         flex

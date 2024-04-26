@@ -884,12 +884,11 @@ function FilterbarServiceAreas({
           ">
             {R.map(x => {
               return <div className={`
-                ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
+                ${activeZone.geography_type === x.name ? 'Button-orange' : 'text-gray-500'}
                 cursor-pointer
                 flex-1
                 
                 rounded-lg
-                text-gray-500
                 text-center
                 h-10
                 flex
@@ -961,11 +960,10 @@ function FilterbarServiceAreas({
             */}
             {R.map(x => {
               return <div className={`
-                ${activeZone.zone_availability === x.name ? 'Button-blue' : ''}
+                ${activeZone.zone_availability === x.name ? 'Button-blue' : 'text-gray-500'}
                 cursor-pointer
                 flex-1
                 rounded-lg
-                text-gray-500
                 text-center
                 border-gray-500
                 h-10

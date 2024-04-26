@@ -21,10 +21,10 @@ const PolicyHubsPhaseMenu = () => {
     const policyHubPhases = get_phases();
 
     return <>
-        <div className={`PhaseMenu ${isFilterbarOpen ? 'filter-open' : ''}`}>
+        <div className={`PhaseMenu text-center ${isFilterbarOpen ? 'filter-open' : ''}`}>
             <div className="
                 PhaseMenu-inner
-                px-0 mx-auto bg-white box-border w-full flex justify-center sm:px-4 sm:shadow-lg sm:m-4 sm:mb-1 sm:rounded-3xl 
+                px-0 mx-auto bg-white box-border sm:px-4 sm:shadow-lg sm:m-4 md:mx-auto sm:mb-1 sm:rounded-3xl
             ">
             {Object.keys(policyHubPhases).map((name, i) => {
                 // Get phase title

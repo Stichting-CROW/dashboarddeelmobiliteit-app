@@ -30,15 +30,7 @@ const PolicyHubsCommit = ({
 }) => {
     const dispatch = useDispatch()
 
-    const [hubData, setHubData] = useState<HubType>({
-        stop: {},
-        name: '',
-        geography_type: '',
-        zone_availability: '',
-        geography_id: '',
-        published_date: '',
-        effective_date: ''
-    });
+    const [geographyIds, setGeographyIds] = useState([]);
     const [formData, setFormData] = useState<FormDataType>({
         publish_on: moment().add(7, 'days').format('YYYY-MM-DD 04:00'),
         effective_on: moment().add(14, 'days').format('YYYY-MM-DD 04:00')
@@ -48,19 +40,19 @@ const PolicyHubsCommit = ({
 
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+        if(! selected_policy_hubs || selected_policy_hubs.length === 0) return;
 
         // Load hub data
-        loadHubData(selected_policy_hubs[0]);
+        fetchGeographyIds(selected_policy_hubs);
     }, [
         selected_policy_hubs,
         selected_policy_hubs.length
     ]);
 
     // Find hub data in array with all policy hubs
-    const loadHubData = async (hub_id) => {
-        const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
-        if(foundHub) setHubData(foundHub);
+    const fetchGeographyIds = async (zone_ids) => {
+        const foundHub = all_policy_hubs.filter(x => x.geography_id && zone_ids.indexOf(x.zone_id) > -1).map(x => x.geography_id);
+        if(foundHub) setGeographyIds(foundHub);
     }
 
     const postCommitCallback = (zone_id?: number) => {
@@ -71,12 +63,12 @@ const PolicyHubsCommit = ({
     }
 
     const commitToConcept = async () => {
-        if(! hubData) return;
+        if(! geographyIds) return;
         if(! formData.publish_on) return;
         if(! formData.effective_on) return;
 
         const result = await commit_to_concept(token, {
-            "geography_ids": [hubData.geography_id],
+            "geography_ids": geographyIds,
             "publish_on": moment(`${formData.publish_on}`).format(),
             "effective_on": moment(`${formData.effective_on}`).format()
         });
@@ -87,7 +79,7 @@ const PolicyHubsCommit = ({
             return;
         }
 
-        notify('De hub is vastgesteld en omgezet naar fase: Vastgesteld concept');
+        notify(`De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`);
 
         dispatch(setShowCommitForm(false));
 
@@ -110,11 +102,10 @@ const PolicyHubsCommit = ({
     }
 
     if(! selected_policy_hubs) return <></>;
-    if(selected_policy_hubs.length > 1) return <></>;
     return (
         <div>
             <div className="mb-8">
-                Je staat op het punt een concept vast te stellen. Stel nu de publicatie- en startdatum in.
+                Je staat op het punt <b>{selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`}</b> vast te stellen. Stel nu de publicatie- en startdatum in.
             </div>
             <div>
                 <FormLabel classes="mt-2 mb-4 font-bold">

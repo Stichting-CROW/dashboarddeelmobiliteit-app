@@ -47,13 +47,12 @@ export const PolicyHubsEdit_isVirtual = ({
                     {name: 'is_not_virtual', title: 'Fysieke hub', color: '#15aeef'}
                 ].map(x => {
                     return <div className={`
-                        ${(hubData?.stop?.is_virtual === true && x.name === 'is_virtual') ? 'Button-orange' : ''}
-                        ${(hubData?.stop?.is_virtual === false && x.name === 'is_not_virtual') ? 'Button-orange' : ''}
+                        ${(hubData?.stop?.is_virtual === true && x.name === 'is_virtual') ? 'Button-orange text-white' : 'text-gray-500'}
+                        ${(hubData?.stop?.is_virtual === false && x.name === 'is_not_virtual') ? 'Button-orange text-white' : 'text-gray-500'}
                         cursor-pointer
                         flex-1
                         
                         rounded-lg
-                        text-gray-500
                         text-center
                         h-10
                         flex

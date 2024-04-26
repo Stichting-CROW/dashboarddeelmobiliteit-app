@@ -574,11 +574,10 @@ const PolicyHubsEdit = ({
                         {name: 'closed', title: 'Gesloten'}
                     ].map(x => {
                         return <div className={`
-                            ${getZoneAvailability() === x.name ? 'Button-blue' : ''}
+                            ${getZoneAvailability() === x.name ? 'Button-blue' : 'text-gray-500'}
                             cursor-pointer
                             flex-1
                             rounded-lg
-                            text-gray-500
                             text-center
                             border-gray-500
                             h-10
