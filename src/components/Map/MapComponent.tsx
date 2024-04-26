@@ -48,6 +48,7 @@ import IsochroneTools from '../IsochroneTools/IsochroneTools';
 import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
+import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -351,9 +352,12 @@ const MapComponent = (props): JSX.Element => {
     stateLayers.displaymode
   ]);
 
-  // Switch to satelite -> view automatically
+  // Switch satelite->base map view automatically
   // let TO_local;
   useEffect(() => {
+
+    return;
+
     if(! didMapLoad) return;
     if(! stateLayers.displaymode) return;
     if(! window['ddMap'].isStyleLoaded()) return;
@@ -397,7 +401,9 @@ const MapComponent = (props): JSX.Element => {
         }, 500);
       }
       // Also, hide isochrones layer
-      window['ddMap'].U.hide('zones-isochrones')
+      if(window['ddMap'].isStyleLoaded()) {
+        window['ddMap'].U.hide('zones-isochrones')
+      }
       return;
     }
 
@@ -461,6 +467,7 @@ const MapComponent = (props): JSX.Element => {
   // Set active source
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
+    if(! didMapLoad) return;
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -498,7 +505,6 @@ const MapComponent = (props): JSX.Element => {
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
     if(map.current.getSource('vehicles')) {
-
       map.current.U.setData('vehicles', vehicles.data);
     }
     if(map.current.getSource('vehicles-clusters')) {
@@ -657,6 +663,7 @@ const MapComponent = (props): JSX.Element => {
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
+    {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <DdPolicyHubsLayer map={map.current} />}
   </>

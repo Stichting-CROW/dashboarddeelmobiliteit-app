@@ -79,10 +79,7 @@ function FilterbarPolicyHubs({
 
   const labelClassNames = 'mb-2 text-sm';
 
-  const filterGebied = useSelector((state: StateType) => {
-    return state.filter ? state.filter.gebied : null
-  });
-
+  const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
   const showList = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.show_list : false);
 
   const token = useSelector((state: StateType) => {
@@ -107,24 +104,28 @@ function FilterbarPolicyHubs({
     enableRelevantPhases();
     if(active_phase) {
       update_url({
+        gm_code: filterGebied,
         phase: active_phase
       });
     }
-  }, [active_phase])
+  }, [
+    active_phase,
+    filterGebied
+  ])
 
-    // If visible_layers changes ->
-    useEffect(() => {
-      if(! visible_layers) return;
-      update_url({
-        visible_layers: visible_layers
-      });
-    }, [
-      visible_layers,
-      visible_layers?.length
-    ])
+  // If visible_layers changes ->
+  useEffect(() => {
+    if(! visible_layers) return;
+    update_url({
+      visible_layers: visible_layers
+    });
+  }, [
+    visible_layers,
+    visible_layers?.length
+  ])
   
   const enableRelevantPhases = () => {
-    // Only continue if state changd
+    // Only continue if state changed
     if(lastActivePhase === active_phase) return;
 
     // Unset all checkboxes

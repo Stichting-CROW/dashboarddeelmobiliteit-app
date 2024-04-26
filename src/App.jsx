@@ -199,17 +199,6 @@ function App() {
     return state.authentication.user_data ? true : false;
   });
   
-  // const isAdmin = useSelector((state: StateType) => {
-  //   if(! state.authentication) return false;
-  //   if(! state.authentication.user_data) return false;
-  //   let userIsAdmin = false;
-  //   state.authentication.user_data.user.registrations.forEach(x => {
-  //     if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
-  //     if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
-  //   });
-  //   return userIsAdmin;
-  // });
-  
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
   });
@@ -315,9 +304,6 @@ function App() {
     isLoggedIn,
     metadata.zones_loaded,
     filter
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
   ]);
 
   // Reload rentals data if i.e. filter changes

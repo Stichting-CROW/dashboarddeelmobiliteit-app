@@ -38,6 +38,7 @@ import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
+import { setActivePhase } from '../../actions/policy-hubs';
 
 const DdPolicyHubsLayer = ({
   map
@@ -89,13 +90,22 @@ const DdPolicyHubsLayer = ({
   useEffect(() => {
     if(! map) return;
 
-    // Wait until map has been loaded
+    // If map was already loaded:
+    if(map.isStyleLoaded()) {
+      setTimeout(() => {
+        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
+        setMapStyle(map, mapStyles.satelite)
+      }, 250);
+    }
+
+    // If map wasn't loaded, wait on full map load:
     map.on('load', function() {
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
       setMapStyle(map, mapStyles.satelite)
     });
   }, [
-    map
+    map,
+    document.location.pathname
   ]);
 
   // onComponentUnLoad
@@ -123,6 +133,10 @@ const DdPolicyHubsLayer = ({
       const selectedIds = selected.map(x => Number(x));
       dispatch(setSelectedPolicyHubs(selectedIds));
       dispatch(setShowEditForm(true));
+    }
+    const phase = queryParams.get('phase');
+    if(selected) {
+      dispatch(setActivePhase(phase));
     }
   }, [])
 
@@ -407,6 +421,8 @@ const DdPolicyHubsLayer = ({
     return true;
   }
 
+  const didSelectMultipleHubs = () => selected_policy_hubs && selected_policy_hubs.length > 1;
+
   const didSelectConceptHub = () => {
     if(! didSelectHub()) return;
 
@@ -469,7 +485,7 @@ const DdPolicyHubsLayer = ({
 
     <ActionButtons>
       {/* Teken hub button */}
-      {(! show_edit_form && ! is_drawing_enabled && active_phase === 'concept') && 
+      {(! didSelectMultipleHubs() && ! show_edit_form && ! is_drawing_enabled && active_phase === 'concept') && 
         <Button theme="white" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
           Teken nieuwe hub
         </Button>

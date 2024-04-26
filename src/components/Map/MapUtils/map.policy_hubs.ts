@@ -31,6 +31,7 @@ const removeHubsFromMap = (map: any) => {
 
 async function renderPolygons_fill(map, geojson) {
     if(! map) return;
+    if(! map.isStyleLoaded()) return;
     
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`
@@ -100,7 +101,7 @@ const generateGeojson = (
                 "phase": x.phase,
                 "created_at": x.created_at,
                 "is_selected": selected_policy_hubs && selected_policy_hubs.indexOf(x.zone_id) > -1 ? 1 : 0,
-                "is_in_drawing_mode": hubs_in_drawing_mode.indexOf(x.zone_id) > -1 ? 1 : 0
+                "is_in_drawing_mode": hubs_in_drawing_mode && hubs_in_drawing_mode.indexOf(x.zone_id) > -1 ? 1 : 0
             },
             "geometry": x.area.geometry
         }

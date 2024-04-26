@@ -3,9 +3,9 @@ export const update_url = (params) => {
 
     let url = new URL(window.location.href)
 
-    if(params.phase) {
-        url.searchParams.set('phase', params.phase);
-    }
+    if(params.phase) url.searchParams.set('phase', params.phase);
+    if(params.gm_code) url.searchParams.set('gm_code', params.gm_code);
+
     if(params.visible_layers) {
         url.searchParams.delete('visible');
         params.visible_layers.forEach((x) => {
