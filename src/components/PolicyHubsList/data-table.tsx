@@ -240,13 +240,13 @@ export function DataTable<TData, TValue>({
           {table.getFilteredSelectedRowModel().rows.length} van de {" "}
           {table.getFilteredRowModel().rows.length} rij(en) geselecteerd
         </div>
-          <div>
-          <Paginator
+        <div>
+          {table.getPageCount() > 1 && <Paginator
               currentPage={table.getState().pagination.pageIndex + 1}
               totalPages={table.getPageCount()}
               onPageChange={(pageNumber) => table.setPageIndex(pageNumber - 1)}
               showPreviousNext
-          />
+          />}
         </div>
       </div>
     </>
