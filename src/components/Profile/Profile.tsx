@@ -16,6 +16,7 @@ import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
 import Button from '../Form/Button.jsx';
 import Section from '../Section/Section';
+import ActiveUserStats from '../ActiveUserStats/ActiveUserStats';
 
 // import './Profile.css';
 
@@ -87,6 +88,10 @@ function Profile() {
         }}>
           Uitloggen
         </Button>
+      </div>
+
+      <div className="my-4">
+        <ActiveUserStats />
       </div>
 
     </div>
