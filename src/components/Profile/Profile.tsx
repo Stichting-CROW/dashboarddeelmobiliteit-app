@@ -90,9 +90,9 @@ function Profile() {
         </Button>
       </div>
 
-      <div className="my-4">
+      {false && <div className="my-4">
         <ActiveUserStats />
-      </div>
+      </div>}
 
     </div>
   )
