@@ -78,12 +78,20 @@ const DdPolicyHubsLayer = ({
   });
 
   const show_edit_form = useSelector((state: StateType) => {
+    // console.log('state.policy_hubs', state.policy_hubs)
     return state.policy_hubs ? state.policy_hubs.show_edit_form : false;
   });
 
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   const queryParams = new URLSearchParams(window.location.search);
+
+  // On component load: reset 'selected_policy_hubs'
+  useEffect(() => {
+    dispatch(setShowEditForm(false));
+    dispatch(setSelectedPolicyHubs([]));
+    dispatch(setIsDrawingEnabled(false));
+  }, []);
 
   // On component load: Set satelite view
   const mapStyles = getMapStyles();
@@ -129,7 +137,7 @@ const DdPolicyHubsLayer = ({
       dispatch(setVisibleLayers(visible));
     }
     const selected = queryParams.getAll('selected');
-    if(selected) {
+    if(selected && selected.length > 0) {
       const selectedIds = selected.map(x => Number(x));
       dispatch(setSelectedPolicyHubs(selectedIds));
       dispatch(setShowEditForm(true));
@@ -554,6 +562,7 @@ const DdPolicyHubsLayer = ({
           dispatch(setHubsInDrawingMode([]));
           dispatch(setIsDrawingEnabled(false));
           dispatch(setShowEditForm(false));
+          dispatch(setSelectedPolicyHubs([]));
           setDrawedArea(undefined);
         }}
       />
