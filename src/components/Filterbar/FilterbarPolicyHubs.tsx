@@ -45,7 +45,6 @@ const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" st
 </div>
 
 const CheckboxWithLabel = ({id, checked, onClick, children}) => {
-  // console.log('id checked', id, checked)
   return <div className="flex justify-start cursor-pointer my-2" onClick={onClick}>
     <div className="flex flex-col justify-center">
       <Checkbox id={`${id}`} checked={checked} />
@@ -57,7 +56,6 @@ const CheckboxWithLabel = ({id, checked, onClick, children}) => {
 }
 
 const EyeWithLabel = ({id, checked, onClick, children}) => {
-  // console.log('id checked', id, checked)
   return <div className="flex justify-start cursor-pointer my-2" onClick={onClick}>
     <div className="flex flex-col justify-center">
       {checked ? <img src={eyeOpen} width="15" alt="Oog open" /> : <img src={eyeClosed} width="15" alt="Oog gesloten" />}
@@ -90,7 +88,9 @@ function FilterbarPolicyHubs({
   });
 
   // Get current state (active phase and visible layers)
-  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+  const active_phase = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.active_phase : ''
+  });
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   // Get all available hub phases
@@ -101,14 +101,18 @@ function FilterbarPolicyHubs({
 
   // If active_phase changes ->
   useEffect(() => {
-    enableRelevantPhases();
     if(active_phase) {
       update_url({
         gm_code: filterGebied,
         phase: active_phase
       });
     }
-  }, [
+    
+    // Enable layers related to the phase
+    setTimeout(() => {
+      enableRelevantPhases();
+    }, 5);
+}, [
     active_phase,
     filterGebied
   ])
@@ -116,6 +120,7 @@ function FilterbarPolicyHubs({
   // If visible_layers changes ->
   useEffect(() => {
     if(! visible_layers) return;
+
     update_url({
       visible_layers: visible_layers
     });
