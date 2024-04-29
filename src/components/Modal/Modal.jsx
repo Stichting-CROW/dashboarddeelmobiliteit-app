@@ -50,7 +50,7 @@ const Modal = ({
             mx-auto w-11/12
             max-w-full
           " style={{
-            width: config && config.fullWidth ? 'fit-content' : '800px',
+            width: config && config.fullWidth ? '96%' : '800px',
             maxWidth: '96%',
             maxHeight: '100%'
           }}>

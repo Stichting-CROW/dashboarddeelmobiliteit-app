@@ -191,8 +191,8 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border" style={{width: 'fit-content'}}>
-        <Table style={{width: 'fit-content'}}>
+      <div className="rounded-md border" style={{width: '100%'}}>
+        <Table style={{width: '100%'}}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
