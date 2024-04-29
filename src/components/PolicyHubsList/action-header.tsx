@@ -3,13 +3,17 @@ import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "@/src/types/StateType"
 
 import { readable_phase } from "../../helpers/policy-hubs/common"
-import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actions/policy-hubs"
+import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList } from "../../actions/policy-hubs"
 
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import Modal from "../Modal/Modal"
 import Button from "../Button/Button"
 
-const ActionHeader = () => {
+const ActionHeader = ({
+    policyHubs
+}, {
+    policyHubs: any
+}) => {
     const dispatch = useDispatch();
 
     const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
@@ -29,10 +33,49 @@ const ActionHeader = () => {
         dispatch(setShowEditForm(true));
     }
 
+    const commitHandler = () => {
+        if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
+            // Nothing to commit
+            return;
+        }
+        dispatch(setSelectedPolicyHubs(selected_policy_hubs));
+        dispatch(setShowList(false));
+        dispatch(setShowEditForm(false));
+        dispatch(setShowCommitForm(true));
+    }
+
+    // Function: canCommit
+    // User can only commit if in concept phase & no monitoring hubs are selected
+    const canCommit = () => {
+        // There should be a policy hubs list
+        if(! policyHubs || policyHubs.length === 0) {
+            return;
+        }
+        // At least one hub should be selected
+        if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
+            return false;
+        }
+        // Phase should be 'concept'
+        if(active_phase !== 'concept') {
+            return false;
+        }
+        // None of the selected hubs should be 'monitoring' hubs
+        let isHubOrNoParkingHub = true;
+        const allowedGeoTypes = ['stop', 'no_parking']
+        policyHubs
+            .filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1)
+            .forEach(x => {
+                if(allowedGeoTypes.indexOf(x.geography_type) <= -1) {
+                    isHubOrNoParkingHub = false;
+                }
+            });
+        return isHubOrNoParkingHub;
+    }
+
     return <>
         <div className="flex justify-between sticky left-0">
             <div className="flex justify-start">
-                {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" disabled={true}>
+                {canCommit() && <Button theme="white" onClick={commitHandler}>
                     Stel vast
                 </Button>}
                 {(selected_policy_hubs && selected_policy_hubs.length === 1) && <Button theme="white" onClick={editHandler}>

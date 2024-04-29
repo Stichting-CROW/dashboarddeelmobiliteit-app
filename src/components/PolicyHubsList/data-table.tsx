@@ -142,15 +142,14 @@ export function DataTable<TData, TValue>({
 
   // If selection changes: Update selected hubs
   useEffect(() => {
-    // Only continue if there are any rows
-    if(table.getFilteredSelectedRowModel()?.rows?.length < 1) {
-      return;
-    }
+    // Only continue if the table was inited
+    if(! didInitDataTable) return;
     
     const hubIds = table.getFilteredSelectedRowModel()?.rows.map((x: any) => x.original?.id);
     dispatch(setSelectedPolicyHubs(hubIds));
   }, [
-    table.getFilteredSelectedRowModel()
+    table.getFilteredSelectedRowModel(),
+    didInitDataTable
   ]);
 
   return (
@@ -162,12 +161,6 @@ export function DataTable<TData, TValue>({
           onChange={(event) => {
             // Filter every column
             table.getColumn('name')?.setFilterValue(event.target.value)
-
-          //   columns.forEach((x: any) => {
-          //     if(! x.accessorKey) return;
-          //     console.log('x.accessorKey', x.accessorKey, event.target.value)
-          //     table.getColumn(x.accessorKey)?.setFilterValue(event.target.value)
-          //   });
           }}
           className="max-w-sm px-4"
         />
