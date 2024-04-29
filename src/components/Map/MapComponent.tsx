@@ -519,6 +519,7 @@ const MapComponent = (props): JSX.Element => {
   useEffect(()   => {
     if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
+    if(! map.current) return;
 
     map.current.U.setData('zones-geodata', zones_geodata.data);
   }, [

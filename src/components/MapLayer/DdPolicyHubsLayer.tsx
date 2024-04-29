@@ -135,7 +135,7 @@ const DdPolicyHubsLayer = ({
       dispatch(setShowEditForm(true));
     }
     const phase = queryParams.get('phase');
-    if(selected) {
+    if(phase) {
       dispatch(setActivePhase(phase));
     }
   }, [])

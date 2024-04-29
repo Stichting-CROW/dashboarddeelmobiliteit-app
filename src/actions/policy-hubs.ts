@@ -14,7 +14,7 @@ import {
 
 export const setActivePhase = (phase) => ({
   type: SET_ACTIVE_PHASE,
-  payload: phase
+  payload: phase || 'concept'
 })
 
 export const toggleVisibleLayer = (layer) => ({
