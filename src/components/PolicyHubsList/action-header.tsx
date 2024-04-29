@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "@/src/types/StateType"
+import { notify } from '../../helpers/notify';
 
+import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { readable_phase } from "../../helpers/policy-hubs/common"
 import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList } from "../../actions/policy-hubs"
 
@@ -10,15 +12,18 @@ import Modal from "../Modal/Modal"
 import Button from "../Button/Button"
 
 const ActionHeader = ({
-    policyHubs
+    policyHubs,
+    fetchHubs
 }, {
-    policyHubs: any
+    policyHubs: any,
+    fetchHubs: Function
 }) => {
     const dispatch = useDispatch();
 
     const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
     const [doShowImportModal, setDoShowImportModal] = useState<Boolean>(false);
 
+    const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
     const selected_policy_hubs = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.selected_policy_hubs : []);
@@ -42,6 +47,46 @@ const ActionHeader = ({
         dispatch(setShowList(false));
         dispatch(setShowEditForm(false));
         dispatch(setShowCommitForm(true));
+    }
+
+    const deleteHandler = async () => {
+        notify('Verwijderen van meerdere hubs in 1x is nog niet mogelijk.');
+        return;
+        
+        if(! window.confirm('Weet je zeker dat je deze hub(s) wilt verwijderen?')) {
+            alert('Verwijderen geannuleerd');
+            return;
+        }
+
+        try {
+            const selectedGeoIds = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
+            const response = await deleteHubs(token, selectedGeoIds);
+            console.log('Delete reponse', response);
+    
+            if(response && response.detail) {
+                // Give error if something went wrong
+                notify('Er ging iets fout bij het verwijderen');
+            }
+            else {
+                notify('Hub verwijderd');
+                dispatch(setSelectedPolicyHubs([]))
+                fetchHubs();
+            }
+        } catch(err) {
+            console.error('Delete error', err);
+        }
+    }
+
+    const getGeoIdForZoneIds = (all_hubs, selected_hub_ids) => {
+        if(! all_hubs) return;
+        if(! selected_hub_ids) return;
+
+        const geo_ids =
+            all_hubs
+                .filter(x => selected_hub_ids.indexOf(x.zone_id) > -1)
+                .map(x => x.geography_id);
+
+        return geo_ids;
     }
 
     // Function: canCommit
@@ -81,7 +126,7 @@ const ActionHeader = ({
                 {(selected_policy_hubs && selected_policy_hubs.length === 1) && <Button theme="white" onClick={editHandler}>
                     Bewerk
                 </Button>}
-                {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" disabled={true}>
+                {false && active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
                     Verwijder
                 </Button>}
             </div>

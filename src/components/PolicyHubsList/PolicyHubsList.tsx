@@ -103,6 +103,7 @@ const PolicyHubsList = () => {
         <>
             <ActionHeader
                 policyHubs={policyHubs}
+                fetchHubs={fetchHubs    }
             />
             <div data-name="body" className="p-4" style={{}}>
                 <DataTable columns={columns} data={tableData} />
