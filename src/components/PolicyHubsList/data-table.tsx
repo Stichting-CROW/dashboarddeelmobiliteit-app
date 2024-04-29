@@ -80,6 +80,8 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const [didInitDataTable, setDidInitDataTable] = React.useState(false)
+
   const table = useReactTable({
     data,
     columns,
@@ -105,9 +107,14 @@ export function DataTable<TData, TValue>({
 
   // On component load: Select selected hubs
   useEffect(() => {
+    // Don't continue if no rows were found
+    const rowsFound = table.getRowModel()?.rowsById;
+    if(! rowsFound || Object.keys(rowsFound).length <= 0) return;
+
     // Don't do anything if rowSelection was already set
-    if(Object.keys(rowSelection).length >= 1) return;
-    
+    if(didInitDataTable) return;
+    setDidInitDataTable(true);
+
     const rowIdsToSelect = [];
     const allRows = table.getRowModel().rowsById;
     Object.keys(allRows).map((key) => {
@@ -129,7 +136,8 @@ export function DataTable<TData, TValue>({
     });
     setRowSelection(newRowSelectionObject);
   }, [
-    table.getRowModel()
+    table.getRowModel(),
+    didInitDataTable
   ]);
 
   // If selection changes: Update selected hubs

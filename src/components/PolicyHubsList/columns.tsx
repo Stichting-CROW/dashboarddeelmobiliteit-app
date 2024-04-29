@@ -25,7 +25,9 @@ export const columns: ColumnDef<Hub>[] = [
           table.getIsAllPageRowsSelected() as CheckedState ||
           (table.getIsSomePageRowsSelected() && "indeterminate") as CheckedState
         }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={(value) => {
+          table.toggleAllPageRowsSelected(!!value)
+        }}
         aria-label="Select all"
       />
     ),
