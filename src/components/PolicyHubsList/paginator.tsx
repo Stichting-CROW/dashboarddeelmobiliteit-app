@@ -30,7 +30,9 @@ export default function Paginator({
         {showPreviousNext && totalPages ? (
           <PaginationItem>
             <PaginationNext
-              onClick={() => onPageChange(currentPage + 1)}
+              onClick={() => {
+                onPageChange(currentPage + 1);
+              }}
               disabled={currentPage > totalPages - 1}
             />
           </PaginationItem>

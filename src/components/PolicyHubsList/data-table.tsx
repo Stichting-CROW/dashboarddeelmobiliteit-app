@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       pagination: {
         pageIndex: 0,
-        pageSize: 100
+        pageSize: 10000
       }
     },
   });
