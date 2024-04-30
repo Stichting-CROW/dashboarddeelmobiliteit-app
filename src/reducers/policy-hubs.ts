@@ -97,6 +97,12 @@ export default function policy_hubs(state = initialState, action) {
           show_list: action.payload
       };
     }
+    case 'SET_HUB_REFETCH_COUNTER': {
+      return {
+          ...state,
+          hub_refetch_counter: action.payload
+      };
+    }
     default:
       return state;
   }

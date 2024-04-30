@@ -9,7 +9,8 @@ import {
   setIsDrawingEnabled,
   setVisibleLayers,
   setShowEditForm,
-  setShowList
+  setShowList,
+  setHubRefetchCounter
 } from '../../actions/policy-hubs'
 
 import {
@@ -61,6 +62,7 @@ const DdPolicyHubsLayer = ({
   });
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+  const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
 
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
@@ -176,7 +178,8 @@ const DdPolicyHubsLayer = ({
   }, [
     filter.gebied,
     visible_layers,
-    visible_layers.length
+    visible_layers.length,
+    hub_refetch_counter
   ]);
 
   // Render hubs if 'policyHubs' or 'selected_policy_hubs' or 'hubs_in_drawing_mode' change
@@ -197,6 +200,7 @@ const DdPolicyHubsLayer = ({
     };
   }, [
     policyHubs,
+    policyHubs.length,
     selected_policy_hubs,
     hubs_in_drawing_mode
   ]);
@@ -310,7 +314,7 @@ const DdPolicyHubsLayer = ({
     // Return
     if(! map) return;
     if(! policyHubs) return;
-    
+
     setTimeout(() => {
       renderHubs(
         map,
@@ -387,7 +391,7 @@ const DdPolicyHubsLayer = ({
 
   const clickHandler = (e) => {
     if(! map) return;
-    
+
     // Don't do anything if the drawing tool is enabled
     if(is_drawing_enabled) return;
   

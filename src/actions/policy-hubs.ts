@@ -9,7 +9,8 @@ import {
   SET_SHOW_EDIT_FORM,
   SET_SHOW_LIST,
   SET_HUBS_IN_DRAWING_MODE,
-  SET_IS_DRAWING_ENABLED
+  SET_IS_DRAWING_ENABLED,
+  SET_HUB_REFETCH_COUNTER,
 } from "./actionTypes";
 
 export const setActivePhase = (phase) => ({
@@ -55,5 +56,9 @@ export const setHubsInDrawingMode = (ids) => ({
 })
 export const setIsDrawingEnabled = (value: any) => ({
   type: SET_IS_DRAWING_ENABLED,
+  payload: value
+})
+export const setHubRefetchCounter = (value: number) => ({
+  type: SET_HUB_REFETCH_COUNTER,
   payload: value
 })

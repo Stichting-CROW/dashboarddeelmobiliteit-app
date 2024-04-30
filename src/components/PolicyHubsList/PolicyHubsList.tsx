@@ -36,7 +36,6 @@ function populateTableData(policyHubs) {
             published_retire_date: hub.published_retire_date ? moment(hub.published_retire_date).format('YYYY-MM-DD HH:mm') : '',
             propose_retirement: hub.propose_retirement,
             // vervangt_zone: 0,
-
         }
     });
 }
@@ -108,7 +107,7 @@ const PolicyHubsList = () => {
         <>
             <ActionHeader
                 policyHubs={policyHubs}
-                fetchHubs={fetchHubs    }
+                fetchHubs={fetchHubs}
             />
             <div data-name="body" className="p-4" style={{}}>
                 <DataTable columns={columns} data={tableData} />

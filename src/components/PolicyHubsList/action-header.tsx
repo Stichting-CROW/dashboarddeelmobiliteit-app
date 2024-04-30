@@ -5,7 +5,7 @@ import { notify } from '../../helpers/notify';
 
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { readable_phase } from "../../helpers/policy-hubs/common"
-import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList } from "../../actions/policy-hubs"
+import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList, setHubRefetchCounter } from "../../actions/policy-hubs"
 
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import Modal from "../Modal/Modal"
@@ -25,6 +25,7 @@ const ActionHeader = ({
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+    const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
     const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
     const selected_policy_hubs = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.selected_policy_hubs : []);
 
@@ -50,9 +51,6 @@ const ActionHeader = ({
     }
 
     const deleteHandler = async () => {
-        notify('Verwijderen van meerdere hubs in 1x is nog niet mogelijk.');
-        return;
-        
         if(! window.confirm('Weet je zeker dat je deze hub(s) wilt verwijderen?')) {
             alert('Verwijderen geannuleerd');
             return;
@@ -70,6 +68,7 @@ const ActionHeader = ({
             else {
                 notify('Hub verwijderd');
                 dispatch(setSelectedPolicyHubs([]))
+                dispatch(setHubRefetchCounter(hub_refetch_counter+1))
                 fetchHubs();
             }
         } catch(err) {
@@ -126,7 +125,7 @@ const ActionHeader = ({
                 {(selected_policy_hubs && selected_policy_hubs.length === 1) && <Button theme="white" onClick={editHandler}>
                     Bewerk
                 </Button>}
-                {false && active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
+                {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
                     Verwijder
                 </Button>}
             </div>
