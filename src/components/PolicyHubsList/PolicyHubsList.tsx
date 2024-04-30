@@ -30,6 +30,11 @@ function populateTableData(policyHubs) {
             last_modified_by: hub.last_modified_by,
             modified_at: moment(hub.modified_at).format('YYYY-MM-DD HH:mm'),
             is_virtual: hub.stop?.is_virtual ? 'Virtueel' : 'Fysiek',
+            published_date: hub.published_date ? moment(hub.published_date).format('YYYY-MM-DD HH:mm') : '',
+            effective_date: hub.effective_date ? moment(hub.effective_date).format('YYYY-MM-DD HH:mm') : '',
+            retire_date: hub.retire_date ? moment(hub.retire_date).format('YYYY-MM-DD HH:mm') : '',
+            published_retire_date: hub.published_retire_date ? moment(hub.published_retire_date).format('YYYY-MM-DD HH:mm') : '',
+            propose_retirement: hub.propose_retirement,
             // vervangt_zone: 0,
 
         }

@@ -72,6 +72,24 @@ export const columns: ColumnDef<Hub>[] = [
     ),
   },
   {
+    accessorKey: "published_date",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Publicatiedatum" />
+    ),
+  },
+  {
+    accessorKey: "effective_date",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Startdatum" />
+    ),
+  },
+  {
+    accessorKey: "retire_date",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Verwijderdatum" />
+    ),
+  },
+  {
     accessorKey: "created_by",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Gemaakt door" />
@@ -94,5 +112,5 @@ export const columns: ColumnDef<Hub>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Aangepast op" />
     ),
-  },
+  }
 ]
