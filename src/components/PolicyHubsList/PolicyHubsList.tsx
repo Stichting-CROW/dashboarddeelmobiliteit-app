@@ -27,7 +27,7 @@ function populateTableData(policyHubs) {
             type: readable_geotype(hub.geography_type),
             created_by: hub.created_by,
             created_at: moment(hub.created_at).format('YYYY-MM-DD HH:mm'),
-            modified_by: hub.modified_by,
+            last_modified_by: hub.last_modified_by,
             modified_at: moment(hub.modified_at).format('YYYY-MM-DD HH:mm'),
             is_virtual: hub.stop?.is_virtual ? 'Virtueel' : 'Fysiek',
             // vervangt_zone: 0,

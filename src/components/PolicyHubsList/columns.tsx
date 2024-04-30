@@ -80,11 +80,11 @@ export const columns: ColumnDef<Hub>[] = [
   {
     accessorKey: "created_at",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Aangepast door" />
+      <DataTableColumnHeader column={column} title="Gemaakt op" />
     ),
   },
   {
-    accessorKey: "modified_by",
+    accessorKey: "last_modified_by",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Aangepast door" />
     ),
@@ -92,7 +92,7 @@ export const columns: ColumnDef<Hub>[] = [
   {
     accessorKey: "modified_at",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Aangepast door" />
+      <DataTableColumnHeader column={column} title="Aangepast op" />
     ),
   },
 ]
