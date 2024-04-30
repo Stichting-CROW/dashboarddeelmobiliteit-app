@@ -100,11 +100,16 @@ const DdPolicyHubsLayer = ({
 
     // If map was already loaded:
     if(map.isStyleLoaded()) {
+      // Set satelite map
       setTimeout(() => {
         dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-        setMapStyle(map, mapStyles.satelite)
+        setMapStyle(map, mapStyles.satelite);
       }, 250);
-    }
+      // And refetch hubs
+      setTimeout(() => {
+        fetchHubs();
+      }, 1000);
+  }
 
     // If map wasn't loaded, wait on full map load:
     map.on('load', function() {
