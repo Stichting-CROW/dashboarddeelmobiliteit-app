@@ -11,13 +11,13 @@ function ModalityRow({
     name?: any,
     value?: any
   }) {
-    return <div className="
+    return <div className={`
       bg-no-repeat
-      pl-12
       h-8
       flex
       w-full
-    " style={{
+      ${imageUrl && imageUrl.length > 0 ? `pl-12` : ''}
+    `} style={{
       backgroundImage: `url('${imageUrl}')`,
       backgroundSize: '30px',
       backgroundPosition: 'center left'
@@ -35,7 +35,10 @@ function ModalityRow({
         style={{width: "calc(100% - 48px)"}}
       />
       <div className="text-xs ml-2 h-8 flex justify-center flex-col">
-        {value ? value : ''}
+        <input type="number" min="0" value={value}
+          className="w-12 text-center py-2 border solid"
+          onChange={onChange}
+        />
       </div>
       {children}
     </div>

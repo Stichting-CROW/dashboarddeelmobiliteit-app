@@ -8,7 +8,8 @@ import {
   setSelectedPolicyHubs,
   setIsDrawingEnabled,
   setVisibleLayers,
-  setShowEditForm
+  setShowEditForm,
+  setShowList
 } from '../../actions/policy-hubs'
 
 import {
@@ -91,6 +92,7 @@ const DdPolicyHubsLayer = ({
     dispatch(setShowEditForm(false));
     dispatch(setSelectedPolicyHubs([]));
     dispatch(setIsDrawingEnabled(false));
+    dispatch(setShowList(false));
   }, []);
 
   // On component load: Set satelite view
@@ -109,12 +111,17 @@ const DdPolicyHubsLayer = ({
       setTimeout(() => {
         fetchHubs();
       }, 1000);
+      return;
   }
 
     // If map wasn't loaded, wait on full map load:
     map.on('load', function() {
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
       setMapStyle(map, mapStyles.satelite)
+
+      setTimeout(() => {
+        fetchHubs();
+      }, 1000);
     });
   }, [
     map,
@@ -282,6 +289,8 @@ const DdPolicyHubsLayer = ({
     if(! draw) return;
     if(! hubs_in_drawing_mode || ! hubs_in_drawing_mode[0]) return;
 
+    if(! policyHubs || policyHubs.length <= 0) return;
+
     const selected_hub = policyHubs.find(x => x.zone_id === hubs_in_drawing_mode[0]);
     if(! selected_hub || ! selected_hub.area) return;
 
@@ -415,6 +424,9 @@ const DdPolicyHubsLayer = ({
     if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
       return false;
     }
+    
+    if(! policyHubs || policyHubs.length <= 0) return;
+
     const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
     if(! selected_hub) return false;
 
