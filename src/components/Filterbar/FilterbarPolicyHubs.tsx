@@ -127,14 +127,16 @@ function FilterbarPolicyHubs({
   }, [
     visible_layers,
     visible_layers?.length
-  ])
-  
+  ]);
+
   const enableRelevantPhases = () => {
     // Only continue if state changed
     if(lastActivePhase === active_phase) return;
 
     // Unset all checkboxes
     Object.keys(policyHubPhases).map(key => {
+      if(! key) return;
+
       let id = `hub-${key}`;
       dispatch(unsetVisibleLayer(id));
       id = `verbodsgebied-${key}`;

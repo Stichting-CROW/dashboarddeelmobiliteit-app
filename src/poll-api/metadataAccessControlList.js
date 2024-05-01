@@ -20,7 +20,7 @@ const cPublicAanbieders = [
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
 ];
 
-const isDutchDashboardDeelmobiliteit = document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
+const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
 const cPublicGebieden = isDutchDashboardDeelmobiliteit
   ? [

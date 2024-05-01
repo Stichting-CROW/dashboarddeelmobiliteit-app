@@ -41,6 +41,9 @@ import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
+import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
+import { getGeoIdForZoneIds } from '../../helpers/policy-hubs/common';
+import { canEditHubs } from '../../helpers/authentication';
 
 const DdPolicyHubsLayer = ({
   map
@@ -53,6 +56,8 @@ const DdPolicyHubsLayer = ({
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
+
+  const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -281,6 +286,7 @@ const DdPolicyHubsLayer = ({
     const res = await fetch_hubs({
       token: token,
       municipality: filter.gebied,
+      phase: active_phase,
       visible_layers: visible_layers
     });
     setPolicyHubs(res);
@@ -509,10 +515,11 @@ const DdPolicyHubsLayer = ({
     });
   }
 
+  // setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
   return <>
     <PolicyHubsPhaseMenu />
 
-    <ActionButtons>
+    {canEditHubs(acl) && <ActionButtons>
       {/* Teken hub button */}
       {(! didSelectMultipleHubs() && ! show_edit_form && ! is_drawing_enabled && active_phase === 'concept') && 
         <Button theme="white" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
@@ -564,16 +571,30 @@ const DdPolicyHubsLayer = ({
           if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
             return;
           }
-          notify('Deze functionaliteit is in ontwikkeling');
+          try {
+            const selectedGeoIds = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
+            const response = await deleteHubs(token, selectedGeoIds);
+            console.log('Delete reponse', response);
+    
+            if(response && response.detail) {
+                // Give error if something went wrong
+                notify('Er ging iets fout bij het voorstellen tot verwijderen');
+            }
+            else {
+                notify('Het verwijdervoorstel is toegevoegd, zie de conceptfase');
+                dispatch(setHubRefetchCounter(hub_refetch_counter+1))
+            }
+          } catch(err) {
+              console.error('Delete error', err);
+          }
         }}>
           Voorstel tot verwijderen
         </Button>
       </>}
-
-    </ActionButtons>
+    </ActionButtons>}
 
     {/* Hub edit form */}
-    {(didSelectOneHub() && show_edit_form && ! show_commit_form) && <ActionModule>
+    {(canEditHubs(acl) && didSelectOneHub() && show_edit_form && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit
         fetchHubs={fetchHubs}
         all_policy_hubs={policyHubs}
@@ -590,7 +611,7 @@ const DdPolicyHubsLayer = ({
     </ActionModule>}
 
     {/* Hub 'commit to concept' form */}
-    {(didSelectHub() && show_commit_form) && <ActionModule>
+    {(canEditHubs(acl) && didSelectHub() && show_commit_form) && <ActionModule>
       <PolicyHubsCommit
         all_policy_hubs={policyHubs}
         selected_policy_hubs={selected_policy_hubs}

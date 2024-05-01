@@ -38,9 +38,7 @@ import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx'
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
-import EditUser from './components/EditUser/EditUser';
 import OrganisationList from './components/OrganisationList/OrganisationList';
-import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
@@ -49,6 +47,7 @@ import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
 import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
 
+import {setAclInRedux} from './actions/authentication.js';
 import { initUpdateParkingData } from './poll-api/pollParkingData.js';
 import {
   initUpdateVerhuringenData
@@ -189,11 +188,18 @@ function App() {
   useEffect(() => {
     (async () => {
       const theAcl = await getAcl(token);
+      if(! theAcl) return;
+
+      // dispatch(setAclInRedux(theAcl));
       setAcl(theAcl);
-      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-      setIsAdmin(theAcl.is_admin);
+      setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+      setIsAdmin(theAcl?.is_admin);
     })();
   }, [token])
+
+  const test = useSelector((state: StateType) => {
+    return state.authentication;
+  });
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;

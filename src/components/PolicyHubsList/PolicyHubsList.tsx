@@ -13,6 +13,7 @@ import Modal from "../Modal/Modal"
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actions/policy-hubs"
 import ActionHeader from './action-header';
+import { canEditHubs } from "../../helpers/authentication"
 
 // async function getData(): Promise<Payment[]> {
 function populateTableData(policyHubs) {
@@ -48,6 +49,7 @@ const PolicyHubsList = () => {
     const [doShowExportModal, setDoShowExportModal] = useState(false);
 
     const filter = useSelector((state: StateType) => state.filter || null);
+    const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
     const token = useSelector((state: StateType) => {
       if(state.authentication && state.authentication.user_data) {
@@ -98,19 +100,33 @@ const PolicyHubsList = () => {
         const res = await fetch_hubs({
             token: token,
             municipality: filter.gebied,
+            phase: active_phase,
             visible_layers: visible_layers
         });
         setPolicyHubs(res);
     };
 
+    // Filter colums if guest user
+    const filterColumnsForGuest = (columns) => {
+        const columns_to_remove = [
+            'internal_id',
+            'created_by',
+            'last_modified_by'
+        ]
+        return columns.filter(x =>
+            columns_to_remove.indexOf(x.accessorKey) <= -1
+            && x.id !== 'select'
+        );
+    }
+
     return (
         <>
-            <ActionHeader
+            {canEditHubs(acl) && <ActionHeader
                 policyHubs={policyHubs}
                 fetchHubs={fetchHubs}
-            />
+            />}
             <div data-name="body" className="p-4" style={{}}>
-                <DataTable columns={columns} data={tableData} />
+                <DataTable columns={filterColumnsForGuest(columns)} data={tableData} />
             </div>
         </>
     );

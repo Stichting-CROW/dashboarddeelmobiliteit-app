@@ -45,3 +45,15 @@ export const defaultStopProperties = {
       combined: 50
   }
 }
+
+export const getGeoIdForZoneIds = (all_hubs, selected_hub_ids) => {
+  if(! all_hubs) return;
+  if(! selected_hub_ids) return;
+
+  const geo_ids =
+      all_hubs
+          .filter(x => selected_hub_ids.indexOf(x.zone_id) > -1)
+          .map(x => x.geography_id);
+
+  return geo_ids;
+}

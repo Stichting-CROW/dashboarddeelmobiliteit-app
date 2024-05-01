@@ -502,7 +502,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Laatst gewijzigd
+                                Gewijzigd door
                             </th>
                             <td>
                                 {hubData.last_modified_by}

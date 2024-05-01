@@ -6,6 +6,7 @@ export const CLEAR_VEHICLES = 'CLEAR_VEHICLES';
 // authentication
 export const SET_USER = 'SET_USER';
 export const CLEAR_USER = 'CLEAR_USER';
+export const SET_ACL_IN_REDUX = 'SET_ACL_IN_REDUX';
 
 // policy hubs
 export const SET_ACTIVE_PHASE = 'SET_ACTIVE_PHASE'

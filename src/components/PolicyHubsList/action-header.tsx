@@ -4,7 +4,7 @@ import { StateType } from "@/src/types/StateType"
 import { notify } from '../../helpers/notify';
 
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
-import { readable_phase } from "../../helpers/policy-hubs/common"
+import { getGeoIdForZoneIds, readable_phase } from "../../helpers/policy-hubs/common"
 import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList, setHubRefetchCounter } from "../../actions/policy-hubs"
 
 import { ImportZonesModal } from "../ImportZones/ImportZones"
@@ -74,18 +74,6 @@ const ActionHeader = ({
         } catch(err) {
             console.error('Delete error', err);
         }
-    }
-
-    const getGeoIdForZoneIds = (all_hubs, selected_hub_ids) => {
-        if(! all_hubs) return;
-        if(! selected_hub_ids) return;
-
-        const geo_ids =
-            all_hubs
-                .filter(x => selected_hub_ids.indexOf(x.zone_id) > -1)
-                .map(x => x.geography_id);
-
-        return geo_ids;
     }
 
     // Function: canCommit
