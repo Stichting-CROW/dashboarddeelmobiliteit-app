@@ -460,7 +460,7 @@ const PolicyHubsEdit = ({
                 || hubData.phase === 'published'
                 || hubData.phase === 'active'
             ) && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
-                <table className="w-full">
+                <table className="w-full text-sm">
                     <tbody>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>

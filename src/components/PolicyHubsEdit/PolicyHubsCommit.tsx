@@ -31,6 +31,7 @@ const PolicyHubsCommit = ({
     const dispatch = useDispatch()
 
     const [geographyIds, setGeographyIds] = useState([]);
+    const [errors, setErrors] = useState<any>({});
     const [formData, setFormData] = useState<FormDataType>({
         publish_on: moment().add(7, 'days').format('YYYY-MM-DD 04:00'),
         effective_on: moment().add(14, 'days').format('YYYY-MM-DD 04:00')
@@ -64,8 +65,18 @@ const PolicyHubsCommit = ({
 
     const commitToConcept = async () => {
         if(! geographyIds) return;
-        if(! formData.publish_on) return;
-        if(! formData.effective_on) return;
+        if(! formData.publish_on) {
+            setErrors({
+                publish_on: true
+            });
+            return;
+        }
+        if(! formData.effective_on) {
+            setErrors({
+                effective_on: true
+            });
+            return;
+        }
 
         const result = await commit_to_concept(token, {
             "geography_ids": geographyIds,
@@ -91,6 +102,7 @@ const PolicyHubsCommit = ({
             ...formData,
             [e.target.name]: e.target.value
         });
+        setErrors({})
     }
 
     const hideCommitForm = () => {
@@ -104,6 +116,7 @@ const PolicyHubsCommit = ({
     if(! selected_policy_hubs) return <></>;
     return (
         <div>
+
             <div className="mb-8">
                 Je staat op het punt <b>{selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`}</b> vast te stellen. Stel nu de publicatie- en startdatum in.
             </div>
@@ -111,6 +124,9 @@ const PolicyHubsCommit = ({
                 <FormLabel classes="mt-2 mb-4 font-bold">
                     Publicatiedatum (standaard +7 dagen)
                 </FormLabel>
+                {errors.publish_on && <p className="text-sm text-red-600 -mt-2 mb-2 font-bold">
+                    Vul een valide publicatiedatum/-tijd in:
+                </p>}
                 <FormInput
                     type="datetime-local"
                     name="publish_on"
@@ -123,6 +139,9 @@ const PolicyHubsCommit = ({
                 <FormLabel classes="mt-2 mb-4 font-bold">
                     Startdatum (standaard +14 dagen)
                 </FormLabel>
+                {errors.effective_on && <p className="text-sm text-red-600 -mt-2 mb-2 font-bold">
+                    Vul een valide startdatum/-tijd in:
+                </p>}
                 <FormInput
                     type="datetime-local"
                     name="effective_on"
