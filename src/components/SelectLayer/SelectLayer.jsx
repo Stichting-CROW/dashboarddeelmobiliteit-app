@@ -141,9 +141,9 @@ function SelectLayer(props) {
               Terrein
             </span>
           </div>
-          <div data-type="map-style-satelite" className={`layer${layers.map_style!=='satelite' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-            setMapStyle(window.ddMap, mapStyles.satelite)
+          <div data-type="map-style-satellite" className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} onClick={() => {
+            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+            setMapStyle(window.ddMap, mapStyles.satellite)
           }}>
             <span className="layer-title">
               Sateliet

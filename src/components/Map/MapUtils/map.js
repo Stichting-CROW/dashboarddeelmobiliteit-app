@@ -13,7 +13,7 @@ export const getMapStyles = () => {
     // NOTE: mapbox:// urls are not supported anymore.
     // See https://github.com/maplibre/maplibre-gl-js/issues/1225#issuecomment-1118769488
     base: nine3030Style,
-    satelite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
+    satellite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
   }
 }
 

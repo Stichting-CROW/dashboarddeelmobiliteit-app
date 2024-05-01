@@ -46,8 +46,8 @@
 .SelectLayer .layer[data-type='map-style-default'] {
   background-image: url('../../images/layer-map-style-default.png')
 }
-.SelectLayer .layer[data-type='map-style-satelite'] {
-  background-image: url('../../images/layer-map-style-satelite.png')
+.SelectLayer .layer[data-type='map-style-satellite'] {
+  background-image: url('../../images/layer-map-style-satellite.png')
 }
 
 .SelectLayer .layer-title {

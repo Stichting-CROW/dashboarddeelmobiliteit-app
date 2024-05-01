@@ -103,17 +103,17 @@ const DdPolicyHubsLayer = ({
     dispatch(setShowList(false));
   }, []);
 
-  // On component load: Set satelite view
+  // On component load: Set satellite view
   const mapStyles = getMapStyles();
   useEffect(() => {
     if(! map) return;
 
     // If map was already loaded:
     if(map.isStyleLoaded()) {
-      // Set satelite map
+      // Set satellite map
       setTimeout(() => {
-        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-        setMapStyle(map, mapStyles.satelite);
+        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+        setMapStyle(map, mapStyles.satellite);
       }, 250);
       // And refetch hubs
       setTimeout(() => {
@@ -124,8 +124,8 @@ const DdPolicyHubsLayer = ({
 
     // If map wasn't loaded, wait on full map load:
     map.on('load', function() {
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-      setMapStyle(map, mapStyles.satelite)
+      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+      setMapStyle(map, mapStyles.satellite)
 
       setTimeout(() => {
         fetchHubs();

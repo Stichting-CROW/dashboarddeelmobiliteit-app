@@ -307,10 +307,10 @@ const MapComponent = (props): JSX.Element => {
     // Init map drawing features
     initMapDrawLogic(map.current);
 
-    // Switch to satelite view
+    // Switch to satellite view
     setTimeout(() => {
       const mapStyles = getMapStyles();
-      setMapStyle(window['ddMap'], mapStyles.satelite);
+      setMapStyle(window['ddMap'], mapStyles.satellite);
     }, 5);
 
     setDidAddAdminZones(true);
@@ -359,7 +359,7 @@ const MapComponent = (props): JSX.Element => {
     stateLayers.displaymode
   ]);
 
-  // Switch satelite->base map view automatically
+  // Switch satellite->base map view automatically
   // let TO_local;
   useEffect(() => {
 
@@ -371,7 +371,7 @@ const MapComponent = (props): JSX.Element => {
 
     const mapStyles = getMapStyles();
 
-    // Switch from satelite to base view
+    // Switch from satellite to base view
     let TO_local;
     if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
       TO_local = setTimeout(() => {
