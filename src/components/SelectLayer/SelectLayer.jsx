@@ -22,7 +22,7 @@ import {
   DISPLAYMODE_POLICY_HUBS
 } from '../../reducers/layers.js';
 
-import {getMapStyles, setMapStyle} from '../Map/MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from '../Map/MapUtils/map.js';
 
 function SelectLayer(props) {
   // const {setLayers, setActiveSource} = props;
@@ -132,10 +132,10 @@ function SelectLayer(props) {
           </span>
         </div> : null }
 
-        {(displayMode===DISPLAYMODE_ZONES_ADMIN || DISPLAYMODE_POLICY_HUBS) && <>
+        {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
           <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
-            setMapStyle(window.ddMap, mapStyles.base)
+            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
+            applyMapStyle(window.ddMap, mapStyles.base)
           }}>
             <span className="layer-title">
               Terrein
@@ -143,10 +143,10 @@ function SelectLayer(props) {
           </div>
           <div data-type="map-style-satellite" className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} onClick={() => {
             dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-            setMapStyle(window.ddMap, mapStyles.satellite)
+            applyMapStyle(window.ddMap, mapStyles.satellite)
           }}>
             <span className="layer-title">
-              Sateliet
+              Satelliet
             </span>
           </div>
         </>}

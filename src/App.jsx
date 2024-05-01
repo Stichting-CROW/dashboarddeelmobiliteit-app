@@ -298,6 +298,7 @@ function App() {
   //  or if pathName/filter is changed:
   //  reload park events data
   useEffect(() => {
+    // displayMode
     if(displayMode !== 'displaymode-park') return;
     if(isLoggedIn && metadata.zones_loaded === false) return;
 
@@ -309,7 +310,8 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    filter
+    filter,
+    // exportState?.layers.map_style,
   ]);
 
   // Reload rentals data if i.e. filter changes
@@ -326,9 +328,7 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
+    // exportState?.layers.map_style,
   ]);
 
   // Mobile menu: Filters / Layers

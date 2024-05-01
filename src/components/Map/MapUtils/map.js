@@ -19,10 +19,12 @@ export const getMapStyles = () => {
 
 // Variable to keep track of the map style that we used last
 let mapStyleHash = md5(getMapStyles().base);
-// Function setMapStyle -- It reorders all layers, so the layers stay in the order we want
-export const setMapStyle = async (map, styleUrlOrObject) => {
+// Function applyMapStyle -- It reorders all layers, so the layers stay in the order we want
+export const applyMapStyle = async (map, styleUrlOrObject) => {
   if(! map) return;
+  if(! map.isStyleLoaded()) return;
   if(! styleUrlOrObject) return;
+  console.log('Apply map style: ', styleUrlOrObject)
 
   const newMapStyleHash = md5(styleUrlOrObject);
   if(mapStyleHash === newMapStyleHash) {

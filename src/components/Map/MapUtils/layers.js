@@ -6,8 +6,16 @@ export const addLayers = (map) => {
   })
 }
 
-export const activateLayers = (map, allLayers, layersToShow) => {
+export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
   if(! layersToShow) {
+    return;
+  }
+
+  // If not loaded: try again in x seconds
+  if(! map.isStyleLoaded() && ! isRetry) {
+    setTimeout(() => {
+      activateLayers(map, allLayers, layersToShow, true);
+    }, 5);
     return;
   }
 

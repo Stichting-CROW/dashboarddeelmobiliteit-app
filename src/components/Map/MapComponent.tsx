@@ -12,7 +12,7 @@ import {StateType} from '../../types/StateType';
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, setMapStyle} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -63,6 +63,10 @@ const MapComponent = (props): JSX.Element => {
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
+  const mapStyle = useSelector((state: StateType) => {
+    return state.layers ? state.layers.map_style : null;
   });
 
   // Connect to redux store
@@ -310,7 +314,8 @@ const MapComponent = (props): JSX.Element => {
     // Switch to satellite view
     setTimeout(() => {
       const mapStyles = getMapStyles();
-      setMapStyle(window['ddMap'], mapStyles.satellite);
+      applyMapStyle(window['ddMap'], mapStyles.satellite);
+      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
     }, 5);
 
     setDidAddAdminZones(true);
@@ -332,7 +337,8 @@ const MapComponent = (props): JSX.Element => {
       // Switch to base map
       setTimeout(() => {
         const mapStyles = getMapStyles();
-        setMapStyle(window['ddMap'], mapStyles.base);
+        applyMapStyle(window['ddMap'], mapStyles.base);
+        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
       }, 5);
     } else {
       // REMOVE zone layers
@@ -362,7 +368,6 @@ const MapComponent = (props): JSX.Element => {
   // Switch satellite->base map view automatically
   // let TO_local;
   useEffect(() => {
-
     return;
 
     if(! didMapLoad) return;
@@ -375,7 +380,8 @@ const MapComponent = (props): JSX.Element => {
     let TO_local;
     if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
       TO_local = setTimeout(() => {
-        setMapStyle(window['ddMap'], mapStyles.base);
+        applyMapStyle(window['ddMap'], mapStyles.base);
+        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
       }, 100);
     }
     return () => {
@@ -475,6 +481,7 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! didMapLoad) return;
+    if(! map.current.isStyleLoaded()) return;
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -492,18 +499,20 @@ const MapComponent = (props): JSX.Element => {
     activateSources()
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.activeSources)
+    JSON.stringify(props.activeSources),
+    mapStyle
   ])
 
   // Set active layers
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    // if(! map.current.isStyleLoaded()) return;
 
+    console.log('layers', layers, props.layers)
     activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.layers)
+    JSON.stringify(props.layers),
+    mapStyle
   ])
 
   // Set vehicles sources

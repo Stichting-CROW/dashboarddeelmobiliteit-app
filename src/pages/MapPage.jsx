@@ -71,6 +71,7 @@ function Map({mode, mapContainer}) {
       default:
     }
   }
+
   // Active layers for rentals page
   else if(displayMode===DISPLAYMODE_RENTALS && viewRentals) {
     const rentalsKey = (filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');

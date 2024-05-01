@@ -35,7 +35,7 @@ import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
-import { getMapStyles, setMapStyle } from '../Map/MapUtils/map';
+import { getMapStyles, applyMapStyle } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
@@ -111,10 +111,10 @@ const DdPolicyHubsLayer = ({
     // If map was already loaded:
     if(map.isStyleLoaded()) {
       // Set satellite map
-      setTimeout(() => {
+      // setTimeout(() => {
         dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-        setMapStyle(map, mapStyles.satellite);
-      }, 250);
+        applyMapStyle(map, mapStyles.satellite);
+      // }, 250);
       // And refetch hubs
       setTimeout(() => {
         fetchHubs();
@@ -125,7 +125,7 @@ const DdPolicyHubsLayer = ({
     // If map wasn't loaded, wait on full map load:
     map.on('load', function() {
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-      setMapStyle(map, mapStyles.satellite)
+      applyMapStyle(map, mapStyles.satellite)
 
       setTimeout(() => {
         fetchHubs();
