@@ -224,6 +224,16 @@ const DdPolicyHubsLayer = ({
     hubs_in_drawing_mode
   ]);
 
+  // If phase changes: Check if drawing should be disabled
+  useEffect(() => {
+    if(active_phase !== 'concept') {
+      dispatch(setIsDrawingEnabled(false));
+      dispatch(setShowEditForm(false));
+      setDrawedArea(undefined);
+      dispatch(setSelectedPolicyHubs([]));
+    }
+  }, [active_phase]);
+  
   // Function that filters hubs based on the selected phases in the Filterbar
   const filterPolicyHubs = (hubs: any, visible_layers: any) => {
     // If there was an error or no hubs were found: Return empty array
@@ -635,8 +645,8 @@ const DdPolicyHubsLayer = ({
         selected_policy_hubs={selected_policy_hubs}
         drawed_area={drawedArea}
         cancelHandler={() => {
-          dispatch(setHubsInDrawingMode([]));
           dispatch(setIsDrawingEnabled(false));
+          dispatch(setHubsInDrawingMode([]));
           dispatch(setShowEditForm(false));
           dispatch(setSelectedPolicyHubs([]));
           setDrawedArea(undefined);
