@@ -445,6 +445,16 @@ const DdPolicyHubsLayer = ({
     return selected_hub;
   }
 
+  const getSelectedHubs = () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
+      return [];
+    }
+    
+    if(! policyHubs || policyHubs.length <= 0) return [];
+
+    return policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1);
+  }
+
   const didSelectHub = () => getSelectedHub() ? true : false;
 
   const didSelectOneHub = () => {
@@ -481,8 +491,6 @@ const DdPolicyHubsLayer = ({
   }
 
   const didSelectCommittedConceptHub = () => {
-    if(! didSelectOneHub()) return;
-
     // Get extra hub info
     if(! policyHubs || ! policyHubs[0]) return;
     const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
@@ -565,11 +573,11 @@ const DdPolicyHubsLayer = ({
       {/* Terug naar concept button */}
       {(didSelectCommittedConceptHub() && ! show_commit_form) && 
         <Button theme="red" onClick={async () => {
-          await makeConcept(token, [getSelectedHub()?.geography_id]);
-          if(! window.confirm('Wil je de vastgestelde hub terugzetten naar de conceptfase?')) {
+          await makeConcept(token, getSelectedHubs().map(x => x.geography_id));
+          if(! window.confirm('Wil je de vastgestelde hub(s) terugzetten naar de conceptfase?')) {
             return;
           }
-          notify('De hub is teruggezet naar de conceptfase');
+          notify('De hub(s) is/zijn teruggezet naar de conceptfase');
           dispatch(setSelectedPolicyHubs([]));
           dispatch(setShowEditForm(false));
           fetchHubs();
