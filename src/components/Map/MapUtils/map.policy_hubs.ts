@@ -50,6 +50,12 @@ async function renderPolygons_fill(map, geojson) {
       source = map.getSource(sourceId);
     }
     if (! layer) {
+      // Add cross image to use for retirement hubs
+      map.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
+        if(err) throw err;
+        map.addImage('pattern', image);
+      });
+
       // Add polygons (fill + 1px outline)
       map.addLayer({
         id: layerId,

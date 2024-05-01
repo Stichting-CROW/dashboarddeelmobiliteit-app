@@ -11,7 +11,7 @@ import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { postHub } from '../../helpers/policy-hubs/post-hub';
 import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
-import { readable_geotype, defaultStopProperties } from "../../helpers/policy-hubs/common"
+import { readable_geotype, defaultStopProperties, readable_phase } from "../../helpers/policy-hubs/common"
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -136,6 +136,7 @@ const PolicyHubsEdit = ({
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
         if(foundHub) {
             // Set hub data in local state
+            console.log('hubData', foundHub)
             setHubData(foundHub);
         }
     }
@@ -446,7 +447,9 @@ const PolicyHubsEdit = ({
             </div>}
 
             {/* Committed concept data */}
-            {(hubData.phase === 'committed_concept'
+            {(
+                hubData.phase === 'committed_concept'
+                || hubData.phase === 'retirement_concept'
                 || hubData.phase === 'published'
                 || hubData.phase === 'active'
             ) && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
@@ -466,6 +469,14 @@ const PolicyHubsEdit = ({
                             </th>
                             <td>
                                 {readable_geotype(hubData.geography_type)}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Fase:
+                            </th>
+                            <td valign="top">
+                                {readable_phase(hubData.phase)}
                             </td>
                         </tr>
                         {hubData.stop && <tr>
@@ -551,7 +562,7 @@ const PolicyHubsEdit = ({
                 setHubData={setHubData}
             />}
 
-            <div className={`
+            {(hubData.phase !== 'retirement_concept' && hubData.phase !== 'retirement_committed_concept') && <div className={`
                 py-2
                 ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
             `}>
@@ -592,9 +603,9 @@ const PolicyHubsEdit = ({
                     >
                         {x.title}
                     </div>
-                })}
+                    })}
             </div>
-            </div>
+            </div>}
 
             <div className={hubData.geography_type === 'stop' ? 'visible' : 'invisible'}>
             <p className="mb-2 text-sm">

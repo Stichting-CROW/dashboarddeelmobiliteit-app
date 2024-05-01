@@ -36,11 +36,15 @@ export const polygonLineStyle = {
 
 export const polygonFillStyle = {
     'fill-color': [
-      'match', ['get', 'geography_type'], // get the property
-      'stop', themes.zone.stop.primaryColor,
-      'no_parking', themes.zone.no_parking.primaryColor,
-      'monitoring', themes.zone.monitoring.primaryColor,
-      themes.zone.monitoring.primaryColor
+      'match', ['get', 'phase'], // get the phase
+        'retirement_concept', '#400001',
+        [
+          'match', ['get', 'geography_type'], // get the property
+            'stop', themes.zone.stop.primaryColor,
+            'no_parking', themes.zone.no_parking.primaryColor,
+            'monitoring', themes.zone.monitoring.primaryColor,
+            themes.zone.monitoring.primaryColor
+        ]
     ],
     'fill-outline-color': '#3bb2d0',
     'fill-opacity': [
@@ -55,6 +59,13 @@ export const polygonFillStyle = {
        0.5]
     ]
   }
+
+  // ['==', ['get', 'phase'], 'retirement_concept'], 'pattern',
+  // 'fill-pattern': [
+  //   'case',
+  //   ['==', ['get', 'phase'], 'retirement_concept'], 'pattern',
+  //   null
+  // ],
   
   const oldAdmin = [
     // Polygon outline stroke

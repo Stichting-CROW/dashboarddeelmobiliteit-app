@@ -44,6 +44,7 @@ import { setActivePhase } from '../../actions/policy-hubs';
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { getGeoIdForZoneIds } from '../../helpers/policy-hubs/common';
 import { canEditHubs } from '../../helpers/authentication';
+import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 
 const DdPolicyHubsLayer = ({
   map
@@ -573,8 +574,8 @@ const DdPolicyHubsLayer = ({
           }
           try {
             const selectedGeoIds = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
-            const response = await deleteHubs(token, selectedGeoIds);
-            console.log('Delete reponse', response);
+            const response = await proposeRetirement(token, selectedGeoIds);
+            console.log('Propose retirement reponse', response);
     
             if(response && response.detail) {
                 // Give error if something went wrong
