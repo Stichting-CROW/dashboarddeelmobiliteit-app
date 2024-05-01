@@ -228,6 +228,13 @@ const MapComponent = (props): JSX.Element => {
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
+
+        // Add cross image to use for retirement hubs
+        map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
+          if(err) throw err;
+          map.current.addImage('pattern', image);
+        });
+
       });
 
       // Disable rotating

@@ -585,6 +585,7 @@ const DdPolicyHubsLayer = ({
             }
             else {
                 notify('Het verwijdervoorstel is toegevoegd, zie de conceptfase');
+                dispatch(setShowEditForm(false));
                 dispatch(setHubRefetchCounter(hub_refetch_counter+1))
             }
           } catch(err) {
