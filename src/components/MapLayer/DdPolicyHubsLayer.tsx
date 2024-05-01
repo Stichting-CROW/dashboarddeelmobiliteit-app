@@ -413,7 +413,7 @@ const DdPolicyHubsLayer = ({
     const props = e.features[0].properties;
 
     // Check if user holds ctrl (or Command on MacOS)
-    const userHoldsCtrl = (e.originalEvent !== undefined ? (e.originalEvent.metaKey || e.originalEvent.ctrlKey) : false);
+    const userHoldsCtrl = (e.originalEvent !== undefined ? (e.originalEvent.metaKey || e.originalEvent.ctrlKey || e.originalEvent.shiftKey) : false);
 
     // Define new selected hub ids
     const newHubIds = userHoldsCtrl
@@ -466,13 +466,18 @@ const DdPolicyHubsLayer = ({
     // Get extra hub info
     if(! policyHubs || policyHubs.length <= 0) return;
 
-    // Get hub info
-    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
-    if(! selected_hub) return false;
-    
-    // Return if hub is a concept hub
-    return selected_hub.phase === 'concept'
-      || selected_hub.phase === 'retirement_concept'
+    // Hub phases we want to keep
+    const wantedHubPhases = [
+      'concept',
+      'retirement_concept'
+    ];
+
+    // Every selected hub should be a concept hub
+    const unwantedHubs = policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1).filter((x) => {
+      return wantedHubPhases.indexOf(x.phase) <= -1;
+    })
+
+    return unwantedHubs?.length === 0;
   }
 
   const didSelectCommittedConceptHub = () => {
@@ -511,6 +516,23 @@ const DdPolicyHubsLayer = ({
     return selected_hub.phase === 'active';
   }
 
+  const didSelectAnyMonitoringHubs = () => {
+    if(! didSelectHub()) return;
+    if(! policyHubs || policyHubs.length <= 0) return;
+
+    // Hub geotypes we want to keep
+    const wantedGeoTypes = [
+      'monitoring'
+    ];
+
+    // At least one hub should be a monitoring hub
+    const monitoringHubs = policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1).filter((x) => {
+      return wantedGeoTypes.indexOf(x.geography_type) > -1;
+    })
+
+    return monitoringHubs?.length > 0;
+  }
+
   const commitToConcept = (zone_id) => {
     dispatch({
       type: 'SET_SHOW_COMMIT_FORM',
@@ -532,7 +554,7 @@ const DdPolicyHubsLayer = ({
 
       {/* Vaststellen button */}
       {(didSelectConceptHub()
-        && getSelectedHub()?.geography_type !== 'monitoring'
+        && ! didSelectAnyMonitoringHubs()
         && ! show_commit_form
       ) && 
         <Button theme="white" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
