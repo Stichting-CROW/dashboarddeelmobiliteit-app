@@ -38,6 +38,8 @@ export const polygonFillStyle = {
     'fill-color': [
       'match', ['get', 'phase'], // get the phase
         'retirement_concept', '#400001',
+        'committed_retirement_concept', '#400001',
+        'published_retirement', '#400001',
         [
           'match', ['get', 'geography_type'], // get the property
             'stop', themes.zone.stop.primaryColor,

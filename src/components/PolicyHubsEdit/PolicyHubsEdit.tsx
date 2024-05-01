@@ -436,6 +436,11 @@ const PolicyHubsEdit = ({
         )
     }
 
+    const is_retirement_hub = hubData.phase === 'retirement_concept'
+        || hubData.phase === 'retirement_committed_concept'
+        || hubData.phase === 'committed_retirement_concept'
+        || hubData.phase === 'published_retirement';
+
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
@@ -450,6 +455,8 @@ const PolicyHubsEdit = ({
             {(
                 hubData.phase === 'committed_concept'
                 || hubData.phase === 'retirement_concept'
+                || hubData.phase === 'committed_retirement_concept'
+                || hubData.phase === 'published_retirement'
                 || hubData.phase === 'published'
                 || hubData.phase === 'active'
             ) && <div className="my-4 rounded-lg bg-white border-solid border border-gray-400 p-4">
@@ -489,7 +496,7 @@ const PolicyHubsEdit = ({
                         </tr>}
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Publicatie op:
+                                Publicatie:
                             </th>
                             <td>
                                 {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
@@ -497,15 +504,31 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Actief op:
+                                Actief:
                             </th>
                             <td>
                                 {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>
+                        {hubData.published_retire_date && <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Voorstel verwijderen:
+                            </th>
+                            <td>
+                                {moment(hubData.published_retire_date).format('DD-MM-YYYY HH:mm')}
+                            </td>
+                        </tr>}
+                        {hubData.retire_date && <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                Verwijdering:
+                            </th>
+                            <td>
+                                {moment(hubData.retire_date).format('DD-MM-YYYY HH:mm')}
+                            </td>
+                        </tr>}
                         <tr title={`Gemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Gemaakt door
+                                Gemaakt door:
                             </th>
                             <td>
                                 {hubData.created_by}
@@ -513,7 +536,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Gewijzigd door
+                                Gewijzigd door:
                             </th>
                             <td>
                                 {hubData.last_modified_by}
@@ -562,112 +585,117 @@ const PolicyHubsEdit = ({
                 setHubData={setHubData}
             />}
 
-            {(hubData.phase !== 'retirement_concept' && hubData.phase !== 'retirement_committed_concept') && <div className={`
-                py-2
-                ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
-            `}>
-                <div className="
-                    flex
-                    rounded-lg bg-white
-                    border-solid
-                    border
-                    border-gray-400
-                    text-sm
-                ">
-                    {/*
-                        Availability zit verstopt in status.
-                        is_enabled = true is open, is_enabled = false is gesloten
-                        control_automatic=true
-                    */}
-                    {[
-                        {name: 'auto', title: 'Automatisch'},
-                        {name: 'open', title: 'Open'},
-                        {name: 'closed', title: 'Gesloten'}
-                    ].map(x => {
-                        return <div className={`
-                            ${getZoneAvailability() === x.name ? 'Button-blue' : 'text-gray-500'}
-                            cursor-pointer
-                            flex-1
-                            rounded-lg
-                            text-center
-                            border-gray-500
-                            h-10
-                            flex
-                            flex-col
-                            justify-center
-                        `}
-                        key={x.name}
-                        onClick={() => {
-                            updateZoneAvailability(x.name)
-                        }}
-                    >
-                        {x.title}
+            {! is_retirement_hub && <>
+
+                <div className={`
+                    py-2
+                    ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
+                `}>
+                    <div className="
+                        flex
+                        rounded-lg bg-white
+                        border-solid
+                        border
+                        border-gray-400
+                        text-sm
+                    ">
+                        {/*
+                            Availability zit verstopt in status.
+                            is_enabled = true is open, is_enabled = false is gesloten
+                            control_automatic=true
+                        */}
+                        {[
+                            {name: 'auto', title: 'Automatisch'},
+                            {name: 'open', title: 'Open'},
+                            {name: 'closed', title: 'Gesloten'}
+                        ].map(x => {
+                            return <div className={`
+                                ${getZoneAvailability() === x.name ? 'Button-blue' : 'text-gray-500'}
+                                cursor-pointer
+                                flex-1
+                                rounded-lg
+                                text-center
+                                border-gray-500
+                                h-10
+                                flex
+                                flex-col
+                                justify-center
+                            `}
+                            key={x.name}
+                            onClick={() => {
+                                updateZoneAvailability(x.name)
+                            }}
+                        >
+                            {x.title}
+                        </div>
+                        })}
                     </div>
-                    })}
-            </div>
-            </div>}
+                </div>
 
-            <div className={hubData.geography_type === 'stop' ? 'visible' : 'invisible'}>
-            <p className="mb-2 text-sm">
-                Limiet <a onClick={() => {
-                    updateCapacityType('combined');
-                }} className={`
-                    ${getCapacityType() === 'combined' ? 'underline' : ''}
-                    cursor-pointer
-                `}>
-                totaal
-                </a> | <a onClick={() => {
-                    updateCapacityType('modality');
-                }} className={`
-                    ${getCapacityType() === 'modality' ? 'underline' : ''}
-                    cursor-pointer
-                `}>
-                per modaliteit
-                </a>
-            </p>
+                <div className={hubData.geography_type === 'stop' ? 'visible' : 'invisible'}>
+                    <p className="mb-2 text-sm">
+                        Limiet <a onClick={() => {
+                            updateCapacityType('combined');
+                        }} className={`
+                            ${getCapacityType() === 'combined' ? 'underline' : ''}
+                            cursor-pointer
+                        `}>
+                        totaal
+                        </a> | <a onClick={() => {
+                            updateCapacityType('modality');
+                        }} className={`
+                            ${getCapacityType() === 'modality' ? 'underline' : ''}
+                            cursor-pointer
+                        `}>
+                        per modaliteit
+                        </a>
+                    </p>
 
-            <div className="
-                rounded-lg
-                bg-white
-                border-solid
-                border
-                border-gray-400
-                p-4
-            ">
-                {getCapacityType() === 'combined' && <ModalityRow
-                    imageUrl=""
-                    name="vehicles-limit.combined"
-                    value={hubData?.stop?.capacity?.combined}
-                    onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
-                />}
-                {getCapacityType() === 'modality' && <>
-                    <ModalityRow
-                        imageUrl="https://i.imgur.com/IF05O8u.png"
-                        name="vehicles-limit.bicycle"
-                        value={hubData?.stop?.capacity?.bicycle}
-                        onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
-                    />
-                    <ModalityRow
-                        imageUrl="https://i.imgur.com/FdVBJaZ.png"
-                        name="vehicles-limit.cargo_bicycle"
-                        value={hubData?.stop?.capacity?.cargo_bicycle}
-                        onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
-                    />
-                    <ModalityRow
-                        imageUrl="https://i.imgur.com/h264sb2.png"
-                        name="vehicles-limit.moped"
-                        value={hubData?.stop?.capacity?.moped}
-                        onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
-                    />
-                    <ModalityRow
-                        imageUrl="https://i.imgur.com/7Y2PYpv.png"
-                        name="vehicles-limit.car"
-                        value={hubData?.stop?.capacity?.car}
-                        onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
-                    />
-                </>}
-            </div>
-        </div>
+                    <div className="
+                        rounded-lg
+                        bg-white
+                        border-solid
+                        border
+                        border-gray-400
+                        p-4
+                    ">
+                        {getCapacityType() === 'combined' && <ModalityRow
+                            imageUrl=""
+                            name="vehicles-limit.combined"
+                            value={hubData?.stop?.capacity?.combined}
+                            onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
+                        />}
+                        {getCapacityType() === 'modality' && <>
+                            <ModalityRow
+                                imageUrl="https://i.imgur.com/IF05O8u.png"
+                                name="vehicles-limit.bicycle"
+                                value={hubData?.stop?.capacity?.bicycle}
+                                onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
+                            />
+                            <ModalityRow
+                                imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                                name="vehicles-limit.cargo_bicycle"
+                                value={hubData?.stop?.capacity?.cargo_bicycle}
+                                onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
+                            />
+                            <ModalityRow
+                                imageUrl="https://i.imgur.com/h264sb2.png"
+                                name="vehicles-limit.moped"
+                                value={hubData?.stop?.capacity?.moped}
+                                onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
+                            />
+                            <ModalityRow
+                                imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                                name="vehicles-limit.car"
+                                value={hubData?.stop?.capacity?.car}
+                                onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
+                            />
+                        </>}
+                    </div>
+                </div>
+
+            </>}
+            
 
         {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
             <Text
@@ -703,13 +731,13 @@ const PolicyHubsEdit = ({
                 </Button>}
             </>}
 
-            <Button
+            {! is_retirement_hub && <Button
                 theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
                 style={{marginRight: 0}}
                 onClick={saveZone}
             >
                 Opslaan
-            </Button>
+            </Button>}
 
         </div>
     </div>

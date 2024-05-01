@@ -241,14 +241,15 @@ const DdPolicyHubsLayer = ({
       }
       else if(x === 'hub-committed_concept') {
         hubsToKeep.push({geo_type: 'stop', phase: 'committed_concept'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_committed_concept'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
       }
       else if(x === 'hub-published') {
         hubsToKeep.push({geo_type: 'stop', phase: 'published'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_published'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'published_retirement'});
       }
       else if(x === 'hub-active') {
         hubsToKeep.push({geo_type: 'stop', phase: 'active'});
+        hubsToKeep.push({geo_type: 'stop', phase: 'active_retirement'});
       }
       // No parking
       else if(x === 'verbodsgebied-concept') {
@@ -470,7 +471,8 @@ const DdPolicyHubsLayer = ({
     if(! selected_hub) return false;
     
     // Return if hub is a concept hub
-    return selected_hub.phase === 'concept';
+    return selected_hub.phase === 'concept'
+      || selected_hub.phase === 'retirement_concept'
   }
 
   const didSelectCommittedConceptHub = () => {
