@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMapStyles, applyMapStyle } from '../Map/MapUtils/map';
 
-const DdParkEventsLayer = ({
+const DdRentalsLayer = ({
   map
 }): JSX.Element => {
   const dispatch = useDispatch()
@@ -31,4 +31,4 @@ const DdParkEventsLayer = ({
   return <></>
 }
 
-export default DdParkEventsLayer;
+export default DdRentalsLayer;

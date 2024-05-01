@@ -24,7 +24,6 @@ export const applyMapStyle = async (map, styleUrlOrObject) => {
   if(! map) return;
   if(! map.isStyleLoaded()) return;
   if(! styleUrlOrObject) return;
-  console.log('Apply map style: ', styleUrlOrObject)
 
   const newMapStyleHash = md5(styleUrlOrObject);
   if(mapStyleHash === newMapStyleHash) {

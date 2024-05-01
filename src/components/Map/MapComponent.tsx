@@ -49,6 +49,7 @@ import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
+import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -507,7 +508,6 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
-    console.log('layers', layers, props.layers)
     activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
@@ -681,6 +681,7 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
+    {stateLayers.displaymode === 'displaymode-rentals' && <DdRentalsLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <DdPolicyHubsLayer map={map.current} />}
   </>

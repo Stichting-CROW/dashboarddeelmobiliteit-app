@@ -111,10 +111,8 @@ const DdPolicyHubsLayer = ({
     // If map was already loaded:
     if(map.isStyleLoaded()) {
       // Set satellite map
-      // setTimeout(() => {
-        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-        applyMapStyle(map, mapStyles.satellite);
-      // }, 250);
+      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+      applyMapStyle(map, mapStyles.satellite);
       // And refetch hubs
       setTimeout(() => {
         fetchHubs();
@@ -185,7 +183,7 @@ const DdPolicyHubsLayer = ({
     filter.gebied,
     visible_layers,
     visible_layers.length,
-    hub_refetch_counter
+    hub_refetch_counter,
   ]);
 
   // Render hubs if 'policyHubs' or 'selected_policy_hubs' or 'hubs_in_drawing_mode' change
@@ -208,7 +206,7 @@ const DdPolicyHubsLayer = ({
     policyHubs,
     policyHubs.length,
     selected_policy_hubs,
-    hubs_in_drawing_mode
+    hubs_in_drawing_mode,
   ]);
 
   useEffect(() => {
