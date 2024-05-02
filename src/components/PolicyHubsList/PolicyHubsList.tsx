@@ -108,6 +108,10 @@ const PolicyHubsList = () => {
 
     // Filter colums if guest user
     const filterColumnsForGuest = (columns) => {
+        if(canEditHubs(acl)) {
+            return columns;
+        }
+
         const columns_to_remove = [
             'internal_id',
             'created_by',
