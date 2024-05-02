@@ -42,7 +42,7 @@ import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
-import { getGeoIdForZoneIds } from '../../helpers/policy-hubs/common';
+import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
 import { canEditHubs } from '../../helpers/authentication';
 import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 
@@ -194,7 +194,7 @@ const DdPolicyHubsLayer = ({
 
     renderHubs(
       map,
-      filterPolicyHubs(policyHubs, visible_layers),
+      sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
@@ -232,6 +232,11 @@ const DdPolicyHubsLayer = ({
     }
   }, [active_phase]);
   
+  const sortedPolicyHubs = (hubs: any) => {
+    // Layer/sort zones per geography_type (monitoring/stop/no_parking)
+    return sortZonesInPreferedOrder(hubs)
+  }
+
   // Function that filters hubs based on the selected phases in the Filterbar
   const filterPolicyHubs = (hubs: any, visible_layers: any) => {
     // If there was an error or no hubs were found: Return empty array
@@ -286,7 +291,7 @@ const DdPolicyHubsLayer = ({
         keep.geo_type === x.geography_type && keep.phase === x.phase
       );
       return wannaSee;
-    })
+    });
 
     return filteredHubs;
   }
@@ -334,7 +339,7 @@ const DdPolicyHubsLayer = ({
     setTimeout(() => {
       renderHubs(
         map,
-        filterPolicyHubs(policyHubs, visible_layers),
+        sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
         selected_policy_hubs,
         hubs_in_drawing_mode
       );

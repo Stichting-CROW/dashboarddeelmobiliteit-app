@@ -58,3 +58,31 @@ export const getGeoIdForZoneIds = (all_hubs, selected_hub_ids) => {
 
   return geo_ids;
 }
+
+const groupZonesPerGeographyType = (zones) => {
+  const groupedZones = [
+    // First, get all 'monitoring' zones
+    zones.filter(x => x.geography_type === 'monitoring'),
+    // Next, get all 'no_parking' zones
+    zones.filter(x => x.geography_type === 'no_parking'),
+    // Next, get all 'stop' zones
+    zones.filter(x => x.geography_type === 'stop'),
+  ]
+  return groupedZones;
+}
+
+export const sortZonesInPreferedOrder = (zones) => {
+  const groupedZones = groupZonesPerGeographyType(zones);
+  let groupedZonesToReturn = [];
+  groupedZones[0].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  groupedZones[1].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  groupedZones[2].forEach(x => {
+    groupedZonesToReturn.push(x);
+  })
+  return groupedZonesToReturn;
+}
+
