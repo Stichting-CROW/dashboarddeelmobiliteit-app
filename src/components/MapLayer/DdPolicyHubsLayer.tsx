@@ -421,6 +421,8 @@ const DdPolicyHubsLayer = ({
       return;
     }
 
+    console.log('e', e);
+
     // Get coordinates and props
     const coordinates = e.lngLat;
     const props = e.features[0].properties;

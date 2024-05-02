@@ -3,5 +3,10 @@ export const isLoggedIn = (state) => {
 };
 
 export const canEditHubs = (acl) => {
-  return acl && acl.privileges?.indexOf('ORGANISATION_ADMIN') > -1
+  const allowedRoles = [
+    'MICROHUB_EDIT',
+    'ORGANISATION_ADMIN'
+  ];
+  return acl && acl.privileges?.indexOf('ORGANISATION_ADMIN') > -1;
+  return true;
 }
