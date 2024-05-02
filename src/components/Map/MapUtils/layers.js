@@ -3,7 +3,7 @@ import {layers} from '../layers';
 export const addLayers = (map) => {
   Object.keys(layers).forEach((key, idx) => {
     map.U.addLayer(layers[key]);
-  })
+  });
 }
 
 export const activateLayers = (map, allLayers, layersToShow, isRetry) => {

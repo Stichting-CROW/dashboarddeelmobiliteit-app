@@ -29,7 +29,6 @@ import {
 import {StateType} from '../../types/StateType.js';
 
 import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
-import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept'
 import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
 import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
@@ -41,7 +40,6 @@ import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
-import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
 import { canEditHubs } from '../../helpers/authentication';
 import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
@@ -104,35 +102,44 @@ const DdPolicyHubsLayer = ({
   }, []);
 
   // On component load: Set satellite view
-  const mapStyles = getMapStyles();
+  // const mapStyles = getMapStyles();
+  // useEffect(() => {
+  //   if(! map) return;
+
+  //   // If map was already loaded:
+  //   if(map.isStyleLoaded()) {
+  //     // Set satellite map
+  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+  //     applyMapStyle(map, mapStyles.satellite);
+  //     // And refetch hubs
+  //     setTimeout(() => {
+  //       fetchHubs();
+  //     }, 1000);
+  //     return;
+  // }
+
+  //   // If map wasn't loaded, wait on full map load:
+  //   map.on('load', function() {
+  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+  //     applyMapStyle(map, mapStyles.satellite)
+
+  //     setTimeout(() => {
+  //       fetchHubs();
+  //     }, 1000);
+  //   });
+  // }, [
+  //   map,
+  //   document.location.pathname
+  // ]);
+
   useEffect(() => {
     if(! map) return;
 
-    // If map was already loaded:
-    if(map.isStyleLoaded()) {
-      // Set satellite map
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-      applyMapStyle(map, mapStyles.satellite);
-      // And refetch hubs
-      setTimeout(() => {
-        fetchHubs();
-      }, 1000);
-      return;
-  }
-
-    // If map wasn't loaded, wait on full map load:
-    map.on('load', function() {
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-      applyMapStyle(map, mapStyles.satellite)
-
-      setTimeout(() => {
-        fetchHubs();
-      }, 1000);
-    });
+    console.log(map)
+    map.U.show('luchtfoto-pdok');
   }, [
-    map,
-    document.location.pathname
-  ]);
+    map
+  ])
 
   // onComponentUnLoad
   useEffect(() => {
