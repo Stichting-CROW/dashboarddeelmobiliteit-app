@@ -23,7 +23,15 @@ export const fetch_hubs = async ({
   let url = `https://mds.test.dashboarddeelmobiliteit.nl/${token ? 'admin' : 'public'}/zones`+
               `?municipality=${municipality}`;
   // Add phases to URL
-  url += `&phases=${phase}`
+  visible_layers.forEach(layer => {
+    // Don't have duplicates
+    if(url.indexOf(`&phases=${layer.split('-')[1]}`) > -1) return;
+    const phase_name = layer.split('-')[1];
+    if(phase_name) {
+      // Add phase to URL
+      url += `&phases=${phase_name}`;
+    }
+});
 
   // If concept phase is visible: Show retirement concepts as well (hubs based on a previously published hub)
   url += visible_layers.indexOf('concept') ? '&phases=retirement_concept' : '';

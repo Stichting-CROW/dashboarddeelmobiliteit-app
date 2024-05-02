@@ -54,7 +54,7 @@ const PolicyHubsEdit = ({
         stop: defaultStopProperties,
         name: '',
         geography_type: 'stop',
-        zone_availability: '',
+        zone_availability: 'auto',
         municipality: gm_code,
         description: 'Hub',
         internal_id: '',
@@ -277,6 +277,7 @@ const PolicyHubsEdit = ({
         if(name === 'auto') {
             setHubData({
                 ...hubData,
+                zone_availability: name,
                 stop: {
                     ...hubData.stop,
                     status: {
@@ -290,6 +291,7 @@ const PolicyHubsEdit = ({
         } else if(name === 'open') {
             setHubData({
                 ...hubData,
+                zone_availability: name,
                 stop: {
                     ...hubData.stop,
                     status: {
@@ -304,6 +306,7 @@ const PolicyHubsEdit = ({
         } else if(name === 'closed') {
             setHubData({
                 ...hubData,
+                zone_availability: name,
                 stop: {
                     ...hubData.stop,
                     status: {

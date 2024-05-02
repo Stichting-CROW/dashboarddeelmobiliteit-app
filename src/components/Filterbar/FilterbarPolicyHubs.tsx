@@ -313,6 +313,12 @@ function FilterbarPolicyHubs({
         <SharePermalink />
       </Modal>}
 
+      <div className="absolute left-5 bottom-5 text-xs text-purple-800">
+        2024-05-02:<br />
+        - Nieuwe satelietfoto<br />
+        - Filterbalk oogjes werken
+      </div>
+
     </>
   )
 }
