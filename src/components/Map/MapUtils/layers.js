@@ -30,7 +30,7 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
   if(! map.isStyleLoaded() && ! isRetry) {
     setTimeout(() => {
       activateLayers(map, allLayers, layersToShow, true);
-    }, 100);
+    }, 500);
 
     return;
   }
