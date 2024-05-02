@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
+import { setBackgroundLayer } from '../Map/MapUtils/map';
 
 import {StateType} from '../../types/StateType';
 
@@ -23,9 +24,9 @@ import {
 } from '../../reducers/layers.js';
 
 import {getMapStyles, applyMapStyle} from '../Map/MapUtils/map.js';
+import { setMapStyle } from '../../actions/layers';
 
-function SelectLayer(props) {
-  // const {setLayers, setActiveSource} = props;
+function SelectLayer() {
   const dispatch = useDispatch()
   
   const showZoneOnOff = useSelector((state: StateType) => {
@@ -133,20 +134,18 @@ function SelectLayer(props) {
         </div> : null }
 
         {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
-          <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-            applyMapStyle(window.ddMap, mapStyles.base)
+          <div data-type="map-style-default" className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} onClick={() => {
+            setBackgroundLayer(window['ddMap'], 'base', setMapStyle);
           }}>
             <span className="layer-title">
               Terrein
             </span>
           </div>
-          <div data-type="map-style-satellite" className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-            applyMapStyle(window.ddMap, mapStyles.satellite)
+          <div data-type="map-style-satellite" className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} onClick={() => {
+            setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', setMapStyle);
           }}>
             <span className="layer-title">
-              Satelliet
+              Luchtfoto
             </span>
           </div>
         </>}

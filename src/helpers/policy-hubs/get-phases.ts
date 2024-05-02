@@ -6,7 +6,7 @@ export const get_phases = () => ({
         title: 'Vastgesteld concept'
     },
     'published': {
-        title: 'Definitief gepland'
+        title: 'Definitief gepubliceerd'
     },
     'active': {
         title: 'Definitief actief'

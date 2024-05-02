@@ -31,7 +31,7 @@ const removeHubsFromMap = (map: any) => {
 
 async function renderPolygons_fill(map, geojson) {
     if(! map) return;
-    if(! map.isStyleLoaded()) return;
+    // if(! map.isStyleLoaded()) return;
     
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`

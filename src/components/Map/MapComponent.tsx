@@ -301,58 +301,58 @@ const MapComponent = (props): JSX.Element => {
   ])
 
   // Init drawing functionality (for drawing zones)
-  useEffect(() => {
-    if(! didMapLoad) return;
-    if(! map.current) return;
-    if(! stateLayers) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
+  //   if(! map.current) return;
+  //   if(! stateLayers) return;
 
-    // Only init map draw features if on zones admin page
-    if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
+  //   // Only init map draw features if on zones admin page
+  //   if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
 
-    // Init map drawing features
-    initMapDrawLogic(map.current);
+  //   // Init map drawing features
+  //   initMapDrawLogic(map.current);
 
-    // Switch to satellite view
-    setTimeout(() => {
-      const mapStyles = getMapStyles();
-      applyMapStyle(window['ddMap'], mapStyles.satellite);
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-    }, 5);
+  //   // Switch to satellite view
+  //   setTimeout(() => {
+  //     const mapStyles = getMapStyles();
+  //     applyMapStyle(window['ddMap'], mapStyles.satellite);
+  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+  //   }, 5);
 
-    setDidAddAdminZones(true);
-  }, [
-    didMapLoad,
-    stateLayers.displaymode
-  ]);
+  //   setDidAddAdminZones(true);
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode
+  // ]);
 
   // Init public zones map (if needed)
-  useEffect(() => {
-    if(! didMapLoad) return;
-    // If we did add public zones already: return
-    // if( didAddPublicZones) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
+  //   // If we did add public zones already: return
+  //   // if( didAddPublicZones) return;
 
-    // Only init map draw features if on zones admin page
-    if(stateLayers.displaymode === 'displaymode-zones-public') {
-      // Add zone layers
-      initZonesMap(map.current, token, filterGebied)
-      // Switch to base map
-      setTimeout(() => {
-        const mapStyles = getMapStyles();
-        applyMapStyle(window['ddMap'], mapStyles.base);
-        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-      }, 5);
-    } else {
-      // REMOVE zone layers
-      // Not needed, because the layer does hide itself automatically on page change
-    }
+  //   // Only init map draw features if on zones admin page
+  //   if(stateLayers.displaymode === 'displaymode-zones-public') {
+  //     // Add zone layers
+  //     initZonesMap(map.current, token, filterGebied)
+  //     // Switch to base map
+  //     setTimeout(() => {
+  //       const mapStyles = getMapStyles();
+  //       applyMapStyle(window['ddMap'], mapStyles.base);
+  //       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
+  //     }, 5);
+  //   } else {
+  //     // REMOVE zone layers
+  //     // Not needed, because the layer does hide itself automatically on page change
+  //   }
 
-    setDidAddPublicZones(true);
-  }, [
-    didMapLoad,
-    didAddPublicZones,
-    filterGebied,
-    stateLayers.displaymode
-  ]);
+  //   setDidAddPublicZones(true);
+  // }, [
+  //   didMapLoad,
+  //   didAddPublicZones,
+  //   filterGebied,
+  //   stateLayers.displaymode
+  // ]);
 
   // Auto reload zones on displaymode update
   // only on the zones-page (public or admin)
@@ -363,34 +363,6 @@ const MapComponent = (props): JSX.Element => {
     // Get zones
     getZonesFunc();
   }, [
-    stateLayers.displaymode
-  ]);
-
-  // Switch satellite->base map view automatically
-  // let TO_local;
-  useEffect(() => {
-    return;
-
-    if(! didMapLoad) return;
-    if(! stateLayers.displaymode) return;
-    if(! window['ddMap'].isStyleLoaded()) return;
-
-    const mapStyles = getMapStyles();
-
-    // Switch from satellite to base view
-    let TO_local;
-    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
-      TO_local = setTimeout(() => {
-        applyMapStyle(window['ddMap'], mapStyles.base);
-        dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-      }, 100);
-    }
-    return () => {
-      clearTimeout(TO_local);
-    }
-  }, [
-    didMapLoad,
-    didInitSourcesAndLayers,
     stateLayers.displaymode
   ]);
 
@@ -511,8 +483,7 @@ const MapComponent = (props): JSX.Element => {
     activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.layers),
-    mapStyle
+    JSON.stringify(props.layers)
   ])
 
   // Set vehicles sources

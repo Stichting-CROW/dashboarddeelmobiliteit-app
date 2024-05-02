@@ -15,7 +15,11 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
   const doAction = () => {
     // Show given layers
     layersToShow.forEach(l => {
-      map.U.show(l);
+      const data = allLayers[l];
+      // Only activate layer if it's not a background layer
+      if(! data['is-background-layer']) {
+        map.U.show(l);
+      }
     });
 
     // Hide all other layersToShow
@@ -27,13 +31,13 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
   }
 
   // If not loaded: try again in x seconds
-  if(! map.isStyleLoaded() && ! isRetry) {
-    setTimeout(() => {
-      activateLayers(map, allLayers, layersToShow, true);
-    }, 500);
+  // if(! map.isStyleLoaded() && ! isRetry) {
+  //   setTimeout(() => {
+  //     activateLayers(map, allLayers, layersToShow, true);
+  //   }, 250);
 
-    return;
-  }
+  //   return;
+  // }
 
   doAction();
 

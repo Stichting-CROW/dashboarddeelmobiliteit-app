@@ -19,6 +19,8 @@ import {
 } from '../Map/MapUtils/map.service_area_delta';
 
 import {StateType} from '../../types/StateType.js';
+import { setBackgroundLayer } from '../Map/MapUtils/map';
+import { setMapStyle } from '../../actions/layers';
 
 const DdServiceAreasLayer = ({
   map
@@ -67,6 +69,18 @@ const DdServiceAreasLayer = ({
       removeServiceAreasFromMap(map);
     };
   }, [
+  ]);
+
+  // On component load: Set background layer to 'base layer'
+  useEffect(() => {
+    if(! map) return;
+    if(! map.U) return;
+
+    setBackgroundLayer(map, 'base', setMapStyle);
+  }, [
+    map,
+    map?.U,
+    document.location.pathname
   ]);
 
   // Load 'delta' if if version_id changes

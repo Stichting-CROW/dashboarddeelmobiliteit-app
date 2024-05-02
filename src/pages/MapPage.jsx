@@ -15,6 +15,7 @@ import {
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
+  DISPLAYMODE_POLICY_HUBS,
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
@@ -50,9 +51,6 @@ function Map({mode, mapContainer}) {
 
   layers.push('zones-isochrones');
 
-  layers.push('luchtfoto-pdok');
-  activeSources.push('luchtfoto-pdok');
-  
   // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
@@ -101,7 +99,10 @@ function Map({mode, mapContainer}) {
     layers.push('zones-metrics-public-border');
     activeSources.push('zones-metrics-public');
   }
-
+  else if(displayMode===DISPLAYMODE_POLICY_HUBS) {
+    layers.push('luchtfoto-pdok');
+    activeSources.push('luchtfoto-pdok');
+  }
 
   // console.log('layers', layers)
   // console.log('activeSources', activeSources)

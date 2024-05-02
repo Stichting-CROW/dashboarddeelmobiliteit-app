@@ -34,7 +34,7 @@ import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
-import { getMapStyles, applyMapStyle } from '../Map/MapUtils/map';
+import { getMapStyles, applyMapStyle, setBackgroundLayer } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { makeConcept } from '../../helpers/policy-hubs/make-concept';
 import { notify } from '../../helpers/notify';
@@ -43,6 +43,7 @@ import { setActivePhase } from '../../actions/policy-hubs';
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
 import { canEditHubs } from '../../helpers/authentication';
 import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
+import { setMapStyle } from '../../actions/layers';
 
 const DdPolicyHubsLayer = ({
   map
@@ -101,50 +102,24 @@ const DdPolicyHubsLayer = ({
     dispatch(setShowList(false));
   }, []);
 
-  // On component load: Set satellite view
-  // const mapStyles = getMapStyles();
-  // useEffect(() => {
-  //   if(! map) return;
-
-  //   // If map was already loaded:
-  //   if(map.isStyleLoaded()) {
-  //     // Set satellite map
-  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-  //     applyMapStyle(map, mapStyles.satellite);
-  //     // And refetch hubs
-  //     setTimeout(() => {
-  //       fetchHubs();
-  //     }, 1000);
-  //     return;
-  // }
-
-  //   // If map wasn't loaded, wait on full map load:
-  //   map.on('load', function() {
-  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-  //     applyMapStyle(map, mapStyles.satellite)
-
-  //     setTimeout(() => {
-  //       fetchHubs();
-  //     }, 1000);
-  //   });
-  // }, [
-  //   map,
-  //   document.location.pathname
-  // ]);
-
+  // On component load: Set background layer to 'satellite layer'
   useEffect(() => {
     if(! map) return;
+    if(! map.U) return;
 
-    console.log(map)
-    map.U.show('luchtfoto-pdok');
+    setBackgroundLayer(map, 'luchtfoto-pdok', setMapStyle);
   }, [
-    map
-  ])
+    map,
+    map?.U,
+    document.location.pathname
+  ]);
 
   // onComponentUnLoad
   useEffect(() => {
     return () => {
-      removeHubsFromMap(map);
+      setTimeout(() => {
+        removeHubsFromMap(map);
+      }, 500)
     };
   }, []);
 
@@ -205,15 +180,12 @@ const DdPolicyHubsLayer = ({
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
-
-    // onComponentUnLoad
-    return () => {
-    };
   }, [
     policyHubs,
     policyHubs.length,
     selected_policy_hubs,
     hubs_in_drawing_mode,
+    mapStyle
   ]);
 
   useEffect(() => {
@@ -338,20 +310,20 @@ const DdPolicyHubsLayer = ({
   }
 
   // If mapStyle changes: re-render after a short delay
-  useEffect(() => {
-    // Return
-    if(! map) return;
-    if(! policyHubs) return;
+  // useEffect(() => {
+  //   // Return
+  //   if(! map) return;
+  //   if(! policyHubs) return;
 
-    setTimeout(() => {
-      renderHubs(
-        map,
-        sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
-        selected_policy_hubs,
-        hubs_in_drawing_mode
-      );
-    }, 50);
-  }, [mapStyle]);
+  //   // setTimeout(() => {
+  //     renderHubs(
+  //       map,
+  //       sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
+  //       selected_policy_hubs,
+  //       hubs_in_drawing_mode
+  //     );
+  //   // }, 50);
+  // }, [mapStyle]);
 
   // Init hub click handlers
   useEffect(() => {

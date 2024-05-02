@@ -17,6 +17,22 @@ export const getMapStyles = () => {
   }
 }
 
+export const setBackgroundLayer = (map, name, setMapStyle) => {
+  if(! setMapStyle) {
+    console.error('setMapStyle not given');
+    return;
+  }
+
+  setMapStyle(name);
+
+  if(name === 'base') {
+    map.U.hide('luchtfoto-pdok');
+  }
+  else {
+    map.U.show(name);
+  }
+}
+
 // Variable to keep track of the map style that we used last
 let mapStyleHash = md5(getMapStyles().base);
 // Function applyMapStyle -- It reorders all layers, so the layers stay in the order we want

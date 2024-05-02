@@ -1,30 +1,22 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getMapStyles, applyMapStyle } from '../Map/MapUtils/map';
+import { getMapStyles, applyMapStyle, setBackgroundLayer } from '../Map/MapUtils/map';
+import { setMapStyle } from '../../actions/layers';
 
 const DdRentalsLayer = ({
   map
 }): JSX.Element => {
   const dispatch = useDispatch()
 
-  // On component load: Set base view
-  const mapStyles = getMapStyles();
+  // On component load: Set background layer to 'base layer'
   useEffect(() => {
     if(! map) return;
+    if(! map.U) return;
 
-    // If map was already loaded:
-    if(map.isStyleLoaded()) {
-      applyMapStyle(map, mapStyles.base)
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-    }
-
-    // If map wasn't loaded, wait on full map load:
-    map.on('load', function() {
-      applyMapStyle(map, mapStyles.base)
-      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-    });
+    setBackgroundLayer(map, 'base', setMapStyle);
   }, [
     map,
+    map?.U,
     document.location.pathname
   ]);
 
