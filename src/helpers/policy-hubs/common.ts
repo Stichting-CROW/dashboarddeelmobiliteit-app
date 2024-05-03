@@ -28,8 +28,8 @@ export const readable_phase = (name: string) => {
   if(name === 'concept') return 'Concept';
   else if(name === 'active') return 'Actief';
   else if(name === 'retirement_concept') return 'Concept \'te verwijderen\'';
-  else if(name === 'committed_concept') return 'Voorgesteld concept';
-  else if(name === 'committed_retirement_concept') return 'Voorgesteld concept \'te verwijderen\'';
+  else if(name === 'committed_concept') return 'Vastgesteld concept';
+  else if(name === 'committed_retirement_concept') return 'Vastgesteld concept \'te verwijderen\'';
   else if(name === 'published') return 'Definitief gepubliceerd';
   else if(name === 'published_retirement') return 'Definitief gepubliceerd \'te verwijderen\'';
   else if(name === 'active') return 'Definitief Actief';
