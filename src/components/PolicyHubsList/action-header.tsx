@@ -118,7 +118,7 @@ const ActionHeader = ({
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-kml.kml`;
+        a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-kml.zip`;
         document.body.appendChild(a); // append the element to the dom, otherwise it will not work in firefox
         a.click();    
         a.remove();//afterwards remove the element again
