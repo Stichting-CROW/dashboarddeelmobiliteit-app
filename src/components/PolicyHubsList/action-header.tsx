@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { StateType } from "@/src/types/StateType"
+import { StateType } from "../../types/StateType"
 import { notify } from '../../helpers/notify';
 
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
@@ -10,6 +10,8 @@ import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList,
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import Modal from "../Modal/Modal"
 import Button from "../Button/Button"
+import { export_kml } from "../../helpers/policy-hubs/export-kml";
+import moment from "moment";
 
 const ActionHeader = ({
     policyHubs,
@@ -104,6 +106,24 @@ const ActionHeader = ({
         return isHubOrNoParkingHub;
     }
 
+    const exportKml = async () => {
+        if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
+            notify('Geen hubs geselecteerd')
+            return;
+        }
+        const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
+        const blob = await export_kml(token, geography_ids);
+
+        if(! blob) return;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-kml.kml`;
+        document.body.appendChild(a); // append the element to the dom, otherwise it will not work in firefox
+        a.click();    
+        a.remove();//afterwards remove the element again
+    }
+
     return <>
         <div className="flex justify-between sticky left-0">
             <div className="flex justify-start">
@@ -159,7 +179,7 @@ const ActionHeader = ({
             </p>
             <ul className="my-4">
             <li>
-                &raquo; <a href={`${process.env.REACT_APP_MDS_URL}/kml/export${filterGebied ? '?municipality='+filterGebied : ''}`} className="font-bold theme-color-blue">
+                &raquo; <a onClick={exportKml} className="cursor-pointer font-bold theme-color-blue">
                 Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
                 </a>
             </li>

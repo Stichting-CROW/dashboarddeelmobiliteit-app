@@ -65,8 +65,6 @@ function SelectLayer() {
     return null; // no layer selection
   }
 
-  const mapStyles = getMapStyles();
-
   return (
     <SlideBox name="SelectLayer" direction="right" options={{
       title: 'Lagen',
@@ -135,14 +133,18 @@ function SelectLayer() {
 
         {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
           <div data-type="map-style-default" className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} onClick={() => {
-            setBackgroundLayer(window['ddMap'], 'base', setMapStyle);
+            setBackgroundLayer(window['ddMap'], 'base', (name) => {
+              dispatch(setMapStyle(name))
+            });
           }}>
             <span className="layer-title">
               Terrein
             </span>
           </div>
           <div data-type="map-style-satellite" className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} onClick={() => {
-            setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', setMapStyle);
+            setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', (name) => {
+              dispatch(setMapStyle(name))
+            });
           }}>
             <span className="layer-title">
               Luchtfoto

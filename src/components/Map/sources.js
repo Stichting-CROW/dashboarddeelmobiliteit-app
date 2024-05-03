@@ -74,7 +74,7 @@ export const sources = {
     'type': 'raster',
     'tiles': ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
     'tileSize': 256,
-    'minzoom': 13,
+    'minzoom': 12,
     'attribution': 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
   },
 }
