@@ -423,7 +423,8 @@ const PolicyHubsEdit = ({
                     Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
                 </div>
                 <p className="my-2">
-                    Teken een gebied op de kaart 
+                    Teken een gebied op de kaart.<br /><br />
+                    Indien gereed, klik op het punt waar je begonnen bent met tekenen om verder te gaan.
                 </p>
                 <div className="flex w-full justify-between">
 
