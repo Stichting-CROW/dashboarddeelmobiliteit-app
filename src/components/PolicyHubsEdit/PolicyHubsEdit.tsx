@@ -219,7 +219,7 @@ const PolicyHubsEdit = ({
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
             }
-            notify('Hub opgeslagen')
+            notify('Zone opgeslagen')
         }
         setHasUnsavedChanges(false);
     }
@@ -240,7 +240,7 @@ const PolicyHubsEdit = ({
                 notify('Er ging iets fout bij het verwijderen');
             }
             else {
-                notify('Hub verwijderd');
+                notify('Zone verwijderd');
                 // Hide edit form
                 dispatch(setSelectedPolicyHubs([]))
                 dispatch(setShowEditForm(false));
@@ -420,7 +420,7 @@ const PolicyHubsEdit = ({
         return (
             <div>
                 <div className={`${labelClassNames} font-bold`}>
-                    Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
+                    Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
                 </div>
                 <p className="my-2">
                     Teken een gebied op de kaart 
@@ -447,7 +447,7 @@ const PolicyHubsEdit = ({
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
-                Hub {isNewZone ? 'toevoegen' : 'wijzigen'}
+                Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
             </div>
 
             {hubData?.prev_geographies?.[0] && <div className="my-4">

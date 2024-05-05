@@ -68,7 +68,7 @@ const ActionHeader = ({
                 notify('Er ging iets fout bij het verwijderen');
             }
             else {
-                notify('Hub verwijderd');
+                notify('Zone verwijderd');
                 dispatch(setSelectedPolicyHubs([]))
                 dispatch(setHubRefetchCounter(hub_refetch_counter+1))
                 fetchHubs();
@@ -108,7 +108,7 @@ const ActionHeader = ({
 
     const exportKml = async () => {
         if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
-            notify('Geen hubs geselecteerd')
+            notify('Geen zones geselecteerd')
             return;
         }
         const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);

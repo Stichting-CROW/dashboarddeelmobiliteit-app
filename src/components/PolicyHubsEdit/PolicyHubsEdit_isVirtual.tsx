@@ -5,7 +5,7 @@ export const PolicyHubsEdit_isVirtual = ({
     setHubData,
 }) => {
     if(! hubData) return <>
-        Hub data wordt geladen..
+        Zone data wordt geladen..
     </>
 
     const updateIsVirtual = (key: string) => {

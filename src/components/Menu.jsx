@@ -197,7 +197,7 @@ function Menu({
 
             <MenuItem
               pathName={pathName}
-              text={'Hubs'}
+              text={'Zones'}
               path={'/map/beleidshubs'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />
@@ -251,7 +251,7 @@ function Menu({
             />
             {/* <MenuItem
               pathName={pathName}
-              text={'Hubs'}
+              text={'Zones'}
               path={'/map/beleidshubs'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             /> */}

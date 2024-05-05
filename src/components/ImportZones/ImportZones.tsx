@@ -71,6 +71,14 @@ const ImportZonesModal = ({
     const body = new FormData;
     body.append("file", file);
 
+    // Create function that's called if there's an error
+    const postError = () => {
+      // Set loading=false
+      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig KML-bestand is.');
+      setIsProcessingFile(false);
+      setDraftZones([]);
+    }
+
     let responseJson; 
     try {
       responseJson = await preprocessKmlFile({
@@ -78,14 +86,17 @@ const ImportZonesModal = ({
         gm_code,
         body
       });
+
+      if(responseJson && responseJson.detail) {
+        postError();
+        return;
+      }
+
       setNotificationText('Het bestand is succesvol verwerkt. Selecteer hieronder de zones die je wilt importeren en klik dan op de knop: Importeer zones.');
       setIsProcessingFile(false);
       setDraftZones(responseJson);
     } catch(e) {
-      // Set loading=false
-      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig KML-bestand is.');
-      setIsProcessingFile(false);
-      setDraftZones([]);
+      postError();
     }
   }
 

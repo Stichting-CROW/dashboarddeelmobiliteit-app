@@ -114,7 +114,7 @@ const PolicyHubsEdit_bulk = ({
         if(updatedZone && updatedZone.zone_id) {
             postSaveOrDeleteCallback(updatedZone.zone_id);
         }
-        notify('Hub opgeslagen')
+        notify('Zone opgeslagen')
     }
 
     const cancelButtonHandler = () => {
@@ -126,7 +126,7 @@ const PolicyHubsEdit_bulk = ({
 
     return <div>
         <div className={`${labelClassNames} font-bold`}>
-            Meerdere hubs tegelijkertijd wijzigen
+            Meerdere zones tegelijkertijd wijzigen
         </div>
 
         {selectedHubsPhase === 'concept' && <PolicyHubsEdit_isVirtual

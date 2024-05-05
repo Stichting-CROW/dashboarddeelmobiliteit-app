@@ -276,7 +276,7 @@ function FilterbarPolicyHubs({
 
       {showList && <Modal
         isVisible={showList}
-        title={`Hubs in fase: ${readable_phase(active_phase)}`}
+        title={`Zones in fase: ${readable_phase(active_phase)}`}
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
           e.preventDefault();
