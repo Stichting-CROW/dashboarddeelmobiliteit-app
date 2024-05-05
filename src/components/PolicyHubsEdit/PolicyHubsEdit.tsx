@@ -365,7 +365,7 @@ const PolicyHubsEdit = ({
 
     const updateCapacityValue = (key: string, value: number) => {
         if(! key) return;
-        if(! value) return;
+        if(!value === undefined) return;
 
         setHasUnsavedChanges(true);
 
