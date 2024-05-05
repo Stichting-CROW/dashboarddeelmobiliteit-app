@@ -169,13 +169,13 @@ const ActionHeader = ({
             }}
         >
             <p className="mb-4">
-            Met onderstaande link kun je de ingetekende zones als KML-bestanden downloaden.
+                Met onderstaande link kun je de geselecteerde zones als KML-bestanden downloaden.
             </p>
             <p className="mb-4">
-            Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
+                Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
             </p>
             <p className="mb-4">
-            Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
+                Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
             </p>
             <ul className="my-4">
             <li>
