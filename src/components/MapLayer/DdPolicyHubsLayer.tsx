@@ -152,11 +152,10 @@ const DdPolicyHubsLayer = ({
     }
   }, [])
 
-  // Load state based on query params
+  // Set default state
   useEffect(() => {
-    console.log('want to set active phase', active_phase)
     if(! active_phase) {
-      dispatch(setActivePhase('concept'))
+      dispatch(setActivePhase(acl ? 'concept' : 'active'))
     }
   }, [])
 
