@@ -138,7 +138,6 @@ const PolicyHubsEdit = ({
         const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
         if(foundHub) {
             // Set hub data in local state
-            console.log('hubData', foundHub)
             setHubData(foundHub);
         }
     }

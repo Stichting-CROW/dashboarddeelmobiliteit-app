@@ -20,16 +20,18 @@ export const columns: ColumnDef<Hub>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() as CheckedState ||
-          (table.getIsSomePageRowsSelected() && "indeterminate") as CheckedState
-        }
-        onCheckedChange={(value) => {
-          table.toggleAllPageRowsSelected(!!value)
-        }}
-        aria-label="Select all"
-      />
+      <div className="flex flex-col justify-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() as CheckedState ||
+            (table.getIsSomePageRowsSelected() && "indeterminate") as CheckedState
+          }
+          onCheckedChange={(value) => {
+            table.toggleAllPageRowsSelected(!!value)
+          }}
+          aria-label="Select all"
+        />
+      </div>
     ),
     cell: ({ row }) => (
       <Checkbox
@@ -55,6 +57,7 @@ export const columns: ColumnDef<Hub>[] = [
   },
   {
     accessorKey: "name",
+    cell: info => info.getValue(),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Naam" />
     ),
