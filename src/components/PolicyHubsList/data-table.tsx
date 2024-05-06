@@ -10,7 +10,9 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
   getPaginationRowModel,
-  VisibilityState
+  VisibilityState,
+  getFacetedMinMaxValues,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table"
 
 import {
@@ -93,6 +95,8 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    getFacetedUniqueValues: getFacetedUniqueValues(), // generate unique values for select filter/autocomplete
+    getFacetedMinMaxValues: getFacetedMinMaxValues(), // generate min/max values for range filter
     state: {
       sorting,
       columnFilters,
@@ -154,7 +158,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex items-center py-4 sticky left-0">
+      <div className="hidden items-center py-4 sticky left-0">
         <Input
           placeholder="Filter"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -192,7 +196,7 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
       <div className="rounded-md border" style={{width: '100%'}}>
-        <Table style={{width: '100%'}}>
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

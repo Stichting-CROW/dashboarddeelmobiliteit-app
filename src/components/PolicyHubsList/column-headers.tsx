@@ -16,6 +16,8 @@ import {
     DropdownMenuTrigger,
   } from "../ui/dropdown-menu"
   
+  import Filter from './column-filter';
+
   interface DataTableColumnHeaderProps<TData, TValue>
     extends React.HTMLAttributes<HTMLDivElement> {
     column: Column<TData, TValue>
@@ -32,40 +34,47 @@ import {
     }
   
     return (
-      <div className={cn("flex items-center space-x-2 cursor-pointer select-none", className)}>
-        <DropdownMenu>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-3 h-8 data-[state=open]:bg-accent"
-            onClick={column.getToggleSortingHandler()}
-          >
-            <span>{title}</span>
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDownIcon className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUpIcon className="ml-2 h-4 w-4" />
-            ) : (
-              <CaretSortIcon className="ml-2 h-4 w-4" />
-            )}
-          </Button>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-              A-Z
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-              Z-A
-            </DropdownMenuItem>
-            {/* <DropdownMenuSeparator /> */}
-            {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-              <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-              Hide
-            </DropdownMenuItem> */}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <>
+        <div className={cn("flex items-center space-x-2 cursor-pointer select-none", className)}>
+          <DropdownMenu>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="-ml-3 h-8 data-[state=open]:bg-accent"
+              onClick={column.getToggleSortingHandler()}
+            >
+              <span>{title}</span>
+              {column.getIsSorted() === "desc" ? (
+                <ArrowDownIcon className="ml-2 h-4 w-4" />
+              ) : column.getIsSorted() === "asc" ? (
+                <ArrowUpIcon className="ml-2 h-4 w-4" />
+              ) : (
+                <CaretSortIcon className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+                <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                A-Z
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+                <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                Z-A
+              </DropdownMenuItem>
+              {/* <DropdownMenuSeparator /> */}
+              {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+                <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                Hide
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {column.getCanFilter() ? (
+          <div>
+            <Filter column={column} />
+          </div>
+        ) : null}
+      </>
     )
   }
   

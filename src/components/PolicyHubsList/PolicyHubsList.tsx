@@ -153,7 +153,9 @@ const PolicyHubsList = () => {
                 policyHubs={policyHubs}
                 fetchHubs={fetchHubs}
             />}
-            <div data-name="body" className="p-4" style={{}}>
+            <div data-name="body" className="mx-auto p-4" style={{
+                width: 'fit-content'
+            }}>
                 <DataTable columns={filterColumnsForGuest(columns)} data={tableData} />
             </div>
         </>

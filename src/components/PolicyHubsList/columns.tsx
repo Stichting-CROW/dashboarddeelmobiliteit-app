@@ -38,6 +38,7 @@ export const columns: ColumnDef<Hub>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
+        className="block"
       />
     ),
     enableSorting: true,
@@ -48,12 +49,18 @@ export const columns: ColumnDef<Hub>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Fase" />
     ),
+    meta: {
+      filterVariant: 'select',
+    },
   },
   {
     accessorKey: "type",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
     ),
+    meta: {
+      filterVariant: 'select',
+    },
   },
   {
     accessorKey: "name",
@@ -73,6 +80,9 @@ export const columns: ColumnDef<Hub>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Virtueel / Fysiek" />
     ),
+    meta: {
+      filterVariant: 'select',
+    },
   },
   {
     accessorKey: "published_date",
