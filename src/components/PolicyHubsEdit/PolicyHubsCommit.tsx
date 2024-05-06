@@ -127,7 +127,7 @@ const PolicyHubsCommit = ({
             </div>
             <div>
                 <FormLabel classes="mt-2 mb-4 font-bold">
-                    Publicatiedatum (standaard +7 dagen)
+                    Publiceren op (standaard +7 dagen)
                 </FormLabel>
                 {errors.publish_on && <p className="text-sm text-red-600 -mt-2 mb-2 font-bold">
                     Vul een valide publicatiedatum/-tijd in:
@@ -142,10 +142,10 @@ const PolicyHubsCommit = ({
             </div>
             <div>
                 <FormLabel classes="mt-2 mb-4 font-bold">
-                    Startdatum (standaard +14 dagen)
+                    Activeren op (standaard +14 dagen)
                 </FormLabel>
                 {errors.effective_on && <p className="text-sm text-red-600 -mt-2 mb-2 font-bold">
-                    Vul een valide startdatum/-tijd in:
+                    Vul een valide activeringsdatum/-tijd in:
                 </p>}
                 <FormInput
                     type="datetime-local"

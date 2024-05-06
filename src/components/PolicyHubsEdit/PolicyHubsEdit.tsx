@@ -513,7 +513,7 @@ const PolicyHubsEdit = ({
                         </tr>}
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Publicatie:
+                                {moment(hubData.published_date).isBefore(moment()) ? 'Gepubliceerd op' : 'Publiceren op'}:
                             </th>
                             <td>
                                 {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
@@ -521,7 +521,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Actief:
+                                {moment(hubData.effective_date).isBefore(moment()) ? 'Geactiveerd op' : 'Activeren op'}:
                             </th>
                             <td>
                                 {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
@@ -543,7 +543,7 @@ const PolicyHubsEdit = ({
                                 {moment(hubData.retire_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>}
-                        <tr title={`Gemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
+                        <tr title={`Aangemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
                             <th align="left" style={{verticalAlign: 'top'}}>
                                 Gemaakt door:
                             </th>
