@@ -39,8 +39,13 @@ import SharePermalink from '../SharePermalink/SharePermalink';
 import eyeOpen from './img/icon_eye_open.svg';
 import eyeClosed from './img/icon_eye_closed.svg';
 import { readable_phase } from '../../helpers/policy-hubs/common';
+import { themes } from '../../themes';
 
-const CheckboxesWrapper = ({children}) => <div className="px-2 py-2 bg-white" style={{borderRadius: '0.5rem'}}>
+const CheckboxesWrapper = ({children, color}) => <div className="px-2 py-2 bg-white" style={Object.assign({
+  borderRadius: '0.5rem'
+}, color ? {
+  border: `2px solid ${color}`
+} : {})}>
   {children}
 </div>
 
@@ -191,7 +196,7 @@ function FilterbarPolicyHubs({
 
         {filterGebied && (<>
           <Fieldset title="Hubs">
-            <CheckboxesWrapper>
+            <CheckboxesWrapper color={themes.zone.stop.primaryColor}>
               {Object.keys(policyHubPhases).map(key => {
                 const id = `hub-${key}`;
                 const title = policyHubPhases[key].title;
@@ -217,7 +222,7 @@ function FilterbarPolicyHubs({
           </Fieldset>
 
           <Fieldset title="Verbodsgebieden">
-            <CheckboxesWrapper>
+            <CheckboxesWrapper color={themes.zone.no_parking.primaryColor}>
               {Object.keys(policyHubPhases).map(key => {
                 const id = `verbodsgebied-${key}`;
                 const title = policyHubPhases[key].title;
@@ -243,7 +248,7 @@ function FilterbarPolicyHubs({
           </Fieldset>
 
           <Fieldset title="Analysegebieden">
-            <CheckboxesWrapper>
+            <CheckboxesWrapper color={themes.zone.monitoring.primaryColor}>
               {Object.keys(policyHubPhases).map(key => {
                 if(key !== 'concept') return;
 
@@ -313,11 +318,11 @@ function FilterbarPolicyHubs({
         <SharePermalink />
       </Modal>}
 
-      <div className="absolute right-5 top-5 text-xs text-purple-800">
+      {/* <div className="absolute right-5 top-5 text-xs text-purple-800">
         2024-05-03:<br />
         - Export hubs als KML<br />
         - Solide polygoon-randen<br />
-      </div>
+      </div> */}
 
     </>
   )

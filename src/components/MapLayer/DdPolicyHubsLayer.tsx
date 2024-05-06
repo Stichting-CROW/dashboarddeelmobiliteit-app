@@ -620,13 +620,9 @@ const DdPolicyHubsLayer = ({
                 );
             }
             else {
-              notify(
-                toast,
-                'Het verwijdervoorstel is toegevoegd, zie de conceptfase',
-                {}
-                );
-                dispatch(setShowEditForm(false));
-                dispatch(setHubRefetchCounter(hub_refetch_counter+1))
+              notify(toast, 'Het verwijdervoorstel is toegevoegd, zie de conceptfase');
+              dispatch(setShowEditForm(false));
+              dispatch(setHubRefetchCounter(hub_refetch_counter+1))
             }
           } catch(err) {
               console.error('Delete error', err);
