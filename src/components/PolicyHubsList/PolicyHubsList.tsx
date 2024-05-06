@@ -121,13 +121,17 @@ const PolicyHubsList = () => {
 
     // Fetch hubs
     const fetchHubs = async () => {
-        const all = await fetch_hubs({
-            token: token,
-            municipality: filter.gebied,
-            phase: active_phase,
-            visible_layers: visible_layers
-        });
-        setPolicyHubs(all);
+        try {
+            const all: any = await fetch_hubs({
+                token: token,
+                municipality: filter.gebied,
+                phase: active_phase,
+                visible_layers: visible_layers
+            });
+            setPolicyHubs(all);
+        } catch(err) {
+            // console.error(err);
+        }
     };
 
     // Filter colums if guest user

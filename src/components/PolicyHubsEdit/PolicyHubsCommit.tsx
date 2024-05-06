@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import { useToast } from "../ui/use-toast"
 import { useDispatch, useSelector } from 'react-redux';
 
-import {
-    fetch_hubs
-} from '../../helpers/policy-hubs/fetch-hubs'
-
 import {HubType} from '../../types/HubType';
 
 import Button from '../Button/Button';

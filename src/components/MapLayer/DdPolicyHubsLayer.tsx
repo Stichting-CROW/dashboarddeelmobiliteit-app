@@ -71,7 +71,6 @@ const DdPolicyHubsLayer = ({
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
-  console.log('dd layer: ', active_phase)
 
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
@@ -90,7 +89,6 @@ const DdPolicyHubsLayer = ({
   });
 
   const show_edit_form = useSelector((state: StateType) => {
-    // console.log('state.policy_hubs', state.policy_hubs)
     return state.policy_hubs ? state.policy_hubs.show_edit_form : false;
   });
 
@@ -234,53 +232,68 @@ const DdPolicyHubsLayer = ({
       return [];
     }
 
-    let hubsToKeep = [];
+    let geoFilter = [];
 
     visible_layers.forEach((x) => {
       // Hub
       if(x === 'hub-concept') {
-        hubsToKeep.push({geo_type: 'stop', phase: 'concept'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'retirement_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'retirement_concept'});
       }
       else if(x === 'hub-committed_concept') {
-        hubsToKeep.push({geo_type: 'stop', phase: 'committed_concept'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'committed_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
       }
       else if(x === 'hub-published') {
-        hubsToKeep.push({geo_type: 'stop', phase: 'published'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'published_retirement'});
+        geoFilter.push({geo_type: 'stop', phase: 'published'});
+        geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
+        // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
+        geoFilter.push({geo_type: 'stop', phase: 'retirement_concept', 'effective_date': 'x'});
+        geoFilter.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
       }
       else if(x === 'hub-active') {
-        hubsToKeep.push({geo_type: 'stop', phase: 'active'});
-        hubsToKeep.push({geo_type: 'stop', phase: 'active_retirement'});
+        geoFilter.push({geo_type: 'stop', phase: 'active'});
+        geoFilter.push({geo_type: 'stop', phase: 'active_retirement'});
+        // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
+        geoFilter.push({geo_type: 'stop', phase: 'retirement_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
+        geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
       }
       // No parking
       else if(x === 'verbodsgebied-concept') {
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'concept'});
-        // hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'retirement_concept'});
       }
       else if(x === 'verbodsgebied-committed_concept') {
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'committed_concept'});
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_committed_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'committed_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'committed_retirement_concept'});
       }
       else if(x === 'verbodsgebied-published') {
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'published'});
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'retirement_published'});
-      }
+        geoFilter.push({geo_type: 'no_parking', phase: 'published'});
+        // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
+        geoFilter.push({geo_type: 'no_parking', phase: 'retirement_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'committed_retirement_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'published_retirement'});      }
       else if(x === 'verbodsgebied-active') {
-        hubsToKeep.push({geo_type: 'no_parking', phase: 'active'});
-      }
+        geoFilter.push({geo_type: 'no_parking', phase: 'active'});
+        // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
+        geoFilter.push({geo_type: 'no_parking', phase: 'retirement_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'committed_retirement_concept'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'published_retirement'});      }
       // Monitoring
       else if(x === 'monitoring-concept') {
-        hubsToKeep.push({geo_type: 'monitoring', phase: 'concept'});
+        geoFilter.push({geo_type: 'monitoring', phase: 'concept'});
       }
     });
 
+    // Loop all hubs
     const filteredHubs = hubs.filter((x) => {
-      const wannaSee = hubsToKeep.find(keep => 
-        keep.geo_type === x.geography_type && keep.phase === x.phase
-      );
-      return wannaSee;
+      // Keep the hubs we want
+      const wannaHave = geoFilter.find(keep => {
+        return keep.geo_type === x.geography_type && keep.phase === x.phase;
+      });
+      return wannaHave;
     });
 
     return filteredHubs;
@@ -288,15 +301,20 @@ const DdPolicyHubsLayer = ({
 
   // Fetch hubs
   const fetchHubs = async () => {
-    const res = await fetch_hubs({
-      token: token,
-      municipality: filter.gebied,
-      phase: active_phase,
-      visible_layers: visible_layers
-    });
-    setPolicyHubs(res);
+    try {
+      const res: any = await fetch_hubs({
+        token: token,
+        municipality: filter.gebied,
+        phase: active_phase,
+        visible_layers: visible_layers
+      });
+      setPolicyHubs(res);
+    }
+    catch(err) {
+      // console.error(err);
+    }
 
-    return res;
+    return true;
   };
 
   const drawEditablePolygon = () => {
