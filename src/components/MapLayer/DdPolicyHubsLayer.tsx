@@ -1,3 +1,4 @@
+import { useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // import { useSearchParams } from 'react-router-dom'
@@ -44,12 +45,14 @@ import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/poli
 import { canEditHubs } from '../../helpers/authentication';
 import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 import { setMapStyle } from '../../actions/layers';
+import { cn } from "../../lib/utils";
 
 const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
   const dispatch = useDispatch()
-
+  const { toast } = useToast()
+  
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
@@ -571,7 +574,9 @@ const DdPolicyHubsLayer = ({
           if(! window.confirm('Wil je de vastgestelde hub(s) terugzetten naar de conceptfase?')) {
             return;
           }
-          notify('De hub(s) is/zijn teruggezet naar de conceptfase');
+
+          notify(toast, 'De hub(s) is/zijn teruggezet naar de conceptfase');
+
           dispatch(setSelectedPolicyHubs([]));
           dispatch(setShowEditForm(false));
           fetchHubs();
@@ -587,7 +592,7 @@ const DdPolicyHubsLayer = ({
             return;
           }
           await makeConcept(token, [getSelectedHub()?.geography_id]);
-          notify('De hub is omgezet naar een nieuw concept');
+          notify(toast, 'De hub is omgezet naar een nieuw concept');
           dispatch(setSelectedPolicyHubs([]));
           dispatch(setShowEditForm(false));
           fetchHubs();
@@ -605,10 +610,21 @@ const DdPolicyHubsLayer = ({
     
             if(response && response.detail) {
                 // Give error if something went wrong
-                notify('Er ging iets fout bij het voorstellen tot verwijderen');
+                notify(
+                  toast,
+                  'Er ging iets fout bij het voorstellen tot verwijderen',
+                  {
+                    title: 'Er ging iets fout',
+                    variant: 'destructive'
+                  }
+                );
             }
             else {
-                notify('Het verwijdervoorstel is toegevoegd, zie de conceptfase');
+              notify(
+                toast,
+                'Het verwijdervoorstel is toegevoegd, zie de conceptfase',
+                {}
+                );
                 dispatch(setShowEditForm(false));
                 dispatch(setHubRefetchCounter(hub_refetch_counter+1))
             }

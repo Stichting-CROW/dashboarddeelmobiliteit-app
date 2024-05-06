@@ -19,6 +19,7 @@ import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
+import { Toaster } from "./components/ui/toaster"
 
 import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
@@ -581,6 +582,7 @@ function App() {
       <Menu acl={acl} pathName={pathName} />
 
      </div>
+     <Toaster />     
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useToast } from "../ui/use-toast"
 import { StateType } from '../../types/StateType';
 import { readable_geotype, defaultStopProperties } from "../../helpers/policy-hubs/common"
 import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
@@ -24,6 +25,7 @@ const PolicyHubsEdit_bulk = ({
     postSaveOrDeleteCallback: Function
 }) => {
     const dispatch = useDispatch()
+    const { toast } = useToast()
 
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -108,13 +110,16 @@ const PolicyHubsEdit_bulk = ({
 
         const updatedZone = await patchHub(token, newHubsData);
         if(updatedZone && updatedZone.detail) {
-            notify('Er ging iets fout bij het opslaan: ' + updatedZone?.detail)
+            notify(toast, 'Er ging iets fout bij het opslaan: ' + updatedZone?.detail, {
+                title: 'Er ging iets fout',
+                variant: 'destructive'
+            })
             return;
         }
         if(updatedZone && updatedZone.zone_id) {
             postSaveOrDeleteCallback(updatedZone.zone_id);
         }
-        notify('Zone opgeslagen')
+        notify(toast, 'Zone opgeslagen')
     }
 
     const cancelButtonHandler = () => {

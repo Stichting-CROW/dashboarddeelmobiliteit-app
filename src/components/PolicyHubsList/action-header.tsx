@@ -1,3 +1,4 @@
+import { useToast } from "../ui/use-toast"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "../../types/StateType"
@@ -21,6 +22,7 @@ const ActionHeader = ({
     fetchHubs: Function
 }) => {
     const dispatch = useDispatch();
+    const { toast } = useToast()
 
     const [doShowExportModal, setDoShowExportModal] = useState<Boolean>(false);
     const [doShowImportModal, setDoShowImportModal] = useState<Boolean>(false);
@@ -65,10 +67,13 @@ const ActionHeader = ({
     
             if(response && response.detail) {
                 // Give error if something went wrong
-                notify('Er ging iets fout bij het verwijderen');
+                notify(toast, 'Er ging iets fout bij het verwijderen', {
+                    title: 'Er ging iets fout',
+                    variant: 'destructive'
+                });
             }
             else {
-                notify('Zone verwijderd');
+                notify(toast, 'Zone verwijderd');
                 dispatch(setSelectedPolicyHubs([]))
                 dispatch(setHubRefetchCounter(hub_refetch_counter+1))
                 fetchHubs();
@@ -108,7 +113,7 @@ const ActionHeader = ({
 
     const exportKml = async () => {
         if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
-            notify('Geen zones geselecteerd')
+            notify(toast, 'Geen zones geselecteerd')
             return;
         }
         const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);

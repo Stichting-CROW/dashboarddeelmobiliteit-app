@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useToast } from "../ui/use-toast"
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -29,6 +30,7 @@ const PolicyHubsCommit = ({
     fetchHubs
 }) => {
     const dispatch = useDispatch()
+    const { toast } = useToast()
 
     const [geographyIds, setGeographyIds] = useState([]);
     const [errors, setErrors] = useState<any>({});
@@ -86,11 +88,14 @@ const PolicyHubsCommit = ({
 
         // If error: Show error
         if(result && result?.detail) {
-            notify('Opslaan mislukt: ' + result?.detail);
+            notify(toast, 'Opslaan mislukt: ' + result?.detail, {
+                title: 'Er ging iets fout',
+                variant: 'destructive'
+            });
             return;
         }
 
-        notify(`De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`);
+        notify(toast, `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`);
 
         dispatch(setShowCommitForm(false));
 

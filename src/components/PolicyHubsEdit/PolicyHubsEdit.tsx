@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useToast } from "../ui/use-toast"
 
 import {
     fetch_hubs
@@ -41,6 +42,7 @@ const PolicyHubsEdit = ({
     cancelHandler: Function,
 }) => {
     const dispatch = useDispatch()
+    const { toast } = useToast()
 
     // Get gebied / municipality code
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
@@ -198,11 +200,14 @@ const PolicyHubsEdit = ({
             const addedZone = await postHub(token, fiteredHubData);
             // Notify if something went wrong
             if(addedZone && addedZone.detail) {
-                notify('Er ging iets fout bij het opslaan: ' + addedZone?.detail)
+                notify(toast, 'Er ging iets fout bij het opslaan: ' + addedZone?.detail, {
+                    title: 'Er ging iets fout',
+                    variant: 'destructive'
+                })
                 return;
             }
             if(addedZone && addedZone.zone_id) {
-                notify('Hub toegevoegd');
+                notify(toast, 'Hub toegevoegd');
                 postSaveOrDeleteCallback(addedZone.zone_id);
                 setHubData({
                     ...fiteredHubData,
@@ -213,13 +218,16 @@ const PolicyHubsEdit = ({
         else {
             const updatedZone = await patchHub(token, fiteredHubData);
             if(updatedZone && updatedZone.detail) {
-                notify('Er ging iets fout bij het opslaan: ' + updatedZone?.detail)
+                notify(toast, 'Er ging iets fout bij het opslaan: ' + updatedZone?.detail, {
+                    title: 'Er ging iets fout',
+                    variant: 'destructive'
+                })
                 return;
             }
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
             }
-            notify('Zone opgeslagen')
+            notify(toast, 'Zone opgeslagen')
         }
         setHasUnsavedChanges(false);
     }
@@ -227,7 +235,9 @@ const PolicyHubsEdit = ({
     const deleteZoneHandler = async (e) => {
         if(! hubData || ! hubData.geography_id) return;
         if(! window.confirm('Weet je zeker dat je deze hub wilt verwijderen?')) {
-            alert('Verwijderen geannuleerd');
+            notify(toast, '', {
+                title: 'Verwijderen geannuleerd',
+            });
             return;
         }
 
@@ -237,10 +247,13 @@ const PolicyHubsEdit = ({
     
             if(response && response.detail) {
                 // Give error if something went wrong
-                notify('Er ging iets fout bij het verwijderen');
+                notify(toast, 'Er ging iets fout bij het verwijderen', {
+                    title: 'Er ging iets fout',
+                    variant: 'destructive'
+                });
             }
             else {
-                notify('Zone verwijderd');
+                notify(toast, 'Zone verwijderd');
                 // Hide edit form
                 dispatch(setSelectedPolicyHubs([]))
                 dispatch(setShowEditForm(false));
