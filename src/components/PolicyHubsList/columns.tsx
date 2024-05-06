@@ -3,6 +3,13 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "../ui/checkbox"
 import { CheckedState } from "@radix-ui/react-checkbox"
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CaretSortIcon,
+  EyeNoneIcon,
+} from "@radix-ui/react-icons";
+import { Button } from "../ui/button"
 
 import { DataTableColumnHeader } from "./column-headers";
 
@@ -13,14 +20,14 @@ export type Hub = {
   name: string
   // type: "pending" | "processing" | "success" | "failed"
   type: string
-  fase: string
+  // fase: string
 }
 
 export const columns: ColumnDef<Hub>[] = [
   {
     id: "select",
-    header: ({ table }) => (
-      <div className="flex flex-col justify-center">
+    header: ({ table, column }) => (
+      <div className="flex justify-center">
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() as CheckedState ||
@@ -34,25 +41,27 @@ export const columns: ColumnDef<Hub>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="block"
-      />
+      <>
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="block"
+        />
+      </>
     ),
     enableSorting: true,
     enableHiding: false,
   },
-  {
-    accessorKey: "fase",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Fase" />
-    ),
-    meta: {
-      filterVariant: 'select',
-    },
-  },
+  // {
+  //   accessorKey: "fase",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Fase" />
+  //   ),
+  //   meta: {
+  //     filterVariant: 'select',
+  //   },
+  // },
   {
     accessorKey: "type",
     header: ({ column }) => (

@@ -75,7 +75,7 @@ function Filter({ column }: { column: any }) {
         onChange={e => column.setFilterValue(e.target.value)}
         value={columnFilterValue?.toString()}
       >
-        <option value="">All</option>
+        <option value="">Alle</option>
         {sortedUniqueValues.map((value: any) => (
           //dynamically generated select options from faceted values feature
           <option value={value} key={value}>

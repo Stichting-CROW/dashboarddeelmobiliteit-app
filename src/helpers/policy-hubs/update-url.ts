@@ -1,3 +1,18 @@
+const allowedLayerNames = [
+  'append visible hub-concept',
+  'verbodsgebied-concept',
+  'monitoring-concept',
+  'hub-committed_concept',
+  'hub-concept',
+  'hub-published',
+  'hub-active',
+  'hub-archive',
+  'verbodsgebied-committed_concept',
+  'verbodsgebied-published',
+  'verbodsgebied-active',
+  'verbodsgebied-archive',
+];
+
 export const update_url = (params) => {
     if(! params) return;
 
@@ -9,6 +24,10 @@ export const update_url = (params) => {
     if(params.visible_layers) {
         url.searchParams.delete('visible');
         params.visible_layers.forEach((x) => {
+            if(allowedLayerNames.indexOf(x) <= -1) {
+                console.log('update-url - layer name not allowed. Layer name: ', x)
+                return;
+            }
             url.searchParams.append('visible', x);
         })
     }

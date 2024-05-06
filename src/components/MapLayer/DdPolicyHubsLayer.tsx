@@ -71,6 +71,7 @@ const DdPolicyHubsLayer = ({
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
+  console.log('dd layer: ', active_phase)
 
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
@@ -148,6 +149,14 @@ const DdPolicyHubsLayer = ({
     const phase = queryParams.get('phase');
     if(phase) {
       dispatch(setActivePhase(phase));
+    }
+  }, [])
+
+  // Load state based on query params
+  useEffect(() => {
+    console.log('want to set active phase', active_phase)
+    if(! active_phase) {
+      dispatch(setActivePhase('concept'))
     }
   }, [])
 

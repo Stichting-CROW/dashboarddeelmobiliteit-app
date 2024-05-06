@@ -188,13 +188,17 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      const theAcl = await getAcl(token);
-      if(! theAcl) return;
-
-      dispatch(setAclInRedux(theAcl));
-      setAcl(theAcl);
-      setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-      setIsAdmin(theAcl?.is_admin);
+      try {
+        const theAcl = await getAcl(token);
+        if(! theAcl) return;
+  
+        dispatch(setAclInRedux(theAcl));
+        setAcl(theAcl);
+        setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+        setIsAdmin(theAcl?.is_admin);
+      } catch(err) {
+        console.error(err);
+      }
     })();
   }, [token])
 
