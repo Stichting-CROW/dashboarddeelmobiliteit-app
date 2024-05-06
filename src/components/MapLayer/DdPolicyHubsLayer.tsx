@@ -263,7 +263,7 @@ const DdPolicyHubsLayer = ({
         hubsToKeep.push({geo_type: 'no_parking', phase: 'active'});
       }
       // Monitoring
-      else if(x === 'analyse-concept') {
+      else if(x === 'monitoring-concept') {
         hubsToKeep.push({geo_type: 'monitoring', phase: 'concept'});
       }
     });

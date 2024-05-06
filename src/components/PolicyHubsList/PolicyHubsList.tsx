@@ -84,26 +84,50 @@ const PolicyHubsList = () => {
         if(! policyHubs) return;
 
         // Only keep hubs in active phase
-        const filteredHubs = (policyHubs) => {
-            return policyHubs.filter((x) => x.phase === active_phase)
-        }
+        const filteredHubs = filterVisible(
+            filterPhase(policyHubs)
+        );
 
         (() => {
-            setTableData(populateTableData(filteredHubs(policyHubs)));
+            setTableData(populateTableData(filteredHubs));
         })();
     }, [
         policyHubs
     ]);
 
+    const filterPhase = (policyHubs) => {
+        return policyHubs.filter((x) => x.phase === active_phase);
+    }
+
+    const filterVisible = (policyHubs) => {
+        // Only keep hubs of layers that are selected
+        let visiblePhaseLayers = visible_layers.map(x => {
+            // For every layer, only keep 'hub' or 'monitoring'
+            return x.split('-')[0];
+        });
+        visiblePhaseLayers = visiblePhaseLayers.filter((x, index) => {
+            // Remove duplicate values
+            return visiblePhaseLayers.indexOf(x) === index;
+        }).map(x => {
+            // Finally rename 'verbodsgebied' to 'no_parking' and 'hub' to 'stop'
+            if(x === 'hub') return 'stop';
+            if(x === 'verbodsgebied') return 'no_parking';
+            return x;
+        });
+        return policyHubs.filter(hub => {
+            return visiblePhaseLayers.indexOf(hub.geography_type) > -1;
+        });
+    }
+
     // Fetch hubs
     const fetchHubs = async () => {
-        const res = await fetch_hubs({
+        const all = await fetch_hubs({
             token: token,
             municipality: filter.gebied,
             phase: active_phase,
             visible_layers: visible_layers
         });
-        setPolicyHubs(res);
+        setPolicyHubs(all);
     };
 
     // Filter colums if guest user

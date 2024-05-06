@@ -146,14 +146,14 @@ function FilterbarPolicyHubs({
       dispatch(unsetVisibleLayer(id));
       id = `verbodsgebied-${key}`;
       dispatch(unsetVisibleLayer(id));
-      id = `analyse-${key}`;
+      id = `monitoring-${key}`;
       dispatch(unsetVisibleLayer(id));
     });
     
     // Only check active phase
     dispatch(setVisibleLayer(`hub-${active_phase}`));
     dispatch(setVisibleLayer(`verbodsgebied-${active_phase}`));
-    dispatch(setVisibleLayer(`analyse-${active_phase}`));
+    dispatch(setVisibleLayer(`monitoring-${active_phase}`));
     
     lastActivePhase = active_phase;
   }
@@ -252,7 +252,7 @@ function FilterbarPolicyHubs({
               {Object.keys(policyHubPhases).map(key => {
                 if(key !== 'concept') return;
 
-                const id = `analyse-${key}`;
+                const id = `monitoring-${key}`;
                 const title = policyHubPhases[key].title;
 
                 if(key === active_phase) {
