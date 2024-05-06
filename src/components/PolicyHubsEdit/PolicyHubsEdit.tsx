@@ -529,7 +529,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         {hubData.published_retire_date && <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Voorstel verwijderen:
+                                Archivering publiceren op:
                             </th>
                             <td>
                                 {moment(hubData.published_retire_date).format('DD-MM-YYYY HH:mm')}
@@ -537,7 +537,7 @@ const PolicyHubsEdit = ({
                         </tr>}
                         {hubData.retire_date && <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Verwijdering:
+                                {moment(hubData.retire_date).isBefore(moment()) ? 'Gearchiveerd op' : 'Archiveren op'}:
                             </th>
                             <td>
                                 {moment(hubData.retire_date).format('DD-MM-YYYY HH:mm')}
