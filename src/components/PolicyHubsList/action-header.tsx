@@ -143,16 +143,19 @@ const ActionHeader = ({
                 </Button>}
             </div>
             <div className="flex justify-end">
-               <Button theme="white"  onClick={() => {
-                    setDoShowImportModal(true);
-                }}>
-                    Importeer
-                </Button>
-                <Button theme="white" onClick={() => {
+                {selected_policy_hubs && selected_policy_hubs.length > 0 && <Button theme="white" onClick={() => {
                     setDoShowExportModal(true);
                 }}>
                     Exporteer
-                </Button>
+                </Button>}
+                {active_phase === 'concept' && <Button theme="white"  onClick={() => {
+                    setDoShowImportModal(true);
+                }}>
+                    Importeer
+                </Button>}
+                {active_phase !== 'concept' && <div style={{height: '55px'}} className="flex flex-col justify-center text-xs mr-4">
+                    Importeren kan in de conceptfase
+                </div>}
             </div>
         </div>
 
@@ -185,7 +188,7 @@ const ActionHeader = ({
             <ul className="my-4">
             <li>
                 &raquo; <a onClick={exportKml} className="cursor-pointer font-bold theme-color-blue">
-                Download zones als KML{filterGebied ? `, van gemeente ${filterGebied}` : ', van heel Nederland'}
+                  <u>Download de geselecteerde zones als KML</u>
                 </a>
             </li>
             </ul>
