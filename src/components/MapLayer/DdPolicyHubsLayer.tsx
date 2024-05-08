@@ -46,6 +46,7 @@ import { canEditHubs } from '../../helpers/authentication';
 import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 import { setMapStyle } from '../../actions/layers';
 import { cn } from "../../lib/utils";
+import moment from "moment";
 
 let TO_fetch_delay;
 
@@ -97,6 +98,12 @@ const DdPolicyHubsLayer = ({
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
   const queryParams = new URLSearchParams(window.location.search);
+
+  const retirement_phases = [
+    'retirement_concept',
+    'committed_retirement_concept',
+    'published_retirement'
+  ];
 
   // On component load: reset 'selected_policy_hubs'
   useEffect(() => {
@@ -191,7 +198,7 @@ const DdPolicyHubsLayer = ({
 
     renderHubs(
       map,
-      sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
+      sortedPolicyHubs(filterPolicyHubs(policyHubs, active_phase, visible_layers)),
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
@@ -200,6 +207,7 @@ const DdPolicyHubsLayer = ({
     policyHubs.length,
     selected_policy_hubs,
     hubs_in_drawing_mode,
+    active_phase,
     mapStyle
   ]);
 
@@ -231,8 +239,25 @@ const DdPolicyHubsLayer = ({
     return sortZonesInPreferedOrder(hubs)
   }
 
+  // Function that checks if a retirement hub should be shown in published/active
+  const shouldShowPhase = (active_phase: string, hub: any): boolean => {
+    // If hub isn't in 'retirement' phase: Just show it
+    if(retirement_phases.indexOf(hub.phase) <= -1) {
+      return true;
+    }
+    // In published phase, only show retirement concept with effective date >= now()
+    else if(active_phase === 'published' && moment(moment()).isBefore(hub.effective_date)) {
+      return true;
+    }
+    // - In active phase, only show retirement concept with effective date < now()
+    else if(active_phase === 'active' && moment(hub.effective_date).isBefore(moment())) {
+      return true;
+    }
+    return false;
+  }
+
   // Function that filters hubs based on the selected phases in the Filterbar
-  const filterPolicyHubs = (hubs: any, visible_layers: any) => {
+  const filterPolicyHubs = (hubs: any, active_phase: string, visible_layers: any) => {
     // If there was an error or no hubs were found: Return empty array
     if(! hubs || hubs.detail) {
       return [];
@@ -254,17 +279,17 @@ const DdPolicyHubsLayer = ({
         geoFilter.push({geo_type: 'stop', phase: 'published'});
         geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
         // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
-        geoFilter.push({geo_type: 'stop', phase: 'retirement_concept', 'effective_date': 'x'});
-        geoFilter.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
-        geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
+        retirement_phases.forEach((name) => {
+          geoFilter.push({geo_type: 'stop', phase: name});
+        })
       }
       else if(x === 'hub-active') {
         geoFilter.push({geo_type: 'stop', phase: 'active'});
         geoFilter.push({geo_type: 'stop', phase: 'active_retirement'});
         // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
-        geoFilter.push({geo_type: 'stop', phase: 'retirement_concept'});
-        geoFilter.push({geo_type: 'stop', phase: 'committed_retirement_concept'});
-        geoFilter.push({geo_type: 'stop', phase: 'published_retirement'});
+        retirement_phases.forEach((name) => {
+          geoFilter.push({geo_type: 'stop', phase: name});
+        })
       }
       // No parking
       else if(x === 'verbodsgebied-concept') {
@@ -278,15 +303,17 @@ const DdPolicyHubsLayer = ({
       else if(x === 'verbodsgebied-published') {
         geoFilter.push({geo_type: 'no_parking', phase: 'published'});
         // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
-        geoFilter.push({geo_type: 'no_parking', phase: 'retirement_concept'});
-        geoFilter.push({geo_type: 'no_parking', phase: 'committed_retirement_concept'});
-        geoFilter.push({geo_type: 'no_parking', phase: 'published_retirement'});      }
+        retirement_phases.forEach((name) => {
+          geoFilter.push({geo_type: 'no_parking', phase: name});
+        });
+      }
       else if(x === 'verbodsgebied-active') {
         geoFilter.push({geo_type: 'no_parking', phase: 'active'});
         // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
-        geoFilter.push({geo_type: 'no_parking', phase: 'retirement_concept'});
-        geoFilter.push({geo_type: 'no_parking', phase: 'committed_retirement_concept'});
-        geoFilter.push({geo_type: 'no_parking', phase: 'published_retirement'});      }
+        retirement_phases.forEach((name) => {
+          geoFilter.push({geo_type: 'no_parking', phase: name});
+        });
+      }
       // Monitoring
       else if(x === 'monitoring-concept') {
         geoFilter.push({geo_type: 'monitoring', phase: 'concept'});
@@ -299,7 +326,13 @@ const DdPolicyHubsLayer = ({
       const wannaHave = geoFilter.find(keep => {
         return keep.geo_type === x.geography_type && keep.phase === x.phase;
       });
-      return wannaHave;
+      // Now do two extra checks:
+      // - In published phase, only show retirement concept with effective date >= now()
+      // - In active phase, only show retirement concept with effective date < now()
+      const hub = x;
+      const shouldShow = shouldShowPhase(active_phase, hub);
+
+      return wannaHave && shouldShow;
     });
 
     return filteredHubs;
