@@ -6,7 +6,7 @@ export const commit_to_concept = async (token, data) => {
   if(! data.publish_on) return;
   if(! data.effective_on) return;
   
-  const url = `${process.env.REACT_APP_MDS_TEST_URL}/admin/zones/publish`;
+  const url = `${process.env.REACT_APP_MDS_URL}/admin/zones/publish`;
   const response = await fetch(url, Object.assign({}, getFetchOptions(token), {
     method: 'POST',
     body: JSON.stringify({

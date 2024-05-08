@@ -24,7 +24,7 @@ export const fetch_hubs = async ({
   phase,
   visible_layers
 }) => {
-  let url = `${process.env.REACT_APP_MDS_TEST_URL}/${token ? 'admin' : 'public'}/zones`+
+  let url = `${process.env.REACT_APP_MDS_URL}/${token ? 'admin' : 'public'}/zones`+
               `?municipality=${municipality}`;
   // Add phases to URL
   visible_layers.forEach(layer => {
