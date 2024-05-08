@@ -57,9 +57,17 @@ export const fetch_hubs = async ({
     url += `&phases=published_retirement`
   }
 
+  // This works:
+  // const options = token ? getHeaders(token) : {};
+  // theFetch = fetch(url, options);
+  // const response = await theFetch;
+  // const json = await response.json();
+  // return json;
+  // return;
+
   // Abort previous fetch
   if(theFetch) {
-    theFetch.abort()
+    // theFetch.abort()
   }
   // Now do a new fetch
   return new Promise(async (resolve, reject) => {

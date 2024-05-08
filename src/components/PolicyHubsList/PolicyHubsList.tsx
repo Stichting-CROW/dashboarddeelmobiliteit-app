@@ -81,7 +81,7 @@ const PolicyHubsList = () => {
 
     // Populate table data if policyHubs change
     useEffect(() => {
-        if(! policyHubs) return;
+        if(! policyHubs || policyHubs.length === 0) return;
 
         // Only keep hubs in active phase
         const filteredHubs = filterVisible(
@@ -150,6 +150,8 @@ const PolicyHubsList = () => {
             && x.id !== 'select'
         );
     }
+
+    if(tableData.length === 0) return <></>
 
     return (
         <>
