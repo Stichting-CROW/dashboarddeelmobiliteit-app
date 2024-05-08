@@ -27,6 +27,7 @@ import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs, setSh
 import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
 import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
 import moment from 'moment';
+import { canEditHubs } from '../../helpers/authentication';
 
 const PolicyHubsEdit = ({
     fetchHubs,
@@ -46,6 +47,8 @@ const PolicyHubsEdit = ({
 
     // Get gebied / municipality code
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
+
+    const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
 
     const is_drawing_enabled = useSelector((state: StateType) => {
         return state.policy_hubs ? state.policy_hubs.is_drawing_enabled : [];
@@ -459,7 +462,9 @@ const PolicyHubsEdit = ({
         || hubData.phase === 'retirement_committed_concept'
         || hubData.phase === 'committed_retirement_concept'
         || hubData.phase === 'published_retirement';
-
+        
+    console.log('hubData', hubData)
+    
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
@@ -589,6 +594,12 @@ const PolicyHubsEdit = ({
                     value={hubData.internal_id || ""}
                     onChange={changeHandler}
                     classes="w-full"
+                    disabled={
+                        ! canEditHubs(acl) ||
+                        hubData.phase === 'published' ||
+                        hubData.phase === 'active' ||
+                        hubData.phase === 'published_retirement'
+                    }
                 />
             </div>
 
@@ -604,12 +615,16 @@ const PolicyHubsEdit = ({
                 setHubData={setHubData}
             />}
 
-            {! is_retirement_hub && <>
+            {(true || ! is_retirement_hub) && <>
 
                 <div className={`
                     py-2
+                    relative
                     ${hubData.geography_type === 'stop' ? 'visible' : 'invisible'}
                 `}>
+                    {! canEditHubs(acl) && <div>
+                        <div className="absolute top-0 right-0 bottom-0 left-0" />
+                    </div>}
                     <div className="
                         flex
                         rounded-lg bg-white
@@ -651,7 +666,10 @@ const PolicyHubsEdit = ({
                     </div>
                 </div>
 
-                <div className={hubData.geography_type === 'stop' ? 'visible' : 'invisible'}>
+                <div className={`${hubData.geography_type === 'stop' ? 'visible' : 'invisible'} relative`}>
+                    {! canEditHubs(acl) && <div>
+                        <div className="absolute top-0 right-0 bottom-0 left-0" />
+                    </div>}
                     <p className="mb-2 text-sm">
                         Limiet <a onClick={() => {
                             updateCapacityType('combined');
