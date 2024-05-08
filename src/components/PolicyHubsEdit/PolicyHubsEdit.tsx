@@ -554,22 +554,42 @@ const PolicyHubsEdit = ({
                                 {moment(hubData.retire_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>}
-                        <tr title={`Aangemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
-                            <th align="left" style={{verticalAlign: 'top'}}>
-                                Gemaakt door:
-                            </th>
-                            <td>
-                                {hubData.created_by}
-                            </td>
-                        </tr>
-                        <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
-                            <th align="left" style={{verticalAlign: 'top'}}>
-                                Gewijzigd door:
-                            </th>
-                            <td>
-                                {hubData.last_modified_by}
-                            </td>
-                        </tr>
+                        {canEditHubs(acl) && <>
+                            <tr title={`Aangemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
+                                <th align="left" style={{verticalAlign: 'top'}}>
+                                    Gemaakt door:
+                                </th>
+                                <td>
+                                    {hubData.created_by}
+                                </td>
+                            </tr>
+                            <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
+                                <th align="left" style={{verticalAlign: 'top'}}>
+                                    Gewijzigd door:
+                                </th>
+                                <td>
+                                    {hubData.last_modified_by}
+                                </td>
+                            </tr>
+                        </>}
+                        {! canEditHubs(acl) && <>
+                            <tr>
+                                <th align="left" style={{verticalAlign: 'top'}}>
+                                    Gemaakt op:
+                                </th>
+                                <td>
+                                    {moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left" style={{verticalAlign: 'top'}}>
+                                    Gewijzigd op:
+                                </th>
+                                <td>
+                                    {moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}
+                                </td>
+                            </tr>
+                        </>}
                     </tbody>
                 </table>
             </div>}

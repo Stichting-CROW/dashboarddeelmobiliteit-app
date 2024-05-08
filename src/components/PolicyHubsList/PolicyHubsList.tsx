@@ -36,6 +36,7 @@ function populateTableData(policyHubs) {
             retire_date: hub.retire_date ? moment(hub.retire_date).format('YYYY-MM-DD HH:mm') : '',
             published_retire_date: hub.published_retire_date ? moment(hub.published_retire_date).format('YYYY-MM-DD HH:mm') : '',
             propose_retirement: hub.propose_retirement,
+            area: hub.area
             // vervangt_zone: 0,
         }
     });

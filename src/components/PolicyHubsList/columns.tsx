@@ -23,6 +23,20 @@ export type Hub = {
   // fase: string
 }
 
+const flyTo = (area, zone_id) => {
+  if(! area) return;
+  if(! zone_id) return;
+
+  // Trigger setSelectedZone custom event (see FilterbarZones.tsx)
+  const event = new CustomEvent('flyToHubTrigger', {
+    detail: {
+      area,
+      zone_id
+    }
+  });
+  window.dispatchEvent(event);
+}
+
 export const columns: ColumnDef<Hub>[] = [
   {
     id: "select",
@@ -62,6 +76,20 @@ export const columns: ColumnDef<Hub>[] = [
   //     filterVariant: 'select',
   //   },
   // },
+  {
+    accessorKey: "fly_to_hub",
+    header: ({ column }) => (
+      <div className="flex justify-start whitespace-nowrap">
+      </div>
+    ),
+    cell: (info: any) => {
+      return <div className="cursor-pointer" title="Bekijk zone op de kaart" onClick={() => {
+        flyTo(info.row.original.area, info.row.original.id)
+      }}>
+        🗺️
+      </div>
+    }
+  },
   {
     accessorKey: "type",
     header: ({ column }) => (

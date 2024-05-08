@@ -3,6 +3,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // import { useSearchParams } from 'react-router-dom'
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
+import st from 'geojson-bounds';
 
 import {
   setHubsInDrawingMode,
@@ -116,6 +117,50 @@ const DdPolicyHubsLayer = ({
       clearTimeout(TO_fetch_delay);
     }
   }, []);
+
+  useEffect(() => {
+    if(! map) return;
+
+    // Event handler for flying to a hub
+    initFlyToEventHandler();
+
+    return () => {
+      destroyFlyToEventHandler();
+    }
+  }, [map]);
+
+  const flyToHub = async (e) => {
+    if(! map) return;
+
+    const area = e.detail?.area;
+    const zone_id = e.detail?.zone_id;
+
+    if(! area) return;
+    if(! zone_id) return;
+
+    // Set selected hub
+    // dispatch(setSelectedPolicyHubs([zone_id]));
+
+    // Get hub extent
+    const extent = st.extent(area);
+
+    // Fly to hub
+    map.fitBounds(extent);
+  }
+  
+  const initFlyToEventHandler = () => {
+    console.log('init');
+    // @ts-ignore
+    window.addEventListener('flyToHubTrigger', flyToHub)
+    return () => {
+      // @ts-ignore
+      window.removeEventListener('flyToHubTrigger', flyToHub);
+    }
+  }
+
+  const destroyFlyToEventHandler = () => {
+
+  }
 
   // On component load: Set background layer to 'satellite layer'
   useEffect(() => {
