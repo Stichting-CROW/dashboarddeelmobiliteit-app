@@ -31,7 +31,7 @@ const removeHubsFromMap = (map: any) => {
 
 async function renderPolygons_fill(map, geojson) {
     if(! map) return;
-    // if(! map.isStyleLoaded()) return;
+    if(! map.isStyleLoaded()) return;
     
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`
@@ -43,6 +43,7 @@ async function renderPolygons_fill(map, geojson) {
       map.addSource(sourceId, {
         type: 'geojson',
         data: geojson,
+        tolerance: 0.5,// Simplies polygons for performance. Defaults to 0.375. Higher is simpler.
         generateId: true // This ensures that all features have unique IDs
       });
   

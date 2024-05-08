@@ -41,9 +41,12 @@ function populateTableData(policyHubs) {
     });
 }
 
+let TO_fetch_delay;
+
 const PolicyHubsList = () => {
     const dispatch = useDispatch();
     
+    const [counter, setCounter] = useState<number>(0);
     const [policyHubs, setPolicyHubs] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [doShowExportModal, setDoShowExportModal] = useState(false);
@@ -64,6 +67,11 @@ const PolicyHubsList = () => {
     // On load: Hide edit modal
     useEffect(() => {
         dispatch(setShowEditForm(false));
+
+        // Clear timeouts
+        return () => {
+            clearTimeout(TO_fetch_delay)
+        }
     }, [])
     
     // Fetch hubs
@@ -81,6 +89,7 @@ const PolicyHubsList = () => {
 
     // Populate table data if policyHubs change
     useEffect(() => {
+        if(! active_phase) return;
         if(! policyHubs || policyHubs.length === 0) return;
 
         // Only keep hubs in active phase
@@ -90,9 +99,12 @@ const PolicyHubsList = () => {
 
         (() => {
             setTableData(populateTableData(filteredHubs));
+            // setCounter(counter+1);
         })();
     }, [
-        policyHubs
+        policyHubs,
+        policyHubs.length,
+        active_phase
     ]);
 
     const filterPhase = (policyHubs) => {
@@ -121,17 +133,23 @@ const PolicyHubsList = () => {
 
     // Fetch hubs
     const fetchHubs = async () => {
-        try {
-            const all: any = await fetch_hubs({
-                token: token,
-                municipality: filter.gebied,
-                phase: active_phase,
-                visible_layers: visible_layers
-            });
-            setPolicyHubs(all);
-        } catch(err) {
-            // console.error(err);
-        }
+        // Add a small delay to prevent mulitple fetches
+        if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
+        // TO_fetch_delay = setTimeout(async () => {
+            try {
+                const all: any = await fetch_hubs({
+                    token: token,
+                    municipality: filter.gebied,
+                    phase: active_phase,
+                    visible_layers: visible_layers
+                });
+                setPolicyHubs(all);
+            } catch(err) {
+                // console.error(err);
+            }
+        // }, 5)
+        // The issue seems to be like:
+        // If data is loaded 'late' (i.e. in timeout), the data table does not update its data
     };
 
     // Filter colums if guest user
@@ -151,8 +169,6 @@ const PolicyHubsList = () => {
         );
     }
 
-    if(tableData.length === 0) return <></>
-
     return (
         <>
             {canEditHubs(acl) && <ActionHeader
@@ -162,7 +178,7 @@ const PolicyHubsList = () => {
             <div data-name="body" className="mx-auto p-4" style={{
                 width: 'fit-content'
             }}>
-                <DataTable columns={filterColumnsForGuest(columns)} data={tableData} />
+                <DataTable key="data-table" columns={filterColumnsForGuest(columns)} data={tableData} />
             </div>
         </>
     );

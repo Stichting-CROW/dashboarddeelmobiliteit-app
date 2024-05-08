@@ -47,6 +47,8 @@ import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement'
 import { setMapStyle } from '../../actions/layers';
 import { cn } from "../../lib/utils";
 
+let TO_fetch_delay;
+
 const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
@@ -102,6 +104,10 @@ const DdPolicyHubsLayer = ({
     dispatch(setSelectedPolicyHubs([]));
     dispatch(setIsDrawingEnabled(false));
     dispatch(setShowList(false));
+
+    return () => {
+      clearTimeout(TO_fetch_delay);
+    }
   }, []);
 
   // On component load: Set background layer to 'satellite layer'
@@ -301,19 +307,22 @@ const DdPolicyHubsLayer = ({
 
   // Fetch hubs
   const fetchHubs = async () => {
-    try {
-      const res: any = await fetch_hubs({
-        token: token,
-        municipality: filter.gebied,
-        phase: active_phase,
-        visible_layers: visible_layers
-      });
-      setPolicyHubs(res);
-    }
-    catch(err) {
-      // console.error(err);
-    }
-
+    // Add a small delay to prevent multiple fetches
+    if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
+    // TO_fetch_delay = setTimeout(async () => {
+      try {
+        const res: any = await fetch_hubs({
+          token: token,
+          municipality: filter.gebied,
+          phase: active_phase,
+          visible_layers: visible_layers
+        });
+        setPolicyHubs(res);
+      }
+      catch(err) {
+        // console.error(err);
+      }
+    // }, 100);
     return true;
   };
 

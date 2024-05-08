@@ -24,7 +24,7 @@ export const fetch_hubs = async ({
   phase,
   visible_layers
 }) => {
-  let url = `https://mds.test.dashboarddeelmobiliteit.nl/${token ? 'admin' : 'public'}/zones`+
+  let url = `${process.env.REACT_APP_MDS_TEST_URL}/${token ? 'admin' : 'public'}/zones`+
               `?municipality=${municipality}`;
   // Add phases to URL
   visible_layers.forEach(layer => {
@@ -57,6 +57,9 @@ export const fetch_hubs = async ({
     url += `&phases=published_retirement`
   }
 
+  // Don't execute if no phase was given, as at least 1 phases param should be specified
+  if(url.indexOf('phases=') <= -1) return;
+
   // This works:
   // const options = token ? getHeaders(token) : {};
   // theFetch = fetch(url, options);
@@ -67,7 +70,7 @@ export const fetch_hubs = async ({
 
   // Abort previous fetch
   if(theFetch) {
-    // theFetch.abort()
+    // theFetch.abort();
   }
   // Now do a new fetch
   return new Promise(async (resolve, reject) => {

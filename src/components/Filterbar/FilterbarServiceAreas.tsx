@@ -287,25 +287,27 @@ function FilterbarServiceAreas({
   }
 
   // Get public zones on component load, and keep refreshing
-  useEffect(() => {
-    // Decide on the function to call (admin or public)
-    const getZonesFunc = token ? getAdminZones : getPublicZones;
-    // On load: get zones
-    let TO_local = setTimeout(async () => {
-      getZonesFunc();
-    }, 5);
-    // Set an interval: refresh data every 60s
-    let TO_local_interval = setInterval(async () => {
-      getZonesFunc();
-    }, 60*1000);
-    // Cleanup
-    return () => {
-      clearTimeout(TO_local);
-      clearInterval(TO_local_interval);
-    }
-  }, [
-    filterGebied
-  ])
+  // useEffect(() => {
+  //   return;
+
+  //   // Decide on the function to call (admin or public)
+  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
+  //   // On load: get zones
+  //   let TO_local = setTimeout(async () => {
+  //     getZonesFunc();
+  //   }, 5);
+  //   // Set an interval: refresh data every 60s
+  //   let TO_local_interval = setInterval(async () => {
+  //     getZonesFunc();
+  //   }, 60*1000);
+  //   // Cleanup
+  //   return () => {
+  //     clearTimeout(TO_local);
+  //     clearInterval(TO_local_interval);
+  //   }
+  // }, [
+  //   filterGebied
+  // ])
 
   const autoSaveZone = async () => {
     return await saveZone();

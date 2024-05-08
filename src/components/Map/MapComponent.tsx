@@ -124,12 +124,12 @@ const MapComponent = (props): JSX.Element => {
   }, [location]);
 
   // Get public zones on component load
-  useEffect(() => {
-    // Decide on the function to call (admin or public)
-    const getZonesFunc = token ? getAdminZones : getPublicZones;
-    // Get zones
-    getZonesFunc();
-  }, [])
+  // useEffect(() => {
+  //   // Decide on the function to call (admin or public)
+  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
+  //   // Get zones
+  //   getZonesFunc();
+  // }, [])
 
   const getAdminZones = async () => {
     const sortedZones = await fetchAdminZones(token, filterGebied);
