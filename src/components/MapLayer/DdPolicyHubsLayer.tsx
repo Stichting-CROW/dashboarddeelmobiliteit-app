@@ -700,7 +700,7 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Hub edit form */}
-    {(canEditHubs(acl) && didSelectOneHub() && show_edit_form && ! show_commit_form) && <ActionModule>
+    {(didSelectOneHub() && show_edit_form && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit
         fetchHubs={fetchHubs}
         all_policy_hubs={policyHubs}

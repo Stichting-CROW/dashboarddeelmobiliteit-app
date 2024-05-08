@@ -8,5 +8,4 @@ export const canEditHubs = (acl) => {
     'ORGANISATION_ADMIN'
   ];
   return acl && acl.privileges?.indexOf('ORGANISATION_ADMIN') > -1;
-  return true;
 }

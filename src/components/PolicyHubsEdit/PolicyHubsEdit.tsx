@@ -438,7 +438,10 @@ const PolicyHubsEdit = ({
         return (
             <div>
                 <div className={`${labelClassNames} font-bold`}>
-                    Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
+                    Zone {canEditHubs(acl) ?
+                        (isNewZone ? 'toevoegen' : 'wijzigen')
+                        : 'bekijken'
+                    }
                 </div>
                 <p className="my-2">
                     Teken een gebied op de kaart.<br /><br />
@@ -463,12 +466,13 @@ const PolicyHubsEdit = ({
         || hubData.phase === 'committed_retirement_concept'
         || hubData.phase === 'published_retirement';
         
-    console.log('hubData', hubData)
-    
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
-                Zone {isNewZone ? 'toevoegen' : 'wijzigen'}
+                Zone {canEditHubs(acl) ?
+                    (isNewZone ? 'toevoegen' : 'wijzigen')
+                    : 'bekijken'
+                }
             </div>
 
             {hubData?.prev_geographies?.[0] && <div className="my-4">
@@ -581,6 +585,7 @@ const PolicyHubsEdit = ({
                     value={hubData.name || ""}
                     onChange={changeHandler}
                     classes="w-full"
+                    disabled={! canEditHubs(acl)}
                 />
             </div>}
 
@@ -603,17 +608,23 @@ const PolicyHubsEdit = ({
                 />
             </div>
 
-            {hubData.phase === 'concept' && <PolicyHubsEdit_geographyType
-                defaultStopProperties={defaultStopProperties}
-                hubData={hubData}
-                setHubData={setHubData}
-                setHasUnsavedChanges={setHasUnsavedChanges}
-            />}
+            {hubData.phase === 'concept' && <div className="relative">
+                {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
+                <PolicyHubsEdit_geographyType
+                    defaultStopProperties={defaultStopProperties}
+                    hubData={hubData}
+                    setHubData={setHubData}
+                    setHasUnsavedChanges={setHasUnsavedChanges}
+                />
+            </div>}
             
-            {hubData.phase === 'concept' && <PolicyHubsEdit_isVirtual
-                hubData={hubData}
-                setHubData={setHubData}
-            />}
+            {hubData.phase === 'concept' && <div className="relative">
+                {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
+                <PolicyHubsEdit_isVirtual
+                    hubData={hubData}
+                    setHubData={setHubData}
+                />
+            </div>}
 
             {(true || ! is_retirement_hub) && <>
 
@@ -754,7 +765,7 @@ const PolicyHubsEdit = ({
                 Sluiten
             </Button>
 
-            {hubData.phase === 'concept' && <>
+            {canEditHubs(acl) && hubData.phase === 'concept' && <>
                 {(! isNewZone) && <Button
                     onClick={toggleDrawingForHub}
                     theme={is_drawing_enabled ? `greenHighlighted` : ''}
@@ -768,7 +779,7 @@ const PolicyHubsEdit = ({
                 </Button>}
             </>}
 
-            {! is_retirement_hub && <Button
+            {canEditHubs(acl) && ! is_retirement_hub && <Button
                 theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
                 style={{marginRight: 0}}
                 onClick={saveZone}
