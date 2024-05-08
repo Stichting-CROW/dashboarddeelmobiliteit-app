@@ -3,12 +3,11 @@ const preprocessKmlFile = async ({
   gm_code,
   body
 }) => {
-
   const response = await fetch(`${process.env.REACT_APP_MDS_URL}/admin/kml/import?municipality=${gm_code}`, {
     method: "POST",
     body,
     headers: {
-      'Content-Type': 'application/json',
+      // 'Content-Type': 'application/json',
       'charset': 'utf-8',
       'Authorization': `Bearer ${token}`
     }
@@ -45,12 +44,11 @@ const importKmlFile = async ({
   gm_code,
   body
 }) => {
-
   const response = await fetch(`${process.env.REACT_APP_MDS_URL}/admin/bulk_insert_zones`, {
     method: "POST",
     body: JSON.stringify(body),
     headers: {
-      'Content-Type': 'application/json; charset=utf-8',
+      // 'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${token}`
     }
   });
