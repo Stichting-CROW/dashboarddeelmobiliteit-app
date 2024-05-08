@@ -226,7 +226,10 @@ const PolicyHubsEdit = ({
             if(updatedZone && updatedZone.zone_id) {
                 postSaveOrDeleteCallback(updatedZone.zone_id);
             }
-            notify(toast, 'Zone opgeslagen')
+            // Notify
+            notify(toast, 'Zone opgeslagen');
+            // Hide edit form
+            dispatch(setShowEditForm(false));
         }
         setHasUnsavedChanges(false);
     }
