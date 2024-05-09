@@ -666,8 +666,11 @@ const DdPolicyHubsLayer = ({
 
     {canEditHubs(acl) && <ActionButtons>
       {/* Teken hub button */}
-      {(! didSelectMultipleHubs() && ! show_edit_form && ! is_drawing_enabled && active_phase === 'concept') && 
-        <Button theme="white" onClick={() => dispatch(setIsDrawingEnabled('new'))}>
+      {(! is_drawing_enabled && active_phase === 'concept') && 
+        <Button theme="white" onClick={() => {
+          dispatch(setIsDrawingEnabled('new'))
+          dispatch(setSelectedPolicyHubs([]))
+        }}>
           Teken nieuwe zone
         </Button>
       }
