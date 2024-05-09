@@ -149,7 +149,6 @@ const DdPolicyHubsLayer = ({
   }
   
   const initFlyToEventHandler = () => {
-    console.log('init');
     // @ts-ignore
     window.addEventListener('flyToHubTrigger', flyToHub)
     return () => {
@@ -177,9 +176,10 @@ const DdPolicyHubsLayer = ({
   // onComponentUnLoad
   useEffect(() => {
     return () => {
+      console.log('unload')
       setTimeout(() => {
         removeHubsFromMap(map);
-      }, 500)
+      }, 250)//TODO: Map is unloaded lots of times
     };
   }, []);
 
@@ -239,8 +239,10 @@ const DdPolicyHubsLayer = ({
   useEffect(() => {
     // Return
     if(! map) return;
+    if(! map.isStyleLoaded()) return;
     if(! policyHubs) return;
 
+    // console.log('renderHubs', 'policyHubs.length', policyHubs.length, 'selected_policy_hubs', selected_policy_hubs.length);
     renderHubs(
       map,
       sortedPolicyHubs(filterPolicyHubs(policyHubs, active_phase, visible_layers)),
@@ -253,7 +255,8 @@ const DdPolicyHubsLayer = ({
     selected_policy_hubs,
     hubs_in_drawing_mode,
     active_phase,
-    mapStyle
+    mapStyle,
+    map?.isStyleLoaded()
   ]);
 
   useEffect(() => {
@@ -515,6 +518,7 @@ const DdPolicyHubsLayer = ({
     if(! e.features || ! e.features[0]) {
       return;
     }
+    // console.log('clickHandler')
 
     // Get coordinates and props
     const coordinates = e.lngLat;

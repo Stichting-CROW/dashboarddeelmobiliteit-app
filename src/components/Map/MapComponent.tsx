@@ -356,95 +356,95 @@ const MapComponent = (props): JSX.Element => {
 
   // Auto reload zones on displaymode update
   // only on the zones-page (public or admin)
-  useEffect(() => {
-    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
-    // Decide on the function to call (admin or public)
-    const getZonesFunc = token ? getAdminZones : getPublicZones;
-    // Get zones
-    getZonesFunc();
-  }, [
-    stateLayers.displaymode
-  ]);
+  // useEffect(() => {
+  //   if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
+  //   // Decide on the function to call (admin or public)
+  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
+  //   // Get zones
+  //   getZonesFunc();
+  // }, [
+  //   stateLayers.displaymode
+  // ]);
 
   /**
    * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
    * Load zones onto the map
   */
-  useEffect(() => {
-    if(! didMapLoad) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
 
-    // If we are not on zones page: remove all drawed zones from the map
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
-      // Delete draws
-      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-        window['CROW_DD'].theDraw.deleteAll();
-        // #TODO Not sure why this is needed.
-        // If the timeout is not here, the draw polygons keep visible
-        // if you switch from zones-admin to zones-public
-        setTimeout(() => {
-          window['CROW_DD'].theDraw.deleteAll();
-        }, 500);
-      }
-      // Also, hide isochrones layer
-      if(window['ddMap'].isStyleLoaded()) {
-        window['ddMap'].U.hide('zones-isochrones')
-      }
-      return;
-    }
+  //   // If we are not on zones page: remove all drawed zones from the map
+  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
+  //     // Delete draws
+  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+  //       window['CROW_DD'].theDraw.deleteAll();
+  //       // #TODO Not sure why this is needed.
+  //       // If the timeout is not here, the draw polygons keep visible
+  //       // if you switch from zones-admin to zones-public
+  //       setTimeout(() => {
+  //         window['CROW_DD'].theDraw.deleteAll();
+  //       }, 500);
+  //     }
+  //     // Also, hide isochrones layer
+  //     if(window['ddMap'].isStyleLoaded()) {
+  //       window['ddMap'].U.hide('zones-isochrones')
+  //     }
+  //     return;
+  //   }
 
-    (async () => {
-      // Remove existing zones first
-      window['CROW_DD'].theDraw.deleteAll();
-      const filter = {
-        municipality: filterGebied
-      }
-      addAdminZonesToMap(token, filter);
-      setDidMapDrawLoad(true)
-      // Force DOM update
-      setCounter(counter+1)
-    })()
+  //   (async () => {
+  //     // Remove existing zones first
+  //     window['CROW_DD'].theDraw.deleteAll();
+  //     const filter = {
+  //       municipality: filterGebied
+  //     }
+  //     addAdminZonesToMap(token, filter);
+  //     setDidMapDrawLoad(true)
+  //     // Force DOM update
+  //     setCounter(counter+1)
+  //   })()
 
-    return;
-  }, [
-    didMapLoad,
-    stateLayers.displaymode,
-    filterGebied
-  ])
+  //   return;
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode,
+  //   filterGebied
+  // ])
 
   /**
    * MICROHUBS / ZONES [PUBLIC] LOGIC
    * 
    * Load zones onto the map
-  */
-  useEffect(() => {
-    // Make sure map loaded
-    if(! didMapLoad) return;
-    // Make sure mapDraw loaded
-    if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
+  // */
+  // useEffect(() => {
+  //   // Make sure map loaded
+  //   if(! didMapLoad) return;
+  //   // Make sure mapDraw loaded
+  //   if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
 
-    // If we are not on zones page: remove all drawed zones from the map
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
-      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-        window['CROW_DD'].theDraw.deleteAll();
-      }
-      return;
-    }
-    // If on zones page: add zones to map
-    (async () => {
-      // Remove existing zones fist
-      window['CROW_DD'].theDraw.deleteAll();
-      const filter = {
-        municipality: filterGebied
-      }
-      addPublicZonesToMap(token, filter);
-      setDidMapDrawLoad(true)
-    })()
-  }, [
-    didMapLoad,
-    stateLayers.displaymode,
-    filterGebied
-  ])
+  //   // If we are not on zones page: remove all drawed zones from the map
+  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
+  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+  //       window['CROW_DD'].theDraw.deleteAll();
+  //     }
+  //     return;
+  //   }
+  //   // If on zones page: add zones to map
+  //   (async () => {
+  //     // Remove existing zones fist
+  //     window['CROW_DD'].theDraw.deleteAll();
+  //     const filter = {
+  //       municipality: filterGebied
+  //     }
+  //     addPublicZonesToMap(token, filter);
+  //     setDidMapDrawLoad(true)
+  //   })()
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode,
+  //   filterGebied
+  // ])
 
   /**
    * SET SOURCES AND LAYERS

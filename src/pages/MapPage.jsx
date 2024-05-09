@@ -104,9 +104,6 @@ function Map({mode, mapContainer}) {
     activeSources.push('luchtfoto-pdok');
   }
 
-  // console.log('layers', layers)
-  // console.log('activeSources', activeSources)
-
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
