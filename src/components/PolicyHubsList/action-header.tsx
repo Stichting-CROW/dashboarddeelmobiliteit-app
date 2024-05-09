@@ -73,7 +73,7 @@ const ActionHeader = ({
                 });
             }
             else {
-                notify(toast, 'Zone verwijderd');
+                notify(toast, 'Zone(s) verwijderd');
                 dispatch(setSelectedPolicyHubs([]))
                 dispatch(setHubRefetchCounter(hub_refetch_counter+1))
                 fetchHubs();
