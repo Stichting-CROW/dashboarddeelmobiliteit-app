@@ -25,7 +25,7 @@ export const update_url = (params) => {
         url.searchParams.delete('visible');
         params.visible_layers.forEach((x) => {
             if(allowedLayerNames.indexOf(x) <= -1) {
-                console.log('update-url - layer name not allowed. Layer name: ', x)
+                // console.log('update-url - layer name not allowed. Layer name: ', x)
                 return;
             }
             url.searchParams.append('visible', x);

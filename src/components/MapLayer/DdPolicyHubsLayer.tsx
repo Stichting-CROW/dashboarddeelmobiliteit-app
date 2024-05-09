@@ -293,6 +293,12 @@ const DdPolicyHubsLayer = ({
     if(retirement_phases.indexOf(hub.phase) <= -1) {
       return true;
     }
+    else if(active_phase === 'concept' && hub.phase === 'retirement_concept') {
+      return true;
+    }
+    else if(active_phase === 'committed_concept' && hub.phase === 'committed_retirement_concept') {
+      return true;
+    }
     // In published phase, only show retirement concept with effective date >= now()
     else if(active_phase === 'published' && moment(moment()).isBefore(hub.effective_date)) {
       return true;
