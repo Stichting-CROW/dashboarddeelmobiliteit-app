@@ -13,15 +13,32 @@ export const getMapStyles = () => {
     // NOTE: mapbox:// urls are not supported anymore.
     // See https://github.com/maplibre/maplibre-gl-js/issues/1225#issuecomment-1118769488
     base: nine3030Style,
-    satelite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
+    satellite: 'https://api.maptiler.com/maps/hybrid/style.json?key=ZH8yI08EPvuzF57Lyc61'
+  }
+}
+
+export const setBackgroundLayer = (map, name, setMapStyle) => {
+  if(! setMapStyle) {
+    console.error('setMapStyle not given');
+    return;
+  }
+
+  setMapStyle(name);
+
+  if(name === 'base') {
+    map.U.hide('luchtfoto-pdok');
+  }
+  else {
+    map.U.show(name);
   }
 }
 
 // Variable to keep track of the map style that we used last
 let mapStyleHash = md5(getMapStyles().base);
-// Function setMapStyle -- It reorders all layers, so the layers stay in the order we want
-export const setMapStyle = async (map, styleUrlOrObject) => {
+// Function applyMapStyle -- It reorders all layers, so the layers stay in the order we want
+export const applyMapStyle = async (map, styleUrlOrObject) => {
   if(! map) return;
+  if(! map.isStyleLoaded()) return;
   if(! styleUrlOrObject) return;
 
   const newMapStyleHash = md5(styleUrlOrObject);

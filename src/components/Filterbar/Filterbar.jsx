@@ -23,6 +23,7 @@ import FilterbarServiceAreas from './FilterbarServiceAreas';
 import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
+import FilterbarPolicyHubs from './FilterbarPolicyHubs';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -33,6 +34,7 @@ import {
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -63,8 +65,9 @@ function Filterbar({
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
   const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
+  const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
-  
+
   const showdatum=isrentals||ispark||!isLoggedIn;
   const showduur=isrentals;
   const showparkeerduur=ispark;
@@ -107,9 +110,16 @@ function Filterbar({
     />
   }
 
-  // Zones
+  // Servicegebieden
   if(isservicegebieden) {
     return <FilterbarServiceAreas
+      hideLogo={hideLogo}
+    />
+  }
+
+  // Beleidshubs
+  else if(isPolicyHubs) {
+    return <FilterbarPolicyHubs
       hideLogo={hideLogo}
     />
   }

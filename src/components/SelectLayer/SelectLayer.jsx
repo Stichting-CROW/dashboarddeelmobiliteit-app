@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
+import { setBackgroundLayer } from '../Map/MapUtils/map';
 
 import {StateType} from '../../types/StateType';
 
@@ -18,13 +19,14 @@ import {
   DISPLAYMODE_VERHUURDATA_HB,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
-  DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_POLICY_HUBS
 } from '../../reducers/layers.js';
 
-import {getMapStyles, setMapStyle} from '../Map/MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from '../Map/MapUtils/map.js';
+import { setMapStyle } from '../../actions/layers';
 
-function SelectLayer(props) {
-  // const {setLayers, setActiveSource} = props;
+function SelectLayer() {
   const dispatch = useDispatch()
   
   const showZoneOnOff = useSelector((state: StateType) => {
@@ -62,8 +64,6 @@ function SelectLayer(props) {
   if(displayMode===DISPLAYMODE_OTHER) {
     return null; // no layer selection
   }
-
-  const mapStyles = getMapStyles();
 
   return (
     <SlideBox name="SelectLayer" direction="right" options={{
@@ -131,21 +131,23 @@ function SelectLayer(props) {
           </span>
         </div> : null }
 
-        {displayMode===DISPLAYMODE_ZONES_ADMIN && <>
-          <div data-type="map-style-default" className={`layer${layers.map_style!=='default' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'default' })
-            setMapStyle(window.ddMap, mapStyles.base)
+        {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
+          <div data-type="map-style-default" className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} onClick={() => {
+            setBackgroundLayer(window['ddMap'], 'base', (name) => {
+              dispatch(setMapStyle(name))
+            });
           }}>
             <span className="layer-title">
               Terrein
             </span>
           </div>
-          <div data-type="map-style-satelite" className={`layer${layers.map_style!=='satelite' ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satelite' })
-            setMapStyle(window.ddMap, mapStyles.satelite)
+          <div data-type="map-style-satellite" className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} onClick={() => {
+            setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', (name) => {
+              dispatch(setMapStyle(name))
+            });
           }}>
             <span className="layer-title">
-              Sateliet
+              Luchtfoto
             </span>
           </div>
         </>}

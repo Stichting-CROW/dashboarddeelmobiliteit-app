@@ -152,16 +152,16 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
 }
 
 export const convertDurationToBin = (duration) => {
-  if (duration < 24 * 60) {
+  if (duration < 60 * 24 * 3) {
     return 0;
   }
-  else if (duration < 24 * 60 * 4) {
+  else if (duration < 60 * 24 * 5) {
     return 1;
   }
-  else if (duration < 24 * 60 * 8) {
+  else if (duration < 60 * 24 * 8) {
     return 2;
   }
-  else if (duration < 24 * 60 * 15) {
+  else if (duration < 60 * 24 * 15) {
     return 3;
   }
   return 4;

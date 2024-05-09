@@ -19,6 +19,7 @@ import StatsPage from './pages/StatsPage.jsx';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
+import { Toaster } from "./components/ui/toaster"
 
 import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
@@ -38,9 +39,7 @@ import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx'
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
-import EditUser from './components/EditUser/EditUser';
 import OrganisationList from './components/OrganisationList/OrganisationList';
-import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
@@ -49,6 +48,7 @@ import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
 import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
 
+import {setAclInRedux} from './actions/authentication.js';
 import { initUpdateParkingData } from './poll-api/pollParkingData.js';
 import {
   initUpdateVerhuringenData
@@ -65,6 +65,7 @@ import {
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -176,6 +177,8 @@ function App() {
       payload=DISPLAYMODE_ZONES_ADMIN;
     } else if(pathName.includes("/map/servicegebieden")) {
       payload=DISPLAYMODE_SERVICE_AREAS;
+    } else if(pathName.includes("/map/beleidshubs")) {
+      payload=DISPLAYMODE_POLICY_HUBS;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -185,27 +188,27 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      const theAcl = await getAcl(token);
-      setAcl(theAcl);
-      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-      setIsAdmin(theAcl.is_admin);
+      try {
+        const theAcl = await getAcl(token);
+        if(! theAcl) return;
+  
+        dispatch(setAclInRedux(theAcl));
+        setAcl(theAcl);
+        setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+        setIsAdmin(theAcl?.is_admin);
+      } catch(err) {
+        console.error(err);
+      }
     })();
   }, [token])
+
+  const test = useSelector((state: StateType) => {
+    return state.authentication;
+  });
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
-  
-  // const isAdmin = useSelector((state: StateType) => {
-  //   if(! state.authentication) return false;
-  //   if(! state.authentication.user_data) return false;
-  //   let userIsAdmin = false;
-  //   state.authentication.user_data.user.registrations.forEach(x => {
-  //     if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
-  //     if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
-  //   });
-  //   return userIsAdmin;
-  // });
   
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
@@ -300,6 +303,7 @@ function App() {
   //  or if pathName/filter is changed:
   //  reload park events data
   useEffect(() => {
+    // displayMode
     if(displayMode !== 'displaymode-park') return;
     if(isLoggedIn && metadata.zones_loaded === false) return;
 
@@ -311,10 +315,8 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    filter
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
+    filter,
+    // exportState?.layers.map_style,
   ]);
 
   // Reload rentals data if i.e. filter changes
@@ -331,9 +333,7 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
+    // exportState?.layers.map_style,
   ]);
 
   // Mobile menu: Filters / Layers
@@ -462,8 +462,11 @@ function App() {
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+            <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
+
             <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
@@ -530,6 +533,7 @@ function App() {
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+          <Route exact path="/map/beleidshubs" element={renderMapElements()} />
           <Route path="/map/zones" element={renderMapElements()} />
           <Route exact path="/misc" element={
             <Overlay>
@@ -582,6 +586,7 @@ function App() {
       <Menu acl={acl} pathName={pathName} />
 
      </div>
+     <Toaster />     
     </div>
   );
 }

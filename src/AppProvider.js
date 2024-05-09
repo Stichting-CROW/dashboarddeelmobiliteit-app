@@ -51,7 +51,8 @@ store.subscribe(() => {
     authentication: storeState.authentication,
     filter: storeState.filter,
     layers: storeState.layers,
-    ui: storeState.ui
+    ui: storeState.ui,
+    policy_hubs: storeState.policy_hubs
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })

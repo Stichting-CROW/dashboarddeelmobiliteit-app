@@ -14,7 +14,7 @@ export const getEmptyZonesGeodataPayload = () => {
 const isAdmin = (state) => {
   if(! state) return;
   if(! state.authentication) return;
-  if(! state.authentication.user_data.user.registrations) return;
+  if(! state.authentication.user_data?.user?.registrations) return;
 
   let admin = false;
   state.authentication.user_data.user.registrations.forEach(x => {

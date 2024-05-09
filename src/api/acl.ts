@@ -24,10 +24,13 @@ export const getAcl = async (token) => {
   let json;
   try {
     json = await response.json();
+    if(! json || json.error) {
+      return;
+    }
     return json;
   } catch(e) {
     console.error('Error getting ACL');
-    return [];
+    return;
   }
 }
 

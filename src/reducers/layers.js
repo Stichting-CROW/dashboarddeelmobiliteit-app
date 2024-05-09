@@ -4,6 +4,7 @@ export const DISPLAYMODE_RENTALS = 'displaymode-rentals';
 export const DISPLAYMODE_ZONES_ADMIN = 'displaymode-zones-admin';
 export const DISPLAYMODE_ZONES_PUBLIC = 'displaymode-zones-public';
 export const DISPLAYMODE_SERVICE_AREAS = 'displaymode-service-areas';
+export const DISPLAYMODE_POLICY_HUBS = 'displaymode-policy-hubs';
 export const DISPLAYMODE_OTHER = 'displaymode-other';
 
 export const DISPLAYMODE_PARKEERDATA_HEATMAP = 'parkeerdata-heatmap';

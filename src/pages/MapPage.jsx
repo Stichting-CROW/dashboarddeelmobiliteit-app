@@ -15,6 +15,7 @@ import {
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
+  DISPLAYMODE_POLICY_HUBS,
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
@@ -49,7 +50,7 @@ function Map({mode, mapContainer}) {
   }
 
   layers.push('zones-isochrones');
-  
+
   // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
@@ -71,6 +72,7 @@ function Map({mode, mapContainer}) {
       default:
     }
   }
+
   // Active layers for rentals page
   else if(displayMode===DISPLAYMODE_RENTALS && viewRentals) {
     const rentalsKey = (filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins');
@@ -97,9 +99,10 @@ function Map({mode, mapContainer}) {
     layers.push('zones-metrics-public-border');
     activeSources.push('zones-metrics-public');
   }
-
-  // console.log('layers', layers)
-  // console.log('activeSources', activeSources)
+  else if(displayMode===DISPLAYMODE_POLICY_HUBS) {
+    layers.push('luchtfoto-pdok');
+    activeSources.push('luchtfoto-pdok');
+  }
 
   return (
     <div className="flex flex-col">

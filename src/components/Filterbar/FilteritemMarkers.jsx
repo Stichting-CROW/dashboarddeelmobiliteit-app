@@ -7,11 +7,11 @@ import {StateType} from '../../types/StateType';
 export function FilteritemMarkersParkeerduur() {
   const markers = useSelector((state: StateType) => {
     return [
-      { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '< 1 dag'},
-      { id: 1, color: '#48E248', fillcolor: '#48E248', name: '1-3 dagen'},
-      { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '4-7 dagen'},
-      { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '8-14 dagen'},
-      { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '> 14 dagen'}
+      { id: 0, color: '#1FA024', fillcolor: '#1FA024', name: '<= 2 dagen'},
+      { id: 1, color: '#48E248', fillcolor: '#48E248', name: '<= 4 dagen'},
+      { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '<= 7 dagen'},
+      { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '<= 14 dagen'},
+      { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '>= 15 dagen'}
     ];
   });
   

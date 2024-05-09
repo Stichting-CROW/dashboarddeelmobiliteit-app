@@ -12,7 +12,7 @@ import {StateType} from '../../types/StateType';
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, setMapStyle} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -47,6 +47,9 @@ import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js'
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
 import DdH3HexagonLayer from '../MapLayer/DdH3HexagonLayer';
 import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
+import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
+import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
+import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -61,6 +64,10 @@ const MapComponent = (props): JSX.Element => {
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
+  });
+
+  const mapStyle = useSelector((state: StateType) => {
+    return state.layers ? state.layers.map_style : null;
   });
 
   // Connect to redux store
@@ -117,12 +124,12 @@ const MapComponent = (props): JSX.Element => {
   }, [location]);
 
   // Get public zones on component load
-  useEffect(() => {
-    // Decide on the function to call (admin or public)
-    const getZonesFunc = token ? getAdminZones : getPublicZones;
-    // Get zones
-    getZonesFunc();
-  }, [])
+  // useEffect(() => {
+  //   // Decide on the function to call (admin or public)
+  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
+  //   // Get zones
+  //   getZonesFunc();
+  // }, [])
 
   const getAdminZones = async () => {
     const sortedZones = await fetchAdminZones(token, filterGebied);
@@ -226,6 +233,13 @@ const MapComponent = (props): JSX.Element => {
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
+
+        // Add cross image to use for retirement hubs
+        map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
+          if(err) throw err;
+          map.current.addImage('pattern', image);
+        });
+
       });
 
       // Disable rotating
@@ -241,24 +255,6 @@ const MapComponent = (props): JSX.Element => {
     // dispatch,
     registerMapView
   ])
-
-  // Recognise if HB view should be loaded
-  // useEffect(() => {
-  //   // Stop if map didn't load
-  //   if(! didMapLoad) return;
-  //   // Set HB status
-  //   let newActiveLayers = activeLayers;
-  //   if(is_hb_view) {
-  //     newActiveLayers.push('hb');
-  //     setActiveLayers(newActiveLayers);
-  //   } else {
-  //     newActiveLayers = newActiveLayers.filter(x => x !== 'hb')
-  //     setActiveLayers(newActiveLayers);
-  //   }
-  // }, [
-  //   didMapLoad,
-  //   is_hb_view
-  // ]);
 
   // If on Zones page and geographyId is in URL -> navigate to zone
   useEffect(() => {
@@ -305,171 +301,150 @@ const MapComponent = (props): JSX.Element => {
   ])
 
   // Init drawing functionality (for drawing zones)
-  useEffect(() => {
-    if(! didMapLoad) return;
-    if(! map.current) return;
-    if(! stateLayers) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
+  //   if(! map.current) return;
+  //   if(! stateLayers) return;
 
-    // Only init map draw features if on zones admin page
-    if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
+  //   // Only init map draw features if on zones admin page
+  //   if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
 
-    // Init map drawing features
-    initMapDrawLogic(map.current);
+  //   // Init map drawing features
+  //   initMapDrawLogic(map.current);
 
-    // Switch to satelite view
-    setTimeout(() => {
-      const mapStyles = getMapStyles();
-      setMapStyle(window['ddMap'], mapStyles.satelite);
-    }, 5);
+  //   // Switch to satellite view
+  //   setTimeout(() => {
+  //     const mapStyles = getMapStyles();
+  //     applyMapStyle(window['ddMap'], mapStyles.satellite);
+  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
+  //   }, 5);
 
-    setDidAddAdminZones(true);
-  }, [
-    didMapLoad,
-    stateLayers.displaymode
-  ]);
+  //   setDidAddAdminZones(true);
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode
+  // ]);
 
   // Init public zones map (if needed)
-  useEffect(() => {
-    if(! didMapLoad) return;
-    // If we did add public zones already: return
-    // if( didAddPublicZones) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
+  //   // If we did add public zones already: return
+  //   // if( didAddPublicZones) return;
 
-    // Only init map draw features if on zones admin page
-    if(stateLayers.displaymode === 'displaymode-zones-public') {
-      // Add zone layers
-      initZonesMap(map.current, token, filterGebied)
-      // Switch to base map
-      setTimeout(() => {
-        const mapStyles = getMapStyles();
-        setMapStyle(window['ddMap'], mapStyles.base);
-      }, 5);
-    } else {
-      // REMOVE zone layers
-      // Not needed, because the layer does hide itself automatically on page change
-    }
+  //   // Only init map draw features if on zones admin page
+  //   if(stateLayers.displaymode === 'displaymode-zones-public') {
+  //     // Add zone layers
+  //     initZonesMap(map.current, token, filterGebied)
+  //     // Switch to base map
+  //     setTimeout(() => {
+  //       const mapStyles = getMapStyles();
+  //       applyMapStyle(window['ddMap'], mapStyles.base);
+  //       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
+  //     }, 5);
+  //   } else {
+  //     // REMOVE zone layers
+  //     // Not needed, because the layer does hide itself automatically on page change
+  //   }
 
-    setDidAddPublicZones(true);
-  }, [
-    didMapLoad,
-    didAddPublicZones,
-    filterGebied,
-    stateLayers.displaymode
-  ]);
+  //   setDidAddPublicZones(true);
+  // }, [
+  //   didMapLoad,
+  //   didAddPublicZones,
+  //   filterGebied,
+  //   stateLayers.displaymode
+  // ]);
 
   // Auto reload zones on displaymode update
   // only on the zones-page (public or admin)
-  useEffect(() => {
-    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
-    // Decide on the function to call (admin or public)
-    const getZonesFunc = token ? getAdminZones : getPublicZones;
-    // Get zones
-    getZonesFunc();
-  }, [
-    stateLayers.displaymode
-  ]);
-
-  // Switch to satelite -> view automatically
-  // let TO_local;
-  useEffect(() => {
-    if(! didMapLoad) return;
-    if(! stateLayers.displaymode) return;
-    if(! window['ddMap'].isStyleLoaded()) return;
-
-    const mapStyles = getMapStyles();
-
-    // Switch from satelite to base view
-    let TO_local;
-    if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) {
-      TO_local = setTimeout(() => {
-        setMapStyle(window['ddMap'], mapStyles.base);
-      }, 100);
-    }
-    return () => {
-      clearTimeout(TO_local);
-    }
-  }, [
-    didMapLoad,
-    didInitSourcesAndLayers,
-    stateLayers.displaymode
-  ]);
+  // useEffect(() => {
+  //   if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
+  //   // Decide on the function to call (admin or public)
+  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
+  //   // Get zones
+  //   getZonesFunc();
+  // }, [
+  //   stateLayers.displaymode
+  // ]);
 
   /**
    * MICROHUBS / ZONES [ADMIN] LOGIC
    * 
    * Load zones onto the map
   */
-  useEffect(() => {
-    if(! didMapLoad) return;
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
 
-    // If we are not on zones page: remove all drawed zones from the map
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
-      // Delete draws
-      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-        window['CROW_DD'].theDraw.deleteAll();
-        // #TODO Not sure why this is needed.
-        // If the timeout is not here, the draw polygons keep visible
-        // if you switch from zones-admin to zones-public
-        setTimeout(() => {
-          window['CROW_DD'].theDraw.deleteAll();
-        }, 500);
-      }
-      // Also, hide isochrones layer
-      window['ddMap'].U.hide('zones-isochrones')
-      return;
-    }
+  //   // If we are not on zones page: remove all drawed zones from the map
+  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
+  //     // Delete draws
+  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+  //       window['CROW_DD'].theDraw.deleteAll();
+  //       // #TODO Not sure why this is needed.
+  //       // If the timeout is not here, the draw polygons keep visible
+  //       // if you switch from zones-admin to zones-public
+  //       setTimeout(() => {
+  //         window['CROW_DD'].theDraw.deleteAll();
+  //       }, 500);
+  //     }
+  //     // Also, hide isochrones layer
+  //     if(window['ddMap'].isStyleLoaded()) {
+  //       window['ddMap'].U.hide('zones-isochrones')
+  //     }
+  //     return;
+  //   }
 
-    (async () => {
-      // Remove existing zones first
-      window['CROW_DD'].theDraw.deleteAll();
-      const filter = {
-        municipality: filterGebied
-      }
-      addAdminZonesToMap(token, filter);
-      setDidMapDrawLoad(true)
-      // Force DOM update
-      setCounter(counter+1)
-    })()
+  //   (async () => {
+  //     // Remove existing zones first
+  //     window['CROW_DD'].theDraw.deleteAll();
+  //     const filter = {
+  //       municipality: filterGebied
+  //     }
+  //     addAdminZonesToMap(token, filter);
+  //     setDidMapDrawLoad(true)
+  //     // Force DOM update
+  //     setCounter(counter+1)
+  //   })()
 
-    return;
-  }, [
-    didMapLoad,
-    stateLayers.displaymode,
-    filterGebied
-  ])
+  //   return;
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode,
+  //   filterGebied
+  // ])
 
   /**
    * MICROHUBS / ZONES [PUBLIC] LOGIC
    * 
    * Load zones onto the map
-  */
-  useEffect(() => {
-    // Make sure map loaded
-    if(! didMapLoad) return;
-    // Make sure mapDraw loaded
-    if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
+  // */
+  // useEffect(() => {
+  //   // Make sure map loaded
+  //   if(! didMapLoad) return;
+  //   // Make sure mapDraw loaded
+  //   if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
 
-    // If we are not on zones page: remove all drawed zones from the map
-    if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
-      if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-        window['CROW_DD'].theDraw.deleteAll();
-      }
-      return;
-    }
-    // If on zones page: add zones to map
-    (async () => {
-      // Remove existing zones fist
-      window['CROW_DD'].theDraw.deleteAll();
-      const filter = {
-        municipality: filterGebied
-      }
-      addPublicZonesToMap(token, filter);
-      setDidMapDrawLoad(true)
-    })()
-  }, [
-    didMapLoad,
-    stateLayers.displaymode,
-    filterGebied
-  ])
+  //   // If we are not on zones page: remove all drawed zones from the map
+  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
+  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
+  //       window['CROW_DD'].theDraw.deleteAll();
+  //     }
+  //     return;
+  //   }
+  //   // If on zones page: add zones to map
+  //   (async () => {
+  //     // Remove existing zones fist
+  //     window['CROW_DD'].theDraw.deleteAll();
+  //     const filter = {
+  //       municipality: filterGebied
+  //     }
+  //     addPublicZonesToMap(token, filter);
+  //     setDidMapDrawLoad(true)
+  //   })()
+  // }, [
+  //   didMapLoad,
+  //   stateLayers.displaymode,
+  //   filterGebied
+  // ])
 
   /**
    * SET SOURCES AND LAYERS
@@ -478,6 +453,8 @@ const MapComponent = (props): JSX.Element => {
   // Set active source
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
+    if(! didMapLoad) return;
+    if(! map.current.isStyleLoaded()) return;
 
     const activateSources = () => {
       props.activeSources.forEach(sourceName => {
@@ -495,13 +472,13 @@ const MapComponent = (props): JSX.Element => {
     activateSources()
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.activeSources)
+    JSON.stringify(props.activeSources),
+    mapStyle
   ])
 
   // Set active layers
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    // if(! map.current.isStyleLoaded()) return;
 
     activateLayers(map.current, layers, props.layers);
   }, [
@@ -515,7 +492,6 @@ const MapComponent = (props): JSX.Element => {
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
     if(map.current.getSource('vehicles')) {
-
       map.current.U.setData('vehicles', vehicles.data);
     }
     if(map.current.getSource('vehicles-clusters')) {
@@ -530,6 +506,7 @@ const MapComponent = (props): JSX.Element => {
   useEffect(()   => {
     if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
+    if(! map.current) return;
 
     map.current.U.setData('zones-geodata', zones_geodata.data);
   }, [
@@ -668,13 +645,16 @@ const MapComponent = (props): JSX.Element => {
 
   return <>
     {/* The map container (HTML element) */}
-    <div ref={mapContainer} className="map" />
+    <div ref={mapContainer} className="map flex-1" />
     {/* H3 layer */}
     <DdH3HexagonLayer map={map.current} />
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
+    {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
+    {stateLayers.displaymode === 'displaymode-rentals' && <DdRentalsLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
+    {stateLayers.displaymode === 'displaymode-policy-hubs' && <DdPolicyHubsLayer map={map.current} />}
   </>
 }
 

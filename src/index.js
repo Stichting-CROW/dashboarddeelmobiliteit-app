@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import './styles/tailwind.css';
 import AppProvider from './AppProvider';
 import reportWebVitals from './reportWebVitals';
 

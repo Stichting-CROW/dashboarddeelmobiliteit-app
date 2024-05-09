@@ -6,5 +6,6 @@ export type StateType = {
   ui: any,
   vehicles: any,
   rentals: any,
-  zones_geodata: any
+  zones_geodata: any,
+  policy_hubs: any
 }

@@ -3,6 +3,7 @@ import {themes} from '../../themes';
 function FormInput({
   type,
   name,
+  autofocus,
   defaultValue,
   value,
   placeholder,
@@ -15,6 +16,7 @@ function FormInput({
 }: {
   type?: any,
   name?: any,
+  autofocus?: any,
   defaultValue?: any,
   value?: any,
   placeholder?: any,
@@ -29,6 +31,7 @@ function FormInput({
     <input
       type={type}
       name={name}
+      autoFocus={autofocus}
       autoComplete={autoComplete}
       id={id}
       value={value}
