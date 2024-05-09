@@ -1,11 +1,11 @@
 {
   "files": {
-    "main.css": "/static/css/main.f0b87c83.css",
-    "main.js": "/static/js/main.daf4c2cf.js",
+    "main.css": "/static/css/main.c5429385.css",
+    "main.js": "/static/js/main.5f49946e.js",
     "static/js/200.12a20215.chunk.js": "/static/js/200.12a20215.chunk.js",
     "static/js/539.6d1aa9bb.chunk.js": "/static/js/539.6d1aa9bb.chunk.js",
     "static/js/787.a0871968.chunk.js": "/static/js/787.a0871968.chunk.js",
-    "static/media/layer-map-style-satelite.png": "/static/media/layer-map-style-satelite.8cd4b63e20e0bd02c788.png",
+    "static/media/layer-map-style-satellite.png": "/static/media/layer-map-style-satellite.8cd4b63e20e0bd02c788.png",
     "static/media/layer-map-style-default.png": "/static/media/layer-map-style-default.63221e55b463875551bc.png",
     "static/media/layer-od.png": "/static/media/layer-od.ef6206b8d43d48064a48.png",
     "static/media/layer-heatmap.png": "/static/media/layer-heatmap.6317acea2067eed6d873.png",
@@ -28,22 +28,25 @@
     "static/media/fiets-active.svg": "/static/media/fiets-active.b99d14d5a46cad349f5b.svg",
     "static/media/fiets.svg": "/static/media/fiets.c1eb6eb6fab2f9148566.svg",
     "static/media/delete-object.svg": "/static/media/delete-object.4275b5bc6482a5cb62bf.svg",
+    "static/media/icon_eye_closed.svg": "/static/media/icon_eye_closed.5565dcfbe341eac5ae5451c65e8adaa7.svg",
     "static/media/person-add-outline.svg": "/static/media/person-add-outline.0f2d7d3498823bcaf68f.svg",
     "static/media/download-outline.svg": "/static/media/download-outline.1396c99c321059993d76.svg",
+    "static/media/icon_eye_open.svg": "/static/media/icon_eye_open.a21dc840808fa22e59f39f104e247946.svg",
     "static/media/noun-edit-684936.svg": "/static/media/noun-edit-684936.83ef8aa7d24c11b21018.svg",
+    "static/media/arrow-right.svg": "/static/media/arrow-right.c7beac010c69784bd943d5c466d83639.svg",
     "static/media/times-circle.svg": "/static/media/times-circle.d3585a7d5617e073f320.svg",
     "static/media/isochrones-close.svg": "/static/media/isochrones-close.7781f729cdc60cedc9e7.svg",
     "static/media/controls-zoom-in.svg": "/static/media/controls-zoom-in.4867dd714ef98793c1b7.svg",
     "static/media/search-solid.svg": "/static/media/search-solid.6b31fe2388f30dcac021.svg",
     "static/media/controls-zoom-out.svg": "/static/media/controls-zoom-out.b83ce275d7125aca58c8.svg",
-    "main.f0b87c83.css.map": "/static/css/main.f0b87c83.css.map",
-    "main.daf4c2cf.js.map": "/static/js/main.daf4c2cf.js.map",
+    "main.c5429385.css.map": "/static/css/main.c5429385.css.map",
+    "main.5f49946e.js.map": "/static/js/main.5f49946e.js.map",
     "200.12a20215.chunk.js.map": "/static/js/200.12a20215.chunk.js.map",
     "539.6d1aa9bb.chunk.js.map": "/static/js/539.6d1aa9bb.chunk.js.map",
     "787.a0871968.chunk.js.map": "/static/js/787.a0871968.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f0b87c83.css",
-    "static/js/main.daf4c2cf.js"
+    "static/css/main.c5429385.css",
+    "static/js/main.5f49946e.js"
   ]
 }
