@@ -11,7 +11,7 @@ export function FilteritemMarkersParkeerduur() {
       { id: 1, color: '#48E248', fillcolor: '#48E248', name: '<= 4 dagen'},
       { id: 2, color: '#FFD837', fillcolor: '#FFD837', name: '<= 7 dagen'},
       { id: 3, color: '#FD3E48', fillcolor: '#FD3E48', name: '<= 14 dagen'},
-      { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '>= 15 dagen'}
+      { id: 4, color: '#9158DE', fillcolor: '#9158DE', name: '> 14 dagen'}
     ];
   });
   

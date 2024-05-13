@@ -138,6 +138,9 @@ const DdPolicyHubsLayer = ({
     if(! area) return;
     if(! zone_id) return;
 
+    // Make sure hub list is hidden
+    dispatch(setShowList(false));
+
     // Set selected hub
     // dispatch(setSelectedPolicyHubs([zone_id]));
 
@@ -176,7 +179,6 @@ const DdPolicyHubsLayer = ({
   // onComponentUnLoad
   useEffect(() => {
     return () => {
-      console.log('unload')
       setTimeout(() => {
         removeHubsFromMap(map);
       }, 250)//TODO: Map is unloaded lots of times
@@ -396,7 +398,7 @@ const DdPolicyHubsLayer = ({
   const fetchHubs = async () => {
     // Add a small delay to prevent multiple fetches
     if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
-    // TO_fetch_delay = setTimeout(async () => {
+    TO_fetch_delay = setTimeout(async () => {
       try {
         const res: any = await fetch_hubs({
           token: token,
@@ -407,9 +409,9 @@ const DdPolicyHubsLayer = ({
         setPolicyHubs(res);
       }
       catch(err) {
-        // console.error(err);
+        console.error(err);
       }
-    // }, 100);
+    }, 50);
     return true;
   };
 

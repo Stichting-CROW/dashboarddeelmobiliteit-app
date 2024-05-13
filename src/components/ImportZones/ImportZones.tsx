@@ -21,7 +21,7 @@ const ImportZones = ({
 
   return <>
     <p className="mb-4">
-      Importeer een KML-bestand met zone-polygonen middels onderstaande upload-functie. Tip: importeer niet te veel zones, maar enkel de zones waar je analyses op gaat doen.
+      Importeer een KML-bestand met zone-polygonen middels onderstaande upload-functie. De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een ID dat al in het Dashboard Deelmobiliteit staat, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
     </p>
 
     {! importResult || Object.keys(importResult).length <= 0 && <form encType="multipart/form-data">

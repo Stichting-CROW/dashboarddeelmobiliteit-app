@@ -18,8 +18,14 @@ export const getMapStyles = () => {
 }
 
 export const setBackgroundLayer = (map, name, setMapStyle) => {
+  // Check if setMapStyle func was given
   if(! setMapStyle) {
     console.error('setMapStyle not given');
+    return;
+  }
+
+  // Check if map style was loaded
+  if(! map.isStyleLoaded()) {
     return;
   }
 

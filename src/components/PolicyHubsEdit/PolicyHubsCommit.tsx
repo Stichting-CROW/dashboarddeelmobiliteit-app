@@ -117,6 +117,9 @@ const PolicyHubsCommit = ({
     if(! selected_policy_hubs) return <></>;
     return (
         <div>
+            <div className={`mb-2 font-bold`}>
+                Zone vaststellen
+            </div>
 
             <div className="mb-8">
                 Je staat op het punt <b>{selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`}</b> vast te stellen. Stel nu de publicatie- en startdatum in.

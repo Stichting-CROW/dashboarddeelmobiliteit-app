@@ -24,6 +24,12 @@ export const fetch_hubs = async ({
   phase,
   visible_layers
 }) => {
+  // Abort previous fetch, if any
+  if(theFetch) {
+    theFetch.abort();
+  }
+
+  // Set MDS URL
   let url = `${process.env.REACT_APP_MDS_URL}/${token ? 'admin' : 'public'}/zones`+
               `?municipality=${municipality}`;
   // Add phases to URL
@@ -60,30 +66,24 @@ export const fetch_hubs = async ({
   // Don't execute if no phase was given, as at least 1 phases param should be specified
   if(url.indexOf('phases=') <= -1) return;
 
-  // This works:
-  // const options = token ? getHeaders(token) : {};
-  // theFetch = fetch(url, options);
-  // const response = await theFetch;
-  // const json = await response.json();
-  // return json;
-  // return;
-
-  // Abort previous fetch
-  if(theFetch) {
-    // theFetch.abort();
-  }
   // Now do a new fetch
-  return new Promise(async (resolve, reject) => {
-    try {
-      const options = token ? getHeaders(token) : {};
-      theFetch = abortableFetch(url, options);
-      const response = await theFetch.ready;
-      const json = await response.json();
+  let json;
+  try {
+    const options = token ? getHeaders(token) : {};
+    theFetch = abortableFetch(url, options);
+    const response = await theFetch.ready;
+    // Set theFetch to null, so next request is not aborted
+    theFetch = null;
+    json = await response.json();
+  }
+  catch(err) {
+    // Set theFetch to null, so next request is not aborted
+    theFetch = null;
 
-      resolve(json);
-    }
-    catch(err) {
-      reject(new Error('Error while fetching hubs'));
-    }
-  });
+    // If this was an abort error, no problem
+    if(err && err.name === 'AbortError') return;
+    console.log(err);
+  }
+
+  return json;
 }

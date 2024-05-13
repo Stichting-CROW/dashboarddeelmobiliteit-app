@@ -2,7 +2,7 @@ import Button from "../Button/Button"
 
 import { Hub, columns } from "./columns"
 import { DataTable } from "./data-table"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "@/src/types/StateType"
 import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
@@ -15,9 +15,10 @@ import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actio
 import ActionHeader from './action-header';
 import { canEditHubs } from "../../helpers/authentication"
 
-// async function getData(): Promise<Payment[]> {
 function populateTableData(policyHubs) {
-    if(! policyHubs || policyHubs.detail) return [];// .detail means there was an errors
+    if(! policyHubs || policyHubs.detail) {
+        return [];// .detail means there was an errors
+    }
 
     return policyHubs.map((hub) => {
         return {
@@ -42,15 +43,13 @@ function populateTableData(policyHubs) {
     });
 }
 
-let TO_fetch_delay;
-
 const PolicyHubsList = () => {
+    const TO_fetch = useRef(null);
     const dispatch = useDispatch();
     
     const [counter, setCounter] = useState<number>(0);
     const [policyHubs, setPolicyHubs] = useState([]);
     const [tableData, setTableData] = useState([]);
-    const [doShowExportModal, setDoShowExportModal] = useState(false);
 
     const filter = useSelector((state: StateType) => state.filter || null);
     const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
@@ -69,9 +68,8 @@ const PolicyHubsList = () => {
     useEffect(() => {
         dispatch(setShowEditForm(false));
 
-        // Clear timeouts
         return () => {
-            clearTimeout(TO_fetch_delay)
+            clearTimeout(TO_fetch.current);
         }
     }, [])
     
@@ -79,9 +77,12 @@ const PolicyHubsList = () => {
     useEffect(() => {
         if(! filter.gebied) return;
         if(! visible_layers || visible_layers.length === 0) return;
-  
+
         // Fetch hubs
-        fetchHubs();
+        if(TO_fetch.current) clearTimeout(TO_fetch.current);
+        TO_fetch.current = setTimeout(() => {
+            fetchHubs();
+        }, 50);
     }, [
       filter.gebied,
       visible_layers,
@@ -97,14 +98,13 @@ const PolicyHubsList = () => {
         const filteredHubs = filterVisible(
             filterPhase(policyHubs)
         );
-
-        (() => {
-            setTableData(populateTableData(filteredHubs));
-            // setCounter(counter+1);
-        })();
+        const data = [...populateTableData(filteredHubs)];
+        if(! data || data.length === 0) return;
+        
+        setTableData(data);
     }, [
         policyHubs,
-        policyHubs.length,
+        policyHubs?.length,
         active_phase
     ]);
 
@@ -134,23 +134,19 @@ const PolicyHubsList = () => {
 
     // Fetch hubs
     const fetchHubs = async () => {
-        // Add a small delay to prevent mulitple fetches
-        if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
-        // TO_fetch_delay = setTimeout(async () => {
-            try {
-                const all: any = await fetch_hubs({
-                    token: token,
-                    municipality: filter.gebied,
-                    phase: active_phase,
-                    visible_layers: visible_layers
-                });
+        try {
+            const all: any = await fetch_hubs({
+                token: token,
+                municipality: filter.gebied,
+                phase: active_phase,
+                visible_layers: visible_layers
+            });
+            if(all) {
                 setPolicyHubs(all);
-            } catch(err) {
-                // console.error(err);
             }
-        // }, 5)
-        // The issue seems to be like:
-        // If data is loaded 'late' (i.e. in timeout), the data table does not update its data
+        } catch(err) {
+            console.error(err);
+        }
     };
 
     // Filter colums if guest user
@@ -181,6 +177,9 @@ const PolicyHubsList = () => {
             }}>
                 <DataTable key="data-table" columns={filterColumnsForGuest(columns)} data={tableData} />
             </div>
+            <div className="text-gray-200 px-2" onClick={() => {
+                fetchHubs();
+            }}>.</div>
         </>
     );
 }

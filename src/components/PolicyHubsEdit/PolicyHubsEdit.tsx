@@ -419,7 +419,7 @@ const PolicyHubsEdit = ({
         }
     }
 
-    const labelClassNames = 'mb-2 text-sm';
+    const labelClassNames = 'mb-2';
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
 
