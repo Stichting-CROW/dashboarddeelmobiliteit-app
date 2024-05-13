@@ -3,9 +3,19 @@ export const isLoggedIn = (state) => {
 };
 
 export const canEditHubs = (acl) => {
+  if(! acl) return false;
+
   const allowedRoles = [
     'MICROHUB_EDIT',
     'ORGANISATION_ADMIN'
   ];
-  return acl && acl.privileges?.indexOf('ORGANISATION_ADMIN') > -1;
+
+  let canEdit = false;
+  acl.privileges?.forEach((role) => {
+    if(allowedRoles.indexOf(role) > -1) {
+      canEdit = true;
+    }
+  });
+
+  return canEdit;
 }
