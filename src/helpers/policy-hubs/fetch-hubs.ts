@@ -26,7 +26,7 @@ export const fetch_hubs = async ({
 }) => {
   // Abort previous fetch, if any
   if(theFetch) {
-    theFetch.abort();
+    // theFetch.abort();
   }
 
   // Set MDS URL
