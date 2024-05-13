@@ -1,5 +1,32 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-05-09
+
+**Algemeen**
+
+- Luchtfoto geactualiseerd: nu [PDOK 2023 8cm](https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok) actief
+- Nieuwe notificatie-stijl, voor notificaties als "Zone opgeslagen"
+
+**Aanbod**
+
+- Nieuwe indeling van parkeerduurfilter: <= 2 dagen, <= 4 dagen, <= 7 dagen, <= 14 dagen, >= 15 dagen
+
+**Beleidszones**
+
+- Nieuwe beleidszones-kaart
+- Nieuwe beleidszones-tabel met filtermogelijkheden
+- Teken zones in de conceptfase
+- Stel in wanneer zones vastgesteld zijn, gepubliceerd worden voor implementatie en actief moeten zijn
+- Multi-edit
+- Multi-delete
+- Import vanuit KML geupdate: zie hoeveel zones zijn toegevoegd of juist gewijzigd
+- Export naar KML geupdate: nu mogelijkheid om selectie te exporteren
+- 'Deel een link'-functie: Deel een link naar de huidige weergave
+- Stel voor een hub in of het een virtuele hub is of niet
+- Stel hub-capaciteit in middels een slider, pijltjes of een vrij-invulveld
+- Stel een 'lokaal ID' in, voor extra herkenbaarheid van de hub
+- Filter zones op zone-type (verbods- of analysezone, of hub)
+
 ## Release 2024-03-11
 
 **Servicegebieden**
