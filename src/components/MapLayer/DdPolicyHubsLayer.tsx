@@ -106,6 +106,8 @@ const DdPolicyHubsLayer = ({
     'published_retirement'
   ];
 
+  const uniqueComponentId = Math.random()*9000000;
+
   // On component load: reset 'selected_policy_hubs'
   useEffect(() => {
     dispatch(setShowEditForm(false));
@@ -244,7 +246,6 @@ const DdPolicyHubsLayer = ({
     if(! map.isStyleLoaded()) return;
     if(! policyHubs) return;
 
-    // console.log('renderHubs', 'policyHubs.length', policyHubs.length, 'selected_policy_hubs', selected_policy_hubs.length);
     renderHubs(
       map,
       sortedPolicyHubs(filterPolicyHubs(policyHubs, active_phase, visible_layers)),
@@ -253,7 +254,7 @@ const DdPolicyHubsLayer = ({
     );
   }, [
     policyHubs,
-    policyHubs.length,
+    policyHubs?.length,
     selected_policy_hubs,
     hubs_in_drawing_mode,
     active_phase,
@@ -405,7 +406,7 @@ const DdPolicyHubsLayer = ({
           municipality: filter.gebied,
           phase: active_phase,
           visible_layers: visible_layers
-        });
+        }, uniqueComponentId);
         setPolicyHubs(res);
       }
       catch(err) {

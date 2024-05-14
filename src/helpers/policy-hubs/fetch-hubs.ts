@@ -1,3 +1,4 @@
+import md5 from 'md5';
 import { abortableFetch } from "../../poll-api/pollTools";
 
 const getHeaders = (token): {
@@ -16,19 +17,20 @@ const getHeaders = (token): {
 }
 
 // Variable that will prevent simultaneous loading of fetch requests
-let theFetch = null;
+let theFetch = {};
 
 export const fetch_hubs = async ({
   token,
   municipality,
   phase,
-  visible_layers
-}) => {
+  visible_layers,
+}, uuid) => {
   // Abort previous fetch, if any
-  if(theFetch) {
-    // theFetch.abort();
+  if(theFetch[uuid]) {
+    await theFetch[uuid].abort();
+    delete theFetch[uuid];
   }
-
+  
   // Set MDS URL
   let url = `${process.env.REACT_APP_MDS_URL}/${token ? 'admin' : 'public'}/zones`+
               `?municipality=${municipality}`;
@@ -70,15 +72,15 @@ export const fetch_hubs = async ({
   let json;
   try {
     const options = token ? getHeaders(token) : {};
-    theFetch = abortableFetch(url, options);
-    const response = await theFetch.ready;
+    theFetch[uuid] = abortableFetch(url, options);
+    const response = await theFetch[uuid].ready;
     // Set theFetch to null, so next request is not aborted
-    theFetch = null;
+    delete theFetch[uuid];
     json = await response.json();
   }
   catch(err) {
     // Set theFetch to null, so next request is not aborted
-    theFetch = null;
+    delete theFetch[uuid];
 
     // If this was an abort error, no problem
     if(err && err.name === 'AbortError') return;

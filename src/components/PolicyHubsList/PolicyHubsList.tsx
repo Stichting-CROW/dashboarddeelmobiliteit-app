@@ -1,4 +1,5 @@
 import Button from "../Button/Button"
+import md5 from 'md5';
 
 import { Hub, columns } from "./columns"
 import { DataTable } from "./data-table"
@@ -14,6 +15,7 @@ import { ImportZonesModal } from "../ImportZones/ImportZones"
 import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actions/policy-hubs"
 import ActionHeader from './action-header';
 import { canEditHubs } from "../../helpers/authentication"
+import React from "react";
 
 function populateTableData(policyHubs) {
     if(! policyHubs || policyHubs.detail) {
@@ -64,6 +66,8 @@ const PolicyHubsList = () => {
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
+    const uniqueComponentId = Math.random()*9000000;
+
     // On load: Hide edit modal
     useEffect(() => {
         dispatch(setShowEditForm(false));
@@ -71,23 +75,38 @@ const PolicyHubsList = () => {
         return () => {
             clearTimeout(TO_fetch.current);
         }
-    }, [])
-    
+    }, []);
+
     // Fetch hubs
     useEffect(() => {
-        if(! filter.gebied) return;
-        if(! visible_layers || visible_layers.length === 0) return;
-
-        // Fetch hubs
         if(TO_fetch.current) clearTimeout(TO_fetch.current);
         TO_fetch.current = setTimeout(() => {
             fetchHubs();
-        }, 50);
+        }, 50)
     }, [
-      filter.gebied,
-      visible_layers,
-      visible_layers.length
+        token,
+        active_phase,
+        filter.gebied,
+        visible_layers,
+        visible_layers.length
     ]);
+
+    // Fetch hubs
+    const fetchHubs = async () => {
+        try {
+            const all: any = await fetch_hubs({
+                token: token,
+                municipality: filter.gebied,
+                phase: active_phase,
+                visible_layers: visible_layers
+            }, uniqueComponentId);
+            if(all) {
+                setPolicyHubs(all);
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    };
 
     // Populate table data if policyHubs change
     useEffect(() => {
@@ -131,23 +150,6 @@ const PolicyHubsList = () => {
             return visiblePhaseLayers.indexOf(hub.geography_type) > -1;
         });
     }
-
-    // Fetch hubs
-    const fetchHubs = async () => {
-        try {
-            const all: any = await fetch_hubs({
-                token: token,
-                municipality: filter.gebied,
-                phase: active_phase,
-                visible_layers: visible_layers
-            });
-            if(all) {
-                setPolicyHubs(all);
-            }
-        } catch(err) {
-            console.error(err);
-        }
-    };
 
     // Filter colums if guest user
     const filterColumnsForGuest = (columns) => {
