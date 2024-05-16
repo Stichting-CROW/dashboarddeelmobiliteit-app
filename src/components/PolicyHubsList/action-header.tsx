@@ -196,7 +196,7 @@ const ActionHeader = ({
 
         {doShowImportModal && <ImportZonesModal postImportFunc={() => {
             setDoShowImportModal(false);
-            // document.location = '/map/beleidshubs';
+            fetchHubs();
         }} />}
     </>;
 }
