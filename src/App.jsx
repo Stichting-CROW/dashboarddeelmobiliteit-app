@@ -28,6 +28,7 @@ import About from './components/About/About.jsx';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
+import Docs from './components/Docs/Docs';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
@@ -519,7 +520,14 @@ function App() {
             <Route exact path="/faq" element={
               <Overlay>
                 <Misc>
-                  <Faq />
+                  <Docs />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/faq" element={
+              <Overlay>
+                <Misc>
+                  <Docs />
                 </Misc>
               </Overlay>
             } />
