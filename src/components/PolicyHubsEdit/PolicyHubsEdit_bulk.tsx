@@ -32,6 +32,7 @@ const PolicyHubsEdit_bulk = ({
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
     const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
+    const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
 
     const labelClassNames = 'mb-2 text-sm';
     const [selectedHubsData, setSelectedHubsData] = useState([]);
@@ -136,17 +137,17 @@ const PolicyHubsEdit_bulk = ({
         cancelHandler();
     };
 
-    if(! canEditHubs(acl)) {
-        return <>   
+    if(active_phase !== 'concept' || ! canEditHubs(acl)) {
+        return <>
             <div className={`${labelClassNames} font-bold`}>
-                Je selecteerde {Object.keys(hubsData).length} zones
+                Je selecteerde {hubsData ? Object.keys(hubsData).length : 'meerdere'} zones
             </div>
         </>
     }
 
     return <div>
         <div className={`${labelClassNames} font-bold`}>
-            Wijzig {Object.keys(hubsData).length} zones (meerdere zones geselecteerd)
+            Wijzig {hubsData ? Object.keys(hubsData).length : 'meerdere'} zones (meerdere zones geselecteerd)
         </div>
 
         {selectedHubsPhase === 'concept' && <div className="relative">
