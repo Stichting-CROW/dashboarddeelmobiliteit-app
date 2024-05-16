@@ -636,7 +636,8 @@ const PolicyHubsEdit = ({
                     setHubData={setHubData}
                     setHasUnsavedChanges={setHasUnsavedChanges}
                 />
-            </div>}
+            </div>
+            }
             
             {hubData.phase === 'concept' && <div className="relative">
                 {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}

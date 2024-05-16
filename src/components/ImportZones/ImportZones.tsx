@@ -196,7 +196,7 @@ const ImportZonesModal = ({
       button2Title={
         didImport ? 
           'Sluiten' :
-          didImport ? 'Sluiten' : 'Importeer zones'
+          'Importeer zones'
       }
       button2Handler={async (e) => {
         e.preventDefault();

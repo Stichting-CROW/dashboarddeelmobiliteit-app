@@ -7,7 +7,7 @@ export const PolicyHubsEdit_geographyType = ({
     setHasUnsavedChanges
 }) => {
     const updateGeographyType = (type: string) => {
-        const polygonCenter = center(hubData?.area);
+        const polygonCenter = hubData?.area ? center(hubData?.area) : null;
 
         setHubData({
             ...hubData,

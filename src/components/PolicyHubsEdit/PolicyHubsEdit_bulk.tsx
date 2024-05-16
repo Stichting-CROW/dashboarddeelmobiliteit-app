@@ -10,6 +10,8 @@ import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import Button from '../Button/Button';
 import { setSelectedPolicyHubs, setShowEditForm } from "../../actions/policy-hubs";
 import { notify } from "../../helpers/notify";
+import { PolicyHubsEdit_geographyType } from "./PolicyHubsEdit_geographyType";
+import { canEditHubs } from "../../helpers/authentication";
 
 const PolicyHubsEdit_bulk = ({
     fetchHubs,
@@ -29,11 +31,13 @@ const PolicyHubsEdit_bulk = ({
 
     const gm_code = useSelector((state: StateType) => state.filter.gebied);
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+    const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
 
     const labelClassNames = 'mb-2 text-sm';
     const [selectedHubsData, setSelectedHubsData] = useState([]);
     const [selectedHubsPhase, setSelectedHubsPhase] = useState('');
     const [hubsData, setHubsData] = useState<HubType>();
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
     useEffect(() => {
         setSelectedHubsData(get_selected_hubs_data());
@@ -64,6 +68,7 @@ const PolicyHubsEdit_bulk = ({
         });
         // Set common hub attributes in state
         const newHubData: HubType = {};
+        
         if(common_geography_type !== 'mixed') newHubData.geography_type = common_geography_type;
         if(common_is_virtual !== 'mixed') newHubData.stop = {is_virtual: common_is_virtual};
         setHubsData(newHubData);
@@ -103,12 +108,12 @@ const PolicyHubsEdit_bulk = ({
 
     const saveZone = async () => {
         // Remove certain properties based on the hub phase
-        let newHubsData = Object.assign({}, {
-          "geography_ids": [selectedHubsData.map(x => x.geography_id)]
-        }, hubsData);
-        console.log('newHubData', newHubsData);
+        let patchData = {
+          "geography_ids": selectedHubsData.map(x => x.geography_id),
+          bulk_edit: hubsData
+        };
 
-        const updatedZone = await patchHub(token, newHubsData);
+        const updatedZone = await patchHub(token, patchData);
         if(updatedZone && updatedZone.detail) {
             notify(toast, 'Er ging iets fout bij het opslaan: ' + updatedZone?.detail, {
                 title: 'Er ging iets fout',
@@ -119,7 +124,9 @@ const PolicyHubsEdit_bulk = ({
         if(updatedZone && updatedZone.zone_id) {
             postSaveOrDeleteCallback(updatedZone.zone_id);
         }
-        notify(toast, 'Zone opgeslagen')
+        notify(toast, 'Zone opgeslagen');
+        // Reload hubs
+        fetchHubs();
     }
 
     const cancelButtonHandler = () => {
@@ -129,35 +136,50 @@ const PolicyHubsEdit_bulk = ({
         cancelHandler();
     };
 
+    if(! canEditHubs(acl)) {
+        return <>   
+            <div className={`${labelClassNames} font-bold`}>
+                Je selecteerde {Object.keys(hubsData).length} zones
+            </div>
+        </>
+    }
+
     return <div>
         <div className={`${labelClassNames} font-bold`}>
-            Meerdere zones tegelijkertijd wijzigen
+            Wijzig {Object.keys(hubsData).length} zones (meerdere zones geselecteerd)
         </div>
+
+        {selectedHubsPhase === 'concept' && <div className="relative">
+            {/* <div className="absolute top-0 right-0 bottom-0 left-0" /> */}
+            <PolicyHubsEdit_geographyType
+                defaultStopProperties={defaultStopProperties}
+                hubData={hubsData}
+                setHubData={setHubsData}
+                setHasUnsavedChanges={setHasUnsavedChanges}
+            />
+        </div>}
 
         {selectedHubsPhase === 'concept' && <PolicyHubsEdit_isVirtual
             hubData={hubsData}
             setHubData={setHubsData}
         />}
-
-
+        
         <div className="flex w-full justify-between">
+            <Button
+                theme="white"
+                style={{marginLeft: 0}}
+                onClick={cancelButtonHandler}
+            >
+                Sluiten
+            </Button>
 
-        <Button
-            theme="white"
-            style={{marginLeft: 0}}
-            onClick={cancelButtonHandler}
-        >
-            Sluiten
-        </Button>
-
-        <Button
-            theme={`green`}
-            style={{marginRight: 0}}
-            onClick={saveZone}
-        >
-            Opslaan
-        </Button>
-
+            <Button
+                theme={`green`}
+                style={{marginRight: 0}}
+                onClick={saveZone}
+            >
+                Opslaan
+            </Button>
         </div>
 
     </div>

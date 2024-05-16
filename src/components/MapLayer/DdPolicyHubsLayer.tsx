@@ -527,10 +527,9 @@ const DdPolicyHubsLayer = ({
     if(! e.features || ! e.features[0]) {
       return;
     }
-    // console.log('clickHandler')
 
     // Get coordinates and props
-    const coordinates = e.lngLat;
+    // const coordinates = e.lngLat;
     const props = e.features[0].properties;
 
     // Check if user holds ctrl (or Command on MacOS)
@@ -549,8 +548,8 @@ const DdPolicyHubsLayer = ({
 
     // Store active hub ID in redux state
     dispatch(setSelectedPolicyHubs(newHubIds));
-    // Show edit form if user selected 1 hub
-    dispatch(setShowEditForm(newHubIds.length === 1));
+    // Show edit form if user selected >= 1 hubs
+    dispatch(setShowEditForm(true));
   }
 
   const getSelectedHub = () => {
@@ -761,7 +760,7 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Hub edit form */}
-    {(didSelectOneHub() && show_edit_form && ! show_commit_form) && <ActionModule>
+    {(didSelectHub() && show_edit_form && ! show_commit_form) && <ActionModule>
       <PolicyHubsEdit
         fetchHubs={fetchHubs}
         all_policy_hubs={policyHubs}
