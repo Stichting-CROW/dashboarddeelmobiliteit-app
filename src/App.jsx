@@ -520,11 +520,25 @@ function App() {
             <Route exact path="/faq" element={
               <Overlay>
                 <Misc>
+                  <Faq />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/docs" element={
+              <Overlay>
+                <Misc>
                   <Docs />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/faq" element={
+            <Route exact path="/docs/:category" element={
+              <Overlay>
+                <Misc>
+                  <Docs />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/docs/:category/:doc" element={
               <Overlay>
                 <Misc>
                   <Docs />

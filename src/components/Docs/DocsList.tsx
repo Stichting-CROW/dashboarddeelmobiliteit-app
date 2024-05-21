@@ -25,7 +25,12 @@ function DocsList() {
   }, [repoFiles]);
 
   const getDocs = (files: Array<any>) => {
-    return repoFiles.filter(x => {
+    let uniqueFilePaths = [];
+    return repoFiles.filter((item, index) => {
+      const isUnique = uniqueFilePaths.indexOf(item.name) <= -1
+      uniqueFilePaths.push(item.name);
+      return isUnique;
+    }).filter(x => {
       return x.file_type === 'md';
     }).map(x => {
       return {
@@ -44,12 +49,12 @@ function DocsList() {
   console.log('repoFiles', repoFiles)
 
   return <>
-    {repoFiles.map((x: RepoFile) => (
+    {docs.map((x: Doc) => (
       <h3 className="
         mt-4 mb-4
         text-xl font-bold
       " title={x.name} key={x.path}>
-        <Link to={`/Beleidszones/${x.name}`}>
+        <Link to={`./Beleidszones/${x.name}`}>
           {x.name}
         </Link>
       </h3>
