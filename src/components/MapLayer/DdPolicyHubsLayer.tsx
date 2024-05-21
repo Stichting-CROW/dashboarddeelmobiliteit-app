@@ -575,7 +575,12 @@ const DdPolicyHubsLayer = ({
     return policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1);
   }
 
-  const didSelectHub = () => getSelectedHub() ? true : false;
+  const didSelectHub = () => {
+    // If we did draw a new polygon, return true
+    if(selected_policy_hubs && selected_policy_hubs[0] === 'new') return true;
+    // Otherwise: Check if a hub is selected
+    return getSelectedHub() ? true : false;
+  }
 
   const didSelectOneHub = () => {
     if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {

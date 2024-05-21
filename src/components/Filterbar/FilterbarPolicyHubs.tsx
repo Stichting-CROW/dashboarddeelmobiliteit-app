@@ -318,11 +318,9 @@ function FilterbarPolicyHubs({
         <SharePermalink />
       </Modal>}
 
-      {/* <div className="absolute right-5 top-5 text-xs text-purple-800">
-        2024-05-03:<br />
-        - Export hubs als KML<br />
-        - Solide polygoon-randen<br />
-      </div> */}
+      <div className="absolute right-5 top-6 text-xs text-purple-800">
+        versie 2024-05-21
+      </div>
 
     </>
   )

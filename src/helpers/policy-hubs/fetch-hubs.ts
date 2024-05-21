@@ -39,7 +39,7 @@ export const fetch_hubs = async ({
     // Don't have duplicates
     if(url.indexOf(`&phases=${layer.split('-')[1]}`) > -1) return;
     const phase_name = layer.split('-')[1];
-    if(phase_name) {
+    if(phase_name && phase_name !== 'null') {
       // Add phase to URL
       url += `&phases=${phase_name}`;
     }
