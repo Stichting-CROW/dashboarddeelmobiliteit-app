@@ -319,11 +319,12 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute right-5 top-6 text-xs text-purple-800">
-        versie 2024-05-21
       </div>
 
     </>
   )
 }
+
+// versie 2024-05-21
 
 export default FilterbarPolicyHubs;
