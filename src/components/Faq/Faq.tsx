@@ -1,8 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Section from '../Section/Section';
 import {marked} from 'marked'
+import { useEffect, useState } from "react";
 
 function Faq() {
+  const [pathName, setPathName] = useState(document.location.pathname);
+
+  // Store window location in a local variable
+  let location = useLocation();
+  useEffect(() => {
+    setPathName(location ? location.pathname : null);
+  }, [location]);
+
   return (
     <div className="
       Faq
@@ -70,6 +79,18 @@ Wil je zones toevoegen, aanpassen of verwijderen? Doe dit als volgt:
 
 ![img](https://i.imgur.com/LFY7xHt.png)
 
+          `) }}
+          />
+        </Section>
+        <Section
+          path="sturen-met-hubs-en-verbodsgebieden"
+          open={pathName.indexOf('sturen-met-hubs-en-verbodsgebieden') > -1}
+          title="Hoe kan ik sturen met hubs en verbodsgebieden?"
+        >
+          <div dangerouslySetInnerHTML={{ __html: marked.parse(`
+In mei 2024 zijn nieuwe functionaliteiten voor hubs en verbodsgebieden gelanceerd.
+            
+In het document <a href="https://files.dashboarddeelmobiliteit.nl/Notitie_sturen_met_hubs_en_verbodsgebieden.pdf" target="_blank">Instrumenten om te sturen met hubs en verbodsgebieden</a> vind je een toelichting op de nieuwe functionaliteiten en tips voor gemeenten en aanbieders.
           `) }}
           />
         </Section>

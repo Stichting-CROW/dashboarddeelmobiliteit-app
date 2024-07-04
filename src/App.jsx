@@ -524,6 +524,13 @@ function App() {
                 </Misc>
               </Overlay>
             } />
+            <Route exact path="/faq/:path" element={
+              <Overlay>
+                <Misc>
+                  <Faq />
+                </Misc>
+              </Overlay>
+            } />
             <Route exact path="/docs" element={
               <Overlay>
                 <Misc>
@@ -570,6 +577,13 @@ function App() {
             </Overlay>
           } />
           <Route exact path="/faq" element={
+            <Overlay>
+              <Misc>
+                <Faq />
+              </Misc>
+            </Overlay>
+          } />
+          <Route exact path="/faq/:path" element={
             <Overlay>
               <Misc>
                 <Faq />

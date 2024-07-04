@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import {motion} from 'framer-motion'
+import { useNavigate } from "react-router-dom";
 
 const variants: any = {
   open: {
@@ -22,8 +23,20 @@ const variants: any = {
   },
 }
 
-function Section({title, children}: {title: string, children: any}) {
-  const [isOpen, setIsOpen] = useState(false)
+function Section({
+  title,
+  children,
+  path,
+  open
+}: {
+  title: string,
+  children: any,
+  path?: string,
+  open?: boolean
+}) {
+  const navigate = useNavigate();
+
+  const [isOpen, setIsOpen] = useState(open || false)
 
   return <section className="
     my-0 py-2
@@ -31,14 +44,20 @@ function Section({title, children}: {title: string, children: any}) {
     border-solid border-gray-200
   " style={{
     maxWidth: '100%',
-    // width: '320px',
   }}
   >
     <motion.h3 className="
       mt-4 mb-4
       text-xl font-bold
       cursor-pointer
-    " onClick={() => setIsOpen(! isOpen)}
+    " onClick={() => {
+      setIsOpen(! isOpen);
+      if(! isOpen) {
+        navigate(path ? `/faq/${path}` : `/faq`);
+      } else {
+        navigate(`/faq`);
+      }
+    }}
     whileHover={{ textDecoration: 'underline' }}
     whileTap={{ scale: 0.98 }}
     >
