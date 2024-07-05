@@ -52,11 +52,11 @@ function Section({
       cursor-pointer
     " onClick={() => {
       setIsOpen(! isOpen);
-      if(! isOpen) {
-        navigate(path ? `/faq/${path}` : `/faq`);
-      } else {
-        navigate(`/faq`);
-      }
+      // if(! isOpen) {
+      //   navigate(path ? `/faq/${path}` : `/faq`);
+      // } else {
+      //   navigate(`/faq`);
+      // }
     }}
     whileHover={{ textDecoration: 'underline' }}
     whileTap={{ scale: 0.98 }}
