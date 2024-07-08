@@ -318,13 +318,13 @@ function FilterbarPolicyHubs({
         <SharePermalink />
       </Modal>}
 
-      <div className="absolute right-5 top-6 text-xs text-purple-800">
+      <div className="absolute top-6 text-xs text-purple-800" style={{left: '110px'}}>
+        versie 2024-07-08<br />
+        verbeterd: bewerken vanuit tabel
       </div>
 
     </>
   )
 }
-
-// versie 2024-05-21
 
 export default FilterbarPolicyHubs;
