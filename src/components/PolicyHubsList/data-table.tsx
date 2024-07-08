@@ -15,15 +15,15 @@ import {
   getFacetedUniqueValues,
 } from "@tanstack/react-table"
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../ui/pagination"
+// import {
+//   Pagination,
+//   PaginationContent,
+//   PaginationEllipsis,
+//   PaginationItem,
+//   PaginationLink,
+//   PaginationNext,
+//   PaginationPrevious,
+// } from "../ui/pagination"
 
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 

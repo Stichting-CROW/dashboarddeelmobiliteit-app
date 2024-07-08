@@ -30,7 +30,6 @@ const ActionHeader = ({
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
-    const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
     const selected_policy_hubs = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.selected_policy_hubs : []);
 
     const editHandler = () => {
@@ -129,13 +128,38 @@ const ActionHeader = ({
         a.remove();//afterwards remove the element again
     }
 
+    // Function that checks if all hubs have same geotype
+    const haveSameGeoType = (hubs) => {
+      // If no hubs are found: Return false
+      if(! hubs || hubs.length === 0) return false;
+      // If only 1 hub was given: Always return true
+      if(hubs && hubs.length === 1) return true;
+
+      let found_geotype, are_the_same = true;
+      hubs.forEach((hubId) => {
+        // Stop if we already know that hubs don't have same geotype
+        if(! are_the_same) return;
+        // Find hub data
+        const hubData = policyHubs.find(x => x.zone_id === hubId);
+        if(! hubData) return;
+        // Compare geotype to last geotype
+        if(found_geotype && hubData.geography_type !== found_geotype) {
+          are_the_same = false;
+        }
+        // Keep track of last geography_type
+        found_geotype = hubData.geography_type;
+      });
+
+      return are_the_same;
+    }
+
     return <>
         <div className="flex justify-between sticky left-0">
             <div className="flex justify-start">
-                {canCommit() && <Button theme="white" onClick={commitHandler}>
+                {<Button theme="white" onClick={commitHandler} disabled={! canCommit()}>
                     Stel vast
                 </Button>}
-                {(selected_policy_hubs && selected_policy_hubs.length === 1) && <Button theme="white" onClick={editHandler}>
+                {<Button theme="white" onClick={editHandler} disabled={! haveSameGeoType(selected_policy_hubs)}>
                     Bewerk
                 </Button>}
                 {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
