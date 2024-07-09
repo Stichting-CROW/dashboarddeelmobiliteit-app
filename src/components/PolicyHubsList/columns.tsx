@@ -1,5 +1,7 @@
 "use client"
 
+import markerMapIcon from './img/marker_map_icon.svg';
+
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "../ui/checkbox"
 import { CheckedState } from "@radix-ui/react-checkbox"
@@ -83,10 +85,10 @@ export const columns: ColumnDef<Hub>[] = [
       </div>
     ),
     cell: (info: any) => {
-      return <div className="cursor-pointer" title="Bekijk zone op de kaart" onClick={() => {
+      return <div className="cursor-pointer text-center" title="Bekijk zone op de kaart" onClick={() => {
         flyTo(info.row.original.area, info.row.original.id)
       }}>
-        🗺️
+        <img src={markerMapIcon} alt="marker" className="inline-block -mr-5" style={{maxWidth: '9999px', height: '20px'}} />
       </div>
     }
   },
