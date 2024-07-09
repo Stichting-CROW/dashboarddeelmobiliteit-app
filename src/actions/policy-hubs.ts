@@ -11,6 +11,7 @@ import {
   SET_HUBS_IN_DRAWING_MODE,
   SET_IS_DRAWING_ENABLED,
   SET_HUB_REFETCH_COUNTER,
+  SET_IS_STATS_OR_MANAGE_MODE,
 } from "./actionTypes";
 
 export const setActivePhase = (phase) => ({
@@ -56,6 +57,10 @@ export const setHubsInDrawingMode = (ids) => ({
 })
 export const setIsDrawingEnabled = (value: any) => ({
   type: SET_IS_DRAWING_ENABLED,
+  payload: value
+})
+export const setIsStatsOrManageMode = (value: any) => ({
+  type: SET_IS_STATS_OR_MANAGE_MODE,
   payload: value
 })
 export const setHubRefetchCounter = (value: number) => ({

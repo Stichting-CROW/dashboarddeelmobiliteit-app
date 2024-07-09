@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
 
+import {generatePopupHtml} from '../Map/MapUtils/zones.js';
+
 import {
   setHubsInDrawingMode,
   setSelectedPolicyHubs,
@@ -48,6 +50,7 @@ import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement'
 import { setMapStyle } from '../../actions/layers';
 import { cn } from "../../lib/utils";
 import moment from "moment";
+import maplibregl from "maplibre-gl";
 
 let TO_fetch_delay;
 
@@ -75,6 +78,7 @@ const DdPolicyHubsLayer = ({
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
+  const is_stats_or_manage_mode = useSelector((state: StateType) => state.policy_hubs.is_stats_or_manage_mode || 'stats');
 
   const selected_policy_hubs = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.selected_policy_hubs : [];
@@ -529,7 +533,7 @@ const DdPolicyHubsLayer = ({
     }
 
     // Get coordinates and props
-    // const coordinates = e.lngLat;
+    const coordinates = e.lngLat;
     const props = e.features[0].properties;
 
     // Check if user holds ctrl (or Command on MacOS)
@@ -537,19 +541,51 @@ const DdPolicyHubsLayer = ({
 
     // Define new selected hub ids
     const newHubIds = userHoldsCtrl
-      // If control is down:
-      ? (selected_policy_hubs.indexOf(props.id) > -1
-          // Remove hub from selection if it was selected
-          ? selected_policy_hubs.filter(x => x != props.id)
-          // Otherwise add hub to selection
-          : [...selected_policy_hubs, props.id]
-      // If control key was not held down: Just set hub ID as selected hub
-      ) : [props.id];
+    // If control is down:
+    ? (selected_policy_hubs.indexOf(props.id) > -1
+        // Remove hub from selection if it was selected
+        ? selected_policy_hubs.filter(x => x != props.id)
+        // Otherwise add hub to selection
+        : [...selected_policy_hubs, props.id]
+    // If control key was not held down: Just set hub ID as selected hub
+    ) : [props.id];
 
-    // Store active hub ID in redux state
-    dispatch(setSelectedPolicyHubs(newHubIds));
-    // Show edit form if user selected >= 1 hubs
-    dispatch(setShowEditForm(true));
+    // If analysing hubs: Show stats tooltip
+    if(is_stats_or_manage_mode === 'stats') {
+      // Store active hub ID in redux state
+      dispatch(setSelectedPolicyHubs(newHubIds));
+      // Open tooltip
+      openHubStatsTooltip(coordinates, props);
+    }
+    
+    // If managing hubs: open edit popup
+    else {
+      // Store active hub ID in redux state
+      dispatch(setSelectedPolicyHubs(newHubIds));
+      // Show edit form if user selected >= 1 hubs
+      dispatch(setShowEditForm(true));
+    }
+  }
+
+  const openHubStatsTooltip = (coordinates, feature) => {
+    // Don't show popup if it's a no_parking zone
+    if(
+      feature && feature.geography_type && 
+      (feature.geography_type === 'no_parking') || (feature.geography_type === 'monitoring')
+    )
+    {
+      return;
+    }
+
+    // Add map popup
+    new maplibregl.Popup()
+      .setLngLat(coordinates)
+      .setHTML(generatePopupHtml(feature))
+      .addTo(map);
+
+    // // Set page URL without reloading page
+    // const geographyId = hubInfo.geography_id;
+    // setPublicZoneUrl(geographyId);
   }
 
   const getSelectedHub = () => {
@@ -593,7 +629,7 @@ const DdPolicyHubsLayer = ({
     return true;
   }
 
-  const didSelectMultipleHubs = () => selected_policy_hubs && selected_policy_hubs.length > 1;
+  // const didSelectMultipleHubs = () => selected_policy_hubs && selected_policy_hubs.length > 1;
 
   const didSelectConceptHub = () => {
     if(! didSelectHub()) return;
@@ -673,11 +709,12 @@ const DdPolicyHubsLayer = ({
     });
   }
 
-  // setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+  console.log('is_stats_or_manage_mode', is_stats_or_manage_mode)
+
   return <>
     <PolicyHubsPhaseMenu />
 
-    {canEditHubs(acl) && <ActionButtons>
+    {(canEditHubs(acl) && is_stats_or_manage_mode === 'manage') && <ActionButtons>
       {/* Teken hub button */}
       {(! is_drawing_enabled && active_phase === 'concept') && 
         <Button theme="white" onClick={() => {
@@ -765,30 +802,33 @@ const DdPolicyHubsLayer = ({
     </ActionButtons>}
 
     {/* Hub edit form */}
-    {(didSelectHub() && show_edit_form && ! show_commit_form) && <ActionModule>
-      <PolicyHubsEdit
-        fetchHubs={fetchHubs}
-        all_policy_hubs={policyHubs}
-        selected_policy_hubs={selected_policy_hubs}
-        drawed_area={drawedArea}
-        cancelHandler={() => {
-          dispatch(setIsDrawingEnabled(false));
-          dispatch(setHubsInDrawingMode([]));
-          dispatch(setShowEditForm(false));
-          dispatch(setSelectedPolicyHubs([]));
-          setDrawedArea(undefined);
-        }}
-      />
-    </ActionModule>}
+    {is_stats_or_manage_mode === 'manage' && <>
+      {(didSelectHub() && show_edit_form && ! show_commit_form) && <ActionModule>
+        <PolicyHubsEdit
+          fetchHubs={fetchHubs}
+          all_policy_hubs={policyHubs}
+          selected_policy_hubs={selected_policy_hubs}
+          drawed_area={drawedArea}
+          cancelHandler={() => {
+            dispatch(setIsDrawingEnabled(false));
+            dispatch(setHubsInDrawingMode([]));
+            dispatch(setShowEditForm(false));
+            dispatch(setSelectedPolicyHubs([]));
+            setDrawedArea(undefined);
+          }}
+        />
+      </ActionModule>}
 
-    {/* Hub 'commit to concept' form */}
-    {(canEditHubs(acl) && didSelectHub() && show_commit_form) && <ActionModule>
-      <PolicyHubsCommit
-        all_policy_hubs={policyHubs}
-        selected_policy_hubs={selected_policy_hubs}
-        fetchHubs={fetchHubs}
-      />
-    </ActionModule>}
+      {/* Hub 'commit to concept' form */}
+      {(canEditHubs(acl) && didSelectHub() && show_commit_form) && <ActionModule>
+        <PolicyHubsCommit
+          all_policy_hubs={policyHubs}
+          selected_policy_hubs={selected_policy_hubs}
+          fetchHubs={fetchHubs}
+        />
+      </ActionModule>}
+    </>}
+
   </>
 }
 

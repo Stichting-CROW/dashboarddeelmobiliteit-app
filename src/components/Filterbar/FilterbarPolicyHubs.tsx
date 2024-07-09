@@ -8,7 +8,8 @@ import {
   toggleVisibleLayer,
   unsetVisibleLayer,
   setVisibleLayer,
-  setShowList
+  setShowList,
+  setIsStatsOrManageMode
 } from '../../actions/policy-hubs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
@@ -78,9 +79,6 @@ function FilterbarPolicyHubs({
   const [showShareModal, setShowShareModal] = useState(false);
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const labelClassNames = 'mb-2 text-sm';
 
   const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
   const showList = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.show_list : false);
@@ -97,6 +95,7 @@ function FilterbarPolicyHubs({
     return state.policy_hubs ? state.policy_hubs.active_phase : ''
   });
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+  const is_stats_or_manage_mode = useSelector((state: StateType) => state.policy_hubs.is_stats_or_manage_mode || 'stats');
 
   // Get all available hub phases
   const policyHubPhases = get_phases();
@@ -168,6 +167,26 @@ function FilterbarPolicyHubs({
           {! hideLogo && <Link to="/">
             <Logo />
           </Link>}
+        </div>
+
+        <div className="py-2 flex justify-between" style={{
+          visibility: filterGebied ? 'visible' : 'hidden',
+          marginLeft: '-0.5rem'
+        }}>
+          <Button onClick={() => {
+            dispatch(setIsStatsOrManageMode('stats'));
+          }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}>
+            📊 Hubstatistieken
+          </Button>
+          <Button onClick={() => {
+             dispatch(setIsStatsOrManageMode('manage'));
+          }} theme={is_stats_or_manage_mode === 'manage' ? "primary" : "white"}
+          style={{
+            marginRight: '0rem'
+          }}
+          >
+            📏 Hubbeheer
+          </Button>
         </div>
 
         <div className="py-2 flex justify-between" style={{

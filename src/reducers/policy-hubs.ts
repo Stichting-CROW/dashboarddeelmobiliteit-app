@@ -1,6 +1,7 @@
 const initialState = {
   active_phase: null,
-  visible_layers: []
+  visible_layers: [],
+  is_stats_or_manage_mode: 'stats'
 }
 
 export default function policy_hubs(state = initialState, action) {
@@ -101,6 +102,12 @@ export default function policy_hubs(state = initialState, action) {
       return {
           ...state,
           hub_refetch_counter: action.payload
+      };
+    }
+    case 'SET_IS_STATS_OR_MANAGE_MODE': {
+      return {
+          ...state,
+          is_stats_or_manage_mode: action.payload
       };
     }
     default:
