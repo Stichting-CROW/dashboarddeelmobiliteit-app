@@ -140,7 +140,7 @@ const PolicyHubsEdit_bulk = ({
     if(active_phase !== 'concept' || ! canEditHubs(acl)) {
         return <>
             <div className={`${labelClassNames} font-bold`}>
-                Je selecteerde {hubsData ? Object.keys(hubsData).length : 'meerdere'} zones
+                Je selecteerde {selected_policy_hubs ? Object.keys(selected_policy_hubs).length : 'meerdere'} zones
             </div>
         </>
     }

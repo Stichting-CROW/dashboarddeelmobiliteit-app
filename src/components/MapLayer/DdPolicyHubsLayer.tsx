@@ -477,8 +477,6 @@ const DdPolicyHubsLayer = ({
     is_drawing_enabled
   ]);
 
-  // If active phase changes: unselect all 
-
   // If is_drawing_enabled changes: Do things
   useEffect(() => {
     if(! map) return;
@@ -551,21 +549,16 @@ const DdPolicyHubsLayer = ({
     // If control key was not held down: Just set hub ID as selected hub
     ) : [props.id];
 
+    // Store active hub ID in redux state
+    dispatch(setSelectedPolicyHubs(newHubIds));
+
     // Show edit form if user selected >= 1 hubs (hidden if stats mode)
     dispatch(setShowEditForm(true));
 
       // If analysing hubs: Show stats tooltip
     if(is_stats_or_manage_mode === 'stats') {
-      // Store active hub ID in redux state
-      dispatch(setSelectedPolicyHubs(newHubIds));
       // Open tooltip
       openHubStatsTooltip(coordinates, props);
-    }
-    
-    // If managing hubs: open edit popup
-    else {
-      // Store active hub ID in redux state
-      dispatch(setSelectedPolicyHubs(newHubIds));
     }
   }
 
