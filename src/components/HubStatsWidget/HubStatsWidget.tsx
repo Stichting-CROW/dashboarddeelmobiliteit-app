@@ -92,6 +92,10 @@ function HubStatsWidget({
 
       <div className={"agg-button-container justify-center mt-4 mb-2"}>
         {chartArrows.map(x => {
+          // Don't show '>' if it's in the future
+          if(x.title === '>' && (ontwikkelingTot.unix()+86400) > moment().unix()) {
+            return;
+          }
           return <div
             key={x.title}
             className="agg-button"
