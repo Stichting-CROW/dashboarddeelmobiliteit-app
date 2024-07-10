@@ -24,12 +24,15 @@ import { themes } from '../../themes';
 import { HubStatsWidget } from '../HubStatsWidget/HubStatsWidget';
 
 const Section = ({
-  classes, children
+  classes,
+  style,
+  children
 }: {
   classes?: string,
+  style?: object,
   children: any
 }) => {
-  return <div className={`p-4 bg-white rounded-lg border border-gray-300 ${classes}`}>
+  return <div className={`p-4 bg-white rounded-lg border border-gray-300 ${classes}`} style={style}>
     {children}
   </div>
 }
@@ -169,7 +172,7 @@ const HubStats = ({
       }
 
       return element.push(
-        <div className="flex my-1" style={{minWidth: '180px'}}>
+        <div className="flex my-1" style={{minWidth: '180px'}} key={modalityName}>
           <div className="mr-2 flex justify-center flex-col">
             <div
               className="rounded-full w-3 h-3" style={{background: getDotColor()}}
@@ -203,7 +206,7 @@ const HubStats = ({
     // Calculate percentage
     const percentageOfVehiclesAvailable = parseInt(numVehicles)/parseInt(numPlaces)*100;
 
-    return <div className="rounded-xl flex" style={{background: '#fff'}}>
+    return <div className="rounded-xl flex" style={{background: '#f6f5f4'}}>
       <div className="rounded-l-xl font-bold py-1 px-2" style={{
         backgroundColor: getIndicatorColor(numVehicles, numPlaces),
         minWidth: `${percentageOfVehiclesAvailable > 100 ? 100 : percentageOfVehiclesAvailable}%`
@@ -345,7 +348,7 @@ const PolicyHubsStats = ({
           <HubStats hubData={hubData} />
         </Section>
 
-        <Section classes="mt-2">
+        <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
           <HubStatsWidget zone_id={hubData.zone_id} />
         </Section>
 
