@@ -195,7 +195,7 @@ const MapComponent = (props): JSX.Element => {
         accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
         center: [lng, lat],
         zoom: zoom,
-        maxZoom: 19,
+        maxZoom: 21,
         attributionControl: false// Hide info icon
       });
 
