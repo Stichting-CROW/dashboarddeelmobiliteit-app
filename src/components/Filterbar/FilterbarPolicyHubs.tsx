@@ -341,8 +341,9 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute top-6 text-xs text-purple-800" style={{left: '110px'}}>
-        versie 2024-07-08<br />
-        verbeterd: bewerken vanuit tabel
+        versie 2024-07-10<br />
+        - beleidshubstatistieken<br />
+        - verder inzoomen op kaart<br />
       </div>
 
     </>
