@@ -175,12 +175,15 @@ function FilterbarPolicyHubs({
         }}>
           <Button onClick={() => {
             dispatch(setIsStatsOrManageMode('stats'));
-          }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}>
+          }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}
+          classes="flex-2 mr-0 rounded-r-none"
+          >
             📊 Hubstatistieken
           </Button>
           <Button onClick={() => {
              dispatch(setIsStatsOrManageMode('manage'));
           }} theme={is_stats_or_manage_mode === 'manage' ? "primary" : "white"}
+          classes="flex-1 ml-0 rounded-l-none"
           style={{
             marginRight: '0rem'
           }}

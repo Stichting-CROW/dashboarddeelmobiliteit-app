@@ -34,6 +34,7 @@ import {StateType} from '../../types/StateType.js';
 
 import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
 import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
+import PolicyHubsStats from '../PolicyHubsStats/PolicyHubsStats';
 import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
@@ -550,7 +551,10 @@ const DdPolicyHubsLayer = ({
     // If control key was not held down: Just set hub ID as selected hub
     ) : [props.id];
 
-    // If analysing hubs: Show stats tooltip
+    // Show edit form if user selected >= 1 hubs (hidden if stats mode)
+    dispatch(setShowEditForm(true));
+
+      // If analysing hubs: Show stats tooltip
     if(is_stats_or_manage_mode === 'stats') {
       // Store active hub ID in redux state
       dispatch(setSelectedPolicyHubs(newHubIds));
@@ -562,12 +566,13 @@ const DdPolicyHubsLayer = ({
     else {
       // Store active hub ID in redux state
       dispatch(setSelectedPolicyHubs(newHubIds));
-      // Show edit form if user selected >= 1 hubs
-      dispatch(setShowEditForm(true));
     }
   }
 
   const openHubStatsTooltip = (coordinates, feature) => {
+    // TODO Remove function as we show it in a ActionModule
+    return;
+
     // Don't show popup if it's a no_parking zone
     if(
       feature && feature.geography_type && 
@@ -629,7 +634,15 @@ const DdPolicyHubsLayer = ({
     return true;
   }
 
-  // const didSelectMultipleHubs = () => selected_policy_hubs && selected_policy_hubs.length > 1;
+  const didSelectHubHub = () => {
+    // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if zone is a hub
+    return selected_hub.geography_type === 'stop';
+  }
 
   const didSelectConceptHub = () => {
     if(! didSelectHub()) return;
@@ -708,8 +721,6 @@ const DdPolicyHubsLayer = ({
       payload: true
     });
   }
-
-  console.log('is_stats_or_manage_mode', is_stats_or_manage_mode)
 
   return <>
     <PolicyHubsPhaseMenu />
@@ -829,6 +840,22 @@ const DdPolicyHubsLayer = ({
       </ActionModule>}
     </>}
 
+    {(is_stats_or_manage_mode === 'stats' && didSelectOneHub() && didSelectHubHub()) && <>
+      <ActionModule>
+        <PolicyHubsStats
+          fetchHubs={fetchHubs}
+          all_policy_hubs={policyHubs}
+          selected_policy_hubs={selected_policy_hubs}
+          cancelHandler={() => {
+            dispatch(setIsDrawingEnabled(false));
+            dispatch(setHubsInDrawingMode([]));
+            dispatch(setShowEditForm(false));
+            dispatch(setSelectedPolicyHubs([]));
+            setDrawedArea(undefined);
+          }}
+        />
+      </ActionModule>
+    </>}
   </>
 }
 

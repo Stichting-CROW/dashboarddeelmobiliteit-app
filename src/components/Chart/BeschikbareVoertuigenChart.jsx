@@ -50,7 +50,9 @@ import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
 
 function BeschikbareVoertuigenChart({
-  filter, config, title
+  filter,
+  config,
+  title
 }: {
   filter: any,
   config: any,
@@ -239,17 +241,18 @@ function BeschikbareVoertuigenChart({
             {doShowDetailledAggregatedData(filter, zones) && (
               <InfoTooltip className="mx-2 inline-block">
                 {/*Zie in ieder tijdsinterval wat de minimale bezetting was, de gemiddelde bezetting of juist de maximale bezetting.*/}
-                Zie in ieder tijdsinterval wat de (maximale) bezetting was.
+                Zie in ieder tijdsinterval wat de maximale bezetting was.
               </InfoTooltip>
             )}
 
+            {/* As long as min doesn't count 0 values, only show 'max' */}
             {aggregationFunctionButtonsToRender.map(x => renderAggregationFunctionButton(x.name, x.title))}
           </div>
         </div>}
 
       </div>
 
-      <div className="relative" style={{ width: '100%', height: '400px' }}>
+      <div className="relative" style={{ width: '100%', height: config?.height || '400px' }}>
         <ResponsiveContainer>
           {renderChart()}
         </ResponsiveContainer>

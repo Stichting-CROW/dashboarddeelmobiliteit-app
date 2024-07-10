@@ -1,5 +1,4 @@
 import maplibregl from "maplibre-gl";
-import PolicyHubsPopup from '../../PolicyHubsPopup/PolicyHubsPopup';
 
 const removeExistingPopups = () => {
   // Only remove on mobile
