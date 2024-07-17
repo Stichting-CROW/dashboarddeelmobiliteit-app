@@ -94,7 +94,7 @@ function HubStatsWidget({
         {chartArrows.map(x => {
           // Don't show '>' if it's in the future
           if(x.title === '>' && (ontwikkelingTot.unix()+86400) > moment().unix()) {
-            return;
+            return <div className="agg-button" style={{visibility: 'hidden'}} />;
           }
           return <div
             key={x.title}
