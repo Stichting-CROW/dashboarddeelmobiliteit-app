@@ -115,9 +115,9 @@ function EditUser({
   // Get organisation of logged in user
   useEffect(() => {
     if(! organisations || organisations.length <= 0) return;
-    if(! organisationId) return;
+    if(! acl || ! acl.part_of_organisation) return;
 
-    const organisation_of_logged_in_user = getOrganisation(organisationId);
+    const organisation_of_logged_in_user = getOrganisation(acl.part_of_organisation);
     if(! organisation_of_logged_in_user) return;
 
     const org_types_allowed_to_edit_zones = [
@@ -131,7 +131,7 @@ function EditUser({
     );
   }, [
     organisations,
-    organisationId
+    acl
   ]);
 
   const isAdmin = () => acl.is_admin === true;
@@ -152,9 +152,6 @@ function EditUser({
 
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
-
-    console.log('acl', acl);
-    console.log('organisation_id', organisationId);
 
     // Build privileges
     const privileges = [];

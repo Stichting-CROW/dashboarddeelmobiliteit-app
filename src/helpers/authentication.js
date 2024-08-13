@@ -6,8 +6,7 @@ export const canEditHubs = (acl) => {
   if(! acl) return false;
 
   const allowedRoles = [
-    'MICROHUB_EDIT',
-    'ORGANISATION_ADMIN'
+    'MICROHUB_EDIT'
   ];
 
   let canEdit = false;

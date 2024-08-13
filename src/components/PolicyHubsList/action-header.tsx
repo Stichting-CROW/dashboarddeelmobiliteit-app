@@ -7,6 +7,7 @@ import { notify } from '../../helpers/notify';
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { getGeoIdForZoneIds, readable_phase } from "../../helpers/policy-hubs/common"
 import { setSelectedPolicyHubs, setShowEditForm, setShowCommitForm, setShowList, setHubRefetchCounter } from "../../actions/policy-hubs"
+import { canEditHubs } from "../../helpers/authentication"
 
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import Modal from "../Modal/Modal"
@@ -28,6 +29,7 @@ const ActionHeader = ({
     const [doShowImportModal, setDoShowImportModal] = useState<Boolean>(false);
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+    const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
     const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
     const selected_policy_hubs = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.selected_policy_hubs : []);
@@ -154,8 +156,8 @@ const ActionHeader = ({
     }
 
     return <>
-        <div className="flex justify-between sticky left-0">
-            <div className="flex justify-start">
+        <div className="flex justify-between sticky left-0" style={{minHeight: '55px'}}>
+            {canEditHubs(acl) && <div className="flex justify-start">
                 {<Button theme="white" onClick={commitHandler} disabled={! canCommit()}>
                     Stel vast
                 </Button>}
@@ -165,14 +167,14 @@ const ActionHeader = ({
                 {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
                     Verwijder
                 </Button>}
-            </div>
+            </div>}
             <div className="flex justify-end">
                 {selected_policy_hubs && selected_policy_hubs.length > 0 && <Button theme="white" onClick={() => {
                     setDoShowExportModal(true);
                 }}>
                     Exporteer
                 </Button>}
-                {active_phase === 'concept' && <Button theme="white"  onClick={() => {
+                {canEditHubs(acl) && active_phase === 'concept' && <Button theme="white"  onClick={() => {
                     setDoShowImportModal(true);
                 }}>
                     Importeer

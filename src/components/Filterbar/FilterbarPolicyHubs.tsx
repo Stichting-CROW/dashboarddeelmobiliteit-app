@@ -41,6 +41,7 @@ import eyeOpen from './img/icon_eye_open.svg';
 import eyeClosed from './img/icon_eye_closed.svg';
 import { readable_phase } from '../../helpers/policy-hubs/common';
 import { themes } from '../../themes';
+import { canEditHubs } from '../../helpers/authentication';
 
 const CheckboxesWrapper = ({children, color}) => <div className="px-2 py-2 bg-white" style={Object.assign({
   borderRadius: '0.5rem'
@@ -82,6 +83,7 @@ function FilterbarPolicyHubs({
 
   const filterGebied = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
   const showList = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.show_list : false);
+  const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -169,14 +171,15 @@ function FilterbarPolicyHubs({
           </Link>}
         </div>
 
-        <div className="py-2 flex justify-between" style={{
+        {canEditHubs(acl) && <div className="py-2 flex justify-between" style={{
           visibility: filterGebied ? 'visible' : 'hidden',
           marginLeft: '-0.5rem'
         }}>
           <Button onClick={() => {
             dispatch(setIsStatsOrManageMode('stats'));
           }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}
-          classes="flex-2 mr-0 rounded-r-none"
+          classes="flex-2 rounded-r-none"
+          style={{marginRight: 0}}
           >
             📊 Hubstatistieken
           </Button>
@@ -190,7 +193,7 @@ function FilterbarPolicyHubs({
           >
             📏 Hubbeheer
           </Button>
-        </div>
+        </div>}
 
         <div className="py-2 flex justify-between" style={{
           visibility: filterGebied ? 'visible' : 'hidden',
@@ -341,9 +344,8 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute top-6 text-xs text-purple-800" style={{left: '110px'}}>
-        versie 2024-07-17<br />
-        - beleidshubstatistieken<br />
-        - verder inzoomen op kaart<br />
+        versie 2024-08-14<br />
+        - eenieder kan nu zones exporteren<br />
       </div>
 
     </>

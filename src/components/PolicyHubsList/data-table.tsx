@@ -49,7 +49,6 @@ import {
   TableRow,
 } from "../ui/table"
 
-import ActionHeader from './action-header';
 import Paginator from './paginator';
 
 import {

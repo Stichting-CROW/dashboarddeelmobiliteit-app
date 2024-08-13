@@ -153,7 +153,8 @@ const PolicyHubsList = () => {
 
     // Filter colums if guest user
     const filterColumnsForGuest = (columns) => {
-        if(canEditHubs(acl)) {
+        if(true) {
+        // if(canEditHubs(acl)) {
             return columns;
         }
 
@@ -170,10 +171,10 @@ const PolicyHubsList = () => {
 
     return (
         <>
-            {canEditHubs(acl) && <ActionHeader
-                policyHubs={policyHubs}
-                fetchHubs={fetchHubs}
-            />}
+            <ActionHeader
+              policyHubs={policyHubs}
+              fetchHubs={fetchHubs}
+            />
             <div data-name="body" className="mx-auto p-4" style={{
                 width: 'fit-content'
             }}>
