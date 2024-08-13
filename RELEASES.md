@@ -1,6 +1,20 @@
 # Dashboard Deelmobiliteit app Releases
 
-## Release 2024-05-09
+## Release 2024-08-14
+
+**Beleidszones**
+
+- ✨ 'Exporteer zones' nu beschikbaar voor alle gebruikers, inclusief aanbieders
+
+**Gebruikersbeheer**
+
+- Organisatie-beheerders mogen alleen 'kan hubs beheren' recht uitgeven als zij tot een overheidsorganisatie behoren
+
+## Release 2024-XX-XX
+
+- Diverse verbeteringen sinds 9 mei 2024
+
+## Release 2024-05-09: Beleidszones
 
 **Algemeen**
 
