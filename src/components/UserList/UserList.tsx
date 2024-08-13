@@ -33,7 +33,7 @@ const readablePrivilege = (privilegeKey) => {
     case 'CORE_GROUP':
       return 'Kernteam';
     case 'MICROHUB_EDIT':
-      return 'Microhub bewerken';
+      return 'Zones beheren';
     case 'DOWNLOAD_RAW_DATA':
       return 'Ruwe data download';
     case 'ORGANISATION_ADMIN':
