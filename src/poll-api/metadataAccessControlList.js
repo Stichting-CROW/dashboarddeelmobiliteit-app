@@ -5,6 +5,7 @@ const cPublicAanbieders = [
   { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
   { value:"check", system_id:"check", name:"CHECK" },
   { value:"felyx", system_id:"felyx", name:"Felyx" },
+  { value:"felyx_mds", system_id:"felyx_mds", name:"Felyx MDS (test)" },
   { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
   { value:"keobike", system_id:"keobike", name:"Keobike" },
   { value:"lime", system_id:"lime", name:"Lime" },
