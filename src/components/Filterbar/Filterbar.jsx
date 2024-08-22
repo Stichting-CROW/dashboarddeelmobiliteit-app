@@ -6,7 +6,7 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
-import FilteritemAanbieders from './FilteritemAanbieders.jsx';
+import FilteritemAanbieders from './FilteritemAanbieders';
 import FilteritemZones from './FilteritemZones.jsx';
 import {
   FilteritemMarkersAfstand,

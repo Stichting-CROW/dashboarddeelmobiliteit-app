@@ -7,5 +7,6 @@ export type StateType = {
   vehicles: any,
   rentals: any,
   zones_geodata: any,
-  policy_hubs: any
+  policy_hubs: any,
+  statsreducer?: any
 }
