@@ -171,7 +171,7 @@ function FilterbarPolicyHubs({
           </Link>}
         </div>
 
-        {canEditHubs(acl) && <div className="py-2 flex justify-between" style={{
+        {filterGebied && canEditHubs(acl) && <div className="py-2 flex justify-between" style={{
           visibility: filterGebied ? 'visible' : 'hidden',
           marginLeft: '-0.5rem'
         }}>
@@ -195,7 +195,7 @@ function FilterbarPolicyHubs({
           </Button>
         </div>}
 
-        <div className="py-2 flex justify-between" style={{
+        {filterGebied && <div className="py-2 flex justify-between" style={{
           visibility: filterGebied ? 'visible' : 'hidden',
           marginLeft: '-0.5rem'
         }}>
@@ -213,7 +213,7 @@ function FilterbarPolicyHubs({
           >
             👥 Delen
           </Button>
-        </div>
+        </div>}
 
         <Fieldset title="Plaats">
             <FilteritemGebieden />

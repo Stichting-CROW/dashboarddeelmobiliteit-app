@@ -102,48 +102,55 @@ function Filterbar({
     ];
   }
 
-  // Zones
-  if(iszonespublic || iszonesadmin) {
-    return <FilterbarZones
-      view={iszonespublic ? 'readonly' : 'adminView'}
-      hideLogo={hideLogo}
-    />
-  }
+  return <>
 
-  // Servicegebieden
-  if(isservicegebieden) {
-    return <FilterbarServiceAreas
-      hideLogo={hideLogo}
-    />
-  }
+    {/* Zones */
+    (iszonespublic || iszonesadmin) && 
+      <FilterbarZones
+        view={iszonespublic ? 'readonly' : 'adminView'}
+        hideLogo={hideLogo}
+      />
+    }
 
-  // Beleidshubs
-  else if(isPolicyHubs) {
-    return <FilterbarPolicyHubs
-      hideLogo={hideLogo}
-    />
-  }
+    {/* Servicegebieden */
+    (isservicegebieden) &&
+      <FilterbarServiceAreas
+        hideLogo={hideLogo}
+      />
+    }
 
-  // HB
-  else if(is_hb_view) {
-    return <FilterbarHb
-      hideLogo={hideLogo}
-      displayMode={displayMode}
-      visible={visible}
-    />
-  }
+    {/* Beleidshubs */
+    (isPolicyHubs) &&
+      <FilterbarPolicyHubs
+        hideLogo={hideLogo}
+      />
+    }
 
-  // Verhuringen
-  else if (isrentals) {
-    return <FilterbarRentals
-      hideLogo={hideLogo}
-      displayMode={displayMode}
-      visible={visible}
-    />
-  }
+    {/* HB */
+    (is_hb_view) &&
+      <FilterbarHb
+        hideLogo={hideLogo}
+        displayMode={displayMode}
+        visible={visible}
+      />
+    }
 
-  else {
-    return (
+    {/* Verhuringen */
+    (isrentals) &&
+      <FilterbarRentals
+        hideLogo={hideLogo}
+        displayMode={displayMode}
+        visible={visible}
+      />
+    }
+
+    {/* Default: */
+    (! (iszonespublic || iszonesadmin)
+      && ! isservicegebieden
+      && ! isPolicyHubs
+      && ! is_hb_view
+      && ! isrentals
+    ) &&
       <div className="filter-bar-inner py-2">
 
         <div className="justify-between hidden sm:flex" style={{
@@ -211,8 +218,17 @@ function Filterbar({
         {<FilteritemAanbieders />}
 
       </div>
-    )
-  }
+    }
+
+    {/* Policy hubs has its own release notes */
+    ! isPolicyHubs &&
+      <div className="absolute top-6 text-xs text-purple-800" style={{left: '110px'}}>
+        versie 2024-08-22<br />
+        - Nieuwe MDS-feed CHECK & Felyx<br />
+        - Test-feeds niet meer in grafieken<br />
+      </div>
+}
+  </>
 }
 
 export default Filterbar;

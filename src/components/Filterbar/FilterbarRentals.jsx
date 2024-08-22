@@ -88,12 +88,13 @@ function Filterbar({
 
   return (
     <div className="filter-bar-inner py-2">
-
-      <div className="justify-between hidden sm:flex">
+      <div className="justify-between hidden sm:flex" style={{
+        paddingBottom: '24px'
+      }}>
         <div style={{minWidth: '82px'}}>
           {! hideLogo && (
             ispark
-              ? <Logo />
+              ? <Logo  />
               : <Link to="/"><Logo /></Link>
           )}
         </div>

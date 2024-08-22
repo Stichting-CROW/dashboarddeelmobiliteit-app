@@ -174,14 +174,16 @@ const ActionHeader = ({
                 }}>
                     Exporteer
                 </Button>}
-                {canEditHubs(acl) && active_phase === 'concept' && <Button theme="white"  onClick={() => {
-                    setDoShowImportModal(true);
-                }}>
-                    Importeer
-                </Button>}
-                {active_phase !== 'concept' && <div style={{height: '55px'}} className="flex flex-col justify-center text-xs mr-4">
-                    Importeren kan in de conceptfase
-                </div>}
+                {canEditHubs(acl) && <>
+                  {active_phase === 'concept' && <Button theme="white"  onClick={() => {
+                      setDoShowImportModal(true);
+                  }}>
+                      Importeer
+                  </Button>}
+                  {active_phase !== 'concept' && <div style={{height: '55px'}} className="flex flex-col justify-center text-xs mr-4">
+                      Importeren kan in de conceptfase
+                  </div>}
+                </>}
             </div>
         </div>
 
