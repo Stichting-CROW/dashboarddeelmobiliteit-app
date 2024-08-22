@@ -47,7 +47,7 @@ import {
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
-import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
+import InfoTooltip from '../InfoTooltip/InfoTooltip';
 
 function VerhuringenChart(props) {
   const dispatch = useDispatch()

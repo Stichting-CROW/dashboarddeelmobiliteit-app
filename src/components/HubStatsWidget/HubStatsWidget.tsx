@@ -7,7 +7,7 @@ import {StateType} from '../../types/StateType';
 
 import moment from 'moment';
 
-import BeschikbareVoertuigenChart from '../Chart/BeschikbareVoertuigenChart.jsx';
+import BeschikbareVoertuigenChart from '../Chart/BeschikbareVoertuigenChart';
 
 import {
   fetchPublicZones

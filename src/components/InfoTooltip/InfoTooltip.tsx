@@ -53,8 +53,4 @@ function InfoTooltip({
   )
 }
 
-export {
-  InfoTooltip
-}
-
 export default InfoTooltip;

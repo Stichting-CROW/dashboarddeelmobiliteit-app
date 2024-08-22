@@ -2,7 +2,7 @@ import React, {useEffect, useState } from 'react';
 
 import { getOperatorStatsForChart } from './chartTools.js';
 
-import {StateType} from '../../types/StateType';
+import {StateType} from '../../types/StateType.js';
 
 import {
   useDispatch,
@@ -26,7 +26,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
+import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats.js';
 import {
   getProviderColor,
   getUniqueProviderNames
@@ -45,9 +45,9 @@ import {
   getAggregatedChartData
 } from '../../helpers/stats/index';
 
-import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
-import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
-import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
+import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx';
+import {CustomizedTooltip} from './CustomizedTooltip.jsx';
+import InfoTooltip from '../InfoTooltip/InfoTooltip';
 
 function BeschikbareVoertuigenChart({
   filter,
@@ -61,10 +61,10 @@ function BeschikbareVoertuigenChart({
   const dispatch = useDispatch()
   
   // Get authentication token
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // Get metadata
-  const metadata = useSelector(state => state.metadata)
+  const metadata = useSelector((state: StateType) => state.metadata)
 
   // Get all zones
   const zones = useSelector((state: StateType) => {
