@@ -65,7 +65,11 @@ function BeschikbareVoertuigenChart({
 
   // Get metadata
   const metadata = useSelector((state: StateType) => state.metadata)
-
+  
+  const aanbieders = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
+  
   // Get all zones
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -110,7 +114,7 @@ function BeschikbareVoertuigenChart({
   ]);
   
   // Populate chart data
-  let chartData = getAggregatedChartData(vehiclesData, filter, zones);
+  let chartData = getAggregatedChartData(vehiclesData, filter, zones, aanbieders);
 
   const getChartDataWithNiceDates = (data) => {
     const aggregationLevel = filter.ontwikkelingaggregatie;
@@ -135,11 +139,6 @@ function BeschikbareVoertuigenChart({
       </div>
     )
   }
-
-  // if(config && config.sumTotal === true) {
-  //   chartData = sumAggregatedStats(chartData);
-  // }
-  // console.log(chartData);
 
   const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
 

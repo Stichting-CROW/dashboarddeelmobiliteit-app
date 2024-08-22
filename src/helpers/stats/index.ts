@@ -241,6 +241,21 @@ export const downloadCsv = (data: any, filename?: string) => {
   return;
 }
 
+  
+  // Filter out operators that are not active
+  const keepActiveOperators = (chartDataset, activeOperators) => {
+    return chartDataset.map(timeframe => {
+      // https://stackoverflow.com/a/38750895
+      const allowedOperators = activeOperators.map(x=>x.system_id)
+      return Object.keys(timeframe)
+        .filter(key => allowedOperators.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = timeframe[key];
+          return obj;
+        }, {});
+    });
+  }
+
 export {
   prepareAggregatedStatsData,
   prepareAggregatedStatsData_timescaleDB,
@@ -251,5 +266,7 @@ export {
   getAggregatedChartData,
 
   getAggregatedRentalsData,
-  getAggregatedRentalsChartData
+  getAggregatedRentalsChartData,
+
+  keepActiveOperators
 }

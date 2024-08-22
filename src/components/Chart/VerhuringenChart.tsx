@@ -56,6 +56,10 @@ function VerhuringenChart(props) {
   const filter = useSelector((state: StateType) => state.filter)
   const metadata = useSelector((state: StateType) => state.metadata)
 
+  const aanbieders = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
+
   // Get all zones
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -97,7 +101,7 @@ function VerhuringenChart(props) {
   ]);
   
   // Populate chart data
-  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones);
+  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones, aanbieders);
 
   const getChartDataWithNiceDates = (data) => {
     const aggregationLevel = filter.ontwikkelingaggregatie;
