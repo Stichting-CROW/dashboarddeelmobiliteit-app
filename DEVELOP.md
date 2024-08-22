@@ -17,7 +17,7 @@ If you want to run the full Dashboard Deelmobiliteit app on your local machine, 
 - [microhubs-importer](https://gitlab.com/bikedashboard/microhubs-controller) - Script that counts vehicles in microhubs and auto opens/closes microhubs
 - [zone-stats-aggregator](https://gitlab.com/bikedashboard/zone-stats-aggregator) - Script that creates aggregated data for vehicles & rentals
 
-You do not always have to run all tools at the same time. For example, if you only want to develop the frontend app, you only need `dashboarddeelmobiliteit-app`. If you only want to get MDS-, GBFS- or TOMP-feeds you only need `go-import-vehicles`. If you do have raw data and want to aggregate it for quick analysis, you can run `zone-stats-aggregator`.
+You do not always have to run all tools at the same time. For example, if you only want to develop the frontend app, you only need `dashboarddeelmobiliteit-app`. If you only want to get MDS- or GBFS-feeds you only need `go-import-vehicles`. If you do have raw data and want to aggregate it for quick analysis, you can run `zone-stats-aggregator`.
 
 ## Isochrones
 
