@@ -343,9 +343,8 @@ function FilterbarPolicyHubs({
         <SharePermalink />
       </Modal>}
 
-      <div className="absolute top-6 text-xs text-purple-800" style={{left: '110px'}}>
-        versie 2024-08-14<br />
-        - eenieder kan nu zones exporteren<br />
+      <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.5rem'}}>
+        versie 2024-09-03
       </div>
 
     </>

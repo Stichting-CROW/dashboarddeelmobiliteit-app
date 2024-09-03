@@ -248,7 +248,7 @@ export const downloadCsv = (data: any, filename?: string) => {
       // https://stackoverflow.com/a/38750895
       const allowedOperators = activeOperators.map(x=>x.system_id)
       return Object.keys(timeframe)
-        .filter(key => allowedOperators.includes(key) || key === 'name')
+        .filter(key => allowedOperators.includes(key) || key === 'name' || key === 'time')
         .reduce((obj, key) => {
           obj[key] = timeframe[key];
           return obj;

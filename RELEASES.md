@@ -1,5 +1,14 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-09-03
+
+- 🐛 Fix: Bij Ontwikkeling werden datums op x-as niet juist getoond, indien een maatwerkzone werd geselecteerd
+
+## Release 2024-08-22
+
+- 🖌️ Test-feeds niet meer in grafieken
+- Nieuwe MDS-feed CHECK & Felyx
+
 ## Release 2024-08-14
 
 **Beleidszones**
