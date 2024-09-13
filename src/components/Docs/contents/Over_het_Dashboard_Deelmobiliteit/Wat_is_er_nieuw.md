@@ -1,2 +1,0 @@
-De nieuwste functionaliteiten vind je hier:
-- **[Dashboard Deelmobiliteit app Releases](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases)**
