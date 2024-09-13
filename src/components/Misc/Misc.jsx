@@ -20,13 +20,8 @@ export default function Misc({children}) {
       link: '/profile',
     },
     {
-      title: 'Over',
-      link: '/over',
-      public: true
-    },
-    {
-      title: 'FAQ',
-      link: '/faq',
+      title: 'Documentatie',
+      link: '/docs',
       public: true
     },
     {
