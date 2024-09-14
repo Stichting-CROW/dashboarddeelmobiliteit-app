@@ -56,8 +56,8 @@ function Docs() {
     let uniqueFilePaths = [];
     // Don't keep duplicate files
     return repoFiles?.filter((item, index) => {
-      const isUnique = uniqueFilePaths.indexOf(item.name) <= -1
-      uniqueFilePaths.push(item.name);
+      const isUnique = uniqueFilePaths.indexOf(item.path) <= -1
+      uniqueFilePaths.push(item.path);
       return isUnique;
     })
     // Only keep markdown files

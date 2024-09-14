@@ -258,7 +258,7 @@ function Menu({
             <Link className="text-menu" to="/login">
               Log in
             </Link>
-            <Link className="text-menu" to="/over">
+            <Link className="text-menu" to="/docs/Over_het_Dashboard_Deelmobiliteit">
               Over
             </Link>
             <Link className="text-menu" to="/rondleiding">

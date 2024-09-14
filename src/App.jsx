@@ -614,6 +614,27 @@ function App() {
             <SetPassword />
           </Overlay>
         } />
+        <Route exact path="/docs" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/docs/:category" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/docs/:category/:doc" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
         <Route element={renderMapElements()} />
       </Routes>
 

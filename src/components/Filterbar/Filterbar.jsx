@@ -222,10 +222,9 @@ function Filterbar({
 
     {/* Policy hubs has its own release notes */
     ! isPolicyHubs &&
-      <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.5rem'}}>
-        versie 2024-09-03<br />
-        - Nieuwe MDS-feed CHECK & Felyx<br />
-        - Juiste datums in x-as grafieken<br />
+      <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
+        versie 2024-09-14<br />
+        - Nieuwe <Link to="/docs">documentatie</Link><br />
       </div>
 }
   </>
