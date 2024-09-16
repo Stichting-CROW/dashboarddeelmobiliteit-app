@@ -47,6 +47,8 @@ function Doc({
   
   const getFolderName = (path) => path?.split('/')[0];
 
+  const gitHubEditPage = `https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/edit/main/src/components/Docs/contents/${activeDoc?.path}`
+
   if(! activeDoc) return <>
     Aan het laden..
   </>
@@ -64,11 +66,18 @@ function Doc({
 
     <br /><hr /><br />
 
-    <p>
-    ⚪ <Link to={`/docs/${getFolderName(activeDoc?.path)}`}>
-        Bekijk het <b>{activeDoc ? getFolderName(activeDoc?.path)?.replaceAll('_', ' ') : ' '}</b> overzicht
-      </Link>
-    </p>
+    <div className="flex justify-between">
+      <p>
+      ⚪ <Link to={`/docs/${getFolderName(activeDoc?.path)}`}>
+          Bekijk het <b>{activeDoc ? getFolderName(activeDoc?.path)?.replaceAll('_', ' ') : ' '}</b> overzicht
+        </Link>
+      </p>
+      <p>
+        <a href={gitHubEditPage} target="_blank" rel="external">
+          Bewerk
+        </a>
+      </p>
+    </div>
   </>
 }
 
