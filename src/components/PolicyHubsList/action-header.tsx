@@ -12,7 +12,7 @@ import { canEditHubs } from "../../helpers/authentication"
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import Modal from "../Modal/Modal"
 import Button from "../Button/Button"
-import { export_kml } from "../../helpers/policy-hubs/export-kml";
+import { export_kml, export_geopackage } from "../../helpers/policy-hubs/export-kml";
 import moment from "moment";
 
 const ActionHeader = ({
@@ -113,22 +113,40 @@ const ActionHeader = ({
     }
 
     const exportKml = async () => {
-        if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
-            notify(toast, 'Geen zones geselecteerd')
-            return;
-        }
-        const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
-        const blob = await export_kml(token, geography_ids);
+      if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
+          notify(toast, 'Geen zones geselecteerd')
+          return;
+      }
+      const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
+      const blob = await export_kml(token, geography_ids);
 
-        if(! blob) return;
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-kml.zip`;
-        document.body.appendChild(a); // append the element to the dom, otherwise it will not work in firefox
-        a.click();    
-        a.remove();//afterwards remove the element again
+      if(! blob) return;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-kml.zip`;
+      document.body.appendChild(a); // append the element to the dom, otherwise it will not work in firefox
+      a.click();    
+      a.remove();//afterwards remove the element again
+  }
+
+  const exportGeoPackage = async () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length === 0) {
+        notify(toast, 'Geen zones geselecteerd')
+        return;
     }
+    const geography_ids = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
+    const blob = await export_geopackage(token, geography_ids);
+
+    if(! blob) return;
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${moment().format('YYYY-MM-DD_HH-mm')}_exported-geopackage.zip`;
+    document.body.appendChild(a); // append the element to the dom, otherwise it will not work in firefox
+    a.click();    
+    a.remove();//afterwards remove the element again
+  }
 
     // Function that checks if all hubs have same geotype
     const haveSameGeoType = (hubs) => {
@@ -215,10 +233,15 @@ const ActionHeader = ({
             </p>
             <ul className="my-4">
             <li>
-                &raquo; <a onClick={exportKml} className="cursor-pointer font-bold theme-color-blue">
-                  <u>Download de geselecteerde zones als KML</u>
-                </a>
-            </li>
+                  &raquo; <a onClick={exportKml} className="cursor-pointer font-bold theme-color-blue">
+                    <u>Download de geselecteerde zones als KML</u>
+                  </a>
+              </li>
+              <li>
+                  &raquo; <a onClick={exportGeoPackage} className="cursor-pointer theme-color-blue">
+                    <u>Download de geselecteerde zones als GeoPackage <span className="text-color-500">(experimenteel)</span></u>
+                  </a>
+              </li>
             </ul>
         </Modal>
 
