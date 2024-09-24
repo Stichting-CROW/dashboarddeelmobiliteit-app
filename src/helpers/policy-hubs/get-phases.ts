@@ -11,7 +11,7 @@ export const get_phases = () => ({
     'active': {
         title: 'Definitief actief'
     },
-    'archive': {
+    'archived': {
         title: 'Archief'
     }
 });

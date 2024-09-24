@@ -6,11 +6,11 @@ const allowedLayerNames = [
   'hub-concept',
   'hub-published',
   'hub-active',
-  'hub-archive',
+  'hub-archived',
   'verbodsgebied-committed_concept',
   'verbodsgebied-published',
   'verbodsgebied-active',
-  'verbodsgebied-archive',
+  'verbodsgebied-archived',
 ];
 
 export const update_url = (params) => {

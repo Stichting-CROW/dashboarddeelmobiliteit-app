@@ -301,6 +301,10 @@ const DdPolicyHubsLayer = ({
     if(retirement_phases.indexOf(hub.phase) <= -1) {
       return true;
     }
+    // If archived: Show hub
+    else if(hub.phase === 'archived') {
+      return true;
+    }
     else if(active_phase === 'concept' && hub.phase === 'retirement_concept') {
       return true;
     }
@@ -353,6 +357,9 @@ const DdPolicyHubsLayer = ({
           geoFilter.push({geo_type: 'stop', phase: name});
         })
       }
+      else if(x === 'hub-archived') {
+        geoFilter.push({geo_type: 'stop', phase: 'archived'});
+      }
       // No parking
       else if(x === 'verbodsgebied-concept') {
         geoFilter.push({geo_type: 'no_parking', phase: 'concept'});
@@ -375,6 +382,9 @@ const DdPolicyHubsLayer = ({
         retirement_phases.forEach((name) => {
           geoFilter.push({geo_type: 'no_parking', phase: name});
         });
+      }
+      else if(x === 'verbodsgebied-archived') {
+        geoFilter.push({geo_type: 'no_parking', phase: 'archived'});
       }
       // Monitoring
       else if(x === 'monitoring-concept') {
