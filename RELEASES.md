@@ -1,5 +1,13 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-09-24
+
+- ✨ Zoek op zone-naam op de Beleidszones-pagina, voor snel navigeren naar een hub of verbodsgebied
+
+## Release 2024-09-14
+
+- ✨ Nieuwe gebruikersdocumenentatie op /docs
+
 ## Release 2024-09-03
 
 - 🐛 Fix: Bij Ontwikkeling werden datums op x-as niet juist getoond, indien een maatwerkzone werd geselecteerd

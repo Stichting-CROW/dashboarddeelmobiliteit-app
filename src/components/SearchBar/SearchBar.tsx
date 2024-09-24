@@ -44,8 +44,6 @@ function SearchBar() {
   useEffect(() => {
     if(! searchBarQuery) return;
 
-    console.log('changed', visible_layers);
-
     setFilteredPolicyHubs(
       policyHubs.filter(x => x.name.toLowerCase().indexOf(searchBarQuery.toLowerCase()) > -1)
     );
