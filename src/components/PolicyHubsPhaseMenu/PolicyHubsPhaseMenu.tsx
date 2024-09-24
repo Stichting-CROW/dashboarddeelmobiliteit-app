@@ -14,9 +14,7 @@ const PolicyHubsPhaseMenu = () => {
     const dispatch = useDispatch();
 
     const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
-    const isFilterbarOpen = useSelector((state: StateType) => {
-      return state.ui && state.ui.FILTERBAR || false;
-    });
+    const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
 
     const policyHubPhases = get_phases();
 

@@ -8,5 +8,6 @@ export type StateType = {
   rentals: any,
   zones_geodata: any,
   policy_hubs: any,
-  statsreducer?: any
+  statsreducer?: any,
+  search?: any
 }

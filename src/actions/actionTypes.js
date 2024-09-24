@@ -25,3 +25,6 @@ export const SET_IS_STATS_OR_MANAGE_MODE = 'SET_IS_STATS_OR_MANAGE_MODE'
 
 // layers
 export const LAYER_SET_MAP_STYLE = 'LAYER_SET_MAP_STYLE'
+
+// search
+export const SET_SEARCH_BAR_QUERY = 'SET_SEARCH_BAR_QUERY'

@@ -11,6 +11,7 @@ import layers from './layers';
 import ui from './ui';
 import statsreducer from './statsreducer';
 import policy_hubs from './policy-hubs';
+import search from './search';
 
 export default combineReducers({
   created,
@@ -24,5 +25,6 @@ export default combineReducers({
   layers,
   ui,
   statsreducer,
-  policy_hubs
+  policy_hubs,
+  search
 })

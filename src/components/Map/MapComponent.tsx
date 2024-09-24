@@ -4,7 +4,7 @@ import maplibregl from 'maplibre-gl';
 import moment from 'moment';
 import 'moment/min/locales';
 import {useLocation} from "react-router-dom";
-import center from '@turf/center'
+import SearchBar from '../SearchBar/SearchBar';
 
 import {StateType} from '../../types/StateType';
 
@@ -21,10 +21,6 @@ import {
 } from './MapUtils/layers.js';
 import {addSources} from './MapUtils/sources.js';
 import {
-  addAdminZonesToMap,
-  addPublicZonesToMap,
-  initMapDrawLogic,
-  initZonesMap,
   navigateToGeography,
   triggerGeographyClick,
   fetchPublicZones,
@@ -33,9 +29,6 @@ import {
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
-  DISPLAYMODE_ZONES_PUBLIC,
-  DISPLAYMODE_ZONES_ADMIN,
-  DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
 import './MapComponent.css';
@@ -50,6 +43,7 @@ import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
+import { WidthIcon } from '@radix-ui/react-icons';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -122,14 +116,6 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     setUriParams(location ? location.search : null);
   }, [location]);
-
-  // Get public zones on component load
-  // useEffect(() => {
-  //   // Decide on the function to call (admin or public)
-  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
-  //   // Get zones
-  //   getZonesFunc();
-  // }, [])
 
   const getAdminZones = async () => {
     const sortedZones = await fetchAdminZones(token, filterGebied);
@@ -299,152 +285,6 @@ const MapComponent = (props): JSX.Element => {
     didAddPublicZones,
     didAddAdminZones
   ])
-
-  // Init drawing functionality (for drawing zones)
-  // useEffect(() => {
-  //   if(! didMapLoad) return;
-  //   if(! map.current) return;
-  //   if(! stateLayers) return;
-
-  //   // Only init map draw features if on zones admin page
-  //   if(stateLayers.displaymode !== 'displaymode-zones-admin') return;
-
-  //   // Init map drawing features
-  //   initMapDrawLogic(map.current);
-
-  //   // Switch to satellite view
-  //   setTimeout(() => {
-  //     const mapStyles = getMapStyles();
-  //     applyMapStyle(window['ddMap'], mapStyles.satellite);
-  //     dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'satellite' })
-  //   }, 5);
-
-  //   setDidAddAdminZones(true);
-  // }, [
-  //   didMapLoad,
-  //   stateLayers.displaymode
-  // ]);
-
-  // Init public zones map (if needed)
-  // useEffect(() => {
-  //   if(! didMapLoad) return;
-  //   // If we did add public zones already: return
-  //   // if( didAddPublicZones) return;
-
-  //   // Only init map draw features if on zones admin page
-  //   if(stateLayers.displaymode === 'displaymode-zones-public') {
-  //     // Add zone layers
-  //     initZonesMap(map.current, token, filterGebied)
-  //     // Switch to base map
-  //     setTimeout(() => {
-  //       const mapStyles = getMapStyles();
-  //       applyMapStyle(window['ddMap'], mapStyles.base);
-  //       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: 'base' })
-  //     }, 5);
-  //   } else {
-  //     // REMOVE zone layers
-  //     // Not needed, because the layer does hide itself automatically on page change
-  //   }
-
-  //   setDidAddPublicZones(true);
-  // }, [
-  //   didMapLoad,
-  //   didAddPublicZones,
-  //   filterGebied,
-  //   stateLayers.displaymode
-  // ]);
-
-  // Auto reload zones on displaymode update
-  // only on the zones-page (public or admin)
-  // useEffect(() => {
-  //   if(stateLayers.displaymode.indexOf('displaymode-zones') <= -1) return;
-  //   // Decide on the function to call (admin or public)
-  //   const getZonesFunc = token ? getAdminZones : getPublicZones;
-  //   // Get zones
-  //   getZonesFunc();
-  // }, [
-  //   stateLayers.displaymode
-  // ]);
-
-  /**
-   * MICROHUBS / ZONES [ADMIN] LOGIC
-   * 
-   * Load zones onto the map
-  */
-  // useEffect(() => {
-  //   if(! didMapLoad) return;
-
-  //   // If we are not on zones page: remove all drawed zones from the map
-  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-admin') {
-  //     // Delete draws
-  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-  //       window['CROW_DD'].theDraw.deleteAll();
-  //       // #TODO Not sure why this is needed.
-  //       // If the timeout is not here, the draw polygons keep visible
-  //       // if you switch from zones-admin to zones-public
-  //       setTimeout(() => {
-  //         window['CROW_DD'].theDraw.deleteAll();
-  //       }, 500);
-  //     }
-  //     // Also, hide isochrones layer
-  //     if(window['ddMap'].isStyleLoaded()) {
-  //       window['ddMap'].U.hide('zones-isochrones')
-  //     }
-  //     return;
-  //   }
-
-  //   (async () => {
-  //     // Remove existing zones first
-  //     window['CROW_DD'].theDraw.deleteAll();
-  //     const filter = {
-  //       municipality: filterGebied
-  //     }
-  //     addAdminZonesToMap(token, filter);
-  //     setDidMapDrawLoad(true)
-  //     // Force DOM update
-  //     setCounter(counter+1)
-  //   })()
-
-  //   return;
-  // }, [
-  //   didMapLoad,
-  //   stateLayers.displaymode,
-  //   filterGebied
-  // ])
-
-  /**
-   * MICROHUBS / ZONES [PUBLIC] LOGIC
-   * 
-   * Load zones onto the map
-  // */
-  // useEffect(() => {
-  //   // Make sure map loaded
-  //   if(! didMapLoad) return;
-  //   // Make sure mapDraw loaded
-  //   if(! window['CROW_DD'] || ! window['CROW_DD'].theDraw) return;
-
-  //   // If we are not on zones page: remove all drawed zones from the map
-  //   if(! stateLayers || stateLayers.displaymode !== 'displaymode-zones-public') {
-  //     if(window['CROW_DD'] && window['CROW_DD'].theDraw) {
-  //       window['CROW_DD'].theDraw.deleteAll();
-  //     }
-  //     return;
-  //   }
-  //   // If on zones page: add zones to map
-  //   (async () => {
-  //     // Remove existing zones fist
-  //     window['CROW_DD'].theDraw.deleteAll();
-  //     const filter = {
-  //       municipality: filterGebied
-  //     }
-  //     addPublicZonesToMap(token, filter);
-  //     setDidMapDrawLoad(true)
-  //   })()
-  // }, [
-  //   didMapLoad,
-  //   stateLayers.displaymode,
-  //   filterGebied
-  // ])
 
   /**
    * SET SOURCES AND LAYERS
@@ -654,7 +494,10 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-rentals' && <DdRentalsLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
-    {stateLayers.displaymode === 'displaymode-policy-hubs' && <DdPolicyHubsLayer map={map.current} />}
+    {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
+      <DdPolicyHubsLayer map={map.current} />
+      <SearchBar />
+    </>}
   </>
 }
 
