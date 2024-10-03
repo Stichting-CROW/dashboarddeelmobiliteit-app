@@ -73,12 +73,16 @@ function FilteritemAanbieders() {
     dispatch({ type: 'REMOVE_FROM_FILTER_AANBIEDERS_EXCLUDE', payload: aanbieder.system_id })
   }
   
-  const clearFilterAanbiedersExclude = e => {
+  const clearFilterAanbiedersExclude = (e?: any) => {
     dispatch({ type: 'CLEAR_FILTER_AANBIEDERS_EXCLUDE', payload: '' })
   }
 
   // Function that gets executed if user clicks a provider filter
   const clickFilter = provider => {
+    const isProviderActive = (provider) => {
+      return filterAanbiedersExclude ? ! filterAanbiedersExclude.includes(provider.system_id) : false;
+    }
+
     // If no filters were set, only show this provider and hide all others
     if(filterAanbiedersExclude==="") {
       // Disable all but the selected provider
@@ -89,6 +93,11 @@ function FilteritemAanbieders() {
         return x;
       })
     }
+
+    // Else: If provider, and only this provider, was active: Re-enable all
+    // else if(isProviderActive && false) {
+    //   clearFilterAanbiedersExclude();
+    // }
 
     // If provider was disabled, re-enable provider
     else {
@@ -135,10 +144,21 @@ function FilteritemAanbieders() {
             }
             
             let excluded = filterAanbiedersExclude ? filterAanbiedersExclude.includes(aanbieder.system_id) : false;
-            let handler = excluded ?
-                e=>{ e.stopPropagation(); removeFromfilterAanbiedersExclude(aanbieder)}
+            let handler =
+              excluded
+                // If provider is inactive:
+                ?
+                e=>{
+                  e.stopPropagation();
+                  removeFromfilterAanbiedersExclude(aanbieder)
+                }
+              // Else: If provider is active:
               :
-                e=>{ e.stopPropagation(); clickFilter(aanbieder); };
+                e=>{
+                  console.log('is NOT excluded', excluded)
+                  e.stopPropagation();
+                  clickFilter(aanbieder);
+                };
                 
             return (
               <div
