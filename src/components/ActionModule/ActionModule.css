@@ -1,0 +1,13 @@
+.ActionModule {
+  width: 100%;
+  max-height: calc(100% - 60px); /* 60px = mobile menu height */
+  overflow-y: auto;
+}
+@media(min-width: 640px) {
+  .ActionModule {
+    top: 8px;
+    max-height: 9999px;
+    width: 492px;
+    max-width: 100%;
+  }
+}

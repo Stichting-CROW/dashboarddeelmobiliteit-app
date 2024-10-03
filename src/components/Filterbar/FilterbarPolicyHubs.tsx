@@ -344,9 +344,8 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-09-24<br />
-        - Zoek op hubnaam en navigeer<br />
-        - Nieuwe <Link to="/docs">documentatie</Link><br />
+        versie 2024-10-03<br />
+        - Bekijk hub-stats op mobiel<br />
       </div>
 
     </>

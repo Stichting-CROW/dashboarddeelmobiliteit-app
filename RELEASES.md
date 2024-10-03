@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-10-03
+
+- 🖌️ Betere mobiele weergave van hubstats
+
+![Screenshot hub-stats op mobiel](https://private-user-images.githubusercontent.com/899234/373241007-c1f3bc74-239d-4901-a3b3-aa62cfe7ae58.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mjc5NTY4MTAsIm5iZiI6MTcyNzk1NjUxMCwicGF0aCI6Ii84OTkyMzQvMzczMjQxMDA3LWMxZjNiYzc0LTIzOWQtNDkwMS1hM2IzLWFhNjJjZmU3YWU1OC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQxMDAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MTAwM1QxMTU1MTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT03MTYxN2U5NDEyMzkwM2RkZTA0YTM0NWI4N2U2NWQwNGZjNTc2MTI4MzE4YTAyNTMwMDU0MmFlNTg5NjhlYmI3JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.jjeEH4U_rXBjHkYrvTIyJI6NeBfk8NUUg9lxp8oShV4)
+
 ## Release 2024-09-24
 
 - ✨ Zoek op zone-naam op de Beleidszones-pagina, voor snel navigeren naar een hub of verbodsgebied
