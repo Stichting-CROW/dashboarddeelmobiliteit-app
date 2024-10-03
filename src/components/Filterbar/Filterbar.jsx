@@ -225,6 +225,7 @@ function Filterbar({
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
         versie 2024-10-03<br />
         - Bekijk hub-stats op mobiel<br />
+        - Betere selectie aanbieders<br />
       </div>
 }
   </>

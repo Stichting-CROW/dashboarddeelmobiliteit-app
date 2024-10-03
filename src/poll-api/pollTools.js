@@ -9,10 +9,10 @@ import {
 export const vehiclesAbortController = new AbortController();
 
 export const createFilterparameters = (displayMode, filter, metadata, options) => {
-  const isParkingData=displayMode===DISPLAYMODE_PARK;
-  const isRentalData=displayMode===DISPLAYMODE_RENTALS;
-  const isOntwikkelingData=displayMode===DISPLAYMODE_OTHER;
-  
+  const isParkingData = displayMode === DISPLAYMODE_PARK;
+  const isRentalData = displayMode === DISPLAYMODE_RENTALS;
+  const isOntwikkelingData = displayMode === DISPLAYMODE_OTHER;
+
   options = options || {
     includeOperators: false
   }
@@ -24,29 +24,28 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   // ADD ZONES
   let filterparams = [];
   // If zones are explicity asked: add these to the request query
-  if(filter.zones!=="") {
-    filterparams.push("zone_ids="+filter.zones);
+  if (filter.zones !== "") {
+    filterparams.push("zone_ids=" + filter.zones);
   }
   // If a place is selected, get all zones for this place
-  else if(filter.gebied!=="" && hasAccessToFilterGebied) {
+  else if (filter.gebied !== "" && hasAccessToFilterGebied) {
     // create zone filter
     let candidates = [];
-    let municipality = metadata.gebieden.find(gebied => gebied.gm_code===filter.gebied);
-    if(undefined!==municipality) {
+    let municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
+    if (undefined !== municipality) {
       candidates = metadata.zones.filter(zone => {
-        return zone.municipality===municipality.gm_code&&zone.name===municipality.name && zone.zone_type!=='custom'
+        return zone.municipality === municipality.gm_code && zone.name === municipality.name && zone.zone_type !== 'custom'
       });
     } else {
     }
-    if(candidates.length===1) {
-      filterparams.push("zone_ids="+candidates[0].zone_id);
+    if (candidates.length === 1) {
+      filterparams.push("zone_ids=" + candidates[0].zone_id);
     } else {
       // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
     }
   }
   // If no place is set, but the user is no admin: Set all places user has access to
-  // If amount of gebieden this user has access to exeeds 100, assume this is an admin user and continue
-  else if(hasAccessToMultipleGebieden && ! options.show_global) {
+  else if (hasAccessToMultipleGebieden && !options.show_global) {
     // Get zone IDs as array
     const allowed_zone_ids = metadata.zones.filter(zone => {
       return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';
@@ -64,81 +63,81 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // filterparams.push("zone_ids=51233");
   }
 
-  if(options.includeOperators === true) {
+  if (options.includeOperators === true) {
     // Add provider filter
-    if(filter.aanbiedersexclude!=="" && filter.aanbiedersexclude!==undefined) {
+    if (filter.aanbiedersexclude !== "" && filter.aanbiedersexclude !== undefined) {
       let filteritems = filter.aanbiedersexclude.split(",");
       let selectedaanbieders = metadata.aanbieders
-        .filter(aanbieder=>(filteritems.includes(aanbieder.system_id)===false))
-        .map(aanbieder=>aanbieder.system_id).join(",");
-  
+        .filter(aanbieder => (filteritems.includes(aanbieder.system_id) === false))
+        .map(aanbieder => aanbieder.system_id).join(",");
+
       filterparams.push("operators=" + selectedaanbieders);
-    } else if (metadata.aanbieders.length===1) {
+    } else if (metadata.aanbieders.length === 1) {
       filterparams.push("operators=" + metadata.aanbieders[0].system_id);
     }
   } else {
     // filtering is done client side
   }
-  
+
   // only apply here if there is one aanbieder set
-  if (metadata.aanbieders.length===1) {
+  if (metadata.aanbieders.length === 1) {
     filterparams.push("operators=" + metadata.aanbieders[0].system_id);
   }
-  
+
   // Add vehicle type filter
   // form_factors=[cargo_bicycle,moped,bicycle,car,other]
-  if(filter.voertuigtypesexclude!=='' && filter.voertuigtypesexclude!==undefined) {
+  if (filter.voertuigtypesexclude !== '' && filter.voertuigtypesexclude !== undefined) {
     let filteritems = filter.voertuigtypesexclude.split(",");
     let selectedtypes = metadata.vehicle_types
-      .filter(vtype=>(filteritems.includes(vtype.id)===false))
-      .map(vtype=>vtype.id).join(",");
+      .filter(vtype => (filteritems.includes(vtype.id) === false))
+      .map(vtype => vtype.id).join(",");
 
     filterparams.push("form_factors=" + selectedtypes);
   }
-  
+
   // Add date (start and/or end)
-  if(isParkingData) {
+  if (isParkingData) {
     let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
-    if(filter.datum!=="") {
+    if (filter.datum !== "") {
       ts = new Date(filter.datum).toISOString().replace(/.\d+Z$/g, "Z");
     }
-    filterparams.push("timestamp="+ts)
+    filterparams.push("timestamp=" + ts)
   }
-  
-  if(isRentalData) {
+
+  if (isRentalData) {
     let ts1 = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
     let ts2 = ts1;
     // filter.intervalstart = moment().subtract(filter.intervalduur / 1000, 'seconds').toISOString();
     // filter.intervalend = moment().toISOString();
     const isInvalid = () => {
-      return ! filter
-          // || filter.intervalstart === ""
-          || filter.intervalend === ""
-          // || filter.intervalstart === undefined
-          || filter.intervalend === undefined;
+      return !filter
+        // || filter.intervalstart === ""
+        || filter.intervalend === ""
+        // || filter.intervalstart === undefined
+        || filter.intervalend === undefined;
     }
-    if(! isInvalid()) {
+    if (!isInvalid()) {
       ts1 = moment(filter.intervalend).subtract(filter.intervalduur / 1000, 'seconds').toISOString().replace(/.\d+Z$/g, "Z");
       ts2 = moment(filter.intervalend).toISOString().replace(/.\d+Z$/g, "Z");
     }
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }
-  
-  if(isOntwikkelingData) {
+
+  if (isOntwikkelingData) {
     let van = undefined;
     let tot = undefined;
-    if(filter.ontwikkelingvan && filter.ontwikkelingtot) {
+    if (filter.ontwikkelingvan && filter.ontwikkelingtot) {
       van = new Date(filter.ontwikkelingvan);
       tot = new Date(moment(filter.ontwikkelingtot).add(1, 'day'));
     }
-    
-    if(!van||!tot) {
+
+    if (!van || !tot) {
       van = new Date();
       // take now, strip hours, add 24 h
-      tot = new Date((new Date()).toDateString()) ;
-      van.setDate(tot.getDate()-7); // go back 1 week
+      tot = new Date((new Date()).toDateString());
+      van.setDate(tot.getDate() - 7); // go back 1 week
     }
-    
+
     // toISOString(true) keeps local timezone://momentjs.com/docs/#/displaying/as-iso-string/
     // Date format to create: 2020-12-31T23:00:00Z
     // let ts1 = van.toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
@@ -147,7 +146,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     let ts2 = moment(tot).format('YYYY-MM-DDTHH:mm:ss') + 'Z'; // use current time without decimals
     filterparams.push("start_time=" + ts1 + "&end_time=" + ts2)
   }
-  
+
   return filterparams;
 }
 
@@ -196,7 +195,7 @@ export function abortableFetch(request, opts) {
 export const shouldFetchVehicles = (newFilter, existingFilter) => {
 
   // If no filter was known of: trigger fetch
-  if(! existingFilter) return true;
+  if (!existingFilter) return true;
 
   // If one of these fields change, we should (re)fetch
   const fieldChangesThatShouldTriggerUpdate = [
@@ -215,7 +214,7 @@ export const shouldFetchVehicles = (newFilter, existingFilter) => {
   let doFetchVehicles = false;
   fieldChangesThatShouldTriggerUpdate.forEach(x => {
     // If field was changed: (re)fetch
-    if(newFilter[x] !== existingFilter[x]) {
+    if (newFilter[x] !== existingFilter[x]) {
       doFetchVehicles = true;
     }
   })
@@ -227,7 +226,7 @@ export const shouldFetchVehicles = (newFilter, existingFilter) => {
 export const shouldFetchVehicleStats = (newFilter, existingFilter) => {
 
   // If no filter was known of: trigger fetch
-  if(! existingFilter) return true;
+  if (!existingFilter) return true;
 
   // If one of these fields change, we should (re)fetch
   const fieldChangesThatShouldTriggerUpdate = [
@@ -241,7 +240,7 @@ export const shouldFetchVehicleStats = (newFilter, existingFilter) => {
   let doFetchVehicles = false;
   fieldChangesThatShouldTriggerUpdate.forEach(x => {
     // If field was changed: (re)fetch
-    if(newFilter[x] !== existingFilter[x]) {
+    if (newFilter[x] !== existingFilter[x]) {
       doFetchVehicles = true;
     }
   })

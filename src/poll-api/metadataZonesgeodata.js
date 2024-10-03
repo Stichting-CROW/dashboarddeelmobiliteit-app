@@ -1,4 +1,4 @@
-import {isLoggedIn} from '../helpers/authentication.js';
+import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
 
 export const getEmptyZonesGeodataPayload = () => {
   return {
@@ -8,22 +8,6 @@ export const getEmptyZonesGeodataPayload = () => {
     },
     "filter": ""
   }
-}
-
-// Checks if user is admin
-const isAdmin = (state) => {
-  if(! state) return;
-  if(! state.authentication) return;
-  if(! state.authentication.user_data?.user?.registrations) return;
-
-  let admin = false;
-  state.authentication.user_data.user.registrations.forEach(x => {
-    if(x.roles.includes('admin')) {
-      admin = true;
-    }
-  });
-
-  return admin;
 }
 
 export const updateZonesgeodata = (store)  => {

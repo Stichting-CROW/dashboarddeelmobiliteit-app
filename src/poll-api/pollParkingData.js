@@ -4,7 +4,7 @@ import {
   convertDurationToBin,
   abortableFetch
 } from './pollTools.js';
-import { isLoggedIn } from '../helpers/authentication.js';
+import { isLoggedIn, isAdmin } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 import {shouldFetchVehicles} from './pollTools.js';
 
@@ -102,13 +102,14 @@ const doApiCall = (
 ) => {
 
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
+  const is_admin = isAdmin(state);
 
   // Set API URL
   let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
 
   let options = {};
   let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
-    show_global: true
+    show_global: is_admin
   });
 
   // Set query params for guests
