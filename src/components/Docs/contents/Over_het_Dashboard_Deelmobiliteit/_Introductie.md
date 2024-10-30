@@ -20,7 +20,7 @@ Voor analyses waar het dashboard niet in voorziet, kunnen overheden downloads ma
 
 In overleg met deelnemende overheden zijn de volgende functionaliteiten ontwikkeld:
 
-- Een kaart met het aanbod van deelvoertuigen op een tijdstip naar keuze. Een kleurcode geeft tevens aan hoe lang het voertuig te huur staat.
+- Een kaart met [het aanbod](https://dashboarddeelmobiliteit.nl/docs/Aanbod/Aanbod-kaart.md) van deelvoertuigen op een tijdstip naar keuze. Een kleurcode geeft tevens aan hoe lang het voertuig te huur staat.
 - Een kaart met verhuringen van deelvoertuigen gedurende een periode naar keuze. Het betreft zowel de locaties waar verhuringen gestart zijn als beëindigd.
 - Een HB-kaart met verhuringen (herkomst-bestemmingsmatrix).
 - Grafieken met ontwikkelingen in een periode naar keuze. Het gaat zowel om de ontwikkeling in het aantal deelvoertuigen dat aangeboden wordt als om de ontwikkeling het aantal verhuringen.
