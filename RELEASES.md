@@ -1,5 +1,9 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-10-30
+
+- ✨ Nieuwe documentatie-pagina: **Aanbod-kaart**
+
 ## Release 2024-10-03
 
 - 🖌️ Betere mobiele weergave van hubstats
