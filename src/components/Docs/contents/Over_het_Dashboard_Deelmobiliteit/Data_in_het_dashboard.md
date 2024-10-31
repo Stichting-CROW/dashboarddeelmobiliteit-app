@@ -2,12 +2,11 @@ Op deze pagina lees je wat voor data er in het Dashboard Deelmobiliteit wordt ge
 
 ## Typen data
 
-Dit zijn de typen data die het Data Exchange Platform verzamelt en het Dashboard Deelmobiliteit toont:
+Dit zijn de typen data die het 'Data Exchange Platform' verzamelt en het Dashboard Deelmobiliteit toont:
 
 - [Aanbod](https://dashboarddeelmobiliteit.nl/docs/Aanbod/Aanbod-kaart.md) van geparkeerde voertuigen in de publieke ruimte
   - Per plaats / stadsdeel / wijk / maatwerkzone
-  - Maatwerkzone-statistieken geaggregeerd per aanbieder per periode
-    - 5 minuten / 15 minuten / 1 uur / dag / week / maand
+  - Maatwerkzone-statistieken geaggregeerd per aanbieder per periode: 5 minuten / 15 minuten / 1 uur / dag / week / maand
 - Verhuringen met begin- en eindlocatie
 - Verhuringen als [herkomst-bestemmingsmatrix](/docs/HB-relaties)
 - Servicegebieden van aanbieders inclusief historie
@@ -16,7 +15,7 @@ Dit zijn de typen data die het Data Exchange Platform verzamelt en het Dashboard
 
 ![Zone-aanbod geaggregeerd per 5 minuten](https://dashboarddeelmobiliteit.nl/components/Docs/Over_het_Dashboard_Deelmobiliteit/aanbod_per_5min.png)
 
-## Hoe ontvangt dit Data Exchange Platform de data?
+## Hoe ontvangt het Data Exchange Platform de data?
 
 Aanbieders kunnen een datafeed online aanbieden. Die datafeed met alle voertuigen, verhuringen en servicegebieden lezen wij elke 30 seconden in.
 
