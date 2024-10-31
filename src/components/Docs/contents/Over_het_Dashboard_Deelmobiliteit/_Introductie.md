@@ -52,31 +52,11 @@ Via het CROW of via info@dashboarddeelmobiliteit.nl kun je een login aanvragen. 
 
 ### Wat is de datakwaliteit?
 
-Op de pagina [dashboarddeelmobiliteit-datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit#dashboard-deelmobiliteit-data-quality) houden wij bij wat de datakwaliteit is per aanbieder. Voor elke aanbieder staat er in het totaaloverzicht een score op 5 kwaliteitseigenschappen. Als alle 5 eigenschappen goed zijn, is de datakwaliteit van de aanbieder 🟢 Perfect.
-
-Het is mogelijk om per aanbieder de datakwaliteit-geschiedenis in te zien door te klikken op de aanbieder.
-
-Per jaar is er een overzicht van de belangrijkste datakwaliteit-issues, zie jaaroverzicht [2022](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/blob/main/year-overview/2022.md), [2023](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/blob/main/year-overview/2023.md) en [2024](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/blob/main/year-overview/2024.md).
+Lees over dit ontwerp bij: [Data in het dashboard](https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md)
 
 ### Welke datastandaarden worden ondersteund?
 
-Hoewel het Dashboard Deelmobiliteit verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun voertuigdata aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.dashboarddeelmobiliteit.nl/data_feeds/for_monitoring/).
-
-Voor analyses gebruiken we:
-
-```
-MDS  /vehicles         | Voor registreren van het aanbod
-MDS  /trips            | Voor registreren van verhuringen
-GBFS /geofencing_zones | Voor registreren van servicegebieden
-```
-
-<br />Voor sturing gebruiken we:
-
-```
-MDS  /stops            | De microhubs inclusief metadata
-MDS  /policies         | Ingestelde regels per microhub
-MDS  /geographies      | Geografische randen per microhub
-```
+Lees over dit ontwerp bij: [Data in het dashboard](https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md)
 
 ### Wat zijn de afspraken over data en financiering?
 

@@ -1,5 +1,9 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-10-31
+
+- ✨ Nieuwe documentatie-pagina: **Data in het dashboard**
+
 ## Release 2024-10-30
 
 - ✨ Nieuwe documentatie-pagina: **Aanbod-kaart**

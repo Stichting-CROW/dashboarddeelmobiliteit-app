@@ -344,8 +344,9 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-10-30<br />
-        - Nieuwe docs: <a href="https://dashboarddeelmobiliteit.nl/docs/Aanbod/Aanbod-kaart.md"><u>Aanbod-kaart</u></a><br />
+        versie 2024-10-31<br />
+        - Docs: <a href="https://dashboarddeelmobiliteit.nl/docs/Aanbod/Aanbod-kaart.md"><u>Aanbod-kaart</u></a><br />
+        - Docs: <a href="https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md"><u>Data in het Dashboard</u></a><br />
       </div>
 
     </>

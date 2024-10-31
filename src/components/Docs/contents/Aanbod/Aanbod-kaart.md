@@ -53,7 +53,7 @@ Standaard zie je de kaartweergave met alle voertuigen die op dit moment geparkee
 
 Je kunt ook een datum/tijd in het verleden selecteren. Dit doe je met de "Datum/tijd"-selectie.
 
-Wil je weer het huidige aanbod zien, ga dan naar het nu met een klik op de knop met de klok.
+Wil je weer het huidige aanbod zien, ga dan naar het "nu" met een klik op de knop met de klok.
 
 ### Filter op plaats/zone
 
@@ -61,7 +61,7 @@ Wil je weer het huidige aanbod zien, ga dan naar het nu met een klik op de knop 
 
 Als je toegang hebt tot meerdere plaatsen, kun je bij **Plaats** de plaats selecteren waar je voertuigen van wilt zien.
 
-Binnen een plaats zijn vaak meerdere zones, bijvoorbeeld de stadsdelen, wijken, en zelf toegevoegde "maatwerkzones". Je kunt optioneel 1 of meerdere zones selecteren waarvan je de voertuigen wilt zien. De rest van de voertuigen wordt dan verborgen.
+Binnen een plaats zijn vaak meerdere zones, bijvoorbeeld de stadsdelen, wijken, en zelf toegevoegde 'maatwerkzones'. Je kunt optioneel 1 of meerdere zones selecteren waarvan je de voertuigen wilt zien. De rest van de voertuigen wordt dan verborgen.
 
 ### Filter op parkeerduur
 
@@ -87,4 +87,4 @@ Met de aanbieders-filter kun je alleen voertuigen tonen van een specifieke (set 
 
 De aanbodsdata wordt aangeleverd door de verschillende aanbieders. Op de pagina [datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit?tab=readme-ov-file#dashboard-deelmobiliteit-data-quality) staat een lijst met aanbieders en de datafeed die zij aanleveren.
 
-Wij bevragen de datafeeds elke 30 seconden en slaan de aanbodsdata op in ons Data Exchange Platform. In het Dashboard Deelmobiliteit kun je de data visueel bekijken. Je kunt de aanbodsdata ook zelf ophalen middels de beschikbare [API's](https://dashboarddeelmobiliteit.nl/docs/APIs) voor je eigen analyses, of voor integratie in je eigen software / andere softwarepakketten.
+Wij bevragen de datafeeds elke 30 seconden en slaan de aanbodsdata op in ons Data Exchange Platform. In het Dashboard Deelmobiliteit kun je de data visueel weergeven. Je kunt de aanbodsdata ook zelf ophalen middels de beschikbare [API's](https://dashboarddeelmobiliteit.nl/docs/APIs) voor je eigen analyses, of voor integratie in je eigen software / andere softwarepakketten.
