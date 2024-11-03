@@ -38,12 +38,24 @@ const ActiveFeeds = () => {
   const [datafeeds, setDatafeeds] = useState([]);
 
   useEffect(() => {
-    (async () => {
-      const result = await fetch_datafeeds();
-      const sorted = sort_datafeeds(result);
-      setDatafeeds(sorted);
-    })();
+    // Variable to keep track of interval variable
+    let TO_refresh_datafeeds;
+
+    // Load datafeeds once every minute
+    load_datafeeds();
+    TO_refresh_datafeeds = setInterval(load_datafeeds, 1000*60);
+
+    return () => {
+      // Clear interval on component unload
+      clearInterval(TO_refresh_datafeeds);
+    }
   }, []);
+
+  const load_datafeeds = async () => {
+    const result = await fetch_datafeeds();
+    const sorted = sort_datafeeds(result);
+    setDatafeeds(sorted);
+  }
 
   const fetch_datafeeds = async () => {
     const response = await fetch('https://api.dashboarddeelmobiliteit.nl/dashboard-api/public/active_feeds');
