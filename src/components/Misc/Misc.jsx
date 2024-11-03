@@ -29,6 +29,11 @@ export default function Misc({children}) {
       link: '/export'
     },
     {
+      title: 'Datafeeds',
+      link: '/active_feeds',
+      public: true
+    },
+    {
       title: 'API keys',
       link: '/profile/api'
     }

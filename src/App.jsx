@@ -32,6 +32,7 @@ import Docs from './components/Docs/Docs';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
+import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
 import Menu from './components/Menu.jsx';
@@ -552,6 +553,13 @@ function App() {
                 </Misc>
               </Overlay>
             } />
+            <Route exact path="/active_feeds" element={
+              <Overlay>
+                <Misc>
+                  <ActiveFeeds />
+                </Misc>
+              </Overlay>
+            } />
           </>
           :
           null
@@ -632,6 +640,13 @@ function App() {
           <Overlay>
             <Misc>
               <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/active_feeds" element={
+          <Overlay>
+            <Misc>
+              <ActiveFeeds />
             </Misc>
           </Overlay>
         } />
