@@ -13,7 +13,7 @@ const Feed = ({data}) => {
   return <div className="mb-4 pb-4 sm:pb-0 border-b border-solid border-black sm:border-none sm:mb-0 sm:flex w-full justify-between">
     <div className="sm:w-48">
       <span className="sm:hidden inline-block w-48 font-bold">Aanbieder:</span> 
-      {data.system_id}
+      {data.system_id} <span className="text-gray-300">{data.feed_id}</span>
     </div>
     <div className="sm:w-16">
       <span className="sm:hidden inline-block w-48 font-bold">Open standaard:</span> 
@@ -66,7 +66,9 @@ const ActiveFeeds = () => {
   }
 
   const sort_datafeeds = (feeds) => {
-    return feeds.sort((a, b) => a.up === false ? 1 : -1);
+    let sorted_by_operator = feeds.sort((a, b) => a.system_id < b.system_id ? 1 : -1);
+    let sorted_by_up = sorted_by_operator.sort((a, b) => a.up === false ? 1 : -1);
+    return sorted_by_up;
   }
 
   return (
