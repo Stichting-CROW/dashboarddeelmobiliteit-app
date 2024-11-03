@@ -452,22 +452,6 @@ const DdPolicyHubsLayer = ({
     }, 25);
   }
 
-  // If mapStyle changes: re-render after a short delay
-  // useEffect(() => {
-  //   // Return
-  //   if(! map) return;
-  //   if(! policyHubs) return;
-
-  //   // setTimeout(() => {
-  //     renderHubs(
-  //       map,
-  //       sortedPolicyHubs(filterPolicyHubs(policyHubs, visible_layers)),
-  //       selected_policy_hubs,
-  //       hubs_in_drawing_mode
-  //     );
-  //   // }, 50);
-  // }, [mapStyle]);
-
   // Init hub click handlers
   useEffect(() => {
     if(! map) return;
@@ -527,7 +511,6 @@ const DdPolicyHubsLayer = ({
       type: e.type,
       features: e.features
     });
-    // console.log('changeAreaHandler', e)
   }
 
   const clickHandler = (e) => {
@@ -564,36 +547,6 @@ const DdPolicyHubsLayer = ({
 
     // Show edit form if user selected >= 1 hubs (hidden if stats mode)
     dispatch(setShowEditForm(true));
-
-      // If analysing hubs: Show stats tooltip
-    if(is_stats_or_manage_mode === 'stats') {
-      // Open tooltip
-      openHubStatsTooltip(coordinates, props);
-    }
-  }
-
-  const openHubStatsTooltip = (coordinates, feature) => {
-    // TODO Remove function as we show it in a ActionModule
-    return;
-
-    // Don't show popup if it's a no_parking zone
-    if(
-      feature && feature.geography_type && 
-      (feature.geography_type === 'no_parking') || (feature.geography_type === 'monitoring')
-    )
-    {
-      return;
-    }
-
-    // Add map popup
-    new maplibregl.Popup()
-      .setLngLat(coordinates)
-      .setHTML(generatePopupHtml(feature))
-      .addTo(map);
-
-    // // Set page URL without reloading page
-    // const geographyId = hubInfo.geography_id;
-    // setPublicZoneUrl(geographyId);
   }
 
   const getSelectedHub = () => {

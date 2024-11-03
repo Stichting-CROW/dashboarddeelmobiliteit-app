@@ -1,5 +1,9 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-11-03
+
+- ✨ Zie sneller waar hubs staan op de kaart: Uitgezoomd zie je het [Mijksenaar hub-logo](https://www.zeeland.nl/sites/default/files/2022-07/2022-07-11%20Handboek%20identiteit%20hubs%20V1.pdf), ingezoomd de hubcontouren zelf
+
 ## Release 2024-10-31
 
 - ✨ Nieuwe documentatie-pagina: **Data in het dashboard**

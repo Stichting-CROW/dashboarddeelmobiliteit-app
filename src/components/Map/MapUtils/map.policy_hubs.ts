@@ -3,6 +3,8 @@ import {
   polygonFillStyle
 } from './map.policy_hubs.styles'
 
+const max_zoom_for_hub_logo = 16;
+
 const removeHubSources = (map: any) => {
     if(! map) return;
 
@@ -15,7 +17,6 @@ const removeHubSources = (map: any) => {
 
 const removeHubsFromMap = (map: any) => {
     if(! map) return;
-    // console.log('removeHubsFromMap')
 
     let layer, key;
     
@@ -27,13 +28,28 @@ const removeHubsFromMap = (map: any) => {
     layer = map.getLayer(`${key}`);
     if(layer) map.removeLayer(`${key}`);
   
+    key = 'policy_hubs-hub-logo';
+    layer = map.getLayer(`${key}`);
+    if(layer) map.removeLayer(`${key}`);
+
+    // Remove event listeners
+    map.off('click', key, clickHubLogo);
+
     removeHubSources(map);
+}
+
+const clickHubLogo = (e) => {
+  const zoom = window['ddMap'].getZoom();
+
+  window['ddMap'].easeTo({
+    center: e.lngLat,
+    zoom: zoom+2
+  });
 }
 
 async function renderPolygons_fill(map, geojson) {
     if(! map) return;
     if(! map.isStyleLoaded()) return;
-    // console.log('renderPolygons_fill')
     
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`
@@ -45,40 +61,106 @@ async function renderPolygons_fill(map, geojson) {
       map.addSource(sourceId, {
         type: 'geojson',
         data: geojson,
-        tolerance: 0.5,// Simplies polygons for performance. Defaults to 0.375. Higher is simpler.
-        generateId: true // This ensures that all features have unique IDs
+        // tolerance: 0.5,// Simplies polygons for performance. Defaults to 0.375. Higher is simpler.
+        tolerance: 0.2,// Simplies polygons for performance. Defaults to 0.375. Higher is simpler.
+        generateId: true, // This ensures that all features have unique IDs
       });
   
       // Set source variable
       source = map.getSource(sourceId);
     }
+    // Add layers if these weren't added yet
     if (! layer) {
-      // Add polygons (fill + 1px outline)
+      // Add polygons (fill + 1px outline) if zoomed in
+      map.addLayer({
+        id: `${layerId}`,
+        source: sourceId,
+        type: 'fill',
+        paint: polygonFillStyle,
+        // Only show hubs fill from a certain zoom level
+        // Inspired by: https://stackoverflow.com/a/74550432
+        "filter": [
+          ">=", ["zoom"],
+            ["match", ["get", "geography_type"],
+            'no_parking', 0,// 0 = minimum zoom level / always show monitoring zones
+            'monitoring', 0,// 0 = minimum zoom level / always show monitoring zones
+            max_zoom_for_hub_logo]
+        ]
+      });
+
+      // Add line layer for wider outline/borders, on top of fill layer
+      // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
+      layerId = `${sourceId}-layer-border`;
       map.addLayer({
         id: layerId,
         source: sourceId,
-        type: 'fill',
-        paint: polygonFillStyle
+        type: 'line',
+        paint: polygonLineStyle,
+        // Only show hubs outlines from a certain zoom level
+        "filter": [
+          ">=", ["zoom"],
+            ["match", ["get", "geography_type"],
+            'no_parking', 0,// 0 = minimum zoom level / always show monitoring zones
+            'monitoring', 0,// 0 = minimum zoom level / always show monitoring zones
+            max_zoom_for_hub_logo]
+        ]
       });
+
+      layerId = `${sourceId}-hub-logo`;
+      map.addLayer({
+        id: layerId,
+        source: sourceId,
+        type: 'symbol',
+        'layout': {
+          'icon-image': 'hub-icon-mijksenaar',
+          "icon-size": [
+            'interpolate',
+            // Set the exponential rate of change to 1.5
+            ['exponential', 1.5],
+            ['zoom'],
+            // When zoom is 1, icon will be 50% size.
+            1,
+            0.005,
+            // 
+            11,
+            0.02,
+            // When zoom is 10, icon will be 50% size.
+            12,
+            0.04,
+            //
+            13,
+            0.06,
+            // When zoom is 22, icon will be 10% size.
+            15,
+            0.15
+          ],
+          'icon-allow-overlap': true,
+        },
+        // Only show hub logo until a certain zoom level
+        // Inspired by: https://stackoverflow.com/a/74550432
+        "filter": [
+          "<", ["zoom"],
+            ["match", ["get", "geography_type"],
+            'no_parking', 0,// 0 = maximum zoom level (never show mijksenaar logo for no_parking zones)
+            'monitoring', 0,// 0 = maximum zoom level (never show mijksenaar logo for monitoring zones)
+            max_zoom_for_hub_logo]
+        ]
+      });
+
+      map.on('click', layerId, clickHubLogo);
+      map.on('mouseenter', layerId, function () {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', layerId, function () {
+        map.getCanvas().style.cursor = '';
+      });
+
     }
     // If source was already present: Update data
     else {
       // Update the geojson data
       source.setData(geojson);
     }
-    
-    // Set fill color
-    // map.setPaintProperty(layerId, 'fill-color', '#FD862E');
-
-    // Add line layer for wider outline/borders, on top of fill layer
-    // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
-    layerId = `${sourceId}-layer-border`;
-    map.addLayer({
-      id: layerId,
-      source: sourceId,
-      type: 'line',
-      paint: polygonLineStyle
-    });
 }
 
 const generateGeojson = (

@@ -226,6 +226,11 @@ const MapComponent = (props): JSX.Element => {
           map.current.addImage('pattern', image);
         });
 
+        // Add 'Mijksenaar' hub logo for Beleidshubs, if zoomed out
+        map.current.loadImage('https://dashboarddeelmobiliteit.nl/components/MapComponent/hub-icon-mijksenaar.png', (err, image) => {
+          if(err) throw err;
+          map.current.addImage('hub-icon-mijksenaar', image);
+        });
       });
 
       // Disable rotating

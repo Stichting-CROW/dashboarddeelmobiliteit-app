@@ -23,6 +23,7 @@ export const polygonLineStyle = {
       ['==', ['get', 'is_in_drawing_mode'], 1], 0,
       1
     ],
+
     // "line-dasharray": [2, 3],
     // 'line-opacity': [
     //   "case",
