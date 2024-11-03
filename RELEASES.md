@@ -4,9 +4,15 @@
 
 - ✨ Zie sneller waar hubs staan op de kaart: Uitgezoomd zie je het [Mijksenaar hub-logo](https://www.zeeland.nl/sites/default/files/2022-07/2022-07-11%20Handboek%20identiteit%20hubs%20V1.pdf), ingezoomd de hubcontouren zelf
 
+## Release 2024-11-01
+
+- ✨ Nieuw status-overzicht met active datafeeds geeft aan of de feed werkt en zo ja: wanneer de laatste data-import was. API end point: https://api.dashboarddeelmobiliteit.nl/dashboard-api/public/active_feeds ([commit](https://github.com/Stichting-CROW/dd-importer-v2/commit/e828924dcb78de696f368d28f7b161756f20c794))
+
+- ✨ Custom integratie voor importeren van de Dott-datafeed, zodat we nu de nieuwe Dott MDS feed kunnen gebruiken. ([commit](https://github.com/Stichting-CROW/dd-importer-v2/commit/e828924dcb78de696f368d28f7b161756f20c794))
+
 ## Release 2024-10-31
 
-- ✨ Nieuwe documentatie-pagina: **Data in het dashboard**
+- ✨ Nieuwe documentatie-pagina: **Data in het dashboard** 
 
 ## Release 2024-10-30
 
