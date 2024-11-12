@@ -461,10 +461,14 @@ const PolicyHubsEdit = ({
         )
     }
 
-    const is_retirement_hub = hubData.phase === 'retirement_concept'
+    const is_retirement_hub = false
+        || hubData.phase === 'retirement_concept'
         || hubData.phase === 'retirement_committed_concept'
         || hubData.phase === 'committed_retirement_concept'
         || hubData.phase === 'published_retirement';
+
+    const can_edit_hub_data = hubData.phase === 'concept'
+        // || hubData.phase === 'retirement_concept';
         
     return (
         <div>
@@ -476,7 +480,7 @@ const PolicyHubsEdit = ({
             </div>
 
             {hubData?.prev_geographies?.[0] && <div className="my-4">
-                Deze hub is een nieuwe versie van hub <u className="cursor-pointer" title={hubData?.prev_geographies?.[0]}>deze hub</u>.
+                Deze hub is een nieuwe versie van een al eerder bestaande zone<u hidden className="cursor-pointer" title={hubData?.prev_geographies?.[0]}>deze hub</u>.
             </div>}
 
             {/* Committed concept data */}
@@ -594,7 +598,7 @@ const PolicyHubsEdit = ({
                 </table>
             </div>}
 
-            {hubData.phase === 'concept' && <div>
+            {can_edit_hub_data && <div>
                 <FormInput
                     type="text"
                     autofocus
@@ -628,7 +632,7 @@ const PolicyHubsEdit = ({
                 />
             </div>
 
-            {hubData.phase === 'concept' && <div className="relative">
+            {can_edit_hub_data && <div className="relative">
                 {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
                 <PolicyHubsEdit_geographyType
                     defaultStopProperties={defaultStopProperties}
@@ -639,7 +643,7 @@ const PolicyHubsEdit = ({
             </div>
             }
             
-            {hubData.phase === 'concept' && <div className="relative">
+            {can_edit_hub_data && <div className="relative">
                 {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
                 <PolicyHubsEdit_isVirtual
                     hubData={hubData}
