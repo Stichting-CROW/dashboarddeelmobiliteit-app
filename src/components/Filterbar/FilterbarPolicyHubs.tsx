@@ -346,7 +346,7 @@ function FilterbarPolicyHubs({
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
         versie 2024-11-13<br />
         - Hub-logo's op de <a href="https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md"><u>Zones-kaart</u></a><br />
-        - Verbodszone edit werkt beter<br />
+        - Nieuwe GeoPackage-zones import<br />
       </div>
 
     </>

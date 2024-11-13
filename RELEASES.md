@@ -2,6 +2,7 @@
 
 ## Release 2024-11-13
 
+- ✨ Zone-beheerders kunnen nu zones importeren als GPKG-bestand (GeoPackage file)
 - 🐛 Fix: Concept-verbodszones gebaseerd op bestaande, actieve verbodszones konden niet bewerkt worden -> opgelost
 
 ## Release 2024-11-03
