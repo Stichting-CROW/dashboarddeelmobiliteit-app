@@ -10,6 +10,7 @@ import {
 import {StateType} from '../../types/StateType';
 
 import {preprocessKmlFile, importKmlFile} from '../../helpers/import-kml.js';
+import {preprocessGeoPackageFile, importGeoPackageFile} from '../../helpers/import-geopackage.js';
 
 import {ZonesToImportConfigurator} from './ZonesToImportConfigurator';
 
@@ -21,12 +22,12 @@ const ImportZones = ({
 
   return <>
     <p className="mb-4">
-      Importeer een KML-bestand met zone-polygonen middels onderstaande upload-functie. De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een ID dat al in het Dashboard Deelmobiliteit staat, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
+      Importeer een GeoPackage-bestand met zone-polygonen middels onderstaande upload-functie. De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een ID dat al in het Dashboard Deelmobiliteit staat, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
     </p>
 
     {! importResult || Object.keys(importResult).length <= 0 && <form encType="multipart/form-data">
       <p className="mt-4">
-        <input type="file" name="file" id="js-kml-file" accept=".kml" onChange={fileChangedHandler} />
+        <input type="file" name="file" id="js-kml-file" accept=".gpkg" onChange={fileChangedHandler} />
       </p>
     </form>}
 
@@ -91,7 +92,7 @@ const ImportZonesModal = ({
 
     let responseJson; 
     try {
-      responseJson = await preprocessKmlFile({
+      responseJson = await preprocessGeoPackageFile({
         token,
         gm_code,
         body
@@ -110,71 +111,6 @@ const ImportZonesModal = ({
     }
   }
 
-  const startImportingFile = async () => {
-
-    const checkboxes = (document.querySelectorAll('input[type=checkbox]') as NodeListOf<Element>);
-    let zoneGeographyIdsToKeep = [];
-    checkboxes.forEach(x => {
-      // Get input name
-      const name = x['name'];
-      // Check if this is a checkbox we want to check
-      if(name.indexOf('import_zone_') <= -1) return;
-      // Check if checkbox is checked
-      if(x['checked']) {
-        // Get geographyId from name
-        const geographyId = name.replace('import_zone_', '');
-        // Add this geographyId to the zoneGeographyIdsToKeep var
-        zoneGeographyIdsToKeep.push(geographyId)
-      }
-    });
-
-    // Set loading=true
-    setImportWasSuccesful(false);
-    setNotificationText('De zones worden geimporteerd...');
-    setIsProcessingFile(true);
-
-    // Process importResult, but only keep the ones that are checked by user
-    const zonesToImport = importResult.filter(x => {
-      return zoneGeographyIdsToKeep.indexOf(x.zone.geography_id) > -1;
-    });
-
-    if(! zonesToImport || zonesToImport.length <= 0) {
-      console.error('Error: No zones to import');
-      setNotificationText('Er zijn geen zones geselecteerd om te importeren');
-      setIsProcessingFile(false);
-      return;
-    }
-
-    // Populate body for API call that imports the zones
-    const body = zonesToImport.map(x => {
-      return Object.assign({}, x.zone, {
-        published: true
-      });
-    });
-
-    const response = await importKmlFile({
-      token,
-      gm_code,
-      body
-    });
-
-    // Check if there was an error
-    if(response && response.detail) {
-      console.error(response);
-      setNotificationText('Er was een fout bij het importeren: ' + response.detail);
-      setIsProcessingFile(false);
-    }
-    // If no error: show that import was done succesful
-    else {
-      setNotificationText('De zones zijn succesvol geimporteerd! Klik op "Sluiten" om de nieuwe zone(s) te bekijken in de filterbalk.');
-      setImportWasSuccesful(true);
-      setIsProcessingFile(false);
-      setImportResult([]);
-    }
-
-    return;
-  }
-
   const getNotificationText = () => {
     if(notificationText && notificationText.length > 0) {
       return notificationText;
@@ -188,7 +124,7 @@ const ImportZonesModal = ({
   return (
     <Modal
       isVisible={isModalVisible}
-      title="Importeer een KML-bestand"
+      title="Importeer een GeoPackage-bestand"
       button1Title={'Annuleer'}
       button1Handler={(e) => {
         postImportFunc();
