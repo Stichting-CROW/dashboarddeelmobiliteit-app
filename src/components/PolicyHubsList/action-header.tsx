@@ -207,7 +207,7 @@ const ActionHeader = ({
 
         <Modal
             isVisible={doShowExportModal}
-            title="Exporteer KML-bestand"
+            title="Exporteer GeoPackage-bestand"
             button1Title={false}
             button1Handler={(e) => {
                 setDoShowExportModal(false);
@@ -232,14 +232,14 @@ const ActionHeader = ({
                 Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
             </p>
             <ul className="my-4">
-            <li>
-                  &raquo; <a onClick={exportKml} className="cursor-pointer font-bold theme-color-blue">
-                    <u>Download de geselecteerde zones als KML</u>
+              <li>
+                  &raquo; <a onClick={exportGeoPackage} className="cursor-pointer font-bold theme-color-blue">
+                    <u>Download de geselecteerde zones als GeoPackage</u>
                   </a>
               </li>
-              <li>
-                  &raquo; <a onClick={exportGeoPackage} className="cursor-pointer theme-color-blue">
-                    <u>Download de geselecteerde zones als GeoPackage <span className="text-color-500">(experimenteel)</span></u>
+              <li hidden>
+                  &raquo; <a onClick={exportKml} className="cursor-pointer theme-color-blue">
+                    <u>Download de geselecteerde zones als KML <span className="text-color-500">(KML export )</span></u>
                   </a>
               </li>
             </ul>
