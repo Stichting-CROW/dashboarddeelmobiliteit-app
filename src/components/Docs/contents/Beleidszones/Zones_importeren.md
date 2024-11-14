@@ -4,7 +4,7 @@ Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones
 
 1. Zet alvast een GeoPackage-bestand klaar met een losse polygon per zone, en metadata zoals de naam van de zone
 2. Ga naar [Zones](/zones)
-3. Zorg dat je de "Concept"-fase actief hebt
+3. Zorg dat je de **Concept**-fase actief hebt
 4. Open de tabel via knop **Tabel openen**
 5. Klik op de knop "Importeer", in de rechtsbovenhoek
 6. Selecteer het .dkpg-bestand en klik op **Importeer zones**<br /><br />
