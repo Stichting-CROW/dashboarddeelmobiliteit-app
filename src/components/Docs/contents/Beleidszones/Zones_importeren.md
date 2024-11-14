@@ -1,20 +1,22 @@
-Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones en verbodszones. Je kunt zones handmatig toevoegen of importeren middels een KML-bestand. Hieronder lees je hoe dit werkt.
+Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones en verbodszones. Je kunt zones handmatig toevoegen of importeren middels een GeoPackage-bestand. Hieronder lees je hoe dit werkt.
 
 ## Zones importeren
 
-1. Zet alvast een KML-bestand klaar met een losse polygon per zone, en metadata zoals de naam van de zone
+1. Zet alvast een GeoPackage-bestand klaar met een losse polygon per zone, en metadata zoals de naam van de zone
 2. Ga naar [Zones](/zones)
-3. Klik links op het potlood-icoon
-4. Klik op de upload-knop, ⬆️. Een popup verschijnt<br /><br />
-![Importeer/Upload-knop](https://i.imgur.com/nKKEOhs.png)<br />
-5. Selecteer het KML-bestand en klik op **Laad zones**<br /><br />
-![Importeer-popup](https://i.imgur.com/2NgFyPv.png)<br />
-6. Selecteer welke zones je wilt importeren<br /><br />
-![Zone-overzicht met checkboxes](https://i.imgur.com/8iYb3Qe.png)<br />
-7. Klik op **Importeer zones**
-8. De zones zijn nu geimporteerd!
+3. Zorg dat je de "Concept"-fase actief hebt
+4. Open de tabel via knop **Tabel openen**
+5. Klik op de knop "Importeer", in de rechtsbovenhoek
+6. Selecteer het .dkpg-bestand en klik op **Importeer zones**<br /><br />
+![img](https://dashboarddeelmobiliteit.nl/components/Docs/Zones/import-zones-from-geopackage-modal.png)
+7. De zones zijn nu geimporteerd!
+
+## Handig: een GeoPackage-template met voorbeeldzones
+
+Download [dit gpkg-bestand](https://drive.google.com/file/d/1xrQSFHN_p5YQXl-mfH7sOsLNSfYco7No/view?usp=sharing
+) als voorbeeld-template van hoe zones kunnen worden aangeleverd. In het bestand zie je per zone alle attributen die je kunt meegeven, zoals de naam en het interne ID van de zone.
 
 ## Tips bij het importeren van zones
 
-- Zorg dat elke zone een losse polygon is
 - Zorg dat elke zone een naam heeft, dan is die gemakkelijk herkenbaar
+- Zorg dat elke zone een losse polygon is

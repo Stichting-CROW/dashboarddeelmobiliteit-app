@@ -3,7 +3,7 @@ De maatwerkzones die aanwezig zijn in het Dashboard Deelmobiliteit kun je export
 ## Zones exporteren als GeoPackage
 
 1. Ga naar [Zones](/zones)
-2. Open de tabel via knop **Tabel openen**<br /><br />
+2. Open de tabel via knop **Tabel openen**
 3. Selecteer de zones die je wilt exporteren
 4. Klik op de knop **Exporteer** rechtsboven
 5. Klik op **Download de geselecteerde zones als GeoPackage**<br /><br />
