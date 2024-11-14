@@ -84,7 +84,7 @@ async function renderPolygons_fill(map, geojson) {
             ["match", ["get", "geography_type"],
             'no_parking', 0,// 0 = minimum zoom level / always show monitoring zones
             'monitoring', 0,// 0 = minimum zoom level / always show monitoring zones
-            max_zoom_for_hub_logo]
+            max_zoom_for_hub_logo-1]
         ]
       });
 
@@ -102,7 +102,7 @@ async function renderPolygons_fill(map, geojson) {
             ["match", ["get", "geography_type"],
             'no_parking', 0,// 0 = minimum zoom level / always show monitoring zones
             'monitoring', 0,// 0 = minimum zoom level / always show monitoring zones
-            max_zoom_for_hub_logo]
+            max_zoom_for_hub_logo-1]
         ]
       });
 
@@ -112,6 +112,7 @@ async function renderPolygons_fill(map, geojson) {
         source: sourceId,
         type: 'symbol',
         'layout': {
+          'icon-anchor': 'bottom',
           'icon-image': 'hub-icon-mijksenaar',
           "icon-size": [
             'interpolate',

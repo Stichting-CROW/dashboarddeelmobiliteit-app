@@ -1,5 +1,10 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-11-14
+
+- Geupdate documentatie-pagina: Importeer zones (inclusief GeoPackage-template)
+- Geupdate documentatie-pagina: Exporteer zones
+
 ## Release 2024-11-13
 
 - ✨ Zone-beheerders kunnen nu zones importeren als GPKG-bestand (GeoPackage file)
