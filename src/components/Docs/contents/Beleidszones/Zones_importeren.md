@@ -11,6 +11,10 @@ Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones
 ![img](https://dashboarddeelmobiliteit.nl/components/Docs/Zones/import-zones-from-geopackage-modal.png)
 7. De zones zijn nu geimporteerd!
 
+## Demo
+
+<a href="https://www.linkedin.com/posts/sven-boor_geopackages-in-het-dashboarddeelmobiliteit-activity-7262776076811001857-v0XY/" target="_blank" rel="external">Bekijk op LinkedIn een video-demo</a> van de exporteer- en importeer-functionaliteit.
+
 ## Handig: een GeoPackage-template met voorbeeldzones
 
 Download [dit gpkg-bestand](https://drive.google.com/file/d/1xrQSFHN_p5YQXl-mfH7sOsLNSfYco7No/view?usp=sharing
