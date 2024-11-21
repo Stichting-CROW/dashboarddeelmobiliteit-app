@@ -21,6 +21,7 @@ import {
 import {StateType} from '../../types/StateType.js';
 import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { setMapStyle } from '../../actions/layers';
+import { ServiceAreaHistoryEvent } from '@/src/types/ServiceAreaHistoryEvent';
 
 const DdServiceAreasLayer = ({
   map
@@ -56,8 +57,9 @@ const DdServiceAreasLayer = ({
 
     // Fetch service areas history and store in state
     (async () => {
-      const res = await fetchServiceAreasHistory();
-      setServiceAreasHistory(res);
+      const history = await fetchServiceAreasHistory();
+      const history_filtered = keepOneEventPerDay(history); 
+      setServiceAreasHistory(history_filtered);
     })();
   }, [
     filter.gebied
@@ -146,7 +148,7 @@ const DdServiceAreasLayer = ({
 
     const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=check&start_date=${startDate}&end_date=${endDate}`;
     const response = await fetch(url);
-    const json = await response.json();
+    const json: ServiceAreaHistoryEvent[] = await response.json();
 
     return json;
   }
@@ -158,6 +160,27 @@ const DdServiceAreasLayer = ({
     const json = await response.json();
 
     return json;
+  }
+
+  const keepOneEventPerDay = (full_history: ServiceAreaHistoryEvent[]) => {
+    // Create a map to store one event per day
+    const eventsByDay = new Map<string, ServiceAreaHistoryEvent>();
+    
+    // Sort events by valid_from date to ensure we process oldest first
+    const sortedHistory = [...full_history].sort((a, b) => 
+      new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
+    );
+
+    // For each event, store only the newest event per day based on valid_from date
+    sortedHistory.forEach(event => {
+      const dateKey = new Date(event.valid_from).toISOString().split('T')[0];
+      if (!eventsByDay.has(dateKey) || new Date(event.valid_from) > new Date(eventsByDay.get(dateKey).valid_from)) {
+        eventsByDay.set(dateKey, event);
+      }
+    });
+
+    // Convert map values back to array
+    return Array.from(eventsByDay.values());
   }
 
   return <>
