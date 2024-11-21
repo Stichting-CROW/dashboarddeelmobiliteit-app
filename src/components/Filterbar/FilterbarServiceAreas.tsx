@@ -60,7 +60,7 @@ function FilterbarServiceAreas({
       <Fieldset title="Aanbieders">
         {[
           'CHECK',
-          'GO Sharing',
+          // 'GO Sharing',
         ].map(x => <div className="
           flex items-center space-x-2
           my-2
