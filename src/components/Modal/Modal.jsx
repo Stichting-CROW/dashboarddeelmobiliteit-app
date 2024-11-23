@@ -33,12 +33,24 @@ const Modal = ({
         aria-modal="true"
         style={{
           'display': isVisible ? 'block' : 'none',
-          backgroundColor: 'rgba(0,0,0,0.3)',
           zIndex: 100,
           padding: '50px 0'
         }}
         role="dialog"
       >
+        <div
+          className="absolute top-0 right-0 bottom-0 left-0"
+          style={{
+            'display': isVisible ? 'block' : 'none',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            zIndex: -1,
+            padding: '50px 0'
+          }}
+          onClick={hideModalHandler}
+        >
+          <span className="text-white text-2xl">X</span>
+        </div>
+        
         <div className="
           modal-dialog modal-dialog-centered modal-dialog-scrollable relative w-auto pointer-events-none
           max-w-full
