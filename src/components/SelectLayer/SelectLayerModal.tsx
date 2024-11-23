@@ -49,7 +49,7 @@ const SelectLayerModal = () => {
     <div className="SelectLayer">
       <h2>Basislaag</h2>
 
-      {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
+      {<>
         <div data-type="map-style-default" className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} onClick={() => {
           setBackgroundLayer(window['ddMap'], 'base', (name) => {
             dispatch(setMapStyle(name))
@@ -79,7 +79,7 @@ const SelectLayerModal = () => {
           dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
         }}>
           <span className="layer-title">
-            Zones
+            CBS-gebied
           </span>
         </div>
       </>}
