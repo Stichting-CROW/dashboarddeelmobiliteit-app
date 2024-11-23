@@ -18,7 +18,7 @@
   background: #fff center center no-repeat;
   background-size: cover;
   cursor: pointer;
-  border-color: #fd3e48;
+  border-color: #000;
   
   position: relative;
   display: inline-block;
@@ -71,7 +71,8 @@
   justify-content: center;
 }
 
-.layer-inactive {
+.SelectLayer .layer-inactive {
+  border-width: 1px;
   opacity: 0.6;
   filter: grayscale(100%);
 }

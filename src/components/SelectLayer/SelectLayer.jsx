@@ -33,6 +33,7 @@ function SelectLayer() {
   return <>
     <div className="SelectLayer absolute top-0 right-1" style={{zIndex: 1}}>
       <div data-type="heat-map" className={`layer layer-inactive`}
+        style={{opacity: 1}}
         onClick={() => {
           setShowModal(! showModal);
         }}>
