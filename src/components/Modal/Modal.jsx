@@ -48,7 +48,6 @@ const Modal = ({
           }}
           onClick={hideModalHandler}
         >
-          <span className="text-white text-2xl">X</span>
         </div>
         
         <div className="
