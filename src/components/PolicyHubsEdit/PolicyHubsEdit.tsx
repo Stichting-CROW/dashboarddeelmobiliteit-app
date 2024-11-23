@@ -110,6 +110,7 @@ const PolicyHubsEdit = ({
         // Load hub data
         loadHubData(zone_id);
     }, [
+        all_policy_hubs,
         all_policy_hubs.length// If there's a new hub added
     ]);
 

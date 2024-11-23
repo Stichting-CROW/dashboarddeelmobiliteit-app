@@ -344,9 +344,9 @@ function FilterbarPolicyHubs({
       </Modal>}
 
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-11-14<br />
-        - Hub-logo's op de <a href="https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md"><u>Zones-kaart</u></a><br />
-        - Nieuwe GeoPackage-zones import<br />
+        versie 2024-11-21<br />
+        - Verbeterde servicegebied-tijdlijn<br />
+        - GO Sharing data AMS/Haarlem<br />
       </div>
 
     </>

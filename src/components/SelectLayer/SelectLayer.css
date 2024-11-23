@@ -1,6 +1,5 @@
 .SelectLayer {
   user-select: none;
-  display: flex;
 }
 .SelectLayer-inner {
   /*min-height: 100px;*/
@@ -13,12 +12,13 @@
 .SelectLayer .layer {
   width: 80px;
   height: 80px;
-  border: 1px solid #343E47;
+  border: 2px solid #343E47;
   border-radius: 10px;
   opacity: 1;
   background: #fff center center no-repeat;
   background-size: cover;
   cursor: pointer;
+  border-color: #fd3e48;
   
   position: relative;
   display: inline-block;

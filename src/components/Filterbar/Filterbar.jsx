@@ -223,9 +223,9 @@ function Filterbar({
     {/* Policy hubs has its own release notes */
     ! isPolicyHubs &&
       <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-11-14<br />
-        - Verbodszone edit werkt beter<br />
-        - Nieuwe GeoPackage-zones import<br />
+        versie 2024-11-21<br />
+        - Verbeterde servicegebied-tijdlijn<br />
+        - GO Sharing data AMS/Haarlem<br />
       </div>}
   </>
 }
