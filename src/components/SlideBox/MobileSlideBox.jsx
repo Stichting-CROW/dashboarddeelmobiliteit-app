@@ -14,7 +14,7 @@ function MobileSlideBox(props) {
       ${props.classes}
     `} style={props.style}>
 
-      <header className="flex justify-between">
+      <header className="flex justify-between relative z-10">
         <h1 className="">{props.title}</h1>
         <IconButtonClose onClick={props.closeHandler} />
       </header>
