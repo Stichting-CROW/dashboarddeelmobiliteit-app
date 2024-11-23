@@ -3,6 +3,7 @@ const cPublicAanbieders = [
   { value:"donkey", system_id:"donkey", name:"Donkey" },
   { value:"htm", system_id:"htm", name:"HTM" },
   { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
+  // { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels" },
   { value:"check", system_id:"check", name:"CHECK" },
   { value:"felyx_mds", system_id:"felyx", name:"Felyx" },
   { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
@@ -18,6 +19,7 @@ const cPublicAanbieders = [
   { value:"bondi", system_id:"bondi", name:"Bondi" },
   { value:"dott", system_id:"dott", name:"Dott" },
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
+  // { value:"mywheels", system_id:"mywheels", name:"MyWheels" },
 ];
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
