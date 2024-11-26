@@ -93,7 +93,7 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             }
             
             // If not admin, filter out certain operators
-            if(!state.authentication.user_data.acl.is_admin) {
+            if(!state.authentication.user_data.acl || !state.authentication.user_data.acl.is_admin) {
               const hideOperators = ['mywheels', 'greenwheels'];
               metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
             }
