@@ -92,7 +92,11 @@ export const initAccessControlList = (store_accesscontrollist)  => {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
             }
             
-            // items -> {"name": "Cykl","system_id": "cykl"}
+            // If not admin, filter out certain operators
+            if(!state.authentication.user_data.acl.is_admin) {
+              const hideOperators = ['mywheels', 'greenwheels'];
+              metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
+            }
             store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: metadata.operators});
 
             // items -> {"id": 1, "name": "asdfasdfadfa" }
