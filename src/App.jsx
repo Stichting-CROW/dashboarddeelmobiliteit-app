@@ -607,6 +607,12 @@ function App() {
             </Misc>
           </Overlay>
         } />
+        <Route exact path="/stats/overview" element={<>
+          <Overlay>
+            <Login />
+          </Overlay>
+          {renderMapElements()}
+        </>} />
         <Route exact path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
