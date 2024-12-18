@@ -207,7 +207,7 @@ const ActionHeader = ({
 
         <Modal
             isVisible={doShowExportModal}
-            title="Exporteer GeoPackage-bestand"
+            title="Exporteer zones"
             button1Title={false}
             button1Handler={(e) => {
                 setDoShowExportModal(false);
@@ -223,13 +223,13 @@ const ActionHeader = ({
             }}
         >
             <p className="mb-4">
-                Met onderstaande link kun je de geselecteerde zones als KML-bestanden downloaden.
+                Met onderstaande link kun je de geselecteerde zones als GeoPackage- of KML-bestand downloaden.
             </p>
             <p className="mb-4">
-                Je krijgt een ZIP met daarin drie KML-bestanden: 1 voor de analyse-zones, 1 voor de parkeerzones en 1 voor de verbodszones.
+                De zones zijn onderverdeeld in: analyse-zones, parkeerzones en verbodszones.
             </p>
             <p className="mb-4">
-                Je kunt de KML-bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders.
+                Je kunt de bestanden gebruiken om te importeren in een ander GIS-programma, of om te delen met aanbieders. Wij raden het GeoPackage-formaat aan boven het gebruik van KML.
             </p>
             <ul className="my-4">
               <li>
@@ -237,9 +237,9 @@ const ActionHeader = ({
                     <u>Download de geselecteerde zones als GeoPackage</u>
                   </a>
               </li>
-              <li hidden>
+              <li>
                   &raquo; <a onClick={exportKml} className="cursor-pointer theme-color-blue">
-                    <u>Download de geselecteerde zones als KML <span className="text-color-500">(KML export )</span></u>
+                    <u>Download de geselecteerde zones als KML</u>
                   </a>
               </li>
             </ul>

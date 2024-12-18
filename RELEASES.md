@@ -1,5 +1,9 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2024-12-18
+
+- Exporteer zones nu zowel als GeoPackage als KML (ipv alleen GeoPackage)
+
 ## Release 2024-12-05
 
 - Nieuwe segmentatie parkeerduurfilters
