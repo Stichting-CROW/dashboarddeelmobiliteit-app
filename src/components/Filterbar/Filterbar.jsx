@@ -222,8 +222,9 @@ function Filterbar({
 
     <div className="absolute text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2024-12-18
-      </a>
+        2025-01-06
+      </a><br />
+      - Een goed 2025 gewenst! 💫<br />
     </div>
   </>
 }

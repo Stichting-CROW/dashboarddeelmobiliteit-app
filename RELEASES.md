@@ -1,5 +1,9 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-01-06
+
+- Toon autoaanbieders in de aanbiederslijst
+
 ## Release 2024-12-18
 
 - Exporteer zones nu zowel als GeoPackage als KML (ipv alleen GeoPackage)
