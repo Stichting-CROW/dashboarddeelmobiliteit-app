@@ -22,6 +22,7 @@ import {StateType} from '../../types/StateType.js';
 import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { setMapStyle } from '../../actions/layers';
 import { ServiceAreaHistoryEvent } from '@/src/types/ServiceAreaHistoryEvent';
+import moment from 'moment';
 
 const DdServiceAreasLayer = ({
   map
@@ -39,6 +40,7 @@ const DdServiceAreasLayer = ({
   const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
   const filter = useSelector((state: StateType) => state.filter || null);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
+  const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -47,22 +49,11 @@ const DdServiceAreasLayer = ({
     return null;
   });
 
-  // onComponentLoad
   useEffect(() => {
-    // Fetch service areas and store in state
-    (async () => {
-      const res = await fetchServiceAreas();
-      setServiceAreas(res);
-    })();
-
-    // Fetch service areas history and store in state
-    (async () => {
-      const history = await fetchServiceAreasHistory();
-      const history_filtered = keepOneEventPerDay(history); 
-      setServiceAreasHistory(history_filtered);
-    })();
+    reloadServiceAreas(visible_operators);
   }, [
-    filter.gebied
+    filter.gebied,
+    visible_operators
   ]);
 
   // onComponentUnLoad
@@ -132,9 +123,26 @@ const DdServiceAreasLayer = ({
     serviceAreaDelta
   ]);
 
+  const reloadServiceAreas = async (visible_operators: string[]) => {
+    // Fetch service areas and store in state
+    (async () => {
+      const res = await fetchServiceAreas(visible_operators);
+      setServiceAreas(res);
+    })();
+
+    // Fetch service areas history and store in state
+    (async () => {
+      const history = await fetchServiceAreasHistory(visible_operators);
+      const history_filtered = keepOneEventPerDay(history); 
+      setServiceAreasHistory(history_filtered);
+    })();
+  }
+
   // Function that gets service areas
-  const fetchServiceAreas = async () => {
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=check`;
+  const fetchServiceAreas = async (visible_operators: string[]) => {
+    const operatorsString = visible_operators.map(x => x.toLowerCase().replace(' ', '')).join(',');
+
+    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=${operatorsString}`;
     const response = await fetch(url);
     const json = await response.json();
 
@@ -142,11 +150,13 @@ const DdServiceAreasLayer = ({
   }
 
   // Function that gets service areas history
-  const fetchServiceAreasHistory = async () => {
-    const startDate = '2024-01-01';
-    const endDate = '2024-12-31';
+  const fetchServiceAreasHistory = async (visible_operators: string[]) => {
+    const startDate = '2024-10-01';
+    const endDate = moment().format('YYYY-MM-DD');
 
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=check&start_date=${startDate}&end_date=${endDate}`;
+    const operatorsString = visible_operators.map(x => x.toLowerCase().replace(' ', '')).join(',');
+
+    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=${operatorsString}&start_date=${startDate}&end_date=${endDate}`;
     const response = await fetch(url);
     const json: ServiceAreaHistoryEvent[] = await response.json();
 

@@ -6,7 +6,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import {
-  toggleServiceAreaForOperator
+  toggleServiceAreaForOperator,
+  showServiceAreaForOperator
 } from '../../actions/service-areas';
 
 import Logo from '../Logo.jsx';
@@ -74,10 +75,13 @@ function FilterbarServiceAreas({
           e.preventDefault();
 
           // Save operator selection to redux store
-          dispatch(toggleServiceAreaForOperator(x));
+          dispatch(showServiceAreaForOperator(x));
         }}
         >
-          <Checkbox id={`aanbieder-${x}`} checked={visible_operators.includes(x)} />
+          <Checkbox
+            id={`aanbieder-${x}`}
+            checked={visible_operators.includes(x)}
+          />
           <label
             htmlFor={`aanbieder-${x}`}
             className="

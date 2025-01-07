@@ -7,6 +7,13 @@ const initialState = {
 
 export default function service_areas(state = initialState, action) {
   switch(action.type) {
+    case 'SHOW_SERVICE_AREA_FOR_OPERATOR': {
+      return {
+          ...state,
+          visible_operators: [action.payload]
+      };
+    }
+
     case 'TOGGLE_SERVICE_AREA_FOR_OPERATOR': {
       // Make sure visible_layers is an array
       if(! state.visible_operators) state.visible_operators = [];
