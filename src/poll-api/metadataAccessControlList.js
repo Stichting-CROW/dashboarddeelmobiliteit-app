@@ -19,7 +19,8 @@ const cPublicAanbieders = [
   { value:"bondi", system_id:"bondi", name:"Bondi" },
   { value:"dott", system_id:"dott", name:"Dott" },
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
-  // { value:"mywheels", system_id:"mywheels", name:"MyWheels" },
+  { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
+  { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
 ];
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
