@@ -52,7 +52,8 @@ store.subscribe(() => {
     filter: storeState.filter,
     layers: storeState.layers,
     ui: storeState.ui,
-    policy_hubs: storeState.policy_hubs
+    policy_hubs: storeState.policy_hubs,
+    service_areas: storeState.service_areas
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })

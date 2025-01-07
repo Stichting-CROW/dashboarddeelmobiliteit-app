@@ -2,9 +2,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
+import {
+  toggleServiceAreaForOperator
+} from '../../actions/service-areas';
 
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
@@ -15,9 +18,10 @@ import {StateType} from '../../types/StateType';
 function FilterbarServiceAreas({
   hideLogo
 }) {
-  const filterGebied = useSelector((state: StateType) => {
-    return state.filter ? state.filter.gebied : null
-  });
+  const municipality = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
+  const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
+
+  const dispatch = useDispatch();
 
   return (
     <div className="filter-bar-inner py-2">
@@ -32,7 +36,7 @@ function FilterbarServiceAreas({
         <FilteritemGebieden />
       </Fieldset>
 
-      {! filterGebied && false && <div>
+      {! municipality && false && <div>
         Selecteer een plaats.
       </div>}
 
@@ -60,12 +64,20 @@ function FilterbarServiceAreas({
       <Fieldset title="Aanbieders">
         {[
           'CHECK',
-          // 'GO Sharing',
+          'GO Sharing',
         ].map(x => <div className="
           flex items-center space-x-2
           my-2
-        " key={x}>
-          <Checkbox id={`aanbieder-${x}`} checked />
+        "
+        key={x}
+        onClick={(e) => {
+          e.preventDefault();
+
+          // Save operator selection to redux store
+          dispatch(toggleServiceAreaForOperator(x));
+        }}
+        >
+          <Checkbox id={`aanbieder-${x}`} checked={visible_operators.includes(x)} />
           <label
             htmlFor={`aanbieder-${x}`}
             className="

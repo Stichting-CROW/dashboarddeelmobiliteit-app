@@ -9,5 +9,6 @@ export type StateType = {
   zones_geodata: any,
   policy_hubs: any,
   statsreducer?: any,
-  search?: any
+  search?: any;
+  service_areas?: any;
 }
