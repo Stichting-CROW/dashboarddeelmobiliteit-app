@@ -49,7 +49,12 @@ const DdServiceAreasLayer = ({
     return null;
   });
 
+  // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
+    // Remove 
+    searchParams.delete('version');
+    setSearchParams(searchParams);
+
     // Remove old service areas and deltas
     removeServiceAreasFromMap(map);
     removeServiceAreaDeltaFromMap(map);
@@ -82,8 +87,10 @@ const DdServiceAreasLayer = ({
     document.location.pathname
   ]);
 
-  // Load 'delta' if if version_id or visible_operators changes
+  // Load 'delta' if version_id or visible_operators changes
   useEffect(() => {
+    if(! searchParams.get('version')) return;
+
     loadServiceAreaDeltas(visible_operators);
   }, [
     searchParams.get('version'),
@@ -98,9 +105,12 @@ const DdServiceAreasLayer = ({
     const serviceAreasForMunicipality = serviceAreas.filter(x => x.municipality === filter.gebied).pop();
 
     // Return if no service areas were found for this municipality
-    if(! serviceAreasForMunicipality) return;
+    if(! serviceAreasForMunicipality) {
+      console.log('no service areas for municipality');
+      return;
+    }
 
-    renderServiceAreas(map, serviceAreasForMunicipality.geometries);
+    renderServiceAreas(map, visible_operators[0], serviceAreasForMunicipality.geometries);
 
     // onComponentUnLoad
     return () => {
@@ -114,7 +124,10 @@ const DdServiceAreasLayer = ({
   useEffect(() => {
     // Return if no service areas were found
     if(! serviceAreaDelta || serviceAreaDelta.length === 0) return;
-    
+
+    // Remove old service area delta
+    removeServiceAreasFromMap(map);
+
     // Render service area delta
     renderServiceAreaDelta(map, serviceAreaDelta);
 
@@ -144,7 +157,6 @@ const DdServiceAreasLayer = ({
   const loadServiceAreaDeltas = async (visible_operators: string[]) => {
     (async () => {
       const deltaResponse = await fetchServiceAreaDelta(searchParams.get('version'));
-      removeServiceAreasFromMap(map);
       setServiceAreaDelta(deltaResponse);
     })();
   }
@@ -210,7 +222,7 @@ const DdServiceAreasLayer = ({
       bottom: '100px',
       left: '360px'
     }}>
-      <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>
+      {serviceAreasHistory.length >= 2 && <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>}
     </div>
   </>
 }

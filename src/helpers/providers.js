@@ -6,6 +6,11 @@ export const getProviderColor = (providers, providerName) => {
   return found && found[0] ? found[0].color : '#666';
 }
 
+export const getProviderColorForProvider = (providerName) => {
+  const providerColors = getProviderColors();
+  return providerColors[providerName] || '#666';
+}
+
 export const getUniqueProviderNames = (objects) => {
   // Check if object was given
   if(! objects || ! objects[0]) return [];
