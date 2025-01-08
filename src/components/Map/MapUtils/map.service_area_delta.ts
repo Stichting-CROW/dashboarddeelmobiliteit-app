@@ -156,7 +156,6 @@ const renderServiceAreaDelta = async (
 ) => {
   // Create feature collection based on geometriesForUser & hbDataResponse
   const featureCollection = createFeatureCollection(serviceAreaVersionData);
-  console.log('featureCollection', featureCollection)
 
   // Remove old sources first
   removeServiceAreaDeltaFromMap(map);

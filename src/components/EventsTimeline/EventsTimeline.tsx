@@ -54,7 +54,7 @@ const EventsTimeline = ({
     height: '125px',
     min: new Date(2023, 0, 1),                // lower limit of visible range
     // max: new Date(2013, 0, 1),                // upper limit of visible range
-    zoomMin: 1000 * 60 * 60 * 24 * 6,             // 6 days in milliseconds
+    zoomMin: 1000 * 60 * 60 * 24 * 3,             // 6 days in milliseconds
     zoomMax: 1000 * 60 * 60 * 24 * 31 * 3     // about three months in milliseconds
   };
   var clusterOpts = {

@@ -50,7 +50,12 @@ const DdServiceAreasLayer = ({
   });
 
   useEffect(() => {
-    reloadServiceAreas(visible_operators);
+    // Remove old service areas and deltas
+    removeServiceAreasFromMap(map);
+    removeServiceAreaDeltaFromMap(map);
+
+    // Load new service areas
+    loadServiceAreas(visible_operators);
   }, [
     filter.gebied,
     visible_operators
@@ -60,6 +65,7 @@ const DdServiceAreasLayer = ({
   useEffect(() => {
     return () => {
       removeServiceAreasFromMap(map);
+      removeServiceAreaDeltaFromMap(map);
     };
   }, [
   ]);
@@ -76,15 +82,11 @@ const DdServiceAreasLayer = ({
     document.location.pathname
   ]);
 
-  // Load 'delta' if if version_id changes
+  // Load 'delta' if if version_id or visible_operators changes
   useEffect(() => {
-    (async () => {
-      const deltaResponse = await fetchServiceAreaDelta(searchParams.get('version'));
-      removeServiceAreasFromMap(map);
-      setServiceAreaDelta(deltaResponse);
-    })();
+    loadServiceAreaDeltas(visible_operators);
   }, [
-    searchParams.get('version')
+    searchParams.get('version'),
   ]);
 
   // Do things if 'serviceAreas' change
@@ -120,10 +122,11 @@ const DdServiceAreasLayer = ({
     return () => {
     };
   }, [
-    serviceAreaDelta
+    serviceAreaDelta,
+    serviceAreaDelta.length
   ]);
 
-  const reloadServiceAreas = async (visible_operators: string[]) => {
+  const loadServiceAreas = async (visible_operators: string[]) => {
     // Fetch service areas and store in state
     (async () => {
       const res = await fetchServiceAreas(visible_operators);
@@ -135,6 +138,14 @@ const DdServiceAreasLayer = ({
       const history = await fetchServiceAreasHistory(visible_operators);
       const history_filtered = keepOneEventPerDay(history); 
       setServiceAreasHistory(history_filtered);
+    })();
+  }
+
+  const loadServiceAreaDeltas = async (visible_operators: string[]) => {
+    (async () => {
+      const deltaResponse = await fetchServiceAreaDelta(searchParams.get('version'));
+      removeServiceAreasFromMap(map);
+      setServiceAreaDelta(deltaResponse);
     })();
   }
 
@@ -154,7 +165,7 @@ const DdServiceAreasLayer = ({
     const startDate = '2024-10-01';
     const endDate = moment().format('YYYY-MM-DD');
 
-    const operatorsString = visible_operators.map(x => x.toLowerCase().replace(' ', '')).join(',');
+    const operatorsString = visible_operators?.map(x => x.toLowerCase().replace(' ', '')).join(',');
 
     const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=${operatorsString}&start_date=${startDate}&end_date=${endDate}`;
     const response = await fetch(url);
@@ -195,12 +206,12 @@ const DdServiceAreasLayer = ({
 
   return <>
     <div style={{
-        position: 'fixed',
-        bottom: '100px',
-        left: '360px'
-      }}>
-        <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>
-      </div>
+      position: 'fixed',
+      bottom: '100px',
+      left: '360px'
+    }}>
+      <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>
+    </div>
   </>
 }
 
