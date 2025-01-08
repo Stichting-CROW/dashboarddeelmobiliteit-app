@@ -9,18 +9,27 @@ import {
   toggleServiceAreaForOperator,
   showServiceAreaForOperator
 } from '../../actions/service-areas';
+import { getPrettyProviderName } from '../../helpers/providers';
 
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
 
 import {StateType} from '../../types/StateType';
-
+import { getAvailableOperators } from '../../api/service-areas';
 function FilterbarServiceAreas({
   hideLogo
 }) {
   const municipality = useSelector((state: StateType) => state.filter ? state.filter.gebied : null);
   const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
+  const [availableOperators, setAvailableOperators] = useState([]);
+
+  useEffect(() => {
+    getAvailableOperators(municipality).then((operators) => {
+      if(! operators) return;
+      setAvailableOperators(operators.operators_with_service_area);
+    });
+  }, [municipality]);
 
   const dispatch = useDispatch();
 
@@ -63,10 +72,7 @@ function FilterbarServiceAreas({
       </Fieldset> */}
 
       <Fieldset title="Aanbieders">
-        {[
-          'CHECK',
-          'GO Sharing',
-        ].map(x => <div className="
+        {availableOperators.map(x => <div className="
           flex items-center space-x-2
           my-2
         "
@@ -88,7 +94,7 @@ function FilterbarServiceAreas({
               text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70
             "
           >
-            {x}
+            {getPrettyProviderName(x)}
           </label>
         </div>)}
       </Fieldset>
