@@ -97,10 +97,12 @@ function FilteritemGebieden() {
           <div className="filter-form-search-container mb-3">
             <div className="filter-form-search-container-2">
             <input type="text"
+              id="filter-form-search"
               className="filter-form-search"
               onChange={changeSearchText}
               value={filterSearch}
               autoFocus={true}
+              autoComplete="off"
               placeholder={"zoek"}/>
             <div className="ml-3 flex flex-col justify-center h-full">
               { filterSearch !== "" ?
@@ -150,7 +152,12 @@ function FilteritemGebieden() {
   return (
     <div className="filter-plaats-container">
       <div className="filter-plaats-box-row ">
-        <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{toggleGebieden('places')}}>
+        <div className={`filter-plaats-value ${value === "" ? 'text-black' : ''}`} onClick={e=>{
+            toggleGebieden('places')
+            clearSearchText();
+            // Focus on "zoek" input
+            document.getElementById('filter-form-search')?.focus();
+        }}>
           {value === "" ? "Alle plaatsen" : value.name}
         </div>
         { filterBarExtendedView === 'places' ? renderSelectGebieden(gebieden) : null }

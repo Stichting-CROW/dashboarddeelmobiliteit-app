@@ -27,7 +27,7 @@ function FilterbarServiceAreas({
   useEffect(() => {
     getAvailableOperators(municipality).then((operators) => {
       if(! operators) return;
-      setAvailableOperators(operators.operators_with_service_area);
+      setAvailableOperators(operators.operators_with_service_area || []);
     });
   }, [municipality]);
 
