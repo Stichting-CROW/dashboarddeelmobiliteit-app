@@ -59,8 +59,8 @@ const EventsTimeline = ({
   };
   var clusterOpts = {
     cluster: {
-        titleTemplate: "{count} wijzigingen: zoom in om deze te bekijken",
-        showStipes: true,
+      titleTemplate: "{count} wijzigingen: zoom in om deze te bekijken",
+      showStipes: true,
     }
   };
   Object.assign(timelineOptions, clusterOpts);
