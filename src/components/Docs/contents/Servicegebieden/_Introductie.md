@@ -2,7 +2,7 @@ Middels de [Servicegebieden](https://dashboarddeelmobiliteit.nl/map/servicegebie
 
 ## Hoe werkt het?
 
-De servicegebieden worden door de aanbieders zelf gedeeld. Zij doen dit middels een zogeheten [GBFS-feed](https://docs.dashboarddeelmobiliteit.nl/data_feeds/service_areas/). 
+De servicegebieden worden door de aanbieders zelf gedeeld. Zij doen dit middels een zogeheten <a href="https://docs.dashboarddeelmobiliteit.nl/data_feeds/service_areas/" target="_blank" rel="external">GBFS-feed</a>. 
 
 Het Dashboard Deelmobiliteit maakt een kaart met de servicegebieden en toont ook de wijzigingen door de tijd.
 
