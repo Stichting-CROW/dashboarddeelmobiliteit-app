@@ -222,10 +222,9 @@ function Filterbar({
 
     <div className="absolute text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2025-01-08
+        2025-02-10
       </a><br />
-      - Een goed 2025 gewenst! 💫<br />
-      - <a href="https://dashboarddeelmobiliteit.nl/docs/Servicegebieden/_Introductie.md" className="underline">Servicegebieden</a> docs<br />
+      - Zoek op hubnaam <a href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md#zoeken" className="underline">of adres</a><br />
     </div>
   </>
 }

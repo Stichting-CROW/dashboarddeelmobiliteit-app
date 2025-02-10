@@ -501,7 +501,7 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
-      <SearchBar />
+      <SearchBar map={map.current} />
     </>}
   </>
 }

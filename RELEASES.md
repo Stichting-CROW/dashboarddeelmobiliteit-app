@@ -1,5 +1,16 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-02-10
+
+- 🪄 Op [Beleidszones](https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md)-pagina: 
+  - Zoek op hubnaam of **adres**
+  - Kaart zal naar de geselecteerde hub of adres zoomen
+
+## Release 2025-01-08
+
+- 🪄 Servicegebieden-pagina heeft nu ondersteuning voor meerdere aanbieders
+- 🪄 Nieuwe documentatie-pagina: [Servicegebieden](https://dashboarddeelmobiliteit.nl/docs/Servicegebieden/_Introductie.md)
+
 ## Release 2025-01-06
 
 - Toon autoaanbieders in de aanbiederslijst

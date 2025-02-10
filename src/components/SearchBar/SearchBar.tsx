@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { readable_geotype } from "../../helpers/policy-hubs/common"
+import center from '@turf/center'
 
 import SearchBarResults from './SearchBarResults';
 import SearchBarInput from './SearchBarInput';
@@ -15,7 +16,7 @@ import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
 
 import './SearchBar.css';
 
-function SearchBar() {
+function SearchBar({map}: {map: any}) {
   const dispatch = useDispatch();
   const uniqueComponentId = Math.random()*9000000;
 
@@ -111,6 +112,14 @@ function SearchBar() {
           afterHtml={
             <></>
           }
+          mapCenter={map?.getCenter()}
+          onAddressSelect={(location, options) => {
+            map.flyTo({
+              center: [location.lng, location.lat],
+              zoom: options.zoom,
+              duration: options.duration
+            });
+          }}
         />
         {searchBarQuery && searchBarQuery.length > 0 && <div
           className={`
