@@ -372,6 +372,7 @@ const DdPolicyHubsLayer = ({
       }
       else if(x === 'verbodsgebied-published') {
         geoFilter.push({geo_type: 'no_parking', phase: 'published'});
+        geoFilter.push({geo_type: 'no_parking', phase: 'published_retirement'});
         // We are adding phases: As long as retirement concepts are not active, these should be still visible in published/active
         retirement_phases.forEach((name) => {
           geoFilter.push({geo_type: 'no_parking', phase: name});
@@ -633,13 +634,18 @@ const DdPolicyHubsLayer = ({
     // Hub phases we want to keep
     const wantedHubPhases = [
       'concept',
-      'retirement_concept'
     ];
+    // If we are not in ACTIVE phase, we also want to keep retirement_concepts
+    if(active_phase !== 'active') {
+      wantedHubPhases.push('retirement_concept');
+    }
 
     // Every selected hub should be a concept hub
     const unwantedHubs = policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1).filter((x) => {
       return wantedHubPhases.indexOf(x.phase) <= -1;
     })
+
+    const didSelectUnwantedHubs = unwantedHubs?.length > 0;
 
     return unwantedHubs?.length === 0;
   }
