@@ -488,6 +488,16 @@ const MapComponent = (props): JSX.Element => {
     stateLayers.displaymode
   ]);
 
+  const showSearchBar = () => {
+    const viewsToShowSearchBar = [
+      'displaymode-policy-hubs',
+      'displaymode-rentals',
+      'displaymode-service-areas',
+      'displaymode-park'
+    ];
+    return viewsToShowSearchBar.indexOf(stateLayers.displaymode) > -1;
+  }
+
   return <>
     {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map flex-1" />
@@ -501,8 +511,8 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
-      <SearchBar map={map.current} />
     </>}
+    {isLoggedIn && showSearchBar && <SearchBar map={map.current} />}
   </>
 }
 

@@ -119,9 +119,14 @@ function SearchBar({map}: {map: any}) {
     const searchValue = e.target.value;
     dispatch(setSearchBarQuery(searchValue));
 
+    // Only keep one of each policy hub (x.name should be unique)
+    // TODO: Remove retired hubs out of the policyHubs list
+    const uniquePolicyHubs = policyHubs.filter((x, index, self) =>
+      index === self.findIndex((t) => t.name === x.name)
+    );
     // Filter policy hubs regardless of search length
     setFilteredPolicyHubs(
-      policyHubs.filter(x => x.name.toLowerCase().includes(searchValue.toLowerCase()))
+      uniquePolicyHubs.filter(x => x.name.toLowerCase().includes(searchValue.toLowerCase()))
     );
 
     // Only search for addresses if search is 3+ characters
@@ -242,7 +247,6 @@ function SearchBar({map}: {map: any}) {
                         zoom: 17,
                         duration: 1000
                       });
-                      setSearchResults([]);
                     }
                   }}
                 >
