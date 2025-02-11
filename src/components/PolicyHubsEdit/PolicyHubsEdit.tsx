@@ -226,9 +226,9 @@ const PolicyHubsEdit = ({
                 })
                 return;
             }
-            if(updatedZone && updatedZone.zone_id) {
-                postSaveOrDeleteCallback(updatedZone.zone_id);
-            }
+            // if(updatedZone && updatedZone.zone_id) {
+                postSaveOrDeleteCallback(updatedZone?.zone_id);
+            // }
             // Notify
             notify(toast, 'Zone opgeslagen');
             // Hide edit form

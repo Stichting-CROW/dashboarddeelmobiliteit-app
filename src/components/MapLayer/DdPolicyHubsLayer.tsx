@@ -424,6 +424,7 @@ const DdPolicyHubsLayer = ({
           phase: active_phase,
           visible_layers: visible_layers
         }, uniqueComponentId);
+        console.log('res new policy hubs', res);
         setPolicyHubs(res);
       }
       catch(err) {
