@@ -509,33 +509,11 @@ const DdPolicyHubsLayer = ({
   ])
 
   const changeAreaHandler = (e) => {
-    if (e.type === 'draw.create' || e.type === 'draw.update') {
-      // Get all features currently drawn
-      const allFeatures = draw.getAll().features;
-      
-      // Create a multipolygon if we have multiple polygons
-      if (allFeatures.length > 1) {
-        const multiPolygon = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'MultiPolygon',
-            coordinates: allFeatures.map(f => f.geometry.coordinates)
-          }
-        };
-        setDrawedArea({
-          type: e.type,
-          features: [multiPolygon]
-        });
-      } else {
-        // Single polygon case
-        setDrawedArea({
-          type: e.type,
-          features: allFeatures
-        });
-      }
-      setDrawnFeatures(allFeatures);
-    }
+    // Set drawedArea
+    setDrawedArea({
+      type: e.type,
+      features: e.features
+    });
   }
 
   const clickHandler = (e) => {
@@ -710,19 +688,19 @@ const DdPolicyHubsLayer = ({
 
   // Add handler for the "Voeg stukje multipolygon toe" button
   const handleAddPolygon = () => {
-    if (!draw) return;
+    // if (!draw) return;
     
-    // Store existing features
-    const existingFeatures = draw.getAll().features;
-    if (existingFeatures.length === 0) {
-      notify(toast, 'Teken eerst een polygon voordat je een nieuwe toevoegt', {
-        variant: 'destructive'
-      });
-      return;
-    }
+    // // Store existing features
+    // const existingFeatures = draw.getAll().features;
+    // if (existingFeatures.length === 0) {
+    //   notify(toast, 'Teken eerst een polygon voordat je een nieuwe toevoegt', {
+    //     variant: 'destructive'
+    //   });
+    //   return;
+    // }
 
-    // Enable drawing mode for new polygon
-    enableDrawingPolygon(draw);
+    // // Enable drawing mode for new polygon
+    // enableDrawingPolygon(draw);
   };
 
   return <>
