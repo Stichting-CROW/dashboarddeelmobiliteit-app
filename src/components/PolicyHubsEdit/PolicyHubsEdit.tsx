@@ -34,12 +34,14 @@ const PolicyHubsEdit = ({
     all_policy_hubs,
     selected_policy_hubs,
     drawed_area,
+    active_phase,
     cancelHandler,
 }: {
     fetchHubs?: Function,
     all_policy_hubs: any,
     selected_policy_hubs: any,
     drawed_area: DrawedAreaType,
+    active_phase: string,
     cancelHandler: Function,
 }) => {
     const dispatch = useDispatch()
@@ -419,19 +421,34 @@ const PolicyHubsEdit = ({
         }
     }
 
+    const getRelevantHubPhase = (active_phase, hub) => {
+      console.log('active_phase', active_phase, 'phase', hub.phase, 'hub', hub);
+
+      if(active_phase === 'active') {
+        // If this is a retirement concept but it's also still active: show active
+        if(hub.phase === 'retirement_concept' && hub.retire_date === null) {
+          return 'active';
+        }
+        else if(hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.retire_date)) {
+          return 'active';
+        }
+      }
+      return hub.phase;
+    }
+
     const labelClassNames = 'mb-2';
     const didChangeZoneConfig = false;
     const viewMode = 'adminEdit';
 
     if(! selected_policy_hubs) return <></>;
     if(selected_policy_hubs.length > 1) {
-        return <PolicyHubsEdit_bulk
-            fetchHubs={fetchHubs}
-            all_policy_hubs={all_policy_hubs}
-            selected_policy_hubs={selected_policy_hubs}
-            cancelHandler={cancelHandler}
-            postSaveOrDeleteCallback={postSaveOrDeleteCallback}
-        />
+      return <PolicyHubsEdit_bulk
+        fetchHubs={fetchHubs}
+        all_policy_hubs={all_policy_hubs}
+        selected_policy_hubs={selected_policy_hubs}
+        cancelHandler={cancelHandler}
+        postSaveOrDeleteCallback={postSaveOrDeleteCallback}
+      />
     };
 
     if(is_drawing_enabled && ! drawed_area) {
@@ -469,7 +486,7 @@ const PolicyHubsEdit = ({
 
     const can_edit_hub_data = hubData.phase === 'concept'
         // || hubData.phase === 'retirement_concept';
-        
+
     return (
         <div>
             <div className={`${labelClassNames} font-bold`}>
@@ -515,7 +532,7 @@ const PolicyHubsEdit = ({
                                 Fase:
                             </th>
                             <td valign="top">
-                                {readable_phase(hubData.phase)}
+                                {readable_phase(getRelevantHubPhase(active_phase, hubData))}
                             </td>
                         </tr>
                         {hubData.stop && <tr>
