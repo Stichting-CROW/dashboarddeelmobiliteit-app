@@ -117,18 +117,6 @@ const MapComponent = (props): JSX.Element => {
     setUriParams(location ? location.search : null);
   }, [location]);
 
-  const getAdminZones = async () => {
-    const sortedZones = await fetchAdminZones(token, filterGebied);
-
-    setPublicZones(sortedZones);
-  }
-
-  const getPublicZones = async () => {
-    const sortedZones = await fetchPublicZones(filterGebied);
-
-    setPublicZones(sortedZones);
-  }
-
   const applyMapSettings = (theMap) => {
     // Hide compass control
     theMap.addControl(new maplibregl.NavigationControl({
@@ -152,14 +140,22 @@ const MapComponent = (props): JSX.Element => {
   }
 
   const registerMapView = useCallback(theMap => {
+    // Add map center & zoom level to URL
+    const mapCenter = theMap.getCenter();
+    const url = new URL(window.location.href);
+    url.searchParams.set('lng', mapCenter.lng);
+    url.searchParams.set('lat', mapCenter.lat);
+    url.searchParams.set('zoom', theMap.getZoom());
+    window.history.replaceState({}, '', url.toString());
+
+    // Store bounds in redux store
     const bounds = theMap.getBounds();
     const payload = [
       bounds._sw.lng,
       bounds._sw.lat,
       bounds._ne.lng,
       bounds._ne.lat
-    ]
-
+    ];
     dispatch({ type: 'LAYER_SET_MAP_EXTENT', payload: payload })
     dispatch({ type: 'LAYER_SET_MAP_ZOOM', payload: theMap.getZoom() })
   }, []);
@@ -247,49 +243,62 @@ const MapComponent = (props): JSX.Element => {
     registerMapView
   ])
 
-  // If on Zones page and geographyId is in URL -> navigate to zone
+  // On map load: Zoom to relevant position
   useEffect(() => {
     if(! didMapLoad) return;
-    if(! didAddPublicZones && ! didAddAdminZones) return;
 
-    // Check if we are on the zones page
-    if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return;
-    // Get geographyId from URL
-    const geographyId = pathName.split('/zones/')[1];
-    // Go for it.
-    navigateToGeography(geographyId, publicZones)
-    // Only for admin page: Make polygon active
-    if(window.location.pathname.indexOf('/admin/zones/') > -1) {
-      // Wait until theDraw has been loaded
-      setTimeout(x => {
-        triggerGeographyClick(geographyId, publicZones)
-      }, 2500);
-    }
-  }, [
-    didMapLoad,
-    didAddPublicZones,
-    didAddAdminZones
-  ])
-
-  // If on Map page and gm_zone is in URL -> navigate to place
-  useEffect(() => {
-    if(! didMapLoad) return;
+    // Get query params
+    const queryParams = new URLSearchParams(window.location.search);
 
     // Get gm_code from URL
-    const queryParams = new URLSearchParams(window.location.search);
     const gm_code = queryParams.get("gm_code");
 
-    if(gm_code) {
+    // Get zoom, lat and lng from URL
+    const zoom = queryParams.get("zoom");
+    const lat = queryParams.get("lat");
+    const lng = queryParams.get("lng");
+
+    // If zoom and lat/lng are in URL -> navigate to that location
+    if(zoom && lat && lng) { 
+      map.current.setZoom(zoom);
+      map.current.setCenter([lng, lat]);
+    }
+
+    // If on Map page and gm_zone is in URL -> navigate to municipality
+    else if(gm_code) {
       dispatch({
         type: 'SET_FILTER_GEBIED',
         payload: gm_code
       })
     }
   }, [
-    didMapLoad,
-    didAddPublicZones,
-    didAddAdminZones
+    didMapLoad
   ])
+
+  // If on Zones page and geographyId is in URL -> navigate to zone
+  // useEffect(() => {
+  //   if(! didMapLoad) return;
+  //   if(! didAddPublicZones && ! didAddAdminZones) return;
+
+  //   // Only execute if we are on the zones page
+  //   if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return;
+
+  //   // Get geographyId from URL
+  //   const geographyId = pathName.split('/zones/')[1];
+  //   // Go for it
+  //   navigateToGeography(geographyId, publicZones)
+  //   // Only for admin page: Make polygon active
+  //   if(window.location.pathname.indexOf('/admin/zones/') > -1) {
+  //     // Wait until theDraw has been loaded
+  //     setTimeout(x => {
+  //       triggerGeographyClick(geographyId, publicZones)
+  //     }, 2500);
+  //   }
+  // }, [
+  //   didMapLoad,
+  //   didAddPublicZones,
+  //   didAddAdminZones
+  // ])
 
   /**
    * SET SOURCES AND LAYERS
@@ -420,20 +429,6 @@ const MapComponent = (props): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
 
-    const isAnalyst = (email) => {
-      // Define email addresses of analysts
-      const analystEmailAddresses = [
-        'mail@bartroorda.nl',
-        'sven.boor@gmail.com'
-      ]
-      // Return true if user is analyst
-      return analystEmailAddresses.indexOf(email) > -1;
-    }
-
-    const isProvider = (user) => {
-      return user.registrations && user.registrations[0].roles.indexOf('operator') > -1;
-    }
-
     // Only S&B and providers can see vehicle ID
     const canSeeVehicleId = () => {
       // If user isn't logged in, it's no analyst
@@ -442,8 +437,6 @@ const MapComponent = (props): JSX.Element => {
       }
       // Return true if user is logged in
       return true;
-      // Return if user can see vehicle ID
-      // return isAnalyst(userData.user.email) || isProvider(userData.user);
     }
 
     initPopupLogic(map.current, providers, canSeeVehicleId(), filter.datum)

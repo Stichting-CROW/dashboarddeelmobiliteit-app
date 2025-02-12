@@ -203,7 +203,9 @@ const DdPolicyHubsLayer = ({
     const selected = queryParams.getAll('selected');
     if(selected && selected.length > 0) {
       const selectedIds = selected.map(x => Number(x));
-      dispatch(setSelectedPolicyHubs(selectedIds));
+      setTimeout(() => {
+        dispatch(setSelectedPolicyHubs(selectedIds));
+      }, 1000);
       dispatch(setShowEditForm(true));
     }
     const phase = queryParams.get('phase');
@@ -246,7 +248,6 @@ const DdPolicyHubsLayer = ({
     if(! map.isStyleLoaded()) return;
     if(! policyHubs) return;
 
-    console.log('renderHubs')
     renderHubs(
       map,
       sortedPolicyHubs(filterPolicyHubs(policyHubs, active_phase, visible_layers)),
@@ -257,6 +258,7 @@ const DdPolicyHubsLayer = ({
     policyHubs,
     policyHubs?.length,
     selected_policy_hubs,
+    selected_policy_hubs?.length,
     hubs_in_drawing_mode,
     active_phase,
     mapStyle,
@@ -283,7 +285,12 @@ const DdPolicyHubsLayer = ({
       dispatch(setIsDrawingEnabled(false));
       dispatch(setShowEditForm(false));
       setDrawedArea(undefined);
-      dispatch(setSelectedPolicyHubs([]));
+      
+      // Clear selected hubs on phase change
+      const selected = queryParams.getAll('selected');
+      if(! (selected && selected.length > 0)) {
+        dispatch(setSelectedPolicyHubs([]));
+      }
     }
   }, [active_phase]);
   
@@ -426,8 +433,6 @@ const DdPolicyHubsLayer = ({
       return ! isReplacedByNewer;
     });
     
-    console.log('hubs', hubs, 'filteredHubs', uniqueHubs);
-
     return uniqueHubs;
   }
 

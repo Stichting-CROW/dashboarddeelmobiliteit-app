@@ -422,8 +422,6 @@ const PolicyHubsEdit = ({
     }
 
     const getRelevantHubPhase = (active_phase, hub) => {
-      console.log('active_phase', active_phase, 'phase', hub.phase, 'hub', hub);
-
       if(active_phase === 'active') {
         // If this is a retirement concept but it's also still active: show active
         if(hub.phase === 'retirement_concept' && hub.retire_date === null) {
