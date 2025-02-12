@@ -113,7 +113,9 @@ const HubStats = ({
       </div>
     </div>
     </>
-  if(! stop.realtime_data) return <div>:)</div>;// Realtime data not yet loaded
+  if(! stop.realtime_data) return <div>
+    Er zijn nog geen realtime statistieken beschikbaar voor deze zone.
+  </div>;// Realtime data not yet loaded
 
   const isControlledAutomatically = stop.status.control_automatic === true;
   const isManuallySetToOpen = ! isControlledAutomatically && stop.status.is_returning === true;
