@@ -106,12 +106,6 @@ const DdPolicyHubsLayer = ({
 
   const queryParams = new URLSearchParams(window.location.search);
 
-  const retirement_phases = [
-    'retirement_concept',
-    'committed_retirement_concept',
-    'published_retirement'
-  ];
-
   const uniqueComponentId = Math.random()*9000000;
 
   // On component load: reset 'selected_policy_hubs'
@@ -305,6 +299,7 @@ const DdPolicyHubsLayer = ({
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-concept') > -1) {
         return (hub.phase === 'concept')
           || (hub.phase === 'retirement_concept')
+          // TODO: In concept phase, hide retirement_concept phase if there's a follow up committed concept
       }
       else if(hub.geography_type === 'monitoring' && visible_layers.indexOf('monitoring-concept') > -1) {
         return (hub.phase === 'concept')
@@ -724,19 +719,19 @@ const DdPolicyHubsLayer = ({
 
   // Add handler for the "Voeg stukje multipolygon toe" button
   const handleAddPolygon = () => {
-    // if (!draw) return;
+    if (!draw) return;
     
-    // // Store existing features
-    // const existingFeatures = draw.getAll().features;
-    // if (existingFeatures.length === 0) {
-    //   notify(toast, 'Teken eerst een polygon voordat je een nieuwe toevoegt', {
-    //     variant: 'destructive'
-    //   });
-    //   return;
-    // }
+    // Store existing features
+    const existingFeatures = draw.getAll().features;
+    if (existingFeatures.length === 0) {
+      notify(toast, 'Teken eerst een polygon voordat je een nieuwe toevoegt', {
+        variant: 'destructive'
+      });
+      return;
+    }
 
-    // // Enable drawing mode for new polygon
-    // enableDrawingPolygon(draw);
+    // Enable drawing mode for new polygon
+    enableDrawingPolygon(draw);
   };
 
   return <>
@@ -753,7 +748,7 @@ const DdPolicyHubsLayer = ({
         </Button>
       }
 
-      {(is_drawing_enabled === 'new' || drawnFeatures.length > 0) && (
+      {false && (is_drawing_enabled === 'new' || drawnFeatures.length > 0) && (
         <Button 
           theme="white" 
           onClick={handleAddPolygon}
