@@ -298,9 +298,9 @@ const DdPolicyHubsLayer = ({
     return sortZonesInPreferedOrder(hubs)
   }
 
-  const doShowHub = (hub: any, active_phase: string, visible_layers: any) => {
+  const isHubInPhase = (hub: any, phase: string) => {
     // CONCEPT
-    if(active_phase === 'concept') {
+    if(phase === 'concept') {
       // Is it a hub, and do we want to show hubs?
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-concept') > -1) {
         return (hub.phase === 'concept')
@@ -316,7 +316,7 @@ const DdPolicyHubsLayer = ({
     }
 
     // COMMITTED CONCEPT
-    else if(active_phase === 'committed_concept') {
+    else if(phase === 'committed_concept') {
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-committed_concept') > -1) {
         return (hub.phase === 'committed_concept')
           || (hub.phase === 'committed_retirement_concept')
@@ -329,7 +329,7 @@ const DdPolicyHubsLayer = ({
     }
 
     // PUBLISHED
-    else if(active_phase === 'published') {
+    else if(phase === 'published') {
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-published') > -1) {
         return (hub.phase === 'published')
           || (hub.phase === 'published_retirement')
@@ -346,7 +346,7 @@ const DdPolicyHubsLayer = ({
     }
 
     // ACTIVE
-    else if(active_phase === 'active') {
+    else if(phase === 'active') {
       // Is it a hub, and do we want to show hubs?
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-active') > -1) {
         return (hub.phase === 'active')
@@ -356,13 +356,15 @@ const DdPolicyHubsLayer = ({
           // Show active retirement if hub is retired
           || (hub.phase === 'active_retirement')
           // In active phase: only show retirement concept with effective date < now()
-          // || (hub.phase === 'X' && moment(moment()).isBefore(hub.effective_date))
+          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.published_retire_date))
+          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.published_retire_date))
           ;
       } else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-active') > -1) {
         return (hub.phase === 'active')
           || (hub.phase === 'active_retirement')
           // In active phase: only show retirement concept with effective date < now()
-          // || (hub.phase === 'X' && moment(moment()).isBefore(hub.effective_date))
+          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.published_retire_date))
+          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.published_retire_date))
           ;
       }
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
@@ -374,14 +376,34 @@ const DdPolicyHubsLayer = ({
     }
 
     // ARCHIVED
-    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
-      return (hub.phase === 'archived');
-    }
-    else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-archived') > -1) {
-      return (hub.phase === 'archived');
+    else if(phase === 'archived') {
+      if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
+        return (hub.phase === 'archived');
+      }
+      else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-archived') > -1) {
+        return (hub.phase === 'archived');
+      }
     }
 
-    return true;
+    return false;
+  }
+
+  // Check if hub is in visible layers
+  const isHubInVisibleLayers = (hub: any) => {
+    let isInVisibleLayers = false;
+
+    // Get all visible phases based on visible layers
+    const visiblePhases = visible_layers.map((layer) => {
+      return layer.split('-')[1];// Get last part of layer name (e.g. 'hub-active' -> 'active')
+    });
+
+    visiblePhases.forEach((phase) => {
+      if(isHubInPhase(hub, phase)) {
+        isInVisibleLayers = true;
+      }
+    });
+
+    return isInVisibleLayers;
   }
 
   // Function that filters hubs based on the selected phases in the Filterbar
@@ -391,8 +413,12 @@ const DdPolicyHubsLayer = ({
       return [];
     }
 
+    console.log('visible_layers', visible_layers);
     const filteredHubs = hubs.filter((x) => {
-      return doShowHub(x, active_phase, visible_layers);
+      const isInPhase = isHubInPhase(x, active_phase);
+      const isInVisibleLayers = isHubInVisibleLayers(x);
+
+      return isInPhase || isInVisibleLayers;
     });
     console.log('hubs', hubs, 'filteredHubs', filteredHubs);
 
