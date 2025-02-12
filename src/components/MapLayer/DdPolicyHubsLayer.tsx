@@ -352,19 +352,19 @@ const DdPolicyHubsLayer = ({
         return (hub.phase === 'active')
           // Show retirement concept if hub is not yet retired
           // As long as retirement concepts are not active, these should be still visible in published/active
-          || (hub.phase === 'retirement_concept' && ! hub.retire_date)
+          || (hub.phase === 'retirement_concept' && moment(hub.effective_date).isBefore(moment()))
           // Show active retirement if hub is retired
           || (hub.phase === 'active_retirement')
           // In active phase: only show retirement concept with effective date < now()
-          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.published_retire_date))
-          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.published_retire_date))
+          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.retire_date))
+          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.retire_date))
           ;
       } else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-active') > -1) {
         return (hub.phase === 'active')
           || (hub.phase === 'active_retirement')
           // In active phase: only show retirement concept with effective date < now()
-          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.published_retire_date))
-          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.published_retire_date))
+          || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.retire_date))
+          || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.retire_date))
           ;
       }
       if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
@@ -413,16 +413,27 @@ const DdPolicyHubsLayer = ({
       return [];
     }
 
-    console.log('visible_layers', visible_layers);
-    const filteredHubs = hubs.filter((x) => {
+    // Only keep hubs that we want to see
+    let filteredHubs = hubs.filter((x) => {
       const isInPhase = isHubInPhase(x, active_phase);
       const isInVisibleLayers = isHubInVisibleLayers(x);
 
       return isInPhase || isInVisibleLayers;
     });
-    console.log('hubs', hubs, 'filteredHubs', filteredHubs);
 
-    return filteredHubs;
+    // Remove all zones that have a zone ID of any of the prev_geography_ids
+    const uniqueHubs = filteredHubs.filter(hub => {
+      // Check if any other hub has this hub's zone_id in its prev_geography_ids
+      const isReplacedByNewer = filteredHubs.some(otherHub => 
+        otherHub.prev_geographies && 
+        otherHub.prev_geographies.includes(hub.geography_id)
+      );
+      return ! isReplacedByNewer;
+    });
+    
+    console.log('hubs', hubs, 'filteredHubs', uniqueHubs);
+
+    return uniqueHubs;
   }
 
   // Fetch hubs
@@ -646,7 +657,7 @@ const DdPolicyHubsLayer = ({
     if(! policyHubs || ! policyHubs[0]) return;
     const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
     if(! selected_hub) return false;
-    
+
     // Return if hub is a concept hub
     return selected_hub.phase === 'committed_concept';
   }
@@ -673,6 +684,18 @@ const DdPolicyHubsLayer = ({
     
     // Return if hub is a concept hub
     return selected_hub.phase === 'active';
+  }
+
+  const didSelectCommittedRetirementHub = () => {
+    if(! didSelectOneHub()) return;
+
+    // Get extra hub info
+    if(! policyHubs || ! policyHubs[0]) return;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+    
+    // Return if hub is a concept hub
+    return selected_hub.phase === 'committed_retirement_concept';
   }
 
   const didSelectAnyMonitoringHubs = () => {
@@ -750,7 +773,7 @@ const DdPolicyHubsLayer = ({
       }
 
       {/* Terug naar concept button */}
-      {(didSelectCommittedConceptHub() && ! show_commit_form) && 
+      {((didSelectCommittedConceptHub() || didSelectCommittedRetirementHub()) && ! show_commit_form) && 
         <Button theme="red" onClick={async () => {
           await makeConcept(token, getSelectedHubs().map(x => x.geography_id));
           if(! window.confirm('Wil je de vastgestelde hub(s) terugzetten naar de conceptfase?')) {
@@ -781,6 +804,9 @@ const DdPolicyHubsLayer = ({
         }}>
           Omzetten naar nieuw concept
         </Button>
+      </>}
+
+      {(didSelectPublishedHub() || didSelectActiveHub()) && <>
         <Button theme="white" onClick={async () => {
           if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
             return;
@@ -822,6 +848,7 @@ const DdPolicyHubsLayer = ({
           all_policy_hubs={policyHubs}
           selected_policy_hubs={selected_policy_hubs}
           drawed_area={drawedArea}
+          active_phase={active_phase}
           cancelHandler={() => {
             dispatch(setIsDrawingEnabled(false));
             dispatch(setHubsInDrawingMode([]));
