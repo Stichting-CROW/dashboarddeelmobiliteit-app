@@ -205,7 +205,7 @@ const DdPolicyHubsLayer = ({
       const selectedIds = selected.map(x => Number(x));
       setTimeout(() => {
         dispatch(setSelectedPolicyHubs(selectedIds));
-      }, 1000);
+      }, 1500);
       dispatch(setShowEditForm(true));
     }
     const phase = queryParams.get('phase');

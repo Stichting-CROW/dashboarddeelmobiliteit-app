@@ -1,5 +1,10 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-02-11
+
+- 🪄 Bij Beleidszones wordt zoom-niveau en kaartmidden nu ook opgeslagen in de URL, zodat je de precieze kaartpositie kunt delen
+- 🪄 Servicegebieden-pagina is nu ook zichtbaar voor gastgebruikers
+
 ## Release 2025-02-10
 
 - 🪄 Op [Beleidszones](https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md)-pagina: 

@@ -255,6 +255,12 @@ function Menu({
               path={'/map/beleidshubs'}
               icon={'https://i.imgur.com/GrF8KBA.png'}
             />
+            <MenuItem
+              pathName={pathName}
+              text={'Servicegebieden'}
+              path={'/map/servicegebieden'}
+              icon={'/images/components/Menu/ontwikkeling.svg'}
+            />
             <Link className="text-menu" to="/login">
               Log in
             </Link>
