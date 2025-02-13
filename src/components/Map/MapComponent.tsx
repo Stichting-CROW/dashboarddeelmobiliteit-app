@@ -259,9 +259,12 @@ const MapComponent = (props): JSX.Element => {
     const lng = queryParams.get("lng");
 
     // If zoom and lat/lng are in URL -> navigate to that location
-    if(zoom && lat && lng) { 
-      map.current.setZoom(zoom);
-      map.current.setCenter([lng, lat]);
+    if(zoom && lat && lng) {
+      console.log('ACTION: setZoom and setCenter (MapComponent - if zoom and lat/lng are in URL)');
+      setTimeout(() => {
+        map.current.setZoom(zoom);
+        map.current.setCenter([lng, lat]);
+      }, 1000);
     }
 
     // If on Map page and gm_zone is in URL -> navigate to municipality
@@ -405,6 +408,7 @@ const MapComponent = (props): JSX.Element => {
     if(! extent || extent.length === 0) {
       return;
     }
+
     // Do not zoom to place if zone geography is in URL
     const hasZoneInUrl = () => {
       // Check if we are on the zones page
@@ -414,7 +418,8 @@ const MapComponent = (props): JSX.Element => {
       return geographyId ? true : false;
     }
     if(hasZoneInUrl()) return;
-    
+
+    console.log('ACTION: fitBounds (MapComponent - if extent changes)');
     map.current.fitBounds(extent);
     
     // Reset extent action

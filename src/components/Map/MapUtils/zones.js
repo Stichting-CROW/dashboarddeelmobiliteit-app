@@ -729,6 +729,7 @@ const navigateToGeography = (geographyId, allZones) => {
     // Delay it a little bit, so it comes after the
     // 'zoom in to extent' on filterGebied change/load
     setTimeout(x => {
+      console.log('ACTION: fitBounds (zones.js - navigateToGeography)');
       window['ddMap'].fitBounds(extent, {
         padding: {
           top: 25,

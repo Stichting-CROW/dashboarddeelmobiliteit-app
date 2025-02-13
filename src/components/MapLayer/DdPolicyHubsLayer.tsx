@@ -150,6 +150,7 @@ const DdPolicyHubsLayer = ({
     const extent = st.extent(area);
 
     // Fly to hub
+    console.log('ACTION: fitBounds (DdPolicyHubsLayer - flyToHub)');
     map.fitBounds(extent);
   }
   
