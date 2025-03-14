@@ -30,8 +30,8 @@
   .PhaseMenu-inner > * {
     position: relative;
     color: #000;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
     display: inline-block;
     font-size: 14px;
     line-height: 3rem;

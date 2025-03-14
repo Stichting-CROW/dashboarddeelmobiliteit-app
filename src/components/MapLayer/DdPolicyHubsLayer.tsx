@@ -641,8 +641,25 @@ const DdPolicyHubsLayer = ({
     enableDrawingPolygon(draw);
   };
 
+  const getPhaseInfo = (phase: string) => {
+    switch(phase) {
+      case 'concept':
+        return "Conceptfase: Zones die nog in ontwikkeling zijn";
+      case 'committed_concept':
+        return "Vastgestelde concepten: Zones die zijn vastgesteld maar nog niet gepubliceerd";
+      case 'published':
+        return "Gepubliceerde zones: Zones die zijn gepubliceerd maar nog niet actief";
+      case 'active':
+        return "Actieve zones: Zones die momenteel van kracht zijn";
+      default:
+        return "";
+    }
+  }
+
   return <>
-    <PolicyHubsPhaseMenu />
+    <div className="flex items-center gap-2">
+      <PolicyHubsPhaseMenu />
+    </div>
 
     {(canEditHubs(acl) && is_stats_or_manage_mode === 'manage') && <ActionButtons>
       {/* Teken hub button */}
