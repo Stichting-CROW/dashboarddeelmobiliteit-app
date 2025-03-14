@@ -7,7 +7,7 @@ Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones
 3. Zorg dat je de **Concept**-fase actief hebt
 4. Open de tabel via knop **Tabel openen**
 5. Klik op de knop "Importeer", in de rechtsbovenhoek
-6. Selecteer het .dkpg-bestand en klik op **Importeer zones**<br /><br />
+6. Selecteer het .gpkg-bestand en klik op **Importeer zones**<br /><br />
 ![img](https://dashboarddeelmobiliteit.nl/components/Docs/Zones/import-zones-from-geopackage-modal.png)
 7. De zones zijn nu geimporteerd!
 
@@ -18,9 +18,10 @@ Bij Zones zie je alle maatwerkzones op het scherm: de analysezones, parkeerzones
 ## Handig: een GeoPackage-template met voorbeeldzones
 
 Download [dit gpkg-bestand](https://drive.google.com/file/d/1xrQSFHN_p5YQXl-mfH7sOsLNSfYco7No/view?usp=sharing
-) als voorbeeld-template van hoe zones kunnen worden aangeleverd. In het bestand zie je per zone alle attributen die je kunt meegeven, zoals de naam en het interne ID van de zone.
+) als voorbeeld-template van hoe zones kunnen worden aangeleverd. In het bestand zie je per zone alle attributen die je kunt meegeven, zoals de naam en het interne ID van de zone. Alle velden die beginnen met een _ worden genegeerd en het heeft daarom geen zin die in te vullen. Zodra je de zones geïmporteerd hebt wordt een deel van deze velden automatisch gevuld. 
 
 ## Tips bij het importeren van zones
 
 - Zorg dat elke zone een naam heeft, dan is die gemakkelijk herkenbaar
 - Zorg dat elke zone een losse polygon is
+- Vul geen velden in die beginnen met een _ in het GIS-programma
