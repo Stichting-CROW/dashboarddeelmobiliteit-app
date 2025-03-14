@@ -8,6 +8,10 @@ Zoekbalk:
 - 🪄 Als je gezocht hebt op een adres, zal de kaart een marker zetten op het adres
 - 🪄 Als je de zoekbalk leeg maakt, wordt de marker verwijderd
 
+Beleidszones:
+
+- 🪄 Nieuwe tooltips geven uitleg over de verschillende fasen van beleidszones
+
 Documentatie:
 
 - 🪄 Nieuwe documentatiepagina over de Open Aanbod API: [Parked Vehicles API](https://docs.dashboarddeelmobiliteit.nl/api_docs/parked_vehicles/)
