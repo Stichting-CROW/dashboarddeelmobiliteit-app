@@ -1,5 +1,17 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-03-14
+
+Zoekbalk:
+
+- 🪄 Gebruik de zoekbalk nu ook om op straatnaam/nummer te zoeken
+- 🪄 Als je gezocht hebt op een adres, zal de kaart een marker zetten op het adres
+- 🪄 Als je de zoekbalk leeg maakt, wordt de marker verwijderd
+
+Documentatie:
+
+- 🪄 Nieuwe documentatiepagina over de Open Aanbod API: [Parked Vehicles API](https://docs.dashboarddeelmobiliteit.nl/api_docs/parked_vehicles/)
+
 ## Release 2025-02-11
 
 - 🪄 Bij Beleidszones wordt zoom-niveau en kaartmidden nu ook opgeslagen in de URL, zodat je de precieze kaartpositie kunt delen

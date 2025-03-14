@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { readable_geotype } from "../../helpers/policy-hubs/common"
 import center from '@turf/center'
+import maplibregl from 'maplibre-gl';
 
 import SearchBarResults from './SearchBarResults';
 import SearchBarInput from './SearchBarInput';
@@ -40,6 +41,7 @@ function SearchBar({map}: {map: any}) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [marker, setMarker] = useState<maplibregl.Marker | null>(null);
 
   // Selectors
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -48,6 +50,9 @@ function SearchBar({map}: {map: any}) {
   const filter = useSelector((state: StateType) => state.filter || null);
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
+
+  // Add AbortController ref
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   // On component load
   useEffect(() => {
@@ -89,10 +94,11 @@ function SearchBar({map}: {map: any}) {
     window.dispatchEvent(event);
   }
 
-  const getAddressDetails = async (id: string): Promise<{ lat: number; lng: number } | null> => {
+  const getAddressDetails = async (id: string, signal: AbortSignal): Promise<{ lat: number; lng: number } | null> => {
     try {
       const response = await fetch(
-        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?id=${id}`
+        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?id=${id}`,
+        { signal }
       );
       const data = await response.json();
       
@@ -129,11 +135,22 @@ function SearchBar({map}: {map: any}) {
       uniquePolicyHubs.filter(x => x.name.toLowerCase().includes(searchValue.toLowerCase()))
     );
 
-    // Only search for addresses if search is 3+ characters
     if (searchValue.length < 3) {
       setSearchResults([]);
+      if (marker) {
+        marker.remove();
+      }
       return;
     }
+
+    // Cancel any ongoing fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this fetch
+    abortControllerRef.current = new AbortController();
+    const { signal } = abortControllerRef.current;
 
     setIsLoading(true);
     try {
@@ -145,29 +162,28 @@ function SearchBar({map}: {map: any}) {
       const searchWegOrAdres = searchValue.match(/\d/) ? 'adres' : 'weg';
 
       const response = await fetch(
-        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(searchValue)}&fq=type:${searchWegOrAdres}${locationParams}`
+        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(searchValue)}&fq=type:${searchWegOrAdres}${locationParams}`,
+        { signal }
       );
       const data = await response.json();
-      console.log('searchWegOrAdres', searchWegOrAdres, data);
 
       const addressResults: SearchResult[] = await Promise.all(
-        data.response.docs
-          // .filter((result: any) => {
-          //   return !result.weergavenaam.match(/\d/);
-          // })
-          .map(async (result: any) => {
-            const location = await getAddressDetails(result.id);
-            return {
-              type: 'address',
-              text: result.weergavenaam,
-              location: location || undefined
-            };
-          })
+        data.response.docs.map(async (result: any) => {
+          const location = await getAddressDetails(result.id, signal);
+          return {
+            type: 'address',
+            text: result.weergavenaam,
+            location: location || undefined
+          };
+        })
       );
 
       setSearchResults(addressResults.filter(result => result.location));
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      // Only log error if it's not an abort error
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching addresses:', error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -185,6 +201,25 @@ function SearchBar({map}: {map: any}) {
   });
 
   const onAddressSelect = (location: { lat: number; lng: number }, options: FlyToOptions) => {
+    if (marker) {
+      marker.remove();
+    }
+
+    const newMarker = new maplibregl.Marker()
+      .setLngLat([location.lng, location.lat])
+      .addTo(map);
+    
+    // Add popup to marker
+    const popup = new maplibregl.Popup({ offset: 25 })
+      .setHTML(`<div>${searchResults.find(r => 
+        r.location?.lat === location.lat && 
+        r.location?.lng === location.lng
+      )?.text || 'Locatie'}</div>`);
+
+    newMarker.setPopup(popup);
+    
+    setMarker(newMarker);
+
     map.flyTo({
       center: [location.lng, location.lat],
       zoom: options.zoom,

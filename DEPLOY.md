@@ -114,7 +114,7 @@ If -in example- the API pod is 'broken', run this:
 
     kubectl delete pod <pod id>
 
-The pod gets destroyed andn restarts automatically.
+The pod gets destroyed and restarts automatically.
 
 ## Export raw data manually
 
