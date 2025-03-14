@@ -142,16 +142,19 @@ function SearchBar({map}: {map: any}) {
         ? `&lat=${mapCenter.lat}&lon=${mapCenter.lng}` 
         : '';
 
+      const searchWegOrAdres = searchValue.match(/\d/) ? 'adres' : 'weg';
+
       const response = await fetch(
-        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(searchValue)}&fq=type:weg${locationParams}`
+        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(searchValue)}&fq=type:${searchWegOrAdres}${locationParams}`
       );
       const data = await response.json();
+      console.log('searchWegOrAdres', searchWegOrAdres, data);
 
       const addressResults: SearchResult[] = await Promise.all(
         data.response.docs
-          .filter((result: any) => {
-            return !result.weergavenaam.match(/\d/);
-          })
+          // .filter((result: any) => {
+          //   return !result.weergavenaam.match(/\d/);
+          // })
           .map(async (result: any) => {
             const location = await getAddressDetails(result.id);
             return {
