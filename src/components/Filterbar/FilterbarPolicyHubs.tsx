@@ -219,7 +219,7 @@ function FilterbarPolicyHubs({
             <FilteritemGebieden />
         </Fieldset>
 
-        {filterGebied && (<>
+        {canEditHubs(acl) && filterGebied && (<>
           <Fieldset title="Hubs">
             <CheckboxesWrapper color={themes.zone.stop.primaryColor}>
               {Object.keys(policyHubPhases).map(key => {
