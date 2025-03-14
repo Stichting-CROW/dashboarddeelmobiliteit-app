@@ -92,8 +92,14 @@ export const isHubInPhase = (hub: any, phase: string, visible_layers: any) => {
   if(phase === 'concept') {
     // Is it a hub, and do we want to show hubs?
     if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-concept') > -1) {
-      return (hub.phase === 'concept')
-        || (hub.phase === 'retirement_concept')
+      // Is this a concept that is not yet published?
+      const isConcept = hub.phase === 'concept' && hub.published_date === null && hub.effective_date === null;
+
+      // Is this a retirement concept?
+      const isRetirementConcept = hub.phase === 'retirement_concept' && hub.published_retire_date === null && hub.retire_date === null;// && hub.prev_geographies?.length > 0;
+
+      return (isConcept)
+        || (isRetirementConcept)
         // TODO: In concept phase, hide retirement_concept phase if there's a follow up committed concept
     }
     else if(hub.geography_type === 'monitoring' && visible_layers.indexOf('monitoring-concept') > -1) {
@@ -176,4 +182,15 @@ export const isHubInPhase = (hub: any, phase: string, visible_layers: any) => {
   }
 
   return false;
+}
+
+export const deDuplicateHubs = (hubs) => {
+  return hubs.filter(hub => {
+    // Check if any other hub has this hub's zone_id in its prev_geography_ids
+    const isReplacedByNewer = hubs.some(otherHub => 
+      otherHub.prev_geographies && 
+      otherHub.prev_geographies.includes(hub.geography_id)
+    );
+    return ! isReplacedByNewer;
+  });
 }

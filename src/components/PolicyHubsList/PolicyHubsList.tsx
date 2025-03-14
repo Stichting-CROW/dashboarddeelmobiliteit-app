@@ -13,7 +13,7 @@ import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actio
 import ActionHeader from './action-header';
 // import { canEditHubs } from "../../helpers/authentication"
 import React from "react";
-import { isHubInPhase } from "../../helpers/policy-hubs/common";
+import { isHubInPhase, deDuplicateHubs } from "../../helpers/policy-hubs/common";
 
 function populateTableData(policyHubs) {
   if(! policyHubs || policyHubs.detail) {
@@ -115,7 +115,9 @@ const PolicyHubsList = () => {
     const filteredHubs = filterVisible(
       filterPhase(policyHubs)
     );
-    const data = [...populateTableData(filteredHubs)];
+    const uniqueHubs = deDuplicateHubs(filteredHubs);
+
+    const data = [...populateTableData(uniqueHubs)];
     if(! data || data.length === 0) return;
     
     setTableData(data);

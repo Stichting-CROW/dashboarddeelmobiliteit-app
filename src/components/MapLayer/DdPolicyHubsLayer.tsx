@@ -4,9 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 // import { useSearchParams } from 'react-router-dom'
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
-import { isHubInPhase } from '../../helpers/policy-hubs/common';
-
-// import {generatePopupHtml} from '../Map/MapUtils/zones.js';
+import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
 
 import {
   setHubsInDrawingMode,
@@ -335,14 +333,7 @@ const DdPolicyHubsLayer = ({
     });
 
     // Remove all zones that have a zone ID of any of the prev_geography_ids
-    const uniqueHubs = filteredHubs.filter(hub => {
-      // Check if any other hub has this hub's zone_id in its prev_geography_ids
-      const isReplacedByNewer = filteredHubs.some(otherHub => 
-        otherHub.prev_geographies && 
-        otherHub.prev_geographies.includes(hub.geography_id)
-      );
-      return ! isReplacedByNewer;
-    });
+    const uniqueHubs = deDuplicateHubs(filteredHubs);
     
     return uniqueHubs;
   }
