@@ -196,7 +196,6 @@ const PolicyHubsEdit = ({
             delete fiteredHubData.name;
             delete fiteredHubData.description;
             delete fiteredHubData.geography_type;
-            delete fiteredHubData.stop?.is_virtual;
             delete fiteredHubData.stop?.location;
         }
         
@@ -533,7 +532,7 @@ const PolicyHubsEdit = ({
                                 {readable_phase(getRelevantHubPhase(active_phase, hubData))}
                             </td>
                         </tr>
-                        {hubData.stop && <tr>
+                        {false && hubData.stop && <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
                                 Fysiek of virtueel?
                             </th>
@@ -637,7 +636,7 @@ const PolicyHubsEdit = ({
                     id="js-FilterbarZones-internal_id-input"
                     value={hubData.internal_id || ""}
                     onChange={changeHandler}
-                    classes="w-full"
+                    classes="w-full mb-0"
                     disabled={
                         ! canEditHubs(acl) ||
                         hubData.phase === 'published' ||
@@ -658,13 +657,13 @@ const PolicyHubsEdit = ({
             </div>
             }
             
-            {can_edit_hub_data && <div className="relative">
+            <div className="relative">
                 {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
                 <PolicyHubsEdit_isVirtual
                     hubData={hubData}
                     setHubData={setHubData}
                 />
-            </div>}
+            </div>
 
             {(true || ! is_retirement_hub) && <>
 
@@ -819,7 +818,7 @@ const PolicyHubsEdit = ({
                 </Button>}
             </>}
 
-            {canEditHubs(acl) && ! is_retirement_hub && <Button
+            {canEditHubs(acl) && <Button
                 theme={didChangeZoneConfig ? `greenHighlighted` : `green`}
                 style={{marginRight: 0}}
                 onClick={saveZone}
