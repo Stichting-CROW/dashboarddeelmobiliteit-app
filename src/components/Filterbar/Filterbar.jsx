@@ -222,7 +222,7 @@ function Filterbar({
 
     <div className="absolute text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2025-03-14
+        2025-03-21
       </a><br />
       - <a href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md#zoeken" className="underline">Zoek</a> op straatnaam/nummer<br />
       - Nieuwe fase-tooltip bij <a href="/map/beleidshubs" className="underline">Zones</a><br />

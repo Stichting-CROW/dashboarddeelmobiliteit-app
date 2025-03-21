@@ -25,6 +25,10 @@ const ImportZones = ({
       Importeer een GeoPackage-bestand met zone-polygonen middels onderstaande upload-functie. De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een ID dat al in het Dashboard Deelmobiliteit staat, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
     </p>
 
+    <p className="mb-4">
+      Lees meer over het importeren van zones in de <a href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_importeren.md" target="_blank" rel="noopener noreferrer" className="font-bold underline">Beleidszones documentatie</a>. Je vindt er ook een GeoPackage-template dat dient als voorbeeld.
+    </p>
+
     {! importResult || Object.keys(importResult).length <= 0 && <form encType="multipart/form-data">
       <p className="mt-4">
         <input type="file" name="file" id="js-kml-file" accept=".gpkg" onChange={fileChangedHandler} />
@@ -85,7 +89,7 @@ const ImportZonesModal = ({
     // Create function that's called if there's an error
     const postError = () => {
       // Set loading=false
-      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig KML-bestand is.');
+      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig GeoPackage-bestand is.');
       setIsProcessingFile(false);
       setImportResult([]);
     }
