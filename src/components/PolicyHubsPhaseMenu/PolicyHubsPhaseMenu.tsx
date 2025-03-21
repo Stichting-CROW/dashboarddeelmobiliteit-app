@@ -17,9 +17,12 @@ import {
 
 import arrowRight from './arrow-right.svg';
 import './PolicyHubsPhaseMenu.css'
+import { isLoggedIn } from '../../helpers/authentication';
 
 const PolicyHubsPhaseMenu = () => {
   const dispatch = useDispatch();
+
+  const state = useSelector((state: StateType) => state);
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
@@ -39,56 +42,61 @@ const PolicyHubsPhaseMenu = () => {
   return <>
     <div className={`PhaseMenu text-center ${isFilterbarOpen ? 'filter-open' : ''}`}>
       <div className="
-          PhaseMenu-inner
-          px-0 mx-auto bg-white box-border sm:px-4 sm:shadow-lg sm:m-4 md:mx-auto sm:mb-1 sm:rounded-3xl
+        PhaseMenu-inner
+        px-0 mx-auto bg-white box-border sm:px-4 sm:shadow-lg sm:m-4 md:mx-auto sm:mb-1 sm:rounded-3xl
       ">
       {Object.keys(policyHubPhases).map((name, i) => {
-          // Get phase title
-          const title = policyHubPhases[name].title;
+        // Get phase title
+        const title = policyHubPhases[name].title;
 
-          // Don't show 'Archief'
-          if(title === 'Archief') {
-              return;
-          }
+        // Don't show 'Archief'
+        if(title === 'Archief') {
+            return;
+        }
 
-          // Show phase title
-          return <React.Fragment key={name}>
+        // Don't show 'Concept' to non-logged in users
+        if(name === 'concept' && !isLoggedIn(state)) {
+          return;
+        }
 
-              <a className={`
-                  cursor-pointer
-                  ${active_phase === name ? '' : ''}
-              `}
-              style={{
-                  color: active_phase === name ? '#15AEEF' : '#000'
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                dispatch(setActivePhase(name));
-              }}>
-                <TooltipProvider delayDuration={350}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      {title}
-                      <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
-                    </TooltipTrigger>
-                    <TooltipContent 
-                      side={i === 0 ? "top" : i === Object.keys(policyHubPhases).length - 2 ? "top" : "top"}
-                      className="max-w-[200px] text-sm whitespace-normal text-left p-2"
-                    >
-                      <p className="leading-tight">
-                        {tooltipText(name)}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </a>
+        // Show phase title
+        return <React.Fragment key={name}>
 
-              {/* Show 'arrow right' divided */}
-              {i != Object.keys(policyHubPhases).length-2 && <span>
-                <img src={arrowRight} alt="Pijl naar rechts" className="inline-block" />
-              </span>}
+          <a className={`
+              cursor-pointer
+              ${active_phase === name ? '' : ''}
+          `}
+          style={{
+              color: active_phase === name ? '#15AEEF' : '#000'
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            dispatch(setActivePhase(name));
+          }}>
+            <TooltipProvider delayDuration={350}>
+              <Tooltip>
+                <TooltipTrigger>
+                  {title}
+                  <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
+                </TooltipTrigger>
+                <TooltipContent 
+                  side={i === 0 ? "top" : i === Object.keys(policyHubPhases).length - 2 ? "top" : "top"}
+                  className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+                >
+                  <p className="leading-tight">
+                    {tooltipText(name)}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </a>
 
-          </React.Fragment>
+          {/* Show 'arrow right' divided */}
+          {i != Object.keys(policyHubPhases).length-2 && <span>
+            <img src={arrowRight} alt="Pijl naar rechts" className="inline-block" />
+          </span>}
+
+        </React.Fragment>
       })}
       </div>
     </div>

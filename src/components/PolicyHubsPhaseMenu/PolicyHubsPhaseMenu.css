@@ -19,7 +19,6 @@
   .PhaseMenu {
     width: calc(100% - 215px + 100px);
     bottom: 80px;
-    white-space: unset;
     margin-left: 0;
     overflow-y: visible;
   }
