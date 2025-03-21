@@ -22,7 +22,11 @@ const ImportZones = ({
 
   return <>
     <p className="mb-4">
-      Importeer een GeoPackage-bestand met zone-polygonen middels onderstaande upload-functie. De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een ID dat al in het Dashboard Deelmobiliteit staat, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
+      Importeer een GeoPackage-bestand met zone-polygonen middels onderstaande upload-functie.
+    </p>
+
+    <p className="mb-4">
+      De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een geography_id dat gelijk is aan het geography_id van een bestaande conceptzone, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
     </p>
 
     <p className="mb-4">
