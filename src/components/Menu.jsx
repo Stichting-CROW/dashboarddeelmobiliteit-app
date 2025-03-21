@@ -1,12 +1,14 @@
-
 import React, { useState } from 'react';
 // import moment from 'moment';
 import { Link } from "react-router-dom";
 import {StateType} from '../types/StateType';
 
+
 import './Menu.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearUser } from '../actions/authentication.js';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
+import { InfoCircledIcon } from "@radix-ui/react-icons"
 
 // Copies a string to the clipboard. Must be called from within an
 // event handler such as click. May return false if it failed, but
@@ -42,7 +44,6 @@ function copyToClipboard(text) {
 }
 
 function MenuItem(props) {
-
   const pathName = props.pathName;
   const isActive = pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
@@ -60,12 +61,47 @@ function MenuItem(props) {
         title={props.title}
         >
         {icon ? <img alt={props.text} src={icon} /> : ''}
-        {props.text && <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
-          {props.text}
-        </span>}
+        {props.text && (
+          isActive && props.text === 'Zones' ? (
+            <>
+              {props.text}
+              <TooltipProvider delayDuration={500}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+                      <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top"
+                    align="center"
+                    className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+                  >
+                    <p className="text-sm leading-tight">
+                      <a 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones" 
+                        className="no-underline text-theme-blue" 
+                        style={{color: '#15AEEF'}}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Lees de documentatie
+                      </a>
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          ) : (
+            <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+              {props.text}
+            </span>
+          )
+        )}
       </Link>}
 
-      {! props.path && <a className={`
+      {!props.path && <a className={`
           text-menu
           text-center
           inline-block cursor-pointer
@@ -76,7 +112,7 @@ function MenuItem(props) {
         title={props.title}
         >
         {icon ? <img alt={props.text} src={icon} /> : ''}
-        {props.text && <span className={`${(isActive || ! icon) ? 'inline-block' : 'hidden'} sm:inline-block  ml-2`}>
+        {props.text && <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
           {props.text}
         </span>}
       </a>}

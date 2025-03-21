@@ -1,5 +1,12 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-03-21
+
+Beleidshubs:
+
+- Nieuwe tooltip-teksten geven uitleg over fases
+- Nieuwe tooltip in het hoofdmenu linkt naar de Zones-doccumentatie
+
 ## Release 2025-03-14
 
 Zoekbalk:

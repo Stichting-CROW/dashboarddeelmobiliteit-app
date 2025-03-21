@@ -31,10 +31,10 @@ const PolicyHubsPhaseMenu = () => {
 
   const tooltipText = (name: string) => {
     const texts = {
-      'concept': 'Conceptfase: Zones die nog in ontwikkeling zijn',
-      'committed_concept': 'Vastgestelde concepten: Zones die zijn vastgesteld maar nog niet gepubliceerd',
-      'published': 'Gepubliceerde zones: Zones die zijn gepubliceerd maar nog niet actief',
-      'active': 'Actieve zones: Zones die momenteel van kracht zijn'
+      'concept': 'Deze fase biedt alle vrijheid om concept-zones  in te tekenen, aan te passen en weer weg te gooien.',
+      'committed_concept': 'Mail de vastgestelde zones naar aanbieders van deelvoertuigen voor een laatste check.',
+      'published': 'De zones zijn definitief. Aanbieders krijgen in deze fase de tijd om de zones te verwerken in hun apps.',
+      'active': 'De zones moeten verwerkt zijn in de apps. In verbodsgebieden mogen geen voertuigen aangeboden worden.'
     }
     return texts[name];
   }
@@ -73,17 +73,19 @@ const PolicyHubsPhaseMenu = () => {
             e.preventDefault();
             dispatch(setActivePhase(name));
           }}>
-            <TooltipProvider delayDuration={350}>
+            {title}
+            <TooltipProvider delayDuration={500}>
               <Tooltip>
                 <TooltipTrigger>
-                  {title}
-                  <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
+                  <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
                 </TooltipTrigger>
                 <TooltipContent 
-                  side={i === 0 ? "top" : i === Object.keys(policyHubPhases).length - 2 ? "top" : "top"}
+                  side="top"
+                  align="center"
                   className="max-w-[200px] text-sm whitespace-normal text-left p-2"
                 >
-                  <p className="leading-tight">
+                  <p className="text-sm leading-tight">
+                    <b>{policyHubPhases[name].title}</b><br />
                     {tooltipText(name)}
                   </p>
                 </TooltipContent>
