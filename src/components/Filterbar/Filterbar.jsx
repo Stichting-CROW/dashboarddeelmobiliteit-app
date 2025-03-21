@@ -225,7 +225,7 @@ function Filterbar({
         2025-03-21
       </a><br />
       - <a href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md#zoeken" className="underline">Zoek</a> op straatnaam/nummer<br />
-      - Nieuwe fase-tooltip bij <a href="/map/beleidshubs" className="underline">Zones</a><br />
+      - Toon geografie-ID bij elke <a href="/map/beleidshubs" className="underline">Zone</a><br />
     </div>
   </>
 }

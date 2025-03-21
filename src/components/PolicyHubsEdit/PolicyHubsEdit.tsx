@@ -510,7 +510,7 @@ const PolicyHubsEdit = ({
                     <tbody>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Naam:
+                                Naam
                             </th>
                             <td valign="top">
                                 {hubData.name}
@@ -518,7 +518,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Type:
+                                Type
                             </th>
                             <td>
                                 {readable_geotype(hubData.geography_type)}
@@ -526,7 +526,7 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Fase:
+                                Fase
                             </th>
                             <td valign="top">
                                 {readable_phase(getRelevantHubPhase(active_phase, hubData))}
@@ -542,23 +542,43 @@ const PolicyHubsEdit = ({
                         </tr>}
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                {moment(hubData.published_date).isBefore(moment()) ? 'Gepubliceerd op' : 'Publiceren op'}:
+                                {moment(hubData.published_date).isBefore(moment()) ? 'Gepubliceerd op' : 'Publiceren op'}
                             </th>
-                            <td>
+                            <td valign='top'>
                                 {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                {moment(hubData.effective_date).isBefore(moment()) ? 'Geactiveerd op' : 'Activeren op'}:
+                                Geografie ID
                             </th>
-                            <td>
+                            <td valign='top'>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(hubData.geography_id);
+                                    notify(toast, 'Geografie ID gekopieerd');
+                                  }}
+                                  className="cursor-pointer flex"
+                                  title="Klik om te kopiëren"
+                                >
+                                  <span className="overflow-hidden whitespace-nowrap text-ellipsis max-w-44">
+                                    {hubData.geography_id}
+                                  </span> <span>📄</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
+                                {moment(hubData.effective_date).isBefore(moment()) ? 'Geactiveerd op' : 'Activeren op'}
+                            </th>
+                            <td valign='top'>
                                 {moment(hubData.effective_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>
                         {hubData.published_retire_date && <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                Archivering publiceren op:
+                                Archivering publiceren op
                             </th>
                             <td>
                                 {moment(hubData.published_retire_date).format('DD-MM-YYYY HH:mm')}
@@ -566,7 +586,7 @@ const PolicyHubsEdit = ({
                         </tr>}
                         {hubData.retire_date && <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
-                                {moment(hubData.retire_date).isBefore(moment()) ? 'Gearchiveerd op' : 'Archiveren op'}:
+                                {moment(hubData.retire_date).isBefore(moment()) ? 'Gearchiveerd op' : 'Archiveren op'}
                             </th>
                             <td>
                                 {moment(hubData.retire_date).format('DD-MM-YYYY HH:mm')}
@@ -575,7 +595,7 @@ const PolicyHubsEdit = ({
                         {canEditHubs(acl) && <>
                             <tr title={`Aangemaakt op ${moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}`}>
                                 <th align="left" style={{verticalAlign: 'top'}}>
-                                    Gemaakt door:
+                                    Gemaakt door
                                 </th>
                                 <td>
                                     {hubData.created_by}
@@ -583,7 +603,7 @@ const PolicyHubsEdit = ({
                             </tr>
                             <tr title={`Gewijzigd op ${moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}`}>
                                 <th align="left" style={{verticalAlign: 'top'}}>
-                                    Gewijzigd door:
+                                    Gewijzigd door
                                 </th>
                                 <td>
                                     {hubData.last_modified_by}
@@ -593,7 +613,7 @@ const PolicyHubsEdit = ({
                         {! canEditHubs(acl) && <>
                             <tr>
                                 <th align="left" style={{verticalAlign: 'top'}}>
-                                    Gemaakt op:
+                                    Gemaakt op
                                 </th>
                                 <td>
                                     {moment(hubData.created_at).format('DD-MM-YYYY HH:mm')}
@@ -601,7 +621,7 @@ const PolicyHubsEdit = ({
                             </tr>
                             <tr>
                                 <th align="left" style={{verticalAlign: 'top'}}>
-                                    Gewijzigd op:
+                                    Gewijzigd op
                                 </th>
                                 <td>
                                     {moment(hubData.modified_at).format('DD-MM-YYYY HH:mm')}

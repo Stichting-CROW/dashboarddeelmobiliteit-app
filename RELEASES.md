@@ -6,6 +6,8 @@ Beleidshubs:
 
 - Nieuwe tooltip-teksten geven uitleg over fases
 - Nieuwe tooltip in het hoofdmenu linkt naar de Zones-doccumentatie
+- In zone import scherm: Link naar documentatie toegevoegd
+- Sta zone-beheerder toe om ook _actieve_ hubs te wijzigen van een virtuele hub naar een fysieke hub en andersom. Net als dat je altijd een hub kunt 'Sluiten' en 'Openen' kun je ook altijd instellen of de hub 'Virtueel' of 'Fysiek' is zonder dat je door alle fases heen moet gaan
 
 ## Release 2025-03-14
 
