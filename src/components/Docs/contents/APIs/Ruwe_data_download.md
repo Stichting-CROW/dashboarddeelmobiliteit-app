@@ -1,4 +1,4 @@
-**NOTE: Momenteel is dit nog geen ruwe data API. Eind 2024 komt de ruwe data API beschikbaar. Je kunt al wel een ruwe data export downloaden via het Dashboard Deelmobiliteit. Deze ontvang je dan per mail. Lees hieronder hoe dit werkt.**
+**NOTE: Momenteel is dit nog geen ruwe data API. Je kunt al wel een ruwe data export downloaden via het Dashboard Deelmobiliteit. Deze ontvang je dan per mail. Lees hieronder hoe dit werkt.**
 
 Via het Dashboard Deelmobiliteit kun je data inzien, en ook de ruwe data downloaden. Hierdoor kun je zelf analyses doen op de data, of eigen visualisaties maken.
 
