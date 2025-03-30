@@ -64,6 +64,7 @@ const DdPolicyHubsLayer = ({
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
   const [drawnFeatures, setDrawnFeatures] = useState<any[]>([]);
+  const [doDrawMultiPolygon, setDoDrawMultiPolygon] = useState<boolean>(false);
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -413,8 +414,11 @@ const DdPolicyHubsLayer = ({
     if(! draw) {
       Draw = initMapboxDraw(map)
       setDraw(Draw);
-      initEventHandlers(map, changeAreaHandler);
     };
+
+    // Add new event handlers
+    initEventHandlers(map, changeAreaHandler);
+
     if(is_drawing_enabled === 'new') {
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
@@ -429,18 +433,46 @@ const DdPolicyHubsLayer = ({
         selectDrawPolygon(Draw, is_drawing_enabled);
       }, 25);
     }
+
+    // Cleanup function to remove event handlers when component unmounts or effect re-runs
+    return () => {
+      if (map) {
+        // Remove event handlers initiated in initEventHandlers
+        map.off('draw.create', changeAreaHandler);
+        map.off('draw.update', changeAreaHandler);
+        map.off('draw.delete', changeAreaHandler);
+      }
+    };
   }, [
     map,
-    is_drawing_enabled
+    is_drawing_enabled,
+
+    doDrawMultiPolygon,
+    drawedArea
   ])
 
   const changeAreaHandler = (e) => {
-    // Set drawedArea
+    const newFeatures = doDrawMultiPolygon
+      ? [{
+          ...drawedArea?.features?.[0],
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [
+              [
+                [...drawedArea?.features?.[0]?.geometry?.coordinates[0]],
+                e.features[0].geometry.coordinates[0]  // Wrap coordinates in an extra array
+              ]
+            ]
+          }
+        }]
+      : e.features;
+
     setDrawedArea({
       type: e.type,
-      features: e.features
+      features: newFeatures
     });
   }
+  // console.log('state', 'drawedArea', drawedArea, 'drawnFeatures', drawnFeatures);
 
   const clickHandler = (e) => {
     if(! map) return;
@@ -627,6 +659,9 @@ const DdPolicyHubsLayer = ({
   // Add handler for the "Voeg stukje multipolygon toe" button
   const handleAddPolygon = () => {
     if (!draw) return;
+
+    // We are now drawing a multi-polygon
+    setDoDrawMultiPolygon(true);
     
     // Store existing features
     const existingFeatures = draw.getAll().features;

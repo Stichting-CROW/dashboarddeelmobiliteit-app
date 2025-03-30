@@ -28,6 +28,7 @@ import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
 import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
 import moment from 'moment';
 import { canEditHubs } from '../../helpers/authentication';
+import { VideoSource } from 'maplibre-gl';
 
 const PolicyHubsEdit = ({
     fetchHubs,
@@ -119,7 +120,21 @@ const PolicyHubsEdit = ({
     useEffect(() => {
         if(! drawed_area || ! drawed_area.features) return;
 
-        const drawedAreaCenter = center(drawed_area.features[0]);
+        let drawedAreaCenter;
+        try {
+            // Handle both Polygon and MultiPolygon types
+            const feature = drawed_area.features[0];
+            if (feature.geometry.type === 'MultiPolygon') {
+                // For MultiPolygon, we need to create a proper Feature object
+                drawedAreaCenter = center(feature);
+            } else {
+                // For regular Polygon, the existing approach works
+                drawedAreaCenter = center(feature);
+            }
+        } catch (err) {
+            console.error('Error calculating center:', err);
+            return;
+        }
 
         setHubData({
             ...hubData,

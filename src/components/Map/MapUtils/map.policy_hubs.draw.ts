@@ -18,9 +18,15 @@ const initMapboxDraw = (map) => {
 }
 
 const initEventHandlers = (map, updateFunction: Function) => {
-    map.on('draw.create', updateFunction);
-    map.on('draw.delete', updateFunction);
-    map.on('draw.update', updateFunction);
+  // Remove existing handlers first
+  map.off('draw.create', updateFunction);
+  map.off('draw.delete', updateFunction);
+  map.off('draw.update', updateFunction);
+  
+  // Add new handlers
+  map.on('draw.create', updateFunction);
+  map.on('draw.delete', updateFunction);
+  map.on('draw.update', updateFunction);
 }
 
 const enableDrawingPolygon = (draw) => {
