@@ -123,7 +123,7 @@ const DdPolicyHubsLayer = ({
   useEffect(() => {
     if(! map) return;
 
-    // Event handler for flying to a hub
+    // Init event handler for flying to a hub
     initFlyToEventHandler();
 
     return () => {
@@ -131,6 +131,7 @@ const DdPolicyHubsLayer = ({
     }
   }, [map]);
 
+  // Function that flys to a hub based on parameter given
   const flyToHub = async (e) => {
     if(! map) return;
 
@@ -403,11 +404,12 @@ const DdPolicyHubsLayer = ({
   // If is_drawing_enabled changes: Do things
   useEffect(() => {
     if(! map) return;
+
     // If drawing isn't enabled: Remove draw tools
     if(! is_drawing_enabled) {
-        removeDrawedPolygons(draw);
-        setDrawnFeatures([]);
-        return;
+      removeDrawedPolygons(draw);
+      setDrawnFeatures([]);
+      return;
     }
     // Initialize draw
     let Draw = draw;
@@ -427,6 +429,12 @@ const DdPolicyHubsLayer = ({
       setTimeout(() => {
         enableDrawingPolygon(Draw);
       }, 25);
+      // Select the polygon after it's created
+      if(drawedArea && drawedArea.features && drawedArea.features[0]) {
+        setTimeout(() => {
+          selectDrawPolygon(Draw, drawedArea.features[0].id);
+        }, 25);
+      }
     }
     else if(is_drawing_enabled) {
       setTimeout(() => {
@@ -446,11 +454,11 @@ const DdPolicyHubsLayer = ({
   }, [
     map,
     is_drawing_enabled,
-
     doDrawMultiPolygon,
     drawedArea
   ])
 
+  // Function that runs when the drawing of a polygon is finished
   const changeAreaHandler = (e) => {
     const newFeatures = doDrawMultiPolygon
       ? [{
@@ -460,12 +468,13 @@ const DdPolicyHubsLayer = ({
             coordinates: [
               [
                 [...drawedArea?.features?.[0]?.geometry?.coordinates[0]],
-                e.features[0].geometry.coordinates[0]  // Wrap coordinates in an extra array
+                e.features[0].geometry.coordinates[0]
               ]
             ]
           }
         }]
-      : e.features;
+      : e.features
+    ;
 
     setDrawedArea({
       type: e.type,
@@ -536,7 +545,7 @@ const DdPolicyHubsLayer = ({
   const didSelectHub = () => {
     // If we did draw a new polygon, return true
     if(selected_policy_hubs && selected_policy_hubs[0] === 'new') return true;
-    // Otherwise: Check if a hub is selected
+    // Oth`erwise: Check if a hub is selected
     return getSelectedHub() ? true : false;
   }
 

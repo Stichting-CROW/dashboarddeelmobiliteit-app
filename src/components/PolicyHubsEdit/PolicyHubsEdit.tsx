@@ -28,7 +28,6 @@ import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
 import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
 import moment from 'moment';
 import { canEditHubs } from '../../helpers/authentication';
-import { VideoSource } from 'maplibre-gl';
 
 const PolicyHubsEdit = ({
     fetchHubs,
