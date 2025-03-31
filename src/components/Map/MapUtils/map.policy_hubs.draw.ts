@@ -37,6 +37,7 @@ const enableDrawingPolygon = (draw) => {
 
 const selectDrawPolygon = (draw, id) => {
     if(! draw) return;
+    // if(! id) return;
 
     // const drawed = draw.getAll();
     // drawed.features.map(x => {
@@ -44,15 +45,15 @@ const selectDrawPolygon = (draw, id) => {
     // })
 
     draw.changeMode('direct_select', {
-        featureId: id
+      featureId: id
     });
 }
 
 const removeDrawedPolygons = (draw) => {
     // Remove all drawed zones from the map
     if(draw) {
-        draw.deleteAll();
-        draw.changeMode('simple_select');
+      draw.deleteAll();
+      draw.changeMode('simple_select');
     }
 }
 

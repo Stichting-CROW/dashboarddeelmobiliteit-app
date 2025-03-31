@@ -1,7 +1,6 @@
 import { useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { useSearchParams } from 'react-router-dom'
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
 import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
@@ -15,6 +14,8 @@ import {
   setShowList,
   setHubRefetchCounter
 } from '../../actions/policy-hubs'
+
+import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
 
 import {
   renderHubs,
@@ -38,19 +39,14 @@ import ActionModule from '../ActionModule/ActionModule';
 import { ActionButtons } from '../ActionButtons/ActionButtons';
 import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
-import { getMapStyles, applyMapStyle, setBackgroundLayer } from '../Map/MapUtils/map';
+import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
-import { makeConcept } from '../../helpers/policy-hubs/make-concept';
-import { notify } from '../../helpers/notify';
+// import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
-import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
 import { canEditHubs } from '../../helpers/authentication';
-import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 import { setMapStyle } from '../../actions/layers';
-import { cn } from "../../lib/utils";
-import moment from "moment";
-import maplibregl from "maplibre-gl";
+import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
 
 let TO_fetch_delay;
 
@@ -144,14 +140,10 @@ const DdPolicyHubsLayer = ({
     // Make sure hub list is hidden
     dispatch(setShowList(false));
 
-    // Set selected hub
-    // dispatch(setSelectedPolicyHubs([zone_id]));
-
     // Get hub extent
     const extent = st.extent(area);
 
     // Fly to hub
-    console.log('ACTION: fitBounds (DdPolicyHubsLayer - flyToHub)');
     map.fitBounds(extent);
   }
   
@@ -361,6 +353,7 @@ const DdPolicyHubsLayer = ({
     return true;
   };
 
+  // Draw editable polygon
   const drawEditablePolygon = () => {
     if(! map) return;
     if(! draw) return;
@@ -368,14 +361,19 @@ const DdPolicyHubsLayer = ({
 
     if(! policyHubs || policyHubs.length <= 0) return;
 
+    // Get selected hub
     const selected_hub = policyHubs.find(x => x.zone_id === hubs_in_drawing_mode[0]);
     if(! selected_hub || ! selected_hub.area) return;
+
+    // If this is a multipolygon: Update drawing mode accordingly
+    // setDoDrawMultiPolygon(selected_hub.area.geometry.type === 'MultiPolygon');
 
     // Add editable feature to the map
     draw.add({
       ...selected_hub.area,
       id: hubs_in_drawing_mode[0]
     });
+
     // Select the polygon, so it is editable
     setTimeout(() => {
       selectDrawPolygon(draw, hubs_in_drawing_mode[0]);
@@ -430,11 +428,11 @@ const DdPolicyHubsLayer = ({
         enableDrawingPolygon(Draw);
       }, 25);
       // Select the polygon after it's created
-      if(drawedArea && drawedArea.features && drawedArea.features[0]) {
-        setTimeout(() => {
-          selectDrawPolygon(Draw, drawedArea.features[0].id);
-        }, 25);
-      }
+      // if(drawedArea && drawedArea.features && drawedArea.features[0]) {
+      //   setTimeout(() => {
+      //     selectDrawPolygon(Draw, drawedArea.features[0].id);
+      //   }, 25);
+      // }
     }
     else if(is_drawing_enabled) {
       setTimeout(() => {
@@ -570,238 +568,16 @@ const DdPolicyHubsLayer = ({
     return selected_hub.geography_type === 'stop';
   }
 
-  const didSelectConceptHub = () => {
-    if(! didSelectHub()) return;
-
-    // Get extra hub info
-    if(! policyHubs || policyHubs.length <= 0) return;
-
-    // Hub phases we want to keep
-    const wantedHubPhases = [
-      'concept',
-    ];
-    // If we are not in ACTIVE phase, we also want to keep retirement_concepts
-    if(active_phase !== 'active') {
-      wantedHubPhases.push('retirement_concept');
-    }
-
-    // Every selected hub should be a concept hub
-    const unwantedHubs = policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1).filter((x) => {
-      return wantedHubPhases.indexOf(x.phase) <= -1;
-    })
-
-    const didSelectUnwantedHubs = unwantedHubs?.length > 0;
-
-    return unwantedHubs?.length === 0;
-  }
-
-  const didSelectCommittedConceptHub = () => {
-    // Get extra hub info
-    if(! policyHubs || ! policyHubs[0]) return;
-    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
-    if(! selected_hub) return false;
-
-    // Return if hub is a concept hub
-    return selected_hub.phase === 'committed_concept';
-  }
-
-  const didSelectPublishedHub = () => {
-    if(! didSelectOneHub()) return;
-
-    // Get extra hub info
-    if(! policyHubs || ! policyHubs[0]) return;
-    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
-    if(! selected_hub) return false;
-    
-    // Return if hub is a concept hub
-    return selected_hub.phase === 'published';
-  }
-
-  const didSelectActiveHub = () => {
-    if(! didSelectOneHub()) return;
-
-    // Get extra hub info
-    if(! policyHubs || ! policyHubs[0]) return;
-    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
-    if(! selected_hub) return false;
-    
-    // Return if hub is a concept hub
-    return selected_hub.phase === 'active';
-  }
-
-  const didSelectCommittedRetirementHub = () => {
-    if(! didSelectOneHub()) return;
-
-    // Get extra hub info
-    if(! policyHubs || ! policyHubs[0]) return;
-    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
-    if(! selected_hub) return false;
-    
-    // Return if hub is a concept hub
-    return selected_hub.phase === 'committed_retirement_concept';
-  }
-
-  const didSelectAnyMonitoringHubs = () => {
-    if(! didSelectHub()) return;
-    if(! policyHubs || policyHubs.length <= 0) return;
-
-    // Hub geotypes we want to keep
-    const wantedGeoTypes = [
-      'monitoring'
-    ];
-
-    // At least one hub should be a monitoring hub
-    const monitoringHubs = policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1).filter((x) => {
-      return wantedGeoTypes.indexOf(x.geography_type) > -1;
-    })
-
-    return monitoringHubs?.length > 0;
-  }
-
-  const commitToConcept = (zone_id) => {
-    dispatch({
-      type: 'SET_SHOW_COMMIT_FORM',
-      payload: true
-    });
-  }
-
-  // Add handler for the "Voeg stukje multipolygon toe" button
-  const handleAddPolygon = () => {
-    if (!draw) return;
-
-    // We are now drawing a multi-polygon
-    setDoDrawMultiPolygon(true);
-    
-    // Store existing features
-    const existingFeatures = draw.getAll().features;
-    if (existingFeatures.length === 0) {
-      notify(toast, 'Teken eerst een polygon voordat je een nieuwe toevoegt', {
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Enable drawing mode for new polygon
-    enableDrawingPolygon(draw);
-  };
-
-  const getPhaseInfo = (phase: string) => {
-    switch(phase) {
-      case 'concept':
-        return "Conceptfase: Zones die nog in ontwikkeling zijn";
-      case 'committed_concept':
-        return "Vastgestelde concepten: Zones die zijn vastgesteld maar nog niet gepubliceerd";
-      case 'published':
-        return "Gepubliceerde zones: Zones die zijn gepubliceerd maar nog niet actief";
-      case 'active':
-        return "Actieve zones: Zones die momenteel van kracht zijn";
-      default:
-        return "";
-    }
-  }
-
   return <>
     <div className="flex items-center gap-2">
       <PolicyHubsPhaseMenu />
     </div>
 
-    {(canEditHubs(acl) && is_stats_or_manage_mode === 'manage') && <ActionButtons>
-      {/* Teken hub button */}
-      {(! is_drawing_enabled && active_phase === 'concept') && 
-        <Button theme="white" onClick={() => {
-          dispatch(setIsDrawingEnabled('new'))
-          dispatch(setSelectedPolicyHubs([]))
-        }}>
-          Teken nieuwe zone
-        </Button>
-      }
-
-      {(is_drawing_enabled === 'new' || drawnFeatures.length > 0) && (
-        <Button 
-          theme="white" 
-          onClick={handleAddPolygon}
-        >
-          Voeg stukje multipolygon toe
-        </Button>
-      )}
-
-      {/* Vaststellen button */}
-      {(didSelectConceptHub()
-        && ! didSelectAnyMonitoringHubs()
-        && ! show_commit_form
-      ) && 
-        <Button theme="white" onClick={() => commitToConcept(selected_policy_hubs ? selected_policy_hubs[0] : null)}>
-          Vaststellen
-        </Button>
-      }
-
-      {/* Terug naar concept button */}
-      {((didSelectCommittedConceptHub() || didSelectCommittedRetirementHub()) && ! show_commit_form) && 
-        <Button theme="red" onClick={async () => {
-          await makeConcept(token, getSelectedHubs().map(x => x.geography_id));
-          if(! window.confirm('Wil je de vastgestelde hub(s) terugzetten naar de conceptfase?')) {
-            return;
-          }
-
-          notify(toast, 'De hub(s) is/zijn teruggezet naar de conceptfase');
-
-          dispatch(setSelectedPolicyHubs([]));
-          dispatch(setShowEditForm(false));
-          fetchHubs();
-        }}>
-          Terugzetten naar concept
-        </Button>
-      }
-
-      {/* 'Nieuw concept op basis van' button */}
-      {(didSelectPublishedHub() || didSelectActiveHub()) && <>
-        <Button theme="white" onClick={async () => {
-          if(! window.confirm('Wil je een wijziging aanbrengen in deze definitieve hub d.w.z. een nieuwe concepthub maken? Klik dan op OK')) {
-            return;
-          }
-          await makeConcept(token, [getSelectedHub()?.geography_id]);
-          notify(toast, 'De hub is omgezet naar een nieuw concept');
-          dispatch(setSelectedPolicyHubs([]));
-          dispatch(setShowEditForm(false));
-          fetchHubs();
-        }}>
-          Omzetten naar nieuw concept
-        </Button>
-      </>}
-
-      {(didSelectPublishedHub() || didSelectActiveHub()) && <>
-        <Button theme="white" onClick={async () => {
-          if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
-            return;
-          }
-          try {
-            const selectedGeoIds = getGeoIdForZoneIds(policyHubs, selected_policy_hubs);
-            const response = await proposeRetirement(token, selectedGeoIds);
-    
-            if(response && response.detail) {
-                // Give error if something went wrong
-                notify(
-                  toast,
-                  'Er ging iets fout bij het voorstellen tot verwijderen',
-                  {
-                    title: 'Er ging iets fout',
-                    variant: 'destructive'
-                  }
-                );
-            }
-            else {
-              notify(toast, 'Het verwijdervoorstel is toegevoegd, zie de conceptfase');
-              dispatch(setShowEditForm(false));
-              dispatch(setHubRefetchCounter(hub_refetch_counter+1))
-            }
-          } catch(err) {
-              console.error('Delete error', err);
-          }
-        }}>
-          Voorstel tot verwijderen
-        </Button>
-      </>}
-    </ActionButtons>}
+    <PolicyHubsActionBar
+      draw={draw}
+      policyHubs={policyHubs}
+      fetchHubs={fetchHubs}
+    />
 
     {/* Hub edit form */}
     {is_stats_or_manage_mode === 'manage' && <>
