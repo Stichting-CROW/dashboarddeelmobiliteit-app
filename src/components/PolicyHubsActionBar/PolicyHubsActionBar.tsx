@@ -26,7 +26,9 @@ const PolicyHubsActionBar = ({
   draw,
   policyHubs,
   fetchHubs,
-  setDrawedArea
+  drawed_area,
+  setDrawedArea,
+  setIsDrawingMultiPolygonActive
 }) => {
   const dispatch = useDispatch();
   const { toast } = useToast()
@@ -50,10 +52,8 @@ const PolicyHubsActionBar = ({
   // Add handler for the "Voeg stukje multipolygon toe" button
   const handleAddPolygon = () => {
     if (!draw) return;
+    console.log('handleAddPolygon')
 
-    // We are now drawing a multi-polygon
-    // setDoDrawMultiPolygon(true);
-    
     // Store existing features
     const existingFeatures = draw.getAll().features;
     if (existingFeatures.length === 0) {
@@ -63,8 +63,18 @@ const PolicyHubsActionBar = ({
       return;
     }
 
+    // Set the drawing mode to multi polygon
+    setIsDrawingMultiPolygonActive(true);
+
+    // Set the drawed area to the existing features
+    setDrawedArea({
+      features: existingFeatures,
+      type: 'draw.create'
+    });
+
     // Enable drawing mode for new polygon
     enableDrawingPolygon(draw);
+
   };
 
 
@@ -219,7 +229,11 @@ const PolicyHubsActionBar = ({
         </Button>
       }
 
-      {(is_drawing_enabled === 'new') && (
+      {(
+        // If drawing enabled AND 
+        (is_drawing_enabled === 'new' && drawed_area)
+        || (is_drawing_enabled && is_drawing_enabled !== 'new' && didSelectConceptHub())
+      ) && (
         <Button 
           theme="white" 
           onClick={handleAddPolygon}

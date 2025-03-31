@@ -36,12 +36,9 @@ import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
 import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
 import PolicyHubsStats from '../PolicyHubsStats/PolicyHubsStats';
 import ActionModule from '../ActionModule/ActionModule';
-import { ActionButtons } from '../ActionButtons/ActionButtons';
-import Button from '../Button/Button';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
 import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
-// import { notify } from '../../helpers/notify';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { canEditHubs } from '../../helpers/authentication';
@@ -54,13 +51,11 @@ const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
   const dispatch = useDispatch()
-  const { toast } = useToast()
   
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
-  const [drawnFeatures, setDrawnFeatures] = useState<any[]>([]);
-  const [doDrawMultiPolygon, setDoDrawMultiPolygon] = useState<boolean>(false);
+  const [isDrawingMultiPolygonActive, setIsDrawingMultiPolygonActive] = useState<boolean>(false);
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -365,9 +360,6 @@ const DdPolicyHubsLayer = ({
     const selected_hub = policyHubs.find(x => x.zone_id === hubs_in_drawing_mode[0]);
     if(! selected_hub || ! selected_hub.area) return;
 
-    // If this is a multipolygon: Update drawing mode accordingly
-    // setDoDrawMultiPolygon(selected_hub.area.geometry.type === 'MultiPolygon');
-
     // Add editable feature to the map
     draw.add({
       ...selected_hub.area,
@@ -405,8 +397,8 @@ const DdPolicyHubsLayer = ({
 
     // If drawing isn't enabled: Remove draw tools
     if(! is_drawing_enabled) {
+      console.log('removeDrawedPolygons');
       removeDrawedPolygons(draw);
-      setDrawnFeatures([]);
       return;
     }
     // Initialize draw
@@ -416,10 +408,8 @@ const DdPolicyHubsLayer = ({
       setDraw(Draw);
     };
 
-    // Add new event handlers
-    initEventHandlers(map, changeAreaHandler);
-
     if(is_drawing_enabled === 'new') {
+      console.log('is_drawing_enabled === new');
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
       dispatch(setShowEditForm(true));
@@ -429,17 +419,35 @@ const DdPolicyHubsLayer = ({
         enableDrawingPolygon(Draw);
       }, 25);
       // Select the polygon after it's created
-      // if(drawedArea && drawedArea.features && drawedArea.features[0]) {
-      //   setTimeout(() => {
-      //     selectDrawPolygon(Draw, drawedArea.features[0].id);
-      //   }, 25);
-      // }
+      if(drawedArea && drawedArea.features && drawedArea.features[0]) {
+        setTimeout(() => {
+          selectDrawPolygon(Draw, drawedArea.features[0].id);
+        }, 25);
+      }
     }
-    else if(is_drawing_enabled) {
+
+    // Auto select polygon if not in multi polygon adding mode
+    else if(is_drawing_enabled && ! isDrawingMultiPolygonActive) {
+      console.log('else if is_drawing_enabled');
       setTimeout(() => {
         selectDrawPolygon(Draw, is_drawing_enabled);
       }, 25);
     }
+
+  }, [
+    map,
+    is_drawing_enabled,
+    isDrawingMultiPolygonActive,
+    drawedArea
+  ]);
+
+  // Init event handlers for drawing
+  useEffect(() => {
+    if(! map) return;
+    if(! draw) return;
+
+    // Add new event handlers
+    initEventHandlers(map, changeAreaHandler);
 
     // Cleanup function to remove event handlers when component unmounts or effect re-runs
     return () => {
@@ -452,47 +460,59 @@ const DdPolicyHubsLayer = ({
     };
   }, [
     map,
-    is_drawing_enabled,
-    doDrawMultiPolygon,
-    drawedArea
-  ])
+    draw,
+    isDrawingMultiPolygonActive
+  ]);
+
 
   // Function that runs when the drawing of a polygon is finished
   const changeAreaHandler = (e) => {
     let newFeatures = [];
 
-    
-    // If there was a feature already: Change to MultiPolygon and add new feature
-    if(drawedArea?.features?.[0]) {
+    // If adding/updating normal polygon
+    if(! isDrawingMultiPolygonActive) {
+      console.log('If this was the first polygon: Add new feature', e.features);
+      newFeatures = e.features
+    }
+
+    // If adding polygon to multipolygon
+    else {
       const existingCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates[0];
       const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
 
       const wasMultiPolygon = drawedArea?.features?.[0]?.geometry?.type === 'MultiPolygon';
-      const newCoordinates = wasMultiPolygon
-        ? [[
-          ...existingCoordinates, // Keep existing polygons
-          newPolygonCoordinates  // Add new polygon
-        ]]
-        : [
-            [
-              [...existingCoordinates],
-              newPolygonCoordinates
-            ]
-          ]
-      ;
+      const willBecomeMultiPolygon = true;
 
-      newFeatures = [{
-        ...drawedArea?.features?.[0],
-        geometry: {
-          type: 'MultiPolygon',
-          coordinates: newCoordinates
-        }
-      }]
-    }
-    
-    // If this was the first polygon: Add new feature
-    else {
-      newFeatures = e.features
+      let newCoordinates = [];
+      if(wasMultiPolygon || willBecomeMultiPolygon) {
+        newCoordinates = wasMultiPolygon
+          ? [[
+            ...existingCoordinates, // Keep existing polygons
+            newPolygonCoordinates  // Add new polygon
+          ]]
+          : [
+              [
+                [...existingCoordinates],
+                newPolygonCoordinates
+              ]
+            ]
+        ;
+
+        newFeatures = [{
+          ...drawedArea?.features?.[0],
+          geometry: {
+            // Set type based on coordinates structure
+            type: willBecomeMultiPolygon || wasMultiPolygon ? 'MultiPolygon' : 'Polygon',
+            coordinates: newCoordinates
+          }
+        }];
+      }
+
+      // If it's not a multi-polygon: Replace coordinates
+      else {
+        console.log('Not a multi-polygon: Replace coordinates', e.features);
+        newFeatures = e.features;
+      }
     }
     
     setDrawedArea({
@@ -554,16 +574,6 @@ const DdPolicyHubsLayer = ({
     return selected_hub;
   }
 
-  const getSelectedHubs = () => {
-    if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
-      return [];
-    }
-    
-    if(! policyHubs || policyHubs.length <= 0) return [];
-
-    return policyHubs.filter(x => selected_policy_hubs.indexOf(x.zone_id) > -1);
-  }
-
   const didSelectHub = () => {
     // If we did draw a new polygon, return true
     if(selected_policy_hubs && selected_policy_hubs[0] === 'new') return true;
@@ -601,7 +611,9 @@ const DdPolicyHubsLayer = ({
       draw={draw}
       policyHubs={policyHubs}
       fetchHubs={fetchHubs}
+      drawed_area={drawedArea}
       setDrawedArea={setDrawedArea}
+      setIsDrawingMultiPolygonActive={setIsDrawingMultiPolygonActive}
     />
 
     {/* Hub edit form */}
