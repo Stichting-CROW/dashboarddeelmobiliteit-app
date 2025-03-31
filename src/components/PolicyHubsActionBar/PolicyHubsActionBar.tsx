@@ -25,7 +25,8 @@ import { enableDrawingPolygon } from '../Map/MapUtils/map.policy_hubs.draw';
 const PolicyHubsActionBar = ({
   draw,
   policyHubs,
-  fetchHubs
+  fetchHubs,
+  setDrawedArea
 }) => {
   const dispatch = useDispatch();
   const { toast } = useToast()
@@ -211,6 +212,8 @@ const PolicyHubsActionBar = ({
         <Button theme="white" onClick={() => {
           dispatch(setIsDrawingEnabled('new'))
           dispatch(setSelectedPolicyHubs([]))
+          // Reset drawed area so we start fresh
+          setDrawedArea(undefined);
         }}>
           Teken nieuwe zone
         </Button>

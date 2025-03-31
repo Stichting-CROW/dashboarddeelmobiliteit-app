@@ -127,6 +127,28 @@ const DdPolicyHubsLayer = ({
     }
   }, [map]);
 
+  const initFlyToEventHandler = () => {
+    // @ts-ignore
+    window.addEventListener('flyToHubTrigger', flyToHub)
+    return () => {
+      // @ts-ignore
+      window.removeEventListener('flyToHubTrigger', flyToHub);
+    }
+  }
+
+  const destroyFlyToEventHandler = () => {
+
+  }
+
+  // onComponentUnLoad
+  useEffect(() => {
+    return () => {
+      setTimeout(() => {
+        removeHubsFromMap(map);
+      }, 250)//TODO: Map is unloaded lots of times
+    };
+  }, []);
+
   // Function that flys to a hub based on parameter given
   const flyToHub = async (e) => {
     if(! map) return;
@@ -147,19 +169,6 @@ const DdPolicyHubsLayer = ({
     map.fitBounds(extent);
   }
   
-  const initFlyToEventHandler = () => {
-    // @ts-ignore
-    window.addEventListener('flyToHubTrigger', flyToHub)
-    return () => {
-      // @ts-ignore
-      window.removeEventListener('flyToHubTrigger', flyToHub);
-    }
-  }
-
-  const destroyFlyToEventHandler = () => {
-
-  }
-
   // On component load: Set background layer to 'satellite layer'
   useEffect(() => {
     if(! map) return;
@@ -171,15 +180,6 @@ const DdPolicyHubsLayer = ({
     map?.U,
     document.location.pathname
   ]);
-
-  // onComponentUnLoad
-  useEffect(() => {
-    return () => {
-      setTimeout(() => {
-        removeHubsFromMap(map);
-      }, 250)//TODO: Map is unloaded lots of times
-    };
-  }, []);
 
   // Load state based on query params
   useEffect(() => {
@@ -423,6 +423,7 @@ const DdPolicyHubsLayer = ({
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
       dispatch(setShowEditForm(true));
+
       // Enable drawing polygons
       setTimeout(() => {
         enableDrawingPolygon(Draw);
@@ -458,28 +459,51 @@ const DdPolicyHubsLayer = ({
 
   // Function that runs when the drawing of a polygon is finished
   const changeAreaHandler = (e) => {
-    const newFeatures = doDrawMultiPolygon
-      ? [{
-          ...drawedArea?.features?.[0],
-          geometry: {
-            type: 'MultiPolygon',
-            coordinates: [
-              [
-                [...drawedArea?.features?.[0]?.geometry?.coordinates[0]],
-                e.features[0].geometry.coordinates[0]
-              ]
-            ]
-          }
-        }]
-      : e.features
-    ;
+    let newFeatures = [];
 
+    
+    // If there was a feature already: Change to MultiPolygon and add new feature
+    if(drawedArea?.features?.[0]) {
+      const existingCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates[0];
+      const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
+
+      const wasMultiPolygon = drawedArea?.features?.[0]?.geometry?.type === 'MultiPolygon';
+      const newCoordinates = wasMultiPolygon
+        ? [[
+          ...existingCoordinates, // Keep existing polygons
+          newPolygonCoordinates  // Add new polygon
+        ]]
+        : [
+            [
+              [...existingCoordinates],
+              newPolygonCoordinates
+            ]
+          ]
+      ;
+
+      newFeatures = [{
+        ...drawedArea?.features?.[0],
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: newCoordinates
+        }
+      }]
+    }
+    
+    // If this was the first polygon: Add new feature
+    else {
+      newFeatures = e.features
+    }
+    
     setDrawedArea({
       type: e.type,
       features: newFeatures
     });
   }
-  // console.log('state', 'drawedArea', drawedArea, 'drawnFeatures', drawnFeatures);
+
+  useEffect(() => {
+    console.log('state', 'drawedArea', drawedArea);
+  }, [drawedArea]);
 
   const clickHandler = (e) => {
     if(! map) return;
@@ -577,6 +601,7 @@ const DdPolicyHubsLayer = ({
       draw={draw}
       policyHubs={policyHubs}
       fetchHubs={fetchHubs}
+      setDrawedArea={setDrawedArea}
     />
 
     {/* Hub edit form */}
