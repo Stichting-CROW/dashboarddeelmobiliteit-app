@@ -408,7 +408,8 @@ const DdPolicyHubsLayer = ({
       setDraw(Draw);
     };
 
-    if(is_drawing_enabled === 'new') {
+    // If drawing is enabled and it's the first polygon
+    if(is_drawing_enabled === 'new' && ! isDrawingMultiPolygonActive) {
       console.log('is_drawing_enabled === new');
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
@@ -428,7 +429,7 @@ const DdPolicyHubsLayer = ({
 
     // Auto select polygon if not in multi polygon adding mode
     else if(is_drawing_enabled && ! isDrawingMultiPolygonActive) {
-      console.log('else if is_drawing_enabled');
+      console.log('Going to select polygon');
       setTimeout(() => {
         selectDrawPolygon(Draw, is_drawing_enabled);
       }, 25);
@@ -471,38 +472,68 @@ const DdPolicyHubsLayer = ({
 
     // If adding/updating normal polygon
     if(! isDrawingMultiPolygonActive) {
-      console.log('If this was the first polygon: Add new feature', e.features);
+      console.log('If no multi polygon is active: Add/replace feature', e.features);
       newFeatures = e.features
     }
 
     // If adding polygon to multipolygon
     else {
-      const existingCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates[0];
-      const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
+      //   Example of correct coordinates for a multi polygon:
 
-      const wasMultiPolygon = drawedArea?.features?.[0]?.geometry?.type === 'MultiPolygon';
-      const willBecomeMultiPolygon = true;
+      //   [
+      //     [
+      //         [  // First Polygon (Outer Ring)
+      //             [5.114602206, 52.096831096],
+      //             [5.114754998, 52.096584701],
+      //             [5.115125518, 52.096662139],
+      //             [5.115136977, 52.096894454],
+      //             [5.114602206, 52.096831096]
+      //         ]
+      //     ],
+      //     [
+      //         [  // Second Polygon (Outer Ring)
+      //             [5.114663322501997, 52.096868641360516],
+      //             [5.114999464582581, 52.09691322689255],
+      //             [5.1150262031570435, 52.09706106281101],
+      //             [5.114640403724138, 52.09702586382747],
+      //             [5.114663322501997, 52.096868641360516]
+      //         ]
+      //     ]
+      // ]
+      //     [
+
+      
+      // Issue is nu volgens mij dat de drawedArea niet het complete multi polygon bevat
 
       let newCoordinates = [];
-      if(wasMultiPolygon || willBecomeMultiPolygon) {
-        newCoordinates = wasMultiPolygon
-          ? [[
-            ...existingCoordinates, // Keep existing polygons
-            newPolygonCoordinates  // Add new polygon
-          ]]
-          : [
-              [
-                [...existingCoordinates],
-                newPolygonCoordinates
-              ]
-            ]
-        ;
+      if(isDrawingMultiPolygonActive) {
+        console.log('isDrawingMultiPolygonActive');
+        // Get new polygon coordinates from event
+        const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
+        // Get polygon type
+        const polygonType = drawedArea?.features?.[0]?.geometry?.type;
+        // Create new coordinates array having all existing coordinates
+        newCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates;// Keep existing polygons
+        // If coordinates are not a multi polygon
+        if(polygonType === 'Polygon') {
+          console.log('Convert to multi polygon');
+          // Make it a multi polygon
+          newCoordinates = [newCoordinates];
+        }
+        // Add the new polygon
+        newCoordinates.push([newPolygonCoordinates]);
+        console.log(
+          'isDrawingMultiPolygonActive :: ',
+          'e.features', e.features,
+          'existing coordinates', drawedArea?.features?.[0]?.geometry?.coordinates,
+          'newCoordinates', newCoordinates,
+        );
 
         newFeatures = [{
           ...drawedArea?.features?.[0],
           geometry: {
             // Set type based on coordinates structure
-            type: willBecomeMultiPolygon || wasMultiPolygon ? 'MultiPolygon' : 'Polygon',
+            type: isDrawingMultiPolygonActive ? 'MultiPolygon' : polygonType,
             coordinates: newCoordinates
           }
         }];
@@ -515,14 +546,18 @@ const DdPolicyHubsLayer = ({
       }
     }
     
+    // Set drawed area into state
     setDrawedArea({
       type: e.type,
       features: newFeatures
     });
+
+    // Disable drawing mode for multi polygons
+    setIsDrawingMultiPolygonActive(false);
   }
 
   useEffect(() => {
-    console.log('state', 'drawedArea', drawedArea);
+    // console.log('state', 'drawedArea', drawedArea);
   }, [drawedArea]);
 
   const clickHandler = (e) => {
