@@ -397,7 +397,6 @@ const DdPolicyHubsLayer = ({
 
     // If drawing isn't enabled: Remove draw tools
     if(! is_drawing_enabled) {
-      console.log('removeDrawedPolygons');
       removeDrawedPolygons(draw);
       return;
     }
@@ -410,7 +409,6 @@ const DdPolicyHubsLayer = ({
 
     // If drawing is enabled and it's the first polygon
     if(is_drawing_enabled === 'new' && ! isDrawingMultiPolygonActive) {
-      console.log('is_drawing_enabled === new');
       // Show edit window
       dispatch(setSelectedPolicyHubs(['new']))
       dispatch(setShowEditForm(true));
@@ -429,7 +427,6 @@ const DdPolicyHubsLayer = ({
 
     // Auto select polygon if not in multi polygon adding mode
     else if(is_drawing_enabled && ! isDrawingMultiPolygonActive) {
-      console.log('Going to select polygon');
       setTimeout(() => {
         selectDrawPolygon(Draw, is_drawing_enabled);
       }, 25);
@@ -472,7 +469,6 @@ const DdPolicyHubsLayer = ({
 
     // If adding/updating normal polygon
     if(! isDrawingMultiPolygonActive) {
-      console.log('If no multi polygon is active: Add/replace feature', e.features);
       newFeatures = e.features
     }
 
@@ -507,7 +503,6 @@ const DdPolicyHubsLayer = ({
 
       let newCoordinates = [];
       if(isDrawingMultiPolygonActive) {
-        console.log('isDrawingMultiPolygonActive');
         // Get new polygon coordinates from event
         const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
         // Get polygon type
@@ -516,18 +511,11 @@ const DdPolicyHubsLayer = ({
         newCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates;// Keep existing polygons
         // If coordinates are not a multi polygon
         if(polygonType === 'Polygon') {
-          console.log('Convert to multi polygon');
           // Make it a multi polygon
           newCoordinates = [newCoordinates];
         }
         // Add the new polygon
         newCoordinates.push([newPolygonCoordinates]);
-        console.log(
-          'isDrawingMultiPolygonActive :: ',
-          'e.features', e.features,
-          'existing coordinates', drawedArea?.features?.[0]?.geometry?.coordinates,
-          'newCoordinates', newCoordinates,
-        );
 
         newFeatures = [{
           ...drawedArea?.features?.[0],
@@ -541,7 +529,6 @@ const DdPolicyHubsLayer = ({
 
       // If it's not a multi-polygon: Replace coordinates
       else {
-        console.log('Not a multi-polygon: Replace coordinates', e.features);
         newFeatures = e.features;
       }
     }
