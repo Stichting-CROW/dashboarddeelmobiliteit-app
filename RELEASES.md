@@ -1,5 +1,12 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-04-01
+
+Beleidshubs:
+
+- 🪄 Nieuw beheer multipolygonen: voeg toe / bewerk / verwijder<br />
+- Toon Mijksenaar logo slechts 1x per <a href="/map/beleidshubs" className="underline">Zone</a>-multipolygoon<br />
+
 ## Release 2025-03-21
 
 Beleidshubs:
