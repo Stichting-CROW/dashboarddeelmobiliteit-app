@@ -58,44 +58,40 @@ const PolicyHubsEdit = ({
     
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
     const [hubData, setHubData] = useState<HubType>({
-        stop: defaultStopProperties,
-        name: '',
-        geography_type: 'stop',
-        zone_availability: 'auto',
-        municipality: gm_code,
-        description: 'Hub',
-        internal_id: '',
-        area: {},
-        phase: 'concept'
+      stop: defaultStopProperties,
+      name: '',
+      geography_type: 'stop',
+      zone_availability: 'auto',
+      municipality: gm_code,
+      description: 'Hub',
+      internal_id: '',
+      area: {},
+      phase: 'concept'
     });
 
     const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
-    // On unload
-    // useEffect(() => {
-    // }, [])
-
     // If selected policy hubs changes: Load data of hub
     useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
+      if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+      const zone_id = selected_policy_hubs[0];
 
-        // Don't do anything if we changed to the same hub
-        if(hubData.zone_id === zone_id) {
-            return;
-        }
+      // Don't do anything if we changed to the same hub
+      if(hubData.zone_id === zone_id) {
+        return;
+      }
 
-        // If we selected an existing hub: Stop being in drawing mode 
-        if(zone_id !== 'new') {
-            // Stop being in drawing mode
-            dispatch(setHubsInDrawingMode([]));
-            dispatch(setIsDrawingEnabled(false));
-        }
+      // If we selected an existing hub: Stop being in drawing mode 
+      if(zone_id !== 'new') {
+        // Stop being in drawing mode
+        dispatch(setHubsInDrawingMode([]));
+        dispatch(setIsDrawingEnabled(false));
+      }
 
-        // Load hub data
-        setTimeout(() => {
-           loadHubData(zone_id);
-        }, 25);
+      // Load hub data
+      setTimeout(() => {
+        loadHubData(zone_id);
+      }, 25);
     }, [
         selected_policy_hubs,
         selected_policy_hubs.length
@@ -103,14 +99,14 @@ const PolicyHubsEdit = ({
 
     // If amount of policy hubs changes: (Re)load data of hub
     useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
-        
-        if(! zone_id) return;
-        if(zone_id === 'new') return;
+      if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+      const zone_id = selected_policy_hubs[0];
+      
+      if(! zone_id) return;
+      if(zone_id === 'new') return;
 
-        // Load hub data
-        loadHubData(zone_id);
+      // Load hub data
+      loadHubData(zone_id);
     }, [
         all_policy_hubs.length// If there's a new hub added
     ]);
@@ -136,16 +132,16 @@ const PolicyHubsEdit = ({
         }
 
         setHubData({
-            ...hubData,
-            area: {
-                geometry: drawed_area.features[0]?.geometry,
-                properties: drawed_area.features[0]?.properties,
-                type: drawed_area.features[0]?.type
-            },
-            stop: hubData.geography_type === 'stop' ? {
-                ...hubData.stop,
-                location: drawedAreaCenter
-            } : null
+          ...hubData,
+          area: {
+            geometry: drawed_area.features[0]?.geometry,
+            properties: drawed_area.features[0]?.properties,
+            type: drawed_area.features[0]?.type
+          },
+          stop: hubData.geography_type === 'stop' ? {
+            ...hubData.stop,
+            location: drawedAreaCenter
+          } : null
         });
         setHasUnsavedChanges(true);
     }, [drawed_area])

@@ -1,9 +1,11 @@
-import { useToast } from "../ui/use-toast"
+import { toast, useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
 import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { notify } from '../../helpers/notify';
 
 import {
   setHubsInDrawingMode,
@@ -44,6 +46,8 @@ import { setActivePhase } from '../../actions/policy-hubs';
 import { canEditHubs } from '../../helpers/authentication';
 import { setMapStyle } from '../../actions/layers';
 import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
+import { ContextMenu } from "./ContextMenu";
+import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 
 let TO_fetch_delay;
 
@@ -56,6 +60,19 @@ const DdPolicyHubsLayer = ({
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
   const [isDrawingMultiPolygonActive, setIsDrawingMultiPolygonActive] = useState<boolean>(false);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    visible: boolean;
+    hubId?: number;
+    onDeletePolygonFromMultiPolygon?: () => void;
+  }>({
+    x: 0,
+    y: 0,
+    visible: false,
+    hubId: undefined,
+    onDeletePolygonFromMultiPolygon: undefined
+  });
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -380,10 +397,19 @@ const DdPolicyHubsLayer = ({
 
     map.on('touchend', layerName, clickHandler);
     map.on('click', layerName, clickHandler);
+    map.on('contextmenu', layerName, clickHandler); // Prevent default context menu
+
+    // Close context menu when clicking outside
+    const handleOutsideClick = () => {
+      setContextMenu(prev => ({ ...prev, visible: false }));
+    };
+    window.addEventListener('click', handleOutsideClick);
 
     return () => {
       map.off('touchend', layerName, clickHandler);
       map.off('click', layerName, clickHandler);
+      map.off('contextmenu', layerName, clickHandler);
+      window.removeEventListener('click', handleOutsideClick);
     }
   }, [
     map,
@@ -462,7 +488,6 @@ const DdPolicyHubsLayer = ({
     isDrawingMultiPolygonActive
   ]);
 
-
   // Function that runs when the drawing of a polygon is finished
   const changeAreaHandler = (e) => {
     let newFeatures = [];
@@ -497,10 +522,7 @@ const DdPolicyHubsLayer = ({
       //     ]
       // ]
       //     [
-
       
-      // Issue is nu volgens mij dat de drawedArea niet het complete multi polygon bevat
-
       let newCoordinates = [];
       if(isDrawingMultiPolygonActive) {
         // Get new polygon coordinates from event
@@ -547,8 +569,86 @@ const DdPolicyHubsLayer = ({
     // console.log('state', 'drawedArea', drawedArea);
   }, [drawedArea]);
 
+  const deletePolygonFromMultiPolygon = (lngLat, features) => {
+    if(! window.confirm('Weet je zeker dat je dit gebied wilt verwijderen van de multipolygon?')) return;
+    
+    // Get all polygons of the multi polygon
+    const polygons = features[0].geometry.coordinates || [];
+
+    // Loop through all polygons, and check if the clicked point is within the polygon
+    const newCoordinates = polygons.filter(polygon => {
+      // Check if the clicked point is within the polygon
+      return ! booleanPointInPolygon([lngLat.lng, lngLat.lat], { type: 'Polygon', coordinates: polygon });
+    });
+
+    const isStillMultiPolygon = newCoordinates.length > 1;
+
+    const newFeatures = [{
+      ...features?.[0],
+      geometry: {
+        ...features?.[0].geometry,
+        type: isStillMultiPolygon ? 'MultiPolygon' : 'Polygon',
+        coordinates: isStillMultiPolygon ? newCoordinates : newCoordinates[0]
+      }
+    }];
+
+    // Set updated area into state
+    setDrawedArea({
+      type: isStillMultiPolygon ? 'MultiPolygon' : 'Polygon',
+      features: newFeatures
+    });
+
+    // setIsDrawingMultiPolygonActive(false);
+
+    // Save updates into the databaes
+    (async () => {
+      const activeZone = policyHubs.find(x => x.zone_id === features[0].properties.id);
+      if(! activeZone) return;
+
+      // Update zone
+      activeZone.area = newFeatures[0];
+
+      const updatedZone = await patchHub(token, activeZone);
+      if(updatedZone && updatedZone.detail) {
+        notify(toast, 'Er ging iets fout bij het opslaan: ' + updatedZone?.detail, {
+          title: 'Er ging iets fout',
+          variant: 'destructive'
+        })
+        return;
+      }
+      // Update hubs
+      fetchHubs();
+      // Notify
+      notify(toast, 'Zone opgeslagen');
+    })();
+  }
+
   const clickHandler = (e) => {
     if(! map) return;
+
+    const isMultiPolygon = e.features[0].geometry.type === 'MultiPolygon';
+    const isMultiPolygonWithMoreThanOnePolygon = isMultiPolygon && e.features[0].geometry.coordinates.length > 1;
+    const isInConceptPhase = active_phase === 'concept';
+
+    // Handle right click for context menu (delete polygon from multi polygon)
+    if (
+      e.originalEvent.button === 2
+      && isMultiPolygon
+      && isMultiPolygonWithMoreThanOnePolygon
+      && isInConceptPhase
+      && ! is_drawing_enabled/* Temporary only allow if not in edit mode */
+    ) {
+      e.preventDefault();
+      const features = e.features;
+      setContextMenu({
+        x: e.originalEvent.clientX,
+        y: e.originalEvent.clientY,
+        visible: true,
+        hubId: e.features[0].properties.id,
+        onDeletePolygonFromMultiPolygon: () => deletePolygonFromMultiPolygon(e.lngLat, features)
+      });
+      return;
+    }
 
     // Don't do anything if the drawing tool is enabled
     if(is_drawing_enabled) return;
@@ -683,6 +783,13 @@ const DdPolicyHubsLayer = ({
         />
       </ActionModule>
     </>}
+
+    {/* Show context menu on right click */}
+    {contextMenu.visible && <ContextMenu
+      contextMenu={contextMenu}
+      setContextMenu={setContextMenu}
+      onDeletePolygonFromMultiPolygon={contextMenu.onDeletePolygonFromMultiPolygon}
+    />}
   </>
 }
 
