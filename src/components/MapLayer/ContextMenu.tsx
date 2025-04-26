@@ -19,7 +19,6 @@ export const ContextMenu = ({
     <button 
       className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600"
       onClick={() => {
-        console.log('delete polygon');
         onDeletePolygonFromMultiPolygon();
         setContextMenu(prev => ({ ...prev, visible: false }));
       }}

@@ -551,28 +551,26 @@ const DdPolicyHubsLayer = ({
       // ]
       //     [
       
-      let newCoordinates = [];
+      let drawedCoordinates = [];
       if(isDrawingMultiPolygonActive) {
-        // Get new polygon coordinates from event
+        // Get the coordinates of the polygon that was just drawn
         const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
-        // Get polygon type
+        // Get polygon type of drawed area
         const polygonType = drawedArea?.features?.[0]?.geometry?.type;
         // Create new coordinates array having all existing coordinates
-        newCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates;// Keep existing polygons
-        // If coordinates are not a multi polygon
-        if(polygonType === 'Polygon') {
-          // Make it a multi polygon
-          newCoordinates = [newCoordinates];
-        }
+        drawedCoordinates = drawedArea?.features?.map(drawedFeature => {
+          return drawedFeature.geometry.coordinates; 
+        });
+
         // Add the new polygon
-        newCoordinates.push([newPolygonCoordinates]);
+        drawedCoordinates.push([newPolygonCoordinates]);
 
         newFeatures = [{
           ...drawedArea?.features?.[0],
           geometry: {
             // Set type based on coordinates structure
             type: isDrawingMultiPolygonActive ? 'MultiPolygon' : polygonType,
-            coordinates: newCoordinates
+            coordinates: drawedCoordinates
           }
         }];
       }
