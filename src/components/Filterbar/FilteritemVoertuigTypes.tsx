@@ -52,7 +52,7 @@ function FilteritemVoertuigTypes() {
       })
     }
 
-    // If provider was disabled, re-enable provider
+    // If type was disabled, re-enable type
     else {
       addToFilterVoertuigTypesExclude(type)
     }
