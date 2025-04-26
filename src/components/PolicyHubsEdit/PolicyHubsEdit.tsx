@@ -13,6 +13,7 @@ import { postHub } from '../../helpers/policy-hubs/post-hub';
 import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import { deleteHub } from '../../helpers/policy-hubs/delete-hub';
 import { readable_geotype, defaultStopProperties, readable_phase } from "../../helpers/policy-hubs/common"
+import { deleteZoneHandler } from './utils/delete_zone';
 
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -247,39 +248,6 @@ const PolicyHubsEdit = ({
         }
         setHasUnsavedChanges(false);
     }
-
-    const deleteZoneHandler = async (e) => {
-        if(! hubData || ! hubData.geography_id) return;
-        if(! window.confirm('Weet je zeker dat je deze hub wilt verwijderen?')) {
-            notify(toast, '', {
-                title: 'Verwijderen geannuleerd',
-            });
-            return;
-        }
-
-        try {
-            const response = await deleteHub(token, hubData.geography_id);
-            console.log('Delete reponse', response);
-    
-            if(response && response.detail) {
-                // Give error if something went wrong
-                notify(toast, 'Er ging iets fout bij het verwijderen', {
-                    title: 'Er ging iets fout',
-                    variant: 'destructive'
-                });
-            }
-            else {
-                notify(toast, 'Zone verwijderd');
-                // Hide edit form
-                dispatch(setSelectedPolicyHubs([]))
-                dispatch(setShowEditForm(false));
-
-                postSaveOrDeleteCallback();
-            }
-        } catch(err) {
-            console.error('Delete error', err);
-        }
-    };
 
     const cancelButtonHandler = () => {
         if(hasUnsavedChanges) {
@@ -817,7 +785,9 @@ const PolicyHubsEdit = ({
         {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
             <Text
                 theme="red"
-                onClick={deleteZoneHandler}
+                onClick={(e) => {
+                  deleteZoneHandler(e, hubData, token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback)
+                }}
                 classes="text-xs"
             >
                Verwijder hub
@@ -842,7 +812,9 @@ const PolicyHubsEdit = ({
                     ✒️
                 </Button>}
                 {! isNewZone && <Button
-                    onClick={deleteZoneHandler}
+                    onClick={(e) => {
+                      deleteZoneHandler(e, [hubData.geography_id], token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
+                    }}
                 >
                     🗑️
                 </Button>}

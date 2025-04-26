@@ -63,4 +63,3 @@ Resultaat is nu dat je een multipolygoon hebt gemaakt bestaande uit twee polygon
 4. Bevestig de verwijdering
 
 ![Animatie gedeelte van multipolygoon verwijderen](https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/multipolygonen/ani-multipolygoon-gedeelte-verwijderen.gif)
-
