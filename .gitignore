@@ -28,8 +28,7 @@ package-lock.json
 
 .angular/
 
-NOTES.md
-NOTES.policy-hubs.md
+NOTES*.md
 yarn.lock
 .env.production
 .env.test
