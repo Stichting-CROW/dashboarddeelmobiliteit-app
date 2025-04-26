@@ -209,6 +209,15 @@ const PolicyHubsEdit = ({
             delete fiteredHubData.geography_type;
             delete fiteredHubData.stop?.location;
         }
+
+        // Remove capacity values that are 0
+        if(fiteredHubData.stop?.capacity) {
+            Object.keys(fiteredHubData.stop.capacity).forEach(key => {
+                if(fiteredHubData.stop.capacity[key] === 0) {
+                    delete fiteredHubData.stop.capacity[key];
+                }
+            });
+        }
         
         if(isNewZone) {
             const addedZone = await postHub(token, fiteredHubData);
@@ -747,32 +756,32 @@ const PolicyHubsEdit = ({
                         {getCapacityType() === 'combined' && <ModalityRow
                             imageUrl=""
                             name="vehicles-limit.combined"
-                            value={hubData?.stop?.capacity?.combined}
+                            value={hubData?.stop?.capacity?.combined || 50}
                             onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
                         />}
                         {getCapacityType() === 'modality' && <>
                             <ModalityRow
                                 imageUrl="https://i.imgur.com/IF05O8u.png"
                                 name="vehicles-limit.bicycle"
-                                value={hubData?.stop?.capacity?.bicycle}
+                                value={hubData?.stop?.capacity?.bicycle || 0}
                                 onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
                             />
                             <ModalityRow
                                 imageUrl="https://i.imgur.com/FdVBJaZ.png"
                                 name="vehicles-limit.cargo_bicycle"
-                                value={hubData?.stop?.capacity?.cargo_bicycle}
+                                value={hubData?.stop?.capacity?.cargo_bicycle || 0}
                                 onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
                             />
                             <ModalityRow
                                 imageUrl="https://i.imgur.com/h264sb2.png"
                                 name="vehicles-limit.moped"
-                                value={hubData?.stop?.capacity?.moped}
+                                value={hubData?.stop?.capacity?.moped || 0}
                                 onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
                             />
                             <ModalityRow
                                 imageUrl="https://i.imgur.com/7Y2PYpv.png"
                                 name="vehicles-limit.car"
-                                value={hubData?.stop?.capacity?.car}
+                                value={hubData?.stop?.capacity?.car || 0}
                                 onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
                             />
                         </>}
@@ -780,21 +789,8 @@ const PolicyHubsEdit = ({
                 </div>
 
             </>}
-            
 
-        {(false && ! isNewZone && viewMode === 'adminEdit') && <div className="my-2 text-center">
-            <Text
-                theme="red"
-                onClick={(e) => {
-                  deleteZoneHandler(e, hubData, token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback)
-                }}
-                classes="text-xs"
-            >
-               Verwijder hub
-            </Text>
-        </div>}
-
-        <div className="flex w-full justify-between">
+          <div className="flex w-full justify-between">
 
             <Button
                 theme="white"
@@ -813,7 +809,7 @@ const PolicyHubsEdit = ({
                 </Button>}
                 {! isNewZone && <Button
                     onClick={(e) => {
-                      deleteZoneHandler(e, [hubData.geography_id], token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
+                      deleteZoneHandler(e, hubData.geography_id, token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
                     }}
                 >
                     🗑️

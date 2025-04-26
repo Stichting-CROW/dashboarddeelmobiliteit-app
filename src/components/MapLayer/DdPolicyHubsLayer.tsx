@@ -14,7 +14,6 @@ import {
   setVisibleLayers,
   setShowEditForm,
   setShowList,
-  setHubRefetchCounter
 } from '../../actions/policy-hubs'
 
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
@@ -73,6 +72,7 @@ const DdPolicyHubsLayer = ({
     hubId: undefined,
     onDeletePolygonFromMultiPolygon: undefined
   });
+  const [affectedModalities, setAffectedModalities] = useState<string[]>([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -85,6 +85,15 @@ const DdPolicyHubsLayer = ({
     }
     return null;
   });
+
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : []);
+
+  const filterVoertuigTypesExclude = useSelector((state: StateType) => {
+    if(Array.isArray(state.filter.voertuigtypesexclude)) {
+      return '';
+    }
+    return state.filter ? state.filter.voertuigtypesexclude : '';
+  }) || '';  
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
@@ -234,7 +243,20 @@ const DdPolicyHubsLayer = ({
     });
   }, [selected_policy_hubs])
 
-  // If 'gebied' or 'visible_layers' is updated:
+  // Set affectedModalities in state
+  useEffect(() => {
+    const filtered = voertuigtypes.filter(x => (
+      ! filterVoertuigTypesExclude?.split(',').includes(x.id)
+    )).map(x => x.id);
+
+    setAffectedModalities(filtered);
+  }, [
+    voertuigtypes,
+    filterVoertuigTypesExclude,
+    filterVoertuigTypesExclude.length
+  ])
+
+  // (Re-)fetch hubs if state updates
   useEffect(() => {
     if(! filter.gebied) return;
     if(! visible_layers || visible_layers.length === 0) return;
@@ -242,6 +264,7 @@ const DdPolicyHubsLayer = ({
     fetchHubs()
   }, [
     filter.gebied,
+    affectedModalities,
     visible_layers,
     visible_layers.length,
     hub_refetch_counter,
@@ -354,7 +377,8 @@ const DdPolicyHubsLayer = ({
           token: token,
           municipality: filter.gebied,
           phase: active_phase,
-          visible_layers: visible_layers
+          visible_layers: visible_layers,
+          affected_modalities: affectedModalities
         }, uniqueComponentId);
         setPolicyHubs(res);
       }
@@ -592,7 +616,7 @@ const DdPolicyHubsLayer = ({
   }
 
   useEffect(() => {
-    // console.log('state', 'drawedArea', drawedArea);
+    //  ('state', 'drawedArea', drawedArea);
   }, [drawedArea]);
 
   const deletePolygonFromMultiPolygon = (lngLat, features) => {

@@ -24,7 +24,14 @@ export const fetch_hubs = async ({
   municipality,
   phase,
   visible_layers,
-}, uuid) => {
+  affected_modalities
+}: {
+  token: string,
+  municipality: string,
+  phase: string,
+  visible_layers: string[],
+  affected_modalities?: string[]
+}, uuid): Promise<any> => {
   // Abort previous fetch, if any
   if(theFetch[uuid]) {
     await theFetch[uuid].abort();
@@ -63,6 +70,17 @@ export const fetch_hubs = async ({
     url += `&phases=retirement_concept`
     url += `&phases=committed_retirement_concept`
     url += `&phases=published_retirement`
+  }
+
+  // Add affected modalities to URL
+  if(affected_modalities) {
+    const allowed_modalities = ['car', 'cargo_bicycle', 'bicycle','moped'];
+    const filtered = affected_modalities.filter(x => allowed_modalities.includes(x));
+    if(filtered.length > 0) {
+      filtered.forEach(x => {
+        url += `&affected_modalities=${x}`;
+      });
+    }
   }
 
   // Don't execute if no phase was given, as at least 1 phases param should be specified

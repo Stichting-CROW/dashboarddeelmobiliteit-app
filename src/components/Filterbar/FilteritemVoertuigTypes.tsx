@@ -7,10 +7,8 @@ import {StateType} from '../../types/StateType';
 function FilteritemVoertuigTypes() {
   const dispatch = useDispatch()
 
-  const voertuigtypes = useSelector((state: StateType) => {
-    return state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : [];
-  });
-  
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : []);
+
   const filterVoertuigTypesExclude = useSelector((state: StateType) => {
     if(Array.isArray(state.filter.voertuigtypesexclude)) {
       return '';
