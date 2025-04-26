@@ -394,10 +394,32 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
 
     const layerName = 'policy_hubs-layer-fill';
+    const drawLayerNames = [
+      'gl-draw-polygon-fill-active.cold',
+      'gl-draw-polygon-fill-active.hot',
+      'gl-draw-polygon-fill-inactive.cold',
+      'gl-draw-polygon-fill-inactive.hot',
+      'gl-draw-polygon-fill-static.cold',
+      'gl-draw-polygon-fill-static.hot',
+      'gl-draw-polygon-midpoint.cold',
+      'gl-draw-polygon-midpoint.hot',
+      'gl-draw-polygon-stroke-active.cold',
+      'gl-draw-polygon-stroke-active.hot',
+      'gl-draw-polygon-stroke-inactive.cold',
+      'gl-draw-polygon-stroke-inactive.hot',
+      'gl-draw-polygon-stroke-static.cold',
+      'gl-draw-polygon-stroke-static.hot',
+    ];
 
+    // Add handlers for policy hubs layer
     map.on('touchend', layerName, clickHandler);
     map.on('click', layerName, clickHandler);
     map.on('contextmenu', layerName, clickHandler); // Prevent default context menu
+
+    // Add handlers for draw layer
+    drawLayerNames.forEach(drawLayerName => {
+      map.on('contextmenu', drawLayerName, clickHandler);
+    });
 
     // Close context menu when clicking outside
     const handleOutsideClick = () => {
@@ -409,12 +431,18 @@ const DdPolicyHubsLayer = ({
       map.off('touchend', layerName, clickHandler);
       map.off('click', layerName, clickHandler);
       map.off('contextmenu', layerName, clickHandler);
+        
+      // Remove handlers for draw layer
+      drawLayerNames.forEach(drawLayerName => {
+        map.off('contextmenu', drawLayerName, clickHandler);
+      });        
       window.removeEventListener('click', handleOutsideClick);
     }
   }, [
     map,
     selected_policy_hubs,
-    is_drawing_enabled
+    is_drawing_enabled,
+    draw
   ]);
 
   // If is_drawing_enabled changes: Do things
@@ -633,10 +661,11 @@ const DdPolicyHubsLayer = ({
     // Handle right click for context menu (delete polygon from multi polygon)
     if (
       e.originalEvent.button === 2
-      && isMultiPolygon
-      && isMultiPolygonWithMoreThanOnePolygon
+      && canEditHubs(acl)
       && isInConceptPhase
-      && ! is_drawing_enabled/* Temporary only allow if not in edit mode */
+      && (
+        (isMultiPolygon && isMultiPolygonWithMoreThanOnePolygon)
+      )
     ) {
       e.preventDefault();
       const features = e.features;
