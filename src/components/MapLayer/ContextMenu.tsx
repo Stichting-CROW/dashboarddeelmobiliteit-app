@@ -24,7 +24,7 @@ export const ContextMenu = ({
         setContextMenu(prev => ({ ...prev, visible: false }));
       }}
     >
-        Verwijder dit stukje polygon
+        Verwijder dit gedeelte
       </button>
     </div>
   )

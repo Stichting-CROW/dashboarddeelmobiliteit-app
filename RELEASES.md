@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-04-26
+
+Beleidshubs:
+
+- 🪄 Zone-beheerder kan nu een enkele polygon verwijderen uit een multipolygon<br />
+
 ## Release 2025-04-01
 
 Beleidshubs:

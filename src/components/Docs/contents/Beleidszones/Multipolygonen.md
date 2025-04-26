@@ -45,7 +45,7 @@ Resultaat is nu dat je een multipolygoon hebt gemaakt bestaande uit twee polygon
 
 ![Animatie multipolygoon aanpassen](https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/multipolygonen/ani-multipolygoon-aanpassen.gif)
 
-## Hoe bewerk ik een multipolygoon?
+## Hoe verwijder ik een multipolygoon?
 
 1. Ga naar de [Beleidszones](/map/zones)
 2. Klik op een hub (die een multipolygoon is)
@@ -53,3 +53,14 @@ Resultaat is nu dat je een multipolygoon hebt gemaakt bestaande uit twee polygon
 4. Bevestig de verwijdering
 
 ![Animatie multipolygoon verwijderen](https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/multipolygonen/ani-multipolygoon-verwijderen.gif)
+
+## Hoe verwijder ik een gedeelte van een multipolygoon?
+
+1. Ga naar de [Beleidszones](/map/zones)
+2. Controleer dat je in de conceptfase bent
+3. Klik met rechter muisknop op een gedeelte van een multipolygoon
+3. Klik in het context-menu op **Verwijder dit gedeelte**
+4. Bevestig de verwijdering
+
+![Animatie gedeelte van multipolygoon verwijderen](https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/multipolygonen/ani-multipolygoon-gedeelte-verwijderen.gif)
+
