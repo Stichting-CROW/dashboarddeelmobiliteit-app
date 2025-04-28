@@ -69,24 +69,6 @@ function FilteritemVoertuigTypes() {
         addToFilterVoertuigTypesExclude(type);
       }
     }
-
-    // console.log('clickFilter', type, filterVoertuigTypesExclude)
-    // // console.log("clickfilter [%s]<", filterVoertuigTypesExclude);
-    // // If no filters were set, only show this provider and hide all others
-    // if(filterVoertuigTypesExclude==="") {
-    //   // Disable all but the selected provider
-    //   voertuigtypes.map(x => {
-    //     if(x.id !== type) {
-    //       addToFilterVoertuigTypesExclude(x.id)
-    //     }
-    //     return x;
-    //   })
-    // }
-
-    // // If type was disabled, re-enable type
-    // else {
-    //   addToFilterVoertuigTypesExclude(type)
-    // }
   }
 
   return <>

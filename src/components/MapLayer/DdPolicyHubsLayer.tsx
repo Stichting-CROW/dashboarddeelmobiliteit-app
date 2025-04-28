@@ -349,7 +349,7 @@ const DdPolicyHubsLayer = ({
   // Function that filters hubs based on the selected phases in the Filterbar
   const filterPolicyHubs = (hubs: any, active_phase: string, visible_layers: any) => {
     // If there was an error or no hubs were found: Return empty array
-    if(! hubs) {
+    if(! hubs || hubs.message) {
       return [];
     }
 
