@@ -14,7 +14,6 @@ export const deleteZoneHandler = async (e, geography_ids, token, dispatch, setSe
   }
 
   try {
-    console.log('Delete geography_ids', geography_ids, geography_ids.length);
     const response = geography_ids.length > 1
       ? await deleteHubs(token, geography_ids)
       : await deleteHub(token, geography_ids[0])
