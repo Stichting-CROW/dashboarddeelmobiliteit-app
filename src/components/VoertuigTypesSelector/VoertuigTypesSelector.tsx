@@ -57,7 +57,7 @@ function VoertuigTypesSelector({
               }}
             >
               <div className={`voertuigtypes-icon ${extraClass}`} />
-              <div className="voertuigtypes-itemlabel">
+              <div className={`voertuigtypes-itemlabel`}>
                 {voertuigtype.name}
               </div>
             </div>

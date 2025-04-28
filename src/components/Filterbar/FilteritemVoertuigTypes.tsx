@@ -20,7 +20,9 @@ function FilteritemVoertuigTypes() {
   }) || '';
   
   useEffect(() => {
-    const active = voertuigtypes.map(x => x.id).filter(x => ! filterVoertuigTypesExclude.includes(x))
+    const active = voertuigtypes.map(x => x.id).filter(x => {
+      return ! filterVoertuigTypesExclude.split(',').includes(x)
+    })
     setActiveTypes(active);
   }, [
     voertuigtypes,
@@ -48,13 +50,24 @@ function FilteritemVoertuigTypes() {
   
   // Function that gets executed if user clicks a provider filter
   const clickFilter = type => {
-    let excluded = (filterVoertuigTypesExclude ? filterVoertuigTypesExclude: '').split(",").includes(type);
-
-    if(excluded) {
-      removeFromFilterVoertuigTypesExclude(type)
+    if(filterVoertuigTypesExclude==="") {
+      // Disable all but the selected provider
+      voertuigtypes.map(x => {
+        if(x.id !== type) {
+          addToFilterVoertuigTypesExclude(x.id)
+        }
+        return x;
+      })
     }
     else {
-      addToFilterVoertuigTypesExclude(type);
+      const excluded = (filterVoertuigTypesExclude ? filterVoertuigTypesExclude: '').split(",").includes(type);
+
+      if(excluded) {
+        removeFromFilterVoertuigTypesExclude(type)
+      }
+      else {
+        addToFilterVoertuigTypesExclude(type);
+      }
     }
 
     // console.log('clickFilter', type, filterVoertuigTypesExclude)
@@ -76,11 +89,29 @@ function FilteritemVoertuigTypes() {
     // }
   }
 
-  return <VoertuigTypeSelector
-    voertuigtypes={voertuigtypes}
-    activeTypes={activeTypes}
-    onTypeClick={clickFilter}
-  />
+  return <>
+    {filterVoertuigTypesExclude!=='' ? <div className="
+      filter-voertuigtypes-title-row
+      relative
+    " style={{
+      marginTop: '-10px'
+    }}>
+      <div className="
+        text-sm text-right filter-voertuigtypes-reset cursor-pointer w-full"
+        onClick={clearFilterVoertuigTypesExclude}
+        style={{
+          marginTop: '-24px'
+        }}
+      >
+        reset
+      </div>
+    </div> : ''}
+    <VoertuigTypeSelector
+      voertuigtypes={voertuigtypes}
+      activeTypes={activeTypes}
+      onTypeClick={clickFilter}
+    />
+  </>
 
   return (
     <div className="w-full filter-voertuigtypes-container">
