@@ -808,7 +808,7 @@ const PolicyHubsEdit = ({
             </Button>}
             {! isNewZone && <Button
                 onClick={(e) => {
-                  deleteZoneHandler(e, hubData.geography_id, token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
+                  deleteZoneHandler(e, [hubData.geography_id], token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
                 }}
             >
                 🗑️
