@@ -1,5 +1,13 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-04-28
+
+Beleidshubs:
+
+- 🪄 Je kunt bij verbodszones nu onderscheid maken tussen voertuigtypes. Maak bijvoorbeeld een verbodszone die alleen van toepassing is voor deelscooters en niet voor deelfietsen<br />
+
+- 🪄 Nieuw voertuigtype-filter maakt het gemakkelijk zones op de kaart te filteren<br />
+
 ## Release 2025-04-26
 
 Beleidshubs:
