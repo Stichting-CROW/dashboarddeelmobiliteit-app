@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import center from '@turf/center';
 
 export const PolicyHubsEdit_geographyType = ({
@@ -7,14 +6,8 @@ export const PolicyHubsEdit_geographyType = ({
     setHubData,
     setHasUnsavedChanges
 }) => {
-  const [geoType, setGeoType] = useState(hubData?.geography_type);
-  
-  useEffect(() => {
-    updateGeographyType(geoType);
-  }, [geoType]);
-
-  const updateGeographyType = (type: string) => {
-    const polygonCenter = (hubData?.area && Object.keys(hubData.area).length > 0) ? center(hubData?.area) : null;
+    const updateGeographyType = (type: string) => {
+    const polygonCenter = hubData?.area ? center(hubData?.area) : null;
 
     setHubData({
       ...hubData,
@@ -67,18 +60,13 @@ export const PolicyHubsEdit_geographyType = ({
           }}
           key={x.name}
           onClick={() => {
-            setGeoType(x.name);
+            updateGeographyType(x.name);
           }}
           >
             {x.title}
           </div>
         })}
       </div>
-      {geoType === 'no_parking' && <div>
-        <p className="mt-2 mb-2 text-sm">
-          Geldt voor:
-        </p>
-      </div>}
     </div>
   )
 }
