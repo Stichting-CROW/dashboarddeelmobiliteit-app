@@ -1,11 +1,30 @@
+import React from 'react'
+import ReactPlayer from 'react-player'
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {marked} from 'marked'
+
+import './Doc.css';
 
 type Doc = {
   name: string,
   path: string,
   download_url: string
+}
+
+const Video = ({url}: {url: string}) => {
+  return <ReactPlayer
+    width="100%"
+    url={url}
+    controls={true}
+    config={{
+      file: {
+        attributes: {
+          controls: true
+        }
+      }
+    }}
+  />
 }
 
 function Doc({
@@ -63,6 +82,10 @@ function Doc({
     </h2>
 
     <div dangerouslySetInnerHTML={{__html: marked(markdown)}} />
+    {markdown.match(/<div class="video-wrapper">(.*?)<\/div>/g)?.map((video, index) => {
+      const url = video.match(/<div class="video-wrapper">(.*?)<\/div>/)?.[1];
+      return url ? <Video url={url} /> : null;
+    })}
 
     <br /><hr /><br />
 
