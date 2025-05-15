@@ -82,7 +82,7 @@ const PolicyHubsPhaseMenu = () => {
                 <TooltipContent 
                   side="top"
                   align="center"
-                  className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+                  className="max-w-[300px] text-sm whitespace-normal text-left p-2"
                 >
                   <p className="text-sm leading-tight">
                     <b>{policyHubPhases[name].title}</b><br />

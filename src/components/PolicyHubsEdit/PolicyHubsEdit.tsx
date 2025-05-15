@@ -532,6 +532,26 @@ const PolicyHubsEdit = ({
                         </tr>
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
+                                Geografie ID
+                            </th>
+                            <td valign='top'>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(hubData.geography_id);
+                                    notify(toast, 'Geografie ID gekopieerd');
+                                  }}
+                                  className="cursor-pointer flex"
+                                  title="Klik om te kopiëren"
+                                >
+                                  <span className="overflow-hidden whitespace-nowrap text-ellipsis max-w-44">
+                                    {hubData.geography_id}
+                                  </span> <span>📄</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left" style={{verticalAlign: 'top'}}>
                                 Type
                             </th>
                             <td>
@@ -562,26 +582,7 @@ const PolicyHubsEdit = ({
                                 {moment(hubData.published_date).format('DD-MM-YYYY HH:mm')}
                             </td>
                         </tr>
-                        <tr>
-                            <th align="left" style={{verticalAlign: 'top'}}>
-                                Geografie ID
-                            </th>
-                            <td valign='top'>
-                                <div 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigator.clipboard.writeText(hubData.geography_id);
-                                    notify(toast, 'Geografie ID gekopieerd');
-                                  }}
-                                  className="cursor-pointer flex"
-                                  title="Klik om te kopiëren"
-                                >
-                                  <span className="overflow-hidden whitespace-nowrap text-ellipsis max-w-44">
-                                    {hubData.geography_id}
-                                  </span> <span>📄</span>
-                                </div>
-                            </td>
-                        </tr>
+                       
                         <tr>
                             <th align="left" style={{verticalAlign: 'top'}}>
                                 {moment(hubData.effective_date).isBefore(moment()) ? 'Geactiveerd op' : 'Activeren op'}
