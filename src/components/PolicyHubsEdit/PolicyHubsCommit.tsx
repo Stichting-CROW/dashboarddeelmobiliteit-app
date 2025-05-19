@@ -230,10 +230,12 @@ const PolicyHubsCommit = ({
                         <TooltipContent 
                         side="top"
                         align="center"
-                        className="max-w-[300px] text-sm whitespace-normal text-left p-2 bg-[#15AEEF]"
+                        className="max-w-[300px] text-sm whitespace-normal text-left p-2 bg-[#15AEEF] rounded-sm"
                         >
-                        <p className="text-sm leading-tight">
-                            Vanaf deze datum is deze zone 'Definitief gepubliceerd', dat betekent dat de aanbieder deze kan gaan verwerken in het service gebied en er geen wijzigingen meer mogelijk zijn.
+                        <p className="text-sm leading-tight font-normal text-white">
+                            <b>Definitief gepubliceerd</b>
+                            <br />
+                            Vanaf deze datum is deze zone 'Definitief gepubliceerd'. Aanbieders kunnen deze gaan verwerken in hun servicegebied.
                         </p>
                         </TooltipContent>
                         </Tooltip>
@@ -312,10 +314,12 @@ const PolicyHubsCommit = ({
                         <TooltipContent 
                         side="top"
                         align="center"
-                        className="max-w-[300px] text-sm whitespace-normal text-left p-2 bg-[#15AEEF]"
+                        className="max-w-[300px] text-sm whitespace-normal text-left p-2 bg-[#15AEEF] rounded-sm"
                         >
-                        <p className="text-sm leading-tight">
-                            Vanaf deze datum is deze zone 'Definitief actief' en moet de aanbieder deze verwerkt hebben in het servicegebied. 
+                        <p className="text-sm leading-tightt font-normal text-white">
+                            <b>Definitief actief</b>
+                            <br />
+                            Vanaf deze datum is deze zone 'Definitief actief' en moet de aanbieder deze verwerkt hebben in het servicegebied.
                         </p>
                         </TooltipContent>
                         </Tooltip>
