@@ -52,7 +52,6 @@ const PolicyHubsActionBar = ({
   // Add handler for the "Voeg stukje multipolygon toe" button
   const handleAddPolygon = () => {
     if (!draw) return;
-    console.log('handleAddPolygon')
 
     // Store existing features
     const existingFeatures = draw.getAll().features;

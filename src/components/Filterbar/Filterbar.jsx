@@ -13,7 +13,7 @@ import {
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
@@ -220,12 +220,12 @@ function Filterbar({
       </div>
     }
 
-    <div className="absolute text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem', top: '16px'}}>
+    <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2025-04-01
+        2025-04-28
       </a><br />
-      - Beter beheer multipolygonen<br />
-      - Mijksenaar logo bij elke <a href="/map/beleidshubs" className="underline">Zone</a><br />
+      - Verwijder polygon uit <a className="underline" href="/docs/Beleidszones/Multipolygonen.md">multipolygon</a><br />
+      - Verbodszones per voertuigtype<br />
     </div>
   </>
 }

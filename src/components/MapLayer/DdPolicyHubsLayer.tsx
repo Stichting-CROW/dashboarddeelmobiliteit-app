@@ -1,9 +1,11 @@
-import { useToast } from "../ui/use-toast"
+import { toast, useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
 import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { notify } from '../../helpers/notify';
 
 import {
   setHubsInDrawingMode,
@@ -12,7 +14,6 @@ import {
   setVisibleLayers,
   setShowEditForm,
   setShowList,
-  setHubRefetchCounter
 } from '../../actions/policy-hubs'
 
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
@@ -44,6 +45,8 @@ import { setActivePhase } from '../../actions/policy-hubs';
 import { canEditHubs } from '../../helpers/authentication';
 import { setMapStyle } from '../../actions/layers';
 import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
+import { ContextMenu } from "./ContextMenu";
+import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 
 let TO_fetch_delay;
 
@@ -56,6 +59,20 @@ const DdPolicyHubsLayer = ({
   const [draw, setDraw] = useState<any>();
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
   const [isDrawingMultiPolygonActive, setIsDrawingMultiPolygonActive] = useState<boolean>(false);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    visible: boolean;
+    hubId?: number;
+    onDeletePolygonFromMultiPolygon?: () => void;
+  }>({
+    x: 0,
+    y: 0,
+    visible: false,
+    hubId: undefined,
+    onDeletePolygonFromMultiPolygon: undefined
+  });
+  const [affectedModalities, setAffectedModalities] = useState<string[]>([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -68,6 +85,15 @@ const DdPolicyHubsLayer = ({
     }
     return null;
   });
+
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : []);
+
+  const filterVoertuigTypesExclude = useSelector((state: StateType) => {
+    if(Array.isArray(state.filter.voertuigtypesexclude)) {
+      return '';
+    }
+    return state.filter ? state.filter.voertuigtypesexclude : '';
+  }) || '';  
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const hub_refetch_counter = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.hub_refetch_counter : 0);
@@ -217,7 +243,20 @@ const DdPolicyHubsLayer = ({
     });
   }, [selected_policy_hubs])
 
-  // If 'gebied' or 'visible_layers' is updated:
+  // Set affectedModalities in state
+  useEffect(() => {
+    const filtered = voertuigtypes.filter(x => (
+      ! filterVoertuigTypesExclude?.split(',').includes(x.id)
+    )).map(x => x.id);
+
+    setAffectedModalities(filtered);
+  }, [
+    voertuigtypes,
+    filterVoertuigTypesExclude,
+    filterVoertuigTypesExclude.length
+  ])
+
+  // (Re-)fetch hubs if state updates
   useEffect(() => {
     if(! filter.gebied) return;
     if(! visible_layers || visible_layers.length === 0) return;
@@ -225,6 +264,7 @@ const DdPolicyHubsLayer = ({
     fetchHubs()
   }, [
     filter.gebied,
+    affectedModalities,
     visible_layers,
     visible_layers.length,
     hub_refetch_counter,
@@ -309,7 +349,7 @@ const DdPolicyHubsLayer = ({
   // Function that filters hubs based on the selected phases in the Filterbar
   const filterPolicyHubs = (hubs: any, active_phase: string, visible_layers: any) => {
     // If there was an error or no hubs were found: Return empty array
-    if(! hubs) {
+    if(! hubs || hubs.message) {
       return [];
     }
 
@@ -337,7 +377,8 @@ const DdPolicyHubsLayer = ({
           token: token,
           municipality: filter.gebied,
           phase: active_phase,
-          visible_layers: visible_layers
+          visible_layers: visible_layers,
+          affected_modalities: affectedModalities
         }, uniqueComponentId);
         setPolicyHubs(res);
       }
@@ -377,18 +418,55 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
 
     const layerName = 'policy_hubs-layer-fill';
+    const drawLayerNames = [
+      'gl-draw-polygon-fill-active.cold',
+      'gl-draw-polygon-fill-active.hot',
+      'gl-draw-polygon-fill-inactive.cold',
+      'gl-draw-polygon-fill-inactive.hot',
+      'gl-draw-polygon-fill-static.cold',
+      'gl-draw-polygon-fill-static.hot',
+      'gl-draw-polygon-midpoint.cold',
+      'gl-draw-polygon-midpoint.hot',
+      'gl-draw-polygon-stroke-active.cold',
+      'gl-draw-polygon-stroke-active.hot',
+      'gl-draw-polygon-stroke-inactive.cold',
+      'gl-draw-polygon-stroke-inactive.hot',
+      'gl-draw-polygon-stroke-static.cold',
+      'gl-draw-polygon-stroke-static.hot',
+    ];
 
+    // Add handlers for policy hubs layer
     map.on('touchend', layerName, clickHandler);
     map.on('click', layerName, clickHandler);
+    map.on('contextmenu', layerName, clickHandler); // Prevent default context menu
+
+    // Add handlers for draw layer
+    drawLayerNames.forEach(drawLayerName => {
+      map.on('contextmenu', drawLayerName, clickHandler);
+    });
+
+    // Close context menu when clicking outside
+    const handleOutsideClick = () => {
+      setContextMenu(prev => ({ ...prev, visible: false }));
+    };
+    window.addEventListener('click', handleOutsideClick);
 
     return () => {
       map.off('touchend', layerName, clickHandler);
       map.off('click', layerName, clickHandler);
+      map.off('contextmenu', layerName, clickHandler);
+        
+      // Remove handlers for draw layer
+      drawLayerNames.forEach(drawLayerName => {
+        map.off('contextmenu', drawLayerName, clickHandler);
+      });        
+      window.removeEventListener('click', handleOutsideClick);
     }
   }, [
     map,
     selected_policy_hubs,
-    is_drawing_enabled
+    is_drawing_enabled,
+    draw
   ]);
 
   // If is_drawing_enabled changes: Do things
@@ -462,7 +540,6 @@ const DdPolicyHubsLayer = ({
     isDrawingMultiPolygonActive
   ]);
 
-
   // Function that runs when the drawing of a polygon is finished
   const changeAreaHandler = (e) => {
     let newFeatures = [];
@@ -497,32 +574,27 @@ const DdPolicyHubsLayer = ({
       //     ]
       // ]
       //     [
-
       
-      // Issue is nu volgens mij dat de drawedArea niet het complete multi polygon bevat
-
-      let newCoordinates = [];
+      let drawedCoordinates = [];
       if(isDrawingMultiPolygonActive) {
-        // Get new polygon coordinates from event
+        // Get the coordinates of the polygon that was just drawn
         const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
-        // Get polygon type
+        // Get polygon type of drawed area
         const polygonType = drawedArea?.features?.[0]?.geometry?.type;
         // Create new coordinates array having all existing coordinates
-        newCoordinates = drawedArea?.features?.[0]?.geometry?.coordinates;// Keep existing polygons
-        // If coordinates are not a multi polygon
-        if(polygonType === 'Polygon') {
-          // Make it a multi polygon
-          newCoordinates = [newCoordinates];
-        }
+        drawedCoordinates = drawedArea?.features?.map(drawedFeature => {
+          return drawedFeature.geometry.coordinates; 
+        });
+
         // Add the new polygon
-        newCoordinates.push([newPolygonCoordinates]);
+        drawedCoordinates.push([newPolygonCoordinates]);
 
         newFeatures = [{
           ...drawedArea?.features?.[0],
           geometry: {
             // Set type based on coordinates structure
             type: isDrawingMultiPolygonActive ? 'MultiPolygon' : polygonType,
-            coordinates: newCoordinates
+            coordinates: drawedCoordinates
           }
         }];
       }
@@ -544,11 +616,90 @@ const DdPolicyHubsLayer = ({
   }
 
   useEffect(() => {
-    // console.log('state', 'drawedArea', drawedArea);
+    //  ('state', 'drawedArea', drawedArea);
   }, [drawedArea]);
+
+  const deletePolygonFromMultiPolygon = (lngLat, features) => {
+    if(! window.confirm('Weet je zeker dat je dit gebied wilt verwijderen van de multipolygon?')) return;
+    
+    // Get all polygons of the multi polygon
+    const polygons = features[0].geometry.coordinates || [];
+
+    // Loop through all polygons, and check if the clicked point is within the polygon
+    const newCoordinates = polygons.filter(polygon => {
+      // Check if the clicked point is within the polygon
+      return ! booleanPointInPolygon([lngLat.lng, lngLat.lat], { type: 'Polygon', coordinates: polygon });
+    });
+
+    const isStillMultiPolygon = newCoordinates.length > 1;
+
+    const newFeatures = [{
+      ...features?.[0],
+      geometry: {
+        ...features?.[0].geometry,
+        type: isStillMultiPolygon ? 'MultiPolygon' : 'Polygon',
+        coordinates: isStillMultiPolygon ? newCoordinates : newCoordinates[0]
+      }
+    }];
+
+    // Set updated area into state
+    setDrawedArea({
+      type: isStillMultiPolygon ? 'MultiPolygon' : 'Polygon',
+      features: newFeatures
+    });
+
+    // setIsDrawingMultiPolygonActive(false);
+
+    // Save updates into the databaes
+    (async () => {
+      const activeZone = policyHubs.find(x => x.zone_id === features[0].properties.id);
+      if(! activeZone) return;
+
+      // Update zone
+      activeZone.area = newFeatures[0];
+
+      const updatedZone = await patchHub(token, activeZone);
+      if(updatedZone && updatedZone.detail) {
+        notify(toast, 'Er ging iets fout bij het opslaan: ' + updatedZone?.detail, {
+          title: 'Er ging iets fout',
+          variant: 'destructive'
+        })
+        return;
+      }
+      // Update hubs
+      fetchHubs();
+      // Notify
+      notify(toast, 'Zone opgeslagen');
+    })();
+  }
 
   const clickHandler = (e) => {
     if(! map) return;
+
+    const isMultiPolygon = e.features[0].geometry.type === 'MultiPolygon';
+    const isMultiPolygonWithMoreThanOnePolygon = isMultiPolygon && e.features[0].geometry.coordinates.length > 1;
+    const isInConceptPhase = active_phase === 'concept';
+
+    // Handle right click for context menu (delete polygon from multi polygon)
+    if (
+      e.originalEvent.button === 2
+      && canEditHubs(acl)
+      && isInConceptPhase
+      && (
+        (isMultiPolygon && isMultiPolygonWithMoreThanOnePolygon)
+      )
+    ) {
+      e.preventDefault();
+      const features = e.features;
+      setContextMenu({
+        x: e.originalEvent.clientX,
+        y: e.originalEvent.clientY,
+        visible: true,
+        hubId: e.features[0].properties.id,
+        onDeletePolygonFromMultiPolygon: () => deletePolygonFromMultiPolygon(e.lngLat, features)
+      });
+      return;
+    }
 
     // Don't do anything if the drawing tool is enabled
     if(is_drawing_enabled) return;
@@ -683,6 +834,13 @@ const DdPolicyHubsLayer = ({
         />
       </ActionModule>
     </>}
+
+    {/* Show context menu on right click */}
+    {contextMenu.visible && <ContextMenu
+      contextMenu={contextMenu}
+      setContextMenu={setContextMenu}
+      onDeletePolygonFromMultiPolygon={contextMenu.onDeletePolygonFromMultiPolygon}
+    />}
   </>
 }
 

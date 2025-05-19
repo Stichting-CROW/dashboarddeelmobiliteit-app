@@ -1,24 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './css/FilteritemVoertuigTypes.css';
+import VoertuigTypeSelector from '../VoertuigTypesSelector/VoertuigTypesSelector';
 
 import {StateType} from '../../types/StateType';
 
 function FilteritemVoertuigTypes() {
   const dispatch = useDispatch()
 
-  const voertuigtypes = useSelector((state: StateType) => {
-    return state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : [];
-  });
-  
+  const [activeTypes, setActiveTypes] = useState([]);
+
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types ? state.metadata.vehicle_types || [] : []);
+
   const filterVoertuigTypesExclude = useSelector((state: StateType) => {
     if(Array.isArray(state.filter.voertuigtypesexclude)) {
       return '';
     }
-    
     return state.filter ? state.filter.voertuigtypesexclude : '';
   }) || '';
   
+  useEffect(() => {
+    const active = voertuigtypes.map(x => x.id).filter(x => {
+      return ! filterVoertuigTypesExclude.split(',').includes(x)
+    })
+    setActiveTypes(active);
+  }, [
+    voertuigtypes,
+    filterVoertuigTypesExclude
+  ]);
+
   const addToFilterVoertuigTypesExclude = (voertuigtype) => {
     const nexcluded = (filterVoertuigTypesExclude || '').split(",").length;
     if(nexcluded===voertuigtypes.length-1) {
@@ -40,8 +50,6 @@ function FilteritemVoertuigTypes() {
   
   // Function that gets executed if user clicks a provider filter
   const clickFilter = type => {
-    // console.log("clickfilter [%s]<", filterVoertuigTypesExclude);
-    // If no filters were set, only show this provider and hide all others
     if(filterVoertuigTypesExclude==="") {
       // Disable all but the selected provider
       voertuigtypes.map(x => {
@@ -51,13 +59,42 @@ function FilteritemVoertuigTypes() {
         return x;
       })
     }
-
-    // If provider was disabled, re-enable provider
     else {
-      addToFilterVoertuigTypesExclude(type)
+      const excluded = (filterVoertuigTypesExclude ? filterVoertuigTypesExclude: '').split(",").includes(type);
+
+      if(excluded) {
+        removeFromFilterVoertuigTypesExclude(type)
+      }
+      else {
+        addToFilterVoertuigTypesExclude(type);
+      }
     }
   }
-  
+
+  return <>
+    {filterVoertuigTypesExclude!=='' ? <div className="
+      filter-voertuigtypes-title-row
+      relative
+    " style={{
+      marginTop: '-10px'
+    }}>
+      <div className="
+        text-sm text-right filter-voertuigtypes-reset cursor-pointer w-full"
+        onClick={clearFilterVoertuigTypesExclude}
+        style={{
+          marginTop: '-24px'
+        }}
+      >
+        reset
+      </div>
+    </div> : ''}
+    <VoertuigTypeSelector
+      voertuigtypes={voertuigtypes}
+      activeTypes={activeTypes}
+      onTypeClick={clickFilter}
+    />
+  </>
+
   return (
     <div className="w-full filter-voertuigtypes-container">
       {filterVoertuigTypesExclude!=='' ? <div className="filter-voertuigtypes-title-row">

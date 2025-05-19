@@ -19,4 +19,5 @@ export type HubType = {
   created_at?: any;
   modified_at?: any;
   prev_geographies?: any;
+  geography_ids?: number[];
 }

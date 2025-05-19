@@ -15,7 +15,7 @@ import {
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';

@@ -12,6 +12,7 @@ import { setSelectedPolicyHubs, setShowEditForm } from "../../actions/policy-hub
 import { notify } from "../../helpers/notify";
 import { PolicyHubsEdit_geographyType } from "./PolicyHubsEdit_geographyType";
 import { canEditHubs } from "../../helpers/authentication";
+import { deleteZoneHandler } from "./utils/delete_zone";
 
 const PolicyHubsEdit_bulk = ({
     fetchHubs,
@@ -24,7 +25,7 @@ const PolicyHubsEdit_bulk = ({
     all_policy_hubs: any,
     selected_policy_hubs: any,
     cancelHandler: Function,
-    postSaveOrDeleteCallback: Function
+    postSaveOrDeleteCallback: Function,
 }) => {
     const dispatch = useDispatch()
     const { toast } = useToast()
@@ -56,22 +57,30 @@ const PolicyHubsEdit_bulk = ({
     // Get common attributes
     useEffect(() => {
         // This function gets common attributes, shared amongst all selected hubs
-        let common_geography_type, common_is_virtual;
+        let common_phase, common_geography_type, common_is_virtual, geography_ids = [];
         selectedHubsData.forEach((hub) => {
-            // Get common geography type
-            common_geography_type = common_geography_type === 'mixed' ? 'mixed' : (
-                (! common_geography_type || common_geography_type === hub.geography_type) ? hub.geography_type : 'mixed'
-            );
-            // Get common 'is_virtual' value
-            common_is_virtual = common_is_virtual === 'mixed' ? 'mixed' : (
-                (! common_is_virtual || common_is_virtual === hub.stop?.is_virtual) ? hub.stop?.is_virtual : 'mixed'
-            );
+          // Get common phase
+          common_phase = common_phase === 'mixed' ? 'mixed' : (
+            (! common_phase || common_phase === hub.phase) ? hub.phase : 'mixed'
+          );
+          // Get common geography type
+          common_geography_type = common_geography_type === 'mixed' ? 'mixed' : (
+            (! common_geography_type || common_geography_type === hub.geography_type) ? hub.geography_type : 'mixed'
+          );
+          // Get common 'is_virtual' value
+          common_is_virtual = common_is_virtual === 'mixed' ? 'mixed' : (
+            (! common_is_virtual || common_is_virtual === hub.stop?.is_virtual) ? hub.stop?.is_virtual : 'mixed'
+          );
+          // Set common geography ids
+          geography_ids.push(hub.geography_id);
         });
         // Set common hub attributes in state
         const newHubData: HubType = {};
         
+        if(common_phase !== 'mixed') newHubData.phase = common_phase;
         if(common_geography_type !== 'mixed') newHubData.geography_type = common_geography_type;
         if(common_is_virtual !== 'mixed') newHubData.stop = {is_virtual: common_is_virtual};
+        newHubData.geography_ids = geography_ids;
         setHubsData(newHubData);
     }, [
         selectedHubsData,
@@ -101,10 +110,6 @@ const PolicyHubsEdit_bulk = ({
         });
 
         return foundPhase;
-    }
-
-    const setHubData = () => {
-
     }
 
     const saveZone = async () => {
@@ -145,6 +150,8 @@ const PolicyHubsEdit_bulk = ({
         </>
     }
 
+    console.log('hubsData', hubsData)
+
     return <div>
         <div className={`${labelClassNames} font-bold`}>
             Wijzig {hubsData ? Object.keys(hubsData).length : 'meerdere'} zones (meerdere zones geselecteerd)
@@ -173,6 +180,16 @@ const PolicyHubsEdit_bulk = ({
             >
                 Sluiten
             </Button>
+
+            {canEditHubs(acl) && hubsData?.phase === 'concept' && <>
+                <Button
+                    onClick={(e) => {
+                      deleteZoneHandler(e, hubsData.geography_ids, token, dispatch, setSelectedPolicyHubs, setShowEditForm, postSaveOrDeleteCallback);
+                    }}
+                >
+                    🗑️
+                </Button>
+            </>}
 
             <Button
                 theme={`green`}
