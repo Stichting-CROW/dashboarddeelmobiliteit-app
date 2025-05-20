@@ -222,9 +222,9 @@ function Filterbar({
 
     <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2025-04-28
+        2025-05-20
       </a><br />
-      - Verwijder polygon uit <a className="underline" href="/docs/Beleidszones/Multipolygonen.md">multipolygon</a><br />
+      - Eenvoudiger inplannen van beleidszones<br />
       - Verbodszones per voertuigtype<br />
     </div>
   </>
