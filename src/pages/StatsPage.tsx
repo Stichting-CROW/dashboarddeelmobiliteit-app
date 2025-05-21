@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'; // , {useEffect, useState }
+import React, {useEffect, useMemo} from 'react'; // , {useEffect, useState }
 import './StatsPage.css'
 
 import {
@@ -34,6 +34,8 @@ function StatsPage(props) {
   const filterZones = useSelector((state: StateType) => {
     return state.filter ? state.filter.zones : 0;
   });
+
+  const gebieden = useSelector((state: StateType) => state.metadata?.gebieden)
 
   const setAggregationLevel = (newlevel) => {
     dispatch({
@@ -168,6 +170,20 @@ function StatsPage(props) {
     return ret;
   }
 
+  const getPageTitle = useMemo(() => {
+    if(filterZones) {
+      const zoneIds = filterZones.split(',').map(id => parseInt(id));
+      const zoneObjects = zones.filter(zone => zoneIds.includes(zone.zone_id));
+      return zoneObjects?.map(zone => zone.name).join(', ');
+    }
+      
+    if(filter.gebied) {
+      const gebied = gebieden.find(gebied => gebied.gm_code === filter.gebied);
+      return gebied?.name;
+    }
+    return 'Ontwikkeling';
+  }, [filterZones, filter.gebied, zones, gebieden]);
+
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
@@ -183,6 +199,11 @@ function StatsPage(props) {
           Toon de data in intervallen van {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je bekijkt nu {aggregationButtonsToRender.filter(x => filter.ontwikkelingaggregatie == x.name).pop()?.title}-niveau.
         </InfoTooltip>)}
       </div>
+
+      {/* Show a title for the chart, that is the area currently selected (gebied or zones) */}
+      <h1 className="text-4xl my-2">
+        {getPageTitle}
+      </h1>
 
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">

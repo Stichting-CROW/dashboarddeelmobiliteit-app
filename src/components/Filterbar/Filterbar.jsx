@@ -224,7 +224,7 @@ function Filterbar({
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
         2025-05-20
       </a><br />
-      - Eenvoudiger inplannen van beleidszones<br />
+      - Eenvoudig inplannen van beleidszones<br />
       - Verbodszones per voertuigtype<br />
     </div>
   </>
