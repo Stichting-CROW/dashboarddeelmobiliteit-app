@@ -25,7 +25,7 @@ import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
 function StatsPage(props) {
   const dispatch = useDispatch()
 
-  const filter = useSelector(state => state.filter);
+  const filter = useSelector((state: StateType) => state.filter);
 
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -188,6 +188,7 @@ function StatsPage(props) {
         <div className="xl:flex-1 mt-8 xl:mt-0">
           <BeschikbareVoertuigenChart
             filter={filter}
+            config={{}}
             title="Beschikbare voertuigen"
             />
         </div>

@@ -15,7 +15,7 @@ import {getAcl} from './api/acl';
 import {StateType} from './types/StateType';
 
 import ContentPage from './pages/ContentPage.jsx';
-import StatsPage from './pages/StatsPage.jsx';
+import StatsPage from './pages/StatsPage.tsx';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
