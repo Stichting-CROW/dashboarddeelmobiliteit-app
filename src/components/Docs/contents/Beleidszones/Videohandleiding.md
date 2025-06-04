@@ -5,4 +5,4 @@ In deze video zie je wat de mogelijkheden zijn met betrekking tot het **bekijken
 
 We updaten de video regelmatig, wanneer er nieuwe functionaliteit beschikbaar komt.
 
-<div class="video-wrapper">https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/videohandleiding/20250502 OpenShot project - Beleidszones in het CROW DD - compressed.mp4</div>
+<div class="video-wrapper">https://files.dashboarddeelmobiliteit.nl/docs/Beleidszones/videohandleiding/2025-06-04 16-42-10 derde versie met weer video en audio.mp4</div>
