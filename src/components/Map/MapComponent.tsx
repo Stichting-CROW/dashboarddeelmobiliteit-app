@@ -5,6 +5,7 @@ import moment from 'moment';
 import 'moment/min/locales';
 import {useLocation} from "react-router-dom";
 import SearchBar from '../SearchBar/SearchBar';
+import { RightTop } from '../MapLayer/widget-positions/RightTop';
 
 import {StateType} from '../../types/StateType';
 
@@ -278,31 +279,6 @@ const MapComponent = (props): JSX.Element => {
     didMapLoad
   ])
 
-  // If on Zones page and geographyId is in URL -> navigate to zone
-  // useEffect(() => {
-  //   if(! didMapLoad) return;
-  //   if(! didAddPublicZones && ! didAddAdminZones) return;
-
-  //   // Only execute if we are on the zones page
-  //   if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return;
-
-  //   // Get geographyId from URL
-  //   const geographyId = pathName.split('/zones/')[1];
-  //   // Go for it
-  //   navigateToGeography(geographyId, publicZones)
-  //   // Only for admin page: Make polygon active
-  //   if(window.location.pathname.indexOf('/admin/zones/') > -1) {
-  //     // Wait until theDraw has been loaded
-  //     setTimeout(x => {
-  //       triggerGeographyClick(geographyId, publicZones)
-  //     }, 2500);
-  //   }
-  // }, [
-  //   didMapLoad,
-  //   didAddPublicZones,
-  //   didAddAdminZones
-  // ])
-
   /**
    * SET SOURCES AND LAYERS
   */
@@ -510,7 +486,13 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
     </>}
-    {isLoggedIn && showSearchBar && <SearchBar map={map.current} />}
+    {isLoggedIn && showSearchBar && 
+      <>
+        <RightTop>
+          <SearchBar map={map.current} />
+        </RightTop>
+      </>
+    }
   </>
 }
 

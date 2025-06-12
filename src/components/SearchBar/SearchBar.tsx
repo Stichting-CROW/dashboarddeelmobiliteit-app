@@ -41,6 +41,7 @@ function SearchBar({map}: {map: any}) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [marker, setMarker] = useState<maplibregl.Marker | null>(null);
 
   // Selectors
@@ -229,34 +230,81 @@ function SearchBar({map}: {map: any}) {
 
   const handleFocus = () => {
     setIsFocused(true);
+    setIsExpanded(true);
   };
 
   const handleBlur = () => {
     // Small delay to allow clicking on results
     setTimeout(() => {
       setIsFocused(false);
+      if (!searchBarQuery) {
+        setIsExpanded(false);
+      }
     }, 200);
+  };
+
+  const toggleSearch = () => {
+    setIsExpanded(!isExpanded);
+    if (!isExpanded) {
+      // Focus the input when expanding
+      const input = document.querySelector('.SearchBar input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+      }
+    }
   };
 
   return (
     <div className={`
       SearchBar
-      absolute
-      right-0
-      my-3
-      z-0
-      ${isFilterbarOpen ? 'filter-open' : ''}
+      relative
     `}>
-      <div className="mx-auto" style={{width: '300px'}}>
-        <SearchBarInput
-          value={searchBarQuery}
-          filterChanged={handleSearch}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          afterHtml={
-            <></>
-          }
-        />
+      <div style={{width: '300px'}}>
+        {isExpanded ? (
+          <SearchBarInput
+            value={searchBarQuery}
+            filterChanged={handleSearch}
+            autoFocus={isExpanded}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            afterHtml={
+              <></>
+            }
+          />
+        ) : (
+          <div className="flex justify-end">
+            <button
+              onClick={toggleSearch}
+              className="
+                h-12
+                w-12
+                rounded-full
+                bg-white
+                shadow-md
+                flex
+                items-center
+                justify-center
+                hover:bg-gray-50
+                transition-colors
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
         {searchBarQuery && searchBarQuery.length > 0 && isFocused && <div
           className={`
             ParkingFacilityBrowser
