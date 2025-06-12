@@ -100,57 +100,29 @@ async function renderPolygons_fill(map, geojson) {
 }
 
 const createFeatureCollection = (data) => {
-    const newFeatures = [];
-    if(data.unchanched_geometries && data.unchanched_geometries.features)
-        data.unchanched_geometries.features.forEach((x) => {
-            x.properties.type = 'unchanged';
-            newFeatures.push(x);
-        });
-    if(data.added_geometries && data.added_geometries.features)
-        data.added_geometries.features.forEach((x) => {
-            x.properties.type = 'added';
-            newFeatures.push(x);
-        });
-    if(data.removed_geometries && data.removed_geometries.features)
-        data.removed_geometries.features.forEach((x) => {
-            x.properties.type = 'removed';
-            newFeatures.push(x);
-        });
+  const newFeatures = [];
+  if(data.unchanched_geometries && data.unchanched_geometries.features)
+    data.unchanched_geometries.features.forEach((x) => {
+      x.properties.type = 'unchanged';
+      newFeatures.push(x);
+    });
+  if(data.added_geometries && data.added_geometries.features)
+    data.added_geometries.features.forEach((x) => {
+      x.properties.type = 'added';
+      newFeatures.push(x);
+    });
+  if(data.removed_geometries && data.removed_geometries.features)
+    data.removed_geometries.features.forEach((x) => {
+      x.properties.type = 'removed';
+      newFeatures.push(x);
+    });
 
-    const geojson = {
-        ...data.unchanched_geometries,
-        features: newFeatures
-        // features: {
-        //     ...data.unchanched_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'unchanged'
-        //             }
-        //         }
-        //     }),
-        //     ...data.added_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'added'
-        //             }
-        //         }
-        //     }),
-        //     ...data.removed_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'removed'
-        //             }
-        //         }
-        //     })
-        // }
-    }
-    return geojson;
+  // Create a proper GeoJSON FeatureCollection
+  const geojson = {
+    type: 'FeatureCollection',
+    features: newFeatures
+  };
+  return geojson;
 }
 
 const renderServiceAreaDelta = async (
