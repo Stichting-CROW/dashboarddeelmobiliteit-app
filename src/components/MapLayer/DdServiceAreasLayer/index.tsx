@@ -212,7 +212,7 @@ const DdServiceAreasLayer = ({
     </div>}
 
     {/* CenterBottom InfoCard */}
-    {true && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
+    {searchParams.get('version') && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
       <CenterBottom>
         <InfoCard>
           <Legend />
