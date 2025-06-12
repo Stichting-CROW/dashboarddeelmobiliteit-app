@@ -9,7 +9,7 @@ import {
   toggleServiceAreaForOperator,
   showServiceAreaForOperator
 } from '../../actions/service-areas';
-import { getPrettyProviderName } from '../../helpers/providers';
+import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
 
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
@@ -50,27 +50,6 @@ function FilterbarServiceAreas({
         Selecteer een plaats.
       </div>}
 
-      {/* <Fieldset title="Zonelagen">
-        {[
-          'Microhubs',
-          'Verbodszones',
-          'Analysezones'
-        ].map(x => <div className="
-          flex items-center space-x-2
-          my-2
-        ">
-          <Checkbox id={`zonelaag-${x}`} />
-          <label
-            htmlFor={`zonelaag-${x}`}
-            className="
-                text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70
-            "
-          >
-            {x}
-          </label>
-        </div>)}
-      </Fieldset> */}
-
       <Fieldset title="Aanbieders">
         {availableOperators.map(x => <div className="
           flex items-center space-x-2
@@ -87,6 +66,7 @@ function FilterbarServiceAreas({
           <Checkbox
             id={`aanbieder-${x}`}
             checked={visible_operators.includes(x)}
+            color={getProviderColorForProvider(x)}
           />
           <label
             htmlFor={`aanbieder-${x}`}
