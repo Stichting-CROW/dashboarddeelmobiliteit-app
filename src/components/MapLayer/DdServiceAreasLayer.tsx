@@ -19,9 +19,9 @@ import {
 import {StateType} from '../../types/StateType.js';
 import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { setMapStyle } from '../../actions/layers';
-import { ServiceAreaHistoryEvent } from '@/src/types/ServiceAreaHistoryEvent';
 import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
 import moment from 'moment';
+import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../helpers/service-areas';
 
 const DdServiceAreasLayer = ({
   map
@@ -48,7 +48,16 @@ const DdServiceAreasLayer = ({
     removeServiceAreaDeltaFromMap(map);
 
     // Load new service areas
-    loadServiceAreas(visible_operators);
+    (async () => {
+      const service_areas = await loadServiceAreas(filter.gebied, visible_operators);
+      setServiceAreas(service_areas);
+    })();
+
+    (async () => {
+      const service_area_history = await loadServiceAreasHistory(filter.gebied, visible_operators);
+      setServiceAreasHistory(service_area_history);
+    })();
+
   }, [
     filter.gebied,
     visible_operators
@@ -79,7 +88,11 @@ const DdServiceAreasLayer = ({
   useEffect(() => {
     if(! searchParams.get('version')) return;
 
-    loadServiceAreaDeltas(visible_operators);
+    (async () => {
+      const response = await loadServiceAreaDeltas(visible_operators, searchParams);
+      setServiceAreaDelta(response);
+    })();
+
   }, [
     searchParams.get('version'),
   ]);
@@ -124,83 +137,6 @@ const DdServiceAreasLayer = ({
     };
   }, [serviceAreaDelta]);
 
-  const loadServiceAreas = async (visible_operators: string[]) => {
-    // Fetch service areas and store in state
-    (async () => {
-      const res = await fetchServiceAreas(visible_operators);
-      setServiceAreas(res);
-    })();
-
-    // Fetch service areas history and store in state
-    (async () => {
-      const history = await fetchServiceAreasHistory(visible_operators);
-      const history_filtered = keepOneEventPerDay(history); 
-      setServiceAreasHistory(history_filtered);
-    })();
-  }
-
-  const loadServiceAreaDeltas = async (visible_operators: string[]) => {
-    (async () => {
-      const deltaResponse = await fetchServiceAreaDelta(searchParams.get('version'));
-      setServiceAreaDelta(deltaResponse);
-    })();
-  }
-
-  // Function that gets service areas
-  const fetchServiceAreas = async (visible_operators: string[]) => {
-    const operatorsString = visible_operators.map(x => x.toLowerCase().replace(' ', '')).join(',');
-
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area?municipalities=${filter.gebied}&operators=${operatorsString}`;
-    const response = await fetch(url);
-    const json = await response.json();
-
-    return json;
-  }
-
-  // Function that gets service areas history
-  const fetchServiceAreasHistory = async (visible_operators: string[]) => {
-    const startDate = '2024-10-01';
-    const endDate = moment().format('YYYY-MM-DD');
-
-    const operatorsString = visible_operators?.map(x => x.toLowerCase().replace(' ', '')).join(',');
-
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/history?municipalities=${filter.gebied}&operators=${operatorsString}&start_date=${startDate}&end_date=${endDate}`;
-    const response = await fetch(url);
-    const json: ServiceAreaHistoryEvent[] = await response.json();
-
-    return json;
-  }
-
-  // Function that gets one specific version with its changes
-  const fetchServiceAreaDelta = async (service_area_version_id) => {
-    const url = `https://mds.dashboarddeelmobiliteit.nl/public/service_area/delta/${service_area_version_id}`;
-    const response = await fetch(url);
-    const json = await response.json();
-
-    return json;
-  }
-
-  const keepOneEventPerDay = (full_history: ServiceAreaHistoryEvent[]) => {
-    // Create a map to store one event per day
-    const eventsByDay = new Map<string, ServiceAreaHistoryEvent>();
-    
-    // Sort events by valid_from date to ensure we process oldest first
-    const sortedHistory = [...full_history].sort((a, b) => 
-      new Date(a.valid_from).getTime() - new Date(b.valid_from).getTime()
-    );
-
-    // For each event, store only the newest event per day based on valid_from date
-    sortedHistory.forEach(event => {
-      const dateKey = new Date(event.valid_from).toISOString().split('T')[0];
-      if (!eventsByDay.has(dateKey) || new Date(event.valid_from) > new Date(eventsByDay.get(dateKey).valid_from)) {
-        eventsByDay.set(dateKey, event);
-      }
-    });
-
-    // Convert map values back to array
-    return Array.from(eventsByDay.values());
-  }
-
   return <>
     {/* LeftTop InfoCard */}
     {visible_operators && visible_operators.length > 0 && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
@@ -216,14 +152,16 @@ const DdServiceAreasLayer = ({
       </LeftTop>
     </div>}
 
-    <div style={{
+    {false && <div style={{
       position: 'fixed',
       bottom: '100px',
       left: '360px'
     }}>
       {/* EventsTimeline */}
-      {serviceAreasHistory.length >= 2 && <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>}
-      </div>
+      {serviceAreasHistory.length >= 2 && 
+        <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>
+      }
+      </div>}
   </>
 }
 
