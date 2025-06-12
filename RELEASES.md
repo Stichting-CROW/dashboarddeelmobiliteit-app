@@ -1,5 +1,13 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-06-13
+
+Servicegebieden:
+
+- 🪄 Nieuw ontwerp van <a href="/map/servicegebieden" className="underline">Servicegebieden</a> pagina
+- 🪄 Historische Felyx-servicegebieden nu op te vragen
+- 🪄 Legenda toegevoegd
+
 ## Release 2025-04-28
 
 Beleidshubs:

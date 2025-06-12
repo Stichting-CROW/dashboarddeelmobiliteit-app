@@ -96,7 +96,7 @@ const ServiceAreaHistory = ({
 
   return <div>
     <a key="actueel" className={`text-sm block cursor-pointer group ${(!searchParams.get('version') || searchParams.get('version') == serviceAreas[0]?.service_area_version_id) ? 'font-bold' : ''}`} onClick={() => {
-      setSearchParams({});
+      setSearchParams({ version: serviceAreas[0]?.service_area_version_id });
     }}>
       Actueel
     </a>
