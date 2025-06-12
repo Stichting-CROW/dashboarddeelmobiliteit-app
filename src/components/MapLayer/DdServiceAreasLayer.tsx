@@ -2,11 +2,9 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom'
 import EventsTimeline from '../EventsTimeline/EventsTimeline';
-
-import {
-  DISPLAYMODE_PARK,
-  DISPLAYMODE_RENTALS,
-} from '../../reducers/layers.js';
+import { LeftTop } from './widget-positions/LeftTop';
+import { InfoCard } from './widgets/InfoCard';
+import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
 
 import {
   renderServiceAreas,
@@ -22,6 +20,7 @@ import {StateType} from '../../types/StateType.js';
 import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { setMapStyle } from '../../actions/layers';
 import { ServiceAreaHistoryEvent } from '@/src/types/ServiceAreaHistoryEvent';
+import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
 import moment from 'moment';
 
 const DdServiceAreasLayer = ({
@@ -29,25 +28,14 @@ const DdServiceAreasLayer = ({
 }): JSX.Element => {
   const [serviceAreas, setServiceAreas] = useState([]);
   const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
-  const [serviceAreaDelta, setServiceAreaDelta] = useState([]);
+  const [serviceAreaDelta, setServiceAreaDelta] = useState<ServiceAreaDelta | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useDispatch()
 
-  const displayMode = useSelector((state: StateType) => state.layers ? state.layers.displaymode : DISPLAYMODE_PARK);
-  const isrentals=displayMode===DISPLAYMODE_RENTALS;
-  const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
   const filter = useSelector((state: StateType) => state.filter || null);
-  const stateLayers = useSelector((state: StateType) => state.layers || null);
   const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
-
-  const token = useSelector((state: StateType) => {
-    if(state.authentication && state.authentication.user_data) {
-      return state.authentication.user_data.token;
-    }
-    return null;
-  });
+  const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
@@ -123,7 +111,7 @@ const DdServiceAreasLayer = ({
   // Do things if 'serviceAreaDelta' change
   useEffect(() => {
     // Return if no service areas were found
-    if(! serviceAreaDelta || serviceAreaDelta.length === 0) return;
+    if (!serviceAreaDelta) return;
 
     // Remove old service area delta
     removeServiceAreasFromMap(map);
@@ -134,10 +122,7 @@ const DdServiceAreasLayer = ({
     // onComponentUnLoad
     return () => {
     };
-  }, [
-    serviceAreaDelta,
-    serviceAreaDelta.length
-  ]);
+  }, [serviceAreaDelta]);
 
   const loadServiceAreas = async (visible_operators: string[]) => {
     // Fetch service areas and store in state
@@ -217,13 +202,28 @@ const DdServiceAreasLayer = ({
   }
 
   return <>
+    {/* LeftTop InfoCard */}
+    {visible_operators && visible_operators.length > 0 && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
+      <LeftTop>
+        <InfoCard>
+          <h1 className="text-base font-bold">
+            Servicegebied van {getPrettyProviderName(visible_operators[0])}
+          </h1>
+          <p>
+            {moment(serviceAreaDelta ? serviceAreaDelta.timestamp : moment()).format('DD-MM-YYYY, HH:mm')}
+          </p>
+        </InfoCard>
+      </LeftTop>
+    </div>}
+
     <div style={{
       position: 'fixed',
       bottom: '100px',
       left: '360px'
     }}>
+      {/* EventsTimeline */}
       {serviceAreasHistory.length >= 2 && <EventsTimeline changeHistory={serviceAreasHistory}></EventsTimeline>}
-    </div>
+      </div>
   </>
 }
 

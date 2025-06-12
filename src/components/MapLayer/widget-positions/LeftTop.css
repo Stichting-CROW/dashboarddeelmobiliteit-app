@@ -1,0 +1,9 @@
+.left-top {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+}
+
+.filter-open .left-top {
+  left: 344px;/* 324px + 20px */
+}
