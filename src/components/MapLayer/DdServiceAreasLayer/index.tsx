@@ -1,27 +1,30 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom'
-import EventsTimeline from '../EventsTimeline/EventsTimeline';
-import { LeftTop } from './widget-positions/LeftTop';
-import { InfoCard } from './widgets/InfoCard';
-import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
+import EventsTimeline from '../../EventsTimeline/EventsTimeline';
+import { LeftTop } from '../widget-positions/LeftTop';
+import { CenterBottom } from '../widget-positions/CenterBottom';
+import { InfoCard } from '../widgets/InfoCard';
+import { getPrettyProviderName, getProviderColorForProvider } from '../../../helpers/providers';
 
 import {
   renderServiceAreas,
   removeServiceAreasFromMap,
-} from '../Map/MapUtils/map.service_areas';
+} from '../../Map/MapUtils/map.service_areas';
 
 import {
   renderServiceAreaDelta,
   removeServiceAreaDeltaFromMap
-} from '../Map/MapUtils/map.service_area_delta';
+} from '../../Map/MapUtils/map.service_area_delta';
 
-import {StateType} from '../../types/StateType.js';
-import { setBackgroundLayer } from '../Map/MapUtils/map';
-import { setMapStyle } from '../../actions/layers';
+import {StateType} from '../../../types/StateType.js';
+import { setBackgroundLayer } from '../../Map/MapUtils/map';
+import { setMapStyle } from '../../../actions/layers';
 import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
 import moment from 'moment';
-import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../helpers/service-areas';
+import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
+
+import { Legend } from './Legend';
 
 const DdServiceAreasLayer = ({
   map
@@ -150,6 +153,15 @@ const DdServiceAreasLayer = ({
           </p>
         </InfoCard>
       </LeftTop>
+    </div>}
+
+    {/* CenterBottom InfoCard */}
+    {true && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
+      <CenterBottom>
+        <InfoCard>
+          <Legend />
+        </InfoCard>
+      </CenterBottom>
     </div>}
 
     {false && <div style={{
