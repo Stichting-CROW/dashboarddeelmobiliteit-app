@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.953d7cf9.css",
-    "main.js": "/static/js/main.82e43ad4.js",
+    "main.css": "/static/css/main.fd9463f1.css",
+    "main.js": "/static/js/main.926d063e.js",
     "static/js/905.a354c9f1.chunk.js": "/static/js/905.a354c9f1.chunk.js",
     "static/js/320.43610ba3.chunk.js": "/static/js/320.43610ba3.chunk.js",
     "reactPlayerYouTube.js": "/static/js/reactPlayerYouTube.2fefdd7f.chunk.js",
@@ -54,8 +54,8 @@
     "static/media/controls-zoom-in.svg": "/static/media/controls-zoom-in.4867dd714ef98793c1b7.svg",
     "static/media/search-solid.svg": "/static/media/search-solid.6b31fe2388f30dcac021.svg",
     "static/media/controls-zoom-out.svg": "/static/media/controls-zoom-out.b83ce275d7125aca58c8.svg",
-    "main.953d7cf9.css.map": "/static/css/main.953d7cf9.css.map",
-    "main.82e43ad4.js.map": "/static/js/main.82e43ad4.js.map",
+    "main.fd9463f1.css.map": "/static/css/main.fd9463f1.css.map",
+    "main.926d063e.js.map": "/static/js/main.926d063e.js.map",
     "905.a354c9f1.chunk.js.map": "/static/js/905.a354c9f1.chunk.js.map",
     "320.43610ba3.chunk.js.map": "/static/js/320.43610ba3.chunk.js.map",
     "reactPlayerYouTube.2fefdd7f.chunk.js.map": "/static/js/reactPlayerYouTube.2fefdd7f.chunk.js.map",
@@ -75,7 +75,7 @@
     "453.25c2dc94.chunk.js.map": "/static/js/453.25c2dc94.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.953d7cf9.css",
-    "static/js/main.82e43ad4.js"
+    "static/css/main.fd9463f1.css",
+    "static/js/main.926d063e.js"
   ]
 }
