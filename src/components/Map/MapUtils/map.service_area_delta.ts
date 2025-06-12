@@ -1,4 +1,3 @@
-
 const removeSources = (map: any) => {
     if(! map) return;
 
@@ -34,6 +33,11 @@ async function renderPolygons_fill(map, geojson) {
   
     // Add the source if we haven't created them yet
     if (! source) {
+      // console.log('GeoJSON structure:', {
+      //   type: geojson.type,
+      //   featuresCount: geojson.features?.length,
+      //   firstFeature: geojson.features?.[0]
+      // });
       map.addSource(sourceId, {
         type: 'geojson',
         data: geojson,
@@ -114,39 +118,11 @@ const createFeatureCollection = (data) => {
             newFeatures.push(x);
         });
 
+    // Create a proper GeoJSON FeatureCollection
     const geojson = {
-        ...data.unchanched_geometries,
+        type: 'FeatureCollection',
         features: newFeatures
-        // features: {
-        //     ...data.unchanched_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'unchanged'
-        //             }
-        //         }
-        //     }),
-        //     ...data.added_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'added'
-        //             }
-        //         }
-        //     }),
-        //     ...data.removed_geometries.features.map((x) => {
-        //         return {
-        //             ...x,
-        //             properties: {
-        //                 ...x.properties,
-        //                 type: 'removed'
-        //             }
-        //         }
-        //     })
-        // }
-    }
+    };
     return geojson;
 }
 
