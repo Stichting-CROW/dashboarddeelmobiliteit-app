@@ -103,6 +103,7 @@ const DdServiceAreasLayer = ({
     
     // Get the service area of the selected municipality
     const serviceAreasForMunicipality = serviceAreas.filter(x => x.municipality === filter.gebied).pop();
+    // console.log('serviceAreas', serviceAreas, 'serviceAreasForMunicipality', serviceAreasForMunicipality, )
 
     // Return if no service areas were found for this municipality
     if(! serviceAreasForMunicipality) {
