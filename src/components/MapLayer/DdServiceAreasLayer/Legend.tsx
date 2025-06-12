@@ -1,3 +1,5 @@
+import './Legend.css';
+
 const legendItems = [
   {
     color: '#0f0',
@@ -18,7 +20,7 @@ const legendItems = [
 ]
 
 export const Legend = () => {
-  return <div className="Legend flex gap-2">
+  return <div className="Legend gap-2">
     {/* <div className="font-bold">Legenda</div> */}
     <div className="grid grid-cols-2 gap-2">
       {legendItems.map((item) => (

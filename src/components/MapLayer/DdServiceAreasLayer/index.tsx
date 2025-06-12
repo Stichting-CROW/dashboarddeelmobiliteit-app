@@ -25,6 +25,7 @@ import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 
 import { Legend } from './Legend';
+import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 
 const DdServiceAreasLayer = ({
   map
@@ -140,6 +141,47 @@ const DdServiceAreasLayer = ({
     };
   }, [serviceAreaDelta]);
 
+  const clickPreviousVersion = () => {
+    if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
+    
+    // Find current version index
+    const currentVersion = searchParams.get('version');
+    const currentIndex = serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === currentVersion);
+    
+    // If no version selected or at start, use one to latest version
+    if (currentIndex === -1 || currentIndex === 0) {
+      setSearchParams({ version: serviceAreasHistory[serviceAreasHistory.length - 2]?.service_area_version_id.toString() });
+      return;
+    }
+    
+    // Go to previous version
+    setSearchParams({ version: serviceAreasHistory[currentIndex - 1]?.service_area_version_id.toString() });
+  }
+
+  const clickNextVersion = () => {
+    if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
+    
+    // Find current version index
+    const currentVersion = searchParams.get('version');
+    const currentIndex = serviceAreasHistory.findIndex(x => x?.service_area_version_id.toString() === currentVersion);
+    
+    // If no historic version found, use latest version
+    if (currentIndex === -1 || currentIndex === serviceAreasHistory.length - 1) {
+      // Get version of latest service area
+      const latestServiceArea = serviceAreas.pop();
+      // If no latest service area, return
+      if(! latestServiceArea) return;
+      setSearchParams({ version: latestServiceArea?.service_area_version_id.toString() });
+      return;
+    }
+    
+    // Go to previous version
+    setSearchParams({ version: serviceAreasHistory[currentIndex + 1]?.service_area_version_id.toString() });
+  }
+
+  const doesHavePreviousVersion = () => !searchParams.get('version') || (serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) > 0);
+  const doesHaveNextVersion = () => serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) < serviceAreasHistory.length - 1;
+
   return <>
     {/* LeftTop InfoCard */}
     {visible_operators && visible_operators.length > 0 && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
@@ -148,8 +190,22 @@ const DdServiceAreasLayer = ({
           <h1 className="text-base font-bold">
             Servicegebied van {getPrettyProviderName(visible_operators[0])}
           </h1>
-          <p>
+          <p className="flex flex-row gap-2 items-center">
+            {/* Arrow left */}
+            <div style={{visibility: `${doesHavePreviousVersion() ? 'visible' : 'hidden'}`}}>
+              <ArrowLeftIcon 
+                className="w-4 h-4 cursor-pointer" 
+                onClick={clickPreviousVersion}
+              />
+            </div>
             {moment(serviceAreaDelta ? serviceAreaDelta.timestamp : moment()).format('DD-MM-YYYY, HH:mm')}
+            {/* Arrow right */}
+            <div style={{visibility: `${doesHaveNextVersion() ? 'visible' : 'hidden'}`}}>
+              <ArrowRightIcon
+                className="w-4 h-4 cursor-pointer"
+                onClick={clickNextVersion}
+              />
+            </div>
           </p>
         </InfoCard>
       </LeftTop>

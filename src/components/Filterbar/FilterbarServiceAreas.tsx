@@ -95,17 +95,14 @@ const ServiceAreaHistory = ({
   }, [serviceAreaDelta]);
 
   return <div>
-    {serviceAreas.map(x => <a key={x.id} className={`text-sm block cursor-pointer group ${searchParams.get('version') == x.service_area_version_id ? 'font-bold' : ''}`} onClick={() => {
-      setSearchParams({ version: x.service_area_version_id });
+    <a key="actueel" className={`text-sm block cursor-pointer group ${(!searchParams.get('version') || searchParams.get('version') == serviceAreas[0]?.service_area_version_id) ? 'font-bold' : ''}`} onClick={() => {
+      setSearchParams({});
     }}>
-      {moment(x.valid_from).format('DD-MM-YYYY')}&nbsp;
-      <span className={`opacity-${searchParams.get('version') == x.service_area_version_id ? '1' : '0'} transition-opacity`}>
-        {moment(x.valid_from).format('HH:mm')}
-      </span>
-    </a>)}
+      Actueel
+    </a>
 
-    {/* Limit to latest 20 updates */}
-    {serviceAreasHistory.map(x => <a key={x.id} className={`text-sm block cursor-pointer group ${searchParams.get('version') == x.service_area_version_id ? 'font-bold' : ''}`} onClick={() => {
+    {/* Skip the first 1 */}
+    {serviceAreasHistory.slice(1).map(x => <a key={x.id} className={`text-sm block cursor-pointer group ${searchParams.get('version') == x.service_area_version_id ? 'font-bold' : ''}`} onClick={() => {
       setSearchParams({ version: x.service_area_version_id });
     }}>
       {moment(x.valid_from).format('DD-MM-YYYY')}&nbsp;
