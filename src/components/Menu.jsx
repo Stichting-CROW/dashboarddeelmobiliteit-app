@@ -200,7 +200,7 @@ function Menu({
         mx-auto
         bg-white
         box-border
-        w-full
+        w-auto
         flex
         flex-col
         justify-center

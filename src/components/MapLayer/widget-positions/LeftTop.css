@@ -1,0 +1,13 @@
+.left-top {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  transition: left 0.6s;
+  transition-timing-function: ease-in;
+}
+
+.filter-open .left-top {
+  transition: left 0.4s;
+  transition-timing-function: ease-out;
+  left: 344px;/* 324px + 20px */
+}
