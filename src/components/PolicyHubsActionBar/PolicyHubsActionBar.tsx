@@ -4,6 +4,7 @@ import {
   setIsDrawingEnabled,
   setVisibleLayers,
   setShowEditForm,
+  setShowProposeDeleteForm,
   setShowList,
   setHubRefetchCounter
 } from '../../actions/policy-hubs'
@@ -287,6 +288,10 @@ const PolicyHubsActionBar = ({
 
       {(didSelectPublishedHub() || didSelectActiveHub()) && <>
         <Button theme="white" onClick={async () => {
+          dispatch(setShowEditForm(false));
+          dispatch(setShowProposeDeleteForm(true));
+          return;
+
           if(! window.confirm('Wil je voorstellen deze hub te verwijderen? Er komt dan een voorstel tot verwijderen in de conceptfase.')) {
             return;
           }

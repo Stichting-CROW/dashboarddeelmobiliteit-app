@@ -14,6 +14,7 @@ import {
   setVisibleLayers,
   setShowEditForm,
   setShowList,
+  setShowProposeDeleteForm,
 } from '../../actions/policy-hubs'
 
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
@@ -47,6 +48,7 @@ import { setMapStyle } from '../../actions/layers';
 import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
 import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
+import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
 
 let TO_fetch_delay;
 
@@ -113,6 +115,10 @@ const DdPolicyHubsLayer = ({
   
   const show_commit_form = useSelector((state: StateType) => {
     return state.policy_hubs ? state.policy_hubs.show_commit_form : false;
+  });
+
+  const show_propose_delete_form = useSelector((state: StateType) => {
+    return state.policy_hubs ? state.policy_hubs.show_propose_delete_form : false;
   });
 
   const show_edit_form = useSelector((state: StateType) => {
@@ -732,6 +738,7 @@ const DdPolicyHubsLayer = ({
 
     // Show edit form if user selected >= 1 hubs (hidden if stats mode)
     dispatch(setShowEditForm(true));
+    dispatch(setShowProposeDeleteForm(false));
   }
 
   const getSelectedHub = () => {
@@ -811,6 +818,14 @@ const DdPolicyHubsLayer = ({
       {/* Hub 'commit to concept' form */}
       {(canEditHubs(acl) && didSelectHub() && show_commit_form) && <ActionModule>
         <PolicyHubsCommit
+          all_policy_hubs={policyHubs}
+          selected_policy_hubs={selected_policy_hubs}
+          fetchHubs={fetchHubs}
+        />
+      </ActionModule>}
+
+      {(canEditHubs(acl) && didSelectHub() && show_propose_delete_form) && <ActionModule>
+        <PolicyHubsProposeDelete
           all_policy_hubs={policyHubs}
           selected_policy_hubs={selected_policy_hubs}
           fetchHubs={fetchHubs}
