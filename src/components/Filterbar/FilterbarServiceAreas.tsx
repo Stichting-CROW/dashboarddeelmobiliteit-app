@@ -94,15 +94,17 @@ const ServiceAreaHistory = ({
     };
   }, [serviceAreaDelta]);
 
-  return <div>
-    <a key="actueel" className={`text-sm block cursor-pointer group ${(!searchParams.get('version') || searchParams.get('version') == serviceAreas[0]?.service_area_version_id) ? 'font-bold' : ''}`} onClick={() => {
+  const showMostRecent = (!searchParams.get('version') || searchParams.get('version') == serviceAreas[0]?.service_area_version_id);
+
+  return <div className="p-1">
+    <a key="actueel" className={`text-sm block cursor-pointer group ${showMostRecent ? 'font-bold text-theme-blue' : ''}`} onClick={() => {
       setSearchParams({ version: serviceAreas[0]?.service_area_version_id });
     }}>
-      Actueel
+      {showMostRecent ? moment(serviceAreas[0]?.valid_from).format('DD-MM-YYYY HH:mm') : 'Actueel'}
     </a>
 
     {/* Skip the first 1 */}
-    {serviceAreasHistory.slice(1).map(x => <a key={x.id} className={`text-sm block cursor-pointer group ${searchParams.get('version') == x.service_area_version_id ? 'font-bold' : ''}`} onClick={() => {
+    {serviceAreasHistory.slice(1).map(x => <a key={x.id} className={`my-1 text-sm block cursor-pointer group ${searchParams.get('version') == x.service_area_version_id ? 'font-bold text-theme-blue' : ''}`} onClick={() => {
       setSearchParams({ version: x.service_area_version_id });
     }}>
       {moment(x.valid_from).format('DD-MM-YYYY')}&nbsp;
@@ -177,9 +179,11 @@ function FilterbarServiceAreas({
       </Fieldset>
 
       <Fieldset title="Historische servicegebieden">
-        <ServiceAreaHistory
-          visible_operators={visible_operators}
-        />
+        <div data-name="white-rounded-box" className="white-rounded-box">
+          <ServiceAreaHistory
+            visible_operators={visible_operators}
+          />
+        </div>
       </Fieldset>
 
     </div>
