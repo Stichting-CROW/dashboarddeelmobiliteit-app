@@ -9,7 +9,6 @@ import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
-import * as te from 'tw-elements';
 import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
@@ -33,6 +32,7 @@ import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
 import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
+import Permits from './components/Permits/Permits';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
 import Menu from './components/Menu.jsx';
@@ -557,6 +557,13 @@ function App() {
               <Overlay>
                 <Misc>
                   <ActiveFeeds />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/permits" element={
+              <Overlay>
+                <Misc>
+                  <Permits />
                 </Misc>
               </Overlay>
             } />
