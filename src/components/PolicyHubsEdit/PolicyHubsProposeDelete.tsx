@@ -8,6 +8,7 @@ import { StateType } from '@/src/types/StateType';
 import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
 import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept';
+import { proposeRetirement } from '../../helpers/policy-hubs/propose-retirement';
 import { notify } from '../../helpers/notify';
 import { setSelectedPolicyHubs, setShowCommitForm, setShowEditForm, setShowProposeDeleteForm } from '../../actions/policy-hubs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@radix-ui/react-tooltip';
@@ -115,6 +116,29 @@ const PolicyHubsProposeDelete = ({
     dispatch(setSelectedPolicyHubs([]));
     // Refetch hubs (for removing the changed hub from the map)
     fetchHubs();
+  }
+
+  const deleteAndCommitToConcept = async () => {
+    try {
+      const response = await proposeRetirement(token, geographyIds);
+
+      if(response && response.detail) {
+        // Give error if something went wrong
+        notify(
+          toast,
+          'Er ging iets fout bij het voorstellen tot verwijderen',
+          {
+            title: 'Er ging iets fout',
+            variant: 'destructive'
+          }
+        );
+      }
+      else {
+        commitToConcept();
+      }
+    } catch(err) {
+      console.error('Delete error', err);
+    }
   }
 
   const commitToConcept = async () => {
@@ -364,7 +388,7 @@ const PolicyHubsProposeDelete = ({
         <Button
           theme={`greenHighlighted`}
           style={{marginRight: 0}}
-          onClick={commitToConcept}
+          onClick={deleteAndCommitToConcept}
         >
           Stel verwijdering vast
         </Button>

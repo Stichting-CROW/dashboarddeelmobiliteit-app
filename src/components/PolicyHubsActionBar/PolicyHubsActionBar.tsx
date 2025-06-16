@@ -253,7 +253,7 @@ const PolicyHubsActionBar = ({
       }
 
       {/* Terug naar concept button */}
-      {((didSelectCommittedConceptHub() || didSelectCommittedRetirementHub()) && ! show_commit_form) && 
+      {(active_phase === 'committed_concept' && (didSelectCommittedConceptHub() || didSelectCommittedRetirementHub()) && ! show_commit_form) && 
         <Button theme="red" onClick={async () => {
           await makeConcept(token, getSelectedHubs().map(x => x.geography_id));
           if(! window.confirm('Wil je de vastgestelde hub(s) terugzetten naar de conceptfase?')) {
