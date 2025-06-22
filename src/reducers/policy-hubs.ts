@@ -92,6 +92,12 @@ export default function policy_hubs(state = initialState, action) {
           show_edit_form: action.payload
       };
     }
+    case 'SET_SHOW_PROPOSE_DELETE_FORM': {
+      return {
+          ...state,
+          show_propose_delete_form: action.payload
+      };
+    }
     case 'SET_SHOW_LIST': {
       return {
           ...state,
