@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-06-22
+
+Beleidshubs:
+
+- Het is gemakkelijker om definitief actieve zones te verwijderen. Je kunt bij het verwijderen vanaf nu direct een publicatiedatum en verwijderdatum opgeven. Dit scheelt 1 stap in het proces ten opzichte van hoe het eerder was
+
 ## Release 2025-06-13
 
 Servicegebieden:
