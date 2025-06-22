@@ -155,18 +155,18 @@ const PolicyHubsProposeDelete = ({
       });
       return;
     }
-    let update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`;
+    let update_text = `De zone${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`;
 
     let publish_on = publicationTimes.publish_on_iso;
     if (formData.publish_on_relative == "now") {
       publish_on = moment().add(5, 'seconds').format();
-      update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} gepubliceerd en omgezet naar fase: Definitief gepubliceerd`
+      update_text = `De zone${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} gepubliceerd en omgezet naar fase: Definitief gepubliceerd`
     }
 
     let effective_on = publicationTimes.effective_on_iso;
     if (formData.publish_on_relative == "now" && formData.effective_on_relative == "now") {
       effective_on = publish_on;
-      update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} actief gemaakt en omgezet naar fase: Definitief actief`
+      update_text = `De zone${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} gearchiveerd en daarmee niet meer zichtbaar op de kaart`
     }
 
     const result = await commit_to_concept(token, {
