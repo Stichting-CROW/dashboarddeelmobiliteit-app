@@ -224,7 +224,7 @@ function Filterbar({
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
         2025-06-22
       </a><br />
-      - Beleidshubs: Verwijder zones eenvoudiger<br />
+      - Beleidshubs: Verwijder zones eenvoudig<br />
       - Nieuw ontwerp <a href="/map/servicegebieden" className="underline">Servicegebieden</a><br />
     </div>
   </>

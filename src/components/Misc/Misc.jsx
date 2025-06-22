@@ -33,11 +33,11 @@ export default function Misc({children}) {
       link: '/active_feeds',
       public: true
     },
-    {
-      title: 'Vergunningen',
-      link: '/permits',
-      public: false
-    },
+    // {
+    //   title: 'Voertuigplafonds',
+    //   link: '/permits',
+    //   public: false
+    // },
     {
       title: 'API keys',
       link: '/profile/api'
