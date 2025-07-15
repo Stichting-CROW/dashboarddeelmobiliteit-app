@@ -16,6 +16,8 @@ export const DISPLAYMODE_VERHUURDATA_HEATMAP = 'verhuurdata-heatmap';
 export const DISPLAYMODE_VERHUURDATA_CLUSTERS = 'verhuurdata-clusters';
 export const DISPLAYMODE_VERHUURDATA_VOERTUIGEN = 'verhuurdata-voertuigen';
 
+export const DISPLAYMODE_START = 'start';
+
 export const DATASOURCE_VOERTUIGEN = 'vehicles';
 export const DATASOURCE_VERHUUR = 'rentals';
 

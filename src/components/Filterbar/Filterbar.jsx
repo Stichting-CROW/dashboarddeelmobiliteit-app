@@ -24,6 +24,7 @@ import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
+import FilterbarStart from './FilterbarStart';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -35,6 +36,7 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_START,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -66,6 +68,7 @@ function Filterbar({
   const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
+  const isStart=displayMode===DISPLAYMODE_START;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -144,12 +147,22 @@ function Filterbar({
       />
     }
 
+    {
+      (isStart) && 
+        <FilterbarStart 
+          hideLogo={hideLogo}
+          displayMode={displayMode}
+          visible={visible}
+        />
+    }
+
     {/* Default: */
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
       && ! isPolicyHubs
       && ! is_hb_view
       && ! isrentals
+      && ! isStart
     ) &&
       <div className="filter-bar-inner py-2">
 
@@ -221,7 +234,7 @@ function Filterbar({
     }
 
     <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
-      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
+      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
         2025-06-22
       </a><br />
       - Beleidshubs: Verwijder zones eenvoudig<br />

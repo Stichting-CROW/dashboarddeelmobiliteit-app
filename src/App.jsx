@@ -15,6 +15,7 @@ import {StateType} from './types/StateType';
 
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.tsx';
+import StartPage from './pages/StartPage';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
@@ -35,7 +36,7 @@ import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import Permits from './components/Permits/Permits';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
-import Menu from './components/Menu.tsx';
+import Menu from './components/Menu';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
@@ -68,6 +69,7 @@ import {
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_START,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -181,6 +183,8 @@ function App() {
       payload=DISPLAYMODE_SERVICE_AREAS;
     } else if(pathName.includes("/map/beleidshubs")) {
       payload=DISPLAYMODE_POLICY_HUBS;
+    } else if(pathName.includes("/start")) {
+      payload=DISPLAYMODE_START;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -196,6 +200,7 @@ function App() {
   
         dispatch(setAclInRedux(theAcl));
         setAcl(theAcl);
+        
         setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
         setIsAdmin(theAcl?.is_admin);
       } catch(err) {
@@ -205,6 +210,7 @@ function App() {
   }, [token])
 
   const test = useSelector((state: StateType) => {
+    console.log('*** test', state)
     return state.authentication;
   });
 
@@ -233,6 +239,7 @@ function App() {
   });
 
   const displayMode = useSelector((state: StateType) => {
+    console.log('*** displayMode', state.layers.displaymode)
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
@@ -469,13 +476,18 @@ function App() {
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
 
+            <Route exact path="/start" element={<>
+              <ContentPage>
+                <StartPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
             <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
               </ContentPage>
               {renderMapElements()}
-            </>} />
-            <Route exact path="/monitoring" element={
+            </>} />            <Route exact path="/monitoring" element={
               <ContentPage>
                 <Monitoring />
               </ContentPage>
