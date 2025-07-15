@@ -35,7 +35,7 @@ import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import Permits from './components/Permits/Permits';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
-import Menu from './components/Menu.jsx';
+import Menu from './components/Menu.tsx';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';

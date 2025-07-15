@@ -20,7 +20,6 @@ function MenuItem(props) {
           ${isActive ? 'is-active' : ''}
         `}
         to={props.path}
-        href={props.href}
         onClick={props.onClick}
         title={props.title}
         >
