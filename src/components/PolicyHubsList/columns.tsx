@@ -5,13 +5,6 @@ import markerMapIcon from './img/marker_map_icon.svg';
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "../ui/checkbox"
 import { CheckedState } from "@radix-ui/react-checkbox"
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  CaretSortIcon,
-  EyeNoneIcon,
-} from "@radix-ui/react-icons";
-import { Button } from "../ui/button"
 
 import { DataTableColumnHeader } from "./column-headers";
 
@@ -20,9 +13,7 @@ import { DataTableColumnHeader } from "./column-headers";
 export type Hub = {
   id: number
   name: string
-  // type: "pending" | "processing" | "success" | "failed"
   type: string
-  // fase: string
 }
 
 const flyTo = (area, zone_id) => {
@@ -43,17 +34,56 @@ export const columns: ColumnDef<Hub>[] = [
   {
     id: "select",
     header: ({ table, column }) => (
-      <div className="flex justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() as CheckedState ||
-            (table.getIsSomePageRowsSelected() && "indeterminate") as CheckedState
-          }
-          onCheckedChange={(value) => {
-            table.toggleAllPageRowsSelected(!!value)
-          }}
-          aria-label="Select all"
-        />
+      <div>
+        <div className="flex items-center">
+          <div className="mr-2">
+            Selecteer alle
+          </div>
+          <label className="flex items-center">
+            <Checkbox
+              checked={
+                table.getIsAllPageRowsSelected() as CheckedState ||
+                (table.getIsSomePageRowsSelected() && "indeterminate") as CheckedState
+              }
+              onCheckedChange={(value) => {
+                table.toggleAllPageRowsSelected(!!value)
+              }}
+              aria-label="Selecteer alle zones"
+            />
+          </label>
+        </div>
+        <div>
+          <select 
+            className="w-36 px-1 border shadow rounded"
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "selected") {
+                // Filter to show only selected rows
+                table.setColumnFilters([
+                  {
+                    id: 'select',
+                    value: 'selected'
+                  }
+                ])
+              } else if (value === "unselected") {
+                // Filter to show only unselected rows
+                table.setColumnFilters([
+                  {
+                    id: 'select',
+                    value: 'unselected'
+                  }
+                ])
+              } else {
+                // Show all rows (clear filter)
+                table.setColumnFilters([])
+              }
+            }}
+          >
+            <option value="">Alle</option>
+            <option value="selected">Geselecteerd</option>
+            <option value="unselected">Niet geselecteerd</option>
+          </select>
+        </div>
       </div>
     ),
     cell: ({ row }) => (
@@ -61,13 +91,22 @@ export const columns: ColumnDef<Hub>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label="Selecteer zone"
           className="block"
         />
       </>
     ),
     enableSorting: true,
     enableHiding: false,
+    filterFn: (row, id, value) => {
+      if (value === 'selected') {
+        return row.getIsSelected();
+      }
+      if (value === 'unselected') {
+        return !row.getIsSelected();
+      }
+      return true; // Show all rows when no filter is applied
+    },
   },
   // {
   //   accessorKey: "fase",
