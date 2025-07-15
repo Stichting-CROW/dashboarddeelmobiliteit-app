@@ -171,7 +171,9 @@ function App() {
     
     // Decide on which display mode we use, based on URL
     let payload;
-    if(pathName.includes("/map/park")||pathName==='/') {
+    if(pathName.includes("/start")||pathName==='/') {
+      payload=DISPLAYMODE_START;
+    } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
       payload=DISPLAYMODE_RENTALS;
@@ -183,8 +185,6 @@ function App() {
       payload=DISPLAYMODE_SERVICE_AREAS;
     } else if(pathName.includes("/map/beleidshubs")) {
       payload=DISPLAYMODE_POLICY_HUBS;
-    } else if(pathName.includes("/start")) {
-      payload=DISPLAYMODE_START;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
@@ -487,7 +487,8 @@ function App() {
                 <StatsPage />
               </ContentPage>
               {renderMapElements()}
-            </>} />            <Route exact path="/monitoring" element={
+            </>} />
+            <Route exact path="/monitoring" element={
               <ContentPage>
                 <Monitoring />
               </ContentPage>
