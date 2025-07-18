@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
 import PermitsCard from './PermitsCard';
+import EditLimitsDialog from './EditLimitsDialog';
 
 import { StateType } from '../../types/StateType';
 
 import { getAvailableOperators } from '../../api/service-areas';
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
-import { generateMockSettingstable, generateMockOccupancyCurrent } from './PermitsMockData';
+import { generateMockSettingstable, generateMockOccupancyCurrent, updateMockSettingsTable } from './PermitsMockData';
 
 // first generate a virtual table with the settings
 export interface settingsrow {
@@ -91,6 +92,48 @@ const Permits = () => {
     fetchPermits();
   }, [mockSettingstable, availableOperatorSystemIds]);
 
+  // State for edit dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDialogPermit, setEditDialogPermit] = useState<APIPermitResultCurrent | null>(null);
+
+  // Admin/normal mode toggle
+  const [mode, setMode] = useState<'normal' | 'admin'>('normal');
+
+  // Handler to open edit dialog
+  const handleEditLimits = (permit: APIPermitResultCurrent) => {
+    setEditDialogPermit(permit);
+    setEditDialogOpen(true);
+  };
+
+  // Handler to close edit dialog
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditDialogPermit(null);
+  };
+
+  // Handler for OK (now updates mock data and reloads)
+  const handleEditDialogOk = (formData: any) => {
+    if (!editDialogPermit) return;
+    // Compose new row for settings table
+    const newRow = {
+      municipality: editDialogPermit.municipality,
+      voertuigtype: editDialogPermit.voertuigtype,
+      operator_system_id: editDialogPermit.operator_system_id,
+      valid_from_iso8601: formData.startDate,
+      valid_until_iso8601: formData.indefinite ? '9999-12-31' : (formData.endDate || '9999-12-31'),
+      min_capacity: formData.minCapacity,
+      max_capacity: formData.maxCapacity,
+      min_pct_duration_correct: formData.minPctDurationCorrect,
+      min_rides_per_vehicle_pct_correct: formData.minPctRidesPerVehicleCorrect,
+      max_vehicles_illegally_parked_count: formData.maxIllegallyParked,
+    };
+    // Update mock settings table
+    const updatedSettings = updateMockSettingsTable(mockSettingstable, newRow, mode);
+    setMockSettingstable(updatedSettings);
+    setEditDialogOpen(false);
+    setEditDialogPermit(null);
+  };
+
   if(activeorganisation === "") {
     return (
       <div>
@@ -123,7 +166,7 @@ const Permits = () => {
         {/* Cards: flex row, wrap, gap */}
         <div className="flex flex-wrap gap-6">
           {permitsForVoertuigtype.map((permit) => (
-            <PermitsCard key={'permits-card-' + permit.id} permit={permit} />
+            <PermitsCard key={'permits-card-' + permit.id} permit={permit} onEditLimits={() => handleEditLimits(permit)} />
           ))}
         </div>
       </div>
@@ -132,8 +175,14 @@ const Permits = () => {
 
   return (
     <div>
-      <div className="text-4xl font-bold mb-8">
+      <div className="text-4xl font-bold mb-8 flex items-center gap-4">
         Voertuigplafonds
+        <button
+          className={`ml-4 px-3 py-1 rounded ${mode === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          onClick={() => setMode(mode === 'normal' ? 'admin' : 'normal')}
+        >
+          {mode === 'admin' ? 'Admin modus' : 'Normale modus'}
+        </button>
       </div>
       
       <div>
@@ -142,6 +191,23 @@ const Permits = () => {
           return renderPermitCardsForVoertuigtype(voertuigtype);
         })}
       </div>
+      {/* Edit Limits Modal Dialog */}
+      {editDialogOpen && editDialogPermit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 relative w-full max-w-2xl">
+            <div className="text-lg font-semibold mb-4">Voertuigplafonds bewerken</div>
+            <EditLimitsDialog
+              municipality={editDialogPermit.municipality}
+              provider_system_id={editDialogPermit.operator_system_id}
+              vehicle_type={editDialogPermit.voertuigtype}
+              settingsTable={mockSettingstable}
+              mode={mode}
+              onOk={handleEditDialogOk}
+              onCancel={handleCloseEditDialog}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

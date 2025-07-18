@@ -14,24 +14,30 @@ export const generateMockSettingstable = async (
     const startYear = moment().subtract(5, 'years').year();
     const endYear = moment().year();
 
-    const min_pct_duration_correct = Math.floor(80 + Math.random() * 15);
-    const min_rides_per_vehicle_pct_correct = Math.floor(80 + Math.random() * 15);
-    const max_vehicles_illegally_parked_count = Math.floor(2 + Math.random() * 1);
-  
     const settingstable: settingsrow[] = [];
     operators.forEach((operator) => {
       voertuigtypes.forEach((voertuigtype) => {
         for (let year = startYear; year <= endYear; year++) {
+          const min_capacity = Math.floor(20 + Math.random() * 100);
+          const max_capacity = Math.floor(min_capacity + 50 + Math.random() * 20);
+          const min_pct_duration_correct = Math.floor(80 + Math.random() * 15);
+          const min_rides_per_vehicle_pct_correct = Math.floor(80 + Math.random() * 15);
+          const max_vehicles_illegally_parked_count = 0; // default to 'niet actief'
+
           const valid_from_iso8601 = moment(`${year}-07-18`).format('YYYY-MM-DD');
-          const valid_until_iso8601 = moment(`${year + 1}-07-18`).format('YYYY-MM-DD');
+          // For the last record, set end date to '9999-12-31', else to next year
+          const isLast = year === endYear;
+          const valid_until_iso8601 = isLast
+            ? '9999-12-31'
+            : moment(`${year + 1}-07-18`).format('YYYY-MM-DD');
           settingstable.push({
             municipality: municipality_gmcode,
             voertuigtype: voertuigtype,
             operator_system_id: operator.system_id,
             valid_from_iso8601,
             valid_until_iso8601,
-            min_capacity: 20,
-            max_capacity: 200,
+            min_capacity,
+            max_capacity,
             min_pct_duration_correct,
             min_rides_per_vehicle_pct_correct,
             max_vehicles_illegally_parked_count,
@@ -127,6 +133,50 @@ export const generateMockSettingstable = async (
     });
   
     return data;
+  }
+  
+  export function updateMockSettingsTable(
+    settingsTable: settingsrow[],
+    newRow: Partial<settingsrow> & { municipality: string; voertuigtype: string; operator_system_id: string; valid_from_iso8601: string; valid_until_iso8601: string | null; },
+    mode: 'normal' | 'admin'
+  ): settingsrow[] {
+    // Find all records for this combination
+    const matchingRows = settingsTable.filter(row =>
+      row.municipality === newRow.municipality &&
+      row.voertuigtype === newRow.voertuigtype &&
+      row.operator_system_id === newRow.operator_system_id
+    );
+    let updatedTable = [...settingsTable];
+
+    if (mode === 'normal') {
+      // Find the latest record (by valid_from_iso8601)
+      const latest = matchingRows.reduce((acc, row) => {
+        if (!acc) return row;
+        return moment(row.valid_from_iso8601).isAfter(acc.valid_from_iso8601) ? row : acc;
+      }, null as settingsrow | null);
+      if (latest && latest.valid_until_iso8601 === '9999-12-31') {
+        // Set its end date to today
+        updatedTable = updatedTable.map(row =>
+          row === latest
+            ? { ...row, valid_until_iso8601: moment().format('YYYY-MM-DD') }
+            : row
+        );
+      }
+      // Add new row with indefinite end date
+      updatedTable.push({
+        ...latest,
+        ...newRow,
+        valid_until_iso8601: '9999-12-31',
+      });
+    } else if (mode === 'admin') {
+      // For now, just add the new row (could be update logic here)
+      updatedTable.push({
+        ...matchingRows[0],
+        ...newRow,
+        valid_until_iso8601: newRow.valid_until_iso8601 || '9999-12-31',
+      });
+    }
+    return updatedTable;
   }
   
   
