@@ -47,7 +47,6 @@ export const getOwnOrganisation = async (token) => {
   const response = await fetch(url, options);
 
   const organisation = await response.json() as OrganisationType;
-  console.log('*** organisation', organisation)
   return organisation;
 }
 

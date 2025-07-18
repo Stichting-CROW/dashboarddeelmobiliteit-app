@@ -31,22 +31,23 @@ function FilterbarStart({
     return state.authentication.token;
   });
 
-  useEffect(() => {
-    const fetchOrganisation = async () => {
-      const organisation = await getOwnOrganisation(token);
-      setOrganisation(organisation);
-    }
+  // useEffect(() => {
+  //   const fetchOrganisation = async () => {
+  //     const organisation = await getOwnOrganisation(token);
+  //     setOrganisation(organisation);
+  //   }
 
-    fetchOrganisation();
-  }, [token])
+  //   fetchOrganisation();
+  // }, [token])
 
   const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
 
-  const filterGebied = useSelector((state: StateType) => {
-    return state.filter ? state.filter.gebied : null
-  });
+  // const filterGebied = useSelector((state: StateType) => {
+  //   return state.filter ? state.filter.gebied : null
+  // });
+
 
   const hidePlaats = gebieden.length <= 1;
 

@@ -25,7 +25,7 @@ import {
 // import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
 
 function StartPage(props) {
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   // const filter = useSelector((state: StateType) => state.filter);
 
@@ -190,6 +190,9 @@ function StartPage(props) {
 
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
+
+  console.log('*** render startpage', new Date())
+
   return (
     <div className="StartPage pt-4 pb-24">
       <Permits />

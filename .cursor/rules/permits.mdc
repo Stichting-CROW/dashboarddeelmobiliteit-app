@@ -1,0 +1,58 @@
+# extra feature: limieten per aanbieder/gebied/voertuigtype 
+
+
+# configuratie:
+- voor een combinatie van aanbieder, voertuigtype en gebied geldt een minimaal en maximaal aantal voertuigen dat gestald mag worden en een maximale parkeerduur (uur)
+  - 0 = geen limiet voor min/max/stallingsduur
+- deze limieten worden historisch vastgelegd (ie er zijn intervallen [van datum, tot datum] waarvoor deze limieten gelden)
+
+# statistieken:
+- voor een combinatie van aanbieder, voertuigtype en gebied wordt een huidig aantal voertuigen geregistreerd
+- deze aantallen kunnen per tijdsinterval worden opgevraag [van datum/tijd, tot datum/tijd]
+- per interval kunnen kpis worden berekend waaronder:
+    - aantal voertuigen dat maximaal gestald mag worden 
+    - aantal voertuigen dat gestald is
+    - percentage van het maximaal aantal voertuigen dat gestald mag worden
+    - aantal voertuigen dat gestald moet worden
+    - bezetting: "onder minimumwaarde", "binnen limiet", "boven limiet"
+- in de toekomst kunnen meer kpis worden toegevoegd
+  - algemeen: typen kpis:
+    - absoluut getal (bv aantal, minimum aantal, aantal overschrijding)
+    - relatief getal (percentage overschrijding)
+    - categorien (wel/niet binnen limieten, onder/in/boven capaciteit)
+
+# backend
+
+Bevraging van de backend via een API
+- instellen / beheren van de limieten
+- GET / POST / PUT / DELETE
+key = gebied / aanbieder / van - tot (ISO 
+
+
+- opvragen huidige waarden
+- opvragen statistiek
+
+# frontend
+
+# weergaven huidige status (aanzicht gemeente)
+
+De pagina heeft een secties voor ieder voertuigtype (een kolom, een rij per secie)
+
+In ieder blok wordt getoond (van boven naar onder):
+- logo van de aanbieder horizontaal gecentreerd 
+- naam van de aanbieder horizontaal gecentreerd 
+- Kpi 1
+- Kpi 2
+- etc.
+Alle blokken hebben dezelfde afmeting en worden in een flow weergave (rij vullen, indien vol door naar volgende rij) weergeven binnen de sectie
+
+
+
+
+![Permits Design](permits-design-1.png)
+
+[Permits Component](src/components/Permits/Permits.tsx)
+
+
+# kpi descriptions
+ok, expand the control: if a min is given (not undefined) there is a bottom limit. If a max is given (not undefined) there is a top limit. the max value in the bar is the maximum of (max, current). annotate the min and the max values above the bar, annotate the current below the bar. Bar color if the section upto current is red when outside of the given range, green when inside of the given range. bar background (above the current value is grey). Fonts are small and subtle. Title is displayed above the min/max labels in a slightly larger bold font

@@ -33,7 +33,6 @@ import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
 import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
-import Permits from './components/Permits/Permits';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
 import Menu from './components/Menu';
@@ -190,10 +189,10 @@ function App() {
     }
     dispatch({type: 'LAYER_SET_DISPLAYMODE', payload});
 
-  }, [pathName, uriParams]);
+  }, [pathName, uriParams, dispatch]);
 
   useEffect(() => {
-    (async () => {
+    const updateACL = async () => {
       try {
         const theAcl = await getAcl(token);
         if(! theAcl) return;
@@ -206,13 +205,15 @@ function App() {
       } catch(err) {
         console.error(err);
       }
-    })();
-  }, [token])
+    }
 
-  const test = useSelector((state: StateType) => {
-    console.log('*** test', state)
-    return state.authentication;
-  });
+    updateACL();
+  }, [token, dispatch])
+
+  // const test = useSelector((state: StateType) => {
+  //   console.log('*** test', state)
+  //   return state.authentication;
+  // });
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -234,12 +235,11 @@ function App() {
     return state.filter;
   });
   
-  const layers = useSelector((state: StateType) => {
-    return state.layers;
-  });
+  // const layers = useSelector((state: StateType) => {
+  //   return state.layers;
+  // });
 
   const displayMode = useSelector((state: StateType) => {
-    console.log('*** displayMode', state.layers.displaymode)
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
@@ -325,6 +325,9 @@ function App() {
     isLoggedIn,
     metadata.zones_loaded,
     filter,
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -342,6 +345,9 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -570,13 +576,6 @@ function App() {
               <Overlay>
                 <Misc>
                   <ActiveFeeds />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/permits" element={
-              <Overlay>
-                <Misc>
-                  <Permits />
                 </Misc>
               </Overlay>
             } />

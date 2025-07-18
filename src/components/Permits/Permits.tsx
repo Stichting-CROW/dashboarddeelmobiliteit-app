@@ -1,95 +1,146 @@
 import { useEffect, useState } from 'react';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
+import PermitsCard from './PermitsCard';
 
-import {
-  getProvider,
-  getProviderColor,
-} from '../../helpers/providers.js';
+import { StateType } from '../../types/StateType';
+
+import { getAvailableOperators } from '../../api/service-areas';
+import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
+import { generateMockSettingstable, generateMockOccupancyCurrent } from './PermitsMockData';
+
+// first generate a virtual table with the settings
+export interface settingsrow {
+  municipality: string;
+  voertuigtype: string;
+  operator_system_id: string;
+  valid_from_iso8601: string;
+  valid_until_iso8601: string;
+  min_capacity: number;
+  max_capacity: number;
+  min_pct_duration_correct: number;
+  min_rides_per_vehicle_pct_correct: number;
+  max_vehicles_illegally_parked_count: number;  
+}
+export interface APIPermitResultCurrent {
+  id: number;
+
+  // bin
+  municipality: string;
+  voertuigtype: string;
+  operator_system_id: string;
+
+  // settings
+  valid_from_iso8601: string;
+  valid_until_iso8601: string;  
+  min_capacity: number;
+  max_capacity: number;
+  min_pct_duration_correct: number;
+  min_rides_per_vehicle_pct_correct: number;
+  max_vehicles_illegally_parked_count: number;
+
+  // kpis
+  current_capacity: number;
+  pct_duration_correct : number;
+  pct_rides_per_vehicle_correct : number;
+  vehicles_illegally_parked_count: number;
+}
 
 const Permits = () => {
-  const [permits, setPermits] = useState<any[]>([]);
+  const aanbieders = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
+
+  const activeorganisation = useSelector((state: StateType) => state.filter.gebied);
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);  
+
+  const [permits, setPermits] = useState<APIPermitResultCurrent[]>([]);
+
+  const [mockSettingstable, setMockSettingstable] = useState<settingsrow[]>([]);
+  const [availableOperatorSystemIds, setAvailableOperatorSystemIds] = useState<string[]>([]);
+
+  // useEffect(() => {
+  //   getAvailableOperators(activeorganisation).then((availableOperatorSystemIds) => {
+  //     console.log('*** availableOperatorSystemIds', availableOperatorSystemIds)
+  //     setAvailableOperatorSystemIds(availableOperatorSystemIds.operators_with_service_area);
+  //   });
+  // }, [activeorganisation]);
+
+  useEffect(() => {
+    const fetchMockSettingstable = async () => {
+      const mockSettingstable = await generateMockSettingstable(activeorganisation, voertuigtypes.map((voertuigtype) => voertuigtype.id), aanbieders);
+      setMockSettingstable(mockSettingstable);
+    }
+
+    fetchMockSettingstable();
+  }, [activeorganisation, voertuigtypes, aanbieders]);
 
   useEffect(() => {
     // TODO: Replace with actual API call to fetch permits
     const fetchPermits = async () => {
       // This is a placeholder - replace with actual API call
-      const mockPermits: any[] = [
-        {
-          id: 1,
-          municipality: "Utrecht",
-          operator: "check",
-          valid_from: "2024-01-01",
-          valid_until: "2025-10-31"
-        },
-        {
-          id: 3,
-          municipality: "Utrecht",
-          operator: "felyx",
-          valid_from: "2024-06-01",
-          valid_until: "2025-12-31"
-        },
-        {
-          id: 2,
-          municipality: "Utrecht",
-          operator: "donkey",
-          valid_from: "2024-01-01",
-          valid_until: "2025-12-31"
-        },
-        {
-          id: 4,
-          municipality: "Utrecht",
-          operator: "cykl",
-          valid_from: "2024-02-01",
-          valid_until: "2025-12-31"
-        },
-      ];
+      const mockPermits: APIPermitResultCurrent[] = generateMockOccupancyCurrent(
+        mockSettingstable,
+        availableOperatorSystemIds,
+        moment().format('YYYY-MM-DD')
+      );
+
       setPermits(mockPermits);
     };
 
     fetchPermits();
-  }, []);
+  }, [mockSettingstable, availableOperatorSystemIds]);
+
+  if(activeorganisation === "") {
+    return (
+      <div>
+        <h1 className="text-4xl font-bold mb-8">
+          Voertuigplafonds
+        </h1>
+        <span className="text-gray-600">
+          Selecteer een plaats om voertuigplafonds te bekijken
+        </span>
+      </div>
+    )
+  }
+
+  const renderPermitCardsForVoertuigtype = (voertuigtype: {id: string, name: string}) => {
+    const permitsForVoertuigtype = permits.filter((permit) => permit.voertuigtype === voertuigtype.id);
+    const prettyVehicleTypeName = getPrettyVehicleTypeName(voertuigtype.id) || `Onbekend`;
+    const logoUrl = getVehicleIconUrl(voertuigtype.id);
+
+    return (
+      <div key={'voertuigtype-' + voertuigtype.id} className="mb-8">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <img
+            src={getVehicleIconUrl(voertuigtype.id)}
+            alt={voertuigtype.name}
+            className="inline-block w-8 h-8 object-contain"
+            style={{ verticalAlign: 'middle' }}
+          />
+          {voertuigtype.name}
+        </h2>
+        {/* Cards: flex row, wrap, gap */}
+        <div className="flex flex-wrap gap-6">
+          {permitsForVoertuigtype.map((permit) => (
+            <PermitsCard key={'permits-card-' + permit.id} permit={permit} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1 className="text-4xl font-bold mb-8">
+      <div className="text-4xl font-bold mb-8">
         Voertuigplafonds
-      </h1>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {permits.map((permit) => {
-          const provider = getProvider(permit.operator);
-          return (
-            <div key={permit.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center mb-4">
-                <img 
-                  src={provider.logo}
-                  alt={`${provider.name} logo`}
-                  className="w-12 h-12 object-contain mr-4"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/48?text=Logo';
-                  }}
-                />
-                <h2 title={provider.name} className="text-xl font-semibold whitespace-nowrap text-ellipsis overflow-hidden">
-                  {provider.name}
-                </h2>
-              </div>
-              
-              <div className="space-y-2">
-                <div>
-                  <span className="text-gray-600">Van:</span>
-                  <span className="ml-2">{moment(permit.valid_from).format('DD-MM-YYYY')}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Tot:</span>
-                  <span className="ml-2">{moment(permit.valid_until).format('DD-MM-YYYY')}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Gemeente:</span>
-                  <span className="ml-2">{permit.municipality}</span>
-                </div>
-              </div>
-            </div>
-        )})}
+      <div>
+        {/* Outer: stack voertuigtypes vertically */}
+        {voertuigtypes.map((voertuigtype) => {
+          return renderPermitCardsForVoertuigtype(voertuigtype);
+        })}
       </div>
     </div>
   );
