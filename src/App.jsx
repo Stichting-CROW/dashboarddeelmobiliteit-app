@@ -45,6 +45,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
+import GuestIntroduction from './components/GuestIntroduction/GuestIntroduction';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -473,7 +474,6 @@ function App() {
                 } />
               </> : null
             }
-            <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
@@ -482,10 +482,19 @@ function App() {
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
 
+            <Route exact path="/" element={<>
+              <ContentPage>
+                <StartPage />
+              </ContentPage>
+              {/* We need this for the filterbar: */}
+              {renderMapElements()}
+            </>} />
+
             <Route exact path="/start" element={<>
               <ContentPage>
                 <StartPage />
               </ContentPage>
+              {/* We need this for the filterbar: */}
               {renderMapElements()}
             </>} />
             <Route exact path="/stats/overview" element={<>
@@ -585,7 +594,19 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          <Route exact path="/" element={renderMapElements()} />
+
+          <Route exact path="/" element={<>
+            <ContentPage forceFullWidth={true}>
+              <GuestIntroduction />
+            </ContentPage>
+          </>} />
+
+          <Route exact path="/start" element={<>
+            <ContentPage forceFullWidth={true}>
+              <GuestIntroduction />
+            </ContentPage>
+          </>} />
+
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />

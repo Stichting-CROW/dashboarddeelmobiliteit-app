@@ -164,6 +164,12 @@ function Menu({
     return <>
       <MenuItem
         pathName={pathName}
+        text={'Start'}
+        path={'/start'}
+        icon={'/images/components/Menu/start.svg'}
+      />
+      <MenuItem
+        pathName={pathName}
         text={'Aanbod'}
         path={'/map/park'}
         icon={'/images/components/Menu/aanbod.svg'}
