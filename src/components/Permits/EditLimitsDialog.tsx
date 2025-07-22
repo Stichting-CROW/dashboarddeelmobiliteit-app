@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { getProvider } from '../../helpers/providers.js';
 import { getVehicleIconUrl, getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import { settingsrow } from './Permits';
 
 interface EditLimitsDialogProps {
   municipality: string;
@@ -10,8 +12,17 @@ interface EditLimitsDialogProps {
   mode: 'normal' | 'admin';
   onOk: (formData: any) => void;
   onCancel: () => void;
-  settingsTable: any[];
+  settingsTable: settingsrow[];
 }
+
+// Helper: get 'niet actief' value for each field
+const NIET_ACTIEF = {
+  min_capacity: 0,
+  max_capacity: 99999999,
+  min_pct_duration_correct: 0,
+  min_pct_rides_per_vehicle_correct: 0,
+  max_vehicles_illegally_parked_count: 0,
+};
 
 const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provider_system_id, vehicle_type, mode, onOk, onCancel, settingsTable }) => {
   // Initial date logic
@@ -35,17 +46,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provi
   const [minPctRidesActive, setMinPctRidesActive] = useState(true);
   const [maxIllegallyParkedActive, setMaxIllegallyParkedActive] = useState(true);
 
-  // Helper: get 'niet actief' value for each field
-  const NIET_ACTIEF = {
-    min_capacity: 0,
-    max_capacity: 99999999,
-    min_pct_duration_correct: 0,
-    min_pct_rides_per_vehicle_correct: 0,
-    max_vehicles_illegally_parked_count: 0,
-  };
-
   // Simulate backend fetch: find the correct record for the keys and startDate
-  const findCurrentRecord = () => {
+  const findCurrentRecord = useCallback(() => {
     return settingsTable.find(row =>
       row.municipality === municipality &&
       row.operator_system_id === provider_system_id &&
@@ -53,14 +55,14 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provi
       moment(startDate).isSameOrAfter(row.valid_from_iso8601) &&
       moment(startDate).isBefore(row.valid_until_iso8601)
     );
-  };
+  }, [municipality, provider_system_id, vehicle_type, startDate, settingsTable]);
 
   const [currentRecord, setCurrentRecord] = useState<any | null>(null);
 
   // Fetch current record on mount and when startDate changes
   useEffect(() => {
     setCurrentRecord(findCurrentRecord());
-  }, [settingsTable, municipality, provider_system_id, vehicle_type, startDate]);
+  }, [settingsTable, municipality, provider_system_id, vehicle_type, startDate, findCurrentRecord]);
 
   // Set initial actief state based on huidig value
   useEffect(() => {
@@ -70,7 +72,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provi
     setMinPctDurationActive(currentRecord.min_pct_duration_correct !== NIET_ACTIEF.min_pct_duration_correct);
     setMinPctRidesActive(currentRecord.min_rides_per_vehicle_pct_correct !== NIET_ACTIEF.min_pct_rides_per_vehicle_correct);
     setMaxIllegallyParkedActive(currentRecord.max_vehicles_illegally_parked_count !== NIET_ACTIEF.max_vehicles_illegally_parked_count);
-  }, [currentRecord]);
+  }, [currentRecord, provider_system_id, vehicle_type, municipality, startDate, settingsTable]);
 
   // Set showEndDate and endDate based on currentRecord's valid_until_iso8601
   useEffect(() => {
@@ -79,17 +81,18 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provi
     setEndDate(currentRecord.valid_until_iso8601 !== '9999-12-31' ? currentRecord.valid_until_iso8601 : '');
   }, [currentRecord]);
 
-  // Log the huidig record whenever it changes
-  useEffect(() => {
-    if (currentRecord) {
-      console.log('Selected huidig record for startdate', startDate, JSON.stringify(currentRecord, null, 2));
-    }
-  }, [currentRecord, startDate]);
-
   // Provider and vehicle type info
   const provider = getProvider(provider_system_id);
-  const providerLogo = provider?.logo;
+  console.log(provider);
+
   const providerName = provider?.name || provider_system_id;
+  const providerLogo = provider ? provider.logo : createSvgPlaceholder({
+    width: 48,
+    height: 48,
+    text: providerName.slice(0, 2),
+    bgColor: '#0F1C3F',
+    textColor: '#7FDBFF',
+  });
   const vehicleTypeLogo = getVehicleIconUrl(vehicle_type);
   const vehicleTypeName = getPrettyVehicleTypeName(vehicle_type) || vehicle_type;
 
@@ -196,13 +199,22 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ municipality, provi
         {/* Provider column */}
         <div className="flex flex-col items-center">
           <div className="min-h-[64px] flex items-center justify-center">
-            {providerLogo ? (
-              <img src={providerLogo} alt={providerName} className="w-16 h-16 object-contain mb-1" />
-            ) : (
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 mb-1">
-                {providerName.slice(0, 2)}
-              </div>
-            )}
+              <img src={providerLogo} alt={providerName} className="w-16 h-16 object-contain mb-1" 
+                onError={(e) => {
+                    e.currentTarget.src = createSvgPlaceholder({
+                    width: 48,
+                    height: 48,
+                    text: providerName.slice(0, 2),
+                    bgColor: '#0F1C3F',
+                    textColor: '#7FDBFF',
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    fontFamily: 'Arial, sans-serif',
+                    dy: 7,
+                    radius: 4,
+                    });
+                  }}
+               />
           </div>
           <div className="text-center text-base font-medium text-gray-800 mt-1">{providerName}</div>
         </div>

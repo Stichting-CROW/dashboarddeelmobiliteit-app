@@ -6,7 +6,7 @@ import EditLimitsDialog from './EditLimitsDialog';
 
 import { StateType } from '../../types/StateType';
 
-import { getAvailableOperators } from '../../api/service-areas';
+// import { getAvailableOperators } from '../../api/service-areas';
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
 import { generateMockSettingstable, generateMockOccupancyCurrent, updateMockSettingsTable } from './PermitsMockData';
 
@@ -149,19 +149,22 @@ const Permits = () => {
 
   const renderPermitCardsForVoertuigtype = (voertuigtype: {id: string, name: string}) => {
     const permitsForVoertuigtype = permits.filter((permit) => permit.voertuigtype === voertuigtype.id);
-    const prettyVehicleTypeName = getPrettyVehicleTypeName(voertuigtype.id) || `Onbekend`;
-    const logoUrl = getVehicleIconUrl(voertuigtype.id);
+
+    let voertuigLogo = getVehicleIconUrl(voertuigtype.id);
+    if(!voertuigLogo) {
+      voertuigLogo = getVehicleIconUrl('other');
+    }
 
     return (
       <div key={'voertuigtype-' + voertuigtype.id} className="mb-8">
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
           <img
-            src={getVehicleIconUrl(voertuigtype.id)}
+            src={voertuigLogo}
             alt={voertuigtype.name}
             className="inline-block w-8 h-8 object-contain"
             style={{ verticalAlign: 'middle' }}
           />
-          {voertuigtype.name}
+          {getPrettyVehicleTypeName(voertuigtype.id) || `Onbekend`}
         </h2>
         {/* Cards: flex row, wrap, gap */}
         <div className="flex flex-wrap gap-6">
