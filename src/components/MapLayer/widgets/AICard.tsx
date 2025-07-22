@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SlideBox from '../../SlideBox/SlideBox.jsx';
 import { Input } from '../../ui/input';
 import { Button } from '../../ui/button';
-import { LLMPrompt } from '../../../ai-agent/LLMPrompt';
+import { MockLlmService } from '../../../ai-agent/mockLlmService';
 
 interface ConversationMessage {
   role: 'user' | 'assistant';
@@ -10,42 +10,53 @@ interface ConversationMessage {
 }
 
 const exampleQuestions = [
-  "Hoe kan ik het aantal verhuringen in de afgelopen 24 uur bekijken voor de gemeente Utrecht?",
-  "Hoe kan ik het aanbod voor aanbieder check zien in Den Haag?",
+  "Verhuringen afgelopen week",
+  "Aanbod in Amsterdam",
+  "Verhuringen in Utrecht",
 ];
 
 export const AICard = () => {
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [llmService] = useState(() => new MockLlmService());
 
   const createPrompt = async(userMsg?: string) => {
     const msg = userMsg !== undefined ? userMsg : input.trim();
     if (!msg) return;
     setInput('');
-    let prompt = LLMPrompt(msg, messages.map(msg => `${msg.role}: ${msg.content}`).join('\n'));
-    await sendPrompt(prompt, msg);
+    
+    // Add user message to messages array
+    setMessages(prev => [...prev, { role: 'user', content: msg }]);
+    
+    await sendPrompt(msg);
   }
 
-  const sendPrompt = async (prompt: string, userMsg?: string) => {
+  const sendPrompt = async (userMsg: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg || input })
-      });
-      if (!response.ok) throw new Error('LLM API error');
-      const data = await response.json();
-      setMessages(data.conversation as ConversationMessage[]);
+      const conversation = await llmService.sendMessage(userMsg);
+      
+      // Get the latest assistant message
+      const lastMessage = conversation[conversation.length - 1];
+      if (lastMessage.role === 'assistant') {
+        setMessages(prev => [...prev, { role: 'assistant', content: lastMessage.content }]);
+      }
     } catch (err) {
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: 'Er is een fout opgetreden bij het ophalen van het antwoord van de AI.' }
-      ]);
+      console.error('AI service error:', err);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, er is een fout opgetreden. Probeer het opnieuw.' 
+      }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const resetConversation = () => {
+    setMessages([]);
+    setInput('');
+    llmService.clearConversation();
   };
 
   return (
@@ -64,7 +75,11 @@ export const AICard = () => {
         )}
         {messages.map((msg, idx) => (
           <div key={idx} className={`mb-2 text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-            <span className={msg.role === 'user' ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded' : 'bg-gray-200 text-gray-800 px-2 py-1 rounded'}>
+            <span className={`px-2 py-1 rounded ${
+              msg.role === 'user' 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-gray-200 text-gray-800'
+            }`}>
               {msg.content}
             </span>
           </div>
@@ -90,7 +105,7 @@ export const AICard = () => {
         <Button onClick={() => createPrompt()} disabled={isLoading || !input.trim()}>
           Verstuur
         </Button>
-        <Button onClick={() => { setMessages([]); setInput(''); }} variant="secondary" disabled={isLoading}>
+        <Button onClick={resetConversation} variant="secondary" disabled={isLoading}>
           Reset
         </Button>
       </div>
