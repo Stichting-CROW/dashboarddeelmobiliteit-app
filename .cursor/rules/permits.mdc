@@ -1,0 +1,111 @@
+# extra feature: limieten per aanbieder/gebied/voertuigtype 
+
+
+# configuratie:
+- voor een combinatie van aanbieder, voertuigtype en gebied geldt een minimaal en maximaal aantal voertuigen dat gestald mag worden en een maximale parkeerduur (uur)
+  - 0 = geen limiet voor min/max/stallingsduur
+- deze limieten worden historisch vastgelegd (ie er zijn intervallen [van datum, tot datum] waarvoor deze limieten gelden)
+
+# statistieken:
+- voor een combinatie van aanbieder, voertuigtype en gebied wordt een huidig aantal voertuigen geregistreerd
+- deze aantallen kunnen per tijdsinterval worden opgevraag [van datum/tijd, tot datum/tijd]
+- per interval kunnen kpis worden berekend waaronder:
+    - aantal voertuigen dat maximaal gestald mag worden 
+    - aantal voertuigen dat gestald is
+    - percentage van het maximaal aantal voertuigen dat gestald mag worden
+    - aantal voertuigen dat gestald moet worden
+    - bezetting: "onder minimumwaarde", "binnen limiet", "boven limiet"
+- in de toekomst kunnen meer kpis worden toegevoegd
+  - algemeen: typen kpis:
+    - absoluut getal (bv aantal, minimum aantal, aantal overschrijding)
+    - relatief getal (percentage overschrijding)
+    - categorien (wel/niet binnen limieten, onder/in/boven capaciteit)
+
+# backend
+
+Bevraging van de backend via een API
+- instellen / beheren van de limieten
+- GET / POST / PUT / DELETE
+key = gebied / aanbieder / van - tot (ISO 
+
+
+- opvragen huidige waarden
+- opvragen statistiek
+
+# frontend
+
+# weergaven huidige status (aanzicht gemeente)
+
+De pagina heeft een secties voor ieder voertuigtype (een kolom, een rij per secie)
+
+In ieder blok wordt getoond (van boven naar onder):
+- logo van de aanbieder horizontaal gecentreerd 
+- naam van de aanbieder horizontaal gecentreerd 
+- Kpi 1
+- Kpi 2
+- etc.
+Alle blokken hebben dezelfde afmeting en worden in een flow weergave (rij vullen, indien vol door naar volgende rij) weergeven binnen de sectie
+
+
+
+
+![Permits Design](permits-design-1.png)
+
+[Permits Component](src/components/Permits/Permits.tsx)
+
+# kpi descriptions
+ok, expand the control: if a min is given (not undefined) there is a bottom limit. If a max is given (not undefined) there is a top limit. the max value in the bar is the maximum of (max, current). annotate the min and the max values above the bar, annotate the current below the bar. Bar color if the section upto current is red when outside of the given range, green when inside of the given range. bar background (above the current value is grey). Fonts are small and subtle. Title is displayed above the min/max labels in a slightly larger bold font
+
+# Edit limits component
+
+Ok, add a sprocket icon (alt text) "Voertuigplafonds bewerken" to the top right of each permitcard. When it is clicked a modal popup edit dialog is opened that contains the edit limit component.
+- make the state management + component itself part of the Permits component
+- make sure the limit data is reloaded when edits are made
+
+# Edit limits component
+
+In the edit limits component, the limits for all vehicle types can be set or modified for a given municipality / operator_system_id / vehicle type combination
+
+It has the following fields:
+start date
+end date + indefinite yes/no (when checked, no end date is required, default checked)
+ - (in normal mode, always set to indefinite, enddate and checkbox disabled, otherwise enabled]
+Minimum Capacity: number;
+Maximum Capacity: number;
+Minimum Percentage Duration Correct: number 0..100;
+Minimum Percentage Rides Per Vehicle Correct: number 0..100;
+Maximum Illegally Parked Vehicles: number;  
+
+button ok (enabled when the entered data is correct)
+button cancel
+
+Component layout: single column with rows 
+- a row with the provider logo (centered horizontally)
+- a row with the provider name (centered horizontally)
+- a row with the vehicle type logo (centered horizontally)
+- a row with the vehicle type description (centered horizontally)
+- a row the start / end date entry + checkbox indefinite:
+- a row for ech of the other fields 
+- a row with ok and cancel buttons
+
+Initial data
+When loaded, start date is set to tomorrow, end date to indefinite 
+when the start date is set to a date in the future, the count edit boxes reflect the most recent values for each vehicle type, otherwise the edit boxes are left empty
+
+The form has two modes: "normal" and "administrator"
+
+In normal mode, only a new limit entry can be added (starting tomorrow or a day in the future, ending after its start date or not ending at all when the indefinite checkbox is checked)
+When ok is pressed the backend api updates the related tables to the given form data
+ - for the most current record of the given municipality/ operator_system_id: if the end date for the latest record is indefinite, it is set to today () otherwise no action
+ - a new record is created with the given form data and an indefinite end date (for the given municipality/ operator_system_id)
+
+In admin mode, new limits entries can be made (see above) and existing limits can be updated. 
+In admin mode start and end date + indefinite checkbox are enabled and a time interval can be set
+When ok is pressed the backend api updates the related tables to the given form data. 
+
+Do development in steps:
+- first create the blank dialog with ok/cancel buttons and the general flow
+- next create the edit limits component with date management and provider / vehicle type logo
+- finally add the other fields
+
+The backend api is not yet available so we need to simulate that using the existing / new mock code

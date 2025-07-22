@@ -75,7 +75,11 @@ NOTES:
 
 1. Link remote database to local port
 
+    OLD, doesn't work anymore:
     ssh root@167.99.219.233 -L 5431:10.133.75.95:5432
+
+    NEW, 2025-05: 
+    ssh root@auth.dashboarddeelmobiliteit.nl -L 5431:localhost:5432
 
 2. Open postbird (a postgresql GUI)
 
@@ -114,7 +118,7 @@ If -in example- the API pod is 'broken', run this:
 
     kubectl delete pod <pod id>
 
-The pod gets destroyed andn restarts automatically.
+The pod gets destroyed and restarts automatically.
 
 ## Export raw data manually
 

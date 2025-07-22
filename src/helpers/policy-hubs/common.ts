@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const getFetchOptions = (token?) => {
     if(token) {
       return {
@@ -85,3 +87,110 @@ export const sortZonesInPreferedOrder = (zones) => {
   return groupedZonesToReturn;
 }
 
+export const isHubInPhase = (hub: any, phase: string, visible_layers: any) => {
+  // CONCEPT
+  if(phase === 'concept') {
+    // Is it a hub, and do we want to show hubs?
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-concept') > -1) {
+      // Is this a concept that is not yet published?
+      const isConcept = hub.phase === 'concept' && hub.published_date === null && hub.effective_date === null;
+
+      // Is this a retirement concept?
+      const isRetirementConcept = hub.phase === 'retirement_concept' && hub.published_retire_date === null && hub.retire_date === null;// && hub.prev_geographies?.length > 0;
+
+      return (isConcept)
+        || (isRetirementConcept)
+        // TODO: In concept phase, hide retirement_concept phase if there's a follow up committed concept
+    }
+    else if(hub.geography_type === 'monitoring' && visible_layers.indexOf('monitoring-concept') > -1) {
+      return (hub.phase === 'concept')
+    }
+    else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-concept') > -1) {
+      return (hub.phase === 'concept')
+        || (hub.phase === 'retirement_concept')
+    }
+  }
+
+  // COMMITTED CONCEPT
+  else if(phase === 'committed_concept') {
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-committed_concept') > -1) {
+      return (hub.phase === 'committed_concept')
+        || (hub.phase === 'committed_retirement_concept')
+      ;
+    } else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-committed_concept') > -1) {
+      return (hub.phase === 'committed_concept')
+        || (hub.phase === 'committed_retirement_concept')
+      ;
+    }
+  }
+
+  // PUBLISHED
+  else if(phase === 'published') {
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-published') > -1) {
+      return (hub.phase === 'published')
+        || (hub.phase === 'published_retirement')
+        // In published phase: only show retirement concept with effective date >= now()
+        || (hub.phase === 'retirement_concept' && moment(moment()).isBefore(hub.effective_date))
+        ;
+    } else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-published') > -1) {
+      return (hub.phase === 'published')
+        || (hub.phase === 'published_retirement')
+        // In published phase: only show retirement concept with effective date >= now()
+        // || (hub.phase === 'X' && moment(moment()).isBefore(hub.effective_date))
+        ;
+    }
+  }
+
+  // ACTIVE
+  else if(phase === 'active') {
+    // Is it a hub, and do we want to show hubs?
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-active') > -1) {
+      return (hub.phase === 'active')
+        // Show retirement concept if hub is not yet retired
+        // As long as retirement concepts are not active, these should be still visible in published/active
+        || (hub.phase === 'retirement_concept' && moment(hub.effective_date).isBefore(moment()))
+        // Show active retirement if hub is retired
+        || (hub.phase === 'active_retirement')
+        // In active phase: only show retirement concept with effective date < now()
+        || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.retire_date))
+        || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.retire_date))
+        ;
+    } else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-active') > -1) {
+      return (hub.phase === 'active')
+        || (hub.phase === 'active_retirement')
+        // In active phase: only show retirement concept with effective date < now()
+        || (hub.phase === 'committed_retirement_concept' && moment(moment()).isBefore(hub.retire_date))
+        || (hub.phase === 'published_retirement' && moment(moment()).isBefore(hub.retire_date))
+        ;
+    }
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
+      return (hub.phase === 'archived');
+    }
+    else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-archived') > -1) {
+      return (hub.phase === 'archived');
+    }
+  }
+
+  // ARCHIVED
+  else if(phase === 'archived') {
+    if(hub.geography_type === 'stop' && visible_layers.indexOf('hub-archived') > -1) {
+      return (hub.phase === 'archived');
+    }
+    else if(hub.geography_type === 'no_parking' && visible_layers.indexOf('verbodsgebied-archived') > -1) {
+      return (hub.phase === 'archived');
+    }
+  }
+
+  return false;
+}
+
+export const deDuplicateHubs = (hubs) => {
+  return hubs.filter(hub => {
+    // Check if any other hub has this hub's zone_id in its prev_geography_ids
+    const isReplacedByNewer = hubs.some(otherHub => 
+      otherHub.prev_geographies && 
+      otherHub.prev_geographies.includes(hub.geography_id)
+    );
+    return ! isReplacedByNewer;
+  });
+}

@@ -1,0 +1,24 @@
+.center-bottom {
+  position: absolute;
+  bottom: 144px;
+  /* Make left position relative to the center of the map */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: margin 0.6s;
+  transition-timing-function: ease-in;
+}
+
+.filter-open .center-bottom {
+  transition: margin 0.4s;
+  transition-timing-function: ease-out;
+  /* Make left position relative to the filterbar */
+  transform: translateX(-50%);
+  margin-left: calc(324px/2);
+  
+}
+
+@media (min-width: 640px) {
+  .center-bottom {
+    bottom: 78px;
+  }
+}

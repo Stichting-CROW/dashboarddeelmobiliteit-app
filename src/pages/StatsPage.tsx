@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'; // , {useEffect, useState }
+import React, {useEffect, useMemo} from 'react'; // , {useEffect, useState }
 import './StatsPage.css'
 
 import {
@@ -25,7 +25,7 @@ import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
 function StatsPage(props) {
   const dispatch = useDispatch()
 
-  const filter = useSelector(state => state.filter);
+  const filter = useSelector((state: StateType) => state.filter);
 
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -34,6 +34,8 @@ function StatsPage(props) {
   const filterZones = useSelector((state: StateType) => {
     return state.filter ? state.filter.zones : 0;
   });
+
+  const gebieden = useSelector((state: StateType) => state.metadata?.gebieden)
 
   const setAggregationLevel = (newlevel) => {
     dispatch({
@@ -168,6 +170,20 @@ function StatsPage(props) {
     return ret;
   }
 
+  const getPageTitle = useMemo(() => {
+    if(filterZones) {
+      const zoneIds = filterZones.split(',').map(id => parseInt(id));
+      const zoneObjects = zones.filter(zone => zoneIds.includes(zone.zone_id));
+      return zoneObjects?.map(zone => zone.name).join(', ');
+    }
+      
+    if(filter.gebied) {
+      const gebied = gebieden.find(gebied => gebied.gm_code === filter.gebied);
+      return gebied?.name;
+    }
+    return 'Ontwikkeling';
+  }, [filterZones, filter.gebied, zones, gebieden]);
+
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
@@ -184,10 +200,16 @@ function StatsPage(props) {
         </InfoTooltip>)}
       </div>
 
+      {/* Show a title for the chart, that is the area currently selected (gebied or zones) */}
+      <h1 className="text-4xl my-2">
+        {getPageTitle}
+      </h1>
+
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">
           <BeschikbareVoertuigenChart
             filter={filter}
+            config={{}}
             title="Beschikbare voertuigen"
             />
         </div>

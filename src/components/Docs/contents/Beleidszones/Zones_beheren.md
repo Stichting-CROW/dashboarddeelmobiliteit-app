@@ -5,7 +5,6 @@ Wil je zones toevoegen, aanpassen of verwijderen? Doe dit als volgt:
 1. Ga naar [Zones](/map/zones)
 2. Klik links in het menu op het potlood-icoon<br /><br />![img](https://i.imgur.com/b1ehHu5.png)<br /><br />
 
-
 ### Toevoegen
 
 3. Klik op **Nieuwe zone aanmaken**
@@ -18,3 +17,13 @@ Wil je zones toevoegen, aanpassen of verwijderen? Doe dit als volgt:
 7. Klik op **Opslaan**
 
 ![img](https://i.imgur.com/LFY7xHt.png)
+
+### Zoeken naar een hub of adres
+
+In de zoekbalk boven de kaart kan je zoeken naar een hub of adres.
+
+1. Klik op de zoekbalk
+2. Typ een hubnaam of adres
+3. Klik op een resultaat
+
+De kaart zal naar de geselecteerde hub of adres zoomen.

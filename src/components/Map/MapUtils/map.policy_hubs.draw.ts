@@ -18,9 +18,15 @@ const initMapboxDraw = (map) => {
 }
 
 const initEventHandlers = (map, updateFunction: Function) => {
-    map.on('draw.create', updateFunction);
-    map.on('draw.delete', updateFunction);
-    map.on('draw.update', updateFunction);
+  // Remove existing handlers first
+  map.off('draw.create', updateFunction);
+  map.off('draw.delete', updateFunction);
+  map.off('draw.update', updateFunction);
+  
+  // Add new handlers
+  map.on('draw.create', updateFunction);
+  map.on('draw.delete', updateFunction);
+  map.on('draw.update', updateFunction);
 }
 
 const enableDrawingPolygon = (draw) => {
@@ -31,6 +37,7 @@ const enableDrawingPolygon = (draw) => {
 
 const selectDrawPolygon = (draw, id) => {
     if(! draw) return;
+    // if(! id) return;
 
     // const drawed = draw.getAll();
     // drawed.features.map(x => {
@@ -38,15 +45,15 @@ const selectDrawPolygon = (draw, id) => {
     // })
 
     draw.changeMode('direct_select', {
-        featureId: id
+      featureId: id
     });
 }
 
 const removeDrawedPolygons = (draw) => {
     // Remove all drawed zones from the map
     if(draw) {
-        draw.deleteAll();
-        draw.changeMode('simple_select');
+      draw.deleteAll();
+      draw.changeMode('simple_select');
     }
 }
 

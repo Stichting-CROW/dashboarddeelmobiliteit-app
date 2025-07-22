@@ -1,3 +1,5 @@
+import { getProviderColorForProvider } from "../../../helpers/providers";
+
 type HexagonType = any;
 
 // Get geometries for user
@@ -55,7 +57,7 @@ const removeServiceAreasFromMap = (map: any) => {
     removeServiceAreaSources(map);
 }
 
-async function renderPolygons_fill(map, geojson) {
+async function renderPolygons_fill(map, operator: string, geojson) {
     const sourceId = 'service_areas';
     let layerId = `${sourceId}-layer-fill`
       , source = map.getSource(sourceId);
@@ -87,7 +89,8 @@ async function renderPolygons_fill(map, geojson) {
     }
     
     // Set fill color
-    map.setPaintProperty(layerId, 'fill-color', '#8f3af8');
+    // map.setPaintProperty(layerId, 'fill-color', '#8f3af8');
+    map.setPaintProperty(layerId, 'fill-color', getProviderColorForProvider(operator));
 
     // Set opacity
     map.setPaintProperty(layerId, 'fill-opacity', 0.6);
@@ -118,6 +121,7 @@ async function renderPolygons_fill(map, geojson) {
 
 const renderServiceAreas = async (
   map: any,
+  operator: string,
   geojson: any,
 ) => {
   let features = [];
@@ -127,7 +131,7 @@ const renderServiceAreas = async (
   // Remove old sources first
   removeServiceAreasFromMap(map);
   // Render hexes
-  renderPolygons_fill(map, featureCollection);
+  renderPolygons_fill(map, operator, featureCollection);
 //   // Render outline border
 //   renderPolygons_border(map, featureCollection.geojsonForOuterBorder, filter);
 //   // Render percentages inside the polygons

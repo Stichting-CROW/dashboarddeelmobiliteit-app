@@ -1,0 +1,9 @@
+.Legend {
+  display: none;
+}
+
+@media (min-width: 910px) {
+  .Legend {
+    display: flex;
+  }
+}

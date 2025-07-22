@@ -11,8 +11,9 @@ import Modal from "../Modal/Modal"
 import { ImportZonesModal } from "../ImportZones/ImportZones"
 import { setSelectedPolicyHubs, setShowEditForm, setShowList } from "../../actions/policy-hubs"
 import ActionHeader from './action-header';
-import { canEditHubs } from "../../helpers/authentication"
+// import { canEditHubs } from "../../helpers/authentication"
 import React from "react";
+import { isHubInPhase, deDuplicateHubs } from "../../helpers/policy-hubs/common";
 
 function populateTableData(policyHubs) {
   if(! policyHubs || policyHubs.detail) {
@@ -66,7 +67,7 @@ const PolicyHubsList = () => {
   const uniqueComponentId = Math.random()*9000000;
 
   // On load: Hide edit modal
-useEffect(() => {
+  useEffect(() => {
     dispatch(setShowEditForm(false));
 
     return () => {
@@ -112,9 +113,11 @@ useEffect(() => {
 
     // Only keep hubs in active phase
     const filteredHubs = filterVisible(
-        filterPhase(policyHubs)
+      filterPhase(policyHubs)
     );
-    const data = [...populateTableData(filteredHubs)];
+    const uniqueHubs = deDuplicateHubs(filteredHubs);
+
+    const data = [...populateTableData(uniqueHubs)];
     if(! data || data.length === 0) return;
     
     setTableData(data);
@@ -125,7 +128,7 @@ useEffect(() => {
   ]);
 
   const filterPhase = (policyHubs) => {
-    return policyHubs.filter((x) => x.phase === active_phase);
+    return policyHubs.filter((hub) => isHubInPhase(hub, active_phase, visible_layers));
   }
 
   const filterVisible = (policyHubs) => {

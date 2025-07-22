@@ -68,3 +68,24 @@
   flex-direction: column;
   /*overflow: auto;*/
 }
+
+.white-rounded-box {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 100%;
+  height: auto;
+  padding: 10px 8px;
+  flex-grow: 0 1;
+  justify-content: flex-start;
+  align-items: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #CCCCCC;
+  border-radius: 10px;
+  opacity: 1;
+}
+
+.text-theme-blue {
+  color: #15AEEF;
+}

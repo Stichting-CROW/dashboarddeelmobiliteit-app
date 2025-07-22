@@ -2,6 +2,7 @@ import {
   polygonLineStyle,
   polygonFillStyle
 } from './map.policy_hubs.styles'
+import center from '@turf/center';
 
 const max_zoom_for_hub_logo = 16;
 
@@ -136,15 +137,17 @@ async function renderPolygons_fill(map, geojson) {
             0.15
           ],
           'icon-allow-overlap': true,
+          'symbol-placement': 'point',
         },
-        // Only show hub logo until a certain zoom level
-        // Inspired by: https://stackoverflow.com/a/74550432
         "filter": [
-          "<", ["zoom"],
+          "all",
+          ["<", ["zoom"], 
             ["match", ["get", "geography_type"],
             'no_parking', 0,// 0 = maximum zoom level (never show mijksenaar logo for no_parking zones)
             'monitoring', 0,// 0 = maximum zoom level (never show mijksenaar logo for monitoring zones)
-            max_zoom_for_hub_logo]
+            max_zoom_for_hub_logo],
+          ],
+          ["==", ["get", "is_logo_point"], true]
         ]
       });
 
@@ -178,9 +181,10 @@ const generateGeojson = (
         return geoJson;
     }
     hubs.forEach(x => {
+        // Add the polygon feature
         let feature = {
-            "type":"Feature",
-            "properties":{
+            "type": "Feature",
+            "properties": {
                 "id": x.zone_id,
                 "name": x.name,
                 "geography_type": x.geography_type,
@@ -193,6 +197,20 @@ const generateGeojson = (
             "geometry": x.area.geometry
         }
         geoJson.features.push(feature);
+
+        // Add a point feature for the Mijksenaar logo
+        if (x.geography_type !== 'no_parking' && x.geography_type !== 'monitoring') {
+            const the_center = center(x.area.geometry);
+            const pointFeature = {
+                "type": "Feature",
+                "properties": {
+                    ...feature.properties,
+                    "is_logo_point": true
+                },
+                "geometry": the_center.geometry
+            }
+            geoJson.features.push(pointFeature);
+        }
     });
 
     return geoJson;   

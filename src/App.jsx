@@ -9,13 +9,13 @@ import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
-import * as te from 'tw-elements';
 import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
 
 import ContentPage from './pages/ContentPage.jsx';
-import StatsPage from './pages/StatsPage.jsx';
+import StatsPage from './pages/StatsPage.tsx';
+import StartPage from './pages/StartPage';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
@@ -35,7 +35,7 @@ import Export from './components/Export/Export';
 import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
-import Menu from './components/Menu.jsx';
+import Menu from './components/Menu';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
@@ -45,6 +45,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
+import GuestIntroduction from './components/GuestIntroduction/GuestIntroduction';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -68,6 +69,7 @@ import {
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_START,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -169,7 +171,9 @@ function App() {
     
     // Decide on which display mode we use, based on URL
     let payload;
-    if(pathName.includes("/map/park")||pathName==='/') {
+    if(pathName.includes("/start")||pathName==='/') {
+      payload=DISPLAYMODE_START;
+    } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
       payload=DISPLAYMODE_RENTALS;
@@ -186,27 +190,31 @@ function App() {
     }
     dispatch({type: 'LAYER_SET_DISPLAYMODE', payload});
 
-  }, [pathName, uriParams]);
+  }, [pathName, uriParams, dispatch]);
 
   useEffect(() => {
-    (async () => {
+    const updateACL = async () => {
       try {
         const theAcl = await getAcl(token);
         if(! theAcl) return;
   
         dispatch(setAclInRedux(theAcl));
         setAcl(theAcl);
+        
         setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
         setIsAdmin(theAcl?.is_admin);
       } catch(err) {
         console.error(err);
       }
-    })();
-  }, [token])
+    }
 
-  const test = useSelector((state: StateType) => {
-    return state.authentication;
-  });
+    updateACL();
+  }, [token, dispatch])
+
+  // const test = useSelector((state: StateType) => {
+  //   console.log('*** test', state)
+  //   return state.authentication;
+  // });
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -228,9 +236,9 @@ function App() {
     return state.filter;
   });
   
-  const layers = useSelector((state: StateType) => {
-    return state.layers;
-  });
+  // const layers = useSelector((state: StateType) => {
+  //   return state.layers;
+  // });
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
@@ -318,6 +326,9 @@ function App() {
     isLoggedIn,
     metadata.zones_loaded,
     filter,
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -335,6 +346,9 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -460,7 +474,6 @@ function App() {
                 } />
               </> : null
             }
-            <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
@@ -469,6 +482,21 @@ function App() {
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
 
+            <Route exact path="/" element={<>
+              <ContentPage>
+                <StartPage />
+              </ContentPage>
+              {/* We need this for the filterbar: */}
+              {renderMapElements()}
+            </>} />
+
+            <Route exact path="/start" element={<>
+              <ContentPage>
+                <StartPage />
+              </ContentPage>
+              {/* We need this for the filterbar: */}
+              {renderMapElements()}
+            </>} />
             <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
@@ -566,7 +594,19 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          <Route exact path="/" element={renderMapElements()} />
+
+          <Route exact path="/" element={<>
+            <ContentPage forceFullWidth={true}>
+              <GuestIntroduction />
+            </ContentPage>
+          </>} />
+
+          <Route exact path="/start" element={<>
+            <ContentPage forceFullWidth={true}>
+              <GuestIntroduction />
+            </ContentPage>
+          </>} />
+
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />
@@ -607,6 +647,12 @@ function App() {
             </Misc>
           </Overlay>
         } />
+        <Route exact path="/stats/overview" element={<>
+          <Overlay>
+            <Login />
+          </Overlay>
+          {renderMapElements()}
+        </>} />
         <Route exact path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />

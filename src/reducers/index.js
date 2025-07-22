@@ -12,6 +12,7 @@ import ui from './ui';
 import statsreducer from './statsreducer';
 import policy_hubs from './policy-hubs';
 import search from './search';
+import service_areas from './service-areas';
 
 export default combineReducers({
   created,
@@ -26,5 +27,6 @@ export default combineReducers({
   ui,
   statsreducer,
   policy_hubs,
-  search
+  search,
+  service_areas
 })

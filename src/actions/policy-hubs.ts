@@ -7,6 +7,7 @@ import {
   SET_SELECTED_POLICY_HUBS,
   SET_SHOW_COMMIT_FORM,
   SET_SHOW_EDIT_FORM,
+  SET_SHOW_PROPOSE_DELETE_FORM,
   SET_SHOW_LIST,
   SET_HUBS_IN_DRAWING_MODE,
   SET_IS_DRAWING_ENABLED,
@@ -45,6 +46,10 @@ export const setShowCommitForm = (boolValue) => ({
 });
 export const setShowEditForm = (boolValue) => ({
   type: SET_SHOW_EDIT_FORM,
+  payload: boolValue
+});
+export const setShowProposeDeleteForm = (boolValue) => ({
+  type: SET_SHOW_PROPOSE_DELETE_FORM,
   payload: boolValue
 });
 export const setShowList = (boolValue) => ({

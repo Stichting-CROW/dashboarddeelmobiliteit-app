@@ -13,7 +13,7 @@ import {
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
@@ -24,6 +24,7 @@ import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
+import FilterbarStart from './FilterbarStart';
 
 // Import API functions
 import {postZone} from '../../api/zones';
@@ -35,6 +36,7 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_START,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -66,6 +68,7 @@ function Filterbar({
   const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
+  const isStart=displayMode===DISPLAYMODE_START;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -144,12 +147,22 @@ function Filterbar({
       />
     }
 
+    {
+      (isStart) && 
+        <FilterbarStart 
+          hideLogo={hideLogo}
+          displayMode={displayMode}
+          visible={visible}
+        />
+    }
+
     {/* Default: */
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
       && ! isPolicyHubs
       && ! is_hb_view
       && ! isrentals
+      && ! isStart
     ) &&
       <div className="filter-bar-inner py-2">
 
@@ -220,13 +233,13 @@ function Filterbar({
       </div>
     }
 
-    {/* Policy hubs has its own release notes */
-    ! isPolicyHubs &&
-      <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-11-21<br />
-        - Verbeterde servicegebied-tijdlijn<br />
-        - GO Sharing data AMS/Haarlem<br />
-      </div>}
+    <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
+      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
+        2025-06-22
+      </a><br />
+      - Beleidshubs: Verwijder zones eenvoudig<br />
+      - Nieuw ontwerp <a href="/map/servicegebieden" className="underline">Servicegebieden</a><br />
+    </div>
   </>
 }
 

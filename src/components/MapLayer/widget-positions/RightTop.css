@@ -1,0 +1,5 @@
+.right-top {
+  position: absolute;
+  top: 14px;
+  right: 48px;/* 20px + 28px for "Lagen" widget */
+}

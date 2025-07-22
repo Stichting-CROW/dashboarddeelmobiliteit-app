@@ -19,7 +19,8 @@ const cPublicAanbieders = [
   { value:"bondi", system_id:"bondi", name:"Bondi" },
   { value:"dott", system_id:"dott", name:"Dott" },
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
-  // { value:"mywheels", system_id:"mywheels", name:"MyWheels" },
+  { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
+  { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
 ];
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
@@ -92,7 +93,11 @@ export const initAccessControlList = (store_accesscontrollist)  => {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
             }
             
-            // items -> {"name": "Cykl","system_id": "cykl"}
+            // If not admin, filter out certain operators
+            // if(!state.authentication.user_data.acl || !state.authentication.user_data.acl.is_admin) {
+            //   const hideOperators = ['mywheels', 'greenwheels'];
+            //   metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
+            // }
             store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: metadata.operators});
 
             // items -> {"id": 1, "name": "asdfasdfadfa" }

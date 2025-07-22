@@ -1,5 +1,119 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-06-22
+
+Beleidshubs:
+
+- Het is gemakkelijker om definitief actieve zones te verwijderen. Je kunt bij het verwijderen vanaf nu direct een publicatiedatum en verwijderdatum opgeven. Dit scheelt 1 stap in het proces ten opzichte van hoe het eerder was
+
+## Release 2025-06-13
+
+Servicegebieden:
+
+- 🪄 Nieuw ontwerp van <a href="/map/servicegebieden" className="underline">Servicegebieden</a> pagina
+- 🪄 Historische Felyx-servicegebieden nu op te vragen
+- 🪄 Legenda toegevoegd
+
+## Release 2025-04-28
+
+Beleidshubs:
+
+- 🪄 Je kunt bij verbodszones nu onderscheid maken tussen voertuigtypes. Maak bijvoorbeeld een verbodszone die alleen van toepassing is voor deelscooters en niet voor deelfietsen<br />
+
+- 🪄 Nieuw voertuigtype-filter maakt het gemakkelijk zones op de kaart te filteren<br />
+
+## Release 2025-04-26
+
+Beleidshubs:
+
+- 🪄 Zone-beheerder kan nu een enkele polygon verwijderen uit een multipolygon<br />
+
+## Release 2025-04-01
+
+Beleidshubs:
+
+- 🪄 Nieuw beheer multipolygonen: voeg toe / bewerk / verwijder<br />
+- Toon Mijksenaar logo slechts 1x per <a href="/map/beleidshubs" className="underline">Zone</a>-multipolygoon<br />
+
+## Release 2025-03-21
+
+Beleidshubs:
+
+- Nieuwe tooltip-teksten geven uitleg over fases
+- Nieuwe tooltip in het hoofdmenu linkt naar de Zones-doccumentatie
+- In zone import scherm: Link naar documentatie toegevoegd
+- Sta zone-beheerder toe om ook _actieve_ hubs te wijzigen van een virtuele hub naar een fysieke hub en andersom. Net als dat je altijd een hub kunt 'Sluiten' en 'Openen' kun je ook altijd instellen of de hub 'Virtueel' of 'Fysiek' is zonder dat je door alle fases heen moet gaan
+
+## Release 2025-03-14
+
+Zoekbalk:
+
+- 🪄 Gebruik de zoekbalk nu ook om op straatnaam/nummer te zoeken
+- 🪄 Als je gezocht hebt op een adres, zal de kaart een marker zetten op het adres
+- 🪄 Als je de zoekbalk leeg maakt, wordt de marker verwijderd
+
+Beleidszones:
+
+- 🪄 Nieuwe tooltips geven uitleg over de verschillende fasen van beleidszones
+
+Documentatie:
+
+- 🪄 Nieuwe documentatiepagina over de Open Aanbod API: [Parked Vehicles API](https://docs.dashboarddeelmobiliteit.nl/api_docs/parked_vehicles/)
+
+## Release 2025-02-11
+
+- 🪄 Bij Beleidszones wordt zoom-niveau en kaartmidden nu ook opgeslagen in de URL, zodat je de precieze kaartpositie kunt delen
+- 🪄 Servicegebieden-pagina is nu ook zichtbaar voor gastgebruikers
+
+## Release 2025-02-10
+
+- 🪄 Op [Beleidszones](https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_beheren.md)-pagina: 
+  - Zoek op hubnaam of **adres**
+  - Kaart zal naar de geselecteerde hub of adres zoomen
+
+## Release 2025-01-08
+
+- 🪄 Servicegebieden-pagina heeft nu ondersteuning voor meerdere aanbieders
+- 🪄 Nieuwe documentatie-pagina: [Servicegebieden](https://dashboarddeelmobiliteit.nl/docs/Servicegebieden/_Introductie.md)
+
+## Release 2025-01-06
+
+- Toon autoaanbieders in de aanbiederslijst
+
+## Release 2024-12-18
+
+- Exporteer zones nu zowel als GeoPackage als KML (ipv alleen GeoPackage)
+
+## Release 2024-12-05
+
+- Nieuwe segmentatie parkeerduurfilters
+  - Oud: <= 2 dagen, <= 4 dagen, <= 7 dagen, <= 14 dagen, >= 15 dagen
+  - Nieuw: < 2 dagen, < 4 dagen, < 7 dagen, < 14 dagen, >= 14 dagen
+
+## Release 2024-12-03
+
+- 🏁 Sneller laden van historische parkeerdata op de kaart
+  - Resultaat 1: binnen 30 seconden laden van parkeerdata voor elke datum in het verleden
+  - Resultaat 2: 30 GB minder schijfruimte gebruikt voor park_events indexes in database
+  - Technische details:
+    - Indexes van tabel park_events worden enkel voor laatste x dagen bewaard
+    - Voor oudere data wordt een nachtelijk geupdated 'view' bevraagd, waar parkeerdata opgeslagen is per dag
+    - Code: [Maken materialized view + Verwijderen oude indexes](https://github.com/Stichting-CROW/dd-daily-report-aggregator/commit/d63597f8681075bf3c07e756c0368024ab8e3287#diff-b10564ab7d2c520cdd0243874879fb0a782862c3c902ab535faabe57d5a505e1R55)
+    - Code: [Geupdated queries voor opvragen park_event_ids per datum](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-api/commit/bff348252a7549d87172d048cb156266146f8711)
+
+## Release 2024-11-23
+
+- ✨ Nieuwe lagenselectie-knop in de kaart, voor meer gebruikersgemak
+
+## Release 2024-11-21
+
+- ✨ Verbeterde UX voor de servicegebieden-tijdlijn:
+  - Zie maximaal 1 wijziging per dag voor beter overzicht
+  - Standaard ingezoomd op huidige week
+  - Maximaal zoomniveau is gelimiteerd tot 'per dag' in plaats van 'per uur'
+  - Meerdere datums bij elkaar worden gegroepeerd tot een cluster
+  - Verticaal scrollen uitgeschakeld
+
 ## Release 2024-11-14
 
 - Geupdate documentatie-pagina: Importeer zones (inclusief GeoPackage-template)

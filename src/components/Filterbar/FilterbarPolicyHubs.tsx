@@ -14,12 +14,9 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-import { useNavigate } from "react-router-dom";
-import {getAcl} from '../../api/acl';
 
 import Logo from '../Logo.jsx';
 import Button from '../Button/Button';
-import FormInput from '../FormInput/FormInput';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
 
@@ -42,6 +39,7 @@ import eyeClosed from './img/icon_eye_closed.svg';
 import { readable_phase } from '../../helpers/policy-hubs/common';
 import { themes } from '../../themes';
 import { canEditHubs } from '../../helpers/authentication';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 
 const CheckboxesWrapper = ({children, color}) => <div className="px-2 py-2 bg-white" style={Object.assign({
   borderRadius: '0.5rem'
@@ -93,9 +91,7 @@ function FilterbarPolicyHubs({
   });
 
   // Get current state (active phase and visible layers)
-  const active_phase = useSelector((state: StateType) => {
-    return state.policy_hubs ? state.policy_hubs.active_phase : ''
-  });
+  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
   const is_stats_or_manage_mode = useSelector((state: StateType) => state.policy_hubs.is_stats_or_manage_mode || 'stats');
 
@@ -216,10 +212,14 @@ function FilterbarPolicyHubs({
         </div>}
 
         <Fieldset title="Plaats">
-            <FilteritemGebieden />
+          <FilteritemGebieden />
         </Fieldset>
 
-        {filterGebied && (<>
+        <Fieldset title="Voertuigtype">
+          <FilteritemVoertuigTypes />
+        </Fieldset>
+
+        {canEditHubs(acl) && filterGebied && (<>
           <Fieldset title="Hubs">
             <CheckboxesWrapper color={themes.zone.stop.primaryColor}>
               {Object.keys(policyHubPhases).map(key => {
@@ -342,12 +342,6 @@ function FilterbarPolicyHubs({
       >
         <SharePermalink />
       </Modal>}
-
-      <div className="absolute top-4 text-xs text-purple-800" style={{left: '110px', fontSize: '0.75rem'}}>
-        versie 2024-11-21<br />
-        - Verbeterde servicegebied-tijdlijn<br />
-        - GO Sharing data AMS/Haarlem<br />
-      </div>
 
     </>
   )
