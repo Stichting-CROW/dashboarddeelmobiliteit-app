@@ -112,6 +112,14 @@ const doApiCall = (
     show_global: is_admin
   });
 
+  // Debug logging for zone_ids parameter
+  const hasZoneIds = filterparams.some(param => param.startsWith('zone_ids='));
+  if (state.filter.gebied !== "" && !hasZoneIds) {
+    console.warn("Missing zone_ids parameter for gebied:", state.filter.gebied, "zones_loaded:", state.metadata.zones_loaded, "zones_count:", state.metadata.zones ? state.metadata.zones.length : 0);
+  } else if (state.filter.gebied !== "" && hasZoneIds) {
+    console.log("zone_ids parameter included for gebied:", state.filter.gebied);
+  }
+
   // Set query params for guests
   if(! canfetchdata) {
     if(filterparams.length>0) {
@@ -188,13 +196,27 @@ const updateParkingData = async () => {
 
     const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
 
+    // Check if zones are loaded when we have a gebied selected
+    if (state.filter.gebied !== "" && (!state.metadata.zones_loaded || !state.metadata.zones || state.metadata.zones.length === 0)) {
+      if(process && process.env.DEBUG) console.log("Zones not yet loaded for gebied:", state.filter.gebied, "- skipping parking data update");
+      return false;
+    }
+
     // Should we (re)fetch vehicles?
     const doFetchVehicles = shouldFetchVehicles(state.filter, existingFilter);
+
+    // Also force refresh if zones just became available for this gebied
+    const zonesJustBecameAvailable = existingFilter && 
+      existingFilter.gebied === state.filter.gebied && 
+      state.filter.gebied !== "" &&
+      state.metadata.zones_loaded && 
+      state.metadata.zones && 
+      state.metadata.zones.length > 0;
 
     // Update active filter
     existingFilter = state.filter;
 
-    if(doFetchVehicles || ! activeVehicles) {
+    if(doFetchVehicles || ! activeVehicles || zonesJustBecameAvailable) {
       doApiCall(state, processVehiclesResult);
     } else {
       // Regenerate geoJson without querying API

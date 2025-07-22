@@ -29,32 +29,58 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   }
   // If a place is selected, get all zones for this place
   else if (filter.gebied !== "" && hasAccessToFilterGebied) {
-    // create zone filter
-    let candidates = [];
-    let municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
-    if (undefined !== municipality) {
-      candidates = metadata.zones.filter(zone => {
-        return zone.municipality === municipality.gm_code && zone.name === municipality.name && zone.zone_type !== 'custom'
-      });
+    // Check if zones metadata is available
+    if (!metadata.zones || metadata.zones.length === 0) {
+      // Zones not loaded yet, skip zone filtering for now
+      // This will be retried when zones are loaded
+      console.warn("Zones metadata not yet loaded for gebied:", filter.gebied);
     } else {
-    }
-    if (candidates.length === 1) {
-      filterparams.push("zone_ids=" + candidates[0].zone_id);
-    } else {
-      // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
+      // create zone filter
+      let candidates = [];
+      let municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
+      if (undefined !== municipality) {
+        candidates = metadata.zones.filter(zone => {
+          return zone.municipality === municipality.gm_code && zone.name === municipality.name && zone.zone_type !== 'custom'
+        });
+      }
+      if (candidates.length === 1) {
+        filterparams.push("zone_ids=" + candidates[0].zone_id);
+      } else if (candidates.length > 1) {
+        // Multiple zones found, use all of them
+        const zoneIds = candidates.map(zone => zone.zone_id).join(',');
+        filterparams.push("zone_ids=" + zoneIds);
+      } else {
+        // No zones found, try to find any municipality zone as fallback
+        const fallbackCandidates = metadata.zones.filter(zone => {
+          return zone.municipality === municipality.gm_code && zone.zone_type === 'municipality'
+        });
+        if (fallbackCandidates.length > 0) {
+          const zoneIds = fallbackCandidates.map(zone => zone.zone_id).join(',');
+          filterparams.push("zone_ids=" + zoneIds);
+        } else {
+          console.warn("No zones found for municipality:", filter.gebied);
+        }
+      }
     }
   }
   // If no place is set, but the user is no admin: Set all places user has access to
   else if (hasAccessToMultipleGebieden && !options.show_global) {
-    // Get zone IDs as array
-    const allowed_zone_ids = metadata.zones.filter(zone => {
-      return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';
-    });
-    // Get zone IDs as array
-    const zone_ids_as_array = allowed_zone_ids.map(zone => {
-      return zone.zone_id;
-    });
-    filterparams.push(`zone_ids=${zone_ids_as_array.join(',')}`);
+    // Check if zones metadata is available
+    if (!metadata.zones || metadata.zones.length === 0) {
+      console.warn("Zones metadata not yet loaded for multiple gebieden");
+    } else {
+      // Get zone IDs as array
+      const allowed_zone_ids = metadata.zones.filter(zone => {
+        return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';
+      });
+      // Get zone IDs as array
+      const zone_ids_as_array = allowed_zone_ids.map(zone => {
+        return zone.zone_id;
+      });
+      if (zone_ids_as_array.length > 0) {
+        filterparams.push(`zone_ids=${zone_ids_as_array.join(',')}`);
+      }
+    }
   }
   // If no place is set: Get NL data (NL 'zone')
   // Only providers and admins are allowed to see this info

@@ -49,6 +49,20 @@ export const updateZones = async (store_zones) => {
       if(zonesGeoDataJson && zonesGeoDataJson.filter_values && zonesGeoDataJson.filter_values.zones) {
         store_zones.dispatch({ type: 'SET_ZONES', payload: zonesGeoDataJson.filter_values.zones});
         store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+        
+        // Trigger parking data update when zones are loaded (public case)
+        setTimeout(() => {
+          const currentState = store_zones.getState();
+          if (currentState && currentState.layers && currentState.layers.displaymode === 'displaymode-park') {
+            import('./pollParkingData.js').then(module => {
+              if (module.initUpdateParkingData) {
+                module.initUpdateParkingData(store_zones);
+              }
+            }).catch(err => {
+              console.warn("Could not trigger parking data update after zones load (public):", err);
+            });
+          }
+        }, 100);
       }
       else {
         store_zones.dispatch({ type: 'SET_ZONES', payload: []});
@@ -93,6 +107,22 @@ export const updateZones = async (store_zones) => {
         .then((metadata) => {
           store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones});
           store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
+          
+          // Trigger parking data update when zones are loaded
+          // This ensures zone_ids parameter is included in API calls
+          setTimeout(() => {
+            const currentState = store_zones.getState();
+            if (currentState && currentState.layers && currentState.layers.displaymode === 'displaymode-park') {
+              // Import the parking data update function
+              import('./pollParkingData.js').then(module => {
+                if (module.initUpdateParkingData) {
+                  module.initUpdateParkingData(store_zones);
+                }
+              }).catch(err => {
+                console.warn("Could not trigger parking data update after zones load:", err);
+              });
+            }
+          }, 100); // Small delay to ensure state is updated
         })
       }).catch(ex=>{
         console.error("unable to decode JSON");
