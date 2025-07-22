@@ -210,6 +210,11 @@ const MapComponent = (props): JSX.Element => {
         // Store map in a global variable
         window['ddMap'] = map.current;
 
+        // Set map in context if available (for backward compatibility)
+        if ((window as any).__MAP_CONTEXT__ && (window as any).__MAP_CONTEXT__.setMap) {
+          (window as any).__MAP_CONTEXT__.setMap(map.current);
+        }
+
         setDidMapLoad(true)
 
         addSources(map.current);

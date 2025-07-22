@@ -8,6 +8,9 @@ import {
   activateLayers
 } from './layers.js';
 
+// Cache for map styles to avoid repeated fetches
+const styleCache = new Map();
+
 export const getMapStyles = () => {
   return {
     // NOTE: mapbox:// urls are not supported anymore.
@@ -41,6 +44,7 @@ export const setBackgroundLayer = (map, name, setMapStyle) => {
 
 // Variable to keep track of the map style that we used last
 let mapStyleHash = md5(getMapStyles().base);
+
 // Function applyMapStyle -- It reorders all layers, so the layers stay in the order we want
 export const applyMapStyle = async (map, styleUrlOrObject) => {
   if(! map) return;
@@ -65,9 +69,24 @@ export const applyMapStyle = async (map, styleUrlOrObject) => {
   let newStyle = styleUrlOrObject;
   // If style URL was given: fetch JSON
   if(typeof styleUrlOrObject === 'string') {
-    const response = await fetch(styleUrlOrObject);
-    const responseJson = await response.json();
-    newStyle = responseJson;
+    // Check cache first
+    if (styleCache.has(styleUrlOrObject)) {
+      newStyle = styleCache.get(styleUrlOrObject);
+    } else {
+      try {
+        const response = await fetch(styleUrlOrObject);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch style: ${response.statusText}`);
+        }
+        const responseJson = await response.json();
+        newStyle = responseJson;
+        // Cache the style
+        styleCache.set(styleUrlOrObject, newStyle);
+      } catch (error) {
+        console.error('Error fetching map style:', error);
+        throw error;
+      }
+    }
   }
 
   // Ensure any sources from the current style are copied across to the new style
@@ -97,4 +116,28 @@ export const applyMapStyle = async (map, styleUrlOrObject) => {
 
   // Set new map style (having style _and_ DD layers)
   await map.setStyle(newStyle);
+}
+
+// Function to preload map styles for faster switching
+export const preloadMapStyles = async () => {
+  const mapStyles = getMapStyles();
+  
+  for (const [name, style] of Object.entries(mapStyles)) {
+    if (typeof style === 'string' && !styleCache.has(style)) {
+      try {
+        const response = await fetch(style);
+        if (response.ok) {
+          const styleJson = await response.json();
+          styleCache.set(style, styleJson);
+        }
+      } catch (error) {
+        console.warn(`Failed to preload style ${name}:`, error);
+      }
+    }
+  }
+}
+
+// Function to clear style cache (useful for memory management)
+export const clearStyleCache = () => {
+  styleCache.clear();
 }

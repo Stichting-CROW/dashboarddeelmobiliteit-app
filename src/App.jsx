@@ -46,6 +46,7 @@ import SharedDataOverview from './components/SharedDataOverview/SharedDataOvervi
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
 import GuestIntroduction from './components/GuestIntroduction/GuestIntroduction';
+import { MapProvider } from './components/Map/MapContext';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -373,146 +374,246 @@ function App() {
   }
 
   return (
-    <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
+    <MapProvider>
+      <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
 
-      <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
+        <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
 
-      <LoadingIndicator  />
+        <LoadingIndicator  />
 
-      <div className="gui-layer">
+        <div className="gui-layer">
 
-      <Routes>
-        { isLoggedIn ?
-          <>
-            { (isAdmin || isOrganisationAdmin) ?
-              <>
-                <Route exact path="/admin" element={
-                  <Overlay>
-                    <Admin>
-                      <UserList acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/users" element={
-                  <Overlay>
-                    <Admin>
-                      <UserList acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/users/new" element={
-                  <Overlay>
-                    <Admin>
-                      <UserList
-                        acl={acl}
-                        showAddUserModule={true} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/users/:username" element={
-                  <Overlay>
-                    <Admin>
-                      <UserList acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/shared" element={
-                  <Overlay>
-                    <Admin>
-                      <SharedDataOverview acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/organisations" element={
-                  <Overlay>
-                    <Admin>
-                      <OrganisationList />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/organisations/new" element={
-                  <Overlay>
-                    <Admin>
-                      <OrganisationList showAddOrganisationModule={true} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/organisations/:organisationId" element={
-                  <Overlay>
-                    <Admin>
-                      <OrganisationList />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/stats" element={
-                  <Overlay>
-                    <Admin>
-                      <LoginStats />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/yearly-costs" element={
-                  <Overlay>
-                    <Admin>
-                      <YearlyCostsExport acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/mail-templates" element={
-                  <Overlay>
-                    <Admin>
-                      <MailTemplateList acl={acl} />
-                    </Admin>
-                  </Overlay>
-                } />
-                <Route exact path="/admin/mail-templates/new" element={
-                  <Overlay>
-                    <Admin>
-                      <MailTemplateList acl={acl} showAddMailTemplateModule={true}  />
-                    </Admin>
-                  </Overlay>
-                } />
-              </> : null
-            }
+        <Routes>
+          { isLoggedIn ?
+            <>
+              { (isAdmin || isOrganisationAdmin) ?
+                <>
+                  <Route exact path="/admin" element={
+                    <Overlay>
+                      <Admin>
+                        <UserList acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/users" element={
+                    <Overlay>
+                      <Admin>
+                        <UserList acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/users/new" element={
+                    <Overlay>
+                      <Admin>
+                        <UserList
+                          acl={acl}
+                          showAddUserModule={true} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/users/:username" element={
+                    <Overlay>
+                      <Admin>
+                        <UserList acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/shared" element={
+                    <Overlay>
+                      <Admin>
+                        <SharedDataOverview acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/organisations" element={
+                    <Overlay>
+                      <Admin>
+                        <OrganisationList />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/organisations/new" element={
+                    <Overlay>
+                      <Admin>
+                        <OrganisationList showAddOrganisationModule={true} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/organisations/:organisationId" element={
+                    <Overlay>
+                      <Admin>
+                        <OrganisationList />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/stats" element={
+                    <Overlay>
+                      <Admin>
+                        <LoginStats />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/yearly-costs" element={
+                    <Overlay>
+                      <Admin>
+                        <YearlyCostsExport acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/mail-templates" element={
+                    <Overlay>
+                      <Admin>
+                        <MailTemplateList acl={acl} />
+                      </Admin>
+                    </Overlay>
+                  } />
+                  <Route exact path="/admin/mail-templates/new" element={
+                    <Overlay>
+                      <Admin>
+                        <MailTemplateList acl={acl} showAddMailTemplateModule={true}  />
+                      </Admin>
+                    </Overlay>
+                  } />
+                </> : null
+              }
+              <Route exact path="/map/park" element={renderMapElements()} />
+              <Route exact path="/map/rentals" element={renderMapElements()} />
+              <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+              <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+
+              <Route path="/map/zones" element={renderMapElements()} />
+              <Route path="/admin/zones" element={renderMapElements()} />
+
+              <Route exact path="/" element={<>
+                <ContentPage>
+                  <StartPage />
+                </ContentPage>
+                {/* We need this for the filterbar: */}
+                {renderMapElements()}
+              </>} />
+
+              <Route exact path="/start" element={<>
+                <ContentPage>
+                  <StartPage />
+                </ContentPage>
+                {/* We need this for the filterbar: */}
+                {renderMapElements()}
+              </>} />
+              <Route exact path="/stats/overview" element={<>
+                <ContentPage>
+                  <StatsPage />
+                </ContentPage>
+                {renderMapElements()}
+              </>} />
+              <Route exact path="/monitoring" element={
+                <ContentPage>
+                  <Monitoring />
+                </ContentPage>
+              } />
+              <Route exact path="/rondleiding" element={
+                <ContentPage forceFullWidth={true}>
+                  <Tour />
+                </ContentPage>
+              } />
+              <Route exact path="/misc" element={
+                <Overlay>
+                  <Misc />
+                </Overlay>
+              } />
+              <Route exact path="/profile" element={
+                <Overlay>
+                  <Misc>
+                    <Profile />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/profile/api" element={
+                <Overlay>
+                  <Misc>
+                    <ApiKeys />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/over" element={
+                <Overlay>
+                  <Misc>
+                    <About />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/export" element={
+                <Overlay>
+                  <Misc>
+                    <Export />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/faq" element={
+                <Overlay>
+                  <Misc>
+                    <Faq />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/faq/:path" element={
+                <Overlay>
+                  <Misc>
+                    <Faq />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/docs" element={
+                <Overlay>
+                  <Misc>
+                    <Docs />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/docs/:category" element={
+                <Overlay>
+                  <Misc>
+                    <Docs />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/docs/:category/:doc" element={
+                <Overlay>
+                  <Misc>
+                    <Docs />
+                  </Misc>
+                </Overlay>
+              } />
+              <Route exact path="/active_feeds" element={
+                <Overlay>
+                  <Misc>
+                    <ActiveFeeds />
+                  </Misc>
+                </Overlay>
+              } />
+            </>
+            :
+            null
+          }
+
+          { ! isLoggedIn ? <>
+
+            <Route exact path="/" element={<>
+              <ContentPage forceFullWidth={true}>
+                <GuestIntroduction />
+              </ContentPage>
+            </>} />
+
+            <Route exact path="/start" element={<>
+              <ContentPage forceFullWidth={true}>
+                <GuestIntroduction />
+              </ContentPage>
+            </>} />
+
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
             <Route exact path="/map/beleidshubs" element={renderMapElements()} />
-
             <Route path="/map/zones" element={renderMapElements()} />
-            <Route path="/admin/zones" element={renderMapElements()} />
-
-            <Route exact path="/" element={<>
-              <ContentPage>
-                <StartPage />
-              </ContentPage>
-              {/* We need this for the filterbar: */}
-              {renderMapElements()}
-            </>} />
-
-            <Route exact path="/start" element={<>
-              <ContentPage>
-                <StartPage />
-              </ContentPage>
-              {/* We need this for the filterbar: */}
-              {renderMapElements()}
-            </>} />
-            <Route exact path="/stats/overview" element={<>
-              <ContentPage>
-                <StatsPage />
-              </ContentPage>
-              {renderMapElements()}
-            </>} />
-            <Route exact path="/monitoring" element={
-              <ContentPage>
-                <Monitoring />
-              </ContentPage>
-            } />
-            <Route exact path="/rondleiding" element={
-              <ContentPage forceFullWidth={true}>
-                <Tour />
-              </ContentPage>
-            } />
             <Route exact path="/misc" element={
               <Overlay>
                 <Misc />
@@ -522,27 +623,6 @@ function App() {
               <Overlay>
                 <Misc>
                   <Profile />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/profile/api" element={
-              <Overlay>
-                <Misc>
-                  <ApiKeys />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/over" element={
-              <Overlay>
-                <Misc>
-                  <About />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/export" element={
-              <Overlay>
-                <Misc>
-                  <Export />
                 </Misc>
               </Overlay>
             } />
@@ -560,152 +640,75 @@ function App() {
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/docs" element={
-              <Overlay>
-                <Misc>
-                  <Docs />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/docs/:category" element={
-              <Overlay>
-                <Misc>
-                  <Docs />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/docs/:category/:doc" element={
-              <Overlay>
-                <Misc>
-                  <Docs />
-                </Misc>
-              </Overlay>
-            } />
-            <Route exact path="/active_feeds" element={
-              <Overlay>
-                <Misc>
-                  <ActiveFeeds />
-                </Misc>
-              </Overlay>
-            } />
-          </>
-          :
-          null
-        }
+          </> : '' }
 
-        { ! isLoggedIn ? <>
-
-          <Route exact path="/" element={<>
-            <ContentPage forceFullWidth={true}>
-              <GuestIntroduction />
-            </ContentPage>
+          <Route exact path="/over" element={
+            <Overlay>
+              <Misc>
+                <About />
+              </Misc>
+            </Overlay>
+          } />
+          <Route exact path="/stats/overview" element={<>
+            <Overlay>
+              <Login />
+            </Overlay>
+            {renderMapElements()}
           </>} />
-
-          <Route exact path="/start" element={<>
+          <Route exact path="/rondleiding" element={
             <ContentPage forceFullWidth={true}>
-              <GuestIntroduction />
+              <Tour />
             </ContentPage>
-          </>} />
-
-          <Route exact path="/map/park" element={renderMapElements()} />
-          <Route exact path="/map/rentals" element={renderMapElements()} />
-          <Route exact path="/map/servicegebieden" element={renderMapElements()} />
-          <Route exact path="/map/beleidshubs" element={renderMapElements()} />
-          <Route path="/map/zones" element={renderMapElements()} />
-          <Route exact path="/misc" element={
+          } />
+          <Route exact path="/login" element={
             <Overlay>
-              <Misc />
+              <Login />
             </Overlay>
           } />
-          <Route exact path="/profile" element={
+          <Route exact path="/reset-password/:changePasswordCode" element={
+            <Overlay>
+              <SetPassword />
+            </Overlay>
+          } />
+          <Route exact path="/docs" element={
             <Overlay>
               <Misc>
-                <Profile />
+                <Docs />
               </Misc>
             </Overlay>
           } />
-          <Route exact path="/faq" element={
+          <Route exact path="/docs/:category" element={
             <Overlay>
               <Misc>
-                <Faq />
+                <Docs />
               </Misc>
             </Overlay>
           } />
-          <Route exact path="/faq/:path" element={
+          <Route exact path="/docs/:category/:doc" element={
             <Overlay>
               <Misc>
-                <Faq />
+                <Docs />
               </Misc>
             </Overlay>
           } />
-        </> : '' }
+          <Route exact path="/active_feeds" element={
+            <Overlay>
+              <Misc>
+                <ActiveFeeds />
+              </Misc>
+            </Overlay>
+          } />
+          <Route element={renderMapElements()} />
+        </Routes>
 
-        <Route exact path="/over" element={
-          <Overlay>
-            <Misc>
-              <About />
-            </Misc>
-          </Overlay>
-        } />
-        <Route exact path="/stats/overview" element={<>
-          <Overlay>
-            <Login />
-          </Overlay>
-          {renderMapElements()}
-        </>} />
-        <Route exact path="/rondleiding" element={
-          <ContentPage forceFullWidth={true}>
-            <Tour />
-          </ContentPage>
-        } />
-        <Route exact path="/login" element={
-          <Overlay>
-            <Login />
-          </Overlay>
-        } />
-        <Route exact path="/reset-password/:changePasswordCode" element={
-          <Overlay>
-            <SetPassword />
-          </Overlay>
-        } />
-        <Route exact path="/docs" element={
-          <Overlay>
-            <Misc>
-              <Docs />
-            </Misc>
-          </Overlay>
-        } />
-        <Route exact path="/docs/:category" element={
-          <Overlay>
-            <Misc>
-              <Docs />
-            </Misc>
-          </Overlay>
-        } />
-        <Route exact path="/docs/:category/:doc" element={
-          <Overlay>
-            <Misc>
-              <Docs />
-            </Misc>
-          </Overlay>
-        } />
-        <Route exact path="/active_feeds" element={
-          <Overlay>
-            <Misc>
-              <ActiveFeeds />
-            </Misc>
-          </Overlay>
-        } />
-        <Route element={renderMapElements()} />
-      </Routes>
+        <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+        <MapPage mapContainer={mapContainer} />
+        <Menu acl={acl} pathName={pathName} />
 
-      <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
-      <MapPage mapContainer={mapContainer} />
-      <Menu acl={acl} pathName={pathName} />
-
-     </div>
-     <Toaster />     
-    </div>
+       </div>
+       <Toaster />     
+      </div>
+    </MapProvider>
   );
 }
 

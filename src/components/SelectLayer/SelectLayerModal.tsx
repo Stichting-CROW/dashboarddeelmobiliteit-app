@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
-import { setBackgroundLayer } from '../Map/MapUtils/map';
-import { setMapStyle } from '../../actions/layers';
+import { useMapLayerSwitch } from './useMapLayerSwitch';
 
 import {
   DISPLAYMODE_PARK,
@@ -19,7 +18,8 @@ import {
 } from '../../reducers/layers.js';
 
 const SelectLayerModal = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const { switchMapLayer } = useMapLayerSwitch();
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
@@ -45,25 +45,28 @@ const SelectLayerModal = () => {
     return state.layers ? state.layers.zones_visible : false;
   });
 
+  const handleMapLayerSwitch = (layerName: string) => {
+    switchMapLayer(layerName);
+  };
+
   return <>
     <div className="SelectLayer">
       <h2>Basislaag</h2>
 
-      {(displayMode===DISPLAYMODE_ZONES_ADMIN || displayMode===DISPLAYMODE_POLICY_HUBS) && <>
-        <div data-type="map-style-default" className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} onClick={() => {
-          setBackgroundLayer(window['ddMap'], 'base', (name) => {
-            dispatch(setMapStyle(name))
-          });
-        }}>
+        <div 
+          data-type="map-style-default" 
+          className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} 
+          onClick={() => handleMapLayerSwitch('base')}
+        >
           <span className="layer-title">
             Terrein
           </span>
         </div>
-        <div data-type="map-style-satellite" className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} onClick={() => {
-          setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', (name) => {
-            dispatch(setMapStyle(name))
-          });
-        }}>
+        <div 
+          data-type="map-style-satellite" 
+          className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} 
+          onClick={() => handleMapLayerSwitch('luchtfoto-pdok')}
+        >
           <span className="layer-title">
             Luchtfoto
           </span>
@@ -72,17 +75,16 @@ const SelectLayerModal = () => {
           className={`layer${!zonesVisible ? ' layer-inactive':''}`}
           style={{width: '1px', borderColor: '#eee'}}
         />}
-      </>}
 
-      {isLoggedIn && <>
-        <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
-          dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
-        }}>
-          <span className="layer-title">
-            CBS-gebied
-          </span>
-        </div>
-      </>}
+        {isLoggedIn && <>
+          <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
+            dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
+          }}>
+            <span className="layer-title">
+              CBS-gebied
+            </span>
+          </div>
+        </>}
 
       <h2>Datalaag</h2>
 
