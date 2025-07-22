@@ -5,6 +5,7 @@ import EventsTimeline from '../../EventsTimeline/EventsTimeline';
 import { LeftTop } from '../widget-positions/LeftTop';
 import { CenterBottom } from '../widget-positions/CenterBottom';
 import { InfoCard } from '../widgets/InfoCard';
+import { AICard } from '../widgets/AICard';
 import { getPrettyProviderName, getProviderColorForProvider } from '../../../helpers/providers';
 
 import {

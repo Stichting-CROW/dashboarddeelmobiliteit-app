@@ -1,0 +1,183 @@
+Goal of this extension is to use an AI prompt to setup the filter and scope for reports. 
+
+Reports are made up of report elements 
+
+There are report templates (these contain fields that need to be filled in)
+There are report element templates (these contain fields that need to be filled in)
+
+The LLM is responsible for selecting a report template and eliciting all the required fields to fill from a conversation with the user.
+
+This will be done in an interactive session between the user and LLM agent where the user sees the result of the changed settings in each step.
+
+The available views have been documented below in the "Available views" section.
+
+I think integration needs the following components:
+- LLM undefstands which fields (and their types, available ranges/values) are required to show the view
+  - - LLM is able to queury the backend api to get information about the filter settings (
+- LLM is able to set the current view, filter fields and layer
+
+
+
+
+
+
+
+
+## Related Files and Components
+
+The following files and components are central to the implementation of smart filters, report/chart generation, and their interaction:
+
+### Chart and Report Generation
+- `src/api/aggregatedStats.js` – API calls for aggregated stats and report downloads
+- `src/api/parkeventStats.js` 
+- `src/components/Chart/BeschikbareVoertuigenChart.tsx` – Chart for available vehicles
+- `src/components/Chart/VerhuringenChart.tsx` – Chart for rentals
+- `src/components/Chart/ParkeerduurChart.jsx` – Chart for parking duration
+- `src/components/Export/Export.tsx` – Export and report download UI
+- `src/helpers/stats/rental-data.ts` – Data preparation for rental charts
+
+### Filtering and State
+- `src/reducers/filter.js` – Redux reducer for filter state
+- `src/components/Filterbar/Filterbar.jsx` – Main filter bar UI
+- `src/components/Filterbar/FilterbarDesktop.jsx` – Desktop filter bar
+- `src/components/Filterbar/FilterbarMobile.jsx` – Mobile filter bar
+- `src/components/Filterbar/FilterbarExtended.jsx` – Extended filter bar
+- `src/components/Filterbar/FilterbarZones.tsx` – Zones filter bar
+- `src/components/Filterbar/FilterbarRentals.jsx` – Rentals filter bar
+- `src/components/Filterbar/FilterbarHb.jsx` – Hb (Herkomstbestemming) filter bar
+- `src/components/Filterbar/FilteritemAanbieders.tsx` – Filter for providers/operators
+- `src/components/DateFromTo/DateFromTo.jsx` – Date range filter
+
+### Menus and Integration
+- `
+
+
+## Available views
+
+### Aanbod View – Filter Settings and Layers
+
+**Filter Settings (left sidebar):**
+- **Datum/tijd:** Select date and time for data snapshot
+- **Plaats:** Select municipality/city (e.g., Utrecht)
+- **Zones:** Select from all zones or specific zones
+- **Parkeerduur:** Filter by parking duration (color-coded: <2 days, <4 days, <14 days, >14 days)
+- **Voertuigtype:** Filter by vehicle type (Fiets, Bakfiets, Scooter, Auto, Onbekend)
+- **Aanbieders:** Filter by one or more mobility providers (multi-select)
+
+**Map Layers (top right):**
+- **Heat map:** Visualizes density of vehicles
+- **Clusters:** Groups vehicles into clusters
+- **Voertuigen:** Shows individual vehicles on the map
+- **Zones:** Displays zone boundaries
+
+These filters and layers allow users to interactively explore the current supply (aanbod) of shared vehicles, filtered by time, location, provider, vehicle type, and parking duration.
+
+### Verhuringen View – Filter Settings and Layers
+
+**Filter Settings (left sidebar):**
+- **Eindtijd:** Select end date and time for the rental data
+- **Periode:** Select rental period duration (slider: 1h, 4h, 8h, 1d, 2d, 3d)
+- **Plaats:** Select municipality/city (e.g., Utrecht)
+- **Zones:** Select from all zones or specific zones
+- **Afstand:** Filter by distance (1km, 2km, 5km, >5km)
+- **Herkomst of bestemming?:** Choose between origin (Herkomst) or destination (Bestemming) of trips
+- **Voertuigtype:** Filter by vehicle type (Fiets, Bakfiets, Scooter, Auto, Onbekend)
+- **Aanbieders:** Filter by one or more mobility providers (multi-select)
+
+**Map Layers (top right):**
+- **HB:** Displays origin-destination (herkomst-bestemming) flows
+- **Heat map:** Visualizes density of trips
+- **Clusters:** Groups vehicles/trips into clusters
+- **Voertuigen:** Shows individual vehicles on the map
+- **Zones:** Displays zone boundaries
+
+These filters and layers allow users to interactively explore rental (verhuringen) data, filtered by time, period, location, trip type, provider, vehicle type, and distance.
+
+### Zones View – Filter Settings and Layers
+
+**Filter Settings (left sidebar):**
+- **Tabel openen:** Open the zones data table
+- **Delen:** Share the current view
+- **Plaats:** Select municipality/city (e.g., Utrecht)
+- **Voertuigtype:** Filter by vehicle type (Fiets, Bakfiets, Scooter, Auto, Onbekend)
+
+**Map Layers (top right):**
+- **Terrein:** Shows terrain map
+- **Luchtfoto:** Shows aerial/satellite imagery
+- **Zones:** Displays zone boundaries
+
+These filters and layers allow users to explore and analyze the defined zones, filtered by location and vehicle type, with options to view the map as terrain or aerial imagery and to open/share the zones data table.
+
+### Servicegebieden View – Filter Settings and Layers
+
+**Filter Settings (left sidebar):**
+- **Plaats:** Select municipality/city (e.g., 's-Gravenhage)
+- **Aanbieders:** Filter by one or more mobility providers (multi-select, e.g., Check, Felyx)
+- **Historische servicegebieden:** Select a date/time to view historical service area boundaries
+
+**Map Layers (top right):**
+- **Zones:** Displays service area boundaries on the map
+
+These filters and layers allow users to explore and analyze service areas for different providers, including historical changes, filtered by location, provider, and date/time.
+
+### Ontwikkeling View – Filter Settings and Charts
+
+**Filter Settings (left sidebar):**
+- **Periode:** Select start and end date for the analysis period
+- **Plaats:** Select municipality/city (e.g., 's-Gravenhage)
+- **Zones:** Select from all zones or specific zones
+- **Aanbieders:** Filter by one or more mobility providers (multi-select)
+
+**Chart Options (top of charts):**
+- **Interval:** Select aggregation level for charts (dag, week, maand)
+
+**Displayed Charts:**
+- **Beschikbare voertuigen:** Stacked area chart showing available vehicles over time, per provider
+- **Verhuringen:** Stacked bar chart showing rentals over time, per provider
+
+These filters and chart options allow users to analyze trends in vehicle availability and rentals over time, filtered by period, location, zone, and provider, with selectable aggregation intervals.
+
+## Minimal Implementation Approach
+
+To achieve a minimal, working version of smart-filters with LLM-driven filter and scope setup, follow these steps:
+
+### 1. Define a Unified Filter Schema
+- Create a single data structure (e.g., JSON schema or TypeScript interface) describing all possible filter fields for each view.
+- Include field types, allowed values/ranges, and required/optional status for each view.
+
+### 2. Expose Filter Metadata via API
+- Implement a backend endpoint (e.g., `/api/filters/metadata?view=aanbod`) that returns the filter schema for a given view.
+- Enables the LLM or client to query which fields are needed and their constraints.
+
+### 3. LLM Integration Layer
+- Build a service (backend or frontend utility) that:
+  - Accepts a user prompt or intent (e.g., “Show me all scooters in Utrecht last week”).
+  - Uses filter metadata to determine required fields.
+  - Fills in fields from the prompt and asks the user for any missing required fields.
+  - Sets the current view, filter fields, and layers accordingly.
+
+### 4. Frontend: Interactive Filter Application
+- Allow the LLM (or agent) to set the current view and filter state in the frontend (e.g., via Redux actions or context).
+- As the LLM updates the filter, the UI updates to show the new data/charts/layers.
+
+### 5. Minimal User Flow
+- User starts an “AI-assisted report” session.
+- LLM queries the backend for required filter fields for the selected view.
+- LLM asks the user for any missing information (e.g., “Which city?” “What time period?”).
+- As the user responds, the LLM updates the filter state and the UI updates live.
+- When all required fields are filled, the view is fully rendered.
+
+### Minimal Implementation Components
+- Filter schema definition (shared between backend, LLM, and frontend)
+- API endpoint for filter metadata
+- LLM prompt handler (can be mocked or use OpenAI/LLM API)
+- Frontend integration (ability to set filters/views programmatically)
+- Basic UI for LLM-user interaction (chat or step-by-step wizard)
+
+#### Optional for MVP
+- Use a mock LLM (rules-based logic) before integrating a real LLM
+- Only support one or two views initially
+- Hardcode some filter options if dynamic metadata is not yet available
+
+**Summary:**
+Start with a unified filter schema, an API to expose it, and a simple LLM-driven flow that sets filters and views interactively. This demonstrates the core value and allows for iterative expansion.

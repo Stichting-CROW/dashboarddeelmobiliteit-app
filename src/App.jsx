@@ -45,6 +45,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
+import { AICard } from './components/MapLayer/widgets/AICard.tsx';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
@@ -348,6 +349,7 @@ function App() {
         <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
       <SelectLayerMobile />
+        <AICard />
     </div>
   }
 
