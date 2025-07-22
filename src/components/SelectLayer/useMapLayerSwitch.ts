@@ -1,7 +1,12 @@
 import { useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '@/src/types/StateType';
-import { getMapStyles, applyMapStyle } from '../Map/MapUtils/map';
+import { 
+  getMapStyles, 
+  setAdvancedBaseLayer, 
+  setBaseLayer,
+  isBaseLayerActive 
+} from '../Map/MapUtils/map';
 import { setMapStyle } from '../../actions/layers';
 
 interface MapStyleCache {
@@ -45,43 +50,95 @@ export const useMapLayerSwitch = () => {
     try {
       isSwitching.current = true;
       
-      const mapStyles = getMapStyles();
-      const targetStyle = mapStyles[layerName === 'luchtfoto-pdok' ? 'satellite' : 'base'];
+      // Map layer names to base layer types
+      const layerTypeMap: { [key: string]: string } = {
+        'base': 'base',
+        'luchtfoto-pdok': 'satellite'
+      };
       
-      // Check if we have the style cached
-      if (!mapStyleCache.current[layerName]) {
-        if (typeof targetStyle === 'string') {
-          // Cache the fetched style
-          const response = await fetch(targetStyle);
-          mapStyleCache.current[layerName] = await response.json();
-        } else {
-          mapStyleCache.current[layerName] = targetStyle;
+      const targetLayerType = layerTypeMap[layerName];
+      
+      if (targetLayerType) {
+        // Use the new efficient base layer switching
+        await setAdvancedBaseLayer(map, targetLayerType, {
+          opacity: 1,
+          preserveOverlays: true
+        });
+      } else {
+        // Fallback to the old method for custom layers
+        const mapStyles = getMapStyles();
+        const targetStyle = mapStyles[layerName === 'luchtfoto-pdok' ? 'satellite' : 'base'];
+        
+        // Check if we have the style cached
+        if (!mapStyleCache.current[layerName]) {
+          if (typeof targetStyle === 'string') {
+            // Cache the fetched style
+            const response = await fetch(targetStyle);
+            mapStyleCache.current[layerName] = await response.json();
+          } else {
+            mapStyleCache.current[layerName] = targetStyle;
+          }
         }
-      }
 
-      // Apply the cached style
-      await applyMapStyle(map, mapStyleCache.current[layerName]);
+        // Apply the cached style using the new setBaseLayer function
+        await setBaseLayer(map, mapStyleCache.current[layerName]);
+      }
       
       // Update Redux state
       dispatch(setMapStyle(layerName));
       
     } catch (error) {
       console.error('Error switching map layer:', error);
-      // Fallback to simple layer show/hide if style switching fails
-      if (layerName === 'base') {
-        map.U?.hide('luchtfoto-pdok');
-      } else {
-        map.U?.show(layerName);
+      
+      // Enhanced fallback with better error handling
+      try {
+        if (layerName === 'base') {
+          // Try to set terrain as fallback
+          await setAdvancedBaseLayer(map, 'terrain', {
+            opacity: 1,
+            preserveOverlays: true
+          });
+        } else {
+          // Try to set satellite as fallback
+          await setAdvancedBaseLayer(map, 'satellite', {
+            opacity: 1,
+            preserveOverlays: true
+          });
+        }
+        dispatch(setMapStyle(layerName));
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        // Last resort: use the old show/hide method
+        if (layerName === 'base') {
+          map.U?.hide('luchtfoto-pdok');
+        } else {
+          map.U?.show(layerName);
+        }
+        dispatch(setMapStyle(layerName));
       }
-      dispatch(setMapStyle(layerName));
     } finally {
       isSwitching.current = false;
     }
   }, [getMap, currentMapStyle, dispatch]);
 
+  // New function to check if a specific layer type is active
+  const isLayerActive = useCallback((layerName: string) => {
+    const map = getMap();
+    if (!map) return false;
+    
+    const layerTypeMap: { [key: string]: string } = {
+      'base': 'terrain',
+      'luchtfoto-pdok': 'satellite'
+    };
+    
+    const targetLayerType = layerTypeMap[layerName];
+    return targetLayerType ? isBaseLayerActive(map, targetLayerType) : false;
+  }, [getMap]);
+
   return {
     switchMapLayer,
     currentMapStyle,
-    isSwitching: isSwitching.current
+    isSwitching: isSwitching.current,
+    isLayerActive
   };
 }; 
