@@ -313,7 +313,12 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
     if(! didMapLoad) return;
     if(! map.current.isStyleLoaded()) return;
 
-    const activateSources = () => {
+    const activateSourcesWithDelay = async () => {
+      // If we're waiting for map style to be applied, add a small delay
+      if (mapStyle !== 'base' && !hasAppliedMapStyle) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
       // Get active sources from layer manager
       const activeSources = getActiveSources();
       
@@ -330,24 +335,36 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
       });
     }
 
-    activateSources()
+    activateSourcesWithDelay();
   }, [
     didInitSourcesAndLayers,
     getActiveSources,
-    mapStyle
+    mapStyle,
+    hasAppliedMapStyle // Re-activate sources after map style is applied
   ])
 
   // Set active layers using new layer manager
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
-    // Get active layers from layer manager
-    const activeLayers = getActiveLayers();
-    
-    activateLayers(map.current, layers, activeLayers);
+    const activateLayersWithDelay = async () => {
+      // If we're waiting for map style to be applied, add a small delay
+      if (mapStyle !== 'base' && !hasAppliedMapStyle) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Get active layers from layer manager
+      const activeLayers = getActiveLayers();
+      
+      activateLayers(map.current, layers, activeLayers);
+    };
+
+    activateLayersWithDelay();
   }, [
     didInitSourcesAndLayers,
-    getActiveLayers
+    getActiveLayers,
+    hasAppliedMapStyle, // Re-activate layers after map style is applied
+    mapStyle
   ])
 
   // Set vehicles sources
@@ -451,7 +468,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
               preserveOverlays: true
             });
             console.log('Successfully applied base style');
-          } else if (mapStyle === 'luchtfoto-pdok') {
+          } else if (mapStyle === 'satellite') {
             await setAdvancedBaseLayer(map.current, 'satellite', {
               opacity: 1,
               preserveOverlays: true
@@ -473,7 +490,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
             } catch (fallbackError) {
               map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'none');
             }
-          } else if (mapStyle === 'luchtfoto-pdok') {
+          } else if (mapStyle === 'satellite') {
             try {
               map.current.U?.show('luchtfoto-pdok');
             } catch (fallbackError) {
