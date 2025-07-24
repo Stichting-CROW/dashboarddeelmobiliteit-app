@@ -59,7 +59,7 @@ const SelectLayerModal = () => {
           onClick={() => handleMapLayerSwitch('base')}
         >
           <span className="layer-title">
-            Terrein
+            Standaard
           </span>
         </div>
         <div 

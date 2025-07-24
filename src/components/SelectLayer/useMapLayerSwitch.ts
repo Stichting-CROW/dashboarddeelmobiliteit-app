@@ -93,8 +93,8 @@ export const useMapLayerSwitch = () => {
       // Enhanced fallback with better error handling
       try {
         if (layerName === 'base') {
-          // Try to set terrain as fallback
-          await setAdvancedBaseLayer(map, 'terrain', {
+          // Try to set base as fallback
+          await setAdvancedBaseLayer(map, 'base', {
             opacity: 1,
             preserveOverlays: true
           });
@@ -127,7 +127,7 @@ export const useMapLayerSwitch = () => {
     if (!map) return false;
     
     const layerTypeMap: { [key: string]: string } = {
-      'base': 'terrain',
+      'base': 'base',
       'luchtfoto-pdok': 'satellite'
     };
     

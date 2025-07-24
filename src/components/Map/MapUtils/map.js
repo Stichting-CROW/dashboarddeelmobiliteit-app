@@ -247,7 +247,27 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
     
     // Define base layer configurations
     const baseLayerConfigs = {
+      default: {
+        source: {
+          type: 'raster',
+          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors'
+        },
+        layer: {
+          type: 'raster',
+          paint: {
+            'raster-opacity': opacity
+          }
+        }
+      },
+      base: {
+        // Use the default nine3030Style (complete style replacement)
+        useCompleteStyle: true,
+        style: nine3030Style
+      },
       terrain: {
+        // Use a simplified version of the base style
         source: {
           type: 'raster',
           tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
@@ -264,9 +284,10 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
       satellite: {
         source: {
           type: 'raster',
-          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
           tileSize: 256,
-          attribution: '© Esri'
+          minzoom: 12,
+          attribution: 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
         },
         layer: {
           type: 'raster',
@@ -293,6 +314,16 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
 
     // Get the configuration for the requested base layer type
     let config = baseLayerConfigs[baseLayerType];
+    
+    // Special handling for base (uses the default nine3030Style)
+    if (baseLayerType === 'base') {
+      // Use the complete base style instead of just a single layer
+      // This provides the full vector tile styling with all layers
+      config = {
+        useCompleteStyle: true,
+        style: nine3030Style
+      };
+    }
     
     if (baseLayerType === 'custom') {
       if (!customStyleUrl) {
@@ -326,60 +357,132 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
       throw new Error(`Unknown base layer type: ${baseLayerType}`);
     }
 
-    // Define our base layer IDs
-    const baseLayerId = 'base-layer';
-    const baseSourceId = 'base-source';
-
-    // Remove existing base layer and source if they exist
-    if (map.getLayer(baseLayerId)) {
-      map.removeLayer(baseLayerId);
-    }
-    if (map.getSource(baseSourceId)) {
-      map.removeSource(baseSourceId);
-    }
-
-    // Also remove any existing base layers from the current style
-    const existingBaseLayers = currentStyle.layers.filter(layer => 
-      layer.type === 'background' || 
-      layer.type === 'raster' ||
-      layer.id === 'base-layer' ||
-      layer.id === 'luchtfoto-pdok' // Remove the old satellite layer if it exists
-    );
-
-    existingBaseLayers.forEach(layer => {
-      if (map.getLayer(layer.id)) {
-        map.removeLayer(layer.id);
-      }
-      // Only remove source if it's not used by other layers
-      if (map.getSource(layer.source)) {
-        const layersUsingSource = currentStyle.layers.filter(l => l.source === layer.source);
-        if (layersUsingSource.length <= 1) {
-          map.removeSource(layer.source);
-        }
-      }
-    });
-
-    // Add new base layer source
-    map.addSource(baseSourceId, config.source);
-    
-    // Add new base layer
-    map.addLayer({
-      id: baseLayerId,
-      source: baseSourceId,
-      ...config.layer
-    }, map.getStyle().layers[0]?.id); // Insert at the beginning
-
-    // If preserving overlays, ensure they're still visible
-    if (preserveOverlays) {
-      const overlayLayers = currentStyle.layers.filter(layer => 
-        layers[layer.id] || layer.id.indexOf('gl-draw-') > -1
-      );
-      
-      overlayLayers.forEach(layer => {
-        if (!map.getLayer(layer.id)) {
-          map.addLayer(layer);
+    // Handle complete style replacement for base (nine3030Style)
+    if (config.useCompleteStyle) {
+      // Remove all existing layers and sources
+      const existingLayers = currentStyle.layers;
+      existingLayers.forEach(layer => {
+        if (map.getLayer(layer.id)) {
+          map.removeLayer(layer.id);
         }
       });
+      
+      const existingSources = Object.keys(currentStyle.sources);
+      existingSources.forEach(sourceId => {
+        if (map.getSource(sourceId)) {
+          map.removeSource(sourceId);
+        }
+      });
+
+      // Use the complete nine3030Style with error handling
+      try {
+        // Add all sources from the nine3030Style
+        Object.entries(config.style.sources).forEach(([sourceId, source]) => {
+          try {
+            map.addSource(sourceId, source);
+          } catch (error) {
+            console.warn(`Failed to add source ${sourceId}:`, error);
+          }
+        });
+
+        // Add all layers from the nine3030Style
+        config.style.layers.forEach(layer => {
+          try {
+            map.addLayer(layer);
+          } catch (error) {
+            console.warn(`Failed to add layer ${layer.id}:`, error);
+          }
+        });
+      } catch (error) {
+        console.error('Error applying nine3030Style:', error);
+        // Fallback to OpenStreetMap if nine3030Style fails
+        const fallbackSource = {
+          type: 'raster',
+          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors'
+        };
+        
+        try {
+          map.addSource('fallback-source', fallbackSource);
+          map.addLayer({
+            id: 'fallback-layer',
+            type: 'raster',
+            source: 'fallback-source'
+          });
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
+      }
+
+      // If preserving overlays, add them back
+      if (preserveOverlays) {
+        const overlayLayers = currentStyle.layers.filter(layer => 
+          layers[layer.id] || layer.id.indexOf('gl-draw-') > -1
+        );
+        
+        overlayLayers.forEach(layer => {
+          if (!map.getLayer(layer.id)) {
+            map.addLayer(layer);
+          }
+        });
+      }
+    } else {
+      // Handle single layer approach for other base layer types
+      const baseLayerId = 'base-layer';
+      const baseSourceId = 'base-source';
+
+      // Remove existing base layer and source if they exist
+      if (map.getLayer(baseLayerId)) {
+        map.removeLayer(baseLayerId);
+      }
+      if (map.getSource(baseSourceId)) {
+        map.removeSource(baseSourceId);
+      }
+
+      // Also remove any existing base layers from the current style
+      const existingBaseLayers = currentStyle.layers.filter(layer => 
+        layer.type === 'background' || 
+        layer.type === 'raster' ||
+        layer.id === 'base-layer' ||
+        layer.id === 'luchtfoto-pdok' // Remove the old satellite layer if it exists
+      );
+
+      existingBaseLayers.forEach(layer => {
+        if (map.getLayer(layer.id)) {
+          map.removeLayer(layer.id);
+        }
+        // Only remove source if it's not used by other layers
+        if (map.getSource(layer.source)) {
+          const layersUsingSource = currentStyle.layers.filter(l => l.source === layer.source);
+          if (layersUsingSource.length <= 1) {
+            map.removeSource(layer.source);
+          }
+        }
+      });
+
+      // Add new base layer source
+      map.addSource(baseSourceId, config.source);
+      
+      // Add new base layer
+      map.addLayer({
+        id: baseLayerId,
+        source: baseSourceId,
+        ...config.layer
+      }, map.getStyle().layers[0]?.id); // Insert at the beginning
+
+      // If preserving overlays, ensure they're still visible
+      if (preserveOverlays) {
+        const overlayLayers = currentStyle.layers.filter(layer => 
+          layers[layer.id] || layer.id.indexOf('gl-draw-') > -1
+        );
+        
+        overlayLayers.forEach(layer => {
+          if (!map.getLayer(layer.id)) {
+            map.addLayer(layer);
+          }
+        });
+      }
     }
 
   } catch (error) {
@@ -398,6 +501,45 @@ export const getCurrentBaseLayer = (map) => {
   if (!map || !map.isStyleLoaded()) return null;
 
   const currentStyle = map.getStyle();
+  
+  // Check if we're using the nine3030Style (base)
+  const compositeSource = currentStyle.sources.composite;
+  if (compositeSource && compositeSource.tiles && compositeSource.tiles[0] && 
+      compositeSource.tiles[0].includes('mapbox.mapbox-streets-v8')) {
+    return {
+      id: 'nine3030-style',
+      type: 'vector',
+      source: 'composite',
+      sourceInfo: compositeSource,
+      styleType: 'base'
+    };
+  }
+
+  // Check if we're using the base layer (satellite/terrain)
+  const currentBaseLayer = currentStyle.layers.find(layer => layer.id === 'base-layer');
+  if (currentBaseLayer && currentBaseLayer.source === 'base-source') {
+    const baseSource = currentStyle.sources['base-source'];
+    if (baseSource && baseSource.tiles && baseSource.tiles[0]) {
+      if (baseSource.tiles[0].includes('pdok.nl') && baseSource.tiles[0].includes('luchtfotorgb')) {
+        return {
+          id: 'base-layer',
+          type: 'raster',
+          source: 'base-source',
+          sourceInfo: baseSource,
+          styleType: 'satellite'
+        };
+      } else if (baseSource.tiles[0].includes('openstreetmap.org')) {
+        return {
+          id: 'base-layer',
+          type: 'raster',
+          source: 'base-source',
+          sourceInfo: baseSource,
+          styleType: 'terrain'
+        };
+      }
+    }
+  }
+
   const baseLayer = currentStyle.layers.find(layer => 
     layer.type === 'background' || 
     layer.type === 'raster' ||
@@ -422,6 +564,46 @@ export const getCurrentBaseLayer = (map) => {
  * @returns {boolean} True if the specified base layer is active
  */
 export const isBaseLayerActive = (map, baseLayerType) => {
+  if (!map || !map.isStyleLoaded()) return false;
+
+  const currentStyle = map.getStyle();
+  
+  // Special handling for base (uses nine3030Style)
+  if (baseLayerType === 'base') {
+    // Check if the composite source from nine3030Style is present
+    const compositeSource = currentStyle.sources.composite;
+    if (compositeSource && compositeSource.tiles && compositeSource.tiles[0]) {
+      return compositeSource.tiles[0].includes('mapbox.mapbox-streets-v8');
+    }
+    return false;
+  }
+
+  // Special handling for satellite (uses PDOK luchtfoto)
+  if (baseLayerType === 'satellite') {
+    // Check if the base-layer is present and uses PDOK luchtfoto
+    const baseLayer = currentStyle.layers.find(layer => layer.id === 'base-layer');
+    if (baseLayer && baseLayer.source === 'base-source') {
+      const baseSource = currentStyle.sources['base-source'];
+      if (baseSource && baseSource.tiles && baseSource.tiles[0]) {
+        return baseSource.tiles[0].includes('pdok.nl') && baseSource.tiles[0].includes('luchtfotorgb');
+      }
+    }
+    return false;
+  }
+
+  // Special handling for terrain (uses OpenStreetMap)
+  if (baseLayerType === 'terrain') {
+    // Check if the base-layer is present and uses OpenStreetMap
+    const baseLayer = currentStyle.layers.find(layer => layer.id === 'base-layer');
+    if (baseLayer && baseLayer.source === 'base-source') {
+      const baseSource = currentStyle.sources['base-source'];
+      if (baseSource && baseSource.tiles && baseSource.tiles[0]) {
+        return baseSource.tiles[0].includes('openstreetmap.org');
+      }
+    }
+    return false;
+  }
+
   const currentBaseLayer = getCurrentBaseLayer(map);
   if (!currentBaseLayer) return false;
 
@@ -429,8 +611,7 @@ export const isBaseLayerActive = (map, baseLayerType) => {
   const sourceUrl = currentBaseLayer.sourceInfo?.tiles?.[0] || '';
   
   const patterns = {
-    terrain: /openstreetmap\.org/,
-    satellite: /arcgisonline\.com.*World_Imagery/,
+    satellite: /pdok\.nl.*luchtfotorgb/,
     hybrid: /maptiler\.com.*hybrid/
   };
 
