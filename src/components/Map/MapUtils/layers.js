@@ -2,7 +2,14 @@ import {layers} from '../layers';
 
 export const addLayers = (map) => {
   Object.keys(layers).forEach((key, idx) => {
-    map.U.addLayer(layers[key]);
+    const layer = layers[key];
+    if (layer.type === 'raster') {
+      // Handle raster layers with native MapLibre method
+      map.addLayer(layer);
+    } else {
+      // Handle other layers with mapbox-gl-utils
+      map.U.addLayer(layer);
+    }
   });
 }
 

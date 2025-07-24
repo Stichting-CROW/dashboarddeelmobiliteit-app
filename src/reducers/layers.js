@@ -26,6 +26,7 @@ const initialState = {
   displaymode: DISPLAYMODE_PARK,
   view_park: DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   view_rentals: DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  map_style: 'base',
   extent: [],
   mapextent: [],
 }

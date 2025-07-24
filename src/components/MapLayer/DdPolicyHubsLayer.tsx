@@ -77,7 +77,7 @@ const DdPolicyHubsLayer = ({
   const [affectedModalities, setAffectedModalities] = useState<string[]>([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
-  const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
+  const mapStyle = useSelector((state: StateType) => state.layers ? state.layers.map_style : 'base');
 
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
@@ -196,16 +196,24 @@ const DdPolicyHubsLayer = ({
     map.fitBounds(extent);
   }
   
-  // On component load: Set background layer to 'satellite layer'
+  // On component load: Set background layer to 'satellite layer' only if no style is already set
   useEffect(() => {
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'luchtfoto-pdok', setMapStyle);
+    // Only set the background layer if the current map style is the default 'base'
+    // This prevents overriding the user's persisted preference
+    if (mapStyle === 'base') {
+      console.log('DdPolicyHubsLayer: Setting satellite layer as default');
+      setBackgroundLayer(map, 'luchtfoto-pdok', setMapStyle);
+    } else {
+      console.log('DdPolicyHubsLayer: Skipping default layer setting, current style:', mapStyle);
+    }
   }, [
     map,
     map?.U,
-    document.location.pathname
+    document.location.pathname,
+    mapStyle
   ]);
 
   // Load state based on query params

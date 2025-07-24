@@ -8,12 +8,13 @@ import SearchBar from '../SearchBar/SearchBar';
 import { RightTop } from '../MapLayer/widget-positions/RightTop';
 
 import {StateType} from '../../types/StateType';
+import {setMapStyle} from '../../actions/layers';
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, applyMapStyle} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle, setAdvancedBaseLayer, setBackgroundLayer} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -65,7 +66,7 @@ const MapComponent = (props): JSX.Element => {
   });
 
   const mapStyle = useSelector((state: StateType) => {
-    return state.layers ? state.layers.map_style : null;
+    return state.layers ? state.layers.map_style : 'base';
   });
 
   // Connect to redux store
@@ -102,6 +103,7 @@ const MapComponent = (props): JSX.Element => {
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   const [activeLayers, setActiveLayers] = useState([]);
+  const [hasAppliedMapStyle, setHasAppliedMapStyle] = useState(false);
   let map = useRef(null);
 
   const userData = useSelector((state: StateType) => {
@@ -219,11 +221,13 @@ const MapComponent = (props): JSX.Element => {
         }
 
         setDidMapLoad(true)
+        console.log('Map loaded, setting didMapLoad to true');
 
         addSources(map.current);
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
+        console.log('Sources and layers added, setting didInitSourcesAndLayers to true');
 
         // Add cross image to use for retirement hubs
         map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
@@ -380,6 +384,79 @@ const MapComponent = (props): JSX.Element => {
     didInitSourcesAndLayers,
     rentals,
     rentals.destinations
+  ]);
+
+  // Handle map style changes (restore persisted style or apply new style)
+  useEffect(() => {
+    console.log('Map style effect triggered');
+    console.log('Map style effect conditions:', { 
+      didMapLoad, 
+      didInitSourcesAndLayers, 
+      mapExists: !!map.current, 
+      mapStyleLoaded: map.current?.isStyleLoaded(), 
+      hasAppliedMapStyle,
+      mapStyle 
+    });
+    
+    if (!didMapLoad || !didInitSourcesAndLayers || !map.current || hasAppliedMapStyle) {
+      console.log('Map style effect skipped due to conditions not met');
+      return;
+    }
+
+    const applyMapStyleChange = async () => {
+      console.log('Waiting for map style to load...');
+      
+      // Wait for the map style to load
+      while (!map.current.isStyleLoaded()) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      console.log('Map style loaded, restoring persisted map style:', mapStyle);
+      
+      // Add a delay to ensure this runs after layer components
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      try {
+        // Check if the layer exists
+        const layerExists = map.current.getLayer('luchtfoto-pdok');
+        const sourceExists = map.current.getSource('luchtfoto-pdok');
+        console.log('Layer and source check:', { 
+          layerExists: !!layerExists, 
+          sourceExists: !!sourceExists, 
+          mapStyle,
+          layerDetails: layerExists ? { id: layerExists.id, type: layerExists.type, source: layerExists.source } : null
+        });
+        
+        // Apply the map style directly without dispatching Redux action
+        if (mapStyle === 'base') {
+          // Hide the satellite layer
+          try {
+            map.current.U?.hide('luchtfoto-pdok');
+          } catch (e) {
+            console.log('U.hide failed, trying alternative approach');
+            map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'none');
+          }
+        } else if (mapStyle === 'luchtfoto-pdok') {
+          // Show the satellite layer
+          try {
+            map.current.U?.show('luchtfoto-pdok');
+          } catch (e) {
+            console.log('U.show failed, trying alternative approach');
+            map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'visible');
+          }
+        }
+        console.log('Successfully restored map style:', mapStyle);
+        setHasAppliedMapStyle(true);
+        console.log('Set hasAppliedMapStyle to true');
+      } catch (error) {
+        console.error('Error restoring map style:', error);
+      }
+    };
+
+    applyMapStyleChange();
+  }, [
+    didMapLoad,
+    didInitSourcesAndLayers
   ]);
 
   /**

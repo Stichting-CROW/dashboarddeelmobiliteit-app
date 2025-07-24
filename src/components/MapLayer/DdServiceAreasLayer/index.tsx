@@ -40,6 +40,7 @@ const DdServiceAreasLayer = ({
   const filter = useSelector((state: StateType) => state.filter || null);
   const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
+  const mapStyle = useSelector((state: StateType) => state.layers ? state.layers.map_style : 'base');
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
@@ -76,16 +77,24 @@ const DdServiceAreasLayer = ({
   }, [
   ]);
 
-  // On component load: Set background layer to 'base layer'
+  // On component load: Set background layer to 'base layer' only if no style is already set
   useEffect(() => {
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'base', setMapStyle);
+    // Only set the background layer if the current map style is the default 'base'
+    // This prevents overriding the user's persisted preference
+    if (mapStyle === 'base') {
+      console.log('DdServiceAreasLayer: Setting base layer as default');
+      setBackgroundLayer(map, 'base', setMapStyle);
+    } else {
+      console.log('DdServiceAreasLayer: Skipping default layer setting, current style:', mapStyle);
+    }
   }, [
     map,
     map?.U,
-    document.location.pathname
+    document.location.pathname,
+    mapStyle
   ]);
 
   // Load 'delta' if version_id or visible_operators changes
