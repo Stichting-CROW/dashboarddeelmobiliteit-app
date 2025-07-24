@@ -433,10 +433,10 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
               {hoveredTableDate && (
                 <ReferenceLine x={hoveredTableDate} yAxisId="left" stroke="#888" strokeDasharray="4 2" />
               )}
-              <Line yAxisId="left" type="linear" dataKey="minimum_vehicles" name="Minimum capaciteit" stroke="#1f77b4" strokeWidth={2} dot={{ r: 4 }} />
-              <Line yAxisId="left" type="linear" dataKey="maximum_vehicles" name="Maximum capaciteit" stroke="#ff7f0e" strokeWidth={2} dot={{ r: 4 }} />
-              <Line yAxisId="right" type="linear" dataKey="max_parking_duration_days" name="Max. parkeerduur (dagen)" stroke="#2ca02c" strokeWidth={2} dot={{ r: 4 }} />
-              <Line yAxisId="right" type="linear" dataKey="minimal_number_of_trips_per_vehicle" name="Min. % ritten" stroke="#d62728" strokeWidth={2} dot={{ r: 4 }} />
+              <Line yAxisId="left" type="linear" dataKey="minimum_vehicles" name="Minimum capaciteit" stroke="#1f77b4" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
+              <Line yAxisId="left" type="linear" dataKey="maximum_vehicles" name="Maximum capaciteit" stroke="#ff7f0e" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
+              <Line yAxisId="right" type="linear" dataKey="max_parking_duration_days" name="Max. parkeerduur (dagen)" stroke="#2ca02c" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
+              <Line yAxisId="right" type="linear" dataKey="minimal_number_of_trips_per_vehicle" name="Min. % ritten" stroke="#d62728" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
           <div className="flex flex-col justify-center ml-4">
