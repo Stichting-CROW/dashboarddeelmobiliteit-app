@@ -8,13 +8,14 @@ import SearchBar from '../SearchBar/SearchBar';
 import { RightTop } from '../MapLayer/widget-positions/RightTop';
 
 import {StateType} from '../../types/StateType';
-import {setMapStyle} from '../../actions/layers';
+// Note: setMapStyle is no longer needed - using new layer management system
+import { useLayerManager } from '../../hooks/useLayerManager';
 
 // MapBox utils
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, applyMapStyle, setAdvancedBaseLayer, setBackgroundLayer} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle, setAdvancedBaseLayer} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -53,17 +54,27 @@ import { SelectLayer } from '../SelectLayer/SelectLayer';
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
 
-const MapComponent = (props): JSX.Element => {
+interface MapComponentProps {
+  mapContainer?: React.RefObject<HTMLDivElement>;
+}
+
+const MapComponent = (props: MapComponentProps): JSX.Element => {
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
+
+  // Use the new layer manager hook
+  const {
+    currentState,
+    getActiveLayers,
+    getActiveSources,
+    getCurrentDisplayMode
+  } = useLayerManager();
 
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null;
   });
 
-  const displayMode = useSelector((state: StateType) => {
-    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
-  });
+  const displayMode = getCurrentDisplayMode();
 
   const mapStyle = useSelector((state: StateType) => {
     return state.layers ? state.layers.map_style : 'base';
@@ -90,7 +101,8 @@ const MapComponent = (props): JSX.Element => {
   const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
 
-  const mapContainer = useRef(null);
+  const internalMapContainer = useRef(null);
+  const mapContainer = props.mapContainer || internalMapContainer;
 
   // Define mapStateTypeainer;
   const [publicZones, setPublicZones] = useState(null);
@@ -295,18 +307,22 @@ const MapComponent = (props): JSX.Element => {
    * SET SOURCES AND LAYERS
   */
 
-  // Set active source
+  // Set active source using new layer manager
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! didMapLoad) return;
     if(! map.current.isStyleLoaded()) return;
 
     const activateSources = () => {
-      props.activeSources.forEach(sourceName => {
+      // Get active sources from layer manager
+      const activeSources = getActiveSources();
+      
+      activeSources.forEach(sourceName => {
         map.current.U.showSource(sourceName);
       });
+      
       Object.keys(sources).forEach((key, idx) => {
-        if(props.activeSources.indexOf(key) <= -1) {
+        if(activeSources.indexOf(key) <= -1) {
           // Don't remove if source does not exist :)
           if(! map.current.isSourceLoaded(key)) return;
           map.current.U.hideSource(key);
@@ -317,18 +333,21 @@ const MapComponent = (props): JSX.Element => {
     activateSources()
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.activeSources),
+    getActiveSources,
     mapStyle
   ])
 
-  // Set active layers
+  // Set active layers using new layer manager
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
-    activateLayers(map.current, layers, props.layers);
+    // Get active layers from layer manager
+    const activeLayers = getActiveLayers();
+    
+    activateLayers(map.current, layers, activeLayers);
   }, [
     didInitSourcesAndLayers,
-    JSON.stringify(props.layers)
+    getActiveLayers
   ])
 
   // Set vehicles sources
@@ -386,7 +405,7 @@ const MapComponent = (props): JSX.Element => {
     rentals.destinations
   ]);
 
-  // Handle map style changes (restore persisted style or apply new style)
+  // Handle map style changes using new layer manager
   useEffect(() => {
     console.log('Map style effect triggered');
     console.log('Map style effect conditions:', { 
@@ -398,7 +417,12 @@ const MapComponent = (props): JSX.Element => {
       mapStyle 
     });
     
-    if (!didMapLoad || !didInitSourcesAndLayers || !map.current || hasAppliedMapStyle) {
+    // Reset the flag when map style changes
+    if (hasAppliedMapStyle) {
+      setHasAppliedMapStyle(false);
+    }
+    
+    if (!didMapLoad || !didInitSourcesAndLayers || !map.current) {
       console.log('Map style effect skipped due to conditions not met');
       return;
     }
@@ -417,16 +441,6 @@ const MapComponent = (props): JSX.Element => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
-        // Check if the layer exists
-        const layerExists = map.current.getLayer('luchtfoto-pdok');
-        const sourceExists = map.current.getSource('luchtfoto-pdok');
-        console.log('Layer and source check:', { 
-          layerExists: !!layerExists, 
-          sourceExists: !!sourceExists, 
-          mapStyle,
-          layerDetails: layerExists ? { id: layerExists.id, type: layerExists.type, source: layerExists.source } : null
-        });
-        
         // Apply the map style using the advanced base layer function
         try {
           const { setAdvancedBaseLayer } = await import('./MapUtils/map');
@@ -478,7 +492,8 @@ const MapComponent = (props): JSX.Element => {
     applyMapStyleChange();
   }, [
     didMapLoad,
-    didInitSourcesAndLayers
+    didInitSourcesAndLayers,
+    mapStyle
   ]);
 
   /**

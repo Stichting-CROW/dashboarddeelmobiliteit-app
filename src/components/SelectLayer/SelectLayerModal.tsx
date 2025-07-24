@@ -1,198 +1,202 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useLayerManager } from '../../hooks/useLayerManager';
+import { useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
-import { useMapLayerSwitch } from './useMapLayerSwitch';
-
-import {
-  DISPLAYMODE_PARK,
-  DISPLAYMODE_RENTALS,
-  DISPLAYMODE_ZONES_PUBLIC,
-  DISPLAYMODE_ZONES_ADMIN,
-  DISPLAYMODE_PARKEERDATA_HEATMAP,
-  DISPLAYMODE_PARKEERDATA_CLUSTERS,
-  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  DISPLAYMODE_VERHUURDATA_HB,
-  DISPLAYMODE_VERHUURDATA_HEATMAP,
-  DISPLAYMODE_VERHUURDATA_CLUSTERS,
-  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
-  DISPLAYMODE_POLICY_HUBS
-} from '../../reducers/layers.js';
 
 const SelectLayerModal = () => {
-  const dispatch = useDispatch();
-  const { switchMapLayer } = useMapLayerSwitch();
-
-  const displayMode = useSelector((state: StateType) => {
-    return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
-  });
-
-  const viewPark = useSelector((state: StateType) => {
-    return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
-  });
-
-  const viewRentals = useSelector((state: StateType) => {
-    return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
-  });
-  
-  const layers = useSelector((state: StateType) => {
-    return state.layers ? state.layers : null;
-  });
+  const {
+    currentState,
+    getLayersByCategory,
+    getPresetsByCategory,
+    isPresetActive,
+    setBaseLayer,
+    setParkView,
+    setRentalsView,
+    toggleZones,
+    getCurrentDisplayMode,
+    getCurrentParkView,
+    getCurrentRentalsView
+  } = useLayerManager();
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const zonesVisible = useSelector((state: StateType) => {
-    return state.layers ? state.layers.zones_visible : false;
-  });
+  const displayMode = getCurrentDisplayMode();
+  const viewPark = getCurrentParkView();
+  const viewRentals = getCurrentRentalsView();
 
-  const handleMapLayerSwitch = (layerName: string) => {
-    switchMapLayer(layerName);
+  // Get base layers
+  const baseLayers = getLayersByCategory('base');
+  const satelliteLayers = getLayersByCategory('satellite');
+  const hybridLayers = getLayersByCategory('hybrid');
+
+  // Get data layer presets
+  const parkPresets = getPresetsByCategory('park');
+  const rentalsPresets = getPresetsByCategory('rentals');
+
+  // Helper function to get base layer name
+  const getBaseLayerName = (layerId: string) => {
+    const layer = baseLayers.find(l => l.id === layerId) || 
+                  satelliteLayers.find(l => l.id === layerId) || 
+                  hybridLayers.find(l => l.id === layerId);
+    return layer?.name || layerId;
   };
 
-  return <>
+  // Helper function to get base layer style
+  const getBaseLayerStyle = (layerId: string) => {
+    switch (layerId) {
+      case 'base': return 'base';
+      case 'satellite': return 'luchtfoto-pdok';
+      case 'hybrid': return 'hybrid';
+      default: return layerId;
+    }
+  };
+
+  // Helper function to get park view mode
+  const getParkViewMode = (presetId: string) => {
+    switch (presetId) {
+      case 'park-points': return 'parkeerdata-voertuigen';
+      case 'park-clusters': return 'parkeerdata-clusters';
+      case 'park-heatmap': return 'parkeerdata-heatmap';
+      default: return 'parkeerdata-voertuigen';
+    }
+  };
+
+  // Helper function to get rentals view mode
+  const getRentalsViewMode = (presetId: string) => {
+    switch (presetId) {
+      case 'rentals-origins-points': return 'verhuurdata-voertuigen';
+      case 'rentals-origins-clusters': return 'verhuurdata-clusters';
+      case 'rentals-origins-heatmap': return 'verhuurdata-heatmap';
+      case 'rentals-destinations-points': return 'verhuurdata-voertuigen';
+      case 'rentals-destinations-clusters': return 'verhuurdata-clusters';
+      case 'rentals-destinations-heatmap': return 'verhuurdata-heatmap';
+      default: return 'verhuurdata-voertuigen';
+    }
+  };
+
+  return (
     <div className="SelectLayer">
       <h2>Basislaag</h2>
 
-        <div 
-          data-type="map-style-default" 
-          className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} 
-          onClick={() => handleMapLayerSwitch('base')}
-        >
-          <span className="layer-title">
-            Standaard
-          </span>
-        </div>
-        <div 
-          data-type="map-style-satellite" 
-          className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} 
-          onClick={() => handleMapLayerSwitch('luchtfoto-pdok')}
-        >
-          <span className="layer-title">
-            Luchtfoto
-          </span>
-        </div>
-        <div 
-          data-type="map-style-hybrid" 
-          className={`layer${layers.map_style!=='hybrid' ? ' layer-inactive':''}`} 
-          onClick={() => handleMapLayerSwitch('hybrid')}
-        >
-          <span className="layer-title">
-            Hybride
-          </span>
-        </div>
-        {isLoggedIn && <div
-          className={`layer${!zonesVisible ? ' layer-inactive':''}`}
-          style={{width: '1px', borderColor: '#eee'}}
-        />}
+      {/* Base layer options */}
+      <div 
+        data-type="map-style-default" 
+        className={`layer${currentState.baseLayer !== 'base' ? ' layer-inactive' : ''}`} 
+        onClick={() => setBaseLayer('base')}
+      >
+        <span className="layer-title">
+          Standaard
+        </span>
+      </div>
+      
+      <div 
+        data-type="map-style-satellite" 
+        className={`layer${currentState.baseLayer !== 'satellite' ? ' layer-inactive' : ''}`} 
+        onClick={() => setBaseLayer('satellite')}
+      >
+        <span className="layer-title">
+          Luchtfoto
+        </span>
+      </div>
+      
+      <div 
+        data-type="map-style-hybrid" 
+        className={`layer${currentState.baseLayer !== 'hybrid' ? ' layer-inactive' : ''}`} 
+        onClick={() => setBaseLayer('hybrid')}
+      >
+        <span className="layer-title">
+          Hybride
+        </span>
+      </div>
 
-        {isLoggedIn && <>
-          <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
-          }}>
-            <span className="layer-title">
-              CBS-gebied
-            </span>
-          </div>
-        </>}
+      {/* Separator for logged-in users */}
+      {isLoggedIn && (
+        <div
+          className={`layer${!currentState.zonesVisible ? ' layer-inactive' : ''}`}
+          style={{width: '1px', borderColor: '#eee'}}
+        />
+      )}
+
+      {/* Zones layer for logged-in users */}
+      {isLoggedIn && (
+        <div 
+          data-type="zones" 
+          className={`layer${!currentState.zonesVisible ? ' layer-inactive' : ''}`} 
+          onClick={toggleZones}
+        >
+          <span className="layer-title">
+            CBS-gebied
+          </span>
+        </div>
+      )}
 
       <h2>Datalaag</h2>
 
-      {displayMode===DISPLAYMODE_PARK &&
+      {/* Park mode data layers */}
+      {displayMode === 'displaymode-park' && parkPresets.map(preset => (
         <div
-          data-type="heat-map"
-          className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
-        >
-        <span className="layer-title">
-          Heat map
-        </span>
-      </div>}
-
-      { displayMode===DISPLAYMODE_PARK ?
-        <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
-          <span className="layer-title">
-            Clusters
-          </span>
-        </div> : null }
-
-      { displayMode===DISPLAYMODE_PARK ?
-        <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
-          <span className="layer-title">
-            Voertuigen
-          </span>
-        </div> : null }
-
-      { (displayMode===DISPLAYMODE_RENTALS) ?
-        <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
-          <span className="layer-title">
-            HB
-          </span>
-        </div>: null }
-
-      { displayMode===DISPLAYMODE_RENTALS ?
-        <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HEATMAP }) }}>
-          <span className="layer-title">
-            Heat map
-          </span>
-        </div>: null }
-
-      { displayMode===DISPLAYMODE_RENTALS ?
-        <div data-type="pointers" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_CLUSTERS ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_CLUSTERS }) }}>
-          <span className="layer-title">
-            Clusters
-          </span>
-        </div> : null }
-
-      { displayMode===DISPLAYMODE_RENTALS ?
-      <div data-type="vehicles"  className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-        onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_VOERTUIGEN }) }}>
-        <span className="layer-title">
-          Voertuigen
-        </span>
-      </div> : null }
-
-
-      {displayMode===DISPLAYMODE_ZONES_PUBLIC && false && <>
-
-        <div
-          data-type="monitoring"
-          className={`layer`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          key={preset.id}
+          data-type={preset.id.includes('heatmap') ? 'heat-map' : preset.id.includes('clusters') ? 'pointers' : 'vehicles'}
+          className={`layer${!isPresetActive(preset.id) ? ' layer-inactive' : ''}`}
+          onClick={() => setParkView(getParkViewMode(preset.id))}
         >
           <span className="layer-title">
-            Analyse
+            {preset.name}
           </span>
         </div>
+      ))}
 
+      {/* Rentals mode data layers */}
+      {displayMode === 'displaymode-rentals' && rentalsPresets.map(preset => (
         <div
-          data-type="parking"
-          className={`layer`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          key={preset.id}
+          data-type={preset.id.includes('heatmap') ? 'heat-map' : preset.id.includes('clusters') ? 'pointers' : 'vehicles'}
+          className={`layer${!isPresetActive(preset.id) ? ' layer-inactive' : ''}`}
+          onClick={() => setRentalsView(getRentalsViewMode(preset.id))}
         >
           <span className="layer-title">
-            Parking
+            {preset.name}
           </span>
         </div>
+      ))}
 
-        <div
-          data-type="no parking"
-          className={`layer`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
-        >
-          <span className="layer-title">
-            No parking
-          </span>
-        </div>
+      {/* Zones public mode (currently disabled) */}
+      {displayMode === 'displaymode-zones-public' && false && (
+        <>
+          <div
+            data-type="monitoring"
+            className="layer"
+            onClick={() => setParkView('parkeerdata-heatmap')}
+          >
+            <span className="layer-title">
+              Analyse
+            </span>
+          </div>
 
-      </>}
+          <div
+            data-type="parking"
+            className="layer"
+            onClick={() => setParkView('parkeerdata-heatmap')}
+          >
+            <span className="layer-title">
+              Parking
+            </span>
+          </div>
 
+          <div
+            data-type="no parking"
+            className="layer"
+            onClick={() => setParkView('parkeerdata-heatmap')}
+          >
+            <span className="layer-title">
+              No parking
+            </span>
+          </div>
+        </>
+      )}
     </div>
-  </>
-}
+  );
+};
 
 export default SelectLayerModal;

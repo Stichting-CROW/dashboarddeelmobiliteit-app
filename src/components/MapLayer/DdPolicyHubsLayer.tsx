@@ -39,12 +39,11 @@ import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
 import PolicyHubsStats from '../PolicyHubsStats/PolicyHubsStats';
 import ActionModule from '../ActionModule/ActionModule';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
-import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { canEditHubs } from '../../helpers/authentication';
-import { setMapStyle } from '../../actions/layers';
+// Note: Base layer management is now handled by the new layer management system
 import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
 import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
@@ -201,14 +200,9 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    // Only set the background layer if the current map style is the default 'base'
-    // This prevents overriding the user's persisted preference
-    if (mapStyle === 'base') {
-      console.log('DdPolicyHubsLayer: Setting satellite layer as default');
-      setBackgroundLayer(map, 'luchtfoto-pdok', setMapStyle);
-    } else {
-      console.log('DdPolicyHubsLayer: Skipping default layer setting, current style:', mapStyle);
-    }
+          // Note: Base layer management is now handled by the new layer management system
+      // This component no longer needs to set background layers
+      console.log('DdPolicyHubsLayer: Base layer management handled by new system');
   }, [
     map,
     map?.U,

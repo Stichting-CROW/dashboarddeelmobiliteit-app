@@ -18,8 +18,7 @@ import {
 } from '../../Map/MapUtils/map.service_area_delta';
 
 import {StateType} from '../../../types/StateType.js';
-import { setBackgroundLayer } from '../../Map/MapUtils/map';
-import { setMapStyle } from '../../../actions/layers';
+// Note: Base layer management is now handled by the new layer management system
 import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
@@ -82,14 +81,9 @@ const DdServiceAreasLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    // Only set the background layer if the current map style is the default 'base'
-    // This prevents overriding the user's persisted preference
-    if (mapStyle === 'base') {
-      console.log('DdServiceAreasLayer: Setting base layer as default');
-      setBackgroundLayer(map, 'base', setMapStyle);
-    } else {
-      console.log('DdServiceAreasLayer: Skipping default layer setting, current style:', mapStyle);
-    }
+          // Note: Base layer management is now handled by the new layer management system
+      // This component no longer needs to set background layers
+      console.log('DdServiceAreasLayer: Base layer management handled by new system');
   }, [
     map,
     map?.U,
