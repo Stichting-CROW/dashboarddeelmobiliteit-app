@@ -71,6 +71,15 @@ const SelectLayerModal = () => {
             Luchtfoto
           </span>
         </div>
+        <div 
+          data-type="map-style-hybrid" 
+          className={`layer${layers.map_style!=='hybrid' ? ' layer-inactive':''}`} 
+          onClick={() => handleMapLayerSwitch('hybrid')}
+        >
+          <span className="layer-title">
+            Hybride
+          </span>
+        </div>
         {isLoggedIn && <div
           className={`layer${!zonesVisible ? ' layer-inactive':''}`}
           style={{width: '1px', borderColor: '#eee'}}

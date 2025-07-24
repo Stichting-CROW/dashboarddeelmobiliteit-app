@@ -53,7 +53,8 @@ export const useMapLayerSwitch = () => {
       // Map layer names to base layer types
       const layerTypeMap: { [key: string]: string } = {
         'base': 'base',
-        'luchtfoto-pdok': 'satellite'
+        'luchtfoto-pdok': 'satellite',
+        'hybrid': 'hybrid'
       };
       
       const targetLayerType = layerTypeMap[layerName];
@@ -98,6 +99,12 @@ export const useMapLayerSwitch = () => {
             opacity: 1,
             preserveOverlays: true
           });
+        } else if (layerName === 'hybrid') {
+          // Try to set hybrid as fallback
+          await setAdvancedBaseLayer(map, 'hybrid', {
+            opacity: 1,
+            preserveOverlays: true
+          });
         } else {
           // Try to set satellite as fallback
           await setAdvancedBaseLayer(map, 'satellite', {
@@ -128,7 +135,8 @@ export const useMapLayerSwitch = () => {
     
     const layerTypeMap: { [key: string]: string } = {
       'base': 'base',
-      'luchtfoto-pdok': 'satellite'
+      'luchtfoto-pdok': 'satellite',
+      'hybrid': 'hybrid'
     };
     
     const targetLayerType = layerTypeMap[layerName];

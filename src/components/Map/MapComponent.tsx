@@ -427,22 +427,44 @@ const MapComponent = (props): JSX.Element => {
           layerDetails: layerExists ? { id: layerExists.id, type: layerExists.type, source: layerExists.source } : null
         });
         
-        // Apply the map style directly without dispatching Redux action
-        if (mapStyle === 'base') {
-          // Hide the satellite layer
-          try {
-            map.current.U?.hide('luchtfoto-pdok');
-          } catch (e) {
-            console.log('U.hide failed, trying alternative approach');
-            map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'none');
+        // Apply the map style using the advanced base layer function
+        try {
+          const { setAdvancedBaseLayer } = await import('./MapUtils/map');
+          
+          if (mapStyle === 'base') {
+            await setAdvancedBaseLayer(map.current, 'base', {
+              opacity: 1,
+              preserveOverlays: true
+            });
+            console.log('Successfully applied base style');
+          } else if (mapStyle === 'luchtfoto-pdok') {
+            await setAdvancedBaseLayer(map.current, 'satellite', {
+              opacity: 1,
+              preserveOverlays: true
+            });
+            console.log('Successfully applied satellite style');
+          } else if (mapStyle === 'hybrid') {
+            await setAdvancedBaseLayer(map.current, 'hybrid', {
+              opacity: 1,
+              preserveOverlays: true
+            });
+            console.log('Successfully applied hybrid style');
           }
-        } else if (mapStyle === 'luchtfoto-pdok') {
-          // Show the satellite layer
-          try {
-            map.current.U?.show('luchtfoto-pdok');
-          } catch (e) {
-            console.log('U.show failed, trying alternative approach');
-            map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'visible');
+        } catch (e) {
+          console.error('Failed to apply map style:', e);
+          // Fallback to old method for backward compatibility
+          if (mapStyle === 'base') {
+            try {
+              map.current.U?.hide('luchtfoto-pdok');
+            } catch (fallbackError) {
+              map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'none');
+            }
+          } else if (mapStyle === 'luchtfoto-pdok') {
+            try {
+              map.current.U?.show('luchtfoto-pdok');
+            } catch (fallbackError) {
+              map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'visible');
+            }
           }
         }
         console.log('Successfully restored map style:', mapStyle);

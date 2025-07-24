@@ -282,18 +282,29 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
         }
       },
       satellite: {
-        source: {
-          type: 'raster',
-          tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          minzoom: 12,
-          attribution: 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
-        },
-        layer: {
-          type: 'raster',
-          paint: {
-            'raster-opacity': opacity
-          }
+        // Use complete style replacement for satellite to ensure no vector layers remain
+        useCompleteStyle: true,
+        style: {
+          version: 8,
+          sources: {
+            satellite: {
+              type: 'raster',
+              tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              minzoom: 12,
+              attribution: 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
+            }
+          },
+          layers: [
+            {
+              id: 'satellite-layer',
+              type: 'raster',
+              source: 'satellite',
+              paint: {
+                'raster-opacity': opacity
+              }
+            }
+          ]
         }
       },
       hybrid: {
@@ -315,13 +326,19 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
     // Get the configuration for the requested base layer type
     let config = baseLayerConfigs[baseLayerType];
     
-    // Special handling for base (uses the default nine3030Style)
+    // Special handling for base and satellite (uses complete style replacement)
     if (baseLayerType === 'base') {
       // Use the complete base style instead of just a single layer
       // This provides the full vector tile styling with all layers
       config = {
         useCompleteStyle: true,
         style: nine3030Style
+      };
+    } else if (baseLayerType === 'satellite') {
+      // Use complete style replacement for satellite to ensure no vector layers remain
+      config = {
+        useCompleteStyle: true,
+        style: config.style
       };
     }
     
