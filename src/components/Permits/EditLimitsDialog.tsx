@@ -327,8 +327,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-4">
-        <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onCancel}>Cancel</button>
-        <button className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 ${isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`} onClick={handleOk} disabled={!isValid}>OK</button>
+        <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onCancel}>Afbreken</button>
+        <button className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 ${isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`} onClick={handleOk} disabled={!isValid}>Opslaan</button>
       </div>
     </div>
   );
