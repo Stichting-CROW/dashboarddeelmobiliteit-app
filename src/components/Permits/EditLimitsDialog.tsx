@@ -109,6 +109,10 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
     } 
   }, [permitHistory, selectedDate]);
 
+  useEffect(() => {
+    moment.locale(navigator.language);
+  }, []);
+
   const handleSelectedDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
   };
@@ -224,7 +228,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       </div>
       <div className="flex flex-col items-center">
       { currentRecord ? 
-          <span>Voertuigplafond actief vanaf {currentRecord.effective_date} {currentRecord.end_date ? `tot en met ${currentRecord.end_date}` : ''}</span>
+          <span>Voertuigplafond actief vanaf {moment(currentRecord.effective_date).format('L')} {currentRecord.end_date ? `tot en met ${moment(currentRecord.end_date).format('L')}` : ''}</span>
           : 
           'Geen voertuigplafond actief' }
       </div>
