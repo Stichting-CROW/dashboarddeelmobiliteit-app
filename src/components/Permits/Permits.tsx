@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import PermitsCard from './PermitsCard';
 import EditLimitsDialog from './EditLimitsDialog';
@@ -36,15 +36,16 @@ const Permits = () => {
     });
   }, [activeorganisation]);
 
-  useEffect(() => {
-    reloadPermits();
-  }, [availableOperators, activeorganisation, voertuigtypes, aanbieders, token]);
-
   // Helper to reload permits
-  const reloadPermits = async () => {
+
+  const reloadPermits = useCallback(async () => {
     const results = await getPermitLimitOverviewForMunicipality(token, activeorganisation);
     setPermits(results);
-  };
+  }, [token, activeorganisation]);
+
+  useEffect(() => {
+    reloadPermits();
+  }, [availableOperators, activeorganisation, voertuigtypes, aanbieders, token, reloadPermits]);
 
   const [selectProviderModality, setSelectProviderModality] = useState<string | null>(null);
   const [editDialogPermit, setEditDialogPermit] = useState<PermitRecord | null>(null);
