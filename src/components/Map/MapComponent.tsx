@@ -30,6 +30,8 @@ import {
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_START,
+  DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
 import './MapComponent.css';
@@ -45,6 +47,7 @@ import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
+import { SelectLayer } from '../SelectLayer/SelectLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -494,7 +497,13 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn && showSearchBar && 
       <>
         <RightTop>
-          <SearchBar map={map.current} />
+          <div className="flex gap-2">
+            <SearchBar map={map.current} />
+            {(
+              displayMode !== DISPLAYMODE_START
+              && displayMode !== DISPLAYMODE_OTHER
+            ) && <SelectLayer />}
+          </div>
         </RightTop>
       </>
     }
