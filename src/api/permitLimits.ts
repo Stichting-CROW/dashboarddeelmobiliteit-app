@@ -198,3 +198,24 @@ export const getPermitLimitHistory = async (token: string, municipality: string,
         return null;
     }
 }
+
+export const deletePermitLimit = async (token: string, permit_limit_id: number) => {
+    try {
+        const url = `${MDS_BASE_URL}/admin/permit_limit/${permit_limit_id}`;
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                "authorization": `Bearer ${token}`,
+            }
+        });
+        if (response.status !== 200 && response.status !== 204) {
+            const message = `Error deleting permit limit (status: ${response.status}/${response.statusText})`;
+            console.error(message);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error("Error deleting permit limit", error);
+        return false;
+    }
+}

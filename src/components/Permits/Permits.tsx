@@ -37,13 +37,14 @@ const Permits = () => {
   }, [activeorganisation]);
 
   useEffect(() => {
-    const fetchPermits = async () => {
-      const results = await getPermitLimitOverviewForMunicipality(token, activeorganisation)
-      setPermits(results);
-    };
-
-    fetchPermits();
+    reloadPermits();
   }, [availableOperators, activeorganisation, voertuigtypes, aanbieders, token]);
+
+  // Helper to reload permits
+  const reloadPermits = async () => {
+    const results = await getPermitLimitOverviewForMunicipality(token, activeorganisation);
+    setPermits(results);
+  };
 
   const [selectProviderModality, setSelectProviderModality] = useState<string | null>(null);
   const [editDialogPermit, setEditDialogPermit] = useState<PermitRecord | null>(null);
@@ -187,13 +188,15 @@ const Permits = () => {
           return renderPermitCardsForVoertuigtype(voertuigtype);
         })}
       </div>
-      {/* Add Permit: Select Provider Dialog */
-        selectProviderModality && <SelectProviderDialog
-            modality={selectProviderModality}
-            availableProviders={selectProviderModality ? getAvailableProvidersForModality(selectProviderModality) : []}
-            onSelect={handleSelectProvider}
-            onCancel={()=>setSelectProviderModality(null)}
-          />}
+      {/* Add Permit: Select Provider Dialog */}
+      {selectProviderModality && (
+        <SelectProviderDialog
+          modality={selectProviderModality}
+          availableProviders={selectProviderModality ? getAvailableProvidersForModality(selectProviderModality) : []}
+          onSelect={handleSelectProvider}
+          onCancel={() => setSelectProviderModality(null)}
+        />
+      )}
       {/* Edit Limits Modal Dialog */}
       {editDialogPermit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -206,6 +209,7 @@ const Permits = () => {
               mode={mode}
               onOk={handleEditDialogOk}
               onCancel={handleCloseEditDialog}
+              onHistoryChanged={reloadPermits}
             />
           </div>
         </div>
