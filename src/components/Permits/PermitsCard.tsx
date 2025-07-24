@@ -1,13 +1,13 @@
 import { getProvider } from '../../helpers/providers.js';
-import { APIPermitResultCurrent } from './Permits';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import { CategoryBarIndicator } from './CategoryBarIndicator';
+import type { PermitRecord } from '../../api/permitLimits';
 
-export default function PermitsCard({ permit, onEditLimits }: { permit: APIPermitResultCurrent, onEditLimits?: () => void }) {
-    const provider = getProvider(permit.operator_system_id);
+export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRecord, onEditLimits?: () => void }) {
+    const provider = getProvider(permit.permit_limit.system_id);
 
-    const providerName = provider ? provider.name : permit.operator_system_id;
+    const providerName = provider ? provider.name : permit.permit_limit.system_id;
     const providerLogo = provider ? provider.logo : createSvgPlaceholder({
         width: 48,
         height: 48,
@@ -17,7 +17,7 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: APIPermi
     });
 
     return (
-      <div id={'permits-card-' + permit.id} className="bg-white rounded-lg shadow-md p-6 w-64 h-auto relative">
+      <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="bg-white rounded-lg shadow-md p-6 w-64 h-auto relative">
         {/* Sprocket icon for editing limits */}
         <button
           type="button"
@@ -50,19 +50,19 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: APIPermi
               });
             }}
           />: <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-gray-500">{provider?.name.slice(0, 2)}{permit.operator_system_id}</span>
+            <span className="text-gray-500">{provider?.name.slice(0, 2)}{permit.permit_limit.system_id}</span>
           </div> } 
           <div title={provider?.name} className="text-sm font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden">
             {providerName}
           </div>
         </div>
 
-        <RangeBarIndicator title="Aanbod" current={permit.current_capacity} min={permit.min_capacity} max={permit.max_capacity} />
+        <RangeBarIndicator title="Aanbod" current={permit.stats.current_vehicle_count} min={permit.permit_limit.minimum_vehicles} max={permit.permit_limit.maximum_vehicles} />
         <CategoryBarIndicator 
           title="Stilstandtijd (% correct)" 
           categories={[
-            { value: permit.pct_duration_correct, color: '#4caf50' },
-            { value: 100 - permit.pct_duration_correct, color: '#f44336' },
+            { value: permit.stats.duration_correct_percentage, color: '#4caf50' },
+            { value: 100 - permit.stats.duration_correct_percentage, color: '#f44336' },
           ]} 
           max={100} 
           displayValues={true} 
@@ -70,15 +70,15 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: APIPermi
         <CategoryBarIndicator 
           title="Min. aantal ritten (% correct)" 
           categories={[
-            { value: permit.pct_rides_per_vehicle_correct, color: '#4caf50' },
-            { value: 100 - permit.pct_rides_per_vehicle_correct, color: '#f44336' },
+            { value: permit.stats.number_of_rentals_per_vehicle, color: '#4caf50' },
+            { value: 100 - permit.stats.number_of_rentals_per_vehicle, color: '#f44336' },
           ]} 
           max={100} 
           displayValues={true} 
         />
         <RangeBarIndicator 
           title="Verkeerd geparkeerd" 
-          current={permit.vehicles_illegally_parked_count} 
-          max={permit.max_vehicles_illegally_parked_count} />
+          current={permit.stats.number_of_vehicles_illegally_parked_last_month} 
+          max={permit.permit_limit.maximum_vehicles} />
         </div>);
 }
