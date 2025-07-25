@@ -1,0 +1,518 @@
+import { useCallback, useRef, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { StateType } from '../types/StateType';
+import { useLayerManager } from './useLayerManager';
+// Import actual layer definitions
+import { layers as layerDefinitions } from '../components/Map/layers';
+
+/**
+ * Unified Layer Manager Hook
+ * 
+ * This hook consolidates all layer management approaches into a single, consistent API.
+ * It handles both traditional layer switching and ultra-fast switching transparently.
+ */
+export const useUnifiedLayerManager = () => {
+  const dispatch = useDispatch();
+  const mapRef = useRef<any>(null);
+  const isSwitchingRef = useRef(false);
+  const layerVisibilityCache = useRef(new Map<string, boolean>());
+
+  // Get the existing layer manager
+  const layerManager = useLayerManager();
+
+  // Get map instance from global context
+  const getMap = useCallback(() => {
+    if (mapRef.current) return mapRef.current;
+    
+    // Try to get map from global context
+    if ((window as any).ddMap) {
+      mapRef.current = (window as any).ddMap;
+      return mapRef.current;
+    }
+    
+    // Try to get map from context
+    if ((window as any).__MAP_CONTEXT__?.getMap) {
+      mapRef.current = (window as any).__MAP_CONTEXT__.getMap();
+      return mapRef.current;
+    }
+    
+    return null;
+  }, []);
+
+  // Set map instance
+  const setMap = useCallback((map: any) => {
+    mapRef.current = map;
+  }, []);
+
+  // Unified layer visibility setter
+  const setLayerVisibility = useCallback((layerId: string, visible: boolean, options: {
+    useUltraFast?: boolean;
+    batch?: boolean;
+    skipAnimation?: boolean;
+  } = {}) => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn(`Cannot set layer visibility for ${layerId}: map not ready`);
+      return false;
+    }
+
+    const { useUltraFast = false, batch = false, skipAnimation = false } = options;
+
+    try {
+      // Check if layer exists
+      const layer = map.getLayer(layerId);
+      console.log('yolo0 layer', layerId, layer);
+      if (!layer) {
+        // If trying to hide a layer that doesn't exist, that's fine - it's already hidden
+        if (!visible) {
+          // console.log(`Layer ${layerId} does not exist on map, but hiding is already satisfied`);
+          return true;
+        }
+        // If trying to show a layer that doesn't exist, we need to add it first
+        console.warn(`Layer ${layerId} does not exist on map, cannot show it`);
+        return false;
+      }
+
+      // Check current visibility
+      const currentVisibility = map.getLayoutProperty(layerId, 'visibility');
+      const newVisibility = visible ? 'visible' : 'none';
+      
+      console.log('yolo', layer, currentVisibility, newVisibility);
+
+      if (currentVisibility === newVisibility) {
+        // No change needed
+        return true;
+      }
+
+      // Disable interactions if using ultra-fast mode
+      if (useUltraFast && skipAnimation) {
+        map.dragPan.disable();
+        map.scrollZoom.disable();
+      }
+
+      // Set visibility using native MapLibre method
+      console.log('yolo2 VISIBILITY', layerId, newVisibility);
+      map.setLayoutProperty(layerId, 'visibility', newVisibility);
+      
+      // Cache the visibility state
+      layerVisibilityCache.current.set(layerId, visible);
+      
+      // Re-enable interactions if using ultra-fast mode
+      if (useUltraFast && skipAnimation) {
+        map.dragPan.enable();
+        map.scrollZoom.enable();
+      }
+
+      // console.log(`Layer ${layerId} visibility set to ${newVisibility} (ultra-fast: ${useUltraFast})`);
+      return true;
+    } catch (error) {
+      console.error(`Error setting layer visibility for ${layerId}:`, error);
+      
+      // Fallback to mapbox-gl-utils if available
+      try {
+        if (map.U) {
+          if (visible) {
+            map.U.show(layerId);
+          } else {
+            map.U.hide(layerId);
+          }
+          // console.log(`Layer ${layerId} visibility set with fallback (ultra-fast: ${useUltraFast})`);
+          return true;
+        }
+      } catch (fallbackError) {
+        console.error(`Fallback error for layer ${layerId}:`, fallbackError);
+      }
+      
+      return false;
+    }
+  }, [getMap]);
+
+  // Batch layer operations
+  const batchSetLayerVisibility = useCallback((operations: Array<{
+    layerId: string;
+    visible: boolean;
+  }>, options: {
+    useUltraFast?: boolean;
+    skipAnimation?: boolean;
+  } = {}) => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn('Cannot batch set layer visibility: map not ready');
+      return;
+    }
+    else {
+      console.log('Map is ready for batchSetLayerVisibility');
+    }
+
+    const { useUltraFast = false, skipAnimation = false } = options;
+
+    // Disable interactions if using ultra-fast mode
+    if (useUltraFast && skipAnimation) {
+      map.dragPan.disable();
+      map.scrollZoom.disable();
+    }
+
+    console.log('batchSetLayerVisibility: Operations:', operations);
+
+    // Group operations by visibility to minimize state changes
+    const visibleLayers = operations.filter(op => op.visible).map(op => op.layerId);
+    const hiddenLayers = operations.filter(op => !op.visible).map(op => op.layerId);
+
+    console.log(`batchSetLayerVisibility: Operations:`, {
+      total: operations.length,
+      toShow: visibleLayers,
+      toHide: hiddenLayers
+    });
+
+    // Apply all visibility changes
+    const results = {
+      visible: visibleLayers.map(layerId => setLayerVisibility(layerId, true, { useUltraFast })),
+      hidden: hiddenLayers.map(layerId => setLayerVisibility(layerId, false, { useUltraFast }))
+    };
+
+    console.log('yolo3 results', results);
+
+    // Re-enable interactions if using ultra-fast mode
+    if (useUltraFast && skipAnimation) {
+      map.dragPan.enable();
+      map.scrollZoom.enable();
+    }
+
+    // console.log(`Batch layer operations completed: ${visibleLayers.length} shown, ${hiddenLayers.length} hidden`);
+    return results;
+  }, [getMap, setLayerVisibility]);
+
+  // Unified base layer setter
+  const setBaseLayerUnified = useCallback((baseLayer: 'base' | 'satellite' | 'hybrid', options: {
+    useUltraFast?: boolean;
+    skipAnimation?: boolean;
+    batch?: boolean;
+  } = {}) => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn('Cannot set base layer: map not ready');
+      return;
+    }
+
+    const { useUltraFast = false, skipAnimation = true, batch = true } = options;
+
+    // Prevent concurrent switching
+    if (isSwitchingRef.current) {
+      console.warn('Base layer switch already in progress');
+      return;
+    }
+
+    isSwitchingRef.current = true;
+    const startTime = performance.now();
+
+    try {
+      // Update Redux state immediately for UI responsiveness
+      dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: baseLayer });
+
+      // Define base layer visibility rules
+      const baseLayerConfig = {
+        base: {
+          show: ['base-layer'],
+          hide: ['satellite-layer', 'hybrid-layer', 'luchtfoto-pdok']
+        },
+        satellite: {
+          show: ['satellite-layer', 'luchtfoto-pdok'],
+          hide: ['base-layer', 'hybrid-layer']
+        },
+        hybrid: {
+          show: ['hybrid-layer', 'luchtfoto-pdok'],
+          hide: ['base-layer', 'satellite-layer']
+        }
+      };
+
+      const config = baseLayerConfig[baseLayer];
+      if (!config) {
+        console.error(`Unknown base layer style: ${baseLayer}`);
+        return;
+      }
+
+      // Create batch operations
+      const operations = [
+        ...config.show.map(layerId => ({ layerId, visible: true })),
+        ...config.hide.map(layerId => ({ layerId, visible: false }))
+      ];
+
+      // Apply base layer changes
+      batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
+
+      // Track performance
+      const endTime = performance.now();
+      const switchTime = endTime - startTime;
+      // console.log(`⚡ Base layer switch to ${baseLayer} took ${switchTime.toFixed(1)}ms (ultra-fast: ${useUltraFast})`);
+
+      // Trigger data layer re-activation after base layer switch
+      setTimeout(() => {
+        if (map && map.isStyleLoaded()) {
+          // console.log('Triggering data layer re-activation after base layer switch');
+          dispatch({ type: 'LAYER_REACTIVATE_DATA_LAYERS', payload: { timestamp: Date.now() } });
+        }
+      }, 100);
+
+    } catch (error) {
+      console.error('Error switching base layer:', error);
+    } finally {
+      isSwitchingRef.current = false;
+    }
+  }, [dispatch, getMap, batchSetLayerVisibility]);
+
+  // Unified zones toggle
+  const toggleZonesUnified = useCallback((options: {
+    useUltraFast?: boolean;
+    skipAnimation?: boolean;
+  } = {}) => {
+    const map = getMap();
+    const { useUltraFast = false, skipAnimation = false } = options;
+
+    // Get current zones visibility
+    const zonesLayers = ['zones-geodata', 'zones-geodata-border'];
+    let currentZonesVisible = false;
+
+    if (map && map.isStyleLoaded()) {
+      try {
+        currentZonesVisible = map.getLayoutProperty('zones-geodata', 'visibility') === 'visible';
+      } catch (error) {
+        // Fallback to Redux state
+        currentZonesVisible = layerManager.currentState.zonesVisible;
+      }
+    } else {
+      // Fallback to Redux state
+      currentZonesVisible = layerManager.currentState.zonesVisible;
+    }
+
+    const newZonesVisible = !currentZonesVisible;
+
+    // Update Redux state immediately
+    dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null });
+
+    // Immediately toggle layer visibility for instant feedback
+    if (map && map.isStyleLoaded()) {
+      const operations = zonesLayers.map(layerId => ({
+        layerId,
+        visible: newZonesVisible
+      }));
+
+      batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
+    }
+
+    // If zones are becoming visible and user is logged in, trigger zones data loading
+    if (newZonesVisible) {
+      console.log('Zones becoming visible, dispatching thunk action');
+      dispatch(async (dispatch: any, getState: any) => {
+        try {
+          const { updateZonesgeodata } = await import('../poll-api/metadataZonesgeodata');
+          const store = { getState, dispatch };
+          updateZonesgeodata(store);
+        } catch (error) {
+          console.error('Failed to load zones data:', error);
+        }
+      });
+    }
+
+    console.log(`Zones visibility toggled to: ${newZonesVisible} (ultra-fast: ${useUltraFast})`);
+  }, [dispatch, getMap, batchSetLayerVisibility, layerManager]);
+
+  // Unified layer activation (replaces the old activateLayers function)
+  const activateLayersUnified = useCallback((layerIds: string[], options: {
+    useUltraFast?: boolean;
+    skipAnimation?: boolean;
+    preserveExisting?: boolean;
+  } = {}) => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn('Cannot activate layers: map not ready');
+      return;
+    }
+
+    const { useUltraFast = false, skipAnimation = false, preserveExisting = false } = options;
+
+    // Get all available layers from the layer manager (for metadata)
+    const allLayers = layerManager.allLayers;
+    const allLayerIds = Object.keys(allLayers);
+
+    // Create operations for all layers
+    const operations: Array<{ layerId: string; visible: boolean }> = [];
+
+    // Add layers to show
+    layerIds.forEach(layerId => {
+      const layerConfig = allLayers[layerId];
+      const layerDefinition = layerDefinitions[layerId];
+      
+      // console.log(`activateLayersUnified: Processing layer ${layerId}:`, {
+      //   hasConfig: !!layerConfig,
+      //   hasDefinition: !!layerDefinition,
+      //   layerExists: !!map.getLayer(layerId)
+      // });
+      
+      if (layerConfig && layerDefinition) {
+        // Check if layer exists on map, add if not
+        if (!map.getLayer(layerId)) {
+          try {
+            map.addLayer(layerDefinition);
+            console.log(`Added missing layer: ${layerId}`);
+          } catch (error) {
+            console.error(`Error adding layer ${layerId}:`, error);
+            return; // Skip this layer
+          }
+        }
+
+        // Only activate if not a background layer
+        if (!layerConfig['is-background-layer']) {
+          operations.push({ layerId, visible: true });
+          console.log(`activateLayersUnified: Added ${layerId} to show operations`);
+        } else {
+          console.log(`activateLayersUnified: Skipping ${layerId} - it's a background layer`);
+        }
+      } else {
+        console.warn(`Layer ${layerId} not found in configuration or definitions`);
+      }
+    });
+
+    // Add layers to hide (unless preserving existing)
+    if (!preserveExisting) {
+      allLayerIds.forEach(layerId => {
+        if (!layerIds.includes(layerId)) {
+          const layerConfig = allLayers[layerId];
+          if (layerConfig && !layerConfig['is-background-layer']) {
+            operations.push({ layerId, visible: false });
+          }
+        }
+      });
+    }
+
+    // Apply all operations
+    batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
+
+    // console.log(`Activated layers: ${layerIds.join(', ')} (ultra-fast: ${useUltraFast})`);
+  }, [getMap, layerManager, batchSetLayerVisibility]);
+
+  // Get layer visibility
+  const getLayerVisibility = useCallback((layerId: string): boolean | null => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      return null;
+    }
+
+    try {
+      const visibility = map.getLayoutProperty(layerId, 'visibility');
+      return visibility === 'visible';
+    } catch (error) {
+      console.error(`Error getting layer visibility for ${layerId}:`, error);
+      return null;
+    }
+  }, [getMap]);
+
+  // Check if layer exists on map
+  const layerExists = useCallback((layerId: string): boolean => {
+    const map = getMap();
+    if (!map) return false;
+
+    try {
+      return !!map.getLayer(layerId);
+    } catch (error) {
+      return false;
+    }
+  }, [getMap]);
+
+  // Add layer to map
+  const addLayer = useCallback((layerId: string): boolean => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn(`Cannot add layer ${layerId}: map not ready`);
+      return false;
+    }
+
+    const layerConfig = layerManager.allLayers[layerId];
+    const layerDefinition = layerDefinitions[layerId];
+    
+    if (!layerConfig || !layerDefinition) {
+      console.warn(`Layer ${layerId} not found in configuration or definitions`);
+      return false;
+    }
+
+    if (layerExists(layerId)) {
+      console.log(`Layer ${layerId} already exists on map`);
+      return true;
+    }
+
+    try {
+      map.addLayer(layerDefinition);
+      console.log(`Successfully added layer: ${layerId}`);
+      return true;
+    } catch (error) {
+      console.error(`Error adding layer ${layerId}:`, error);
+      return false;
+    }
+  }, [getMap, layerManager, layerExists]);
+
+  // Remove layer from map
+  const removeLayer = useCallback((layerId: string): boolean => {
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      console.warn(`Cannot remove layer ${layerId}: map not ready`);
+      return false;
+    }
+
+    if (!layerExists(layerId)) {
+      console.log(`Layer ${layerId} does not exist on map`);
+      return true;
+    }
+
+    try {
+      map.removeLayer(layerId);
+      console.log(`Successfully removed layer: ${layerId}`);
+      return true;
+    } catch (error) {
+      console.error(`Error removing layer ${layerId}:`, error);
+      return false;
+    }
+  }, [getMap, layerExists]);
+
+  // Get switching status
+  const isSwitching = useMemo(() => isSwitchingRef.current, []);
+
+  return {
+    // Map management
+    getMap,
+    setMap,
+    
+    // Layer visibility
+    setLayerVisibility,
+    batchSetLayerVisibility,
+    getLayerVisibility,
+    
+    // Layer management
+    addLayer,
+    removeLayer,
+    layerExists,
+    activateLayers: activateLayersUnified,
+    
+    // High-level operations
+    setBaseLayer: setBaseLayerUnified,
+    toggleZones: toggleZonesUnified,
+    
+    // Status
+    isSwitching,
+    
+    // Delegate to existing layer manager for state management (excluding conflicting methods)
+    currentState: layerManager.currentState,
+    allLayers: layerManager.allLayers,
+    allPresets: layerManager.allPresets,
+    getLayersByCategory: layerManager.getLayersByCategory,
+    getPresetsByCategory: layerManager.getPresetsByCategory,
+    getActiveLayers: layerManager.getActiveLayers,
+    getActiveSources: layerManager.getActiveSources,
+    isLayerVisible: layerManager.isLayerVisible,
+    isPresetActive: layerManager.isPresetActive,
+    getCurrentDisplayMode: layerManager.getCurrentDisplayMode,
+    getCurrentParkView: layerManager.getCurrentParkView,
+    getCurrentRentalsView: layerManager.getCurrentRentalsView,
+    setDisplayMode: layerManager.setDisplayMode,
+    setParkView: layerManager.setParkView,
+    setRentalsView: layerManager.setRentalsView
+  };
+}; 

@@ -291,7 +291,7 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
               type: 'raster',
               tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
               tileSize: 256,
-              minzoom: 12,
+              // minzoom: 12,
               attribution: 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
             }
           },
@@ -308,17 +308,386 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
         }
       },
       hybrid: {
-        source: {
-          type: 'raster',
-          tiles: ['https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=ZH8yI08EPvuzF57Lyc61'],
-          tileSize: 256,
-          attribution: '© MapTiler'
-        },
-        layer: {
-          type: 'raster',
-          paint: {
-            'raster-opacity': opacity
-          }
+        // Use complete style replacement for hybrid to combine PDOK satellite with vector overlays
+        useCompleteStyle: true,
+        style: {
+          version: 8,
+          sources: {
+            satellite: {
+              type: 'raster',
+              tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              // minzoom: 12,
+              attribution: 'Kaartgegevens: <a href="https://www.pdok.nl/-/nu-hoge-resolutie-luchtfoto-2023-bij-pdok">PDOK</a>'
+            },
+            composite: {
+              type: 'vector',
+              attribution: 'Mapbox',
+              tiles: ['https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.vector.pbf?access_token=pk.eyJ1IjoiYmFydHdyIiwiYSI6ImNsaXVqYnoybTE1ZGQzZW90YXNwNXE0YTMifQ.xdC_OTxwV95tNVjovRv9yg']
+            },
+            'place-labels': {
+              type: 'vector',
+              attribution: '© OpenStreetMap contributors',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.pbf']
+            }
+          },
+          sprite: "https://api.mapbox.com/styles/v1/bartwr/cl8yy2i2c000014lk0s7mnr7e/draft/sprite@2x.json?access_token=tk.eyJ1IjoiYmFydHdyIiwiZXhwIjoxNjY1MTc5MTQ4LCJpYXQiOjE2NjUxNzU1NDgsInNjb3BlcyI6WyJlc3NlbnRpYWxzIiwic2NvcGVzOmxpc3QiLCJtYXA6cmVhZCIsIm1hcDp3cml0ZSIsInVzZXI6cmVhZCIsInVzZXI6d3JpdGUiLCJ1cGxvYWRzOnJlYWQiLCJ1cGxvYWRzOmxpc3QiLCJ1cGxvYWRzOndyaXRlIiwic3R5bGVzOnRpbGVzIiwic3R5bGVzOnJlYWQiLCJmb250czpsaXN0IiwiZm9udHM6cmVhZCIsImZvbnRzOndyaXRlIiwic3R5bGVzOndyaXRlIiwic3R5bGVzOmxpc3QiLCJzdHlsZXM6ZG93bmxvYWQiLCJzdHlsZXM6cHJvdGVjdCIsInRva2VuczpyZWFkIiwidG9rZW5zOndyaXRlIiwiZGF0YXNldHM6bGlzdCIsImRhdGFzZXRzOnJlYWQiLCJkYXRhc2V0czp3cml0ZSIsInRpbGVzZXRzOmxpc3QiLCJ0aWxlc2V0czpyZWFkIiwidGlsZXNldHM6d3JpdGUiLCJkb3dubG9hZHM6cmVhZCIsInZpc2lvbjpyZWFkIiwidmlzaW9uOmRvd25sb2FkIiwibmF2aWdhdGlvbjpkb3dubG9hZCIsIm9mZmxpbmU6cmVhZCIsIm9mZmxpbmU6d3JpdGUiLCJzdHlsZXM6ZHJhZnQiLCJmb250czptZXRhZGF0YSIsInNwcml0ZS1pbWFnZXM6cmVhZCIsImRhdGFzZXRzOnN0dWRpbyIsImN1c3RvbWVyczp3cml0ZSIsImNyZWRlbnRpYWxzOnJlYWQiLCJjcmVkZW50aWFsczp3cml0ZSIsImFuYWx5dGljczpyZWFkIl0sImNsaWVudCI6Im1hcGJveC5jb20iLCJsbCI6MTY2NTE3NDc0MzUyOCwiaXUiOm51bGwsImVtYWlsIjoibWFpbEBiYXJ0cm9vcmRhLm5sIn0.onvMaEj0urnm2g3FFyrAVg",
+          glyphs: "https://a.tiles.mapbox.com/v4/fontstack/{fontstack}/{range}.pbf?access_token=pk.eyJ1IjoiYmFydHdyIiwiYSI6ImNsaXVqYnoybTE1ZGQzZW90YXNwNXE0YTMifQ.xdC_OTxwV95tNVjovRv9yg",
+          layers: [
+            // Satellite base layer
+            {
+              id: 'satellite-layer',
+              type: 'raster',
+              source: 'satellite',
+              paint: {
+                'raster-opacity': opacity
+              }
+            },
+            // Building outlines for better visibility
+            {
+              id: 'building-outline',
+              type: 'line',
+              metadata: {
+                'mapbox:featureComponent': 'building',
+                'mapbox:group': 'Building, building'
+              },
+              source: 'composite',
+              'source-layer': 'building',
+              minzoom: 13,
+              filter: ['==', ['get', 'underground'], 'false'],
+              layout: {},
+              paint: {
+                'line-color': 'hsl(35, 8%, 85%)',
+                'line-width': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  15,
+                  0.5,
+                  16,
+                  1,
+                  17,
+                  2
+                ]
+              }
+            },
+            // Buildings
+            {
+              id: 'building',
+              type: 'fill',
+              metadata: {
+                'mapbox:featureComponent': 'building',
+                'mapbox:group': 'Building, building'
+              },
+              source: 'composite',
+              'source-layer': 'building',
+              minzoom: 13,
+              filter: ['==', ['get', 'underground'], 'false'],
+              layout: {},
+              paint: {
+                'fill-color': 'hsl(35, 8%, 85%)',
+                'fill-opacity': 0.3
+              }
+            },
+            // Road labels
+            {
+              id: 'road-label-simple',
+              type: 'symbol',
+              metadata: {
+                'mapbox:featureComponent': 'road-network',
+                'mapbox:group': 'Road network, road-labels'
+              },
+              source: 'composite',
+              'source-layer': 'road',
+              minzoom: 12,
+              filter: [
+                'match',
+                ['get', 'class'],
+                [
+                  'motorway',
+                  'trunk',
+                  'primary',
+                  'secondary',
+                  'tertiary',
+                  'street',
+                  'street_limited'
+                ],
+                true,
+                false
+              ],
+              layout: {
+                'text-size': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  10,
+                  [
+                    'match',
+                    ['get', 'class'],
+                    [
+                      'motorway',
+                      'trunk',
+                      'primary',
+                      'secondary',
+                      'tertiary'
+                    ],
+                    10,
+                    9
+                  ],
+                  18,
+                  [
+                    'match',
+                    ['get', 'class'],
+                    [
+                      'motorway',
+                      'trunk',
+                      'primary',
+                      'secondary',
+                      'tertiary'
+                    ],
+                    16,
+                    14
+                  ]
+                ],
+                'text-max-angle': 30,
+                'text-font': ['DIN Pro Regular', 'Arial Unicode MS Regular'],
+                'symbol-placement': 'line',
+                'text-padding': 1,
+                'text-rotation-alignment': 'map',
+                'text-pitch-alignment': 'viewport',
+                'text-field': ['coalesce', ['get', 'name_en'], ['get', 'name']],
+                'text-letter-spacing': 0.01
+              },
+              paint: {
+                'text-color': 'hsl(0, 0%, 100%)',
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 2
+              }
+            },
+            // POI labels
+            {
+              id: 'poi-label',
+              type: 'symbol',
+              metadata: {
+                'mapbox:featureComponent': 'point-of-interest-labels',
+                'mapbox:group': 'Point of interest labels, poi-labels'
+              },
+              source: 'composite',
+              'source-layer': 'poi_label',
+              minzoom: 6,
+              filter: [
+                '<=',
+                ['get', 'filterrank'],
+                ['+', ['step', ['zoom'], 0, 16, 1, 17, 2], 2]
+              ],
+              layout: {
+                'text-size': [
+                  'step',
+                  ['zoom'],
+                  ['step', ['get', 'sizerank'], 18, 5, 12],
+                  17,
+                  ['step', ['get', 'sizerank'], 18, 13, 12]
+                ],
+                'icon-image': [
+                  'case',
+                  ['has', 'maki_beta'],
+                  [
+                    'coalesce',
+                    ['image', ['get', 'maki_beta']],
+                    ['image', ['get', 'maki']]
+                  ],
+                  ['image', ['get', 'maki']]
+                ],
+                'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+                'text-offset': [
+                  'step',
+                  ['zoom'],
+                  [
+                    'step',
+                    ['get', 'sizerank'],
+                    ['literal', [0, 0]],
+                    5,
+                    ['literal', [0, 0.75]]
+                  ],
+                  17,
+                  [
+                    'step',
+                    ['get', 'sizerank'],
+                    ['literal', [0, 0]],
+                    13,
+                    ['literal', [0, 0.75]]
+                  ]
+                ],
+                'text-anchor': [
+                  'step',
+                  ['zoom'],
+                  ['step', ['get', 'sizerank'], 'center', 5, 'top'],
+                  17,
+                  ['step', ['get', 'sizerank'], 'center', 13, 'top']
+                ],
+                'text-field': ['coalesce', ['get', 'name_en'], ['get', 'name']]
+              },
+              paint: {
+                'icon-opacity': [
+                  'step',
+                  ['zoom'],
+                  ['step', ['get', 'sizerank'], 0, 5, 1],
+                  17,
+                  ['step', ['get', 'sizerank'], 0, 13, 1]
+                ],
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 1.5,
+                'text-halo-blur': 0.5,
+                'text-color': 'hsl(0, 0%, 100%)'
+              }
+            },
+            // Settlement labels
+            {
+              id: 'settlement-subdivision-label',
+              type: 'symbol',
+              metadata: {
+                'mapbox:featureComponent': 'place-label',
+                'mapbox:group': 'Place labels, settlement-subdivision-label'
+              },
+              source: 'composite',
+              'source-layer': 'place_label',
+              minzoom: 4,
+              filter: [
+                'all',
+                ['==', ['get', 'class'], 'suburb'],
+                ['==', ['get', 'worldview'], 'all']
+              ],
+              layout: {
+                'text-size': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  4,
+                  8,
+                  10,
+                  12,
+                  18,
+                  20
+                ],
+                'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+                'text-field': ['coalesce', ['get', 'name_en'], ['get', 'name']],
+                'text-letter-spacing': 0.01
+              },
+              paint: {
+                'text-color': 'hsl(0, 0%, 100%)',
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 2
+              }
+            },
+            // City and town labels using OpenStreetMap data
+            {
+              id: 'city-label',
+              type: 'symbol',
+              source: 'place-labels',
+              'source-layer': 'place',
+              minzoom: 2,
+              filter: [
+                'all',
+                ['has', 'name'],
+                ['match', ['get', 'place'], ['city', 'town'], true, false]
+              ],
+              layout: {
+                'text-size': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  2,
+                  10,
+                  6,
+                  14,
+                  10,
+                  18,
+                  18,
+                  24
+                ],
+                'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+                'text-field': ['get', 'name'],
+                'text-letter-spacing': 0.01
+              },
+              paint: {
+                'text-color': 'hsl(0, 0%, 100%)',
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 3
+              }
+            },
+            // Village and smaller settlement labels
+            {
+              id: 'village-label',
+              type: 'symbol',
+              source: 'place-labels',
+              'source-layer': 'place',
+              minzoom: 4,
+              filter: [
+                'all',
+                ['has', 'name'],
+                ['match', ['get', 'place'], ['village', 'hamlet', 'suburb'], true, false]
+              ],
+              layout: {
+                'text-size': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  4,
+                  8,
+                  8,
+                  12,
+                  12,
+                  16,
+                  16,
+                  20
+                ],
+                'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+                'text-field': ['get', 'name'],
+                'text-letter-spacing': 0.01
+              },
+              paint: {
+                'text-color': 'hsl(0, 0%, 100%)',
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 2
+              }
+            },
+            // Country labels for very zoomed out views
+            {
+              id: 'country-label',
+              type: 'symbol',
+              source: 'place-labels',
+              'source-layer': 'place',
+              minzoom: 0,
+              filter: [
+                'all',
+                ['has', 'name'],
+                ['==', ['get', 'place'], 'country']
+              ],
+              layout: {
+                'text-size': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  0,
+                  12,
+                  4,
+                  16,
+                  8,
+                  20,
+                  12,
+                  24
+                ],
+                'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+                'text-field': ['get', 'name'],
+                'text-letter-spacing': 0.02
+              },
+              paint: {
+                'text-color': 'hsl(0, 0%, 100%)',
+                'text-halo-color': 'hsl(0, 0%, 0%)',
+                'text-halo-width': 4
+              }
+            }
+          ]
         }
       }
     };
@@ -326,7 +695,7 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
     // Get the configuration for the requested base layer type
     let config = baseLayerConfigs[baseLayerType];
     
-    // Special handling for base and satellite (uses complete style replacement)
+    // Special handling for base, satellite, and hybrid (uses complete style replacement)
     if (baseLayerType === 'base') {
       // Use the complete base style instead of just a single layer
       // This provides the full vector tile styling with all layers
@@ -336,6 +705,12 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
       };
     } else if (baseLayerType === 'satellite') {
       // Use complete style replacement for satellite to ensure no vector layers remain
+      config = {
+        useCompleteStyle: true,
+        style: config.style
+      };
+    } else if (baseLayerType === 'hybrid') {
+      // Use complete style replacement for hybrid to combine PDOK satellite with vector overlays
       config = {
         useCompleteStyle: true,
         style: config.style
@@ -438,8 +813,13 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
           layers[layer.id] || layer.id.indexOf('gl-draw-') > -1
         );
         
+        console.log('setAdvancedBaseLayer: Preserving overlay layers:', overlayLayers.map(l => l.id));
+        console.log('setAdvancedBaseLayer: Available layers in layers object:', Object.keys(layers));
+        
         overlayLayers.forEach(layer => {
+          console.log('setAdvancedBaseLayer: Checking if layer exists on map:', layer.id, !!map.getLayer(layer.id));
           if (!map.getLayer(layer.id)) {
+            console.log('setAdvancedBaseLayer: Adding back overlay layer:', layer.id);
             map.addLayer(layer);
           }
         });
@@ -494,8 +874,12 @@ export const setAdvancedBaseLayer = async (map, baseLayerType, options = {}) => 
           layers[layer.id] || layer.id.indexOf('gl-draw-') > -1
         );
         
+        console.log('setAdvancedBaseLayer: Preserving overlay layers (single layer approach):', overlayLayers.map(l => l.id));
+        
         overlayLayers.forEach(layer => {
+          console.log('setAdvancedBaseLayer: Checking if layer exists on map (single layer):', layer.id, !!map.getLayer(layer.id));
           if (!map.getLayer(layer.id)) {
+            console.log('setAdvancedBaseLayer: Adding back overlay layer (single layer):', layer.id);
             map.addLayer(layer);
           }
         });
@@ -597,12 +981,26 @@ export const isBaseLayerActive = (map, baseLayerType) => {
 
   // Special handling for satellite (uses PDOK luchtfoto)
   if (baseLayerType === 'satellite') {
-    // Check if the base-layer is present and uses PDOK luchtfoto
-    const baseLayer = currentStyle.layers.find(layer => layer.id === 'base-layer');
-    if (baseLayer && baseLayer.source === 'base-source') {
-      const baseSource = currentStyle.sources['base-source'];
-      if (baseSource && baseSource.tiles && baseSource.tiles[0]) {
-        return baseSource.tiles[0].includes('pdok.nl') && baseSource.tiles[0].includes('luchtfotorgb');
+    // Check if the satellite-layer is present and uses PDOK luchtfoto
+    const satelliteLayer = currentStyle.layers.find(layer => layer.id === 'satellite-layer');
+    if (satelliteLayer && satelliteLayer.source === 'satellite') {
+      const satelliteSource = currentStyle.sources['satellite'];
+      if (satelliteSource && satelliteSource.tiles && satelliteSource.tiles[0]) {
+        return satelliteSource.tiles[0].includes('pdok.nl') && satelliteSource.tiles[0].includes('luchtfotorgb');
+      }
+    }
+    return false;
+  }
+
+  // Special handling for hybrid (uses PDOK luchtfoto with vector overlays)
+  if (baseLayerType === 'hybrid') {
+    // Check if the satellite-layer is present and uses PDOK luchtfoto, and composite source exists
+    const satelliteLayer = currentStyle.layers.find(layer => layer.id === 'satellite-layer');
+    const compositeSource = currentStyle.sources['composite'];
+    if (satelliteLayer && satelliteLayer.source === 'satellite' && compositeSource) {
+      const satelliteSource = currentStyle.sources['satellite'];
+      if (satelliteSource && satelliteSource.tiles && satelliteSource.tiles[0]) {
+        return satelliteSource.tiles[0].includes('pdok.nl') && satelliteSource.tiles[0].includes('luchtfotorgb');
       }
     }
     return false;

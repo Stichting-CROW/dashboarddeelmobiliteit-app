@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {MapComponent} from '../components/Map/MapComponent.tsx';
+import {MapComponentUnified as MapComponent} from '../components/Map/MapComponentUnified.tsx';
 import {SelectLayer} from '../components/SelectLayer/SelectLayer.jsx';
 import {MetaStats} from '../components/MetaStats/MetaStats.jsx';
 import {HubStatsWidget} from '../components/HubStatsWidget/HubStatsWidget';
@@ -24,23 +24,23 @@ import {StateType} from '../types/StateType';
 import './MapPage.css';
 
 function Map({mode, mapContainer}) {
-  const showZones = useSelector((state: StateType) => {
+  const showZones = useSelector((state) => {
     return state.layers ? state.layers.zones_visible : false;
   });
 
-  const filter = useSelector((state: StateType) => {
+  const filter = useSelector((state) => {
     return state.filter;
   });
 
-  const displayMode = useSelector((state: StateType) => {
+  const displayMode = useSelector((state) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const viewPark = useSelector((state: StateType) => {
+  const viewPark = useSelector((state) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
 
-  const viewRentals = useSelector((state: StateType) => {
+  const viewRentals = useSelector((state) => {
     return state.layers ? state.layers.view_rentals : DISPLAYMODE_VERHUURDATA_VOERTUIGEN;
   });
   

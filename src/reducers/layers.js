@@ -75,6 +75,14 @@ export default function filter(state = initialState, action) {
         map_style: action.payload
       };
     }
+    case 'LAYER_REACTIVATE_DATA_LAYERS': {
+      // This action triggers re-activation of data layers after base layer switches
+      // The timestamp ensures the effect in MapComponent will re-run
+      return {
+        ...state,
+        last_reactivation: action.payload.timestamp
+      };
+    }
     case 'LAYER_SET_ZONES_EXTENT': {
       if(md5(JSON.stringify(action.payload||[]))!==md5(JSON.stringify(state.extent||[]))) {
         // console.log("set extent to %o", action.payload)
@@ -120,7 +128,11 @@ export default function filter(state = initialState, action) {
     case 'LOGIN':
     case 'LOGOUT': {
       // console.log('login/logout - reset layer info')      
-      return initialState;
+      // Preserve zones_visible from current state instead of resetting to false
+      return {
+        ...initialState,
+        zones_visible: state.zones_visible
+      };
     }
     default:
       return state;

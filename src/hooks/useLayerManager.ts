@@ -27,6 +27,16 @@ export const useLayerManager = () => {
     const displayMode = layerState?.displaymode || 'displaymode-park';
     const viewPark = layerState?.view_park || 'parkeerdata-voertuigen';
     const viewRentals = layerState?.view_rentals || 'verhuurdata-voertuigen';
+    const zonesVisible = layerState?.zones_visible || false;
+    const mapStyle = layerState?.map_style || 'base';
+    
+    // console.log('useLayerManager: Building current state', {
+    //   displayMode,
+    //   viewPark,
+    //   viewRentals,
+    //   zones_visible: zonesVisible,
+    //   isLoggedIn
+    // });
     
     // Determine active preset based on display mode and view
     let activePreset: string | null = null;
@@ -47,8 +57,15 @@ export const useLayerManager = () => {
     visibleLayers.push('zones-isochrones');
     
     // Add zones if visible and user is logged in
-    if (layerState?.zones_visible && isLoggedIn) {
+    if (zonesVisible && isLoggedIn) {
       visibleLayers.push('zones-geodata', 'zones-geodata-border');
+      // console.log('useLayerManager: Adding zones layers to visible layers');
+    } else {
+      // console.log('useLayerManager: Zones not visible or user not logged in', {
+      //   zones_visible: zonesVisible,
+      //   isLoggedIn,
+      //   visibleLayers
+      // });
     }
     
     // Add preset layers
@@ -59,14 +76,25 @@ export const useLayerManager = () => {
       }
     }
 
+    // console.log('useLayerManager: Final visible layers:', visibleLayers);
+
     return {
       activePreset,
       visibleLayers,
-      baseLayer: layerState?.map_style || 'base',
-      zonesVisible: layerState?.zones_visible || false,
+      baseLayer: mapStyle,
+      zonesVisible: zonesVisible,
       customLayers: []
     };
-  }, [layerState, filter, isLoggedIn]);
+  }, [
+    // Only depend on the specific properties that affect layer visibility
+    layerState?.displaymode,
+    layerState?.view_park,
+    layerState?.view_rentals,
+    layerState?.zones_visible,
+    layerState?.map_style,
+    filter?.herkomstbestemming,
+    isLoggedIn
+  ]);
 
   // Get all available layers
   const allLayers = useMemo(() => layerConfig.layers, []);
@@ -91,8 +119,25 @@ export const useLayerManager = () => {
 
   // Toggle zones visibility
   const toggleZones = useCallback(() => {
+    console.log('useLayerManager: Toggling zones visibility');
+    const newZonesVisible = !layerState?.zones_visible;
+    
     dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null });
-  }, [dispatch]);
+    
+    // If zones are becoming visible and user is logged in, trigger zones data loading
+    if (newZonesVisible && isLoggedIn) {
+      console.log('useLayerManager: Zones becoming visible, dispatching thunk action');
+      dispatch(async (dispatch, getState) => {
+        try {
+          const { updateZonesgeodata } = await import('../poll-api/metadataZonesgeodata');
+          const store = { getState, dispatch };
+          updateZonesgeodata(store);
+        } catch (error) {
+          console.error('Failed to load zones data:', error);
+        }
+      });
+    }
+  }, [dispatch, layerState?.zones_visible, isLoggedIn]);
 
   // Set display mode (converts to preset)
   const setDisplayMode = useCallback((displayMode: string) => {
@@ -118,14 +163,20 @@ export const useLayerManager = () => {
   const getActiveSources = useCallback(() => {
     const sources: string[] = [];
     
+    // console.log('useLayerManager: getActiveSources called with visible layers:', currentState.visibleLayers);
+    
     currentState.visibleLayers.forEach(layerId => {
       const layer = getLayerById(layerId);
+      // console.log('useLayerManager: Processing layer for sources:', layerId, layer);
       if (layer?.source) {
         sources.push(layer.source);
+        // console.log('useLayerManager: Added source:', layer.source, 'for layer:', layerId);
       }
     });
 
-    return Array.from(new Set(sources)); // Remove duplicates
+    const uniqueSources = Array.from(new Set(sources)); // Remove duplicates
+    // console.log('useLayerManager: Final active sources:', uniqueSources);
+    return uniqueSources;
   }, [currentState.visibleLayers]);
 
   // Check if a layer is visible

@@ -257,7 +257,12 @@ const initZonesMap = async (theMap, token, filterGebied) => {
   theMap.U.setData('zones-metrics-public', geoJson);
 
   // Show layer
-  theMap.U.show('zones-metrics-public')
+        // Use unified layer manager if available, otherwise fallback to direct API
+      if (window.__UNIFIED_LAYER_MANAGER__) {
+        window.__UNIFIED_LAYER_MANAGER__.setLayerVisibility('zones-metrics-public', true, { useUltraFast: true });
+      } else {
+        theMap.U.show('zones-metrics-public')
+      }
 
   // Define map click handler
   theMap.on('click', 'zones-metrics-public', function (e) {

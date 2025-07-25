@@ -1,24 +1,66 @@
 import { useLayerManager } from '../../hooks/useLayerManager';
+import { useUnifiedLayerManager } from '../../hooks/useUnifiedLayerManager';
 import { useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
 
+// Simple performance tracking
+const trackPerformance = (layerType: string, startTime: number) => {
+  const endTime = performance.now();
+  const switchTime = endTime - startTime;
+  console.log(`⚡ Layer switch: ${layerType} took ${switchTime.toFixed(1)}ms`);
+  
+  // Show performance indicator
+  const indicator = document.createElement('div');
+  indicator.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${switchTime < 100 ? '#4CAF50' : switchTime < 300 ? '#FF9800' : '#F44336'};
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 10000;
+    pointer-events: none;
+  `;
+  indicator.textContent = `${switchTime.toFixed(1)}ms`;
+  document.body.appendChild(indicator);
+  
+  setTimeout(() => {
+    document.body.removeChild(indicator);
+  }, 2000);
+};
+
 const SelectLayerModal = () => {
+  // Use the ultra-fast layer switching hook for base layers
+  const layerManager = useUnifiedLayerManager();
+  const {
+    setBaseLayer: setBaseLayerFast,
+    toggleZones: toggleZonesFast,
+    currentState: unifiedCurrentState,
+    isSwitching
+  } = layerManager;
+  
+  const currentMapStyle = unifiedCurrentState.baseLayer;
+  const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
+
+  // Use the regular layer manager for data layers
   const {
     currentState,
     getLayersByCategory,
     getPresetsByCategory,
     isPresetActive,
-    setBaseLayer,
     setParkView,
     setRentalsView,
-    toggleZones,
     getCurrentDisplayMode,
     getCurrentParkView,
     getCurrentRentalsView
   } = useLayerManager();
 
-  const isLoggedIn = useSelector((state: StateType) => {
-    return state.authentication.user_data ? true : false;
+  // Add debugging for zones data
+  const zones_geodata = useSelector((state: StateType) => {
+    return state.zones_geodata;
   });
 
   const displayMode = getCurrentDisplayMode();
@@ -33,24 +75,6 @@ const SelectLayerModal = () => {
   // Get data layer presets
   const parkPresets = getPresetsByCategory('park');
   const rentalsPresets = getPresetsByCategory('rentals');
-
-  // Helper function to get base layer name
-  const getBaseLayerName = (layerId: string) => {
-    const layer = baseLayers.find(l => l.id === layerId) || 
-                  satelliteLayers.find(l => l.id === layerId) || 
-                  hybridLayers.find(l => l.id === layerId);
-    return layer?.name || layerId;
-  };
-
-  // Helper function to get base layer style
-  const getBaseLayerStyle = (layerId: string) => {
-    switch (layerId) {
-      case 'base': return 'base';
-      case 'satellite': return 'luchtfoto-pdok';
-      case 'hybrid': return 'hybrid';
-      default: return layerId;
-    }
-  };
 
   // Helper function to get park view mode
   const getParkViewMode = (presetId: string) => {
@@ -82,8 +106,9 @@ const SelectLayerModal = () => {
       {/* Base layer options */}
       <div 
         data-type="map-style-default" 
-        className={`layer${currentState.baseLayer !== 'base' ? ' layer-inactive' : ''}`} 
-        onClick={() => setBaseLayer('base')}
+        className={`layer${currentMapStyle !== 'base' ? ' layer-inactive' : ''}`} 
+        onClick={() => setBaseLayerFast('base')}
+        style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
       >
         <span className="layer-title">
           Standaard
@@ -92,24 +117,15 @@ const SelectLayerModal = () => {
       
       <div 
         data-type="map-style-satellite" 
-        className={`layer${currentState.baseLayer !== 'satellite' ? ' layer-inactive' : ''}`} 
-        onClick={() => setBaseLayer('satellite')}
+        className={`layer${currentMapStyle !== 'hybrid' ? ' layer-inactive' : ''}`} 
+        onClick={() => setBaseLayerFast('hybrid')}
+        style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
       >
         <span className="layer-title">
           Luchtfoto
         </span>
       </div>
       
-      <div 
-        data-type="map-style-hybrid" 
-        className={`layer${currentState.baseLayer !== 'hybrid' ? ' layer-inactive' : ''}`} 
-        onClick={() => setBaseLayer('hybrid')}
-      >
-        <span className="layer-title">
-          Hybride
-        </span>
-      </div>
-
       {/* Separator for logged-in users */}
       {isLoggedIn && (
         <div
@@ -123,7 +139,7 @@ const SelectLayerModal = () => {
         <div 
           data-type="zones" 
           className={`layer${!currentState.zonesVisible ? ' layer-inactive' : ''}`} 
-          onClick={toggleZones}
+          style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
         >
           <span className="layer-title">
             CBS-gebied

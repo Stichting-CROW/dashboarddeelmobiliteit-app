@@ -21,7 +21,12 @@ const addIsochronesToMap = (theMap, featureCollection) => {
   theMap.U.setData('zones-isochrones', featureCollection);
 
   // Show layer
-  theMap.U.show('zones-isochrones')
+        // Use unified layer manager if available, otherwise fallback to direct API
+      if ((window as any).__UNIFIED_LAYER_MANAGER__) {
+        (window as any).__UNIFIED_LAYER_MANAGER__.setLayerVisibility('zones-isochrones', true, { useUltraFast: true });
+      } else {
+        theMap.U.show('zones-isochrones')
+      }
 
 }
 
@@ -104,7 +109,12 @@ const IsochroneTools = () => {
     setIsochroneMarkers([]);
 
     // Hide isochrones layer
-    theMap.U.hide('zones-isochrones')
+    // Use unified layer manager if available, otherwise fallback to direct API
+    if ((window as any).__UNIFIED_LAYER_MANAGER__) {
+      (window as any).__UNIFIED_LAYER_MANAGER__.setLayerVisibility('zones-isochrones', false, { useUltraFast: true });
+    } else {
+      theMap.U.hide('zones-isochrones')
+    }
   }
 
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);

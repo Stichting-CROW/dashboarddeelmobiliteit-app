@@ -8,20 +8,13 @@ import SearchBar from '../SearchBar/SearchBar';
 import { RightTop } from '../MapLayer/widget-positions/RightTop';
 
 import {StateType} from '../../types/StateType';
-// Note: setMapStyle is no longer needed - using new layer management system
-import { useLayerManager } from '../../hooks/useLayerManager';
+import { useUnifiedLayerManager } from '../../hooks/useUnifiedLayerManager';
 
 // MapBox utils
-// https://www.npmjs.com/package/mapbox-gl-utils
-// https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle, setAdvancedBaseLayer} from './MapUtils/map.js';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
-import {
-  addLayers,
-  activateLayers
-} from './MapUtils/layers.js';
 import {addSources} from './MapUtils/sources.js';
 import {
   navigateToGeography,
@@ -48,7 +41,6 @@ import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
-import { WidthIcon } from '@radix-ui/react-icons';
 import { SelectLayer } from '../SelectLayer/SelectLayer';
 
 // Set language for momentJS
@@ -58,23 +50,14 @@ interface MapComponentProps {
   mapContainer?: React.RefObject<HTMLDivElement>;
 }
 
-const MapComponent = (props: MapComponentProps): JSX.Element => {
+const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
-  // Use the new layer manager hook
-  const {
-    currentState,
-    getActiveLayers,
-    getActiveSources,
-    getCurrentDisplayMode
-  } = useLayerManager();
+  // Use the unified layer manager
+  const layerManager = useUnifiedLayerManager();
 
-  const filterGebied = useSelector((state: StateType) => {
-    return state.filter ? state.filter.gebied : null;
-  });
-
-  const displayMode = getCurrentDisplayMode();
+  const displayMode = layerManager.getCurrentDisplayMode();
 
   const mapStyle = useSelector((state: StateType) => {
     return state.layers ? state.layers.map_style : 'base';
@@ -91,7 +74,6 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
   const providers = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
   const extent/* map boundaries */ = useSelector((state: StateType) => state.layers ? state.layers.extent : null);
-  const [counter, setCounter] = useState(0);
   const zones_geodata = useSelector((state: StateType) => {
     if(!state||!state.zones_geodata) {
       return null;
@@ -100,11 +82,11 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
   });
   const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
+  const lastReactivation = useSelector((state: StateType) => state.layers ? state.layers.last_reactivation : null);
 
   const internalMapContainer = useRef(null);
   const mapContainer = props.mapContainer || internalMapContainer;
 
-  // Define mapStateTypeainer;
   const [publicZones, setPublicZones] = useState(null);
   const [didMapLoad, setDidMapLoad] = useState(false);
   const [didMapDrawLoad, setDidMapDrawLoad] = useState(false);
@@ -120,13 +102,6 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
 
   const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
-  });
-
-  const token = useSelector((state: StateType) => {
-    if(state.authentication && state.authentication.user_data) {
-      return state.authentication.user_data.token;
-    }
-    return null;
   });
 
   // Store window location in a local variable
@@ -157,8 +132,8 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
     theMap.touchZoomRotate.disableRotation();
   }
 
+  // registerMapView :: Adds map center & zoom level to URL
   const registerMapView = useCallback(theMap => {
-    // Add map center & zoom level to URL
     const mapCenter = theMap.getCenter();
     const url = new URL(window.location.href);
     url.searchParams.set('lng', mapCenter.lng);
@@ -179,8 +154,6 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
   }, []);
 
   // Init MapLibre map
-  // Docs: https://maptiler.zendesk.com/hc/en-us/articles/4405444890897-Display-MapLibre-GL-JS-map-using-React-JS
-  // const mapcurrent_exists = map.current!==undefined;
   useEffect(() => {
     const initMap = () => {
       // Stop if map exists already
@@ -199,6 +172,9 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
         attributionControl: false// Hide info icon
       });
 
+      // Set map in unified layer manager
+      layerManager.setMap(map.current);
+
       // Apply settings like disabling rotating the map
       applyMapSettings(map.current)
 
@@ -214,6 +190,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
         if(process && process.env.DEBUG) console.log('An idle event occurred.', e);
         dispatch({type: 'SHOW_LOADING', payload: false});
       });
+
       map.current.on('moveend', function() {
         registerMapView(map.current);
       })
@@ -236,10 +213,8 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
         console.log('Map loaded, setting didMapLoad to true');
 
         addSources(map.current);
-        addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
-        console.log('Sources and layers added, setting didInitSourcesAndLayers to true');
 
         // Add cross image to use for retirement hubs
         map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
@@ -264,8 +239,8 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
     lat,
     zoom,
     mapContainer,
-    // dispatch,
-    registerMapView
+    registerMapView,
+    layerManager
   ])
 
   // On map load: Zoom to relevant position
@@ -304,10 +279,10 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
   ])
 
   /**
-   * SET SOURCES AND LAYERS
-  */
+   * UNIFIED LAYER MANAGEMENT
+   */
 
-  // Set active source using new layer manager
+  // Set active sources using unified layer manager
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! didMapLoad) return;
@@ -320,17 +295,41 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
       }
 
       // Get active sources from layer manager
-      const activeSources = getActiveSources();
+      const activeSources = layerManager.getActiveSources();
       
       activeSources.forEach(sourceName => {
-        map.current.U.showSource(sourceName);
+        try {
+          // Use native MapLibre method instead of mapbox-gl-utils
+          const source = map.current.getSource(sourceName);
+          if (source) {
+            // For GeoJSON sources, we can't really "show" them, but we can ensure they're properly initialized
+            // console.log('MapComponentUnified: Source exists, ensuring it\'s properly initialized:', sourceName);
+          } else {
+            // console.log('MapComponentUnified: Source does not exist:', sourceName);
+          }
+          // console.log('MapComponentUnified: Successfully showed source:', sourceName);
+        } catch (error) {
+          console.error('MapComponentUnified: Error showing source:', sourceName, error);
+          // Fallback to mapbox-gl-utils
+          try {
+            map.current.U.showSource(sourceName);
+            // console.log('MapComponentUnified: Successfully showed source with fallback:', sourceName);
+          } catch (fallbackError) {
+            console.error('MapComponentUnified: Error showing source with fallback:', sourceName, fallbackError);
+          }
+        }
       });
       
       Object.keys(sources).forEach((key, idx) => {
         if(activeSources.indexOf(key) <= -1) {
           // Don't remove if source does not exist :)
           if(! map.current.isSourceLoaded(key)) return;
-          map.current.U.hideSource(key);
+          // console.log('MapComponentUnified: Hiding source:', key);
+          try {
+            map.current.U.hideSource(key);
+          } catch (error) {
+            console.error('MapComponentUnified: Error hiding source:', key, error);
+          }
         }
       });
     }
@@ -338,33 +337,100 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
     activateSourcesWithDelay();
   }, [
     didInitSourcesAndLayers,
-    getActiveSources,
+    didMapLoad,
     mapStyle,
-    hasAppliedMapStyle // Re-activate sources after map style is applied
+    hasAppliedMapStyle,
+    layerManager.currentState.visibleLayers
   ])
 
-  // Set active layers using new layer manager
+  // Set active layers using unified layer manager
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
+    if(! didMapLoad) return;
+    if(! map.current.isStyleLoaded()) return;
 
     const activateLayersWithDelay = async () => {
+      // console.log('MapComponentUnified: Layer activation effect triggered', {
+      //   mapStyle,
+      //   hasAppliedMapStyle,
+      //   zones_geodata: !!zones_geodata,
+      //   zonesFeaturesLength: zones_geodata?.data?.features?.length,
+      //   lastReactivation,
+      //   triggerReason: lastReactivation ? 'ultra-fast layer switch reactivation' : 'normal state change'
+      // });
+
       // If we're waiting for map style to be applied, add a small delay
       if (mapStyle !== 'base' && !hasAppliedMapStyle) {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
       // Get active layers from layer manager
-      const activeLayers = getActiveLayers();
+      const activeLayers = layerManager.getActiveLayers();
       
-      activateLayers(map.current, layers, activeLayers);
+      // console.log('MapComponentUnified: Activating layers:', activeLayers);
+      // console.log('MapComponentUnified: Zones geodata available:', zones_geodata);
+      
+      // If zones layers are active but zones data is not available, wait longer
+      const hasZonesLayers = activeLayers.includes('zones-geodata') || activeLayers.includes('zones-geodata-border');
+      // const hasZonesData = zones_geodata?.data?.features?.length > 0;
+      
+      // if (hasZonesLayers && !hasZonesData) {
+      //   console.log('MapComponentUnified: Zones layers active but no data, waiting for data to load...');
+      //   // Wait longer for zones data to load
+      //   await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      //   // Check again after waiting
+      //   const updatedZonesData = zones_geodata?.data?.features?.length > 0;
+      //   if (!updatedZonesData) {
+      //     console.log('MapComponentUnified: Zones data still not available after waiting, proceeding anyway');
+      //   } else {
+      //     console.log('MapComponentUnified: Zones data now available after waiting');
+      //   }
+      // }
+      
+      // Sources are already added during map initialization via addSources()
+      // The unified layer manager will handle any missing layers automatically
+      
+      // console.log('MapComponentUnified: About to call unified layer manager activateLayers with:', {
+      //   mapExists: !!map.current,
+      //   layersCount: Object.keys(layers).length,
+      //   activeLayersCount: activeLayers.length
+      // });
+      
+      // Use unified layer manager to activate layers
+      layerManager.activateLayers(activeLayers, {
+        useUltraFast: false, // Use traditional switching for this effect
+        skipAnimation: false,
+        preserveExisting: false
+      });
+      
+      // After layer activation, verify that vehicle layers are visible
+      // setTimeout(() => {
+      //   const vehicleLayers = ['vehicles-point', 'vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
+      //   vehicleLayers.forEach(layerId => {
+      //     try {
+      //       const layer = map.current.getLayer(layerId);
+      //       if (layer) {
+      //         const visibility = map.current.getLayoutProperty(layerId, 'visibility');
+      //         console.log(`MapComponentUnified: Vehicle layer ${layerId} visibility after activation:`, visibility);
+      //       }
+      //     } catch (error) {
+      //       console.log(`MapComponentUnified: Could not check visibility for vehicle layer ${layerId}:`, error);
+      //     }
+      //   });
+      // }, 100);
+
     };
 
     activateLayersWithDelay();
   }, [
     didInitSourcesAndLayers,
-    getActiveLayers,
-    hasAppliedMapStyle, // Re-activate layers after map style is applied
-    mapStyle
+    didMapLoad,
+    mapStyle,
+    hasAppliedMapStyle,
+    zones_geodata,
+    lastReactivation,
+    layerManager.currentState.visibleLayers
   ])
 
   // Set vehicles sources
@@ -385,11 +451,78 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
 
   // Set zones source
   useEffect(()   => {
+    console.log('MapComponentUnified: Zones source effect triggered', {
+      didInitSourcesAndLayers,
+      zones_geodata: !!zones_geodata,
+      zonesData: zones_geodata?.data,
+      zonesFeaturesLength: zones_geodata?.data?.features?.length,
+      mapExists: !!map.current,
+      mapUExists: !!map.current?.U,
+      zonesSourceExists: map.current?.getSource('zones-geodata'),
+      mapStyleLoaded: map.current?.isStyleLoaded()
+    });
+    
     if(! didInitSourcesAndLayers) return;
-    if(! zones_geodata || zones_geodata.data.length <= 0) return;
+    if(! zones_geodata || !zones_geodata.data || !zones_geodata.data.features || zones_geodata.data.features.length <= 0) return;
     if(! map.current) return;
+    if(! map.current.U) return;
+    if(! map.current.isStyleLoaded()) return;
 
-    map.current.U.setData('zones-geodata', zones_geodata.data);
+    const setZonesData = async () => {
+      // Wait for the zones source to be available
+      let retries = 0;
+      const maxRetries = 10;
+      
+      while (!map.current.getSource('zones-geodata') && retries < maxRetries) {
+        console.log(`MapComponentUnified: Waiting for zones source to be available, retry ${retries + 1}/${maxRetries}`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+      
+      if (!map.current.getSource('zones-geodata')) {
+        console.log('MapComponentUnified: Zones source not found after retries, creating it manually');
+        try {
+          // Manually create the zones source
+          map.current.addSource('zones-geodata', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: []
+            }
+          });
+          console.log('MapComponentUnified: Successfully created zones source manually');
+        } catch (error) {
+          console.error('MapComponentUnified: Error creating zones source manually:', error);
+          return;
+        }
+      }
+
+      console.log('MapComponentUnified: Setting zones data:', zones_geodata.data);
+      try {
+        // Use native MapLibre method instead of mapbox-gl-utils
+        const source = map.current.getSource('zones-geodata');
+        if (source && source.setData) {
+          source.setData(zones_geodata.data);
+          console.log('MapComponentUnified: Successfully set zones data with native method');
+        } else {
+          console.log('MapComponentUnified: Source does not have setData method, trying fallback');
+          // Fallback to mapbox-gl-utils
+          map.current.U.setData('zones-geodata', zones_geodata.data);
+          console.log('MapComponentUnified: Successfully set zones data with fallback');
+        }
+      } catch (error) {
+        console.error('MapComponentUnified: Error setting zones data:', error);
+        // Fallback to mapbox-gl-utils
+        try {
+          map.current.U.setData('zones-geodata', zones_geodata.data);
+          console.log('MapComponentUnified: Successfully set zones data with fallback after error');
+        } catch (fallbackError) {
+          console.error('MapComponentUnified: Error setting zones data with fallback:', fallbackError);
+        }
+      }
+    };
+
+    setZonesData();
   }, [
     didInitSourcesAndLayers,
     zones_geodata,
@@ -422,7 +555,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
     rentals.destinations
   ]);
 
-  // Handle map style changes using new layer manager
+  // Map style effect using unified layer manager
   useEffect(() => {
     console.log('Map style effect triggered');
     console.log('Map style effect conditions:', { 
@@ -431,7 +564,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
       mapExists: !!map.current, 
       mapStyleLoaded: map.current?.isStyleLoaded(), 
       hasAppliedMapStyle,
-      mapStyle 
+      mapStyle
     });
     
     // Reset the flag when map style changes
@@ -458,49 +591,37 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
-        // Apply the map style using the advanced base layer function
-        try {
-          const { setAdvancedBaseLayer } = await import('./MapUtils/map');
-          
-          if (mapStyle === 'base') {
-            await setAdvancedBaseLayer(map.current, 'base', {
-              opacity: 1,
-              preserveOverlays: true
-            });
-            console.log('Successfully applied base style');
-          } else if (mapStyle === 'satellite') {
-            await setAdvancedBaseLayer(map.current, 'satellite', {
-              opacity: 1,
-              preserveOverlays: true
-            });
-            console.log('Successfully applied satellite style');
-          } else if (mapStyle === 'hybrid') {
-            await setAdvancedBaseLayer(map.current, 'hybrid', {
-              opacity: 1,
-              preserveOverlays: true
-            });
-            console.log('Successfully applied hybrid style');
-          }
-        } catch (e) {
-          console.error('Failed to apply map style:', e);
-          // Fallback to old method for backward compatibility
-          if (mapStyle === 'base') {
-            try {
-              map.current.U?.hide('luchtfoto-pdok');
-            } catch (fallbackError) {
-              map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'none');
-            }
-          } else if (mapStyle === 'satellite') {
-            try {
-              map.current.U?.show('luchtfoto-pdok');
-            } catch (fallbackError) {
-              map.current.setLayoutProperty('luchtfoto-pdok', 'visibility', 'visible');
-            }
-          }
-        }
+        // Use unified layer manager to set base layer
+        layerManager.setBaseLayer(mapStyle, {
+          useUltraFast: true, // Use ultra-fast switching for style changes
+          skipAnimation: true,
+          batch: true
+        });
+        
         console.log('Successfully restored map style:', mapStyle);
         setHasAppliedMapStyle(true);
         console.log('Set hasAppliedMapStyle to true');
+        
+        // Force re-activate layers after style change
+        console.log('Forcing layer re-activation after style change');
+        setTimeout(() => {
+          if (map.current && map.current.isStyleLoaded()) {
+            const activeLayers = layerManager.getActiveLayers();
+            console.log('Re-activating layers after style change:', activeLayers);
+            
+            // Sources are already added during initial map load, no need to re-add them
+            // addSources(map.current);
+            
+            // Use unified layer manager to re-activate layers
+            layerManager.activateLayers(activeLayers, {
+              useUltraFast: false, // Use traditional switching for re-activation
+              skipAnimation: false,
+              preserveExisting: false
+            });
+            
+            console.log('Layer re-activation completed');
+          }
+        }, 300);
       } catch (error) {
         console.error('Error restoring map style:', error);
       }
@@ -514,7 +635,7 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
   ]);
 
   /**
-   * /SET SOURCES AND LAYERS
+   * /UNIFIED LAYER MANAGEMENT
   */
 
   // If area selection (place/zone) changes, navigate to area
@@ -642,5 +763,5 @@ const MapComponent = (props: MapComponentProps): JSX.Element => {
 }
 
 export {
-  MapComponent
-}
+  MapComponentUnified
+} 

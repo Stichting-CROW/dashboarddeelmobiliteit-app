@@ -3,49 +3,31 @@ import {layers} from '../layers';
 export const addLayers = (map) => {
   Object.keys(layers).forEach((key, idx) => {
     const layer = layers[key];
+    
     if (layer.type === 'raster') {
       // Handle raster layers with native MapLibre method
       map.addLayer(layer);
     } else {
       // Handle other layers with mapbox-gl-utils
-      map.U.addLayer(layer);
+      try {
+        map.U.addLayer(layer);
+      } catch (error) {
+        console.error('addLayers: Error adding layer with mapbox-gl-utils:', key, error);
+        // Fallback to native method
+        try {
+          map.addLayer(layer);
+          console.log('addLayers: Successfully added layer with native method (fallback):', key);
+        } catch (fallbackError) {
+          console.error('addLayers: Error adding layer with native method (fallback):', key, fallbackError);
+        }
+      }
     }
+    
+    // Verify layer was added
+    setTimeout(() => {
+      const addedLayer = map.getLayer(key);
+      // console.log('addLayers: Layer verification for', key, ':', !!addedLayer);
+    }, 100);
   });
 }
 
-export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
-  if(! layersToShow) {
-    return;
-  }
-
-  // Hide layers
-  const doAction = () => {
-    // Show given layers
-    layersToShow.forEach(l => {
-      const data = allLayers[l];
-      // Only activate layer if it's not a background layer
-      if(! data['is-background-layer']) {
-        map.U.show(l);
-      }
-    });
-
-    // Hide all other layersToShow
-    Object.keys(allLayers).forEach((key, idx) => {
-      if(layersToShow.indexOf(key) <= -1) {
-        map.U.hide(key);
-      }
-    });
-  }
-
-  // If not loaded: try again in x seconds
-  // if(! map.isStyleLoaded() && ! isRetry) {
-  //   setTimeout(() => {
-  //     activateLayers(map, allLayers, layersToShow, true);
-  //   }, 250);
-
-  //   return;
-  // }
-
-  doAction();
-
-}

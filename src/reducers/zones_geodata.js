@@ -13,15 +13,25 @@ export default function filter(state = initialState, action) {
       let datachanged = md5(JSON.stringify(currentdata))!==md5(JSON.stringify(action.payload.data))
       let filterchanged = state.filter!==action.payload.filter;
 
-      // if(datachanged) { console.log('SET_ZONES_GEODATA - data changed')}
-      // if(filterchanged) { console.log('SET_ZONES_GEODATA - filter changed')}
-      
-      if(!datachanged&&!filterchanged) {
-        // console.log('SET_ZONES_GEODATA - no changes')
+      console.log('zones_geodata reducer: SET_ZONES_GEODATA action received', {
+        datachanged,
+        filterchanged,
+        currentDataLength: currentdata?.features?.length,
+        newDataLength: action.payload.data?.features?.length,
+        newFilter: action.payload.filter
+      });
+
+      // Always update if we have new data with features, even if it appears to be the same
+      // This ensures the zones source effect is triggered when zones become visible
+      const hasNewFeatures = action.payload.data?.features?.length > 0;
+      const shouldUpdate = datachanged || filterchanged || hasNewFeatures;
+
+      if(!shouldUpdate) {
+        console.log('zones_geodata reducer: No changes detected, returning current state');
         return state;
       }
       
-      // console.log('SET_ZONES_GEODATA - changes: data %s / filter %s', datachanged, filterchanged)
+      console.log('zones_geodata reducer: Updating zones data');
       return {
           ...state,
           data: action.payload.data,

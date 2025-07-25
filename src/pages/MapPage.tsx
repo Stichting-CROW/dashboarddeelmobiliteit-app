@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { MapComponent } from '../components/Map/MapComponent';
+import { MapComponentUnified as MapComponent } from '../components/Map/MapComponentUnified';
 import { SelectLayer } from '../components/SelectLayer/SelectLayer.jsx';
 import { MetaStats } from '../components/MetaStats/MetaStats.jsx';
 import { HubStatsWidget } from '../components/HubStatsWidget/HubStatsWidget';
