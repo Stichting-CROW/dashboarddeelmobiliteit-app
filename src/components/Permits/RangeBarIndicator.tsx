@@ -95,7 +95,7 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
           </div>
         </div>
         <div style={{ position: 'relative', height: 18, marginBottom: 0, width: barWidth }}>
-          {min !== undefined && (
+          {min !== undefined && min !== 0 && (
             <div style={{
               position: 'absolute',
               left: `calc(${minPercent}% - 10px)`,

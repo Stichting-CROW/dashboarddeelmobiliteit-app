@@ -380,7 +380,9 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
               </tr>
             </thead>
             <tbody>
-              {sortedHistory.length > 0 ? sortedHistory.map((rec) => (
+              {sortedHistory.length > 0 ? sortedHistory.map((rec) => { 
+                const allowChange = mode==='admin' || (moment(rec.effective_date).isAfter(moment().startOf('day')));
+                return (
                 <tr
                   key={rec.permit_limit_id || rec.effective_date}
                   ref={el => { rowRefs.current[moment(rec.effective_date).format('YYYY-MM-DD')] = el; }}
@@ -394,21 +396,21 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
                   <td className="px-2 py-1 border text-center">{(rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? 'niet actief' : rec.max_parking_duration.replace('P','').replace('D',' dagen')}</td>
                   <td className="px-2 py-1 border text-center">{rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : rec.minimal_number_of_trips_per_vehicle}</td>
                   <td className="px-2 py-1 border text-center">
-                    <button title="Aanpassen" className="inline-block align-middle mr-1 p-1 hover:bg-gray-200 rounded" onClick={() => handleEditRecord(rec.effective_date)}>
+                    { allowChange && <button title="Aanpassen" className="inline-block align-middle mr-1 p-1 hover:bg-gray-200 rounded" onClick={() => handleEditRecord(rec.effective_date)}>
                       {/* Pencil SVG */}
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M14.85 2.85a2.121 2.121 0 0 1 3 3l-9.193 9.193a2 2 0 0 1-.708.464l-3.5 1.25a.5.5 0 0 1-.637-.637l1.25-3.5a2 2 0 0 1 .464-.708L14.85 2.85zm2.12.88a1.121 1.121 0 0 0-1.586 0l-1.293 1.293 1.586 1.586 1.293-1.293a1.121 1.121 0 0 0 0-1.586zm-2.293 2.293l-8.5 8.5-.75 2.1 2.1-.75 8.5-8.5-1.85-1.85z" fill="#666"/></svg>
-                    </button>
-                    <button title="Verwijderen" className="inline-block align-middle p-1 hover:bg-gray-200 rounded" onClick={() => rec.permit_limit_id && handleDeleteRecord(rec.permit_limit_id)} disabled={deletingId === rec.permit_limit_id}>
+                    </button>}
+                    { allowChange && <button title="Verwijderen" className="inline-block align-middle p-1 hover:bg-gray-200 rounded" onClick={() => rec.permit_limit_id && handleDeleteRecord(rec.permit_limit_id)} disabled={deletingId === rec.permit_limit_id}>
                       {/* Trash SVG */}
                       {deletingId === rec.permit_limit_id ? (
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline animate-spin" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="#888" strokeWidth="2" fill="none"/></svg>
                       ) : (
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M7 8v6m3-6v6m3-8V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1M4 6h12m-1 0v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       )}
-                    </button>
+                    </button>}
                   </td>
                 </tr>
-              )) : (
+              )}) : (
                 <tr><td colSpan={6} className="text-center text-gray-400 py-4">Geen historische limieten gevonden</td></tr>
               )}
             </tbody>

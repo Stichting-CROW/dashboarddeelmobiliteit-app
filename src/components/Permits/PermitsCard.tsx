@@ -57,28 +57,20 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRe
           </div>
         </div>
 
-        <RangeBarIndicator title="Aanbod" current={permit.stats.current_vehicle_count} min={permit.permit_limit.minimum_vehicles} max={permit.permit_limit.maximum_vehicles} />
-        <CategoryBarIndicator 
-          title="Stilstandtijd (% correct)" 
-          categories={[
-            { value: permit.stats.duration_correct_percentage, color: '#4caf50' },
-            { value: 100 - permit.stats.duration_correct_percentage, color: '#f44336' },
-          ]} 
-          max={100} 
-          displayValues={true} 
-        />
-        <CategoryBarIndicator 
-          title="Min. aantal ritten (% correct)" 
-          categories={[
-            { value: permit.stats.number_of_rentals_per_vehicle, color: '#4caf50' },
-            { value: 100 - permit.stats.number_of_rentals_per_vehicle, color: '#f44336' },
-          ]} 
-          max={100} 
-          displayValues={true} 
-        />
+        <RangeBarIndicator title="Aantal Voertuigen" current={permit.stats.current_vehicle_count} min={permit.permit_limit.minimum_vehicles} max={permit.permit_limit.maximum_vehicles} />
         <RangeBarIndicator 
+          title="Parkeerduur Overschreden (%)" 
+          current={100 - permit.stats.duration_correct_percentage} 
+          max={25} 
+        />
+        {/* <RangeBarIndicator 
+          title="Gem. Aantal Verhuringen" 
+          current={permit.stats.number_of_rentals_per_vehicle} 
+          min={permit.permit_limit.minimal_number_of_trips_per_vehicle} 
+        /> */}
+        {/* <RangeBarIndicator 
           title="Verkeerd geparkeerd" 
           current={permit.stats.number_of_vehicles_illegally_parked_last_month} 
-          max={permit.permit_limit.maximum_vehicles} />
+          max={permit.permit_limit.maximum_vehicles} /> */}
         </div>);
 }

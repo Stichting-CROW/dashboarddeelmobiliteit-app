@@ -2,10 +2,10 @@ const MDS_BASE_URL = 'https://mds.dashboarddeelmobiliteit.nl';
 
 export interface PermitLimitData {
     permit_limit_id?: number; // only for update
+    effective_date: string;
     municipality: string;
     system_id: string;
     modality: string;
-    effective_date: string;
     end_date?: string;
     minimum_vehicles: number;
     maximum_vehicles: number;
