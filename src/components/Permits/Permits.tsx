@@ -6,8 +6,6 @@ import SelectProviderDialog from './SelectProviderDialog';
 import moment from 'moment';
 import { StateType } from '../../types/StateType';
 
-
-// import { getAvailableOperators } from '../../api/service-areas';
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
 import { addPermitLimit, updatePermitLimit, getPermitLimitOverviewForMunicipality, PERMIT_LIMITS_NIET_ACTIEF } from '../../api/permitLimits';
 import type { PermitRecord, PermitLimitData } from '../../api/permitLimits';
@@ -27,6 +25,10 @@ const Permits = () => {
   const [availableOperators, setAvailableOperators] = useState<OperatorData[]>([]);
 
   const token = useSelector((state: StateType) => (state.authentication && state.authentication.user_data && state.authentication.user_data.token)||null)
+  const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
+
+  const isAdmin = () => acl.is_admin === true;
+  const isOrganisationAdmin = () => acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;
 
   useEffect(() => {
     fetchOperators().then((operators) => {
@@ -46,6 +48,15 @@ const Permits = () => {
   useEffect(() => {
     reloadPermits();
   }, [availableOperators, activeorganisation, voertuigtypes, aanbieders, token, reloadPermits]);
+
+    // If user is admin, set mode to admin
+    useEffect(() => {
+    if(isAdmin() || isOrganisationAdmin()) {
+      setMode('admin');
+    } else {
+      setMode('normal');
+    }
+  }, [permits, aanbieders]);
 
   const [selectProviderModality, setSelectProviderModality] = useState<string | null>(null);
   const [editDialogPermit, setEditDialogPermit] = useState<PermitRecord | null>(null);
@@ -133,6 +144,9 @@ const Permits = () => {
   }
 
   const renderPermitCardsForVoertuigtype = (voertuigtype: {id: string, name: string}) => {
+    if(! permits || permits.length === 0) {
+      return null;
+    }
     const permitsForVoertuigtype = permits.filter((permit) => permit.permit_limit.modality === voertuigtype.id);
 
     let voertuigLogo = getVehicleIconUrl(voertuigtype.id);
@@ -175,12 +189,6 @@ const Permits = () => {
     <div>
       <div className="text-4xl font-bold mb-8 flex items-center gap-4">
         Voertuigplafonds
-        <button
-          className={`ml-4 px-3 py-1 rounded ${mode === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setMode(mode === 'normal' ? 'admin' : 'normal')}
-        >
-          {mode === 'admin' ? 'Admin modus' : 'Normale modus'}
-        </button>
       </div>
       
       <div>
