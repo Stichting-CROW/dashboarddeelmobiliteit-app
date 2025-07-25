@@ -24,6 +24,30 @@ let activeRentals;
 // Only do a new fetch() if needed
 let existingFilter;
 
+// Request cache for deduplication
+const requestCache = new Map();
+const CACHE_DURATION = 30000; // 30 seconds cache
+
+// Generate request signature for caching
+const getRequestSignature = (state, type) => {
+  const canfetchdata = isLoggedIn(state) && state && state.filter && state.authentication.user_data.token;
+  const is_admin = isAdmin(state);
+  
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
+  
+  const filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata, {
+    show_global: is_admin
+  });
+  
+  return JSON.stringify({
+    url,
+    type,
+    filterparams,
+    token: canfetchdata ? state.authentication.user_data.token : null,
+    isLoggedIn: isLoggedIn(state)
+  });
+};
+
 const processRentalsResult = (state, type, rentals) => {
   activeRentals = rentals;
 
@@ -93,6 +117,17 @@ const doApiCall = (
   type,
   callback
 ) => {
+  // Check cache first
+  const signature = getRequestSignature(state, type);
+  const cached = requestCache.get(signature);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    console.log('🚀 CACHE HIT: Using cached rentals data (age:', Date.now() - cached.timestamp, 'ms)');
+    callback(state, type, cached.data);
+    return;
+  }
+  
+  console.log('🔄 CACHE MISS: Fetching fresh rentals data');
 
   const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
   const is_admin = isAdmin(state);
@@ -138,6 +173,20 @@ const doApiCall = (
 
     response.json().then(function(data) {
       const rentals = isLoggedIn ? data : [];
+      
+      // Cache the result
+      requestCache.set(signature, {
+        data: rentals,
+        timestamp: Date.now()
+      });
+      
+      // Clean up old cache entries (keep only last 10 entries)
+      if (requestCache.size > 10) {
+        const entries = Array.from(requestCache.entries());
+        entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+        entries.slice(10).forEach(([key]) => requestCache.delete(key));
+      }
+      
       callback(state, type, rentals);
     }).catch(ex=>{
       console.error("unable to decode JSON");
@@ -206,6 +255,12 @@ export const forceUpdateVerhuringenData = () => {
   if(undefined!==timerid_verhuringendata) { clearTimeout(timerid_verhuringendata); }
   updateVerhuringenData();
 }
+
+// Clear cache when filters change significantly
+export const clearRentalsDataCache = () => {
+  requestCache.clear();
+  console.log('Rentals data cache cleared');
+};
 
 export const initUpdateVerhuringenData = (_store) => {
   store_verhuringendata = _store;

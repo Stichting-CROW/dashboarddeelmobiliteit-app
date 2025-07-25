@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {
  BrowserRouter,
  Routes,
@@ -47,15 +47,18 @@ import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport'
 import ApiKeys from './components/ApiKeys/ApiKeys';
 import GuestIntroduction from './components/GuestIntroduction/GuestIntroduction';
 import { MapProvider } from './components/Map/MapContext';
+import { useSmartPollingManager } from './hooks/useSmartPollingManager';
+import PollingStatusIndicator from './components/PollingStatusIndicator/PollingStatusIndicator';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
 import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
 
 import {setAclInRedux} from './actions/authentication.js';
-import { initUpdateParkingData } from './poll-api/pollParkingData.js';
+import { initUpdateParkingData, clearParkingDataCache } from './poll-api/pollParkingData.js';
 import {
-  initUpdateVerhuringenData
+  initUpdateVerhuringenData,
+  clearRentalsDataCache
 } from './poll-api/pollVerhuringenData.js';
 
 import {
@@ -131,6 +134,9 @@ function App() {
 
   let DELAY_TIMEOUT_IN_MS = 250;
 
+  // Initialize smart polling manager
+  const smartPollingManager = useSmartPollingManager(store);
+
   const exportState = useSelector((state: StateType) => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
@@ -149,6 +155,24 @@ function App() {
       showNotification(msg, setDoShowNotification);
     }
   }, [])
+
+  // Add global polling controls for debugging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      window.pollingControls = {
+        pause: smartPollingManager.pauseAllPolling,
+        resume: smartPollingManager.resumeAllPolling,
+        update: smartPollingManager.forceUpdateAll,
+        clearCache: smartPollingManager.clearAllCaches,
+        status: {
+          parking: smartPollingManager.isParkingActive,
+          rentals: smartPollingManager.isRentalsActive,
+          lastUpdate: smartPollingManager.lastUpdate
+        }
+      };
+      console.log('🔧 Polling controls available at window.pollingControls');
+    }
+  }, [smartPollingManager]);
 
   useEffect(() => {
     if(uriParams!==null) {
@@ -309,6 +333,47 @@ function App() {
     filter.zones
   ])
 
+  // Create filter signature for parking data updates
+  const parkingFilterSignature = useMemo(() => {
+    return JSON.stringify({
+      gebied: filter.gebied,
+      datum: filter.datum,
+      aanbiedersexclude: filter.aanbiedersexclude,
+      parkeerduurexclude: filter.parkeerduurexclude,
+      zones: filter.zones
+    });
+  }, [filter.gebied, filter.datum, filter.aanbiedersexclude, filter.parkeerduurexclude, filter.zones]);
+
+  // Clear caches when filters change significantly
+  useEffect(() => {
+    clearParkingDataCache();
+    clearRentalsDataCache();
+  }, [parkingFilterSignature]);
+
+  // Smart polling integration - replaces old polling logic
+  useEffect(() => {
+    // Clear caches when filters change
+    smartPollingManager.clearAllCaches();
+    
+    // Force initial update when filters change
+    if (displayMode === 'displaymode-park' || displayMode === 'displaymode-rentals') {
+      smartPollingManager.forceUpdateAll();
+    }
+  }, [parkingFilterSignature, displayMode, smartPollingManager]);
+
+  // Create filter signature for rentals data updates (kept for cache clearing)
+  const rentalsFilterSignature = useMemo(() => {
+    return JSON.stringify({
+      gebied: filter.gebied,
+      datum: filter.datum,
+      aanbiedersexclude: filter.aanbiedersexclude,
+      herkomstbestemming: filter.herkomstbestemming,
+      zones: filter.zones
+    });
+  }, [filter.gebied, filter.datum, filter.aanbiedersexclude, filter.herkomstbestemming, filter.zones]);
+
+  // Legacy polling logic - commented out in favor of smart polling
+  /*
   // On app start,
   //  if zones are loaded
   //  or if pathName/filter is changed:
@@ -326,7 +391,7 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    filter,
+    parkingFilterSignature,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
     delayTimeout,
@@ -346,12 +411,13 @@ function App() {
   }, [
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
-    filter,
+    rentalsFilterSignature,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
     delayTimeout,
     // exportState?.layers.map_style,
   ]);
+  */
 
   // Mobile menu: Filters / Layers
   const renderMobileMenus = () => {
@@ -482,7 +548,7 @@ function App() {
               <Route exact path="/map/beleidshubs" element={renderMapElements()} />
 
               <Route path="/map/zones" element={renderMapElements()} />
-              <Route path="/admin/zones" element={renderMapElements()} />
+              <Route exact path="/admin/zones" element={renderMapElements()} />
 
               <Route exact path="/" element={<>
                 <ContentPage>
@@ -704,6 +770,12 @@ function App() {
         <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
         <MapPage mapContainer={mapContainer} />
         <Menu acl={acl} pathName={pathName} />
+
+        {/* Smart Polling Status Indicator */}
+        <PollingStatusIndicator 
+          smartPollingManager={smartPollingManager} 
+          isVisible={process.env.NODE_ENV === 'development'} 
+        />
 
        </div>
        <Toaster />     

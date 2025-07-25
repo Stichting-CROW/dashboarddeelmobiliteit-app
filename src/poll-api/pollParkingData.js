@@ -22,6 +22,33 @@ let activeVehicles;
 // Only do a new fetch() if needed
 let existingFilter;
 
+// Request cache for deduplication
+const requestCache = new Map();
+const CACHE_DURATION = 30000; // 30 seconds cache
+
+// Generate request signature for caching
+const getRequestSignature = (state) => {
+  const canfetchdata = state && isLoggedIn(state) && state.filter && state.authentication.user_data.token;
+  const is_admin = isAdmin(state);
+  
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
+  
+  if (canfetchdata) {
+    url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`;
+  }
+  
+  const filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
+    show_global: is_admin
+  });
+  
+  return JSON.stringify({
+    url,
+    filterparams,
+    token: canfetchdata ? state.authentication.user_data.token : null,
+    isLoggedIn: isLoggedIn(state)
+  });
+};
+
 const processVehiclesResult = (state, vehicles) => {
   activeVehicles = vehicles;
 
@@ -100,6 +127,17 @@ const doApiCall = (
   state,
   callback
 ) => {
+  // Check cache first
+  const signature = getRequestSignature(state);
+  const cached = requestCache.get(signature);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    console.log('🚀 CACHE HIT: Using cached parking data (age:', Date.now() - cached.timestamp, 'ms)');
+    callback(state, cached.data);
+    return;
+  }
+  
+  console.log('🔄 CACHE MISS: Fetching fresh parking data');
 
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
   const is_admin = isAdmin(state);
@@ -167,6 +205,20 @@ const doApiCall = (
       } else {
         vehicles = vehicles.vehicles_in_public_space
       }
+      
+      // Cache the result
+      requestCache.set(signature, {
+        data: vehicles,
+        timestamp: Date.now()
+      });
+      
+      // Clean up old cache entries (keep only last 10 entries)
+      if (requestCache.size > 10) {
+        const entries = Array.from(requestCache.entries());
+        entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+        entries.slice(10).forEach(([key]) => requestCache.delete(key));
+      }
+      
       callback(state, vehicles);
     }).catch(ex=>{
       console.error("unable to decode JSON");
@@ -229,6 +281,12 @@ const updateParkingData = async () => {
     //:)
   }
 }
+
+// Clear cache when filters change significantly
+export const clearParkingDataCache = () => {
+  requestCache.clear();
+  console.log('Parking data cache cleared');
+};
 
 export const initUpdateParkingData = (_store) => {
   store_parkingdata = _store;
