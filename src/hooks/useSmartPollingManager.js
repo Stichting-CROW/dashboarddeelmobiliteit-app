@@ -32,11 +32,11 @@ export const useSmartPollingManager = (store) => {
     
     // Prevent too frequent updates (minimum 10 seconds between updates)
     if (timeSinceLastUpdate < 10000) {
-      console.log('⏱️ Skipping parking data update (too recent)');
+      // console.log('⏱️ Skipping parking data update (too recent)');
       return;
     }
     
-    console.log('🔄 Smart polling: Updating parking data');
+    // console.log('🔄 Smart polling: Updating parking data');
     lastUpdateRef.current.parking = now;
     initUpdateParkingData(store);
   }, [displayMode, isLoggedIn, metadata.zones_loaded, store]);
@@ -51,11 +51,11 @@ export const useSmartPollingManager = (store) => {
     
     // Prevent too frequent updates (minimum 10 seconds between updates)
     if (timeSinceLastUpdate < 10000) {
-      console.log('⏱️ Skipping rentals data update (too recent)');
+      // console.log('⏱️ Skipping rentals data update (too recent)');
       return;
     }
     
-    console.log('🔄 Smart polling: Updating rentals data');
+    // console.log('🔄 Smart polling: Updating rentals data');
     lastUpdateRef.current.rentals = now;
     initUpdateVerhuringenData(store);
   }, [displayMode, isLoggedIn, metadata.zones_loaded, store]);
@@ -63,39 +63,39 @@ export const useSmartPollingManager = (store) => {
   // Parking data smart polling
   const parkingPolling = useSmartPolling(updateParkingData, 60000, { // 1 minute interval
     inactivityTimeout: 300000, // 5 minutes
-    debug: true
+    debug: false
   });
 
   // Rentals data smart polling
   const rentalsPolling = useSmartPolling(updateRentalsData, 60000, { // 1 minute interval
     inactivityTimeout: 300000, // 5 minutes
-    debug: true
+    debug: false
   });
 
   // Global cache clearing
   const clearAllCaches = useCallback(() => {
-    console.log('🧹 Clearing all data caches');
+    // console.log('🧹 Clearing all data caches');
     clearParkingDataCache();
     clearRentalsDataCache();
   }, []);
 
   // Force update all data
   const forceUpdateAll = useCallback(() => {
-    console.log('⚡ Force updating all data');
+    // console.log('⚡ Force updating all data');
     parkingPolling.forceUpdate();
     rentalsPolling.forceUpdate();
   }, [parkingPolling, rentalsPolling]);
 
   // Pause all polling
   const pauseAllPolling = useCallback(() => {
-    console.log('⏸️ Pausing all polling');
+    // console.log('⏸️ Pausing all polling');
     parkingPolling.pausePolling();
     rentalsPolling.pausePolling();
   }, [parkingPolling, rentalsPolling]);
 
   // Resume all polling
   const resumeAllPolling = useCallback(() => {
-    console.log('▶️ Resuming all polling');
+    // console.log('▶️ Resuming all polling');
     parkingPolling.resumePolling();
     rentalsPolling.resumePolling();
   }, [parkingPolling, rentalsPolling]);

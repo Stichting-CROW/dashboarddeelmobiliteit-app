@@ -19,16 +19,16 @@ export const updateZonesgeodata = (store)  => {
     
     const state = store.getState();
     if(state.metadata.zones_loaded===false) {
-      console.log("updateZonesgeodata: no zone metadata available yet - skipping zones geodata update");
+      // console.log("updateZonesgeodata: no zone metadata available yet - skipping zones geodata update");
       return false;
     }
 
-    console.log("updateZonesgeodata: Starting zones data update", {
-      gebied: state.filter?.gebied,
-      zones: state.filter?.zones,
-      isAdmin: isAdmin(state),
-      zonesLoaded: state.metadata.zones_loaded
-    });
+    // console.log("updateZonesgeodata: Starting zones data update", {
+    //   gebied: state.filter?.gebied,
+    //   zones: state.filter?.zones,
+    //   isAdmin: isAdmin(state),
+    //   zonesLoaded: state.metadata.zones_loaded
+    // });
 
     let zone_ids="";
     if(!state) {

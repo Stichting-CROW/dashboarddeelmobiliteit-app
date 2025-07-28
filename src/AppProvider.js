@@ -21,11 +21,11 @@ const md5 = require('md5');
 const theState = localStorage.getItem('CROWDD_reduxState')
 const persistedState = theState ? JSON.parse(theState) : {};
 
-console.log('AppProvider: Loading persisted state:', {
-  hasPersistedState: !!theState,
-  persistedLayers: persistedState.layers,
-  persistedZonesVisible: persistedState.layers?.zones_visible
-});
+// console.log('AppProvider: Loading persisted state:', {
+//   hasPersistedState: !!theState,
+//   persistedLayers: persistedState.layers,
+//   persistedZonesVisible: persistedState.layers?.zones_visible
+// });
 
 window.process = { ...window.process }
 

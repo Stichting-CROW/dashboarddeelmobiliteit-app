@@ -5,20 +5,107 @@ import { useLayerManager } from './useLayerManager';
 // Import actual layer definitions
 import { layers as layerDefinitions } from '../components/Map/layers';
 
+// Queue item type for pending operations
+interface QueuedOperation {
+  id: string;
+  type: 'setLayerVisibility' | 'batchSetLayerVisibility' | 'setBaseLayer' | 'activateLayers';
+  operation: () => void;
+  timestamp: number;
+  retryCount: number;
+}
+
 /**
  * Unified Layer Manager Hook
  * 
  * This hook consolidates all layer management approaches into a single, consistent API.
  * It handles both traditional layer switching and ultra-fast switching transparently.
+ * Includes queue-based operation handling for map readiness.
  */
 export const useUnifiedLayerManager = () => {
   const dispatch = useDispatch();
   const mapRef = useRef<any>(null);
   const isSwitchingRef = useRef(false);
   const layerVisibilityCache = useRef(new Map<string, boolean>());
+  
+  // Queue for operations when map is not ready
+  const operationQueue = useRef<QueuedOperation[]>([]);
+  const isProcessingQueue = useRef(false);
+  const maxRetries = 10; // Maximum retry attempts for queued operations
+  const retryDelay = 100; // Delay between retries in ms
 
   // Get the existing layer manager
   const layerManager = useLayerManager();
+
+  // Process queued operations when map becomes ready
+  const processOperationQueue = useCallback(async () => {
+    if (isProcessingQueue.current || operationQueue.current.length === 0) {
+      return;
+    }
+
+    const map = getMap();
+    if (!map || !map.isStyleLoaded()) {
+      return;
+    }
+
+    isProcessingQueue.current = true;
+    console.log(`Processing ${operationQueue.current.length} queued operations`);
+
+    try {
+      const operations = [...operationQueue.current];
+      operationQueue.current = [];
+
+      for (const queuedOp of operations) {
+        try {
+          // Check if operation is still valid (not too old)
+          const age = Date.now() - queuedOp.timestamp;
+          if (age > 30000) { // 30 second timeout
+            console.warn(`Skipping old queued operation: ${queuedOp.type} (age: ${age}ms)`);
+            continue;
+          }
+
+          // Execute the operation
+          queuedOp.operation();
+          console.log(`Successfully executed queued operation: ${queuedOp.type}`);
+        } catch (error) {
+          console.error(`Error executing queued operation ${queuedOp.type}:`, error);
+          
+          // Retry if under max retries
+          if (queuedOp.retryCount < maxRetries) {
+            queuedOp.retryCount++;
+            queuedOp.timestamp = Date.now();
+            operationQueue.current.push(queuedOp);
+            console.log(`Re-queued operation ${queuedOp.type} (retry ${queuedOp.retryCount}/${maxRetries})`);
+          } else {
+            console.error(`Max retries exceeded for operation ${queuedOp.type}`);
+          }
+        }
+      }
+    } finally {
+      isProcessingQueue.current = false;
+      
+      // If new operations were added during processing, process them
+      if (operationQueue.current.length > 0) {
+        setTimeout(processOperationQueue, retryDelay);
+      }
+    }
+  }, []);
+
+  // Queue an operation for later execution
+  const queueOperation = useCallback((type: QueuedOperation['type'], operation: () => void) => {
+    const queuedOp: QueuedOperation = {
+      id: `${type}-${Date.now()}-${Math.random()}`,
+      type,
+      operation,
+      timestamp: Date.now(),
+      retryCount: 0
+    };
+    
+    operationQueue.current.push(queuedOp);
+    console.log(`Queued operation: ${type} (queue size: ${operationQueue.current.length})`);
+    
+    // Try to process queue immediately
+    setTimeout(processOperationQueue, 0);
+  }, [processOperationQueue]);
 
   // Get map instance from global context
   const getMap = useCallback(() => {
@@ -42,7 +129,41 @@ export const useUnifiedLayerManager = () => {
   // Set map instance
   const setMap = useCallback((map: any) => {
     mapRef.current = map;
-  }, []);
+    
+    // When map is set, try to process any queued operations
+    if (map && map.isStyleLoaded()) {
+      setTimeout(processOperationQueue, 0);
+    }
+    
+    // Add event listener for map style load completion
+    if (map && typeof map.on === 'function') {
+      const handleStyleLoad = () => {
+        console.log('Map style loaded, processing queued operations');
+        setTimeout(processOperationQueue, 0);
+      };
+      
+      map.on('styledata', handleStyleLoad);
+      map.on('load', handleStyleLoad);
+      
+      // Store cleanup function
+      map._styleLoadHandler = handleStyleLoad;
+    }
+  }, [processOperationQueue]);
+
+  // Wait for map to be ready with timeout
+  const waitForMapReady = useCallback(async (timeoutMs: number = 5000): Promise<boolean> => {
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < timeoutMs) {
+      const map = getMap();
+      if (map && map.isStyleLoaded()) {
+        return true;
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    return false;
+  }, [getMap]);
 
   // Unified layer visibility setter
   const setLayerVisibility = useCallback((layerId: string, visible: boolean, options: {
@@ -52,7 +173,13 @@ export const useUnifiedLayerManager = () => {
   } = {}) => {
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
-      console.warn(`Cannot set layer visibility for ${layerId}: map not ready`);
+      console.warn(`Cannot set layer visibility for ${layerId}: map not ready, queuing operation`);
+      
+      // Queue the operation for later execution
+      queueOperation('setLayerVisibility', () => {
+        setLayerVisibility(layerId, visible, options);
+      });
+      
       return false;
     }
 
@@ -125,7 +252,7 @@ export const useUnifiedLayerManager = () => {
       
       return false;
     }
-  }, [getMap]);
+  }, [getMap, queueOperation]);
 
   // Batch layer operations
   const batchSetLayerVisibility = useCallback((operations: Array<{
@@ -137,11 +264,17 @@ export const useUnifiedLayerManager = () => {
   } = {}) => {
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
-      console.warn('Cannot batch set layer visibility: map not ready');
+      console.warn('Cannot batch set layer visibility: map not ready, queuing operation');
+      
+      // Queue the operation for later execution
+      queueOperation('batchSetLayerVisibility', () => {
+        batchSetLayerVisibility(operations, options);
+      });
+      
       return;
     }
     else {
-      console.log('Map is ready for batchSetLayerVisibility');
+      // console.log('Map is ready for batchSetLayerVisibility');
     }
 
     const { useUltraFast = false, skipAnimation = false } = options;
@@ -180,7 +313,7 @@ export const useUnifiedLayerManager = () => {
 
     // console.log(`Batch layer operations completed: ${visibleLayers.length} shown, ${hiddenLayers.length} hidden`);
     return results;
-  }, [getMap, setLayerVisibility]);
+  }, [getMap, setLayerVisibility, queueOperation]);
 
   // Unified base layer setter
   const setBaseLayerUnified = useCallback((baseLayer: 'base' | 'satellite' | 'hybrid', options: {
@@ -190,7 +323,13 @@ export const useUnifiedLayerManager = () => {
   } = {}) => {
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
-      console.warn('Cannot set base layer: map not ready');
+      console.warn('Cannot set base layer: map not ready, queuing operation');
+      
+      // Queue the operation for later execution
+      queueOperation('setBaseLayer', () => {
+        setBaseLayerUnified(baseLayer, options);
+      });
+      
       return;
     }
 
@@ -258,7 +397,7 @@ export const useUnifiedLayerManager = () => {
     } finally {
       isSwitchingRef.current = false;
     }
-  }, [dispatch, getMap, batchSetLayerVisibility]);
+  }, [dispatch, getMap, batchSetLayerVisibility, queueOperation]);
 
   // Unified zones toggle
   const toggleZonesUnified = useCallback((options: {
@@ -324,7 +463,13 @@ export const useUnifiedLayerManager = () => {
   } = {}) => {
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
-      console.warn('Cannot activate layers: map not ready');
+      console.warn('Cannot activate layers: map not ready, queuing operation');
+      
+      // Queue the operation for later execution
+      queueOperation('activateLayers', () => {
+        activateLayersUnified(layerIds, options);
+      });
+      
       return;
     }
 
@@ -388,7 +533,7 @@ export const useUnifiedLayerManager = () => {
     batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
 
     // console.log(`Activated layers: ${layerIds.join(', ')} (ultra-fast: ${useUltraFast})`);
-  }, [getMap, layerManager, batchSetLayerVisibility]);
+  }, [getMap, layerManager, batchSetLayerVisibility, queueOperation]);
 
   // Get layer visibility
   const getLayerVisibility = useCallback((layerId: string): boolean | null => {

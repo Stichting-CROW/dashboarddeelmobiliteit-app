@@ -170,7 +170,7 @@ function App() {
           lastUpdate: smartPollingManager.lastUpdate
         }
       };
-      console.log('🔧 Polling controls available at window.pollingControls');
+      // console.log('🔧 Polling controls available at window.pollingControls');
     }
   }, [smartPollingManager]);
 
@@ -771,11 +771,11 @@ function App() {
         <MapPage mapContainer={mapContainer} />
         <Menu acl={acl} pathName={pathName} />
 
-        {/* Smart Polling Status Indicator */}
+        {/* Smart Polling Status Indicator
         <PollingStatusIndicator 
           smartPollingManager={smartPollingManager} 
           isVisible={process.env.NODE_ENV === 'development'} 
-        />
+        />*/}
 
        </div>
        <Toaster />     

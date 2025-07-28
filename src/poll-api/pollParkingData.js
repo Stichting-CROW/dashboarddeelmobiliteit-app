@@ -137,7 +137,7 @@ const doApiCall = (
     return;
   }
   
-  console.log('🔄 CACHE MISS: Fetching fresh parking data');
+  // console.log('🔄 CACHE MISS: Fetching fresh parking data');
 
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
   const is_admin = isAdmin(state);
@@ -155,7 +155,7 @@ const doApiCall = (
   if (state.filter.gebied !== "" && !hasZoneIds) {
     console.warn("Missing zone_ids parameter for gebied:", state.filter.gebied, "zones_loaded:", state.metadata.zones_loaded, "zones_count:", state.metadata.zones ? state.metadata.zones.length : 0);
   } else if (state.filter.gebied !== "" && hasZoneIds) {
-    console.log("zone_ids parameter included for gebied:", state.filter.gebied);
+    // console.log("zone_ids parameter included for gebied:", state.filter.gebied);
   }
 
   // Set query params for guests
@@ -285,7 +285,7 @@ const updateParkingData = async () => {
 // Clear cache when filters change significantly
 export const clearParkingDataCache = () => {
   requestCache.clear();
-  console.log('Parking data cache cleared');
+  // console.log('Parking data cache cleared');
 };
 
 export const initUpdateParkingData = (_store) => {

@@ -127,7 +127,7 @@ const doApiCall = (
     return;
   }
   
-  console.log('🔄 CACHE MISS: Fetching fresh rentals data');
+  // console.log('🔄 CACHE MISS: Fetching fresh rentals data');
 
   const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
   const is_admin = isAdmin(state);
@@ -259,7 +259,7 @@ export const forceUpdateVerhuringenData = () => {
 // Clear cache when filters change significantly
 export const clearRentalsDataCache = () => {
   requestCache.clear();
-  console.log('Rentals data cache cleared');
+  // console.log('Rentals data cache cleared');
 };
 
 export const initUpdateVerhuringenData = (_store) => {
