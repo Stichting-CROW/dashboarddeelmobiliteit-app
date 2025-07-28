@@ -1,4 +1,5 @@
 import React from 'react';
+import { PERMIT_LIMITS_NIET_ACTIEF } from '../../api/permitLimits';
 
 interface RangeBarIndicatorProps {
   title: string;
@@ -21,25 +22,30 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
     const currentFontWeight = 700;
     const barWidth = 180;
     const barHeight = 12; // px
+   
+   // Check if min/max are "not active" values
+   const isMinActive = min !== undefined && min !== PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles;
+   const isMaxActive = max !== undefined && max !== PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles;
+   
     // If max is set and max > current, use 1.2 * max as the range
     let dynamicMax: number;
-    if (max !== undefined && max > current) {
-      dynamicMax = Math.max(current, Math.ceil(max * 1.2));
+    if (isMaxActive && max! > current) {
+      dynamicMax = Math.max(current, Math.ceil(max! * 1.2));
     } else {
-      dynamicMax = Math.max(current, max ?? current);
+      dynamicMax = Math.max(current, isMaxActive ? max! : current);
     }
-    const isInRange = (min === undefined || current >= min) && (max === undefined || current <= max);
+    const isInRange = (!isMinActive || current >= min!) && (!isMaxActive || current <= max!);
     const barColor = isInRange ? '#4caf50' : '#f44336';
-    const minPercent = min !== undefined ? Math.max(0, Math.min(100, (min / dynamicMax) * 100)) : undefined;
-    const maxPercent = max !== undefined ? Math.max(0, Math.min(100, (max / dynamicMax) * 100)) : undefined;
+    const minPercent = isMinActive ? Math.max(0, Math.min(100, (min! / dynamicMax) * 100)) : undefined;
+    const maxPercent = isMaxActive ? Math.max(0, Math.min(100, (max! / dynamicMax) * 100)) : undefined;
     const valuePercent = dynamicMax > 0 ? Math.min(100, (current / dynamicMax) * 100) : 0;
 
     return (
       <div style={{ width: barWidth + 40, margin: '0 auto', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontWeight: titleFontWeight, fontSize: titleFontSize, color: '#19213D', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontWeight: titleFontWeight, fontSize: titleFontSize, color: '#19213D', marginBottom: 2 }}>{title} ({current})</div>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
           <div style={{ position: 'relative', width: barWidth, height: barHeight, background: '#E5E6EB', borderRadius: 1, overflow: 'hidden', marginBottom: 2, display: 'flex', alignItems: 'center' }}>
-            {min !== undefined && (
+            {isMinActive && (
               <div style={{
                 position: 'absolute',
                 left: `calc(${minPercent}% - 1px)`,
@@ -51,7 +57,7 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
                 pointerEvents: 'none',
               }} />
             )}
-            {max !== undefined && (
+            {isMaxActive && (
               <div style={{
                 position: 'absolute',
                 left: `calc(${maxPercent}% - 1px)`,
@@ -77,25 +83,23 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
               }}
             />
           </div>
-          <div
-            style={{
-              marginLeft: 8,
-              color: '#19213D',
-              fontWeight: currentFontWeight,
-              fontSize: currentFontSize,
-              whiteSpace: 'nowrap',
-              minWidth: 24,
-              textAlign: 'left',
-              display: 'flex',
-              alignItems: 'center',
-              height: barHeight,
-            }}
-          >
-            {current}
-          </div>
         </div>
+        {/* Valid range indicator line */}
+        {(isMinActive || isMaxActive) && (
+          <div style={{ position: 'relative', width: barWidth, height: 2, marginBottom: 2 }}>
+            <div style={{
+              position: 'absolute',
+              left: isMinActive ? `${minPercent}%` : '0%',
+              right: isMaxActive ? `calc(100% - ${maxPercent}%)` : '0%',
+              top: 0,
+              height: 2,
+              background: '#19213D',
+              borderRadius: 1,
+            }} />
+          </div>
+        )}
         <div style={{ position: 'relative', height: 18, marginBottom: 0, width: barWidth }}>
-          {min !== undefined && min !== 0 && (
+          {isMinActive && (
             <div style={{
               position: 'absolute',
               left: `calc(${minPercent}% - 10px)`,
@@ -107,10 +111,10 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
               fontWeight: tickFontWeight,
               pointerEvents: 'none',
             }}>
-              <div style={{ marginBottom: 0 }}>{min}</div>
+              <div style={{ marginBottom: 0 }}>{min!}</div>
             </div>
           )}
-          {max !== undefined && (
+          {isMaxActive && (
             <div style={{
               position: 'absolute',
               left: `calc(${maxPercent}% - 10px)`,
@@ -122,7 +126,7 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
               fontWeight: tickFontWeight,
               pointerEvents: 'none',
             }}>
-              <div style={{ marginBottom: 0 }}>{max}</div>
+              <div style={{ marginBottom: 0 }}>{max!}</div>
             </div>
           )}
         </div>

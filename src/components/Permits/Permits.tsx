@@ -134,10 +134,10 @@ const Permits = () => {
     return (
       <div>
         <h1 className="text-4xl font-bold mb-8">
-          Voertuigplafonds
+          Vergunningseisen
         </h1>
         <span className="text-gray-600">
-          Selecteer een plaats om voertuigplafonds te bekijken
+          Selecteer een plaats om vergunningseisen te bekijken
         </span>
       </div>
     )
@@ -188,7 +188,7 @@ const Permits = () => {
   return (
     <div>
       <div className="text-4xl font-bold mb-8 flex items-center gap-4">
-        Voertuigplafonds
+        Vergunningseisen
       </div>
       
       <div>

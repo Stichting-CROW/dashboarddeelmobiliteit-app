@@ -58,7 +58,7 @@ ok, expand the control: if a min is given (not undefined) there is a bottom limi
 
 # Edit limits component
 
-Ok, add a sprocket icon (alt text) "Voertuigplafonds bewerken" to the top right of each permitcard. When it is clicked a modal popup edit dialog is opened that contains the edit limit component.
+Ok, add a sprocket icon (alt text) "Vergunningseisen" to the top right of each permitcard. When it is clicked a modal popup edit dialog is opened that contains the edit limit component.
 - make the state management + component itself part of the Permits component
 - make sure the limit data is reloaded when edits are made
 
