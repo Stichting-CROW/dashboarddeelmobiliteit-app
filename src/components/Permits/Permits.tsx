@@ -7,6 +7,7 @@ import moment from 'moment';
 import { StateType } from '../../types/StateType';
 
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
+import { getProvider } from '../../helpers/providers.js';
 import { addPermitLimit, updatePermitLimit, getPermitLimitOverviewForMunicipality, PERMIT_LIMITS_NIET_ACTIEF } from '../../api/permitLimits';
 import type { PermitRecord, PermitLimitData } from '../../api/permitLimits';
 import { fetchOperators, type OperatorData } from '../../api/operators';
@@ -27,8 +28,6 @@ const Permits = () => {
   const token = useSelector((state: StateType) => (state.authentication && state.authentication.user_data && state.authentication.user_data.token)||null)
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
 
-  const isAdmin = () => acl.is_admin === true;
-  const isOrganisationAdmin = () => acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;
 
   useEffect(() => {
     fetchOperators().then((operators) => {
@@ -50,13 +49,16 @@ const Permits = () => {
   }, [availableOperators, activeorganisation, voertuigtypes, aanbieders, token, reloadPermits]);
 
     // If user is admin, set mode to admin
-    useEffect(() => {
+  useEffect(() => {
+    const isAdmin = () => acl.is_admin === true;
+    const isOrganisationAdmin = () => acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1;
+
     if(isAdmin() || isOrganisationAdmin()) {
       setMode('admin');
     } else {
       setMode('normal');
     }
-  }, [permits, aanbieders]);
+  }, [permits, aanbieders, acl.is_admin, acl.privileges]);
 
   const [selectProviderModality, setSelectProviderModality] = useState<string | null>(null);
   const [editDialogPermit, setEditDialogPermit] = useState<PermitRecord | null>(null);
@@ -90,6 +92,8 @@ const Permits = () => {
 
     if(false!==result) {
       setEditDialogPermit(null);
+      // Reload permits to show the new/updated permit
+      await reloadPermits();
     } else {
       alert("Error adding/updating permit limit");
     }
@@ -148,6 +152,15 @@ const Permits = () => {
       return null;
     }
     const permitsForVoertuigtype = permits.filter((permit) => permit.permit_limit.modality === voertuigtype.id);
+    
+    // Sort permits by provider name
+    const sortedPermitsForVoertuigtype = permitsForVoertuigtype.sort((a, b) => {
+      const providerA = getProvider(a.permit_limit.system_id);
+      const providerB = getProvider(b.permit_limit.system_id);
+      const nameA = providerA ? providerA.name : a.permit_limit.system_id;
+      const nameB = providerB ? providerB.name : b.permit_limit.system_id;
+      return nameA.localeCompare(nameB);
+    });
 
     let voertuigLogo = getVehicleIconUrl(voertuigtype.id);
     if(!voertuigLogo) {
@@ -156,30 +169,77 @@ const Permits = () => {
 
     return (
       <div key={'voertuigtype-' + voertuigtype.id} className="mb-8">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <img
-            src={voertuigLogo}
-            alt={voertuigtype.name}
-            className="inline-block w-8 h-8 object-contain"
-            style={{ verticalAlign: 'middle' }}
-          />
-          {getPrettyVehicleTypeName(voertuigtype.id) || `Onbekend`}
-          <button
-            className="ml-2 p-1 rounded bg-green-500 text-white hover:bg-green-600"
-            title="Voeg permit toe"
-            onClick={() => handleAddPermit(voertuigtype.id)}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="7" y="3" width="2" height="10" rx="1" fill="currentColor"/>
-              <rect x="3" y="7" width="10" height="2" rx="1" fill="currentColor"/>
-            </svg>
-          </button>
-        </h2>
-        {/* Cards: flex row, wrap, gap */}
-        <div className="flex flex-wrap gap-6">
-          {permitsForVoertuigtype.map((permit) => (
-            <PermitsCard key={'permits-card-' + permit.permit_limit.permit_limit_id} permit={permit} onEditLimits={() => handleEditLimits(permit)} />
-          ))}
+        {/* Vehicle type header card positioned to the left */}
+        <div className="flex items-start gap-6">
+          {/* Header card */}
+          <div className="bg-transparent p-0 w-24 min-w-24 h-64 flex flex-col justify-center">
+            {/* Plus button in upper right */}
+            <button
+              className="absolute top-2 right-2 p-1 bg-transparent hover:bg-gray-100 rounded-full"
+              title="Voeg permit toe"
+              onClick={() => handleAddPermit(voertuigtype.id)}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 4v12M4 10h12" stroke="#666" strokeWidth="2" strokeLinecap="round" fill="#666"/>
+              </svg>
+            </button>
+            
+            {/* Content centered */}
+            <div className="flex flex-col items-center">
+              <img
+                src={voertuigLogo}
+                alt={voertuigtype.name}
+                className="w-12 h-12 object-contain mb-2"
+              />
+              <div className="text-sm font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden">
+                {getPrettyVehicleTypeName(voertuigtype.id) || `Onbekend`}
+              </div>
+            </div>
+          </div>
+          
+          {/* Cards: horizontal scrollable row */}
+          <div className="relative flex-1">
+            {/* Left navigation indicator */}
+            <button 
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md border border-gray-200"
+              onClick={() => {
+                const container = document.getElementById(`cards-container-${voertuigtype.id}`);
+                if (container) {
+                  container.scrollLeft -= 300;
+                }
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4l-6 6 6 6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            {/* Right navigation indicator */}
+            <button 
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md border border-gray-200"
+              onClick={() => {
+                const container = document.getElementById(`cards-container-${voertuigtype.id}`);
+                if (container) {
+                  container.scrollLeft += 300;
+                }
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 4l6 6-6 6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            {/* Cards container */}
+            <div 
+              id={`cards-container-${voertuigtype.id}`}
+              className="flex gap-6 overflow-x-auto scrollbar-hide px-8"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              {sortedPermitsForVoertuigtype.map((permit) => (
+                <PermitsCard key={'permits-card-' + permit.permit_limit.permit_limit_id} permit={permit} onEditLimits={() => handleEditLimits(permit)} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );

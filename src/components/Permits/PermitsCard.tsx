@@ -1,33 +1,12 @@
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
-import { CategoryBarIndicator } from './CategoryBarIndicator';
 import type { PermitRecord } from '../../api/permitLimits';
 import { useState, useEffect } from 'react';
 
 export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRecord, onEditLimits?: () => void }) {
     const provider = getProvider(permit.permit_limit.system_id);
 
-    // Simulated animated values
-    const [animatedVehicleCount, setAnimatedVehicleCount] = useState(permit.stats.current_vehicle_count);
-    const [animatedDurationPercentage, setAnimatedDurationPercentage] = useState(100 - permit.stats.duration_correct_percentage);
-
-    // Animate values every 3 seconds
-    useEffect(() => {
-      const interval = setInterval(() => {
-        // Vehicle count variation: ±50
-        const vehicleVariation = Math.random() * 100 - 50; // -50 to +50
-        const newVehicleCount = Math.max(0, Math.round(permit.stats.current_vehicle_count + vehicleVariation));
-        setAnimatedVehicleCount(newVehicleCount);
-
-        // Duration percentage variation: ±50
-        const durationVariation = Math.random() * 100 - 50; // -50 to +50
-        const newDurationPercentage = Math.max(0, Math.min(100, Math.round((100 - permit.stats.duration_correct_percentage) + durationVariation)));
-        setAnimatedDurationPercentage(Math.round(newDurationPercentage));
-      }, 15000);
-
-      return () => clearInterval(interval);
-    }, [permit.stats.current_vehicle_count, permit.stats.duration_correct_percentage]);
 
     const providerName = provider ? provider.name : permit.permit_limit.system_id;
     const providerLogo = provider ? provider.logo : createSvgPlaceholder({
@@ -39,7 +18,7 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRe
     });
 
     return (
-      <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="bg-white rounded-lg shadow-md p-6 w-64 h-auto relative">
+      <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="bg-white rounded-lg shadow-md p-6 w-64 h-auto relative border border-gray-400">
         {/* Sprocket icon for editing limits */}
         <button
           type="button"
