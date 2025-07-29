@@ -253,7 +253,7 @@ const Permits = () => {
         Vergunningseisen
         <button
           className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-          title="Voeg nieuwe vergunning toe"
+          title="Voeg nieuwe vergunningseis toe"
           onClick={handleMainAddClick}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

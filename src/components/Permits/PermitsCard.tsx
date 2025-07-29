@@ -2,7 +2,6 @@ import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitRecord } from '../../api/permitLimits';
-import { useState, useEffect } from 'react';
 
 export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRecord, onEditLimits?: () => void }) {
     const provider = getProvider(permit.permit_limit.system_id);
