@@ -11,7 +11,9 @@ interface SelectProviderDialogProps {
 }
 
 const SelectProviderDialog: React.FC<SelectProviderDialogProps> = ({ modality, availableProviders, onSelect, onCancel }) => {
-  if (!modality) return null;
+  // Only return null if modality is explicitly provided and is falsy
+  // For the main add workflow, modality is null but we still want to show the dialog
+  if (modality !== null && !modality) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

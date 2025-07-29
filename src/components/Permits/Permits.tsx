@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import PermitsCard from './PermitsCard';
 import EditLimitsDialog from './EditLimitsDialog';
 import SelectProviderDialog from './SelectProviderDialog';
+import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
 import moment from 'moment';
 import { StateType } from '../../types/StateType';
 
@@ -62,6 +63,11 @@ const Permits = () => {
 
   const [selectProviderModality, setSelectProviderModality] = useState<string | null>(null);
   const [editDialogPermit, setEditDialogPermit] = useState<PermitRecord | null>(null);
+
+  // New state for the main + button workflow
+  const [showMainAddDialog, setShowMainAddDialog] = useState(false);
+  const [selectedProviderForMainAdd, setSelectedProviderForMainAdd] = useState<OperatorData | null>(null);
+  const [showVehicleTypeSelection, setShowVehicleTypeSelection] = useState(false);
 
   // Admin/normal mode toggle
   const [mode, setMode] = useState<'normal' | 'admin'>('normal');
@@ -134,6 +140,48 @@ const Permits = () => {
     setSelectProviderModality(null);
   };
 
+  // New handlers for main + button workflow
+  const handleMainAddClick = () => {
+    setShowMainAddDialog(true);
+    setSelectedProviderForMainAdd(null);
+    setShowVehicleTypeSelection(false);
+  };
+
+  const handleMainAddSelectProvider = (provider: OperatorData) => {
+    setSelectedProviderForMainAdd(provider);
+    setShowVehicleTypeSelection(true);
+  };
+
+  const handleMainAddSelectVehicleType = (vehicleTypeId: string) => {
+    if (!selectedProviderForMainAdd) return;
+    
+    setEditDialogPermit({
+      permit_limit: {
+        permit_limit_id: -1, // new
+        municipality: activeorganisation,
+        system_id: selectedProviderForMainAdd.system_id,
+        modality: vehicleTypeId,
+        effective_date: moment().add(1, 'day').format('YYYY-MM-DD'), // tomorrow
+        minimum_vehicles: PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles,
+        maximum_vehicles: PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles,
+        minimal_number_of_trips_per_vehicle: PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle,
+        max_parking_duration: PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration,
+      },
+      // add other fields as needed for PermitRecord, or use defaults/nulls
+    } as PermitRecord);
+    
+    // Reset the workflow state
+    setShowMainAddDialog(false);
+    setSelectedProviderForMainAdd(null);
+    setShowVehicleTypeSelection(false);
+  };
+
+  const handleMainAddCancel = () => {
+    setShowMainAddDialog(false);
+    setSelectedProviderForMainAdd(null);
+    setShowVehicleTypeSelection(false);
+  };
+
   if(activeorganisation === "") {
     return (
       <div>
@@ -173,17 +221,6 @@ const Permits = () => {
         <div className="flex items-start gap-6 w-full">
           {/* Header card - fixed to left side */}
           <div className="bg-transparent p-0 w-24 min-w-24 h-64 flex flex-col justify-center flex-shrink-0">
-            {/* Plus button in upper right */}
-            <button
-              className="absolute top-2 right-2 p-1 bg-transparent hover:bg-gray-100 rounded-full"
-              title="Voeg permit toe"
-              onClick={() => handleAddPermit(voertuigtype.id)}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 4v12M4 10h12" stroke="#666" strokeWidth="2" strokeLinecap="round" fill="#666"/>
-              </svg>
-            </button>
-            
             {/* Content centered */}
             <div className="flex flex-col items-center">
               <img
@@ -214,6 +251,15 @@ const Permits = () => {
     <div>
       <div className="text-4xl font-bold mb-8 flex items-center gap-4">
         Vergunningseisen
+        <button
+          className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+          title="Voeg nieuwe vergunning toe"
+          onClick={handleMainAddClick}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 4v12M4 10h12" stroke="white" strokeWidth="2" strokeLinecap="round" fill="white"/>
+          </svg>
+        </button>
       </div>
       
       <div id="permits-container">
@@ -231,6 +277,28 @@ const Permits = () => {
           onCancel={() => setSelectProviderModality(null)}
         />
       )}
+      
+      {/* Main Add Workflow: Select Provider Dialog */}
+      {showMainAddDialog && !showVehicleTypeSelection && (
+        <SelectProviderDialog
+          modality={null}
+          availableProviders={availableOperators}
+          onSelect={handleMainAddSelectProvider}
+          onCancel={handleMainAddCancel}
+        />
+      )}
+      
+
+      
+      {/* Main Add Workflow: Select Vehicle Type Dialog */}
+      {showMainAddDialog && showVehicleTypeSelection && (
+        <SelectVehicleTypeDialog
+          vehicleTypes={voertuigtypes}
+          onSelect={handleMainAddSelectVehicleType}
+          onCancel={handleMainAddCancel}
+        />
+      )}
+      
       {/* Edit Limits Modal Dialog */}
       {editDialogPermit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
