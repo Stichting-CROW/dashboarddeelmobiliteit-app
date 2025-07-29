@@ -168,11 +168,11 @@ const Permits = () => {
     }
 
     return (
-      <div key={'voertuigtype-' + voertuigtype.id} className="mb-8">
+      <div key={'voertuigtype-' + voertuigtype.id} className="mb-8 w-full">
         {/* Vehicle type header card positioned to the left */}
-        <div className="flex items-start gap-6">
-          {/* Header card */}
-          <div className="bg-transparent p-0 w-24 min-w-24 h-64 flex flex-col justify-center">
+        <div className="flex items-start gap-6 w-full">
+          {/* Header card - fixed to left side */}
+          <div className="bg-transparent p-0 w-24 min-w-24 h-64 flex flex-col justify-center flex-shrink-0">
             {/* Plus button in upper right */}
             <button
               className="absolute top-2 right-2 p-1 bg-transparent hover:bg-gray-100 rounded-full"
@@ -197,44 +197,9 @@ const Permits = () => {
             </div>
           </div>
           
-          {/* Cards: horizontal scrollable row */}
-          <div className="relative flex-1">
-            {/* Left navigation indicator */}
-            <button 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md border border-gray-200"
-              onClick={() => {
-                const container = document.getElementById(`cards-container-${voertuigtype.id}`);
-                if (container) {
-                  container.scrollLeft -= 300;
-                }
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4l-6 6 6 6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            {/* Right navigation indicator */}
-            <button 
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md border border-gray-200"
-              onClick={() => {
-                const container = document.getElementById(`cards-container-${voertuigtype.id}`);
-                if (container) {
-                  container.scrollLeft += 300;
-                }
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 4l6 6-6 6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            {/* Cards container */}
-            <div 
-              id={`cards-container-${voertuigtype.id}`}
-              className="flex gap-6 overflow-x-auto scrollbar-hide px-8"
-              style={{ scrollBehavior: 'smooth' }}
-            >
+          {/* Cards: horizontal scrollable row that expands to screen width */}
+          <div className="flex-1 overflow-x-auto">
+            <div className="flex gap-6 min-w-max">
               {sortedPermitsForVoertuigtype.map((permit) => (
                 <PermitsCard key={'permits-card-' + permit.permit_limit.permit_limit_id} permit={permit} onEditLimits={() => handleEditLimits(permit)} />
               ))}
@@ -251,7 +216,7 @@ const Permits = () => {
         Vergunningseisen
       </div>
       
-      <div>
+      <div id="permits-container">
         {/* Outer: stack voertuigtypes vertically */}
         {voertuigtypes.map((voertuigtype) => {
           return renderPermitCardsForVoertuigtype(voertuigtype);
