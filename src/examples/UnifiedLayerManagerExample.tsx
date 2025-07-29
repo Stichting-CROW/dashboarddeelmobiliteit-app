@@ -98,7 +98,7 @@ const UnifiedLayerManagerExample: React.FC = () => {
               <p><strong>Display Mode:</strong> {currentDisplayMode}</p>
             </div>
             <div>
-              <p><strong>Active Preset:</strong> {currentState.activePreset || 'None'}</p>
+              <p><strong>Active Preset:</strong> None (not available in current state)</p>
               <p><strong>Visible Layers:</strong> {currentState.visibleLayers.length}</p>
               <p><strong>Is Switching:</strong> {layerManager.isSwitching ? 'Yes' : 'No'}</p>
             </div>

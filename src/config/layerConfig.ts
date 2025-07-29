@@ -1,4 +1,4 @@
-import { LayerManagerConfig, LayerConfig, LayerPreset } from '../types/LayerTypes';
+import { LayerConfig, LayerPreset } from '../types/LayerTypes';
 
 // Define all available layers
 const layers: Record<string, LayerConfig> = {
@@ -329,6 +329,12 @@ const presets: LayerPreset[] = [
     layers: ['satellite'] // Uses satellite as base layer
   }
 ];
+
+// Simple interface for backward compatibility
+interface LayerManagerConfig {
+  layers: Record<string, LayerConfig>;
+  presets: LayerPreset[];
+}
 
 export const layerConfig: LayerManagerConfig = {
   layers,

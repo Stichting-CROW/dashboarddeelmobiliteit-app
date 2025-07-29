@@ -30,14 +30,6 @@ export const useLayerManager = () => {
     const zonesVisible = layerState?.zones_visible || false;
     const mapStyle = layerState?.map_style || 'base';
     
-    // console.log('useLayerManager: Building current state', {
-    //   displayMode,
-    //   viewPark,
-    //   viewRentals,
-    //   zones_visible: zonesVisible,
-    //   isLoggedIn
-    // });
-    
     // Determine active preset based on display mode and view
     let activePreset: string | null = null;
     if (displayMode === 'displaymode-park') {
@@ -59,13 +51,6 @@ export const useLayerManager = () => {
     // Add zones if visible and user is logged in
     if (zonesVisible && isLoggedIn) {
       visibleLayers.push('zones-geodata', 'zones-geodata-border');
-      // console.log('useLayerManager: Adding zones layers to visible layers');
-    } else {
-      // console.log('useLayerManager: Zones not visible or user not logged in', {
-      //   zones_visible: zonesVisible,
-      //   isLoggedIn,
-      //   visibleLayers
-      // });
     }
     
     // Add preset layers
@@ -73,17 +58,22 @@ export const useLayerManager = () => {
       const preset = getPresetById(activePreset);
       if (preset) {
         visibleLayers.push(...preset.layers);
+      } else {
+        console.warn('useLayerManager: No preset found for', activePreset);
       }
+    } else {
+      console.warn('useLayerManager: No active preset determined');
     }
 
-    // console.log('useLayerManager: Final visible layers:', visibleLayers);
-
     return {
-      activePreset,
       visibleLayers,
+      hiddenLayers: [], // Not tracked in old system
+      activeSources: [], // Not tracked in old system
       baseLayer: mapStyle,
       zonesVisible: zonesVisible,
-      customLayers: []
+      displayMode: displayMode,
+      parkView: viewPark,
+      rentalsView: viewRentals
     };
   }, [
     // Only depend on the specific properties that affect layer visibility
@@ -119,14 +109,12 @@ export const useLayerManager = () => {
 
   // Toggle zones visibility
   const toggleZones = useCallback(() => {
-    console.log('useLayerManager: Toggling zones visibility');
     const newZonesVisible = !layerState?.zones_visible;
     
     dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null });
     
     // If zones are becoming visible and user is logged in, trigger zones data loading
     if (newZonesVisible && isLoggedIn) {
-      console.log('useLayerManager: Zones becoming visible, dispatching thunk action');
       dispatch(async (dispatch, getState) => {
         try {
           const { updateZonesgeodata } = await import('../poll-api/metadataZonesgeodata');
@@ -163,19 +151,14 @@ export const useLayerManager = () => {
   const getActiveSources = useCallback(() => {
     const sources: string[] = [];
     
-    // console.log('useLayerManager: getActiveSources called with visible layers:', currentState.visibleLayers);
-    
     currentState.visibleLayers.forEach(layerId => {
       const layer = getLayerById(layerId);
-      // console.log('useLayerManager: Processing layer for sources:', layerId, layer);
       if (layer?.source) {
         sources.push(layer.source);
-        // console.log('useLayerManager: Added source:', layer.source, 'for layer:', layerId);
       }
     });
 
     const uniqueSources = Array.from(new Set(sources)); // Remove duplicates
-    // console.log('useLayerManager: Final active sources:', uniqueSources);
     return uniqueSources;
   }, [currentState.visibleLayers]);
 
@@ -186,8 +169,22 @@ export const useLayerManager = () => {
 
   // Check if a preset is active
   const isPresetActive = useCallback((presetId: string) => {
-    return currentState.activePreset === presetId;
-  }, [currentState.activePreset]);
+    // Determine active preset based on current state
+    const displayMode = currentState.displayMode;
+    const parkView = currentState.parkView;
+    const rentalsView = currentState.rentalsView;
+    
+    if (displayMode === 'displaymode-park') {
+      const expectedPreset = viewModeToPresetMap.park[parkView];
+      return expectedPreset === presetId;
+    } else if (displayMode === 'displaymode-rentals') {
+      const expectedPreset = viewModeToPresetMap.rentals[rentalsView];
+      return expectedPreset === presetId;
+    } else {
+      const expectedPreset = displayModeToPresetMap[displayMode];
+      return expectedPreset === presetId;
+    }
+  }, [currentState.displayMode, currentState.parkView, currentState.rentalsView]);
 
   // Get current display mode
   const getCurrentDisplayMode = useCallback(() => {

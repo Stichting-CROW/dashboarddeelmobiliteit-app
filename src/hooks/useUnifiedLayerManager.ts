@@ -312,11 +312,11 @@ export const useUnifiedLayerManager = () => {
     const visibleLayers = operations.filter(op => op.visible).map(op => op.layerId);
     const hiddenLayers = operations.filter(op => !op.visible).map(op => op.layerId);
 
-    // console.log(`batchSetLayerVisibility: Operations:`, {
-    //   total: operations.length,
-    //   toShow: visibleLayers,
-    //   toHide: hiddenLayers
-    // });
+    console.log(`batchSetLayerVisibility: Operations:`, {
+      total: operations.length,
+      toShow: visibleLayers,
+      toHide: hiddenLayers
+    });
 
           // Apply all visibility changes in a single batch
       try {
@@ -324,6 +324,12 @@ export const useUnifiedLayerManager = () => {
         const visibleResults = await Promise.all(visibleLayers.map(async layerId => {
           try {
             let layer = map.getLayer(layerId);
+            
+            // console.log(`batchSetLayerVisibility :: Processing layer ${layerId}:`, {
+            //   layerExists: !!layer,
+            //   layerDefinition: !!layerDefinitions[layerId],
+            //   layerConfig: !!layerManager.allLayers[layerId]
+            // });
             
             // If layer doesn't exist, try to add it automatically
             if (!layer) {
@@ -374,11 +380,14 @@ export const useUnifiedLayerManager = () => {
             const newVisibility = 'visible';
             
             if (currentVisibility === newVisibility) {
+              console.log(`batchSetLayerVisibility :: Layer ${layerId} already visible, no change needed`);
               return true; // No change needed
             }
             
+            console.log(`batchSetLayerVisibility :: Setting ${layerId} visibility from ${currentVisibility} to ${newVisibility}`);
             map.setLayoutProperty(layerId, 'visibility', newVisibility);
             layerVisibilityCache.current.set(layerId, true);
+            console.log(`batchSetLayerVisibility :: Successfully set ${layerId} visibility to ${newVisibility}`);
             return true;
           } catch (error) {
             console.error(`Error showing layer ${layerId}:`, error);
@@ -390,6 +399,7 @@ export const useUnifiedLayerManager = () => {
           try {
             const layer = map.getLayer(layerId);
             if (!layer) {
+              console.log(`batchSetLayerVisibility :: Layer ${layerId} does not exist, already hidden`);
               return true; // Layer doesn't exist, so it's already hidden
             }
             
@@ -397,11 +407,14 @@ export const useUnifiedLayerManager = () => {
             const newVisibility = 'none';
             
             if (currentVisibility === newVisibility) {
+              console.log(`batchSetLayerVisibility :: Layer ${layerId} already hidden, no change needed`);
               return true; // No change needed
             }
             
+            console.log(`batchSetLayerVisibility :: Setting ${layerId} visibility from ${currentVisibility} to ${newVisibility}`);
             map.setLayoutProperty(layerId, 'visibility', newVisibility);
             layerVisibilityCache.current.set(layerId, false);
+            console.log(`batchSetLayerVisibility :: Successfully set ${layerId} visibility to ${newVisibility}`);
             return true;
           } catch (error) {
             console.error(`Error hiding layer ${layerId}:`, error);
@@ -414,7 +427,7 @@ export const useUnifiedLayerManager = () => {
           hidden: hiddenResults
         };
 
-        // console.log('yolo3 results', allResults);
+        // console.log('batchSetLayerVisibility results:', allResults);
 
       // Re-enable interactions if using ultra-fast mode
       if (useUltraFast && skipAnimation) {
@@ -443,6 +456,8 @@ export const useUnifiedLayerManager = () => {
     skipAnimation?: boolean;
     batch?: boolean;
   } = {}) => {
+    console.log('setBaseLayerUnified called with:', { baseLayer, options });
+    
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
       console.warn('Cannot set base layer: map not ready, queuing operation');
@@ -467,6 +482,8 @@ export const useUnifiedLayerManager = () => {
     const startTime = performance.now();
 
     try {
+      console.log('Starting base layer switch to:', baseLayer);
+      
       // Update Redux state immediately for UI responsiveness
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: baseLayer });
 
@@ -492,11 +509,15 @@ export const useUnifiedLayerManager = () => {
         return;
       }
 
+      console.log('Base layer config:', config);
+
       // Create batch operations
       const operations = [
         ...config.show.map(layerId => ({ layerId, visible: true })),
         ...config.hide.map(layerId => ({ layerId, visible: false }))
       ];
+
+      console.log('Base layer operations:', operations);
 
       // Apply base layer changes
       await batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
@@ -504,12 +525,12 @@ export const useUnifiedLayerManager = () => {
       // Track performance
       const endTime = performance.now();
       const switchTime = endTime - startTime;
-      // console.log(`⚡ Base layer switch to ${baseLayer} took ${switchTime.toFixed(1)}ms (ultra-fast: ${useUltraFast})`);
+      console.log(`⚡ Base layer switch to ${baseLayer} took ${switchTime.toFixed(1)}ms (ultra-fast: ${useUltraFast})`);
 
       // Trigger data layer re-activation after base layer switch
       setTimeout(() => {
         if (map && map.isStyleLoaded()) {
-          // console.log('Triggering data layer re-activation after base layer switch');
+          console.log('Triggering data layer re-activation after base layer switch');
           dispatch({ type: 'LAYER_REACTIVATE_DATA_LAYERS', payload: { timestamp: Date.now() } });
         }
       }, 100);
@@ -583,6 +604,8 @@ export const useUnifiedLayerManager = () => {
     skipAnimation?: boolean;
     preserveExisting?: boolean;
   } = {}) => {
+    console.log('activateLayersUnified called with layerIds:', layerIds, 'options:', options);
+    
     const map = getMap();
     if (!map || !map.isStyleLoaded()) {
       console.warn('Cannot activate layers: map not ready, queuing operation');
@@ -605,39 +628,63 @@ export const useUnifiedLayerManager = () => {
     const operations: Array<{ layerId: string; visible: boolean }> = [];
 
     // Add layers to show
-    layerIds.forEach(layerId => {
+    for (const layerId of layerIds) {
       const layerConfig = allLayers[layerId];
       const layerDefinition = layerDefinitions[layerId];
       
-      // console.log(`activateLayersUnified: Processing layer ${layerId}:`, {
-      //   hasConfig: !!layerConfig,
-      //   hasDefinition: !!layerDefinition,
-      //   layerExists: !!map.getLayer(layerId)
-      // });
+      console.log(`activateLayersUnified: Processing layer ${layerId}:`, {
+        hasConfig: !!layerConfig,
+        hasDefinition: !!layerDefinition,
+        layerExists: !!map.getLayer(layerId),
+        source: layerDefinition?.source
+      });
       
       if (layerConfig && layerDefinition) {
         // Check if layer exists on map, add if not
         if (!map.getLayer(layerId)) {
           try {
+            // Check if source exists before adding layer
+            const sourceId = layerDefinition.source;
+            if (sourceId && !map.getSource(sourceId)) {
+              console.log(`activateLayersUnified: Source ${sourceId} not found for layer ${layerId}, attempting to add it`);
+              
+              // Try to import and add the source
+              try {
+                const { sources } = await import('../components/Map/sources');
+                const sourceConfig = sources[sourceId];
+                
+                if (sourceConfig) {
+                  console.log(`activateLayersUnified: Adding source ${sourceId} with config:`, sourceConfig);
+                  map.addSource(sourceId, sourceConfig);
+                  console.log(`activateLayersUnified: Successfully added source ${sourceId} for layer ${layerId}`);
+                } else {
+                  console.warn(`activateLayersUnified: No source configuration found for ${sourceId}`);
+                  continue; // Skip this layer
+                }
+              } catch (error) {
+                console.error(`activateLayersUnified: Error adding source ${sourceId}:`, error);
+                continue; // Skip this layer
+              }
+            }
+            
             map.addLayer(layerDefinition);
             console.log(`Added missing layer: ${layerId}`);
           } catch (error) {
             console.error(`Error adding layer ${layerId}:`, error);
-            return; // Skip this layer
+            continue; // Skip this layer
           }
         }
 
         // Only activate if not a background layer
         if (!layerConfig['is-background-layer']) {
           operations.push({ layerId, visible: true });
-          // console.log(`activateLayersUnified: Added ${layerId} to show operations`);
         } else {
-          // console.log(`activateLayersUnified: Skipping ${layerId} - it's a background layer`);
+          console.log(`activateLayersUnified: Skipping ${layerId} - it's a background layer`);
         }
       } else {
         console.warn(`Layer ${layerId} not found in configuration or definitions`);
       }
-    });
+    }
 
     // Add layers to hide (unless preserving existing)
     if (!preserveExisting) {
@@ -652,7 +699,8 @@ export const useUnifiedLayerManager = () => {
     }
 
     // Apply all operations
-          await batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
+    // console.log(`activateLayersUnified :: About to apply ${operations.length} operations:`, operations);
+    await batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
 
     // console.log(`Activated layers: ${layerIds.join(', ')} (ultra-fast: ${useUltraFast})`);
   }, [getMap, layerManager, batchSetLayerVisibility, queueOperation]);
@@ -895,9 +943,15 @@ export const useUnifiedLayerManager = () => {
         return false;
       }
 
+      console.log(`updateSourceData: Updating ${sourceId} with data:`, {
+        dataType: data?.type,
+        featuresLength: data?.features?.length || 0,
+        hasFeatures: !!data?.features
+      });
+
       if (source.setData) {
         source.setData(data);
-        // console.log(`Successffully updated source data: ${sourceId}`);
+        console.log(`Successfully updated source data: ${sourceId}`);
         return true;
       } else {
         console.warn(`Source ${sourceId} does not support setData method`);

@@ -39,6 +39,7 @@ const SelectLayerModal = () => {
   const {
     setBaseLayer: setBaseLayerFast,
     toggleZones: toggleZonesFast,
+    activateLayers: activateLayersFast,
     currentState: unifiedCurrentState,
     isSwitching
   } = layerManager;
@@ -55,7 +56,7 @@ const SelectLayerModal = () => {
   const currentMapStyle = unifiedCurrentState.baseLayer;
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
 
-  // Use the regular layer manager for data layers
+  // Use the regular layer manager for data layers (for state management only)
   const {
     currentState,
     getLayersByCategory,
@@ -65,7 +66,8 @@ const SelectLayerModal = () => {
     setRentalsView,
     getCurrentDisplayMode,
     getCurrentParkView,
-    getCurrentRentalsView
+    getCurrentRentalsView,
+    allLayers
   } = useLayerManager();
 
   // Add debugging for zones data
@@ -89,10 +91,14 @@ const SelectLayerModal = () => {
   // Helper function to get park view mode
   const getParkViewMode = (presetId: string) => {
     switch (presetId) {
-      case 'park-points': return 'parkeerdata-voertuigen';
-      case 'park-clusters': return 'parkeerdata-clusters';
-      case 'park-heatmap': return 'parkeerdata-heatmap';
-      default: return 'parkeerdata-voertuigen';
+      case 'park-points': 
+        return 'parkeerdata-voertuigen';
+      case 'park-clusters': 
+        return 'parkeerdata-clusters';
+      case 'park-heatmap': 
+        return 'parkeerdata-heatmap';
+      default: 
+        return 'parkeerdata-voertuigen';
     }
   };
 
@@ -109,6 +115,88 @@ const SelectLayerModal = () => {
     }
   };
 
+  // Helper function to get layers for a preset
+  const getLayersForPreset = (presetId: string) => {
+    const preset = parkPresets.find(p => p.id === presetId) || rentalsPresets.find(p => p.id === presetId);
+    return preset ? preset.layers : [];
+  };
+
+  // Helper function to handle park view change
+  const handleParkViewChange = async (presetId: string) => {
+    const startTime = performance.now();
+    console.log('SelectLayerModal: Switching park view to:', presetId);
+    
+    // Update Redux state first for UI responsiveness
+    const viewMode = getParkViewMode(presetId);
+    setParkView(viewMode);
+    
+    // Get layers for this preset
+    const layersToActivate = getLayersForPreset(presetId);
+    
+    // Add zones layers if user is logged in and zones are visible
+    const finalLayers = [...layersToActivate];
+    if (isLoggedIn && currentState.zonesVisible) {
+      finalLayers.push('zones-geodata', 'zones-geodata-border');
+    }
+    
+    // Always include isochrones
+    finalLayers.push('zones-isochrones');
+    
+    console.log('SelectLayerModal: Activating layers for park preset:', {
+      presetId,
+      viewMode,
+      layersToActivate,
+      finalLayers
+    });
+    
+    // Use unified layer manager to activate layers immediately
+    await activateLayersFast(finalLayers, {
+      useUltraFast: true,
+      skipAnimation: true,
+      preserveExisting: false
+    });
+    
+    trackPerformance(`park-${presetId}`, startTime);
+  };
+
+  // Helper function to handle rentals view change
+  const handleRentalsViewChange = async (presetId: string) => {
+    const startTime = performance.now();
+    console.log('SelectLayerModal: Switching rentals view to:', presetId);
+    
+    // Update Redux state first for UI responsiveness
+    const viewMode = getRentalsViewMode(presetId);
+    setRentalsView(viewMode);
+    
+    // Get layers for this preset
+    const layersToActivate = getLayersForPreset(presetId);
+    
+    // Add zones layers if user is logged in and zones are visible
+    const finalLayers = [...layersToActivate];
+    if (isLoggedIn && currentState.zonesVisible) {
+      finalLayers.push('zones-geodata', 'zones-geodata-border');
+    }
+    
+    // Always include isochrones
+    finalLayers.push('zones-isochrones');
+    
+    console.log('SelectLayerModal: Activating layers for rentals preset:', {
+      presetId,
+      viewMode,
+      layersToActivate,
+      finalLayers
+    });
+    
+    // Use unified layer manager to activate layers immediately
+    await activateLayersFast(finalLayers, {
+      useUltraFast: true,
+      skipAnimation: true,
+      preserveExisting: false
+    });
+    
+    trackPerformance(`rentals-${presetId}`, startTime);
+  };
+
   return (
     <div className="SelectLayer">
       <h2>Basislaag</h2>
@@ -117,7 +205,10 @@ const SelectLayerModal = () => {
       <div 
         data-type="map-style-default" 
         className={`layer${currentMapStyle !== 'base' ? ' layer-inactive' : ''}`} 
-        onClick={() => setBaseLayerFast('base')}
+        onClick={() => {
+          console.log('SelectLayerModal: Switching to base layer');
+          setBaseLayerFast('base');
+        }}
         style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
       >
         <span className="layer-title">
@@ -128,7 +219,10 @@ const SelectLayerModal = () => {
       <div 
         data-type="map-style-satellite" 
         className={`layer${currentMapStyle !== 'hybrid' ? ' layer-inactive' : ''}`} 
-        onClick={() => setBaseLayerFast('hybrid')}
+        onClick={() => {
+          console.log('SelectLayerModal: Switching to hybrid layer');
+          setBaseLayerFast('hybrid');
+        }}
         style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
       >
         <span className="layer-title">
@@ -149,6 +243,7 @@ const SelectLayerModal = () => {
         <div 
           data-type="zones" 
           className={`layer${!currentState.zonesVisible ? ' layer-inactive' : ''}`} 
+          onClick={() => toggleZonesFast()}
           style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
         >
           <span className="layer-title">
@@ -165,7 +260,8 @@ const SelectLayerModal = () => {
           key={preset.id}
           data-type={preset.id.includes('heatmap') ? 'heat-map' : preset.id.includes('clusters') ? 'pointers' : 'vehicles'}
           className={`layer${!isPresetActive(preset.id) ? ' layer-inactive' : ''}`}
-          onClick={() => setParkView(getParkViewMode(preset.id))}
+          onClick={() => handleParkViewChange(preset.id)}
+          style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
         >
           <span className="layer-title">
             {preset.name}
@@ -179,7 +275,8 @@ const SelectLayerModal = () => {
           key={preset.id}
           data-type={preset.id.includes('heatmap') ? 'heat-map' : preset.id.includes('clusters') ? 'pointers' : 'vehicles'}
           className={`layer${!isPresetActive(preset.id) ? ' layer-inactive' : ''}`}
-          onClick={() => setRentalsView(getRentalsViewMode(preset.id))}
+          onClick={() => handleRentalsViewChange(preset.id)}
+          style={{ opacity: isSwitching ? 0.7 : 1, cursor: isSwitching ? 'wait' : 'pointer' }}
         >
           <span className="layer-title">
             {preset.name}

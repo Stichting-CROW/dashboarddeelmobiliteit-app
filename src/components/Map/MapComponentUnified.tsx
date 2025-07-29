@@ -377,16 +377,11 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! map.current.isStyleLoaded()) return;
 
     const activateLayersWithDelay = async () => {
-      // console.log('MAP activateLayersWithDelay called');
-
-      // console.log('MapComponentUnified: Layer activation effect triggered', {
-      //   mapStyle,
-      //   hasAppliedMapStyle,
-      //   zones_geodata: !!zones_geodata,
-      //   zonesFeaturesLength: zones_geodata?.data?.features?.length,
-      //   lastReactivation,
-      //   triggerReason: lastReactivation ? 'ultra-fast layer switch reactivation' : 'normal state change'
-      // });
+      console.log('MAP activateLayersWithDelay called', {
+        mapStyle,
+        hasAppliedMapStyle,
+        mapStyleLoaded: map.current.isStyleLoaded()
+      });
 
       // If we're waiting for map style to be applied, add a small delay
       if (mapStyle !== 'base' && !hasAppliedMapStyle) {
@@ -395,9 +390,9 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
 
       // Get active layers from layer manager
       const activeLayers = layerManager.getActiveLayers();
-      // console.log('MAP activeLayers:', activeLayers);
-      // console.log('MapComponentUnified: Activating layers:', activeLayers);
-      // console.log('MapComponentUnified: Zones geodata available:', zones_geodata);
+      console.log('MAP activeLayers:', activeLayers);
+      console.log('MapComponentUnified: Activating layers:', activeLayers);
+      console.log('MapComponentUnified: Zones geodata available:', zones_geodata);
       
       // If zones layers are active but zones data is not available, wait longer
       const hasZonesLayers = activeLayers.includes('zones-geodata') || activeLayers.includes('zones-geodata-border');
@@ -420,11 +415,11 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       // Sources are already added during map initialization via addSources()
       // The unified layer manager will handle any missing layers automatically
       
-      // console.log('MapComponentUnified: About to call unified layer manager activateLayers with:', {
-      //   mapExists: !!map.current,
-      //   layersCount: Object.keys(layers).length,
-      //   activeLayersCount: activeLayers.length
-      // });
+      console.log('MapComponentUnified: About to call unified layer manager activateLayers with:', {
+        mapExists: !!map.current,
+        layersCount: Object.keys(layers).length,
+        activeLayersCount: activeLayers.length
+      });
       
       // Use unified layer manager to activate layers
       layerManager.activateLayers(activeLayers, {
@@ -434,20 +429,20 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       });
       
       // After layer activation, verify that vehicle layers are visible
-      // setTimeout(() => {
-      //   const vehicleLayers = ['vehicles-point', 'vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
-      //   vehicleLayers.forEach(layerId => {
-      //     try {
-      //       const layer = map.current.getLayer(layerId);
-      //       if (layer) {
-      //         const visibility = map.current.getLayoutProperty(layerId, 'visibility');
-      //         console.log(`MapComponentUnified: Vehicle layer ${layerId} visibility after activation:`, visibility);
-      //       }
-      //     } catch (error) {
-      //       console.log(`MapComponentUnified: Could not check visibility for vehicle layer ${layerId}:`, error);
-      //     }
-      //   });
-      // }, 100);
+      setTimeout(() => {
+        const vehicleLayers = ['vehicles-point', 'vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
+        vehicleLayers.forEach(layerId => {
+          try {
+            const layer = map.current.getLayer(layerId);
+            if (layer) {
+              const visibility = map.current.getLayoutProperty(layerId, 'visibility');
+              console.log(`MapComponentUnified: Vehicle layer ${layerId} visibility after activation:`, visibility);
+            }
+          } catch (error) {
+            console.log(`MapComponentUnified: Could not check visibility for vehicle layer ${layerId}:`, error);
+          }
+        });
+      }, 100);
 
     };
 
@@ -466,22 +461,75 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
+    if(! map.current || !map.current.isStyleLoaded()) return;
 
     const updateVehicleSources = async () => {
+      // Add a small delay to ensure layers are activated first
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Try to use unified layer manager if available
       const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
       
       if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
-        // console.log('Using unified layer manager for vehicle source updates');
+        console.log('Using unified layer manager for vehicle source updates');
         
-        // Update vehicles source
-        if (unifiedLayerManager.sourceExists('vehicles')) {
-          unifiedLayerManager.updateSourceData('vehicles', vehicles.data);
+        // Get currently visible layers to determine which sources need updating
+        const visibleLayers = unifiedLayerManager.currentState?.visibleLayers || [];
+        const needsVehiclesSource = visibleLayers.some(layerId => 
+          layerId === 'vehicles-point' || layerId === 'vehicles-heatmap'
+        );
+        const needsVehiclesClustersSource = visibleLayers.some(layerId => 
+          layerId === 'vehicles-clusters' || layerId === 'vehicles-clusters-count' || layerId === 'vehicles-clusters-point'
+        );
+        
+        console.log('MapComponentUnified: Vehicle source update analysis:', {
+          visibleLayers,
+          needsVehiclesSource,
+          needsVehiclesClustersSource,
+          vehiclesDataAvailable: !!vehicles.data,
+          vehiclesDataLength: vehicles.data?.features?.length || 0,
+          mapStyle: mapStyle
+        });
+        
+        // Update vehicles source only if needed
+        if (needsVehiclesSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          while (!unifiedLayerManager.sourceExists('vehicles') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+          }
+          
+          if (unifiedLayerManager.sourceExists('vehicles')) {
+            unifiedLayerManager.updateSourceData('vehicles', vehicles.data);
+          }
         }
         
-        // Update vehicles-clusters source
-        if (unifiedLayerManager.sourceExists('vehicles-clusters')) {
-          unifiedLayerManager.updateSourceData('vehicles-clusters', vehicles.data);
+        // Update vehicles-clusters source only if needed
+        if (needsVehiclesClustersSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          console.log('MapComponentUnified: Attempting to update vehicles-clusters source');
+          console.log('MapComponentUnified: vehicles-clusters source exists:', unifiedLayerManager.sourceExists('vehicles-clusters'));
+          
+          while (!unifiedLayerManager.sourceExists('vehicles-clusters') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+            console.log(`MapComponentUnified: Waiting for vehicles-clusters source, retry ${retries}/${maxRetries}`);
+          }
+          
+          if (unifiedLayerManager.sourceExists('vehicles-clusters')) {
+            console.log('MapComponentUnified: Updating vehicles-clusters source with data:', {
+              dataLength: vehicles.data?.features?.length || 0,
+              dataType: vehicles.data?.type,
+              hasFeatures: !!vehicles.data?.features
+            });
+            unifiedLayerManager.updateSourceData('vehicles-clusters', vehicles.data);
+          } else {
+            console.warn('MapComponentUnified: vehicles-clusters source not found after retries');
+          }
         }
         
         return;
@@ -501,7 +549,9 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     updateVehicleSources();
   }, [
     didInitSourcesAndLayers,
-    vehicles.data
+    vehicles.data,
+    layerManager.currentState.visibleLayers,
+    mapStyle // Add mapStyle as dependency to trigger updates after style changes
   ]);
 
   // Set zones source
@@ -628,12 +678,49 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
         console.log('Using unified layer manager for rentals origins update');
         
-        if (unifiedLayerManager.sourceExists('rentals-origins')) {
-          unifiedLayerManager.updateSourceData('rentals-origins', rentals.origins);
+        // Get currently visible layers to determine which sources need updating
+        const visibleLayers = unifiedLayerManager.currentState?.visibleLayers || [];
+        const needsRentalsOriginsSource = visibleLayers.some(layerId => 
+          layerId === 'rentals-origins-point' || layerId === 'rentals-origins-heatmap'
+        );
+        const needsRentalsOriginsClustersSource = visibleLayers.some(layerId => 
+          layerId === 'rentals-origins-clusters' || layerId === 'rentals-origins-clusters-count' || layerId === 'rentals-origins-clusters-point'
+        );
+        
+        console.log('Rentals origins source update needs:', {
+          rentalsOrigins: needsRentalsOriginsSource,
+          rentalsOriginsClusters: needsRentalsOriginsClustersSource,
+          visibleLayers
+        });
+        
+        // Update rentals-origins source only if needed
+        if (needsRentalsOriginsSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          while (!unifiedLayerManager.sourceExists('rentals-origins') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+          }
+          
+          if (unifiedLayerManager.sourceExists('rentals-origins')) {
+            unifiedLayerManager.updateSourceData('rentals-origins', rentals.origins);
+          }
         }
         
-        if (unifiedLayerManager.sourceExists('rentals-origins-clusters')) {
-          unifiedLayerManager.updateSourceData('rentals-origins-clusters', rentals.origins);
+        // Update rentals-origins-clusters source only if needed
+        if (needsRentalsOriginsClustersSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          while (!unifiedLayerManager.sourceExists('rentals-origins-clusters') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+          }
+          
+          if (unifiedLayerManager.sourceExists('rentals-origins-clusters')) {
+            unifiedLayerManager.updateSourceData('rentals-origins-clusters', rentals.origins);
+          }
         }
         
         return;
@@ -665,12 +752,49 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
         console.log('Using unified layer manager for rentals destinations update');
         
-        if (unifiedLayerManager.sourceExists('rentals-destinations')) {
-          unifiedLayerManager.updateSourceData('rentals-destinations', rentals.destinations);
+        // Get currently visible layers to determine which sources need updating
+        const visibleLayers = unifiedLayerManager.currentState?.visibleLayers || [];
+        const needsRentalsDestinationsSource = visibleLayers.some(layerId => 
+          layerId === 'rentals-destinations-point' || layerId === 'rentals-destinations-heatmap'
+        );
+        const needsRentalsDestinationsClustersSource = visibleLayers.some(layerId => 
+          layerId === 'rentals-destinations-clusters' || layerId === 'rentals-destinations-clusters-count' || layerId === 'rentals-destinations-clusters-point'
+        );
+        
+        console.log('Rentals destinations source update needs:', {
+          rentalsDestinations: needsRentalsDestinationsSource,
+          rentalsDestinationsClusters: needsRentalsDestinationsClustersSource,
+          visibleLayers
+        });
+        
+        // Update rentals-destinations source only if needed
+        if (needsRentalsDestinationsSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          while (!unifiedLayerManager.sourceExists('rentals-destinations') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+          }
+          
+          if (unifiedLayerManager.sourceExists('rentals-destinations')) {
+            unifiedLayerManager.updateSourceData('rentals-destinations', rentals.destinations);
+          }
         }
         
-        if (unifiedLayerManager.sourceExists('rentals-destinations-clusters')) {
-          unifiedLayerManager.updateSourceData('rentals-destinations-clusters', rentals.destinations);
+        // Update rentals-destinations-clusters source only if needed
+        if (needsRentalsDestinationsClustersSource) {
+          let retries = 0;
+          const maxRetries = 10;
+          
+          while (!unifiedLayerManager.sourceExists('rentals-destinations-clusters') && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+          }
+          
+          if (unifiedLayerManager.sourceExists('rentals-destinations-clusters')) {
+            unifiedLayerManager.updateSourceData('rentals-destinations-clusters', rentals.destinations);
+          }
         }
         
         return;
@@ -721,9 +845,14 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
         setHasAppliedMapStyle(true);
         setLastMapStyle(mapStyle);
         
-        // Force re-activate layers after style change
-        setTimeout(() => {
+        // Force re-activate layers after style change with longer delay
+        setTimeout(async () => {
           if (map.current && map.current.isStyleLoaded()) {
+            // Re-add sources after style change to ensure they're available
+            console.log('Re-adding sources after style change');
+            const { addSources } = await import('./MapUtils/sources.js');
+            addSources(map.current);
+            
             const activeLayers = layerManager.getActiveLayers();
             
             // Use unified layer manager to re-activate layers
@@ -732,8 +861,37 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
               skipAnimation: false,
               preserveExisting: false
             });
+            
+            // Force update vehicle sources after style change
+            if (vehicles.data && vehicles.data.features && vehicles.data.features.length > 0) {
+              setTimeout(async () => {
+                const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+                
+                if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+                  console.log('Forcing vehicle source updates after style change');
+                  
+                  // Force update vehicles source
+                  if (unifiedLayerManager.sourceExists('vehicles')) {
+                    unifiedLayerManager.updateSourceData('vehicles', vehicles.data);
+                  }
+                  
+                  // Force update vehicles-clusters source
+                  if (unifiedLayerManager.sourceExists('vehicles-clusters')) {
+                    unifiedLayerManager.updateSourceData('vehicles-clusters', vehicles.data);
+                  }
+                } else {
+                  // Fallback to original implementation
+                  if (map.current.getSource('vehicles')) {
+                    map.current.U.setData('vehicles', vehicles.data);
+                  }
+                  if (map.current.getSource('vehicles-clusters')) {
+                    map.current.U.setData('vehicles-clusters', vehicles.data);
+                  }
+                }
+              }, 200);
+            }
           }
-        }, 300);
+        }, 500); // Increased delay from 300ms to 500ms
       } catch (error) {
         console.error('Error restoring map style:', error);
       }
@@ -744,12 +902,65 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     didMapLoad,
     didInitSourcesAndLayers,
     mapStyle,
-    lastMapStyle
+    lastMapStyle,
+    vehicles.data // Add vehicles.data as dependency to ensure it's available
   ]);
 
   /**
    * /UNIFIED LAYER MANAGEMENT
   */
+
+  // Force vehicle source updates after map style changes
+  useEffect(() => {
+    if (!didMapLoad || !didInitSourcesAndLayers || !map.current || !map.current.isStyleLoaded()) {
+      return;
+    }
+    
+    if (!vehicles.data || !vehicles.data.features || vehicles.data.features.length === 0) {
+      return;
+    }
+
+    const forceVehicleSourceUpdate = async () => {
+      console.log('Force vehicle source update after style change:', {
+        mapStyle,
+        vehiclesDataLength: vehicles.data.features.length
+      });
+      
+      // Wait a bit to ensure sources are available
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+      
+      if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+        // Force update vehicles source
+        if (unifiedLayerManager.sourceExists('vehicles')) {
+          console.log('Force updating vehicles source');
+          unifiedLayerManager.updateSourceData('vehicles', vehicles.data);
+        }
+        
+        // Force update vehicles-clusters source
+        if (unifiedLayerManager.sourceExists('vehicles-clusters')) {
+          console.log('Force updating vehicles-clusters source');
+          unifiedLayerManager.updateSourceData('vehicles-clusters', vehicles.data);
+        }
+      } else {
+        // Fallback to original implementation
+        if (map.current.getSource('vehicles')) {
+          map.current.U.setData('vehicles', vehicles.data);
+        }
+        if (map.current.getSource('vehicles-clusters')) {
+          map.current.U.setData('vehicles-clusters', vehicles.data);
+        }
+      }
+    };
+
+    forceVehicleSourceUpdate();
+  }, [
+    didMapLoad,
+    didInitSourcesAndLayers,
+    mapStyle, // This will trigger when map style changes
+    vehicles.data
+  ]);
 
   // If area selection (place/zone) changes, navigate to area
   useEffect(() => {

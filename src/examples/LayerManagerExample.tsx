@@ -33,7 +33,7 @@ const LayerManagerExample: React.FC = () => {
         <div className="bg-gray-100 p-3 rounded">
           <p><strong>Base Layer:</strong> {currentState.baseLayer}</p>
           <p><strong>Zones Visible:</strong> {currentState.zonesVisible ? 'Yes' : 'No'}</p>
-          <p><strong>Active Preset:</strong> {currentState.activePreset || 'None'}</p>
+          <p><strong>Active Preset:</strong> None (not available in current state)</p>
           <p><strong>Display Mode:</strong> {currentDisplayMode}</p>
           <p><strong>Visible Layers:</strong> {currentState.visibleLayers.join(', ')}</p>
         </div>
