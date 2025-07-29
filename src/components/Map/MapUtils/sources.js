@@ -1,6 +1,49 @@
 import {sources} from '../sources.js';
 
 export const addSources = (map) => {
+  // Try to use unified layer manager if available
+  const unifiedLayerManager = window.__UNIFIED_LAYER_MANAGER__;
+  
+  if (unifiedLayerManager && unifiedLayerManager.batchAddSources) {
+    console.log('Using unified layer manager for batch source addition');
+    
+    // Convert sources to the format expected by batchAddSources
+    const sourceConfigs = Object.keys(sources).map(key => {
+      const source = sources[key];
+      
+      if (source.type === 'raster') {
+        return { id: key, config: source };
+      } else {
+        // Handle GeoJSON sources
+        const sourceConfig = {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          },
+          // Preserve clustering properties if they exist
+          ...(source.cluster && { cluster: source.cluster }),
+          ...(source.clusterRadius && { clusterRadius: source.clusterRadius }),
+          ...(source.clusterMaxZoom && { clusterMaxZoom: source.clusterMaxZoom })
+        };
+        
+        return { id: key, config: sourceConfig };
+      }
+    });
+    
+    // Use batch operation for better performance
+    const results = unifiedLayerManager.batchAddSources(sourceConfigs, {
+      useUltraFast: true,
+      skipAnimation: true
+    });
+    
+    console.log('Batch source addition results:', results);
+    return;
+  }
+  
+  // Fallback to original implementation
+  console.log('Using fallback source addition method');
+  
   Object.keys(sources).forEach((key, idx) => {
     const source = sources[key];
     

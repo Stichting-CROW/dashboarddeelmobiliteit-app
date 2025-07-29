@@ -57,6 +57,15 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
   // Use the unified layer manager
   const layerManager = useUnifiedLayerManager();
 
+  // Expose unified layer manager globally for other components to use
+  useEffect(() => {
+    (window as any).__UNIFIED_LAYER_MANAGER__ = layerManager;
+    
+    return () => {
+      delete (window as any).__UNIFIED_LAYER_MANAGER__;
+    };
+  }, [layerManager]);
+
   const displayMode = layerManager.getCurrentDisplayMode();
 
   const mapStyle = useSelector((state: StateType) => {
@@ -98,6 +107,7 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   const [activeLayers, setActiveLayers] = useState([]);
   const [hasAppliedMapStyle, setHasAppliedMapStyle] = useState(false);
+  const [lastMapStyle, setLastMapStyle] = useState(mapStyle);
   let map = useRef(null);
 
   const userData = useSelector((state: StateType) => {
@@ -210,7 +220,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
         }
 
         setDidMapLoad(true)
-        console.log('Map loaded, setting didMapLoad to true');
 
         addSources(map.current);
 
@@ -243,6 +252,26 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     layerManager
   ])
 
+  // Cleanup map on unmount
+  useEffect(() => {
+    return () => {
+      if (map.current) {
+        // Don't destroy the map, just clean up event listeners
+        map.current.off('error');
+        map.current.off('idle');
+        map.current.off('moveend');
+        map.current.off('zoomend');
+        map.current.off('load');
+        
+        // Remove style load handler if it exists
+        if (map.current._styleLoadHandler) {
+          map.current.off('styledata', map.current._styleLoadHandler);
+          map.current.off('load', map.current._styleLoadHandler);
+        }
+      }
+    };
+  }, []);
+
   // On map load: Zoom to relevant position
   useEffect(() => {
     if(! didMapLoad) return;
@@ -260,7 +289,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
 
     // If zoom and lat/lng are in URL -> navigate to that location
     if(zoom && lat && lng) {
-      console.log('ACTION: setZoom and setCenter (MapComponent - if zoom and lat/lng are in URL)');
       setTimeout(() => {
         map.current.setZoom(zoom);
         map.current.setCenter([lng, lat]);
@@ -313,7 +341,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
           // Fallback to mapbox-gl-utils
           try {
             map.current.U.showSource(sourceName);
-            // console.log('MapComponentUnified: Successfully showed source with fallback:', sourceName);
           } catch (fallbackError) {
             console.error('MapComponentUnified: Error showing source with fallback:', sourceName, fallbackError);
           }
@@ -350,6 +377,8 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! map.current.isStyleLoaded()) return;
 
     const activateLayersWithDelay = async () => {
+      // console.log('MAP activateLayersWithDelay called');
+
       // console.log('MapComponentUnified: Layer activation effect triggered', {
       //   mapStyle,
       //   hasAppliedMapStyle,
@@ -366,7 +395,7 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
 
       // Get active layers from layer manager
       const activeLayers = layerManager.getActiveLayers();
-      
+      // console.log('MAP activeLayers:', activeLayers);
       // console.log('MapComponentUnified: Activating layers:', activeLayers);
       // console.log('MapComponentUnified: Zones geodata available:', zones_geodata);
       
@@ -438,19 +467,45 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
 
-    if(map.current.getSource('vehicles')) {
-      map.current.U.setData('vehicles', vehicles.data);
-    }
-    if(map.current.getSource('vehicles-clusters')) {
-      map.current.U.setData('vehicles-clusters', vehicles.data);
-    }
+    const updateVehicleSources = async () => {
+      // Try to use unified layer manager if available
+      const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+      
+      if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+        // console.log('Using unified layer manager for vehicle source updates');
+        
+        // Update vehicles source
+        if (unifiedLayerManager.sourceExists('vehicles')) {
+          unifiedLayerManager.updateSourceData('vehicles', vehicles.data);
+        }
+        
+        // Update vehicles-clusters source
+        if (unifiedLayerManager.sourceExists('vehicles-clusters')) {
+          unifiedLayerManager.updateSourceData('vehicles-clusters', vehicles.data);
+        }
+        
+        return;
+      }
+      
+      // Fallback to original implementation
+      console.log('Using fallback vehicle source update method');
+      
+      if(map.current.getSource('vehicles')) {
+        map.current.U.setData('vehicles', vehicles.data);
+      }
+      if(map.current.getSource('vehicles-clusters')) {
+        map.current.U.setData('vehicles-clusters', vehicles.data);
+      }
+    };
+
+    updateVehicleSources();
   }, [
     didInitSourcesAndLayers,
     vehicles.data
   ]);
 
   // Set zones source
-  useEffect(()   => {
+  useEffect(() => {
     console.log('MapComponentUnified: Zones source effect triggered', {
       didInitSourcesAndLayers,
       zones_geodata: !!zones_geodata,
@@ -469,18 +524,56 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! map.current.isStyleLoaded()) return;
 
     const setZonesData = async () => {
+      // Try to use unified layer manager if available
+      const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+      
+      if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+        console.log('Using unified layer manager for zones source update');
+        
+        // Wait for the zones source to be available
+        let retries = 0;
+        const maxRetries = 10;
+        
+        while (!unifiedLayerManager.sourceExists('zones-geodata') && retries < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retries++;
+        }
+        
+        if (!unifiedLayerManager.sourceExists('zones-geodata')) {
+          console.log('Zones source not found, creating it manually');
+          try {
+            // Manually create the zones source using unified layer manager
+            unifiedLayerManager.addSource('zones-geodata', {
+              type: 'geojson',
+              data: {
+                type: 'FeatureCollection',
+                features: []
+              }
+            });
+          } catch (error) {
+            console.error('Error creating zones source manually:', error);
+            return;
+          }
+        }
+
+        // Update zones data using unified layer manager
+        unifiedLayerManager.updateSourceData('zones-geodata', zones_geodata.data);
+        return;
+      }
+      
+      // Fallback to original implementation
+      console.log('Using fallback zones source update method');
+      
       // Wait for the zones source to be available
       let retries = 0;
       const maxRetries = 10;
       
       while (!map.current.getSource('zones-geodata') && retries < maxRetries) {
-        // console.log(`MapComponentUnified: Waiting for zones source to be available, retry ${retries + 1}/${maxRetries}`);
         await new Promise(resolve => setTimeout(resolve, 100));
         retries++;
       }
       
       if (!map.current.getSource('zones-geodata')) {
-        // console.log('MapComponentUnified: Zones source not found after retries, creating it manually');
         try {
           // Manually create the zones source
           map.current.addSource('zones-geodata', {
@@ -490,34 +583,28 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
               features: []
             }
           });
-          // console.log('MapComponentUnified: Successfully created zones source manually');
         } catch (error) {
-          console.error('MapComponentUnified: Error creating zones source manually:', error);
+          console.error('Error creating zones source manually:', error);
           return;
         }
       }
 
-      // console.log('MapComponentUnified: Setting zones data:', zones_geodata.data);
       try {
         // Use native MapLibre method instead of mapbox-gl-utils
         const source = map.current.getSource('zones-geodata');
         if (source && source.setData) {
           source.setData(zones_geodata.data);
-          // console.log('MapComponentUnified: Successfully set zones data with native method');
         } else {
-          // console.log('MapComponentUnified: Source does not have setData method, trying fallback');
           // Fallback to mapbox-gl-utils
           map.current.U.setData('zones-geodata', zones_geodata.data);
-          // console.log('MapComponentUnified: Successfully set zones data with fallback');
         }
       } catch (error) {
-        console.error('MapComponentUnified: Error setting zones data:', error);
+        console.error('Error setting zones data:', error);
         // Fallback to mapbox-gl-utils
         try {
           map.current.U.setData('zones-geodata', zones_geodata.data);
-          // console.log('MapComponentUnified: Successfully set zones data with fallback after error');
         } catch (fallbackError) {
-          console.error('MapComponentUnified: Error setting zones data with fallback:', fallbackError);
+          console.error('Error setting zones data with fallback:', fallbackError);
         }
       }
     };
@@ -534,8 +621,32 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.origins || Object.keys(rentals.origins).length <= 0) return;
 
-    map.current.U.setData('rentals-origins', rentals.origins);
-    map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    const updateRentalsOrigins = async () => {
+      // Try to use unified layer manager if available
+      const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+      
+      if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+        console.log('Using unified layer manager for rentals origins update');
+        
+        if (unifiedLayerManager.sourceExists('rentals-origins')) {
+          unifiedLayerManager.updateSourceData('rentals-origins', rentals.origins);
+        }
+        
+        if (unifiedLayerManager.sourceExists('rentals-origins-clusters')) {
+          unifiedLayerManager.updateSourceData('rentals-origins-clusters', rentals.origins);
+        }
+        
+        return;
+      }
+      
+      // Fallback to original implementation
+      console.log('Using fallback rentals origins update method');
+      
+      map.current.U.setData('rentals-origins', rentals.origins);
+      map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    };
+
+    updateRentalsOrigins();
   }, [
     didInitSourcesAndLayers,
     rentals,
@@ -547,8 +658,32 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.destinations || Object.keys(rentals.destinations).length <= 0) return;
 
-    map.current.U.setData('rentals-destinations', rentals.destinations);
-    map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    const updateRentalsDestinations = async () => {
+      // Try to use unified layer manager if available
+      const unifiedLayerManager = (window as any).__UNIFIED_LAYER_MANAGER__;
+      
+      if (unifiedLayerManager && unifiedLayerManager.updateSourceData) {
+        console.log('Using unified layer manager for rentals destinations update');
+        
+        if (unifiedLayerManager.sourceExists('rentals-destinations')) {
+          unifiedLayerManager.updateSourceData('rentals-destinations', rentals.destinations);
+        }
+        
+        if (unifiedLayerManager.sourceExists('rentals-destinations-clusters')) {
+          unifiedLayerManager.updateSourceData('rentals-destinations-clusters', rentals.destinations);
+        }
+        
+        return;
+      }
+      
+      // Fallback to original implementation
+      console.log('Using fallback rentals destinations update method');
+      
+      map.current.U.setData('rentals-destinations', rentals.destinations);
+      map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    };
+
+    updateRentalsDestinations();
   }, [
     didInitSourcesAndLayers,
     rentals,
@@ -557,35 +692,20 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
 
   // Map style effect using unified layer manager
   useEffect(() => {
-    // console.log('Map style effect triggered');
-    // console.log('Map style effect conditions:', { 
-    //   didMapLoad, 
-    //   didInitSourcesAndLayers, 
-    //   mapExists: !!map.current, 
-    //   mapStyleLoaded: map.current?.isStyleLoaded(), 
-    //   hasAppliedMapStyle,
-    //   mapStyle
-    // });
-    
-    // Reset the flag when map style changes
-    if (hasAppliedMapStyle) {
-      setHasAppliedMapStyle(false);
+    // Skip if we've already applied this style
+    if (hasAppliedMapStyle && lastMapStyle === mapStyle) {
+      return;
     }
     
     if (!didMapLoad || !didInitSourcesAndLayers || !map.current) {
-      // console.log('Map style effect skipped due to conditions not met');
       return;
     }
 
     const applyMapStyleChange = async () => {
-      // console.log('Waiting for map style to load...');
-      
       // Wait for the map style to load
       while (!map.current.isStyleLoaded()) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
-      
-      // console.log('Map style loaded, restoring persisted map style:', mapStyle);
       
       // Add a delay to ensure this runs after layer components
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -598,19 +718,13 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
           batch: true
         });
         
-        // console.log('Successfully restored map style:', mapStyle);
         setHasAppliedMapStyle(true);
-        // console.log('Set hasAppliedMapStyle to true');
+        setLastMapStyle(mapStyle);
         
         // Force re-activate layers after style change
-        // console.log('Forcing layer re-activation after style change');
         setTimeout(() => {
           if (map.current && map.current.isStyleLoaded()) {
             const activeLayers = layerManager.getActiveLayers();
-            // console.log('Re-activating layers after style change:', activeLayers);
-            
-            // Sources are already added during initial map load, no need to re-add them
-            // addSources(map.current);
             
             // Use unified layer manager to re-activate layers
             layerManager.activateLayers(activeLayers, {
@@ -618,8 +732,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
               skipAnimation: false,
               preserveExisting: false
             });
-            
-            // console.log('Layer re-activation completed');
           }
         }, 300);
       } catch (error) {
@@ -631,7 +743,8 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
   }, [
     didMapLoad,
     didInitSourcesAndLayers,
-    mapStyle
+    mapStyle,
+    lastMapStyle
   ]);
 
   /**

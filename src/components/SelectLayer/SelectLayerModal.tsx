@@ -2,6 +2,7 @@ import { useLayerManager } from '../../hooks/useLayerManager';
 import { useUnifiedLayerManager } from '../../hooks/useUnifiedLayerManager';
 import { useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
+import { useEffect } from "react";
 
 // Simple performance tracking
 const trackPerformance = (layerType: string, startTime: number) => {
@@ -41,6 +42,15 @@ const SelectLayerModal = () => {
     currentState: unifiedCurrentState,
     isSwitching
   } = layerManager;
+  
+  // Expose unified layer manager globally for other components to use
+  useEffect(() => {
+    (window as any).__UNIFIED_LAYER_MANAGER__ = layerManager;
+    
+    return () => {
+      delete (window as any).__UNIFIED_LAYER_MANAGER__;
+    };
+  }, [layerManager]);
   
   const currentMapStyle = unifiedCurrentState.baseLayer;
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
