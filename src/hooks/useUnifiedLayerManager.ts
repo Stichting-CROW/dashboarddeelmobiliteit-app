@@ -458,20 +458,6 @@ export const useUnifiedLayerManager = () => {
   } = {}) => {
     console.log('setBaseLayerUnified called with:', { baseLayer, options });
     
-    const map = getMap();
-    if (!map || !map.isStyleLoaded()) {
-      console.warn('Cannot set base layer: map not ready, queuing operation');
-      
-      // Queue the operation for later execution
-      queueOperation('setBaseLayer', async () => {
-        await setBaseLayerUnified(baseLayer, options);
-      });
-      
-      return;
-    }
-
-    const { useUltraFast = false, skipAnimation = true, batch = true } = options;
-
     // Prevent concurrent switching
     if (isSwitchingRef.current) {
       console.warn('Base layer switch already in progress');
@@ -485,50 +471,17 @@ export const useUnifiedLayerManager = () => {
       console.log('Starting base layer switch to:', baseLayer);
       
       // Update Redux state immediately for UI responsiveness
+      // This will trigger the MapComponent to handle the actual map style change
       dispatch({ type: 'LAYER_SET_MAP_STYLE', payload: baseLayer });
-
-      // Define base layer visibility rules
-      const baseLayerConfig = {
-        base: {
-          show: ['base-layer'],
-          hide: ['satellite-layer', 'hybrid-layer', 'luchtfoto-pdok']
-        },
-        satellite: {
-          show: ['satellite-layer', 'luchtfoto-pdok'],
-          hide: ['base-layer', 'hybrid-layer']
-        },
-        hybrid: {
-          show: ['hybrid-layer', 'luchtfoto-pdok'],
-          hide: ['base-layer', 'satellite-layer']
-        }
-      };
-
-      const config = baseLayerConfig[baseLayer];
-      if (!config) {
-        console.error(`Unknown base layer style: ${baseLayer}`);
-        return;
-      }
-
-      console.log('Base layer config:', config);
-
-      // Create batch operations
-      const operations = [
-        ...config.show.map(layerId => ({ layerId, visible: true })),
-        ...config.hide.map(layerId => ({ layerId, visible: false }))
-      ];
-
-      console.log('Base layer operations:', operations);
-
-      // Apply base layer changes
-      await batchSetLayerVisibility(operations, { useUltraFast, skipAnimation });
 
       // Track performance
       const endTime = performance.now();
       const switchTime = endTime - startTime;
-      console.log(`⚡ Base layer switch to ${baseLayer} took ${switchTime.toFixed(1)}ms (ultra-fast: ${useUltraFast})`);
+      console.log(`⚡ Base layer switch to ${baseLayer} took ${switchTime.toFixed(1)}ms`);
 
       // Trigger data layer re-activation after base layer switch
       setTimeout(() => {
+        const map = getMap();
         if (map && map.isStyleLoaded()) {
           console.log('Triggering data layer re-activation after base layer switch');
           dispatch({ type: 'LAYER_REACTIVATE_DATA_LAYERS', payload: { timestamp: Date.now() } });
@@ -540,7 +493,7 @@ export const useUnifiedLayerManager = () => {
     } finally {
       isSwitchingRef.current = false;
     }
-  }, [dispatch, getMap, batchSetLayerVisibility, queueOperation]);
+  }, [dispatch, getMap, queueOperation]);
 
   // Unified zones toggle
   const toggleZonesUnified = useCallback(async (options: {

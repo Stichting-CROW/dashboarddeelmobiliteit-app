@@ -425,7 +425,7 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       layerManager.activateLayers(activeLayers, {
         useUltraFast: false, // Use traditional switching for this effect
         skipAnimation: false,
-        preserveExisting: false
+        preserveExisting: true  // Preserve base layers when reactivating data layers
       });
       
       // After layer activation, verify that vehicle layers are visible
@@ -816,11 +816,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
 
   // Map style effect using unified layer manager
   useEffect(() => {
-    // Skip if we've already applied this style
-    if (hasAppliedMapStyle && lastMapStyle === mapStyle) {
-      return;
-    }
-    
     if (!didMapLoad || !didInitSourcesAndLayers || !map.current) {
       return;
     }
@@ -835,11 +830,10 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
-        // Use unified layer manager to set base layer
-        layerManager.setBaseLayer(mapStyle, {
-          useUltraFast: true, // Use ultra-fast switching for style changes
-          skipAnimation: true,
-          batch: true
+        // Use original map utilities to set base layer (not unified layer manager)
+        const { setAdvancedBaseLayer } = await import('./MapUtils/map.js');
+        await setAdvancedBaseLayer(map.current, mapStyle, {
+          preserveOverlays: true
         });
         
         setHasAppliedMapStyle(true);
@@ -859,7 +853,7 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
             layerManager.activateLayers(activeLayers, {
               useUltraFast: false, // Use traditional switching for re-activation
               skipAnimation: false,
-              preserveExisting: false
+              preserveExisting: true  // Preserve base layers when reactivating data layers
             });
             
             // Force update vehicle sources after style change
@@ -902,7 +896,6 @@ const MapComponentUnified = (props: MapComponentProps): JSX.Element => {
     didMapLoad,
     didInitSourcesAndLayers,
     mapStyle,
-    lastMapStyle,
     vehicles.data // Add vehicles.data as dependency to ensure it's available
   ]);
 

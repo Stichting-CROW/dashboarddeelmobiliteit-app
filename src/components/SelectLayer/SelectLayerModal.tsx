@@ -130,6 +130,9 @@ const SelectLayerModal = () => {
     const viewMode = getParkViewMode(presetId);
     setParkView(viewMode);
     
+    // Wait a bit for Redux state to update
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     // Get layers for this preset
     const layersToActivate = getLayersForPreset(presetId);
     
@@ -167,6 +170,9 @@ const SelectLayerModal = () => {
     // Update Redux state first for UI responsiveness
     const viewMode = getRentalsViewMode(presetId);
     setRentalsView(viewMode);
+    
+    // Wait a bit for Redux state to update
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Get layers for this preset
     const layersToActivate = getLayersForPreset(presetId);
