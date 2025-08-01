@@ -199,7 +199,7 @@ const Permits = () => {
     if(! permits || permits.length === 0) {
       return null;
     }
-    const permitsForVoertuigtype = permits.filter((permit) => permit.permit_limit.modality === voertuigtype.id);
+    const permitsForVoertuigtype = permits.filter((permit) => permit.permit_limit?.modality === voertuigtype.id);
     
     // Sort permits by provider name
     const sortedPermitsForVoertuigtype = permitsForVoertuigtype.sort((a, b) => {

@@ -57,10 +57,10 @@ export default function PermitsCard({ permit, onEditLimits }: { permit: PermitRe
           </div>
         </div>
 
-        <RangeBarIndicator title="Aantal Voertuigen" current={permit.stats.current_vehicle_count} min={permit.permit_limit.minimum_vehicles} max={permit.permit_limit.maximum_vehicles} />
+        <RangeBarIndicator title="Aantal Voertuigen" current={permit.stats?.current_vehicle_count} min={permit.permit_limit?.minimum_vehicles} max={permit?.permit_limit?.maximum_vehicles} />
         <RangeBarIndicator 
           title="Aantal te lang geparkeerd" 
-          current={permit.stats.duration_correct_percentage} 
+          current={permit?.stats?.duration_correct_percentage} 
           max={25} 
         />
         {/* <RangeBarIndicator 
