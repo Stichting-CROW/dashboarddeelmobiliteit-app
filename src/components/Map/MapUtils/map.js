@@ -26,6 +26,7 @@ export const setBackgroundLayer = (map, name, setMapStyle) => {
 
   // Check if map style was loaded
   if(! map.isStyleLoaded()) {
+    console.error('Map style not loaded');
     return;
   }
 

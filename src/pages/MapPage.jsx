@@ -51,6 +51,10 @@ function Map({mode, mapContainer}) {
 
   layers.push('zones-isochrones');
 
+  // Add luchtfoto background layer
+  layers.push('luchtfoto-pdok');
+  activeSources.push('luchtfoto-pdok');
+
   // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK && viewPark) {
     switch(viewPark) {
@@ -100,8 +104,7 @@ function Map({mode, mapContainer}) {
     activeSources.push('zones-metrics-public');
   }
   else if(displayMode===DISPLAYMODE_POLICY_HUBS) {
-    layers.push('luchtfoto-pdok');
-    activeSources.push('luchtfoto-pdok');
+    // Nothing to add specifically
   }
 
   return (
