@@ -26,7 +26,17 @@ export const setBackgroundLayer = (map, name, setMapStyle) => {
 
   // Check if map style was loaded
   if(! map.isStyleLoaded()) {
-    console.error('Map style not loaded');
+    console.log('Map style not loaded, waiting for style to load...');
+    // Use a polling approach instead of event listener to avoid issues with map reference changes
+    const checkStyleLoaded = () => {
+      if (map && map.isStyleLoaded()) {
+        setBackgroundLayer(map, name, setMapStyle);
+      } else {
+        // Check again in 100ms
+        setTimeout(checkStyleLoaded, 100);
+      }
+    };
+    checkStyleLoaded();
     return;
   }
 
