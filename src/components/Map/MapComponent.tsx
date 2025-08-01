@@ -6,6 +6,7 @@ import 'moment/min/locales';
 import {useLocation} from "react-router-dom";
 import SearchBar from '../SearchBar/SearchBar';
 import { RightTop } from '../MapLayer/widget-positions/RightTop';
+import { SelectLayer } from '../SelectLayer/SelectLayer';
 
 import {StateType} from '../../types/StateType';
 
@@ -30,6 +31,8 @@ import {
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_START,
+  DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
 import './MapComponent.css';
@@ -489,7 +492,13 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn && showSearchBar && 
       <>
         <RightTop>
-          <SearchBar map={map.current} />
+          <div className="flex gap-2">
+            <SearchBar map={map.current} />
+            {(
+              displayMode !== DISPLAYMODE_START
+              && displayMode !== DISPLAYMODE_OTHER
+            ) && <SelectLayer />}
+          </div>
         </RightTop>
       </>
     }
