@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
-import { setBackgroundLayer } from '../Map/MapUtils/map';
+import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 import { setMapStyle } from '../../actions/layers';
 
 import {
@@ -20,6 +20,7 @@ import {
 
 const SelectLayerModal = () => {
   const dispatch = useDispatch();
+  const { setLayer } = useBackgroundLayer(window['ddMap']);
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
@@ -53,9 +54,7 @@ const SelectLayerModal = () => {
           data-type="map-style-default" 
           className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} 
           onClick={() => {
-            setBackgroundLayer(window['ddMap'], 'base', (name) => {
-              dispatch(setMapStyle(name))
-            })
+            setLayer('base');
           }}
         >
           <span className="layer-title">
@@ -64,11 +63,9 @@ const SelectLayerModal = () => {
         </div>
         <div 
           data-type="map-style-satellite" 
-          className={`layer${layers.map_style!=='luchtfoto-pdok' ? ' layer-inactive':''}`} 
+          className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} 
           onClick={() => {
-            setBackgroundLayer(window['ddMap'], 'luchtfoto-pdok', (name) => {
-              dispatch(setMapStyle(name))
-            });
+            setLayer('satellite');
           }}
         >
           <span className="layer-title">

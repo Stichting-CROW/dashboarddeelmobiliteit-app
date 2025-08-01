@@ -8,6 +8,9 @@ import {
   activateLayers
 } from './layers.js';
 
+// Import the new background layer manager
+import { setBackgroundLayer as setBackgroundLayerNew } from './backgroundLayerManager.js';
+
 export const getMapStyles = () => {
   return {
     // NOTE: mapbox:// urls are not supported anymore.
@@ -17,37 +20,9 @@ export const getMapStyles = () => {
   }
 }
 
-export const setBackgroundLayer = (map, name, setMapStyle) => {
-  // Check if setMapStyle func was given
-  if(! setMapStyle) {
-    console.error('setMapStyle not given');
-    return;
-  }
-
-  // Check if map style was loaded
-  if(! map.isStyleLoaded()) {
-    console.log('Map style not loaded, waiting for style to load...');
-    // Use a polling approach instead of event listener to avoid issues with map reference changes
-    const checkStyleLoaded = () => {
-      if (map && map.isStyleLoaded()) {
-        setBackgroundLayer(map, name, setMapStyle);
-      } else {
-        // Check again in 100ms
-        setTimeout(checkStyleLoaded, 100);
-      }
-    };
-    checkStyleLoaded();
-    return;
-  }
-
-  setMapStyle(name);
-
-  if(name === 'base') {
-    map.U.hide('luchtfoto-pdok');
-  }
-  else {
-    map.U.show(name);
-  }
+// Legacy function for backward compatibility
+export const setBackgroundLayer = (map, name, callback) => {
+  setBackgroundLayerNew(map, name, callback);
 }
 
 // Variable to keep track of the map style that we used last

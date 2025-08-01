@@ -201,7 +201,9 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'luchtfoto-pdok', setMapStyle);
+    setBackgroundLayer(map, 'luchtfoto-pdok', () => {
+      dispatch(setMapStyle('luchtfoto-pdok'))
+    });
   }, [
     map,
     map?.U,

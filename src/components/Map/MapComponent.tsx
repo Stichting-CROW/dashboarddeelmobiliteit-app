@@ -14,13 +14,13 @@ import {StateType} from '../../types/StateType';
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, applyMapStyle} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from './MapUtils/map';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
   addLayers,
   activateLayers
-} from './MapUtils/layers.js';
+} from './MapUtils/layers';
 import {addSources} from './MapUtils/sources.js';
 import {
   navigateToGeography,
@@ -28,6 +28,7 @@ import {
   fetchPublicZones,
   fetchAdminZones
 } from './MapUtils/zones.js';
+import {sources} from './sources.js';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
@@ -38,7 +39,6 @@ import {
 import './MapComponent.css';
 
 import {layers} from './layers';
-import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js';
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
@@ -178,6 +178,7 @@ const MapComponent = (props): JSX.Element => {
         container: mapContainer.current,
         // @ts-ignore
         style: mapStyles.base,
+        // @ts-ignore
         accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
         center: [lng, lat],
         zoom: zoom,
@@ -215,7 +216,7 @@ const MapComponent = (props): JSX.Element => {
 
         setDidMapLoad(true)
 
-        addSources(map.current);
+        // addSources(map.current);
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
@@ -326,12 +327,18 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! vehicles.data || vehicles.data.length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    if(map.current.getSource('vehicles')) {
-      map.current.U.setData('vehicles', vehicles.data);
-    }
-    if(map.current.getSource('vehicles-clusters')) {
-      map.current.U.setData('vehicles-clusters', vehicles.data);
+    try {
+      if(map.current.getSource('vehicles')) {
+        map.current.U.setData('vehicles', vehicles.data);
+      }
+      if(map.current.getSource('vehicles-clusters')) {
+        map.current.U.setData('vehicles-clusters', vehicles.data);
+      }
+    } catch (error) {
+      console.warn('Failed to set vehicles data:', error);
     }
   }, [
     didInitSourcesAndLayers,
@@ -343,8 +350,13 @@ const MapComponent = (props): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
     if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('zones-geodata', zones_geodata.data);
+    try {
+      map.current.U.setData('zones-geodata', zones_geodata.data);
+    } catch (error) {
+      console.warn('Failed to set zones data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     zones_geodata,
@@ -355,9 +367,15 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.origins || Object.keys(rentals.origins).length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('rentals-origins', rentals.origins);
-    map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    try {
+      map.current.U.setData('rentals-origins', rentals.origins);
+      map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    } catch (error) {
+      console.warn('Failed to set rentals origins data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     rentals,
@@ -368,9 +386,15 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.destinations || Object.keys(rentals.destinations).length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('rentals-destinations', rentals.destinations);
-    map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    try {
+      map.current.U.setData('rentals-destinations', rentals.destinations);
+      map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    } catch (error) {
+      console.warn('Failed to set rentals destinations data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     rentals,

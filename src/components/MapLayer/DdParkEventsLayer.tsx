@@ -13,7 +13,12 @@ const DdParkEventsLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'base', setMapStyle);
+    console.log('DdParkEventsLayer useEffect');
+    const defaultLayerName = 'base';
+    setBackgroundLayer(map, defaultLayerName, () => {
+      console.log('setMapStyle', defaultLayerName);
+      dispatch(setMapStyle(defaultLayerName))
+    });
   }, [
     map,
     map?.U,

@@ -1,23 +1,26 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getMapStyles, applyMapStyle, setBackgroundLayer } from '../Map/MapUtils/map';
-import { setMapStyle } from '../../actions/layers';
+import { useEffect } from 'react';
+import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 
 const DdRentalsLayer = ({
   map
 }): JSX.Element => {
-  const dispatch = useDispatch()
+  const { setLayer } = useBackgroundLayer(map);
 
   // On component load: Set background layer to 'base layer'
   useEffect(() => {
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'base', setMapStyle);
+    console.log('DdRentalsLayer useEffect');
+    const defaultLayerName = 'base';
+    
+    // Use the new hook for cleaner background layer management
+    setLayer(defaultLayerName);
   }, [
     map,
     map?.U,
-    document.location.pathname
+    document.location.pathname,
+    setLayer
   ]);
 
   return <></>

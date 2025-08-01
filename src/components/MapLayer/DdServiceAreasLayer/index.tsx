@@ -81,7 +81,10 @@ const DdServiceAreasLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'base', setMapStyle);
+    const defaultLayerName = 'base';
+    setBackgroundLayer(map, defaultLayerName, () => {
+      dispatch(setMapStyle(defaultLayerName))
+    });
   }, [
     map,
     map?.U,

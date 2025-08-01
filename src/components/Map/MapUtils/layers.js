@@ -22,9 +22,11 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
       }
     });
 
-    // Hide all other layersToShow
+    // Hide all other layersToShow (but not background layers)
     Object.keys(allLayers).forEach((key, idx) => {
-      if(layersToShow.indexOf(key) <= -1) {
+      const data = allLayers[key];
+      // Don't hide background layers - they're managed by setBackgroundLayer
+      if(layersToShow.indexOf(key) <= -1 && !data['is-background-layer']) {
         map.U.hide(key);
       }
     });
