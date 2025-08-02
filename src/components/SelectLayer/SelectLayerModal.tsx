@@ -50,42 +50,42 @@ const SelectLayerModal = () => {
     <div className="SelectLayer">
       <h2>Basislaag</h2>
 
-        <div 
-          data-type="map-style-default" 
-          className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} 
-          onClick={() => {
-            setLayer('base');
-          }}
-        >
-          <span className="layer-title">
-            Terrein
-          </span>
-        </div>
-        <div 
-          data-type="map-style-satellite" 
-          className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} 
-          onClick={() => {
-            setLayer('satellite');
-          }}
-        >
-          <span className="layer-title">
-            Luchtfoto
-          </span>
-        </div>
-        {isLoggedIn && <div
-          className={`layer${!zonesVisible ? ' layer-inactive':''}`}
-          style={{width: '1px', borderColor: '#eee'}}
-        />}
+      <div 
+        data-type="map-style-default" 
+        className={`layer${layers.map_style!=='base' ? ' layer-inactive':''}`} 
+        onClick={() => {
+          setLayer('base');
+        }}
+      >
+        <span className="layer-title">
+          Terrein
+        </span>
+      </div>
+      <div 
+        data-type="map-style-satellite" 
+        className={`layer${layers.map_style!=='satellite' ? ' layer-inactive':''}`} 
+        onClick={() => {
+          setLayer('satellite');
+        }}
+      >
+        <span className="layer-title">
+          Luchtfoto
+        </span>
+      </div>
+      {isLoggedIn && <div
+        className={`layer${!zonesVisible ? ' layer-inactive':''}`}
+        style={{width: '1px', borderColor: '#eee'}}
+      />}
 
-        {isLoggedIn && <>
-          <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
-            dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null })
-          }}>
-            <span className="layer-title">
-              CBS-gebied
-            </span>
-          </div>
-        </>}
+      {isLoggedIn && <>
+        <div data-type="zones" className={`layer${!zonesVisible ? ' layer-inactive':''}`} onClick={() => {
+          dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null });
+        }}>
+          <span className="layer-title">
+            CBS-gebied
+          </span>
+        </div>
+      </>}
 
       <h2>Datalaag</h2>
 

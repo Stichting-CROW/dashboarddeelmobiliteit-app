@@ -49,11 +49,14 @@ import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
+import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
 
 const MapComponent = (props): JSX.Element => {
+  const { getAvailableLayers } = useBackgroundLayer(null);
+
   const [pathName, setPathName] = useState(document.location.pathname);
   const [uriParams, setUriParams] = useState(document.location.search);
 
@@ -363,8 +366,12 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
-    console.log('Activating layers:', props.layers);
-    activateLayers(map.current, layers, props.layers);
+    // Do not activate background layers
+    // Get background layers from components/Map/MapUtils/backgroundLayerManager.js
+    const backgroundLayers = getAvailableLayers();
+    const layersToActivate = props.layers.filter(layer => !Object.values(backgroundLayers).some(backgroundLayer => backgroundLayer.layerId === layer));
+
+    activateLayers(map.current, layers, layersToActivate);
   }, [
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)
@@ -535,7 +542,7 @@ const MapComponent = (props): JSX.Element => {
       value.forEach((img, idx) => {
         map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
       });
-      console.log('Added provider images for:', aanbieder.system_id);
+      // console.log('Added provider images for:', aanbieder.system_id);
     };
     providers.forEach(aanbieder => {
       addProviderImage(aanbieder);

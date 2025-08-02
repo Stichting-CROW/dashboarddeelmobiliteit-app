@@ -3,7 +3,7 @@ import { sources } from '../sources.js';
 import { layers } from '../layers/index.js';
 
 // Debug flag to control console.log messages
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Background Layer Manager
