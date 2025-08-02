@@ -221,7 +221,7 @@ const MapComponent = (props): JSX.Element => {
 
         setDidMapLoad(true)
 
-        // addSources(map.current);
+        addSources(map.current);
         addLayers(map.current);
 
         setDidInitSourcesAndLayers(true);
@@ -363,6 +363,7 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
+    console.log('Activating layers:', props.layers);
     activateLayers(map.current, layers, props.layers);
   }, [
     didInitSourcesAndLayers,
@@ -372,16 +373,24 @@ const MapComponent = (props): JSX.Element => {
   // Set vehicles sources
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    if(! vehicles.data || vehicles.data.length <= 0) return;
+    if(! vehicles.data || !vehicles.data.features || vehicles.data.features.length <= 0) return;
     if(! map.current) return;
     if(! map.current.U) return;
 
+    console.log('Setting vehicles data:', vehicles.data.features.length, 'features');
+    
     try {
       if(map.current.getSource('vehicles')) {
         map.current.U.setData('vehicles', vehicles.data);
+        console.log('Successfully set vehicles data');
+      } else {
+        console.warn('vehicles source not found');
       }
       if(map.current.getSource('vehicles-clusters')) {
         map.current.U.setData('vehicles-clusters', vehicles.data);
+        console.log('Successfully set vehicles-clusters data');
+      } else {
+        console.warn('vehicles-clusters source not found');
       }
     } catch (error) {
       console.warn('Failed to set vehicles data:', error);
@@ -526,6 +535,7 @@ const MapComponent = (props): JSX.Element => {
       value.forEach((img, idx) => {
         map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
       });
+      console.log('Added provider images for:', aanbieder.system_id);
     };
     providers.forEach(aanbieder => {
       addProviderImage(aanbieder);
