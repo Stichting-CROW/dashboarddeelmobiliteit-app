@@ -327,7 +327,6 @@ function App() {
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
-    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -347,7 +346,6 @@ function App() {
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
-    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
