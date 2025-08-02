@@ -11,11 +11,8 @@ const DdRentalsLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    console.log('DdRentalsLayer useEffect');
-    const defaultLayerName = 'base';
-    
     // Use the new hook for cleaner background layer management
-    setLayer(defaultLayerName);
+    setLayer('base');
   }, [
     map,
     map?.U,

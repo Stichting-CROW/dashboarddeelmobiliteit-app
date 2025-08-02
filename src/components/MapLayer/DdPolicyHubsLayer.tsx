@@ -39,16 +39,15 @@ import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
 import PolicyHubsStats from '../PolicyHubsStats/PolicyHubsStats';
 import ActionModule from '../ActionModule/ActionModule';
 import PolicyHubsCommit from '../PolicyHubsEdit/PolicyHubsCommit';
-import { setBackgroundLayer } from '../Map/MapUtils/map';
 import { DrawedAreaType } from '../../types/DrawedAreaType';
 import { update_url } from '../../helpers/policy-hubs/update-url';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { canEditHubs } from '../../helpers/authentication';
-import { setMapStyle } from '../../actions/layers';
 import PolicyHubsActionBar from "../PolicyHubsActionBar/PolicyHubsActionBar";
 import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
+import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 
 let TO_fetch_delay;
 
@@ -56,6 +55,7 @@ const DdPolicyHubsLayer = ({
   map
 }): JSX.Element => {
   const dispatch = useDispatch()
+  const { setLayer } = useBackgroundLayer(map);
   
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
@@ -201,13 +201,13 @@ const DdPolicyHubsLayer = ({
     if(! map) return;
     if(! map.U) return;
 
-    setBackgroundLayer(map, 'luchtfoto-pdok', () => {
-      dispatch(setMapStyle('luchtfoto-pdok'))
-    });
+    // Use the new hook for cleaner background layer management
+    setLayer('satellite');
   }, [
     map,
     map?.U,
-    document.location.pathname
+    document.location.pathname,
+    setLayer
   ]);
 
   // Load state based on query params

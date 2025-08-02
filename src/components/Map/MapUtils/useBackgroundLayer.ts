@@ -1,25 +1,26 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import maplibregl from 'maplibre-gl';
 import { setBackgroundLayer, getAvailableBackgroundLayers } from './backgroundLayerManager';
 import { setMapStyle } from '../../../actions/layers';
 
 /**
  * React hook for managing background layers
  * 
- * @param {Object} map - The map instance
- * @returns {Object} - Background layer management functions
+ * @param map - The map instance
+ * @returns Background layer management functions
  */
-export const useBackgroundLayer = (map) => {
+export const useBackgroundLayer = (map: maplibregl.Map | null) => {
   const dispatch = useDispatch();
 
   /**
    * Set the background layer
    * 
-   * @param {string} layerName - Name of the background layer to set
-   * @param {Function} onSuccess - Optional success callback
-   * @param {Function} onError - Optional error callback
+   * @param layerName - Name of the background layer to set
+   * @param onSuccess - Optional success callback
+   * @param onError - Optional error callback
    */
-  const setLayer = useCallback((layerName, onSuccess = null, onError = null) => {
+  const setLayer = useCallback((layerName: string, onSuccess: ((layerName: string) => void) | null = null, onError: ((error: string) => void) | null = null) => {
     if (!map) {
       const error = 'Map instance is required';
       console.error(error);
@@ -30,7 +31,7 @@ export const useBackgroundLayer = (map) => {
     setBackgroundLayer(
       map,
       layerName,
-      (layerName) => {
+      (layerName: string) => {
         // Update Redux state
         dispatch(setMapStyle(layerName));
         
@@ -39,7 +40,7 @@ export const useBackgroundLayer = (map) => {
           onSuccess(layerName);
         }
       },
-      (error) => {
+      (error: string) => {
         console.error('Failed to set background layer:', error);
         if (onError) {
           onError(error);

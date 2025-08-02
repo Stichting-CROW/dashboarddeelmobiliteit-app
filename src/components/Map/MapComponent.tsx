@@ -48,6 +48,7 @@ import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
+import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -102,7 +103,11 @@ const MapComponent = (props): JSX.Element => {
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   const [activeLayers, setActiveLayers] = useState([]);
+  const [didApplyMapStyle, setDidApplyMapStyle] = useState(false);
   let map = useRef(null);
+
+  // Use the background layer hook
+  const { setLayer } = useBackgroundLayer(map.current);
 
   const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
@@ -312,6 +317,47 @@ const MapComponent = (props): JSX.Element => {
     JSON.stringify(props.activeSources),
     mapStyle
   ])
+
+  // Apply active map style on first load
+  // This ensures that the map style stored in Redux state is automatically applied
+  // when the map first loads, providing a consistent user experience
+  useEffect(() => {
+    if(! didInitSourcesAndLayers) return;
+    if(! didMapLoad) return;
+    if(! map.current) return;
+    if(! map.current.isStyleLoaded()) return;
+    if(! mapStyle) return;
+    if(didApplyMapStyle) return; // Prevent applying multiple times
+
+    // Validate that the map style is a valid option
+    const validStyles = ['base', 'satellite'];
+    if(! validStyles.includes(mapStyle)) {
+      console.warn(`Invalid map style: ${mapStyle}, defaulting to 'base'`);
+      return;
+    }
+
+    // Apply the active map style using the hook
+    setLayer(mapStyle, 
+      (layerName) => {
+        console.log(`Applied map style on first load: ${layerName}`);
+        setDidApplyMapStyle(true);
+      },
+      (error) => {
+        console.warn('Failed to apply map style on first load:', error);
+      }
+    );
+  }, [
+    didInitSourcesAndLayers,
+    didMapLoad,
+    mapStyle,
+    setLayer,
+    didApplyMapStyle
+  ])
+
+  // Reset didApplyMapStyle when map style changes
+  useEffect(() => {
+    setDidApplyMapStyle(false);
+  }, [mapStyle]);
 
   // Set active layers
   useEffect(() => {
