@@ -2,6 +2,9 @@ import { getMapStyles } from './map.js';
 import { sources } from '../sources.js';
 import { layers } from '../layers/index.js';
 
+// Debug flag to control console.log messages
+const DEBUG = false;
+
 /**
  * Background Layer Manager
  * 
@@ -52,9 +55,11 @@ const checkForDuplicateLayers = (map, layerId) => {
   
   if (layersWithSameId.length > 1) {
     console.warn(`Found ${layersWithSameId.length} layers with ID: ${layerId}`);
-    layersWithSameId.forEach((layer, index) => {
-      console.log(`Layer ${index + 1}:`, layer);
-    });
+    if (DEBUG) {
+      layersWithSameId.forEach((layer, index) => {
+        console.log(`Layer ${index + 1}:`, layer);
+      });
+    }
   }
 };
 
@@ -88,7 +93,7 @@ const addBackgroundLayerToMap = (map, layerName) => {
     const sourceConfig = sources[sourceId];
     if (sourceConfig) {
       map.addSource(sourceId, sourceConfig);
-      console.log(`Added source: ${sourceId}`);
+      if (DEBUG) console.log(`Added source: ${sourceId}`);
     } else {
       console.warn(`Source config not found for: ${sourceId}`);
       return false;
@@ -109,7 +114,7 @@ const addBackgroundLayerToMap = (map, layerName) => {
       };
       
       map.addLayer(layerWithLayout);
-      console.log(`Added layer: ${layerId} with visibility: none`);
+      if (DEBUG) console.log(`Added layer: ${layerId} with visibility: none`);
     } else {
       console.warn(`Layer config not found for: ${layerId}`);
       return false;
@@ -128,7 +133,7 @@ const forceReaddLayer = (map, layerId) => {
     if (layerConfig) {
       // Remove the layer
       map.removeLayer(layerId);
-      console.log(`Removed layer: ${layerId}`);
+      if (DEBUG) console.log(`Removed layer: ${layerId}`);
       
       // Re-add with proper layout
       const layerWithLayout = {
@@ -140,7 +145,7 @@ const forceReaddLayer = (map, layerId) => {
       };
       
       map.addLayer(layerWithLayout);
-      console.log(`Re-added layer: ${layerId} with visibility: none`);
+      if (DEBUG) console.log(`Re-added layer: ${layerId} with visibility: none`);
       return true;
     }
   } catch (e) {
@@ -159,7 +164,7 @@ const showBackgroundLayer = (map, layerName) => {
     return false;
   }
 
-  console.log(`Setting background layer to: ${layerName}`);
+  if (DEBUG) console.log(`Setting background layer to: ${layerName}`);
 
   // Check for duplicate layers
   Object.keys(BACKGROUND_LAYERS).forEach(name => {
@@ -173,12 +178,12 @@ const showBackgroundLayer = (map, layerName) => {
   Object.keys(BACKGROUND_LAYERS).forEach(name => {
     const config = BACKGROUND_LAYERS[name];
     if (config.layerId && layerExists(map, config.layerId)) {
-      console.log(`Hiding layer: ${config.layerId}`);
+      if (DEBUG) console.log(`Hiding layer: ${config.layerId}`);
       
       // Try multiple methods to ensure the layer is hidden
       try {
         map.U.hide(config.layerId);
-        console.log(`Used map.U.hide for ${config.layerId}`);
+        if (DEBUG) console.log(`Used map.U.hide for ${config.layerId}`);
       } catch (e) {
         console.warn(`map.U.hide failed for ${config.layerId}:`, e);
       }
@@ -186,7 +191,7 @@ const showBackgroundLayer = (map, layerName) => {
       // Also set visibility to 'none' as a backup
       try {
         map.setLayoutProperty(config.layerId, 'visibility', 'none');
-        console.log(`Set visibility to 'none' for ${config.layerId}`);
+        if (DEBUG) console.log(`Set visibility to 'none' for ${config.layerId}`);
       } catch (e) {
         console.warn(`Could not set visibility for ${config.layerId}:`, e);
       }
@@ -195,9 +200,9 @@ const showBackgroundLayer = (map, layerName) => {
       try {
         const layer = map.getLayer(config.layerId);
         if (layer && layer.layout && layer.layout.visibility) {
-          console.log(`Layer ${config.layerId} visibility: ${layer.layout.visibility}`);
+          if (DEBUG) console.log(`Layer ${config.layerId} visibility: ${layer.layout.visibility}`);
         } else {
-          console.log(`Layer ${config.layerId} - no visibility property found, forcing re-add`);
+          if (DEBUG) console.log(`Layer ${config.layerId} - no visibility property found, forcing re-add`);
           // Force re-add the layer with proper visibility control
           forceReaddLayer(map, config.layerId);
         }
@@ -208,7 +213,7 @@ const showBackgroundLayer = (map, layerName) => {
       // Force a map repaint to ensure changes are applied
       try {
         map.triggerRepaint();
-        console.log(`Triggered repaint after hiding ${config.layerId}`);
+        if (DEBUG) console.log(`Triggered repaint after hiding ${config.layerId}`);
       } catch (e) {
         console.warn(`Could not trigger repaint:`, e);
       }
@@ -218,17 +223,17 @@ const showBackgroundLayer = (map, layerName) => {
   // Show the requested layer
   if (layerName === 'base') {
     // For base layer, we just hide the satellite layer (already done above)
-    console.log('Base layer selected - satellite should be hidden');
+    if (DEBUG) console.log('Base layer selected - satellite should be hidden');
   } else {
     // Show the specific background layer
     const { layerId } = layerConfig;
     if (layerId && layerExists(map, layerId)) {
-      console.log(`Showing layer: ${layerId}`);
+      if (DEBUG) console.log(`Showing layer: ${layerId}`);
       
       // Try multiple methods to ensure the layer is shown
       try {
         map.U.show(layerId);
-        console.log(`Used map.U.show for ${layerId}`);
+        if (DEBUG) console.log(`Used map.U.show for ${layerId}`);
       } catch (e) {
         console.warn(`map.U.show failed for ${layerId}:`, e);
       }
@@ -236,7 +241,7 @@ const showBackgroundLayer = (map, layerName) => {
       // Also set visibility to 'visible' as a backup
       try {
         map.setLayoutProperty(layerId, 'visibility', 'visible');
-        console.log(`Set visibility to 'visible' for ${layerId}`);
+        if (DEBUG) console.log(`Set visibility to 'visible' for ${layerId}`);
       } catch (e) {
         console.warn(`Could not set visibility for ${layerId}:`, e);
       }
@@ -245,7 +250,7 @@ const showBackgroundLayer = (map, layerName) => {
       try {
         const layer = map.getLayer(layerId);
         if (layer && layer.layout && layer.layout.visibility) {
-          console.log(`Layer ${layerId} visibility: ${layer.layout.visibility}`);
+          if (DEBUG) console.log(`Layer ${layerId} visibility: ${layer.layout.visibility}`);
         }
       } catch (e) {
         console.warn(`Could not check layer visibility for ${layerId}:`, e);
@@ -280,7 +285,7 @@ export const setBackgroundLayer = (map, layerName, onSuccess = null, onError = n
 
   // Check if map style is loaded
   if (!map.isStyleLoaded()) {
-    console.log('Map style not loaded, waiting for style to load...');
+    if (DEBUG) console.log('Map style not loaded, waiting for style to load...');
     const checkStyleLoaded = () => {
       if (map && map.isStyleLoaded()) {
         setBackgroundLayer(map, layerName, onSuccess, onError);
@@ -307,7 +312,7 @@ export const setBackgroundLayer = (map, layerName, onSuccess = null, onError = n
       return;
     }
 
-    console.log(`Background layer set to: ${layerName}`);
+    if (DEBUG) console.log(`Background layer set to: ${layerName}`);
     
     // Execute success callback
     if (onSuccess) {
