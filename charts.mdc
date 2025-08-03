@@ -1,0 +1,435 @@
+# Charts Documentation
+
+## Overview
+
+This document provides comprehensive documentation for all charts in the Dashboard Deelmobiliteit application, including their data sources, API endpoints, data flow, and implementation details.
+
+## Chart Components
+
+### 1. VerhuringenChart (Rental Statistics Chart)
+
+**Location**: `src/components/Chart/VerhuringenChart.tsx`
+
+**Purpose**: Displays rental/usage statistics over time with aggregation by different time intervals.
+
+**Data Source**:
+- **Primary API**: `/dashboard-api/aggregated_stats/rentals` or `/dashboard-api/stats_v2/rental_stats`
+- **Function**: `getAggregatedRentalsData()` → `getAggregatedStats()` or `getAggregatedStats_timescaleDB()`
+- **Data Type**: Rental statistics aggregated by time intervals
+- **Response Structure**: 
+  ```typescript
+  {
+    rental_stats: {
+      values: Array<{
+        time: string,
+        [provider]: number,
+        ...
+      }>
+    },
+    rentals_aggregated_stats: {
+      values: Array<{
+        start_interval: string,
+        [provider]: number,
+        ...
+      }>
+    }
+  }
+  ```
+
+**Filters**:
+- Date range (`filter.ontwikkelingvan`, `filter.ontwikkelingtot`)
+- Zones (`filter.zones`)
+- Operators (`filter.aanbiedersexclude`)
+- Aggregation level (`filter.ontwikkelingaggregatie`)
+- Aggregation function (`filter.ontwikkelingaggregatie_function`)
+
+**Chart Type**: 
+- Area chart (if >24 points and not 5m/15m/hour aggregation)
+- Bar chart (otherwise)
+
+**Data Processing**:
+1. Fetch raw data via `getAggregatedRentalsData()`
+2. Transform via `getAggregatedRentalsChartData()`
+3. Format dates via `getDateFormat()`
+4. Apply provider colors via `getProviderColor()`
+
+---
+
+### 2. BeschikbareVoertuigenChart (Available Vehicles Chart)
+
+**Location**: `src/components/Chart/BeschikbareVoertuigenChart.tsx`
+
+**Purpose**: Shows vehicle availability statistics over time.
+
+**Data Source**:
+- **Primary API**: `/dashboard-api/aggregated_stats/available_vehicles` or `/dashboard-api/stats_v2/availability_stats`
+- **Function**: `getAggregatedVehicleData()` → `getAggregatedStats()` or `getAggregatedStats_timescaleDB()`
+- **Data Type**: Vehicle availability statistics aggregated by time intervals
+- **Response Structure**:
+  ```typescript
+  {
+    availability_stats: {
+      values: Array<{
+        time: string,
+        [provider]: number,
+        ...
+      }>
+    },
+    available_vehicles_aggregated_stats: {
+      values: Array<{
+        start_interval: string,
+        [provider]: number,
+        ...
+      }>
+    }
+  }
+  ```
+
+**Filters**: Same as VerhuringenChart
+
+**Chart Type**: 
+- Area chart (if >24 points and not 5m/15m/hour aggregation)
+- Bar chart (otherwise)
+
+**Data Processing**:
+1. Fetch raw data via `getAggregatedVehicleData()`
+2. Transform via `getAggregatedChartData()`
+3. Format dates via `getDateFormat()`
+4. Apply provider colors via `getProviderColor()`
+
+---
+
+### 3. ParkeerduurChart (Parking Duration Chart)
+
+**Location**: `src/components/Chart/ParkeerduurChart.jsx`
+
+**Purpose**: Displays parking duration statistics (uses rental data as proxy).
+
+**Data Source**:
+- **Primary API**: `/dashboard-api/aggregated_stats/rentals`
+- **Function**: `getAggregatedStats()` directly
+- **Data Type**: Rental statistics (used as proxy for parking duration)
+- **Response Structure**: Same as VerhuringenChart
+
+**Filters**: Same as VerhuringenChart
+
+**Chart Type**: 
+- Area chart (if >12 points)
+- Bar chart (otherwise)
+
+**Data Processing**:
+1. Fetch raw data via `getAggregatedStats()`
+2. Transform via `prepareAggregatedStatsData()`
+3. Apply provider colors via `getProviderColor()`
+
+---
+
+### 4. EditLimitsDialog (Permit Limits History Chart)
+
+**Location**: `src/components/Permits/EditLimitsDialog.tsx`
+
+**Purpose**: Shows historical permit limit changes for specific municipality/provider/vehicle type combinations.
+
+**Data Source**:
+- **Primary API**: `https://mds.dashboarddeelmobiliteit.nl/public/permit_limit_history`
+- **Function**: `getPermitLimitHistory()`
+- **Data Type**: Historical permit limit changes
+- **Response Structure**:
+  ```typescript
+  Array<{
+    permit_limit_id?: number,
+    effective_date: string,
+    municipality: string,
+    system_id: string,
+    modality: string,
+    minimum_vehicles: number,
+    maximum_vehicles: number,
+    max_parking_duration: string
+  }>
+  ```
+
+**Parameters**:
+- `municipality`: Municipality code
+- `provider_system_id`: Provider system ID
+- `vehicle_type`: Vehicle type (modality)
+
+**Chart Type**: Line chart with multiple Y-axes
+
+**Data Processing**:
+1. Fetch historical data via `getPermitLimitHistory()`
+2. Sort by effective date
+3. Transform to chart format with date formatting
+4. Handle inactive values (null for chart display)
+
+---
+
+### 5. ActiveUserStats (Active User Statistics)
+
+**Location**: `src/components/ActiveUserStats/ActiveUserStats.tsx`
+
+**Purpose**: Shows active user statistics by user type.
+
+**Data Source**:
+- **Status**: **HARDCODED MOCK DATA** - No real API integration
+- **Data**: Static array with sample user statistics
+- **Current Structure**:
+  ```typescript
+  Array<{
+    date: string,
+    admin: number,
+    municipality: number,
+    operator: number
+  }>
+  ```
+
+**Chart Type**: Bar chart with stacked bars
+
+**Data Processing**: None - uses static mock data
+
+---
+
+## Data Flow Architecture
+
+### Primary Data Sources
+
+#### 1. Main Dashboard API
+**Base URL**: `process.env.REACT_APP_MAIN_API_URL`
+
+**Endpoints**:
+- `/dashboard-api/aggregated_stats/{key}` - Legacy aggregated stats
+- `/dashboard-api/stats_v2/{key}` - New TimescaleDB stats
+
+**Supported Keys**:
+- `rentals` - Rental statistics
+- `available_vehicles` - Vehicle availability
+
+#### 2. MDS (Mobility Data Service)
+**Base URL**: `https://mds.dashboarddeelmobiliteit.nl`
+
+**Endpoints**:
+- `/public/permit_limit_history` - Permit limits history
+- `/public/permit_limit_overview` - Permit limits overview
+- `/public/service_area/history` - Service areas history
+
+### Data Processing Pipeline
+
+#### 1. Raw API Data
+```typescript
+// Fetch raw data from API
+const rawData = await getAggregatedStats(token, key, options);
+```
+
+#### 2. Data Transformation
+```typescript
+// Transform to chart-ready format
+const chartData = prepareAggregatedStatsData(key, rawData, aggregationLevel);
+```
+
+#### 3. Chart Data Preparation
+```typescript
+// Apply additional processing for specific charts
+const finalData = getAggregatedChartData(vehiclesData, filter, zones, aanbieders);
+```
+
+#### 4. Date Formatting
+```typescript
+// Format dates for display
+const formattedData = data.map(x => ({
+  ...x,
+  time: moment(x.time).format(getDateFormat(aggregationLevel))
+}));
+```
+
+#### 5. Provider Filtering
+```typescript
+// Filter active operators and apply colors
+const filteredData = keepActiveOperators(dataset, aanbieders);
+```
+
+### Key Dependencies
+
+#### Authentication
+- **Token**: Required for all API calls
+- **ACL**: Access Control List for admin features
+- **User Permissions**: Determines available data and features
+
+#### Filter State
+- **Date Range**: `filter.ontwikkelingvan`, `filter.ontwikkelingtot`
+- **Zones**: `filter.zones`
+- **Operators**: `filter.aanbiedersexclude`
+- **Aggregation**: `filter.ontwikkelingaggregatie`, `filter.ontwikkelingaggregatie_function`
+
+#### Metadata
+- **Zones**: Available geographical zones
+- **Providers**: Available service providers
+- **Vehicle Types**: Available vehicle modalities
+
+### Aggregation Levels
+
+| Level | Description | Format |
+|-------|-------------|---------|
+| `5m` | 5-minute intervals | `DD/MM HH:mm` |
+| `15m` | 15-minute intervals | `DD/MM HH:mm` |
+| `hour` | Hourly intervals | `DD/MM HH:ss` |
+| `day` | Daily intervals | `dd DD MMM YYYY` |
+| `week` | Weekly intervals | `[w]W, YYYY` |
+| `month` | Monthly intervals | `MMM YYYY` |
+
+## Implementation Details
+
+### Chart Rendering Logic
+
+#### Area vs Bar Chart Selection
+```typescript
+// VerhuringenChart & BeschikbareVoertuigenChart
+if(numberOfPointsOnXAxis > 24 && 
+   filter.ontwikkelingaggregatie !== '15m' && 
+   filter.ontwikkelingaggregatie !== '5m' && 
+   filter.ontwikkelingaggregatie !== 'hour') {
+  return <AreaChart>...</AreaChart>
+} else {
+  return <BarChart>...</BarChart>
+}
+
+// ParkeerduurChart
+if(numberOfPointsOnXAxis > 12) {
+  return <AreaChart>...</AreaChart>
+} else {
+  return <BarChart>...</BarChart>
+}
+```
+
+#### Custom Components
+- **CustomizedXAxisTick**: Custom X-axis tick rendering
+- **CustomizedYAxisTick**: Custom Y-axis tick rendering  
+- **CustomizedTooltip**: Custom tooltip rendering
+
+### Error Handling
+
+#### API Error Handling
+```typescript
+// Check for valid response
+if(!aggregatedData || (!aggregatedData.rental_stats && !aggregatedData.rentals_aggregated_stats)) {
+  return; // No data available
+}
+```
+
+#### Data Validation
+```typescript
+// Validate data object
+if(!data || !data[`${key}_aggregated_stats`] || !data[`${key}_aggregated_stats`].values) {
+  return [];
+}
+```
+
+## Missing/Incomplete Features
+
+### 1. ActiveUserStats
+**Issue**: Uses hardcoded mock data
+**Solution Needed**: Real API integration for user statistics
+
+### 2. Cross-Organization Data
+**Issue**: Limited to single organization views
+**Solution Needed**: API endpoints supporting multi-organization queries
+
+### 3. Vehicle Type Aggregation
+**Issue**: No dedicated API endpoint for vehicle type aggregated data
+**Solution Needed**: New API endpoint for vehicle type statistics
+
+## Future Enhancements
+
+### 1. Real-Time Data
+- WebSocket integration for live chart updates
+- Real-time user activity tracking
+
+### 2. Advanced Filtering
+- Cross-organization data views
+- Multi-provider comparisons
+- Custom date range selections
+
+### 3. Enhanced Visualizations
+- Interactive drill-down capabilities
+- Export functionality for chart data
+- Custom chart configurations
+
+### 4. Performance Optimizations
+- Data caching strategies
+- Lazy loading for large datasets
+- Optimized re-rendering
+
+## API Documentation
+
+### Aggregated Stats API
+```typescript
+interface AggregatedStatsOptions {
+  filter: FilterState;
+  metadata: MetadataState;
+  aggregationLevel: string;
+  aggregationTime: string;
+  aggregationFunction?: string;
+}
+
+interface AggregatedStatsResponse {
+  [key: string]: {
+    values: Array<{
+      time?: string;
+      start_interval?: string;
+      [provider: string]: number;
+    }>;
+  };
+}
+```
+
+### Permit Limits API
+```typescript
+interface PermitLimitData {
+  permit_limit_id?: number;
+  effective_date: string;
+  municipality: string;
+  system_id: string;
+  modality: string;
+  minimum_vehicles: number;
+  maximum_vehicles: number;
+  max_parking_duration: string;
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No Data Displayed**
+   - Check authentication token
+   - Verify filter parameters
+   - Ensure zones are loaded
+
+2. **Chart Not Updating**
+   - Check useEffect dependencies
+   - Verify API response format
+   - Check data transformation logic
+
+3. **Performance Issues**
+   - Reduce data points for large datasets
+   - Implement data caching
+   - Optimize re-rendering logic
+
+### Debug Tools
+
+1. **API Response Logging**
+   ```typescript
+   console.log('API Response:', responseJson);
+   ```
+
+2. **Data Transformation Logging**
+   ```typescript
+   console.log('Chart Data:', chartData);
+   ```
+
+3. **Filter State Logging**
+   ```typescript
+   console.log('Filter State:', filter);
+   ```
+description:
+globs:
+alwaysApply: false
+---

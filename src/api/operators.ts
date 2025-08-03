@@ -3,7 +3,7 @@ export interface OperatorData {
     system_id: string,
     name: string,
     color: string,
-    operator_url: string
+    operator_url?: string
 }
 
 export const fetchOperators = async (): Promise<OperatorData[] | false> => {

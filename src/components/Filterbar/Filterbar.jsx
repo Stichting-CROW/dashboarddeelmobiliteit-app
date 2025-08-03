@@ -24,10 +24,11 @@ import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
+import FilterbarPermits from './FilterbarPermits';
 import FilterbarStart from './FilterbarStart';
 
 // Import API functions
-import {postZone} from '../../api/zones';
+// import {postZone} from '../../api/zones';
 
 import {
   DISPLAYMODE_PARK,
@@ -37,6 +38,7 @@ import {
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
+  DISPLAYMODE_PERMITS,
   DISPLAYMODE_OTHER
 } from '../../reducers/layers.js';
 
@@ -69,6 +71,7 @@ function Filterbar({
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
   const isStart=displayMode===DISPLAYMODE_START;
+  const isVergunningseisen=displayMode===DISPLAYMODE_PERMITS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -156,12 +159,21 @@ function Filterbar({
         />
     }
 
+    {/* Vergunningseisen */
+      (isVergunningseisen) && 
+        <FilterbarPermits 
+          hideLogo={hideLogo}
+          displayMode={displayMode}
+          visible={visible}
+        />
+    }
     {/* Default: */
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
       && ! isPolicyHubs
       && ! is_hb_view
       && ! isrentals
+      && ! isVergunningseisen
       && ! isStart
     ) &&
       <div className="filter-bar-inner py-2">
