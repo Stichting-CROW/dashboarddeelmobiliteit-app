@@ -50,7 +50,6 @@ import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
-import { useDataLayer } from './MapUtils/useDataLayer';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -110,7 +109,6 @@ const MapComponent = (props): JSX.Element => {
 
   // Initialize hooks after map is declared
   const { getAvailableLayers } = useBackgroundLayer(map.current);
-  const { setLayer: setDataLayer, getAvailableLayers: getAvailableDataLayers } = useDataLayer(map.current);
 
   // Use the background layer hook
   const { setLayer } = useBackgroundLayer(map.current);
@@ -365,50 +363,10 @@ const MapComponent = (props): JSX.Element => {
     setDidApplyMapStyle(false);
   }, [mapStyle]);
 
-  // Data layer management
-  useEffect(() => {
-    if (!didInitSourcesAndLayers) return;
-    if (!didMapLoad) return;
-    if (!map.current) return;
-    if (!map.current.isStyleLoaded()) return;
+  // Data layer management is now handled by MapPage based on active_data_layers
+  // The layers are passed via props.layers and activated by the existing activateLayers logic
 
-    // Get current display mode and active data layers from Redux
-    const activeDataLayers = stateLayers.active_data_layers?.[displayMode] || [];
-    
-    // Get available data layers for current display mode
-    const availableDataLayers = getAvailableDataLayers(displayMode);
-    
-    // Get all available layer names for this display mode
-    const allLayerNames = Object.keys(availableDataLayers);
-    
-    // Hide all data layers first, then show only the active ones
-    allLayerNames.forEach(layerName => {
-      const layerConfig = availableDataLayers[layerName];
-      if (layerConfig && layerConfig.layerId) {
-        try {
-          map.current.U.hide(layerConfig.layerId);
-        } catch (e) {
-          // Layer might not exist yet, ignore error
-        }
-      }
-    });
-    
-    // Show only the active data layers
-    activeDataLayers.forEach(layerName => {
-      if (availableDataLayers[layerName]) {
-        setDataLayer(layerName, displayMode);
-      }
-    });
-  }, [
-    didInitSourcesAndLayers,
-    didMapLoad,
-    displayMode,
-    stateLayers.active_data_layers,
-    setDataLayer,
-    getAvailableDataLayers
-  ]);
-
-  // Set active layers
+  // Set active layers (now handled by MapPage based on active_data_layers)
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
