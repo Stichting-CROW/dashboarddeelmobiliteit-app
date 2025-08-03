@@ -1,0 +1,211 @@
+/* Shared styles for permit components */
+
+.permits-page-title {
+  @apply text-4xl font-bold mb-8 flex items-center gap-4;
+}
+
+.permits-loading-state {
+  @apply text-gray-600;
+}
+
+.permits-error-state {
+  @apply text-red-600;
+}
+
+.permits-empty-state {
+  @apply text-gray-600;
+}
+
+.permits-container {
+  @apply w-full max-w-full;
+}
+
+.permits-modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40;
+}
+
+.permits-modal-content {
+  @apply bg-white rounded-lg shadow-lg p-8 relative w-full max-w-2xl;
+} 
+
+.permits-vehicle-type-header-img {
+    @apply w-12 h-12 object-contain mb-2;
+}
+
+.permits-vehicle-type-header-text {
+    @apply text-sm font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden;
+}
+
+.permits-add-button {
+  @apply p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full;
+}
+
+/* Dialog styles */
+.permits-dialog-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40;
+}
+
+.permits-dialog-content {
+  @apply bg-white rounded-lg shadow-lg p-8 relative w-full max-w-xl;
+}
+
+.permits-dialog-header {
+  @apply text-lg font-semibold mb-4 flex items-center justify-between;
+}
+
+.permits-dialog-close-button {
+  @apply text-gray-500 hover:text-gray-700;
+}
+
+.permits-dialog-grid {
+  @apply flex flex-wrap gap-4 mb-6;
+}
+
+.permits-dialog-empty-state {
+  @apply text-gray-500;
+}
+
+.permits-dialog-button {
+  @apply w-32 h-32 flex flex-col items-center justify-center p-4 border rounded shadow hover:bg-gray-100 focus:outline-none;
+}
+
+.permits-dialog-button-text {
+  @apply font-medium text-center break-words;
+}
+
+.permits-dialog-cancel-button {
+  @apply mt-2 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300;
+}
+
+/* Card styles */
+.permits-card {
+  @apply bg-gray-50 rounded-lg shadow-md p-4 w-48 h-auto relative border border-gray-400;
+}
+
+.permits-card-edit-button {
+  @apply absolute top-1 right-1 p-1 bg-transparent hover:bg-gray-100 rounded-full;
+}
+
+.permits-card-content {
+  @apply flex flex-col items-center mb-3;
+}
+
+.permits-card-logo {
+  @apply w-9 h-9 object-contain;
+}
+
+.permits-card-fallback {
+  @apply w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center;
+}
+
+.permits-card-fallback-text {
+  @apply text-gray-500 text-xs;
+}
+
+.permits-card-label {
+  @apply text-xs font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden;
+}
+
+/* Collection styles */
+.permits-collection-row {
+  @apply mb-8 w-full;
+}
+
+.permits-collection-row-content {
+  @apply flex items-center gap-6 w-full min-w-0;
+}
+
+.permits-collection-header {
+  @apply bg-transparent p-0 w-24 min-w-24 h-auto flex flex-col justify-center flex-shrink-0;
+}
+
+.permits-collection-header-content {
+  @apply flex flex-col items-center;
+}
+
+.permits-collection-cards {
+  @apply flex-1 overflow-x-auto;
+}
+
+.permits-collection-cards-content {
+  @apply flex gap-6 min-w-max px-4 pb-4;
+}
+
+/* Form styles */
+.permits-form-row {
+  @apply flex flex-row items-center gap-3;
+}
+
+.permits-form-label {
+  @apply w-56 text-sm text-gray-700;
+}
+
+.permits-form-input {
+  @apply border rounded px-2 py-1 w-32;
+}
+
+.permits-form-checkbox-label {
+  @apply flex items-center gap-1 ml-2 text-xs text-gray-600;
+}
+
+.permits-form-message {
+  @apply ml-2 text-xs text-gray-400;
+}
+
+.permits-form-actions {
+  @apply flex justify-end gap-2 mt-4;
+}
+
+.permits-form-cancel-button {
+  @apply px-4 py-2 rounded bg-gray-200 hover:bg-gray-300;
+}
+
+.permits-form-save-button {
+  @apply px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700;
+}
+
+
+
+/* Table styles */
+.permits-table-container {
+  @apply overflow-x-auto w-full;
+}
+
+.permits-table {
+  @apply min-w-full text-xs border border-gray-200;
+}
+
+.permits-table-header {
+  @apply bg-gray-100;
+}
+
+.permits-table-header-cell {
+  @apply px-2 py-1 border;
+}
+
+.permits-table-row {
+  @apply border-b hover:bg-gray-50;
+}
+
+
+
+.permits-table-cell {
+  @apply px-2 py-1 border;
+}
+
+.permits-table-cell-center {
+  @apply px-2 py-1 border text-center;
+}
+
+.permits-table-cell-nowrap {
+  @apply px-2 py-1 border whitespace-nowrap;
+}
+
+.permits-table-action-button {
+  @apply inline-block align-middle mr-1 p-1 hover:bg-gray-200 rounded;
+}
+
+.permits-table-delete-button {
+  @apply inline-block align-middle p-1 hover:bg-gray-200 rounded;
+}
+

@@ -16,6 +16,7 @@ import {StateType} from './types/StateType';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage.tsx';
 import StartPage from './pages/StartPage';
+import VergunningEisenPage from './pages/dashboard/VergunningEisenPage';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
@@ -69,6 +70,7 @@ import {
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
+  DISPLAYMODE_PERMITS,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -172,6 +174,8 @@ function App() {
     let payload;
     if(pathName.includes("/start")||pathName==='/') {
       payload=DISPLAYMODE_START;
+    } else if(pathName.includes("/dashboard/vergunningseisen")) {
+      payload=DISPLAYMODE_PERMITS;
     } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
@@ -483,6 +487,12 @@ function App() {
             <Route exact path="/start" element={<>
               <ContentPage>
                 <StartPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
+            <Route exact path="/dashboard/vergunningseisen" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
             </>} />

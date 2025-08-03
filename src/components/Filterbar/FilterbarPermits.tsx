@@ -1,8 +1,5 @@
-import React, {
-  useEffect,
-  useState,
-} from 'react';
-import './css/FilterbarStart.css';
+import React from 'react';
+import './css/FilterbarPermits.css';
 
 import {useSelector} from 'react-redux';
 import { Link } from "react-router-dom";
@@ -13,23 +10,23 @@ import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
-import { OrganisationType } from '@/src/types/OrganisationType';
-import { getOwnOrganisation } from '../../api/organisations';
+// import { OrganisationType } from '@/src/types/OrganisationType';
+// import { getOwnOrganisation } from '../../api/organisations';
 
-interface FilterbarStartProps {
+interface FilterbarPermitsProps {
   hideLogo: boolean;
   hideDatumTijd: boolean;
 }
 
-function FilterbarStart({
+function FilterbarPermits({
   hideLogo,
   hideDatumTijd = true,
-}: FilterbarStartProps) {
-  const [organisation, setOrganisation] = useState<OrganisationType | false | undefined>(undefined);
+}: FilterbarPermitsProps) {
+  // const [organisation, setOrganisation] = useState<OrganisationType | false | undefined>(undefined);
 
-  const token = useSelector((state: StateType) => {
-    return state.authentication.token;
-  });
+  // const token = useSelector((state: StateType) => {
+  //   return state.authentication.token;
+  // });
 
   // useEffect(() => {
   //   const fetchOrganisation = async () => {
@@ -49,7 +46,7 @@ function FilterbarStart({
   // });
 
 
-  const hidePlaats = true; // gebieden.length <= 1;
+  const hidePlaats = gebieden.length <= 1;
 
   return (
     <div className="filter-bar-inner py-2">
@@ -70,4 +67,4 @@ function FilterbarStart({
   )
 }
 
-export default FilterbarStart;
+export default FilterbarPermits;

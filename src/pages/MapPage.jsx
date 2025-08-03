@@ -16,6 +16,7 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
+  DISPLAYMODE_PERMITS,
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
@@ -95,6 +96,8 @@ function Map({mode, mapContainer}) {
         layers.push(`rentals-${rentalsKey}-point`);
         activeSources.push(`rentals-${rentalsKey}`);
         break;
+      default:
+        break;
     }
   }
   // Active layers for zones page
@@ -107,10 +110,14 @@ function Map({mode, mapContainer}) {
     // Nothing to add specifically
   }
 
+  const showSelectLayer = displayMode !== DISPLAYMODE_START && displayMode !== DISPLAYMODE_PERMITS;
+
+  const showMap = displayMode !== DISPLAYMODE_PERMITS;
+
   return (
     <div className="flex flex-col">
       <div className="hidden sm:block">
-        {(displayMode !== DISPLAYMODE_START) && <SelectLayer />}
+        {showSelectLayer && <SelectLayer />}
         {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <MetaStats />}
         {(displayMode === DISPLAYMODE_ZONES_PUBLIC) && <HubStatsWidget />}
       </div>

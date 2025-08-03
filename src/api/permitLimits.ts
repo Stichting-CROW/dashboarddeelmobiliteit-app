@@ -1,5 +1,36 @@
 const MDS_BASE_URL = 'https://mds.dashboarddeelmobiliteit.nl';
-
+export interface PermitMunicipality {
+    gmcode: string;
+    name: string;
+}
+export interface PermitOperator {
+    system_id: string;
+    name: string;
+    color: string;
+    operator_url: string;
+}
+export interface PermitStats {
+    number_of_vehicles_in_public_space: number;
+    number_of_vehicles_in_public_space_parked_to_long: number;
+}
+export interface PermitLimit {
+    permit_limit_id: number;
+    modality: string;
+    effective_date: string;
+    municipality: string;
+    system_id: string;
+    end_date?: string;
+    minimum_vehicles: number;
+    maximum_vehicles: number;
+    minimal_number_of_trips_per_vehicle: number;
+    max_parking_duration: string;
+    future_permit?: PermitLimit;
+}
+export interface PermitVehicleType {
+    id: string;
+    name: string;
+    icon: string;
+}
 export interface PermitLimitData {
     permit_limit_id?: number; // only for update
     effective_date: string;
@@ -10,16 +41,14 @@ export interface PermitLimitData {
     minimum_vehicles: number;
     maximum_vehicles: number;
     minimal_number_of_trips_per_vehicle: number;
-    max_parking_duration: string;
+    max_parking_duration?: string;
 }
-export interface PermitRecord {
-    permit_limit: PermitLimitData;
-    stats: {
-        current_vehicle_count: number;
-        number_of_vehicles_illegally_parked_last_month: number;
-        duration_correct_percentage: number;
-        number_of_rentals_per_vehicle: number;
-    }
+export interface PermitLimitRecord {
+    municipality: PermitMunicipality;
+    operator: PermitOperator;
+    vehicle_type?: PermitVehicleType; /* not yet available via the API now, filled in by the frontend */
+    permit_limit?: PermitLimit;
+    stats?: PermitStats;
 }
 
 // Helper: get 'niet actief' value for each field
@@ -55,7 +84,7 @@ export const getPermitLimitOverviewForMunicipality = async (
             return null;
         }
 
-        const results = await response.json() as PermitRecord[];
+        const results = await response.json() as PermitLimitRecord[];
         if(results.length > 0) {
             // const message = `**** Found ${results.length} permit limits for [${municipality}]`;
             // console.log(message, results);
@@ -73,9 +102,9 @@ export const getPermitLimitOverviewForMunicipality = async (
 
 export const getPermitLimitOverviewForOperator = async (
     token: string, 
-    operator: string) => {
+    system_id: string) => {
     try {
-        const params = new URLSearchParams({operator}).toString();
+        const params = new URLSearchParams({system_id}).toString();
         const url = `${MDS_BASE_URL}/public/permit_limit_overview?${params}`;
         const response = await fetch(url, {
             method: 'GET',
@@ -85,24 +114,25 @@ export const getPermitLimitOverviewForOperator = async (
         });
 
         if(response.status === 500) {
-            const message = `No permit limit found (status: ${response.status}) for [${operator}]`;
+            const message = `No permit limit found (status: ${response.status}) for [${system_id}]`;
             console.warn(message);
             return null;
         }
 
         if(response.status !== 200 && response.status !== 500) {
-            const message = `Error fetching permit limit overview (status: ${response.status}/${response.statusText}) for [${operator}]`;
+            const message = `Error fetching permit limit overview (status: ${response.status}/${response.statusText}) for [${system_id}]`;
             console.error(message);
             return null;
         }
 
-        const results = await response.json() as PermitRecord[];
+        const results = await response.json() as PermitLimitRecord[];
+        
         if(results.length > 0) {
-            // const message = `**** Found ${results.length} permit limits for [${operator}]`;
+            // const message = `**** Found ${results.length} permit limits for [${system_id}]`;
             // console.log(message, results);
             return results;
         } else {
-            // const message = `**** Found no ${results.length} permit limits for [${operator}]`;
+            // const message = `**** Found no ${results.length} permit limits for [${system_id}]`;
             // console.log(message, results);
             return null // no permit limit found
         }

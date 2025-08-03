@@ -245,7 +245,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       </div>
       {/* Date controls row, aligned as a form row */}
       <div className="flex flex-row items-end gap-3 mb-2">
-        <label className="w-56 text-sm text-gray-700">Ingangsdatum</label>
+        <label className="permits-form-label">Ingangsdatum</label>
         <div className="flex flex-row items-end gap-4">
           <input
             id="start-date"
@@ -259,48 +259,48 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       </div>
       {/* Other fields: label, input, and actief checkbox on a single line, left aligned */}
       <div className="flex flex-col gap-2 mb-2">
-        <div className="flex flex-row items-center gap-3">
-          <label htmlFor="min-capacity" className="w-56 text-sm text-gray-700">Minimum capaciteit</label>
+        <div className="permits-form-row">
+          <label htmlFor="min-capacity" className="permits-form-label">Minimum capaciteit</label>
           <input
             id="min-capacity"
             type="number"
-            className="border rounded px-2 py-1 w-32"
+            className="permits-form-input"
             value={minimumVehiculesActive ? minimumVehicules : ''}
             min={0}
             onChange={e => setMinimumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
             disabled={!minimumVehiculesActive}
             readOnly={!minimumVehiculesActive}
           />
-          <label className="flex items-center gap-1 ml-2 text-xs text-gray-600">
+          <label className="permits-form-checkbox-label">
             <input type="checkbox" checked={minimumVehiculesActive} onChange={e => setMinimumVehiculesActive(e.target.checked)} />
             actief
           </label>
-          <span className="ml-2 text-xs text-gray-400">{minCapacityMessage}</span>
+          <span className="permits-form-message">{minCapacityMessage}</span>
         </div>
-        <div className="flex flex-row items-center gap-3">
-          <label htmlFor="max-capacity" className="w-56 text-sm text-gray-700">Maximum capaciteit</label>
+        <div className="permits-form-row">
+          <label htmlFor="max-capacity" className="permits-form-label">Maximum capaciteit</label>
           <input
             id="max-capacity"
             type="number"
-            className="border rounded px-2 py-1 w-32"
+            className="permits-form-input"
             value={maximumVehiculesActive ? maximumVehicules : ''}
             min={0}
             onChange={e => setMaximumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
             disabled={!maximumVehiculesActive}
             readOnly={!maximumVehiculesActive}
           />
-          <label className="flex items-center gap-1 ml-2 text-xs text-gray-600">
+          <label className="permits-form-checkbox-label">
             <input type="checkbox" checked={maximumVehiculesActive} onChange={e => setMaximumVehiculesActive(e.target.checked)} />
             actief
           </label>
-          <span className="ml-2 text-xs text-gray-400">{maxCapacityMessage}</span>
+          <span className="permits-form-message">{maxCapacityMessage}</span>
         </div>
-        <div className="flex flex-row items-center gap-3">
-          <label htmlFor="min-pct-duration" className="w-56 text-sm text-gray-700">Maximale parkeerduur (dagen)</label>
+        <div className="permits-form-row">
+          <label htmlFor="min-pct-duration" className="permits-form-label">Maximale parkeerduur (dagen)</label>
           <input
             id="min-pct-duration"
             type="number"
-            className="border rounded px-2 py-1 w-32"
+            className="permits-form-input"
             value={maxParkingDurationActive ? maxParkingDuration : ''}
             min={0}
             max={100}
@@ -308,18 +308,18 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
             disabled={!maxParkingDurationActive}
             readOnly={!maxParkingDurationActive}
           />
-          <label className="flex items-center gap-1 ml-2 text-xs text-gray-600">
+          <label className="permits-form-checkbox-label">
             <input type="checkbox" checked={maxParkingDurationActive} onChange={e => setMaxParkingDurationActive(e.target.checked)} />
             actief
           </label>
-          <span className="ml-2 text-xs text-gray-400">{maxParkingDurationMessage}</span>
+          <span className="permits-form-message">{maxParkingDurationMessage}</span>
         </div>
-        <div className="flex flex-row items-center gap-3">
-          <label htmlFor="min-pct-rides" className="w-56 text-sm text-gray-700">Min. percentage ritten per voertuig correct</label>
+        <div className="permits-form-row">
+          <label htmlFor="min-pct-rides" className="permits-form-label">Min. percentage ritten per voertuig correct</label>
           <input
             id="min-pct-rides"
             type="number"
-            className="border rounded px-2 py-1 w-32"
+            className="permits-form-input"
             value={minimalNumberOfTripsPerVehicleActive ? minimalNumberOfTripsPerVehicle : ''}
             min={0}
             max={100}
@@ -327,16 +327,16 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
             disabled={!minimalNumberOfTripsPerVehicleActive}
             readOnly={!minimalNumberOfTripsPerVehicleActive}
           />
-          <label className="flex items-center gap-1 ml-2 text-xs text-gray-600">
+          <label className="permits-form-checkbox-label">
             <input type="checkbox" checked={minimalNumberOfTripsPerVehicleActive} onChange={e => setMinimalNumberOfTripsPerVehicleActive(e.target.checked)} />
             actief
           </label>
-          <span className="ml-2 text-xs text-gray-400">{minNumberOfTripsPerVehicleMessage}</span>
+          <span className="permits-form-message">{minNumberOfTripsPerVehicleMessage}</span>
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={onCancel}>Afbreken</button>
-        <button className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 ${isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`} onClick={handleOk} disabled={!isValid}>Opslaan</button>
+      <div className="permits-form-actions">
+        <button className="permits-form-cancel-button" onClick={onCancel}>Afbreken</button>
+        <button className={`permits-form-save-button ${isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`} onClick={handleOk} disabled={!isValid}>Opslaan</button>
       </div>
     </>
   );
@@ -365,52 +365,63 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       max_parking_duration_days: (rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? null : isoDurationToDays(rec.max_parking_duration),
       minimal_number_of_trips_per_vehicle: rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? null : rec.minimal_number_of_trips_per_vehicle,
     }));
+
+
+    
     return (
       <>
-        <div className="overflow-x-auto w-full" style={sortedHistory.length > 10 ? { maxHeight: 320, overflowY: 'auto' } : {}}>
-          <table className="min-w-full text-xs border border-gray-200">
+        <div className="permits-table-container" style={sortedHistory.length > 10 ? { maxHeight: 320, overflowY: 'auto' } : {}}>
+          <table className="permits-table">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="px-2 py-1 border">Ingangsdatum</th>
-                <th className="px-2 py-1 border">Minimum</th>
-                <th className="px-2 py-1 border">Maximum</th>
-                <th className="px-2 py-1 border">Max. parkeerduur</th>
-                <th className="px-2 py-1 border">Min. % ritten</th>
-                <th className="px-2 py-1 border">Acties</th>
+              <tr className="permits-table-header">
+                <th className="permits-table-header-cell">Ingangsdatum</th>
+                <th className="permits-table-header-cell">Minimum</th>
+                <th className="permits-table-header-cell">Maximum</th>
+                <th className="permits-table-header-cell">Max. parkeerduur</th>
+                <th className="permits-table-header-cell">Min. % ritten</th>
+                <th className="permits-table-header-cell">Acties</th>
               </tr>
             </thead>
             <tbody>
               {sortedHistory.length > 0 ? sortedHistory.map((rec) => { 
                 const allowChange = mode==='admin' || (moment(rec.effective_date).isAfter(moment().startOf('day')));
+
+                const data1 = rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : rec.minimum_vehicles.toString()
+                const data2 = rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : rec.maximum_vehicles
+                // Note: max_parking_duration is undefined for new records, so we need to check for that
+                const data3 = (rec.max_parking_duration === undefined || rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? 'niet actief' : rec.max_parking_duration.replace('P','').replace('D',' dagen')
+                const data4 = rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : rec.minimal_number_of_trips_per_vehicle
+
                 return (
-                <tr
-                  key={rec.permit_limit_id || rec.effective_date}
-                  ref={el => { rowRefs.current[moment(rec.effective_date).format('YYYY-MM-DD')] = el; }}
-                  className={`border-b hover:bg-gray-50${highlightedDate === moment(rec.effective_date).format('YYYY-MM-DD') ? ' bg-blue-100' : ''}`}
-                  onMouseEnter={() => setHoveredTableDate(moment(rec.effective_date).format('YYYY-MM-DD'))}
-                  onMouseLeave={() => setHoveredTableDate(null)}
-                >
-                  <td className="px-2 py-1 border whitespace-nowrap">{moment(rec.effective_date).format('L')}</td>
-                  <td className="px-2 py-1 border text-center">{rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : rec.minimum_vehicles}</td>
-                  <td className="px-2 py-1 border text-center">{rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : rec.maximum_vehicles}</td>
-                  <td className="px-2 py-1 border text-center">{(rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? 'niet actief' : rec.max_parking_duration.replace('P','').replace('D',' dagen')}</td>
-                  <td className="px-2 py-1 border text-center">{rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : rec.minimal_number_of_trips_per_vehicle}</td>
-                  <td className="px-2 py-1 border text-center">
-                    { allowChange && <button title="Aanpassen" className="inline-block align-middle mr-1 p-1 hover:bg-gray-200 rounded" onClick={() => handleEditRecord(rec.effective_date)}>
-                      {/* Pencil SVG */}
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M14.85 2.85a2.121 2.121 0 0 1 3 3l-9.193 9.193a2 2 0 0 1-.708.464l-3.5 1.25a.5.5 0 0 1-.637-.637l1.25-3.5a2 2 0 0 1 .464-.708L14.85 2.85zm2.12.88a1.121 1.121 0 0 0-1.586 0l-1.293 1.293 1.586 1.586 1.293-1.293a1.121 1.121 0 0 0 0-1.586zm-2.293 2.293l-8.5 8.5-.75 2.1 2.1-.75 8.5-8.5-1.85-1.85z" fill="#666"/></svg>
-                    </button>}
-                    { allowChange && <button title="Verwijderen" className="inline-block align-middle p-1 hover:bg-gray-200 rounded" onClick={() => rec.permit_limit_id && handleDeleteRecord(rec.permit_limit_id)} disabled={deletingId === rec.permit_limit_id}>
-                      {/* Trash SVG */}
-                      {deletingId === rec.permit_limit_id ? (
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline animate-spin" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="#888" strokeWidth="2" fill="none"/></svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M7 8v6m3-6v6m3-8V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1M4 6h12m-1 0v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      )}
-                    </button>}
-                  </td>
-                </tr>
-              )}) : (
+                  <tr
+                    key={rec.permit_limit_id || rec.effective_date}
+                    ref={el => { rowRefs.current[moment(rec.effective_date).format('YYYY-MM-DD')] = el; }}
+                    className={`permits-table-row${highlightedDate === moment(rec.effective_date).format('YYYY-MM-DD') ? ' bg-blue-100' : ''}`}
+                    onMouseEnter={() => setHoveredTableDate(moment(rec.effective_date).format('YYYY-MM-DD'))}
+                    onMouseLeave={() => setHoveredTableDate(null)}
+                  >
+                    <td className="permits-table-cell-nowrap">{moment(rec.effective_date).format('L')}</td>
+                    <td className="permits-table-cell-center">{data1}</td>
+                    <td className="permits-table-cell-center">{data2}</td>
+                    <td className="permits-table-cell-center">{data3}</td>
+                    <td className="permits-table-cell-center">{data4}</td>
+                    <td className="permits-table-cell-center">
+                      { allowChange && <button title="Aanpassen" className="permits-table-action-button" onClick={() => handleEditRecord(rec.effective_date)}>
+                        {/* Pencil SVG */}
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M14.85 2.85a2.121 2.121 0 0 1 3 3l-9.193 9.193a2 2 0 0 1-.708.464l-3.5 1.25a.5.5 0 0 1-.637-.637l1.25-3.5a2 2 0 0 1 .464-.708L14.85 2.85zm2.12.88a1.121 1.121 0 0 0-1.586 0l-1.293 1.293 1.586 1.586 1.293-1.293a1.121 1.121 0 0 0 0-1.586zm-2.293 2.293l-8.5 8.5-.75 2.1 2.1-.75 8.5-8.5-1.85-1.85z" fill="#666"/></svg>
+                      </button>}
+                      { allowChange && <button title="Verwijderen" className="permits-table-delete-button" onClick={() => rec.permit_limit_id && handleDeleteRecord(rec.permit_limit_id)} disabled={deletingId === rec.permit_limit_id}>
+                        {/* Trash SVG */}
+                        {deletingId === rec.permit_limit_id ? (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline animate-spin" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="#888" strokeWidth="2" fill="none"/></svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M7 8v6m3-6v6m3-8V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1M4 6h12m-1 0v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        )}
+                      </button>}
+                    </td>
+                  </tr>
+                );
+              }) : (
                 <tr><td colSpan={6} className="text-center text-gray-400 py-4">Geen historische limieten gevonden</td></tr>
               )}
             </tbody>

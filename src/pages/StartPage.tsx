@@ -1,12 +1,10 @@
 import React from 'react'; // , {useEffect, useState }
 import './StartPage.css'
 
-import Permits from '../components/Permits/Permits';
-
-import {
-  useDispatch,
-  // useSelector
-} from 'react-redux';
+// import {
+//   useDispatch,
+//   // useSelector
+// } from 'react-redux';
 
 // import moment from 'moment';
 
@@ -191,11 +189,8 @@ function StartPage(props) {
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
 
-  console.log('*** render startpage', new Date())
-
   return (
     <div className="StartPage pt-4 pb-24">
-      <Permits />
     </div>
   )
 }
