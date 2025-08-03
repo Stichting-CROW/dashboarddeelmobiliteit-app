@@ -13,6 +13,7 @@
   width: 80px;
   height: 80px;
   border: 1px solid #343E47;
+  border-bottom-width: 2px;
   border-radius: 10px;
   opacity: 1;
   background: #fff center center no-repeat;
@@ -70,7 +71,8 @@
   justify-content: center;
 }
 
-.layer-inactive {
+.SelectLayer .layer-inactive {
+  border-bottom-width: 1px;
   opacity: 0.6;
   filter: grayscale(100%);
 }
