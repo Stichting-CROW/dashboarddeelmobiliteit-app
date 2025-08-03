@@ -55,11 +55,20 @@ export default function PermitsCard({ label, logo, permit, onEditLimits }: Permi
           </div>
         </div>
 
-        <RangeBarIndicator title="Aantal Voertuigen" current={permit.stats?.number_of_vehicles_in_public_space} min={permit.permit_limit.minimum_vehicles} max={permit.permit_limit.maximum_vehicles} />
+        <RangeBarIndicator 
+          title="Aantal Voertuigen" 
+          current={permit.stats?.number_of_vehicles_in_public_space} 
+          min={permit.permit_limit.minimum_vehicles} 
+          max={permit.permit_limit.maximum_vehicles} 
+          explanation="Deze balk toont of het aantal voertuigen binnen de vergunningseis ligt"
+          onClick={()=>alert('Toon hier een detailgrafiek voor aantal voertuigen')} 
+          />
         <RangeBarIndicator 
           title="Aantal te lang geparkeerd" 
           current={permit.stats?.number_of_vehicles_in_public_space_parked_to_long} 
           max={0} 
+          explanation="Deze balk toont of het aantal voertuigen buiten de vergunningseis ligt"
+          onClick={()=>alert('Toon hier een detailgrafiek voor aantal te lang geparkeerd')} 
         />
         {/* <RangeBarIndicator 
           title="Gem. Aantal Verhuringen" 

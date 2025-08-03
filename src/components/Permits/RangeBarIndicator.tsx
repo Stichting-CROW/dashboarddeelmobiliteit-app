@@ -6,6 +6,8 @@ interface RangeBarIndicatorProps {
   current: number | undefined;
   min?: number;
   max?: number;
+  explanation?: string;
+  onClick?: () => void;
 }
 
 export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
@@ -13,6 +15,8 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
   current,
   min,
   max,
+  explanation,
+  onClick,
 }) => {
     const titleFontSize = '0.7em';
     const titleFontWeight = 700;
@@ -21,6 +25,12 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
     const barWidth = 160; // Reduced from 180 to fit smaller cards
     const barHeight = 10; // Reduced from 12 to match smaller scale
 
+    // Handle click event
+    const handleClick = () => {
+      if (onClick) {
+        onClick();
+      }
+    };
 
    // Check if min/max are "not active" values
    const isMinActive = min !== undefined && min !== PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles;
@@ -44,7 +54,19 @@ export const RangeBarIndicator: React.FC<RangeBarIndicatorProps> = ({
     // console.log(`${title} - min: ${minPercent} / max: ${maxPercent} / current: ${valuePercent} / isMinActive: ${isMinActive} / isMaxActive: ${isMaxActive} / dynamicMax: ${dynamicMax} / isInRange: ${isInRange}`);
 
     return (
-      <div style={{ width: barWidth + 20, margin: '0 auto', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' }}>
+      <div 
+        style={{ 
+          width: barWidth + 20, 
+          margin: '0 auto', 
+          fontFamily: 'sans-serif', 
+          display: 'flex', 
+          flexDirection: 'column',
+          cursor: onClick ? 'pointer' : 'default',
+          position: 'relative'
+        }}
+        onClick={handleClick}
+        title={explanation}
+      >
         <div style={{ fontWeight: titleFontWeight, fontSize: titleFontSize, color: '#19213D', marginBottom: 2 }}>{title} ({current?current:' - '})</div>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
           <div style={{ position: 'relative', width: barWidth, height: barHeight, background: '#E5E6EB', borderRadius: 1, overflow: 'hidden', marginBottom: 2, display: 'flex', alignItems: 'center' }}>
