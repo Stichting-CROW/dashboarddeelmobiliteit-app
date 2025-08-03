@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { StateType } from "@/src/types/StateType";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
+import { useDataLayer } from '../Map/MapUtils/useDataLayer';
 import { setMapStyle } from '../../actions/layers';
 
 import {
@@ -21,11 +22,20 @@ import {
 const SelectLayerModal = () => {
   const dispatch = useDispatch();
   const { setLayer } = useBackgroundLayer(window['ddMap']);
+  const { setSingleLayer: setDataLayer, getAvailableLayers } = useDataLayer(window['ddMap']);
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
+  const activeDataLayers = useSelector((state: StateType) => {
+    return state.layers?.active_data_layers || {
+      'displaymode-park': [DISPLAYMODE_PARKEERDATA_VOERTUIGEN],
+      'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_VOERTUIGEN]
+    };
+  });
+
+  // For backward compatibility, keep the old selectors
   const viewPark = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
   });
@@ -45,6 +55,34 @@ const SelectLayerModal = () => {
   const zonesVisible = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
   });
+
+  // Helper functions to check if a data layer is active
+  const isParkLayerActive = (layerName: string) => {
+    if (!activeDataLayers || typeof activeDataLayers !== 'object') {
+      return false;
+    }
+    const parkLayers = activeDataLayers['displaymode-park'] || [];
+    return Array.isArray(parkLayers) && parkLayers.includes(layerName);
+  };
+
+  const isRentalsLayerActive = (layerName: string) => {
+    if (!activeDataLayers || typeof activeDataLayers !== 'object') {
+      return false;
+    }
+    const rentalsLayers = activeDataLayers['displaymode-rentals'] || [];
+    return Array.isArray(rentalsLayers) && rentalsLayers.includes(layerName);
+  };
+
+  // Function to set only one data layer as active (radio button behavior)
+  const setSingleDataLayer = (layerName: string, displayMode: string) => {
+    // Set only the clicked layer as active
+    setDataLayer(layerName, displayMode);
+  };
+
+  // Don't render until we have proper state
+  if (!activeDataLayers || typeof activeDataLayers !== 'object') {
+    return <div className="SelectLayer">Loading...</div>;
+  }
 
   return <>
     <div className="SelectLayer">
@@ -92,8 +130,8 @@ const SelectLayerModal = () => {
       {displayMode===DISPLAYMODE_PARK &&
         <div
           data-type="heat-map"
-          className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_HEATMAP ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_HEATMAP }) }}
+          className={`layer${!isParkLayerActive(DISPLAYMODE_PARKEERDATA_HEATMAP) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_PARKEERDATA_HEATMAP, displayMode) }}
         >
         <span className="layer-title">
           Heat map
@@ -101,48 +139,48 @@ const SelectLayerModal = () => {
       </div>}
 
       { displayMode===DISPLAYMODE_PARK ?
-        <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
+        <div data-type="pointers" className={`layer${!isParkLayerActive(DISPLAYMODE_PARKEERDATA_CLUSTERS) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_PARKEERDATA_CLUSTERS, displayMode) }}>
           <span className="layer-title">
             Clusters
           </span>
         </div> : null }
 
       { displayMode===DISPLAYMODE_PARK ?
-        <div data-type="vehicles"  className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
+        <div data-type="vehicles"  className={`layer${!isParkLayerActive(DISPLAYMODE_PARKEERDATA_VOERTUIGEN) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_PARKEERDATA_VOERTUIGEN, displayMode) }}>
           <span className="layer-title">
             Voertuigen
           </span>
         </div> : null }
 
       { (displayMode===DISPLAYMODE_RENTALS) ?
-        <div data-type="od" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HB ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB }) }}>
+        <div data-type="od" className={`layer${!isRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_VERHUURDATA_HB, displayMode) }}>
           <span className="layer-title">
             HB
           </span>
         </div>: null }
 
       { displayMode===DISPLAYMODE_RENTALS ?
-        <div data-type="heat-map" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_HEATMAP ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HEATMAP }) }}>
+        <div data-type="heat-map" className={`layer${!isRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HEATMAP) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_VERHUURDATA_HEATMAP, displayMode) }}>
           <span className="layer-title">
             Heat map
           </span>
         </div>: null }
 
       { displayMode===DISPLAYMODE_RENTALS ?
-        <div data-type="pointers" className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_CLUSTERS ? ' layer-inactive':''}`}
-          onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_CLUSTERS }) }}>
+        <div data-type="pointers" className={`layer${!isRentalsLayerActive(DISPLAYMODE_VERHUURDATA_CLUSTERS) ? ' layer-inactive':''}`}
+          onClick={() => { setSingleDataLayer(DISPLAYMODE_VERHUURDATA_CLUSTERS, displayMode) }}>
           <span className="layer-title">
             Clusters
           </span>
         </div> : null }
 
       { displayMode===DISPLAYMODE_RENTALS ?
-      <div data-type="vehicles"  className={`layer${viewRentals!==DISPLAYMODE_VERHUURDATA_VOERTUIGEN ? ' layer-inactive':''}`}
-        onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_VOERTUIGEN }) }}>
+      <div data-type="vehicles"  className={`layer${!isRentalsLayerActive(DISPLAYMODE_VERHUURDATA_VOERTUIGEN) ? ' layer-inactive':''}`}
+        onClick={() => { setSingleDataLayer(DISPLAYMODE_VERHUURDATA_VOERTUIGEN, displayMode) }}>
         <span className="layer-title">
           Voertuigen
         </span>
