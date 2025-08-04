@@ -83,6 +83,7 @@ const DdServiceAreasLayer = ({
     if(! map.U) return;
 
     // Only set to 'base' if the current map style is not already 'base'
+    // and only on initial load, not when map style changes
     if (stateLayers.map_style !== 'base') {
       const defaultLayerName = 'base';
       setBackgroundLayer(map, defaultLayerName, () => {
@@ -92,8 +93,8 @@ const DdServiceAreasLayer = ({
   }, [
     map,
     map?.U,
-    document.location.pathname,
-    stateLayers.map_style
+    document.location.pathname
+    // Removed stateLayers.map_style from dependencies to prevent reverting when user changes background layer
   ]);
 
   // Load 'delta' if version_id or visible_operators changes
