@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import './ActionButtons.css';
-import { StateType } from '@/src/types/StateType';
+import { StateType } from '../../types/StateType';
 
 export const ActionButtons = ({
     children

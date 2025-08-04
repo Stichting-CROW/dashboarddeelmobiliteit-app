@@ -3,15 +3,13 @@ import './VergunningEisenPage.css'
 import PermitsMunicipalityView from '../../components/Permits/PermitsMunicipalityView';
 import PermitsOperatorView from '../../components/Permits/PermitsOperatorView';
 import { useSelector } from 'react-redux';
-import { StateType } from '@/src/types/StateType';
+import { StateType } from '../../types/StateType';
 
 interface VergunningEisenPageProps {
 
 }
 
 function VergunningEisenPage(props: VergunningEisenPageProps) {
-  console.log('***Render VergunningEisenPage');
-  
   const activeorganisation = useSelector((state: StateType) => state.filter.gebied);
 
   // Get query parameters from URL

@@ -28,7 +28,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
         setAvailableOperators(operators);
       }
     });
-  });
+  }, []); // Add empty dependency array to run only once
 
   // Helper to reload permits
   const reloadPermits = useCallback(async () => {
@@ -73,7 +73,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     } finally {
       setLoading(false);
     }
-  }, [token, filterValue, viewType]);
+  }, [token, filterValue, viewType]); // These dependencies are correct
 
   useEffect(() => {
     reloadPermits();

@@ -20,7 +20,7 @@ import {
 import {StateType} from '../../../types/StateType.js';
 import { setBackgroundLayer } from '../../Map/MapUtils/map';
 import { setMapStyle } from '../../../actions/layers';
-import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
+import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 

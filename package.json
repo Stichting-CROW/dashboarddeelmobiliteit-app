@@ -1,6 +1,6 @@
 {
   "name": "dashboarddeelmobiliteit-app",
-  "homepage": "https://dashboarddeelmobiliteit.nl/",
+  "homepage": "https://test.dashboarddeelmobiliteit.nl/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -70,10 +70,10 @@
     "zod": "^3.22.4"
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.1.0"
   },
   "engines": {
-    "node": "18"
+    "node": "v18.18.2"
   },
   "scripts": {
     "build:style": "tailwind build -i src/styles/index.css -o src/styles/tailwind.css",
