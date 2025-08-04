@@ -10,8 +10,6 @@ import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
-// import { OrganisationType } from '@/src/types/OrganisationType';
-// import { getOwnOrganisation } from '../../api/organisations';
 
 interface FilterbarPermitsProps {
   hideLogo: boolean;

@@ -8,7 +8,7 @@ import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
-import { StateType } from '@/src/types/StateType';
+import { StateType } from '../../types/StateType';
 import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
 import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept';

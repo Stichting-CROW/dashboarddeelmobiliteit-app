@@ -24,7 +24,7 @@ import {
 
 import moment from 'moment';
 
-import { ServiceAreaDelta } from '@/src/types/ServiceAreaDelta';
+import { ServiceAreaDelta } from '../../types/ServiceAreaDelta';
 
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
