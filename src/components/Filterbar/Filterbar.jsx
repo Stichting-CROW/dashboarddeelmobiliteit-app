@@ -16,6 +16,7 @@ import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
+import { isRentalsLayerActive, selectActiveDataLayers } from '../../helpers/layerSelectors';
 
 import {StateType} from '../../types/StateType';
 
@@ -39,7 +40,8 @@ import {
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
   DISPLAYMODE_PERMITS,
-  DISPLAYMODE_OTHER
+  DISPLAYMODE_OTHER,
+  DISPLAYMODE_VERHUURDATA_HB
 } from '../../reducers/layers.js';
 
 function Filterbar({
@@ -47,6 +49,7 @@ function Filterbar({
   visible,
   hideLogo
 }) {
+  const activeDataLayers = useSelector(selectActiveDataLayers);
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -63,6 +66,10 @@ function Filterbar({
   const viewRentals = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_rentals : null;
   });
+
+  const checkRentalsLayerActive = (layerName) => {
+    return isRentalsLayerActive(activeDataLayers, layerName);
+  };
 
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
@@ -81,7 +88,8 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  // const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  const is_hb_view=checkRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB);
 
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null

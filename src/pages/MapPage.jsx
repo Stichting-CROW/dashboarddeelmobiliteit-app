@@ -20,6 +20,7 @@ import {
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
+import { selectActiveDataLayers } from '../helpers/layerSelectors';
 
 
 import './MapPage.css';
@@ -37,12 +38,7 @@ function Map({mode, mapContainer}) {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
 
-  const activeDataLayers = useSelector((state: StateType) => {
-    return state.layers?.active_data_layers || {
-      'displaymode-park': [DISPLAYMODE_PARKEERDATA_VOERTUIGEN],
-      'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_VOERTUIGEN]
-    };
-  });
+  const activeDataLayers = useSelector(selectActiveDataLayers);
 
   // For backward compatibility, keep the old selectors
   const viewPark = useSelector((state: StateType) => {
