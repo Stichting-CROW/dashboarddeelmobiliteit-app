@@ -488,7 +488,7 @@ function App() {
 
             <Route exact path="/start" element={<>
               <ContentPage>
-                <StartPage />
+                <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
             </>} />
