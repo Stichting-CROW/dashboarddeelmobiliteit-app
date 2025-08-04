@@ -150,7 +150,7 @@ function Filterbar({
     }
 
     {/* Verhuringen */
-    (isrentals) &&
+    (isrentals && ! is_hb_view) &&
       <FilterbarRentals
         hideLogo={hideLogo}
         displayMode={displayMode}
@@ -256,7 +256,8 @@ function Filterbar({
     <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
         2025-08-04
-      </a>
+      </a><br />
+        - Betere laagselectie
     </div>
   </>
 }
