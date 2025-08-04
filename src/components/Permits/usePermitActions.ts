@@ -106,7 +106,7 @@ export const usePermitActions = (reloadPermits: () => Promise<void>) => {
     } else {
       setMode('normal');
     }
-  }, [acl]);
+  }, [acl?.is_admin, acl?.privileges]); // More specific dependencies
 
   return {
     // States

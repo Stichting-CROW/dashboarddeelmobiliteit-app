@@ -19,8 +19,6 @@ interface PermitsMunicipalityViewProps {
 }
 
 const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityViewProps) => {
-  console.log('***Render PermitsMunicipalityView');
-  
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
 
   // Use the generic data hook
@@ -46,7 +44,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   // Update mode when permits change
   useEffect(() => {
     updateMode();
-  }, [permits, updateMode]);
+  }, [permits]); // Remove updateMode from dependencies to prevent infinite loop
 
   if ((activeorganisation === "")) {
     return (

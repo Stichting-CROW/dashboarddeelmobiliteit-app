@@ -10,8 +10,6 @@ interface VergunningEisenPageProps {
 }
 
 function VergunningEisenPage(props: VergunningEisenPageProps) {
-  console.log('***Render VergunningEisenPage');
-  
   const activeorganisation = useSelector((state: StateType) => state.filter.gebied);
 
   // Get query parameters from URL
