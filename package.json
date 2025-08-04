@@ -73,7 +73,7 @@
     "react-error-overlay": "6.0.9"
   },
   "engines": {
-    "node": "18"
+    "node": "18.18.2"
   },
   "scripts": {
     "build:style": "tailwind build -i src/styles/index.css -o src/styles/tailwind.css",
