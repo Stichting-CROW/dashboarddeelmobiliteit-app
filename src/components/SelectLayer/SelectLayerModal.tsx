@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { StateType } from "@/src/types/StateType";
+import { StateType } from "../../types/StateType";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 import { useDataLayer } from '../Map/MapUtils/useDataLayer';
 import { setMapStyle } from '../../actions/layers';

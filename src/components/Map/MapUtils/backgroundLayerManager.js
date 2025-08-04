@@ -113,8 +113,29 @@ const addBackgroundLayerToMap = (map, layerName) => {
         }
       };
       
-      map.addLayer(layerWithLayout);
-      if (DEBUG) console.log(`Added layer: ${layerId} with visibility: none`);
+      // For background layers, we need to add them at the correct position
+      if (layerConfig['is-background-layer'] === true) {
+        // Find the correct insertion point for background layers
+        const style = map.getStyle();
+        let beforeId = null;
+        for (let i = 0; i < style.layers.length; i++) {
+          const layer = style.layers[i];
+          // Insert after basic map layers like 'land', 'water', 'building', etc.
+          // but before labels and other overlay layers
+          if (layer.id === 'building' || layer.id === 'road-simple' || layer.id === 'bridge-simple') {
+            beforeId = style.layers[i + 1]?.id || null;
+            break;
+          }
+        }
+        
+        // Add layer with beforeId to position it correctly
+        map.addLayer(layerWithLayout, beforeId);
+        if (DEBUG) console.log(`Added background layer: ${layerId} before: ${beforeId}`);
+      } else {
+        // For non-background layers, add at the end (on top)
+        map.addLayer(layerWithLayout);
+        if (DEBUG) console.log(`Added layer: ${layerId} with visibility: none`);
+      }
     } else {
       console.warn(`Layer config not found for: ${layerId}`);
       return false;
@@ -144,8 +165,29 @@ const forceReaddLayer = (map, layerId) => {
         }
       };
       
-      map.addLayer(layerWithLayout);
-      if (DEBUG) console.log(`Re-added layer: ${layerId} with visibility: none`);
+      // For background layers, we need to add them at the correct position
+      if (layerConfig['is-background-layer'] === true) {
+        // Find the correct insertion point for background layers
+        const style = map.getStyle();
+        let beforeId = null;
+        for (let i = 0; i < style.layers.length; i++) {
+          const layer = style.layers[i];
+          // Insert after basic map layers like 'land', 'water', 'building', etc.
+          // but before labels and other overlay layers
+          if (layer.id === 'building' || layer.id === 'road-simple' || layer.id === 'bridge-simple') {
+            beforeId = style.layers[i + 1]?.id || null;
+            break;
+          }
+        }
+        
+        // Add layer with beforeId to position it correctly
+        map.addLayer(layerWithLayout, beforeId);
+        if (DEBUG) console.log(`Re-added background layer: ${layerId} before: ${beforeId}`);
+      } else {
+        // For non-background layers, add at the end (on top)
+        map.addLayer(layerWithLayout);
+        if (DEBUG) console.log(`Re-added layer: ${layerId} with visibility: none`);
+      }
       return true;
     }
   } catch (e) {

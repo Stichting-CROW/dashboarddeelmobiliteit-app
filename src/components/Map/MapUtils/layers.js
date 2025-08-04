@@ -1,8 +1,27 @@
 import {layers} from '../layers';
 
 export const addLayers = (map) => {
-  Object.keys(layers).forEach((key, idx) => {
-    map.U.addLayer(layers[key]);
+  // Separate background layers from data layers
+  const backgroundLayers = [];
+  const dataLayers = [];
+  
+  Object.keys(layers).forEach((key) => {
+    const layerConfig = layers[key];
+    if (layerConfig['is-background-layer'] === true) {
+      backgroundLayers.push({ key, config: layerConfig });
+    } else {
+      dataLayers.push({ key, config: layerConfig });
+    }
+  });
+
+  // Add background layers first (they should be at the bottom)
+  backgroundLayers.forEach(({ key, config }) => {
+    map.U.addLayer(config);
+  });
+
+  // Add data layers after (they should be on top)
+  dataLayers.forEach(({ key, config }) => {
+    map.U.addLayer(config);
   });
 }
 
