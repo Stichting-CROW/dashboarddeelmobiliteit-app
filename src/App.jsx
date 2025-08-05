@@ -686,7 +686,9 @@ function App() {
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+      {/* {pathName !== '/stats/overview' && <MapPage mapContainer={mapContainer} />} */}
       <MapPage mapContainer={mapContainer} />
+
       <Menu acl={acl} pathName={pathName} />
 
      </div>
