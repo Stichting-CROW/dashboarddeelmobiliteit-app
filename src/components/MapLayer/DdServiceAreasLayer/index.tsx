@@ -23,6 +23,7 @@ import { setMapStyle } from '../../../actions/layers';
 import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
+import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
 
 import { Legend } from './Legend';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
@@ -30,6 +31,9 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 const DdServiceAreasLayer = ({
   map
 }): JSX.Element => {
+  const { setLayer } = useBackgroundLayer(map);
+  const hasInitialized = useRef(false);
+
   const [serviceAreas, setServiceAreas] = useState([]);
   const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
   const [serviceAreaDelta, setServiceAreaDelta] = useState<ServiceAreaDelta | null>(null);
@@ -41,6 +45,22 @@ const DdServiceAreasLayer = ({
   const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
+
+  // On component load: Set background layer to 'base layer' only on initial load
+  useEffect(() => {
+    if(! map) return;
+    if(! map.U) return;
+    if(hasInitialized.current) return; // Only run once
+
+    // Set to 'base' on initial load
+    setLayer('base');
+    hasInitialized.current = true;
+  }, [
+    map,
+    map?.U,
+    setLayer
+  ]);
+
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
