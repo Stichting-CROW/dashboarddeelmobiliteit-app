@@ -362,7 +362,6 @@ function App() {
       <div className="block sm:hidden relative z-10">
         <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
-      <SelectLayerMobile />
     </div>
   }
 
