@@ -569,13 +569,14 @@ const MapComponent = (props): JSX.Element => {
   return <>
     {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map flex-1" />
-    {/* H3 layer */}
-    <DdH3HexagonLayer map={map.current} />
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
+    
     {stateLayers.displaymode === 'displaymode-rentals' && <DdRentalsLayer map={map.current} />}
+    {/* H3 layer */}{stateLayers.displaymode === 'displaymode-rentals' && <DdH3HexagonLayer map={map.current} />}
+    
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />

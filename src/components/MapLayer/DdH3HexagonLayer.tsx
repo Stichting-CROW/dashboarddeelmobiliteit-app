@@ -58,6 +58,13 @@ const DdH3HexagonLayer = ({
     return null;
   });
 
+  // On component unload: Remove H3 grid
+  useEffect(() => {
+    return () => {
+      removeH3Grid(map);
+    };
+  }, []);
+
   // If HB view: Show H3 grid, if not: Remove H3 grid
   useEffect(() => {
     // Stop if map didn't load
