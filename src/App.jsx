@@ -474,7 +474,12 @@ function App() {
                 } />
               </> : null
             }
-            <Route exact path="/" element={renderMapElements()} />
+            <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
@@ -592,7 +597,12 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          <Route exact path="/" element={renderMapElements()} />
+          <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />
