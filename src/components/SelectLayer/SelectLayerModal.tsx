@@ -74,7 +74,7 @@ const SelectLayerModal = () => {
 
   return <>
     <div className="SelectLayer">
-      <h2>Basislaag</h2>
+      <h2>Basis</h2>
 
       <div 
         data-type="map-style-default" 
@@ -113,7 +113,7 @@ const SelectLayerModal = () => {
         </div>
       </>}
 
-      <h2>Datalaag</h2>
+      <h2>Data</h2>
 
       { displayMode===DISPLAYMODE_PARK ?
         <div data-type="vehicles"  className={`layer${!checkParkLayerActive(DISPLAYMODE_PARKEERDATA_VOERTUIGEN) ? ' layer-inactive':''}`}
