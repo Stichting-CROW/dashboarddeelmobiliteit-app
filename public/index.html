@@ -74,6 +74,19 @@
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
 
+    <!-- Service Worker Unregistration Script -->
+    <script type="text/javascript">
+      // Immediately unregister any existing service workers to prevent reload issues
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered existing service worker to prevent reload issues');
+          }
+        });
+      }
+    </script>
+
   </head>
   <body style="min-height:100vh">
     <noscript>You need to enable JavaScript to run this app.</noscript>
