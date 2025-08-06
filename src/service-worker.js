@@ -1,7 +1,21 @@
-// Empty service worker to prevent Create React App from generating one automatically
-// This prevents the reload issues caused by service worker caching
+/* eslint-disable no-restricted-globals, no-unused-expressions */
+// This service worker is intentionally minimal to prevent reload issues
+// while still allowing Workbox to inject the manifest during build
 
-// This file is intentionally empty to disable service worker functionality
-// which was causing infinite reload loops on soft refresh
+// This is the required reference that Workbox looks for to inject the manifest
+self.__WB_MANIFEST;
 
-console.log('Service worker disabled to prevent reload issues'); 
+// Minimal service worker functionality
+self.addEventListener('install', (event) => {
+  console.log('Service worker installed');
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('Service worker activated');
+});
+
+// Disable caching to prevent reload issues
+self.addEventListener('fetch', (event) => {
+  // Skip caching for all requests to prevent reload loops
+  event.respondWith(fetch(event.request));
+}); 
