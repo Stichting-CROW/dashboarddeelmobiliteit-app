@@ -177,7 +177,9 @@ function App() {
     
     // Decide on which display mode we use, based on URL
     let payload;
-    if(pathName.includes("/start")||pathName==='/') {
+    if(pathName==='/') {
+      payload=DISPLAYMODE_PARK;
+    } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
     } else if(pathName.includes("/dashboard/vergunningseisen")) {
       payload=DISPLAYMODE_PERMITS;
@@ -498,12 +500,13 @@ function App() {
                 } />
               </> : null
             }
-            <Route exact path="/" element={<>
+            {/* <Route exact path="/" element={<>
               <ContentPage>
                 <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
-            </>} />
+            </>} /> */}
+            <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
@@ -621,12 +624,13 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          <Route exact path="/" element={<>
+          {/* <Route exact path="/" element={<>
               <ContentPage>
                 <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
-            </>} />
+            </>} /> */}
+          <Route exact path="/" element={renderMapElements()} />
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />

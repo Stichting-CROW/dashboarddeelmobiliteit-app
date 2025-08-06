@@ -141,7 +141,7 @@ function Filterbar({
     }
 
     {/* HB */
-    (is_hb_view) &&
+    (is_hb_view && ! isStart) &&
       <FilterbarHb
         hideLogo={hideLogo}
         displayMode={displayMode}
