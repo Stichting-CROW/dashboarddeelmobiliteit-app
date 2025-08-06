@@ -141,7 +141,7 @@ function Filterbar({
     }
 
     {/* HB */
-    (is_hb_view && ! isStart) &&
+    (isrentals && is_hb_view) &&
       <FilterbarHb
         hideLogo={hideLogo}
         displayMode={displayMode}
@@ -179,7 +179,6 @@ function Filterbar({
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
       && ! isPolicyHubs
-      && ! is_hb_view
       && ! isrentals
       && ! isVergunningseisen
       && ! isStart
