@@ -8,6 +8,10 @@ export const SET_USER = 'SET_USER';
 export const CLEAR_USER = 'CLEAR_USER';
 export const SET_ACL_IN_REDUX = 'SET_ACL_IN_REDUX';
 
+// new features tracking
+export const MARK_FEATURE_AS_SEEN = 'MARK_FEATURE_AS_SEEN';
+export const SET_LATEST_SEEN_VERSION = 'SET_LATEST_SEEN_VERSION';
+
 // policy hubs
 export const SET_ACTIVE_PHASE = 'SET_ACTIVE_PHASE'
 export const TOGGLE_VISIBLE_LAYER = 'TOGGLE_VISIBLE_LAYER'

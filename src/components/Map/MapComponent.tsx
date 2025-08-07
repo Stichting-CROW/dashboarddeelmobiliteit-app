@@ -6,6 +6,7 @@ import 'moment/min/locales';
 import {useLocation} from "react-router-dom";
 import SearchBar from '../SearchBar/SearchBar';
 import { RightTop } from '../MapLayer/widget-positions/RightTop';
+import { SelectLayer } from '../SelectLayer/SelectLayer';
 
 import {StateType} from '../../types/StateType';
 
@@ -13,13 +14,13 @@ import {StateType} from '../../types/StateType';
 // https://www.npmjs.com/package/mapbox-gl-utils
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
-import {getMapStyles, applyMapStyle} from './MapUtils/map.js';
+import {getMapStyles, applyMapStyle} from './MapUtils/map';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
   addLayers,
   activateLayers
-} from './MapUtils/layers.js';
+} from './MapUtils/layers';
 import {addSources} from './MapUtils/sources.js';
 import {
   navigateToGeography,
@@ -27,15 +28,17 @@ import {
   fetchPublicZones,
   fetchAdminZones
 } from './MapUtils/zones.js';
+import {sources} from './sources.js';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_START,
+  DISPLAYMODE_OTHER,
 } from '../../reducers/layers.js';
 
 import './MapComponent.css';
 
 import {layers} from './layers';
-import {sources} from './sources.js';
 import {getVehicleMarkers, getVehicleMarkers_rentals} from './vehicle_marker.js';
 
 import IsochroneTools from '../IsochroneTools/IsochroneTools';
@@ -45,6 +48,8 @@ import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
+import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
+import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
 
 // Set language for momentJS
 moment.updateLocale('nl', moment.locale);
@@ -99,7 +104,14 @@ const MapComponent = (props): JSX.Element => {
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
   const [activeLayers, setActiveLayers] = useState([]);
+  const [didApplyMapStyle, setDidApplyMapStyle] = useState(false);
   let map = useRef(null);
+
+  // Initialize hooks after map is declared
+  const { getAvailableLayers } = useBackgroundLayer(map.current);
+
+  // Use the background layer hook
+  const { setLayer } = useBackgroundLayer(map.current);
 
   const userData = useSelector((state: StateType) => {
     return state.authentication.user_data;
@@ -175,6 +187,7 @@ const MapComponent = (props): JSX.Element => {
         container: mapContainer.current,
         // @ts-ignore
         style: mapStyles.base,
+        // @ts-ignore
         accessToken: process ? process.env.REACT_APP_MAPBOX_TOKEN : '',
         center: [lng, lat],
         zoom: zoom,
@@ -309,11 +322,60 @@ const MapComponent = (props): JSX.Element => {
     mapStyle
   ])
 
-  // Set active layers
+  // Apply active map style on first load
+  // This ensures that the map style stored in Redux state is automatically applied
+  // when the map first loads, providing a consistent user experience
+  useEffect(() => {
+    if(! didInitSourcesAndLayers) return;
+    if(! didMapLoad) return;
+    if(! map.current) return;
+    if(! map.current.isStyleLoaded()) return;
+    if(! mapStyle) return;
+    if(didApplyMapStyle) return; // Prevent applying multiple times
+
+    // Validate that the map style is a valid option
+    const validStyles = ['base', 'satellite'];
+    if(! validStyles.includes(mapStyle)) {
+      console.warn(`Invalid map style: ${mapStyle}, defaulting to 'base'`);
+      return;
+    }
+
+    // Apply the active map style using the hook
+    setLayer(mapStyle, 
+      (layerName) => {
+        console.log(`Applied map style on first load: ${layerName}`);
+        setDidApplyMapStyle(true);
+      },
+      (error) => {
+        console.warn('Failed to apply map style on first load:', error);
+      }
+    );
+  }, [
+    didInitSourcesAndLayers,
+    didMapLoad,
+    mapStyle,
+    setLayer,
+    didApplyMapStyle
+  ])
+
+  // Reset didApplyMapStyle when map style changes
+  useEffect(() => {
+    setDidApplyMapStyle(false);
+  }, [mapStyle]);
+
+  // Data layer management is now handled by MapPage based on active_data_layers
+  // The layers are passed via props.layers and activated by the existing activateLayers logic
+
+  // Set active layers (now handled by MapPage based on active_data_layers)
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
 
-    activateLayers(map.current, layers, props.layers);
+    // Do not activate background layers
+    // Get background layers from components/Map/MapUtils/backgroundLayerManager.js
+    const backgroundLayers = getAvailableLayers();
+    const layersToActivate = props.layers.filter(layer => !Object.values(backgroundLayers).some(backgroundLayer => backgroundLayer.layerId === layer));
+
+    activateLayers(map.current, layers, layersToActivate);
   }, [
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)
@@ -322,13 +384,27 @@ const MapComponent = (props): JSX.Element => {
   // Set vehicles sources
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    if(! vehicles.data || vehicles.data.length <= 0) return;
+    if(! vehicles.data || !vehicles.data.features || vehicles.data.features.length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    if(map.current.getSource('vehicles')) {
-      map.current.U.setData('vehicles', vehicles.data);
-    }
-    if(map.current.getSource('vehicles-clusters')) {
-      map.current.U.setData('vehicles-clusters', vehicles.data);
+    console.log('Setting vehicles data:', vehicles.data.features.length, 'features');
+    
+    try {
+      if(map.current.getSource('vehicles')) {
+        map.current.U.setData('vehicles', vehicles.data);
+        console.log('Successfully set vehicles data');
+      } else {
+        console.warn('vehicles source not found');
+      }
+      if(map.current.getSource('vehicles-clusters')) {
+        map.current.U.setData('vehicles-clusters', vehicles.data);
+        console.log('Successfully set vehicles-clusters data');
+      } else {
+        console.warn('vehicles-clusters source not found');
+      }
+    } catch (error) {
+      console.warn('Failed to set vehicles data:', error);
     }
   }, [
     didInitSourcesAndLayers,
@@ -340,8 +416,13 @@ const MapComponent = (props): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! zones_geodata || zones_geodata.data.length <= 0) return;
     if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('zones-geodata', zones_geodata.data);
+    try {
+      map.current.U.setData('zones-geodata', zones_geodata.data);
+    } catch (error) {
+      console.warn('Failed to set zones data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     zones_geodata,
@@ -352,9 +433,15 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.origins || Object.keys(rentals.origins).length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('rentals-origins', rentals.origins);
-    map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    try {
+      map.current.U.setData('rentals-origins', rentals.origins);
+      map.current.U.setData('rentals-origins-clusters', rentals.origins);
+    } catch (error) {
+      console.warn('Failed to set rentals origins data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     rentals,
@@ -365,9 +452,15 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
     if(! rentals || ! rentals.destinations || Object.keys(rentals.destinations).length <= 0) return;
+    if(! map.current) return;
+    if(! map.current.U) return;
 
-    map.current.U.setData('rentals-destinations', rentals.destinations);
-    map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    try {
+      map.current.U.setData('rentals-destinations', rentals.destinations);
+      map.current.U.setData('rentals-destinations-clusters', rentals.destinations);
+    } catch (error) {
+      console.warn('Failed to set rentals destinations data:', error);
+    }
   }, [
     didInitSourcesAndLayers,
     rentals,
@@ -453,6 +546,7 @@ const MapComponent = (props): JSX.Element => {
       value.forEach((img, idx) => {
         map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
       });
+      // console.log('Added provider images for:', aanbieder.system_id);
     };
     providers.forEach(aanbieder => {
       addProviderImage(aanbieder);
@@ -475,13 +569,14 @@ const MapComponent = (props): JSX.Element => {
   return <>
     {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map flex-1" />
-    {/* H3 layer */}
-    <DdH3HexagonLayer map={map.current} />
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
+    
     {stateLayers.displaymode === 'displaymode-rentals' && <DdRentalsLayer map={map.current} />}
+    {/* H3 layer */}{stateLayers.displaymode === 'displaymode-rentals' && <DdH3HexagonLayer map={map.current} />}
+    
     {stateLayers.displaymode === 'displaymode-service-areas' && <DdServiceAreasLayer map={map.current} />}
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
@@ -489,7 +584,13 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn && showSearchBar && 
       <>
         <RightTop>
-          <SearchBar map={map.current} />
+          <div className="flex gap-2">
+            <SearchBar map={map.current} />
+            {(
+              displayMode !== DISPLAYMODE_START
+              && displayMode !== DISPLAYMODE_OTHER
+            ) && <SelectLayer />}
+          </div>
         </RightTop>
       </>
     }

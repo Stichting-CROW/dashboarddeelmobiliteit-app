@@ -21,7 +21,7 @@ import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
 import PolicyHubsEdit_bulk from './PolicyHubsEdit_bulk';
 import { useDispatch, useSelector } from 'react-redux';
-import { StateType } from '@/src/types/StateType';
+import { StateType } from '../../types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
 import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs, setShowEditForm } from '../../actions/policy-hubs';

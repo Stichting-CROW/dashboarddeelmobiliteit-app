@@ -175,7 +175,6 @@ const doApiCall = (
 }
 
 const updateParkingData = async () => {
-
   try {
     if(undefined===store_parkingdata) {
       if(process && process.env.DEBUG) console.error("no redux state available yet - skipping zones update");
@@ -186,7 +185,7 @@ const updateParkingData = async () => {
     const state = store_parkingdata.getState();
     if(! state) return;
 
-    const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
+    // const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
 
     // Should we (re)fetch vehicles?
     const doFetchVehicles = shouldFetchVehicles(state.filter, existingFilter);

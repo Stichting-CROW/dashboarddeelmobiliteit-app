@@ -16,7 +16,7 @@ import { notify } from '../../helpers/notify';
 
 import { canEditHubs } from '../../helpers/authentication';
 import { useDispatch, useSelector } from "react-redux";
-import { StateType } from "@/src/types/StateType";
+import { StateType } from "../../types/StateType";
 
 import Button from '../Button/Button';
 import { ActionButtons } from "../ActionButtons/ActionButtons";

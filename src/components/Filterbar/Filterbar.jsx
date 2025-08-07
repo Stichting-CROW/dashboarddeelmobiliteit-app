@@ -16,6 +16,7 @@ import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Fieldset from '../Fieldset/Fieldset';
+import { isRentalsLayerActive, selectActiveDataLayers } from '../../helpers/layerSelectors';
 
 import {StateType} from '../../types/StateType';
 
@@ -24,9 +25,11 @@ import FilterbarZones from './FilterbarZones';
 import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
+import FilterbarPermits from './FilterbarPermits';
+import FilterbarStart from './FilterbarStart';
 
 // Import API functions
-import {postZone} from '../../api/zones';
+// import {postZone} from '../../api/zones';
 
 import {
   DISPLAYMODE_PARK,
@@ -35,7 +38,10 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
-  DISPLAYMODE_OTHER
+  DISPLAYMODE_START,
+  DISPLAYMODE_PERMITS,
+  DISPLAYMODE_OTHER,
+  DISPLAYMODE_VERHUURDATA_HB
 } from '../../reducers/layers.js';
 
 function Filterbar({
@@ -43,6 +49,7 @@ function Filterbar({
   visible,
   hideLogo
 }) {
+  const activeDataLayers = useSelector(selectActiveDataLayers);
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -60,12 +67,18 @@ function Filterbar({
     return state.layers ? state.layers.view_rentals : null;
   });
 
+  const checkRentalsLayerActive = (layerName) => {
+    return isRentalsLayerActive(activeDataLayers, layerName);
+  };
+
   const ispark=displayMode===DISPLAYMODE_PARK;
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const iszonesadmin=displayMode===DISPLAYMODE_ZONES_ADMIN;
   const iszonespublic=displayMode===DISPLAYMODE_ZONES_PUBLIC;
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
+  const isStart=displayMode===DISPLAYMODE_START;
+  const isVergunningseisen=displayMode===DISPLAYMODE_PERMITS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -75,7 +88,8 @@ function Filterbar({
   const showherkomstbestemming=isrentals;
   const showvantot=isontwikkeling;
   const showvervoerstype=isrentals||ispark||!isLoggedIn;
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  // const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  const is_hb_view=checkRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB);
 
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : null
@@ -127,7 +141,7 @@ function Filterbar({
     }
 
     {/* HB */
-    (is_hb_view) &&
+    (isrentals && is_hb_view) &&
       <FilterbarHb
         hideLogo={hideLogo}
         displayMode={displayMode}
@@ -136,7 +150,7 @@ function Filterbar({
     }
 
     {/* Verhuringen */
-    (isrentals) &&
+    (isrentals && ! is_hb_view) &&
       <FilterbarRentals
         hideLogo={hideLogo}
         displayMode={displayMode}
@@ -144,12 +158,30 @@ function Filterbar({
       />
     }
 
+    {
+      (isStart) && 
+        <FilterbarStart 
+          hideLogo={hideLogo}
+          displayMode={displayMode}
+          visible={visible}
+        />
+    }
+
+    {/* Vergunningseisen */
+      (isVergunningseisen) && 
+        <FilterbarPermits 
+          hideLogo={hideLogo}
+          displayMode={displayMode}
+          visible={visible}
+        />
+    }
     {/* Default: */
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
       && ! isPolicyHubs
-      && ! is_hb_view
       && ! isrentals
+      && ! isVergunningseisen
+      && ! isStart
     ) &&
       <div className="filter-bar-inner py-2">
 
@@ -221,11 +253,10 @@ function Filterbar({
     }
 
     <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
-      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external" className="underline">
-        2025-06-22
+      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
+        2025-08-06
       </a><br />
-      - Beleidshubs: Verwijder zones eenvoudig<br />
-      - Nieuw ontwerp <a href="/map/servicegebieden" className="underline">Servicegebieden</a><br />
+        - Betere laagselectie
     </div>
   </>
 }

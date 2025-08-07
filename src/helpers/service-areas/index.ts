@@ -1,4 +1,4 @@
-import { ServiceAreaHistoryEvent } from '@/src/types/ServiceAreaHistoryEvent';
+import { ServiceAreaHistoryEvent } from '../../types/ServiceAreaHistoryEvent';
 import moment from 'moment';
 
 export const loadServiceAreas = async (gebied: string, visible_operators: string[]) => {
