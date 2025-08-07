@@ -1,0 +1,6 @@
+<svg id="crow_start" data-name="crow start" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 14 25">
+  <!-- House outline -->
+  <path id="house_roof" data-name="house roof" d="M12.5,6L4.5,12.5h2v8h12v-8h2L12.5,6z" fill="none" stroke="#343e47" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Door -->
+  <path id="house_door" data-name="house door" d="M10,20v-4h2v4" fill="none" stroke="#343e47" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>
