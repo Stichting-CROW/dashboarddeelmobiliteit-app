@@ -8,6 +8,9 @@ import {
   activateLayers
 } from './layers.js';
 
+// Import the new background layer manager
+import { setBackgroundLayer as setBackgroundLayerNew } from './backgroundLayerManager.js';
+
 export const getMapStyles = () => {
   return {
     // NOTE: mapbox:// urls are not supported anymore.
@@ -17,26 +20,9 @@ export const getMapStyles = () => {
   }
 }
 
-export const setBackgroundLayer = (map, name, setMapStyle) => {
-  // Check if setMapStyle func was given
-  if(! setMapStyle) {
-    console.error('setMapStyle not given');
-    return;
-  }
-
-  // Check if map style was loaded
-  if(! map.isStyleLoaded()) {
-    return;
-  }
-
-  setMapStyle(name);
-
-  if(name === 'base') {
-    map.U.hide('luchtfoto-pdok');
-  }
-  else {
-    map.U.show(name);
-  }
+// Legacy function for backward compatibility
+export const setBackgroundLayer = (map, name, callback) => {
+  setBackgroundLayerNew(map, name, callback);
 }
 
 // Variable to keep track of the map style that we used last
@@ -86,14 +72,41 @@ export const applyMapStyle = async (map, styleUrlOrObject) => {
             || el.id.indexOf('gl-draw-') > -1;//Keep layer if it's a gl-draw layer;
   });
 
+  // Separate background layers from other app layers
+  const backgroundLayers = appLayers.filter((el) => {
+    const layerConfig = layers[el.id];
+    return layerConfig && layerConfig['is-background-layer'] === true;
+  });
+
+  const dataLayers = appLayers.filter((el) => {
+    const layerConfig = layers[el.id];
+    return !layerConfig || layerConfig['is-background-layer'] !== true;
+  });
+
   // Remove appLayers from newStyle.layers to prevent duplicates
   newStyle.layers = newStyle.layers.filter((el) => {
     return ! layers[el.id]//Remove layer if it's a DD layer
             && el.id.indexOf('gl-draw-') <= -1;//Remove layer if it's a gl-draw layer;
   });
 
-  // Add app layers to newStyle's layers
-  newStyle.layers = newStyle.layers.concat(appLayers);
+  // Insert background layers at the beginning (after the first few base layers)
+  // Find a good insertion point after the basic map layers but before labels
+  let insertionIndex = 0;
+  for (let i = 0; i < newStyle.layers.length; i++) {
+    const layer = newStyle.layers[i];
+    // Insert after basic map layers like 'land', 'water', 'building', etc.
+    // but before labels and other overlay layers
+    if (layer.id === 'building' || layer.id === 'road-simple' || layer.id === 'bridge-simple') {
+      insertionIndex = i + 1;
+      break;
+    }
+  }
+
+  // Insert background layers at the proper position
+  newStyle.layers.splice(insertionIndex, 0, ...backgroundLayers);
+
+  // Add data layers at the end (on top)
+  newStyle.layers = newStyle.layers.concat(dataLayers);
 
   // Set new map style (having style _and_ DD layers)
   await map.setStyle(newStyle);

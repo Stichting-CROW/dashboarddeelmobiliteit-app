@@ -8,9 +8,14 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA_HB,
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+
 } from '../../reducers/layers.js';
 
 import {StateType} from '../../types/StateType';
+import { selectActiveDataLayers, isRentalsLayerActive } from '../../helpers/layerSelectors';
 
 import {
   removeH3Grid
@@ -27,10 +32,17 @@ const DdH3HexagonLayer = ({
 }): JSX.Element => {
   const dispatch = useDispatch()
 
+  const activeDataLayers = useSelector(selectActiveDataLayers);
+
+  const checkRentalsLayerActive = (layerName: string) => {
+    return isRentalsLayerActive(activeDataLayers, layerName);
+  };
+
   const displayMode = useSelector((state: StateType) => state.layers ? state.layers.displaymode : DISPLAYMODE_PARK);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
-  const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  // const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
+  const is_hb_view=checkRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB);
   const filter = useSelector((state: StateType) => state.filter || null);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
 
@@ -45,6 +57,13 @@ const DdH3HexagonLayer = ({
     }
     return null;
   });
+
+  // On component unload: Remove H3 grid
+  useEffect(() => {
+    return () => {
+      removeH3Grid(map);
+    };
+  }, []);
 
   // If HB view: Show H3 grid, if not: Remove H3 grid
   useEffect(() => {

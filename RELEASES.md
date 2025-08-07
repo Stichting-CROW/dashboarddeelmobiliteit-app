@@ -1,5 +1,19 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-08-06
+
+Beleidszones:
+
+- Nieuwe laagselectie-icoon en -modal
+  - Werkt sneller
+  - Werkt robuuster
+  - Satelliet-weergave nu beschikbaar in elke weergave
+- In de tabel: Nieuwe filter voor tonen alleen ge(de)selecteerde zones
+
+Diverse:
+
+- Verbeterd menu-icoon voor 'Zones'
+
 ## Release 2025-06-22
 
 Beleidshubs:

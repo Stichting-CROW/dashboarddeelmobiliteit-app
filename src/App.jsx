@@ -62,6 +62,11 @@ import {
 } from './helpers/notify';
 
 import {
+  isValidAuthState,
+  clearInvalidAuthState,
+} from './helpers/authentication.js';
+
+import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_ZONES_PUBLIC,
@@ -131,7 +136,7 @@ function App() {
 
   let DELAY_TIMEOUT_IN_MS = 250;
 
-  const exportState = useSelector((state: StateType) => {
+  const exportState = useSelector((state) => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
   const isFilterBarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
@@ -172,7 +177,9 @@ function App() {
     
     // Decide on which display mode we use, based on URL
     let payload;
-    if(pathName.includes("/start")||pathName==='/') {
+    if(pathName==='/') {
+      payload=DISPLAYMODE_PARK;
+    } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
     } else if(pathName.includes("/dashboard/vergunningseisen")) {
       payload=DISPLAYMODE_PERMITS;
@@ -198,6 +205,14 @@ function App() {
   useEffect(() => {
     const updateACL = async () => {
       try {
+        // Validate authentication state before making API calls
+        const currentState = store.getState();
+        if (!isValidAuthState(currentState)) {
+          console.warn("Invalid authentication state detected, clearing user data");
+          clearInvalidAuthState(dispatch);
+          return;
+        }
+
         const theAcl = await getAcl(token);
         if(! theAcl) return;
   
@@ -207,7 +222,13 @@ function App() {
         setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
         setIsAdmin(theAcl?.is_admin);
       } catch(err) {
-        console.error(err);
+        console.error("ACL update failed:", err);
+        
+        // If ACL update fails due to authentication issues, clear the user data
+        if (err.status === 401 || err.status === 403) {
+          console.warn("Authentication failed during ACL update, clearing user data");
+          clearInvalidAuthState(dispatch);
+        }
       }
     }
 
@@ -219,35 +240,35 @@ function App() {
   //   return state.authentication;
   // });
 
-  const isLoggedIn = useSelector((state: StateType) => {
+  const isLoggedIn = useSelector((state) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const filterDate = useSelector((state: StateType) => {
+  const filterDate = useSelector((state) => {
     return state.filter ? state.filter.datum : false;
   });
 
-  const isLayersMobileVisible = useSelector((state: StateType) => {
+  const isLayersMobileVisible = useSelector((state) => {
     return state.ui ? state.ui['MenuSecondary.layers'] : false;
   });
 
-  const isFilterBarVisible = useSelector((state: StateType) => {
+  const isFilterBarVisible = useSelector((state) => {
     return state.ui ? state.ui['FILTERBAR'] : false;
   });
 
-  const filter = useSelector((state: StateType) => {
+  const filter = useSelector((state) => {
     return state.filter;
   });
   
-  // const layers = useSelector((state: StateType) => {
+  // const layers = useSelector((state) => {
   //   return state.layers;
   // });
 
-  const displayMode = useSelector((state: StateType) => {
+  const displayMode = useSelector((state) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
-  const metadata = useSelector((state: StateType) => {
+  const metadata = useSelector((state) => {
     return state.metadata;
   });
 
@@ -285,7 +306,12 @@ function App() {
 
   // On app start: get user data
   useEffect(() => {
-    initAccessControlList(store);
+    // Add a small delay to ensure the store is properly initialized
+    const timer = setTimeout(() => {
+      initAccessControlList(store);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isLoggedIn]);
   
   useEffect(() => {
@@ -331,7 +357,6 @@ function App() {
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
-    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -351,7 +376,6 @@ function App() {
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
-    delayTimeout,
     // exportState?.layers.map_style,
   ]);
 
@@ -364,7 +388,6 @@ function App() {
       <div className="block sm:hidden relative z-10">
         <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
-      <SelectLayerMobile />
     </div>
   }
 
@@ -477,6 +500,12 @@ function App() {
                 } />
               </> : null
             }
+            {/* <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} /> */}
             <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
@@ -595,6 +624,12 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
+          {/* <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} /> */}
           <Route exact path="/" element={renderMapElements()} />
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
@@ -689,7 +724,9 @@ function App() {
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+      {/* {pathName !== '/stats/overview' && <MapPage mapContainer={mapContainer} />} */}
       <MapPage mapContainer={mapContainer} />
+
       <Menu acl={acl} pathName={pathName} />
 
      </div>

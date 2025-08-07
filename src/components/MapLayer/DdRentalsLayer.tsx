@@ -1,23 +1,32 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getMapStyles, applyMapStyle, setBackgroundLayer } from '../Map/MapUtils/map';
-import { setMapStyle } from '../../actions/layers';
+import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
+import { StateType } from '../../types/StateType';
 
 const DdRentalsLayer = ({
   map
 }): JSX.Element => {
-  const dispatch = useDispatch()
+  const { setLayer } = useBackgroundLayer(map);
+  const hasInitialized = useRef(false);
+  
+  // Get current map style from Redux state
+  const mapStyle = useSelector((state: StateType) => {
+    return state.layers ? state.layers.map_style : 'base';
+  });
 
-  // On component load: Set background layer to 'base layer'
+  // On component load: Set background layer to 'base layer' only on initial load
   useEffect(() => {
     if(! map) return;
     if(! map.U) return;
+    if(hasInitialized.current) return; // Only run once
 
-    setBackgroundLayer(map, 'base', setMapStyle);
+    // Set to 'base' on initial load
+    setLayer('base');
+    hasInitialized.current = true;
   }, [
     map,
     map?.U,
-    document.location.pathname
+    setLayer
   ]);
 
   return <></>

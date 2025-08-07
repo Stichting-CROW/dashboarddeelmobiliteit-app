@@ -1,0 +1,38 @@
+/* NewFeatureIndicator styles */
+.new-feature-indicator {
+  position: relative;
+}
+
+.new-feature-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background-color: #3b82f6; /* blue-500 */
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Ensure the indicator is clickable */
+.new-feature-indicator {
+  cursor: pointer;
+}
+
+/* Hover effect for better UX */
+.new-feature-indicator:hover .new-feature-dot {
+  animation: none;
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+} 

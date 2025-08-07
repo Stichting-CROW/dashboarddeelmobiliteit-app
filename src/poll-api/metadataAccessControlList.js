@@ -78,6 +78,19 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       fetch(url, options).then((response) => {
         if(!response.ok) {
           console.error("unable to fetch: %o", response);
+          
+          // Handle authentication errors by clearing the user data
+          if (response.status === 401 || response.status === 403) {
+            console.warn("Authentication failed, clearing user data");
+            store_accesscontrollist.dispatch({ type: 'CLEAR_USER' });
+            
+            // Fall back to public data
+            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+            store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+            store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
+          }
+          
           return false
         }
 
@@ -107,7 +120,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
           })
         }).catch(ex=>{
-          console.error("unable to decode JSON");
+          console.error("unable to decode JSON", ex);
+          
+          // Handle network errors by falling back to public data
+          store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+          store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+          store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+          store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
         }).finally(()=>{
           store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
         })
@@ -116,6 +135,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
   } catch(ex) {
     // console.error("Unable to update ACL", ex)
     store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
+    
+    // Handle any other errors by falling back to public data
+    store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+    store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+    store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
+    
     return false;
   }
 }
