@@ -10,6 +10,9 @@ import zones_geodata from './zones_geodata';
 import layers from './layers';
 import ui from './ui';
 import statsreducer from './statsreducer';
+import policy_hubs from './policy-hubs';
+import search from './search';
+import service_areas from './service-areas';
 
 export default combineReducers({
   created,
@@ -22,5 +25,8 @@ export default combineReducers({
   zones_geodata,
   layers,
   ui,
-  statsreducer
+  statsreducer,
+  policy_hubs,
+  search,
+  service_areas
 })

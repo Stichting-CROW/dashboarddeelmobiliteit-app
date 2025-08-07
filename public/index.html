@@ -11,7 +11,6 @@
     />
     <link href='https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.css' rel='stylesheet' />
     <link href="%PUBLIC_URL%/css/fonts.css" rel="stylesheet" />
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
@@ -28,22 +27,22 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Dashboard Deelmobiliteit | Een project van CROW</title>
+    <title>Dashboard Deelmobiliteit | Een project van en voor overheden</title>
 
-    <meta name="title" content="Dashboard Deelmobiliteit | Een project van CROW">
+    <meta name="title" content="Dashboard Deelmobiliteit | Een project van en voor overheden">
     <meta name="description" content="Een webtool voor het volgen van ontwikkelingen rond deelmobiliteit. Van en voor overheden.">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://dashboarddeelmobiliteit.nl/">
-    <meta property="og:title" content="Dashboard Deelmobiliteit | Een project van CROW">
+    <meta property="og:title" content="Dashboard Deelmobiliteit | Een project van en voor overheden">
     <meta property="og:description" content="Een webtool voor het volgen van ontwikkelingen rond deelmobiliteit. Van en voor overheden.">
     <meta property="og:image" content="https://dashboarddeelmobiliteit.nl/og-image.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://dashboarddeelmobiliteit.nl/">
-    <meta property="twitter:title" content="Dashboard Deelmobiliteit | Een project van CROW">
+    <meta property="twitter:title" content="Dashboard Deelmobiliteit | Een project van en voor overheden">
     <meta property="twitter:description" content="Een webtool voor het volgen van ontwikkelingen rond deelmobiliteit. Van en voor overheden.">
     <meta property="twitter:image" content="https://dashboarddeelmobiliteit.nl/og-image.jpg">
 
@@ -75,8 +74,21 @@
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
 
+    <!-- Service Worker Unregistration Script -->
+    <script type="text/javascript">
+      // Immediately unregister any existing service workers to prevent reload issues
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered existing service worker to prevent reload issues');
+          }
+        });
+      }
+    </script>
+
   </head>
-  <body>
+  <body style="min-height:100vh">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--

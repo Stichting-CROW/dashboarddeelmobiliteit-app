@@ -74,14 +74,14 @@ const getIndicatorColor = (parked, capacity) => {
 }
 
 const generatePopupHtml = (feature) => {
-  if(! feature || ! feature.layer) return '<div />';
-  if(! feature.properties) return '<div />';
-  if(! feature.properties.stop) return '<div />';
-  const stop = JSON.parse(feature.properties.stop);
+  if(! feature) return '<div />';
+  if(! feature) return '<div />';
+  if(! feature.stop) return '<div />';
+  const stop = JSON.parse(feature.stop);
   if(! stop) return `
     <div class="font-inter" style="min-width:180px">
       <div class="text-lg font-bold">
-        ${feature.properties.name}
+        ${feature.name}
       </div>
     </div>
   `;
@@ -201,7 +201,7 @@ const generatePopupHtml = (feature) => {
   return `
     <div class="font-inter">
       <div class="text-lg font-bold">
-        ${feature.properties.name}
+        ${feature.name}
       </div>
       <div class="mt-2 text-sm font-bold" ${isControlledAutomatically ? 'hidden' : ''} style="color:#15aeef;">
         Instelling actief: <b>altijd ${isManuallySetToOpen ? 'open' : 'gesloten'}</b>
@@ -305,7 +305,7 @@ const initAdminView = (theMap) => {
   // Add custom draw mode: 'StaticMode'
   // https://github.com/mapbox/mapbox-gl-draw-static-mode
   let modes = MapboxDraw.modes;
-  modes = MapboxDrawWaypoint.enable(modes);// Di`sable moving features
+  modes = MapboxDrawWaypoint.enable(modes);// Disable moving features
   modes.static = StaticMode;
 
   const publicStyles = [
@@ -656,7 +656,7 @@ const zoneToGeoJson = (adminZone) => {
       geography_id: adminZone.geography_id,
       geography_type: adminZone.geography_type,
       name: adminZone.name,
-      stop: JSON.stringify(adminZone.stop),
+      stop: adminZone.stop,
       color: getColor(adminZone.stop),
       borderColor: getBorderColor(adminZone.geography_type),
       opacity: adminZone.geography_type === 'stop' ? 0.6 : 0.1
@@ -729,6 +729,7 @@ const navigateToGeography = (geographyId, allZones) => {
     // Delay it a little bit, so it comes after the
     // 'zoom in to extent' on filterGebied change/load
     setTimeout(x => {
+      console.log('ACTION: fitBounds (zones.js - navigateToGeography)');
       window['ddMap'].fitBounds(extent, {
         padding: {
           top: 25,
@@ -763,6 +764,7 @@ export {
   setPublicZoneUrl,
   setAdminZoneUrl,
   openPopup,
+  generatePopupHtml,
   navigateToGeography,
   triggerGeographyClick,
   getIndicatorColor,

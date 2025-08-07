@@ -7,14 +7,14 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
-import FilteritemAanbieders from './FilteritemAanbieders.jsx';
+import FilteritemAanbieders from './FilteritemAanbieders';
 import FilteritemZones from './FilteritemZones.jsx';
 import {
   FilteritemMarkersAfstand,
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 // import Button from '../Button/Button';
 // import FormInput from '../FormInput/FormInput';
@@ -88,12 +88,13 @@ function Filterbar({
 
   return (
     <div className="filter-bar-inner py-2">
-
-      <div className="justify-between hidden sm:flex">
+      <div className="justify-between hidden sm:flex" style={{
+        paddingBottom: '24px'
+      }}>
         <div style={{minWidth: '82px'}}>
           {! hideLogo && (
             ispark
-              ? <Logo />
+              ? <Logo  />
               : <Link to="/"><Logo /></Link>
           )}
         </div>

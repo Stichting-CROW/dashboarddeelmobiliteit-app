@@ -1,3 +1,5 @@
+import { OrganisationType } from '../types/OrganisationType';
+
 const admin_api_url: string = `${process.env.REACT_APP_MAIN_API_URL}/admin`;
 
 const getHeaders = (token): {
@@ -44,7 +46,8 @@ export const getOwnOrganisation = async (token) => {
   const options = getHeaders(token);
   const response = await fetch(url, options);
 
-  return await response.json();
+  const organisation = await response.json() as OrganisationType;
+  return organisation;
 }
 
 // GET /organisation?organisation_id=1

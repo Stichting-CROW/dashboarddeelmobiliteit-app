@@ -76,13 +76,6 @@ function MenuSecondary() {
           setVisibility('FILTERBAR', true)
         }}
       />
-      {pathName !== '/stats/overview' && <MenuSecondaryItem
-        text="Lagen"
-        onClick={(e) => {
-          e.preventDefault();
-          setVisibility('MenuSecondary.layers', true)
-        }}
-      />}
       {/*
       <MenuSecondaryItem
         text="Info"

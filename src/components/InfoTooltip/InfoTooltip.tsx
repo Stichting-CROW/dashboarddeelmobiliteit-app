@@ -21,7 +21,7 @@ function InfoTooltip({
 
     const toggleHandler = event => {    
       const classes = button.classList;
-      console.log('toggleHandler', button.classList)
+      // console.log('toggleHandler', button.classList)
       if (classes.contains('infoButton_isActive')) {
           classes.remove('infoButton_isActive');
       } else {
@@ -51,10 +51,6 @@ function InfoTooltip({
       </div>
     </button>
   )
-}
-
-export {
-  InfoTooltip
 }
 
 export default InfoTooltip;

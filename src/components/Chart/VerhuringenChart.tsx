@@ -47,7 +47,7 @@ import {
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
-import {InfoTooltip} from '../InfoTooltip/InfoTooltip';
+import InfoTooltip from '../InfoTooltip/InfoTooltip';
 
 function VerhuringenChart(props) {
   const dispatch = useDispatch()
@@ -55,6 +55,10 @@ function VerhuringenChart(props) {
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector((state: StateType) => state.filter)
   const metadata = useSelector((state: StateType) => state.metadata)
+
+  const aanbieders = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
 
   // Get all zones
   const zones = useSelector((state: StateType) => {
@@ -97,7 +101,7 @@ function VerhuringenChart(props) {
   ]);
   
   // Populate chart data
-  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones);
+  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones, aanbieders);
 
   const getChartDataWithNiceDates = (data) => {
     const aggregationLevel = filter.ontwikkelingaggregatie;

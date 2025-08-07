@@ -4,7 +4,7 @@ import {
   convertDistanceToBin,
   abortableFetch
 } from './pollTools.js';
-import {isLoggedIn} from '../helpers/authentication.js';
+import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
 import {shouldFetchVehicles} from './pollTools.js';
 
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
@@ -95,6 +95,7 @@ const doApiCall = (
 ) => {
 
   const canfetchdata = isLoggedIn(state)&&state&&state.filter&&state.authentication.user_data.token;
+  const is_admin = isAdmin(state);
 
   if(type !== 'destinations' && type !== 'origins') {
     console.error('No valid type given to fetchData');
@@ -105,7 +106,9 @@ const doApiCall = (
   let options = {};
   if(null!==state.filter&&null!==state.authenticationdata) {
     url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
-    let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata);
+    let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata, {
+      show_global: is_admin
+    });
     if(filterparams.length>0) {
       url += "?" + filterparams.join("&");
     }

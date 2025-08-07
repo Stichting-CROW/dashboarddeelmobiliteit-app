@@ -10,33 +10,52 @@ import {
 import {StateType} from '../../types/StateType';
 
 import {preprocessKmlFile, importKmlFile} from '../../helpers/import-kml.js';
+import {preprocessGeoPackageFile, importGeoPackageFile} from '../../helpers/import-geopackage.js';
 
 import {ZonesToImportConfigurator} from './ZonesToImportConfigurator';
 
 const ImportZones = ({
   notificationText,
-  draftZones,
+  importResult,
   fileChangedHandler
 }) => {
 
   return <>
     <p className="mb-4">
-      Importeer een KML-bestand met zone-polygonen middels onderstaande upload-functie. Tip: importeer niet te veel zones, maar enkel de zones waar je analyses op gaat doen.
+      Importeer een GeoPackage-bestand met zone-polygonen middels onderstaande upload-functie.
     </p>
 
-    <form encType="multipart/form-data">
+    <p className="mb-4">
+      De zones zullen worden toegevoegd aan de conceptfase. Als je een zone importeert met een geography_id dat gelijk is aan het geography_id van een bestaande conceptzone, dan zal deze zone worden geupdate en niet opnieuw worden aangemaakt.
+    </p>
+
+    <p className="mb-4">
+      Lees meer over het importeren van zones in de <a href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones/Zones_importeren.md" target="_blank" rel="noopener noreferrer" className="font-bold underline">Beleidszones documentatie</a>. Je vindt er ook een GeoPackage-template dat dient als voorbeeld.
+    </p>
+
+    {! importResult || Object.keys(importResult).length <= 0 && <form encType="multipart/form-data">
       <p className="mt-4">
-        <input type="file" name="file" id="js-kml-file" accept=".kml" onChange={fileChangedHandler} />
+        <input type="file" name="file" id="js-kml-file" accept=".gpkg" onChange={fileChangedHandler} />
       </p>
-    </form>
+    </form>}
 
     {notificationText && <div className="my-4 font-bold">
       {notificationText}
     </div>}
 
-    {draftZones && Object.values(draftZones).length > 0 && <div className="my-4">
-      <ZonesToImportConfigurator draftZones={draftZones} />
+    {importResult && Object.keys(importResult).length > 0 && <div>
+      <p className="mt-6 mb-4">
+        <b>
+          De zones zijn ge&iuml;mporteerd
+        </b>
+      </p>
+      <ul>
+        {importResult.created?.length > 0 && <li>- {importResult.created.length} zone{importResult.created.length !== 1 ? 's' : ''} toegevoegd</li>}
+        {importResult.modified?.length > 0 && <li>- {importResult.modified.length} zone{importResult.modified.length !== 1 ? 's' : ''} aangepast</li>}
+        {importResult.error?.length > 0 && <li>- {importResult.error.length} zone{importResult.error.length !== 1 ? 's' : ''} met fouten</li>}
+      </ul>
     </div>}
+
   </>
 }
 
@@ -55,14 +74,14 @@ const ImportZonesModal = ({
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [importWasSuccesful, setImportWasSuccesful] = useState(false);
   const [notificationText, setNotificationText] = useState('');
-  const [draftZones, setDraftZones] = useState([]);
+  const [importResult, setImportResult] = useState([]);
 
   const startProcessingFile = async () => {
     // Set loading=true
     setImportWasSuccesful(false);
     setNotificationText('Het bestand wordt verwerkt...');
     setIsProcessingFile(true);
-    setDraftZones([]);
+    setImportResult([]);
 
     // Get file
     const file = (document.getElementById('js-kml-file') as HTMLInputElement).files[0];
@@ -71,87 +90,33 @@ const ImportZonesModal = ({
     const body = new FormData;
     body.append("file", file);
 
+    // Create function that's called if there's an error
+    const postError = () => {
+      // Set loading=false
+      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig GeoPackage-bestand is.');
+      setIsProcessingFile(false);
+      setImportResult([]);
+    }
+
     let responseJson; 
     try {
-      responseJson = await preprocessKmlFile({
+      responseJson = await preprocessGeoPackageFile({
         token,
         gm_code,
         body
       });
-      setNotificationText('Het bestand is succesvol verwerkt. Selecteer hieronder de zones die je wilt importeren en klik dan op de knop: Importeer zones.');
-      setIsProcessingFile(false);
-      setDraftZones(responseJson);
-    } catch(e) {
-      // Set loading=false
-      setNotificationText('Er was een fout bij het uploaden van het bestand. Controleer of het een geldig KML-bestand is.');
-      setIsProcessingFile(false);
-      setDraftZones([]);
-    }
-  }
 
-  const startImportingFile = async () => {
-
-    const checkboxes = (document.querySelectorAll('input[type=checkbox]') as NodeListOf<Element>);
-    let zoneGeographyIdsToKeep = [];
-    checkboxes.forEach(x => {
-      // Get input name
-      const name = x['name'];
-      // Check if this is a checkbox we want to check
-      if(name.indexOf('import_zone_') <= -1) return;
-      // Check if checkbox is checked
-      if(x['checked']) {
-        // Get geographyId from name
-        const geographyId = name.replace('import_zone_', '');
-        // Add this geographyId to the zoneGeographyIdsToKeep var
-        zoneGeographyIdsToKeep.push(geographyId)
+      if(responseJson && responseJson.detail) {
+        postError();
+        return;
       }
-    });
 
-    // Set loading=true
-    setImportWasSuccesful(false);
-    setNotificationText('De zones worden geimporteerd...');
-    setIsProcessingFile(true);
-
-    // Process draftZones, but only keep the ones that are checked by user
-    const zonesToImport = draftZones.filter(x => {
-      return zoneGeographyIdsToKeep.indexOf(x.zone.geography_id) > -1;
-    });
-
-    if(! zonesToImport || zonesToImport.length <= 0) {
-      console.error('Error: No zones to import');
-      setNotificationText('Er zijn geen zones geselecteerd om te importeren');
+      setNotificationText('');
       setIsProcessingFile(false);
-      return;
+      setImportResult(responseJson);
+    } catch(e) {
+      postError();
     }
-
-    // Populate body for API call that imports the zones
-    const body = zonesToImport.map(x => {
-      return Object.assign({}, x.zone, {
-        published: true
-      });
-    });
-
-    const response = await importKmlFile({
-      token,
-      gm_code,
-      body
-    });
-
-    // Check if there was an error
-    if(response && response.detail) {
-      console.error(response);
-      setNotificationText('Er was een fout bij het importeren: ' + response.detail);
-      setIsProcessingFile(false);
-    }
-    // If no error: show that import was done succesful
-    else {
-      setNotificationText('De zones zijn succesvol geimporteerd! Klik op "Sluiten" om de nieuwe zone(s) te bekijken in de filterbalk.');
-      setImportWasSuccesful(true);
-      setIsProcessingFile(false);
-      setDraftZones([]);
-    }
-
-    return;
   }
 
   const getNotificationText = () => {
@@ -162,32 +127,28 @@ const ImportZonesModal = ({
     }
   }
 
-  const didPreprocess = draftZones && draftZones.length > 0;
+  const didImport = importResult && Object.keys(importResult).length > 0;
 
   return (
     <Modal
       isVisible={isModalVisible}
-      title="Importeer een KML-bestand"
+      title="Importeer een GeoPackage-bestand"
       button1Title={'Annuleer'}
       button1Handler={(e) => {
         postImportFunc();
       }}
       button2Title={
-        importWasSuccesful ? 
+        didImport ? 
           'Sluiten' :
-          didPreprocess ? 'Importeer zones' : 'Laad zones'
+          'Importeer zones'
       }
       button2Handler={async (e) => {
         e.preventDefault();
         
-        if(importWasSuccesful) {
+        if(didImport) {
           postImportFunc();
         }
-        if(didPreprocess) {
-          // Import zones
-          await startImportingFile();
-        } else {
-          // Preprocess zones
+        else {
           startProcessingFile();
         }
         return;
@@ -201,12 +162,12 @@ const ImportZonesModal = ({
     >
       <ImportZones
         notificationText={getNotificationText()}
-        draftZones={draftZones}
+        importResult={importResult}
         fileChangedHandler={() => {
           setImportWasSuccesful(false);
-          setNotificationText('Je hebt een nieuw bestand geselecteerd. Klik op "Laad zones" om verder te gaan.');
+          setNotificationText('Je hebt een nieuw bestand geselecteerd. Klik op "Importeer zones" om deze te importeren.');
           setIsProcessingFile(false);
-          setDraftZones([]);
+          setImportResult([]);
         }}
       />
     </Modal>

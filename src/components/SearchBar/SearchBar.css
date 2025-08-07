@@ -1,0 +1,13 @@
+/* .SearchBar {
+  width: 100%;
+  transition: width 1s;
+  transition-timing-function: ease-out;
+} */
+
+/* 
+.SearchBar.filter-open {
+  width: calc(100% - 324px);
+  transition-timing-function: ease-in;
+}
+*/
+

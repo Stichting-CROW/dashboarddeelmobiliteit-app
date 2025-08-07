@@ -20,19 +20,24 @@ export default function Misc({children}) {
       link: '/profile',
     },
     {
-      title: 'Over',
-      link: '/over',
-      public: true
-    },
-    {
-      title: 'FAQ',
-      link: '/faq',
+      title: 'Documentatie',
+      link: '/docs',
       public: true
     },
     {
       title: 'Exporteer',
       link: '/export'
     },
+    {
+      title: 'Datafeeds',
+      link: '/active_feeds',
+      public: true
+    },
+    // {
+    //   title: 'Voertuigplafonds',
+    //   link: '/permits',
+    //   public: false
+    // },
     {
       title: 'API keys',
       link: '/profile/api'
@@ -52,17 +57,14 @@ export default function Misc({children}) {
       sm:flex sm:justify-center
       sm:px-0
     ">
-      <div className="mx-auto py-8" style={{
-        width: '500px',
-        maxWidth: '100%'
-      }}>
+      <div className="mx-auto py-8">
 
         <IconButtonClose
           onClick={() => navigate('/')}
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo title="Extra" />
+        <Logo title="" />
 
         <div className="mt-8">
           <PillMenu items={allowedPillMenuItems} />
@@ -70,7 +72,10 @@ export default function Misc({children}) {
 
         <div className="
           mt-8
-        ">
+        " style={{
+          width: '600px',
+          maxWidth: '100%'
+        }}>
           {children}
         </div>
 

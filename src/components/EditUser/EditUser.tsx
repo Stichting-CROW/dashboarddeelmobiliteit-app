@@ -94,6 +94,7 @@ function EditUser({
 
   const [doShowDeleteModal, setDoShowDeleteModal] = useState(false);
   const [doShowCredentialsModal, setDoShowCredentialsModal] = useState(false);
+  const [doShowCanEditMicrohubs, setDoShowCanEditMicrohubs] = useState(false);
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -106,12 +107,35 @@ function EditUser({
     buildOptionsValue();
   }, [organisations]);
 
-  // Get user list on component load
+  // Get organisations list on component load
   useEffect(() => {
     fetchOrganisations();
   }, []);
 
+  // Get organisation of logged in user
+  useEffect(() => {
+    if(! organisations || organisations.length <= 0) return;
+    if(! acl || ! acl.part_of_organisation) return;
+
+    const organisation_of_logged_in_user = getOrganisation(acl.part_of_organisation);
+    if(! organisation_of_logged_in_user) return;
+
+    const org_types_allowed_to_edit_zones = [
+      'MUNICIPALITY',
+      'OTHER_GOVERNMENT',
+      'ADMIN'
+    ];
+    // Set in state
+    setDoShowCanEditMicrohubs(
+      org_types_allowed_to_edit_zones.indexOf(organisation_of_logged_in_user.type_of_organisation) > -1
+    );
+  }, [
+    organisations,
+    acl
+  ]);
+
   const isAdmin = () => acl.is_admin === true;
+  const getOrganisation = (organisationId) => organisations.find(x=>x.organisation_id == organisationId);
   
   function getHeaders(): any {
     return {
@@ -128,9 +152,6 @@ function EditUser({
 
   const handleSubmit = async (e) => {
     if(e) e.preventDefault();
-
-    console.log('acl', acl);
-    console.log('organisation_id', organisationId);
 
     // Build privileges
     const privileges = [];
@@ -252,7 +273,7 @@ function EditUser({
           </FormLabel>
         </div>
 
-        <div className=" flex">
+        {doShowCanEditMicrohubs && <div className=" flex">
           <input 
             type="checkbox"
             id="microhub-edit" 
@@ -261,9 +282,9 @@ function EditUser({
             onChange={(event) => setCanEditMicrohubs(event.target.checked ? true : false)}
           />
           <FormLabel htmlFor="microhub-edit" classes="py-3 px-2">
-            Kan microhubs beheren
+            Kan zones beheren
           </FormLabel>
-        </div>
+        </div>}
 
         <div className=" flex">
           <input 
@@ -364,7 +385,7 @@ function EditUser({
           </small>
         </p>
         <p>
-          Leuk dat je aan de slag gaat met het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
+          Welkom bij het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
         </p>
         <p className="mb-4">
           Hierbij stuur ik je inloggegevens voor <a href="https://dashboarddeelmobiliteit.nl/login" target="_blank">https://dashboarddeelmobiliteit.nl/login</a>

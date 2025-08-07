@@ -10,7 +10,8 @@ import {
   aggregationFunctionButtonsToRender,
   getDateFormat,
   prepareDataForCsv,
-  downloadCsv
+  downloadCsv,
+  keepActiveOperators
 } from './index';
 
 export const getAggregatedVehicleData = async (token, filter, zones, metadata) => {
@@ -36,12 +37,16 @@ export const getAggregatedVehicleData = async (token, filter, zones, metadata) =
   return aggregatedVehicleData;
 }
 
-export const getAggregatedChartData = (vehiclesData, filter, zones) => {
+export const getAggregatedChartData = (vehiclesData, filter, zones, aanbieders) => {
+  let dataset;
   if(doShowDetailledAggregatedData(filter, zones)) {
-    return prepareAggregatedStatsData_timescaleDB('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    dataset = prepareAggregatedStatsData_timescaleDB('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
   } else {
-    return prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
+    dataset = prepareAggregatedStatsData('available_vehicles', vehiclesData, filter.ontwikkelingaggregatie, filter.aanbiedersexclude)
   }
+  
+  // Filter out operators that are not active
+  return keepActiveOperators(dataset, aanbieders);
 }
 
 export const getTotalsPerHour = (data: Object[]) => {

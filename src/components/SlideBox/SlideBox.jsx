@@ -44,7 +44,7 @@ function SlideBox(props) {
       direction-${props.direction}
       relative
       ${isVisible ? '' : 'is-hidden'}
-      z-10
+      z-20
     `} ref={containerRef} style={props.style || {}}>
     <div className="
       SlideBox-inner

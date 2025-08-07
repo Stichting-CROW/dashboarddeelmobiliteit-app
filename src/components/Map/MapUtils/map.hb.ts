@@ -158,6 +158,9 @@ const fetchHbData = async (token: string, filter: any) => {
 }
 
 const removeH3Sources = (map: any) => {
+  // Early return if map is null or undefined
+  if (!map) return;
+  
   let layer;
   let key, source;
   
@@ -171,6 +174,9 @@ const removeH3Sources = (map: any) => {
 }
 
 const removeH3Grid = (map: any) => {
+  // Early return if map is null or undefined
+  if (!map) return;
+  
   let layer, key;
   let source;
   

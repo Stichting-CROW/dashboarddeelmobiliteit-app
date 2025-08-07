@@ -9,16 +9,18 @@ import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import {AnimatePresence, motion} from 'framer-motion'
-import * as te from 'tw-elements';
 import {getAcl} from './api/acl';
 
 import {StateType} from './types/StateType';
 
 import ContentPage from './pages/ContentPage.jsx';
-import StatsPage from './pages/StatsPage.jsx';
+import StatsPage from './pages/StatsPage.tsx';
+import StartPage from './pages/StartPage';
+import VergunningEisenPage from './pages/dashboard/VergunningEisenPage';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
+import { Toaster } from "./components/ui/toaster"
 
 import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
@@ -27,20 +29,20 @@ import About from './components/About/About.jsx';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
+import Docs from './components/Docs/Docs';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
 import Export from './components/Export/Export';
+import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
-import Menu from './components/Menu.jsx';
+import Menu from './components/Menu';
 import MenuSecondary from './components/Menu/MenuSecondary.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
 import UserList from './components/UserList/UserList';
-import EditUser from './components/EditUser/EditUser';
 import OrganisationList from './components/OrganisationList/OrganisationList';
-import EditOrganisation from './components/EditOrganisation/EditOrganisation';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import ApiKeys from './components/ApiKeys/ApiKeys';
@@ -49,6 +51,7 @@ import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
 import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
 
+import {setAclInRedux} from './actions/authentication.js';
 import { initUpdateParkingData } from './poll-api/pollParkingData.js';
 import {
   initUpdateVerhuringenData
@@ -59,12 +62,20 @@ import {
 } from './helpers/notify';
 
 import {
+  isValidAuthState,
+  clearInvalidAuthState,
+} from './helpers/authentication.js';
+
+import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_ZONES_ADMIN,
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_START,
+  DISPLAYMODE_PERMITS,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -125,7 +136,7 @@ function App() {
 
   let DELAY_TIMEOUT_IN_MS = 250;
 
-  const exportState = useSelector((state: StateType) => {
+  const exportState = useSelector((state) => {
     return { filter: state.filter, layers: state.layers, ui:state.ui };
   });
   const isFilterBarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
@@ -166,7 +177,13 @@ function App() {
     
     // Decide on which display mode we use, based on URL
     let payload;
-    if(pathName.includes("/map/park")||pathName==='/') {
+    if(pathName==='/') {
+      payload=DISPLAYMODE_PARK;
+    } else if(pathName.includes("/start")) {
+      payload=DISPLAYMODE_START;
+    } else if(pathName.includes("/dashboard/vergunningseisen")) {
+      payload=DISPLAYMODE_PERMITS;
+    } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
       payload=DISPLAYMODE_RENTALS;
@@ -176,62 +193,82 @@ function App() {
       payload=DISPLAYMODE_ZONES_ADMIN;
     } else if(pathName.includes("/map/servicegebieden")) {
       payload=DISPLAYMODE_SERVICE_AREAS;
+    } else if(pathName.includes("/map/beleidshubs")) {
+      payload=DISPLAYMODE_POLICY_HUBS;
     } else {
       payload=DISPLAYMODE_OTHER;
     }
     dispatch({type: 'LAYER_SET_DISPLAYMODE', payload});
 
-  }, [pathName, uriParams]);
+  }, [pathName, uriParams, dispatch]);
 
   useEffect(() => {
-    (async () => {
-      const theAcl = await getAcl(token);
-      setAcl(theAcl);
-      setIsOrganisationAdmin(theAcl.privileges && theAcl.privileges.indexOf('ORGANISATION_ADMIN') > -1);
-      setIsAdmin(theAcl.is_admin);
-    })();
-  }, [token])
+    const updateACL = async () => {
+      try {
+        // Validate authentication state before making API calls
+        const currentState = store.getState();
+        if (!isValidAuthState(currentState)) {
+          console.warn("Invalid authentication state detected, clearing user data");
+          clearInvalidAuthState(dispatch);
+          return;
+        }
 
-  const isLoggedIn = useSelector((state: StateType) => {
+        const theAcl = await getAcl(token);
+        if(! theAcl) return;
+  
+        dispatch(setAclInRedux(theAcl));
+        setAcl(theAcl);
+        
+        setIsOrganisationAdmin(theAcl?.privileges && theAcl?.privileges.indexOf('ORGANISATION_ADMIN') > -1);
+        setIsAdmin(theAcl?.is_admin);
+      } catch(err) {
+        console.error("ACL update failed:", err);
+        
+        // If ACL update fails due to authentication issues, clear the user data
+        if (err.status === 401 || err.status === 403) {
+          console.warn("Authentication failed during ACL update, clearing user data");
+          clearInvalidAuthState(dispatch);
+        }
+      }
+    }
+
+    updateACL();
+  }, [token, dispatch])
+
+  // const test = useSelector((state: StateType) => {
+  //   console.log('*** test', state)
+  //   return state.authentication;
+  // });
+
+  const isLoggedIn = useSelector((state) => {
     return state.authentication.user_data ? true : false;
   });
   
-  // const isAdmin = useSelector((state: StateType) => {
-  //   if(! state.authentication) return false;
-  //   if(! state.authentication.user_data) return false;
-  //   let userIsAdmin = false;
-  //   state.authentication.user_data.user.registrations.forEach(x => {
-  //     if(x.roles.indexOf('administer') > -1) userIsAdmin = true;
-  //     if(x.roles.indexOf('admin') > -1) userIsAdmin = true;
-  //   });
-  //   return userIsAdmin;
-  // });
-  
-  const filterDate = useSelector((state: StateType) => {
+  const filterDate = useSelector((state) => {
     return state.filter ? state.filter.datum : false;
   });
 
-  const isLayersMobileVisible = useSelector((state: StateType) => {
+  const isLayersMobileVisible = useSelector((state) => {
     return state.ui ? state.ui['MenuSecondary.layers'] : false;
   });
 
-  const isFilterBarVisible = useSelector((state: StateType) => {
+  const isFilterBarVisible = useSelector((state) => {
     return state.ui ? state.ui['FILTERBAR'] : false;
   });
 
-  const filter = useSelector((state: StateType) => {
+  const filter = useSelector((state) => {
     return state.filter;
   });
   
-  const layers = useSelector((state: StateType) => {
-    return state.layers;
-  });
+  // const layers = useSelector((state) => {
+  //   return state.layers;
+  // });
 
-  const displayMode = useSelector((state: StateType) => {
+  const displayMode = useSelector((state) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
-  const metadata = useSelector((state: StateType) => {
+  const metadata = useSelector((state) => {
     return state.metadata;
   });
 
@@ -269,7 +306,12 @@ function App() {
 
   // On app start: get user data
   useEffect(() => {
-    initAccessControlList(store);
+    // Add a small delay to ensure the store is properly initialized
+    const timer = setTimeout(() => {
+      initAccessControlList(store);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isLoggedIn]);
   
   useEffect(() => {
@@ -300,6 +342,7 @@ function App() {
   //  or if pathName/filter is changed:
   //  reload park events data
   useEffect(() => {
+    // displayMode
     if(displayMode !== 'displaymode-park') return;
     if(isLoggedIn && metadata.zones_loaded === false) return;
 
@@ -311,10 +354,10 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
-    filter
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
+    filter,
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    // exportState?.layers.map_style,
   ]);
 
   // Reload rentals data if i.e. filter changes
@@ -331,9 +374,9 @@ function App() {
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
     filter,
-    // DELAY_TIMEOUT_IN_MS,
-    // delayTimeout,
-    // displayMode
+    DELAY_TIMEOUT_IN_MS,
+    displayMode,
+    // exportState?.layers.map_style,
   ]);
 
   // Mobile menu: Filters / Layers
@@ -345,7 +388,6 @@ function App() {
       <div className="block sm:hidden relative z-10">
         <FilterbarMobile isVisible={isFilterBarVisible} displayMode={displayMode} />
       </div>
-      <SelectLayerMobile />
     </div>
   }
 
@@ -458,12 +500,33 @@ function App() {
                 } />
               </> : null
             }
+            {/* <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} /> */}
             <Route exact path="/" element={renderMapElements()} />
             <Route exact path="/map/park" element={renderMapElements()} />
             <Route exact path="/map/rentals" element={renderMapElements()} />
             <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+            <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
+
+            <Route exact path="/start" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
+            <Route exact path="/dashboard/vergunningseisen" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} />
             <Route exact path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
@@ -520,16 +583,58 @@ function App() {
                 </Misc>
               </Overlay>
             } />
+            <Route exact path="/faq/:path" element={
+              <Overlay>
+                <Misc>
+                  <Faq />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/docs" element={
+              <Overlay>
+                <Misc>
+                  <Docs />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/docs/:category" element={
+              <Overlay>
+                <Misc>
+                  <Docs />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/docs/:category/:doc" element={
+              <Overlay>
+                <Misc>
+                  <Docs />
+                </Misc>
+              </Overlay>
+            } />
+            <Route exact path="/active_feeds" element={
+              <Overlay>
+                <Misc>
+                  <ActiveFeeds />
+                </Misc>
+              </Overlay>
+            } />
           </>
           :
           null
         }
 
         { ! isLoggedIn ? <>
+          {/* <Route exact path="/" element={<>
+              <ContentPage>
+                <VergunningEisenPage />
+              </ContentPage>
+              {renderMapElements()}
+            </>} /> */}
           <Route exact path="/" element={renderMapElements()} />
           <Route exact path="/map/park" element={renderMapElements()} />
           <Route exact path="/map/rentals" element={renderMapElements()} />
           <Route exact path="/map/servicegebieden" element={renderMapElements()} />
+          <Route exact path="/map/beleidshubs" element={renderMapElements()} />
           <Route path="/map/zones" element={renderMapElements()} />
           <Route exact path="/misc" element={
             <Overlay>
@@ -550,6 +655,13 @@ function App() {
               </Misc>
             </Overlay>
           } />
+          <Route exact path="/faq/:path" element={
+            <Overlay>
+              <Misc>
+                <Faq />
+              </Misc>
+            </Overlay>
+          } />
         </> : '' }
 
         <Route exact path="/over" element={
@@ -559,6 +671,12 @@ function App() {
             </Misc>
           </Overlay>
         } />
+        <Route exact path="/stats/overview" element={<>
+          <Overlay>
+            <Login />
+          </Overlay>
+          {renderMapElements()}
+        </>} />
         <Route exact path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
@@ -574,14 +692,45 @@ function App() {
             <SetPassword />
           </Overlay>
         } />
+        <Route exact path="/docs" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/docs/:category" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/docs/:category/:doc" element={
+          <Overlay>
+            <Misc>
+              <Docs />
+            </Misc>
+          </Overlay>
+        } />
+        <Route exact path="/active_feeds" element={
+          <Overlay>
+            <Misc>
+              <ActiveFeeds />
+            </Misc>
+          </Overlay>
+        } />
         <Route element={renderMapElements()} />
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
+      {/* {pathName !== '/stats/overview' && <MapPage mapContainer={mapContainer} />} */}
       <MapPage mapContainer={mapContainer} />
+
       <Menu acl={acl} pathName={pathName} />
 
      </div>
+     <Toaster />     
     </div>
   );
 }

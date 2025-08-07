@@ -3,8 +3,9 @@ const cPublicAanbieders = [
   { value:"donkey", system_id:"donkey", name:"Donkey" },
   { value:"htm", system_id:"htm", name:"HTM" },
   { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
+  // { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels" },
   { value:"check", system_id:"check", name:"CHECK" },
-  { value:"felyx", system_id:"felyx", name:"Felyx" },
+  { value:"felyx_mds", system_id:"felyx", name:"Felyx" },
   { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
   { value:"keobike", system_id:"keobike", name:"Keobike" },
   { value:"lime", system_id:"lime", name:"Lime" },
@@ -16,10 +17,13 @@ const cPublicAanbieders = [
   { value:"bird", system_id:"bird", name:"Bird" },
   { value:"bolt", system_id:"bolt", name:"Bolt" },
   { value:"bondi", system_id:"bondi", name:"Bondi" },
-  { value:"moveyou", system_id:"moveyou", name:"GoAboout" },
+  { value:"dott", system_id:"dott", name:"Dott" },
+  { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
+  { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
+  { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
 ];
 
-const isDutchDashboardDeelmobiliteit = document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
+const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
 const cPublicGebieden = isDutchDashboardDeelmobiliteit
   ? [
@@ -74,6 +78,19 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       fetch(url, options).then((response) => {
         if(!response.ok) {
           console.error("unable to fetch: %o", response);
+          
+          // Handle authentication errors by clearing the user data
+          if (response.status === 401 || response.status === 403) {
+            console.warn("Authentication failed, clearing user data");
+            store_accesscontrollist.dispatch({ type: 'CLEAR_USER' });
+            
+            // Fall back to public data
+            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+            store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+            store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
+          }
+          
           return false
         }
 
@@ -84,9 +101,16 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
             if(metadata.municipalities.length===1) {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});
+            } else if(metadata.municipalities.length === 0){
+              // Reset filterGebied if user has access to 0 municipalities
+              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
             }
             
-            // items -> {"name": "Cykl","system_id": "cykl"}
+            // If not admin, filter out certain operators
+            // if(!state.authentication.user_data.acl || !state.authentication.user_data.acl.is_admin) {
+            //   const hideOperators = ['mywheels', 'greenwheels'];
+            //   metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
+            // }
             store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: metadata.operators});
 
             // items -> {"id": 1, "name": "asdfasdfadfa" }
@@ -96,7 +120,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
           })
         }).catch(ex=>{
-          console.error("unable to decode JSON");
+          console.error("unable to decode JSON", ex);
+          
+          // Handle network errors by falling back to public data
+          store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+          store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+          store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+          store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
         }).finally(()=>{
           store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
         })
@@ -105,6 +135,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
   } catch(ex) {
     // console.error("Unable to update ACL", ex)
     store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
+    
+    // Handle any other errors by falling back to public data
+    store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
+    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+    store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
+    store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
+    
     return false;
   }
 }

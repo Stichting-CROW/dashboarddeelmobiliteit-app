@@ -241,12 +241,12 @@ const SharedDataOverview = ({
         Stel hieronder in welke organisaties en personen toegang hebben tot de data van jouw organisatie.
       </p>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
-        <Button theme='primary' classes='add-new' onClick={() => {
+        {/* <Button theme='primary' classes='add-new' onClick={() => {
           setShowGrantUserForm(false);
           setShowGrantOrganisationForm(true);
         }}>
           Deel met organisatie
-        </Button>
+        </Button> */}
         <Button theme='primary' classes='add-new' onClick={() => {
           setShowGrantUserForm(true);
           setShowGrantOrganisationForm(false);

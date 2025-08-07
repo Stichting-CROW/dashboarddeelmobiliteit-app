@@ -201,7 +201,7 @@ function EditOrganisation({
 
         {(organisationType === 'MUNICIPALITY' || organisationType === 'OTHER_GOVERNMENT') && <div>
           <FormLabel classes="mt-2 mb-4 font-bold">
-            Data-eigenaar van de volgende gemeentes
+            Heeft overeenkomst voor de data in volgende gemeentegebied(en)
           </FormLabel>
           <Select
             className="my-2 w-80"

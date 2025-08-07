@@ -18,9 +18,10 @@
 @media (min-width: 640px) {
   .Menu {
     right: 50px;/* Some space because of map action buttons */
+    padding-left: 50px;
   }
   .Menu.filter-open {
-    transition-timing-function: ease-in;
+    transition-timing-function: ease-out;
     width: calc(100% - 324px);
   }
 

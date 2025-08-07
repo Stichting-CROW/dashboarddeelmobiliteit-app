@@ -6,6 +6,7 @@ function Button({
   onClick,
   type,
   title,
+  disabled,
   classes,
   style
 }: {
@@ -15,6 +16,7 @@ function Button({
   title?: string,
   type?: "button" | "reset" | "submit",
   classes?: string,
+  disabled?: any,
   style?: object
 }) {
   return (
@@ -29,11 +31,13 @@ function Button({
         mr-2
         mb-2
         text-sm
-        cursor-pointer
         mx-2
         my-2
         text-center
+        ${disabled ? '' : 'cursor-pointer'}
+        ${disabled ? 'opacity-25' : ''}
       `}
+      disabled={disabled}
       type={type}
       title={title}
       onClick={onClick}

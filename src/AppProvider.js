@@ -19,7 +19,36 @@ const md5 = require('md5');
 
 // Get persistentState from localStorage
 const theState = localStorage.getItem('CROWDD_reduxState')
-const persistedState = theState ? JSON.parse(theState) : {};
+let persistedState = theState ? JSON.parse(theState) : {};
+
+// Validate and clean persisted state to prevent reload loops
+const validatePersistedState = (state) => {
+  if (!state || !state.authentication || !state.authentication.user_data) {
+    return {};
+  }
+
+  // Check if token exists and is not expired
+  const userData = state.authentication.user_data;
+  if (!userData.token) {
+    // Clear authentication if no token
+    return {
+      ...state,
+      authentication: { user_data: null }
+    };
+  }
+
+  // Optional: Add token expiration check if your API provides expiration info
+  // if (userData.token_expires && new Date(userData.token_expires) < new Date()) {
+  //   return {
+  //     ...state,
+  //     authentication: { user_data: null }
+  //   };
+  // }
+
+  return state;
+};
+
+persistedState = validatePersistedState(persistedState);
 
 window.process = { ...window.process }
 
@@ -45,13 +74,21 @@ store.subscribe(() => {
     store.dispatch({ type: 'CLEAR_RENTALS_DESTINATIONS', payload: null});
   }
   
+  // Debug: Track authentication state changes
+  if (process.env.NODE_ENV === 'development') {
+    const { debugReload } = require('./helpers/debug.js');
+    debugReload.trackAuthState(storeState.authentication);
+  }
+  
   const storeStateToSaveInLocalStorage = {
     created: storeState.created ? storeState.created : moment().unix(),
     last_update: moment().unix(),
     authentication: storeState.authentication,
     filter: storeState.filter,
     layers: storeState.layers,
-    ui: storeState.ui
+    ui: storeState.ui,
+    policy_hubs: storeState.policy_hubs,
+    service_areas: storeState.service_areas
   }
   localStorage.setItem('CROWDD_reduxState', JSON.stringify(storeStateToSaveInLocalStorage))
 })

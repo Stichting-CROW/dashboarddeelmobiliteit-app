@@ -1,0 +1,48 @@
+.PhaseMenu { 
+  position: fixed;
+  bottom: 140px;
+  height: 68px;
+  overflow-y: hidden;
+  white-space: nowrap;
+  border-radius: 0.5rem;
+  width: calc(100% - 10px);/* 2* 10px margin */
+  margin-left: 5px;
+  text-align: center;
+  transition: width 1s;
+  transition-timing-function: ease-out;
+}
+.PhaseMenu.filter-open {
+  width: calc(100% + 215px);
+  transition-timing-function: ease-in;
+}
+@media(min-width: 640px) {
+  .PhaseMenu {
+    width: calc(100% - 215px + 100px);
+    bottom: 80px;
+    margin-left: 0;
+    overflow-y: visible;
+  }
+}
+.PhaseMenu-inner {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  margin: 1rem auto;
+  margin-bottom: 0px;
+  display: inline-block;
+  border-radius: 1.5rem;
+  max-width: 100%;
+  overflow-x: auto;
+  width: auto;
+}
+  .PhaseMenu-inner > * {
+    position: relative;
+    color: #000;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 3rem;
+    height: 3rem;
+    white-space: nowrap;
+  }

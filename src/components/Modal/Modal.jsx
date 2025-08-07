@@ -8,6 +8,7 @@ const Modal = ({
   button2Handler,
   button2Options,
   hideModalHandler,
+  config
 }: {
   isVisible?: any,
   title?: any,
@@ -17,7 +18,8 @@ const Modal = ({
   button2Title?: any,
   button2Handler?: any,
   button2Options?: any,
-  hideModalHandler?: any
+  hideModalHandler?: any,
+  config?: any
 }) => {
   return (
     <>
@@ -31,12 +33,23 @@ const Modal = ({
         aria-modal="true"
         style={{
           'display': isVisible ? 'block' : 'none',
-          backgroundColor: 'rgba(0,0,0,0.3)',
           zIndex: 100,
           padding: '50px 0'
         }}
         role="dialog"
       >
+        <div
+          className="absolute top-0 right-0 bottom-0 left-0"
+          style={{
+            'display': isVisible ? 'block' : 'none',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            zIndex: -1,
+            padding: '50px 0'
+          }}
+          onClick={hideModalHandler}
+        >
+        </div>
+        
         <div className="
           modal-dialog modal-dialog-centered modal-dialog-scrollable relative w-auto pointer-events-none
           max-w-full
@@ -48,8 +61,8 @@ const Modal = ({
             mx-auto w-11/12
             max-w-full
           " style={{
-            width: '800px',
-            maxWidth: '98%',
+            width: config && config.fullWidth ? '96%' : 'fit-content',
+            maxWidth: '96%',
             maxHeight: '100%'
           }}>
             <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">

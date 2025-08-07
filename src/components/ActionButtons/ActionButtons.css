@@ -1,0 +1,10 @@
+.ActionButtons {
+    transition: margin 0.6s;
+    transition-timing-function: ease-in;
+    z-index: 5;
+}
+.ActionButtons.filter-open {
+    transition: margin 0.4s;
+    transition-timing-function: ease-out;
+    margin-left:324px;
+}

@@ -585,7 +585,7 @@ function FilterbarZones({
     if(! window.confirm('Weet je zeker dat je deze zone wilt verwijderen?')) return;
 
     if(! activeZone || ! activeZone.geography_id) return;
-    await deleteZone(token, activeZone.geography_id)
+    await deleteZone(token, [activeZone.geography_id])
 
     // Reload adminZones
     getAdminZones();
@@ -842,12 +842,11 @@ function FilterbarZones({
           ">
             {R.map(x => {
               return <div className={`
-                ${activeZone.geography_type === x.name ? 'Button-orange' : ''}
+                ${activeZone.geography_type === x.name ? 'Button-orange' : 'text-gray-500'}
                 cursor-pointer
                 flex-1
                 
                 rounded-lg
-                text-gray-500
                 text-center
                 h-10
                 flex
@@ -919,11 +918,10 @@ function FilterbarZones({
             */}
             {R.map(x => {
               return <div className={`
-                ${activeZone.zone_availability === x.name ? 'Button-blue' : ''}
+                ${activeZone.zone_availability === x.name ? 'Button-blue' : 'text-gray-500'}
                 cursor-pointer
                 flex-1
                 rounded-lg
-                text-gray-500
                 text-center
                 border-gray-500
                 h-10

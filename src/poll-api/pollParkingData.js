@@ -4,7 +4,7 @@ import {
   convertDurationToBin,
   abortableFetch
 } from './pollTools.js';
-import { isLoggedIn } from '../helpers/authentication.js';
+import { isLoggedIn, isAdmin } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 import {shouldFetchVehicles} from './pollTools.js';
 
@@ -102,12 +102,15 @@ const doApiCall = (
 ) => {
 
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
+  const is_admin = isAdmin(state);
 
   // Set API URL
   let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
 
   let options = {};
-  let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata);
+  let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
+    show_global: is_admin
+  });
 
   // Set query params for guests
   if(! canfetchdata) {
@@ -172,7 +175,6 @@ const doApiCall = (
 }
 
 const updateParkingData = async () => {
-
   try {
     if(undefined===store_parkingdata) {
       if(process && process.env.DEBUG) console.error("no redux state available yet - skipping zones update");
@@ -183,7 +185,7 @@ const updateParkingData = async () => {
     const state = store_parkingdata.getState();
     if(! state) return;
 
-    const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
+    // const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
 
     // Should we (re)fetch vehicles?
     const doFetchVehicles = shouldFetchVehicles(state.filter, existingFilter);

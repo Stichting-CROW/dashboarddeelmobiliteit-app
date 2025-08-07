@@ -24,10 +24,19 @@ import zonesGeodataBorder from './zones-geodata-border.js';
 
 import zonesIsochrones from './zones-isochrones.js';
 
+import luchtfotoPdok from './luchtfoto-pdok';
+
 // The sort order sets the loading order
 // - 'Zones' have to be at the background,
 // - 'Cluster counts' have to be on top of 'Clusters'
 export const layers = {
+  'luchtfoto-pdok': luchtfotoPdok,
+  // 'brt-achtergrondkaart': {
+  //     'id': 'rasterkaartje',
+  //     'type': 'raster',
+  //     'source': 'brt-achtergrondkaart',
+  // },
+
   'zones-geodata': zonesGeodata,
   'zones-geodata-border': zonesGeodataBorder,
 
@@ -52,5 +61,6 @@ export const layers = {
   'zones-metrics-public': zonesMetricsPublic,
   'zones-metrics-public-border': zonesMetricsPublicBorder,
 
-  'zones-isochrones': zonesIsochrones
+  'zones-isochrones': zonesIsochrones,
+
 }

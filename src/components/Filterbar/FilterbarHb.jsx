@@ -7,7 +7,7 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot.jsx';
 import FilteritemDuur from './FilteritemDuur.jsx';
-import FilteritemAanbieders from './FilteritemAanbieders.jsx';
+import FilteritemAanbieders from './FilteritemAanbieders';
 import FilteritemZones from './FilteritemZones.jsx';
 import FilteritemH3Niveau from './FilteritemH3Niveau.jsx';
 import {
@@ -15,7 +15,7 @@ import {
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
-import FilteritemVoertuigTypes from './FilteritemVoertuigTypes.jsx';
+import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import Logo from '../Logo.jsx';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';
