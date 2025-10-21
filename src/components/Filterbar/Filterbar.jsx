@@ -252,11 +252,10 @@ function Filterbar({
       </div>
     }
 
-    <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px'}}>
-      {/* versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
+    <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px', width: '210px'}}>
+      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
         2025-10-21
-      </a><br /> */}
-      ❗ Er zijn problemen met tonen van voertuigen in o.a. <i>Aanbod</i>. Wij werken aan een oplossing
+      </a>
     </div>
 
   </>
