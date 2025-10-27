@@ -27,6 +27,7 @@ function populateTableData(policyHubs) {
       internal_id: hub.internal_id,
       name: hub.name,
       type: readable_geotype(hub.geography_type),
+      phase: readable_phase(hub.phase),
       created_by: hub.created_by,
       created_at: moment(hub.created_at).format('YYYY-MM-DD HH:mm'),
       last_modified_by: hub.last_modified_by,

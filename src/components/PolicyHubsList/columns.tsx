@@ -132,6 +132,13 @@ export const columns: ColumnDef<Hub>[] = [
     }
   },
   {
+    accessorKey: "name",
+    cell: info => info.getValue(),
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Naam" />
+    ),
+  },
+  {
     accessorKey: "type",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
@@ -141,11 +148,13 @@ export const columns: ColumnDef<Hub>[] = [
     },
   },
   {
-    accessorKey: "name",
-    cell: info => info.getValue(),
+    accessorKey: "phase",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Naam" />
+      <DataTableColumnHeader column={column} title="Fase" />
     ),
+    meta: {
+      filterVariant: 'select',
+    },
   },
   {
     accessorKey: "internal_id",
