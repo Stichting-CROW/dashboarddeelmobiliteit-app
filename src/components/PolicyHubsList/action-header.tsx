@@ -174,7 +174,7 @@ const ActionHeader = ({
     }
 
     return <>
-        <div className="flex justify-between sticky left-0" style={{minHeight: '55px'}}>
+        <div className="flex justify-between" style={{minHeight: '55px'}}>
             {canEditHubs(acl) && <div className="flex justify-start">
                 {<Button theme="white" onClick={commitHandler} disabled={! canCommit()}>
                     Stel vast

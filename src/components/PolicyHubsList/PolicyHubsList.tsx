@@ -171,18 +171,25 @@ const PolicyHubsList = () => {
 
   return (
     <>
-      <ActionHeader
-        policyHubs={policyHubs}
-        fetchHubs={fetchHubs}
-      />
-      <div data-name="body" className="mx-auto p-4" style={{
-        width: 'fit-content'
+      <div className="sticky top-0 z-10 bg-white shadow-sm pb-4" style={{
+        marginTop: '-1rem',
+        marginLeft: '-0.5rem',
+        marginRight: '-0.5rem',
+        top: '-1rem',
+        paddingBottom: 0
+      }}>
+        <ActionHeader
+          policyHubs={policyHubs}
+          fetchHubs={fetchHubs}
+        />
+      </div>
+      <div data-name="body" className="mx-auto" style={{
+        width: 'fit-content',
+        marginLeft: '-1rem',
+        marginRight: '-1rem',
       }}>
         <DataTable key="data-table" columns={filterColumnsForGuest(columns)} data={tableData} />
       </div>
-      <div className="text-gray-200 px-2" onClick={() => {
-        fetchHubs();
-      }}>.</div>
     </>
   );
 }
