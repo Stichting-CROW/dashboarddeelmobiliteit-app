@@ -176,7 +176,8 @@ const PolicyHubsList = () => {
         marginLeft: '-0.5rem',
         marginRight: '-0.5rem',
         top: '-1rem',
-        paddingBottom: 0
+        paddingBottom: 0,
+        width: 'calc(100% + 1.5rem)'
       }}>
         <ActionHeader
           policyHubs={policyHubs}

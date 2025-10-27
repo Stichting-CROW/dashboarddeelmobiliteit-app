@@ -196,7 +196,7 @@ export function DataTable<TData, TValue>({
 
       <div className="" style={{width: '100%'}}>
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky bg-white" style={{top: '39px'}}>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
