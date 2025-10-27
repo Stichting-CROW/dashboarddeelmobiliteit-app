@@ -10,37 +10,37 @@ Een zone (= hub of verbodsgebied) kan zich in verschillende fases bevinden. Dit 
 
 ___
 
-**Concept** (ontwikkelings- en afstemmingsfase)
+**Concept** (ontwikkelings- en afstemmingsfase)<br />
 _In de conceptfase tekent de gemeente zones in, of importeert zij die._
 
 ⬇️
 
-**Vastgesteld concept** (laatste controle door aanbieders)
+**Vastgesteld concept** (laatste controle door aanbieders)<br />
 _Als een concept vastgesteld is, is er een laatste controle door aanbieders. Bij grote bezwaren kan de fase teruggezet worden naar de conceptfase._
 
 ⬇️
 
-**Definitief gepubliceerd** (implementatie door de aanbieders)
+**Definitief gepubliceerd** (implementatie door de aanbieders)<br />
 _Een zone die definitief gepubliceerd is, dient geimplementeerd te worden door de aanbieders. Binnenkort wordt de zone definitief actief en moet die actief geimplementeerd zijn._
 
 ⬇️
 
-**Definitief actief** (toepassingsfase)
+**Definitief actief** (toepassingsfase)<br />
 _De definitief actieve zones zijn de zones zoals die nu actief zijn, en zoals die als het goed is nu in de apps van de aanbieders verwerkt is._
 
 ⬇️
 
-**Voorgenomen te verwijderen** (laatste controle door aanbieders)
+**Voorgenomen te verwijderen** (laatste controle door aanbieders)<br />
 _Definitief actieve zones kun je voornemen te verwijderen per een bepaalde datum. De voorgenomen te verwijderen zone verschijnt in de fase "Vastgesteld concept"._
 
 ⬇️
 
-**Definitief gepland te verwijderen** (implementatie door de aanbieders)
+**Definitief gepland te verwijderen** (implementatie door de aanbieders)<br />
 _Een zone die definitief gepubliceerd is, dient geimplementeerd te worden door de aanbieders. In dit geval moeten de aanbieders de zone dus verwijderen uit hun apps._
 
 ⬇️
 
-**Archief**
+**Archief**<br />
 _Als een zone verwijderd is, kan die alsnog bekeken worden in het archief, bijvoorbeeld om te bekijken welke zones vorige jaren actief geweest zijn._
 
 ___
