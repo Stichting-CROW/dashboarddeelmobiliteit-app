@@ -59,7 +59,7 @@ function StatsPage(props) {
     // If no custom zone:
     else {
       const availableAggLevels = ['day', 'week', 'month'];
-      // If agg level is specific to detailled agg data: switch to other agg level
+    // If agg level is specific to detailled agg data: switch to other agg level
       if(availableAggLevels.indexOf(filter.ontwikkelingaggregatie) <= -1) {
         // Switch to non-detailled agg level
         agg = 'day';
@@ -110,18 +110,6 @@ function StatsPage(props) {
         key={`agg-level-${name}`}
         className={"agg-button " + (filter.ontwikkelingaggregatie===name ? " agg-button-active":"")}
         onClick={() => { setAggregationLevel(name) }}
-      >
-        {title}
-      </div>
-    )
-  }
-
-  const renderAggregationFunctionButton = (name, title) => {
-    return (
-      <div
-        key={`agg-level-${name}`}
-        className={"agg-button " + (filter.ontwikkelingaggregatie_function===name ? " agg-button-active":"")}
-        onClick={() => { setAggregationFunction(name) }}
       >
         {title}
       </div>

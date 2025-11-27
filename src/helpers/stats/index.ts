@@ -95,14 +95,14 @@ const prepareAggregatedStatsData_timescaleDB = (key, data, aggregationLevel, aan
   const dateFormat = getDateFormat(aggregationLevel);
   return data[theKey].values.map(x => {
     const { time, ...rest } = x;
-    // let item = {...rest, ...{ time: moment.tz(time.replace('Z', ''), 'Europe/Amsterdam').format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
-    // Inspiration from https://stackoverflow.com/a/51764389
+    // No timezone indicator, treat as local time in Europe/Amsterdam
+    let formatString: string = "YYYY-MM-DDTHH:mm:ss";
     let item = {...rest, ...{ time: moment.tz(
       time,
-      time.indexOf('+') > -1 ? "YYYY-MM-DDTHH:mm:ss+00:00Z" : "YYYY-MM-DDTHH:mm:ssZ",
+      formatString,
       true,
       'Europe/Amsterdam'
-    ).format('YYYY-MM-DD HH:mm:ss') }}// https://dmitripavlutin.com/remove-object-property-javascript/#2-object-destructuring-with-rest-syntax
+    ).format('YYYY-MM-DD HH:mm:ss') }}
 
     // For rental data: sum modality counts for every provider
     if(theKey === 'rental_stats') {
