@@ -1,5 +1,10 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-11-27
+
+- 🐛 Fix: De x-as van [Ontwikkeling](https://dashboarddeelmobiliteit.nl/stats/overview)-grafieken was onjuist bij selectie van maatwerkzones<br />
+Dat er geen x-as-waardes werden getoond kwam doordat er sinds kort [[1]](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-api/commit/2e18f28425be233d30d819229966d7b8632753fd) [[2]](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-api/commit/476d3d4b1a15d64293d21d856b2b0bb7e6d01b18) een deel van de API's sinds kort tijdzones teruggeven.
+
 ## Release 2025-08-06
 
 Beleidszones:
