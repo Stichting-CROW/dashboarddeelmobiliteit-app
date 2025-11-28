@@ -132,6 +132,18 @@ function FilterbarServiceAreas({
     });
   }, [municipality]);
 
+  // Auto-select first operator if none is selected or if selected operators are not available
+  useEffect(() => {
+    if (availableOperators.length > 0) {
+      const hasValidSelection = visible_operators && visible_operators.length > 0 && 
+        visible_operators.some(op => availableOperators.includes(op));
+      
+      if (!hasValidSelection) {
+        dispatch(showServiceAreaForOperator(availableOperators[0]));
+      }
+    }
+  }, [availableOperators, visible_operators, dispatch]);
+
   return (
     <div className="filter-bar-inner py-2">
 
