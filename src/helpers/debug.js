@@ -19,11 +19,11 @@ export const debugReload = {
   
   trackAuthState: (authState) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[Reload Debug] Auth state:`, {
-        hasUserData: !!authState?.user_data,
-        hasToken: !!authState?.user_data?.token,
-        timestamp: new Date().toISOString()
-      });
+      // console.log(`[Reload Debug] Auth state:`, {
+      //   hasUserData: !!authState?.user_data,
+      //   hasToken: !!authState?.user_data?.token,
+      //   timestamp: new Date().toISOString()
+      // });
     }
   }
 }; 

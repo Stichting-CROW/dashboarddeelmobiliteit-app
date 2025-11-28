@@ -14,7 +14,8 @@ import {
 
 import {
   renderServiceAreaDelta,
-  removeServiceAreaDeltaFromMap
+  removeServiceAreaDeltaFromMap,
+  updateLayerFilters
 } from '../../Map/MapUtils/map.service_area_delta';
 
 import {StateType} from '../../../types/StateType.js';
@@ -25,7 +26,7 @@ import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
 
-import { Legend } from './Legend';
+import { Legend, LegendItemType } from './Legend';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 
 const DdServiceAreasLayer = ({
@@ -37,6 +38,9 @@ const DdServiceAreasLayer = ({
   const [serviceAreas, setServiceAreas] = useState([]);
   const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
   const [serviceAreaDelta, setServiceAreaDelta] = useState<ServiceAreaDelta | null>(null);
+  const [activeTypes, setActiveTypes] = useState<Set<LegendItemType>>(
+    new Set(['added', 'unchanged', 'removed'] as LegendItemType[])
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useDispatch()
@@ -154,7 +158,7 @@ const DdServiceAreasLayer = ({
     serviceAreas
   ]);
 
-  // Do things if 'serviceAreaDelta' change
+  // Do things if 'serviceAreaDelta' changes
   useEffect(() => {
     // Return if no service areas were found
     if (!serviceAreaDelta) return;
@@ -162,13 +166,27 @@ const DdServiceAreasLayer = ({
     // Remove old service area delta
     removeServiceAreasFromMap(map);
 
-    // Render service area delta
-    renderServiceAreaDelta(map, serviceAreaDelta);
+    // Render service area delta with active types filter
+    renderServiceAreaDelta(map, serviceAreaDelta, activeTypes);
 
     // onComponentUnLoad
     return () => {
     };
   }, [serviceAreaDelta]);
+
+  // Update filters when activeTypes change (without recreating layers)
+  useEffect(() => {
+    if (!serviceAreaDelta || !map) return;
+    
+    // Check if layers exist
+    const fillLayer = map.getLayer('service_area_delta-layer-fill');
+    const borderLayer = map.getLayer('service_area_delta-layer-border');
+    
+    if (fillLayer && borderLayer) {
+      // Layers exist, just update filters
+      updateLayerFilters(map, activeTypes);
+    }
+  }, [activeTypes, serviceAreaDelta, map]);
 
   const clickPreviousVersion = () => {
     if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
@@ -244,7 +262,7 @@ const DdServiceAreasLayer = ({
     {searchParams.get('version') && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
       <CenterBottom>
         <InfoCard>
-          <Legend />
+          <Legend onActiveTypesChange={setActiveTypes} />
         </InfoCard>
       </CenterBottom>
     </div>}
