@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom'
 import EventsTimeline from '../../EventsTimeline/EventsTimeline';
@@ -41,6 +41,7 @@ const DdServiceAreasLayer = ({
   const [activeTypes, setActiveTypes] = useState<Set<LegendItemType>>(
     new Set(['added', 'unchanged', 'removed'] as LegendItemType[])
   );
+  const [isLoading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useDispatch()
@@ -68,38 +69,51 @@ const DdServiceAreasLayer = ({
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
-    // Remove 
-    searchParams.delete('version');
-    setSearchParams(searchParams);
+    if (!map || !filter?.gebied || !visible_operators || visible_operators.length === 0) return;
+
+    // Remove version from search params
+    if (searchParams.get('version')) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('version');
+      setSearchParams(newParams);
+    }
 
     // Remove old service areas and deltas
     removeServiceAreasFromMap(map);
     removeServiceAreaDeltaFromMap(map);
 
-    // Load new service areas
-    (async () => {
-      const service_areas = await loadServiceAreas(filter.gebied, visible_operators);
-      setServiceAreas(service_areas);
-    })();
-
-    (async () => {
-      const service_area_history = await loadServiceAreasHistory(filter.gebied, visible_operators);
-      setServiceAreasHistory(service_area_history);
-    })();
+    // Load service areas and history in parallel for better performance
+    setIsLoading(true);
+    Promise.all([
+      loadServiceAreas(filter.gebied, visible_operators),
+      loadServiceAreasHistory(filter.gebied, visible_operators)
+    ])
+      .then(([service_areas, service_area_history]) => {
+        setServiceAreas(service_areas);
+        setServiceAreasHistory(service_area_history);
+      })
+      .catch((error) => {
+        console.error('Error loading service areas:', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
 
   }, [
-    filter.gebied,
+    map,
+    filter?.gebied,
     visible_operators
   ]);
 
-  // onComponentUnLoad
+  // Cleanup on component unmount
   useEffect(() => {
     return () => {
-      removeServiceAreasFromMap(map);
-      removeServiceAreaDeltaFromMap(map);
+      if (map) {
+        removeServiceAreasFromMap(map);
+        removeServiceAreaDeltaFromMap(map);
+      }
     };
-  }, [
-  ]);
+  }, [map]);
 
   // On component load: Set background layer to 'base layer' only if not already set
   useEffect(() => {
@@ -121,58 +135,86 @@ const DdServiceAreasLayer = ({
     // Removed stateLayers.map_style from dependencies to prevent reverting when user changes background layer
   ]);
 
-  // Load 'delta' if version_id or visible_operators changes
+  // Memoize version string to avoid unnecessary re-renders
+  const versionParam = useMemo(() => searchParams.get('version'), [searchParams]);
+
+  // Load 'delta' if version_id changes
   useEffect(() => {
-    if(! searchParams.get('version')) return;
-
-    (async () => {
-      const response = await loadServiceAreaDeltas(visible_operators, searchParams);
-      setServiceAreaDelta(response);
-    })();
-
-  }, [
-    searchParams.get('version'),
-  ]);
-
-  // Do things if 'serviceAreas' change
-  useEffect(() => {
-    // Return if no service areas were found
-    if(! serviceAreas || ! serviceAreas[0]) return;
-    
-    // Get the service area of the selected municipality
-    const serviceAreasForMunicipality = serviceAreas.filter(x => x.municipality === filter.gebied).pop();
-
-    // Return if no service areas were found for this municipality
-    if(! serviceAreasForMunicipality) {
-      console.log('no service areas for municipality');
+    if (!versionParam || !map || !visible_operators || visible_operators.length === 0) {
+      setServiceAreaDelta(null);
       return;
     }
 
-    renderServiceAreas(map, visible_operators[0], serviceAreasForMunicipality.geometries);
+    setIsLoading(true);
+    loadServiceAreaDeltas(visible_operators, searchParams)
+      .then((response) => {
+        setServiceAreaDelta(response);
+      })
+      .catch((error) => {
+        console.error('Error loading service area delta:', error);
+        setServiceAreaDelta(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
 
-    // onComponentUnLoad
+  }, [
+    versionParam,
+    map,
+    visible_operators,
+    searchParams
+  ]);
+
+  // Memoize the service area for the current municipality to avoid unnecessary filtering
+  const serviceAreaForMunicipality = useMemo(() => {
+    if (!serviceAreas || serviceAreas.length === 0 || !filter?.gebied) return null;
+    return serviceAreas.find(x => x.municipality === filter.gebied) || null;
+  }, [serviceAreas, filter?.gebied]);
+
+  // Do things if 'serviceAreas' change
+  useEffect(() => {
+    // Return if no service areas were found or map is not ready
+    if (!map || !serviceAreaForMunicipality || !visible_operators || visible_operators.length === 0) {
+      return;
+    }
+
+    // Only render if we're not showing a delta (delta takes precedence)
+    if (!versionParam) {
+      renderServiceAreas(map, visible_operators[0], serviceAreaForMunicipality.geometries);
+    }
+
+    // Cleanup function - only remove if component unmounts
     return () => {
-
+      // Only cleanup if map still exists and we're not transitioning to delta view
+      if (map && !versionParam) {
+        removeServiceAreasFromMap(map);
+      }
     };
   }, [
-    serviceAreas
+    map,
+    serviceAreaForMunicipality,
+    visible_operators,
+    versionParam
   ]);
 
   // Do things if 'serviceAreaDelta' changes
   useEffect(() => {
-    // Return if no service areas were found
-    if (!serviceAreaDelta) return;
+    // Return if no service area delta or map is not ready
+    if (!map || !serviceAreaDelta) {
+      return;
+    }
 
-    // Remove old service area delta
+    // Remove old service areas when showing delta
     removeServiceAreasFromMap(map);
 
     // Render service area delta with active types filter
     renderServiceAreaDelta(map, serviceAreaDelta, activeTypes);
 
-    // onComponentUnLoad
+    // Cleanup on unmount
     return () => {
+      removeServiceAreaDeltaFromMap(map);
     };
-  }, [serviceAreaDelta]);
+  }, [map, serviceAreaDelta, activeTypes]);
 
   // Update filters when activeTypes change (without recreating layers)
   useEffect(() => {
@@ -188,46 +230,71 @@ const DdServiceAreasLayer = ({
     }
   }, [activeTypes, serviceAreaDelta, map]);
 
-  const clickPreviousVersion = () => {
+  // Memoize version navigation helpers to avoid recalculating on every render
+  const versionNavigation = useMemo(() => {
+    const currentVersion = versionParam;
+    const currentIndex = currentVersion 
+      ? serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === currentVersion)
+      : -1;
+
+    return {
+      currentIndex,
+      hasPrevious: currentIndex > 0,
+      hasNext: currentIndex >= 0 && currentIndex < serviceAreasHistory.length - 1,
+      isAtLatest: currentIndex === -1 || currentIndex === serviceAreasHistory.length - 1
+    };
+  }, [versionParam, serviceAreasHistory]);
+
+  const clickPreviousVersion = useCallback(() => {
     if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
     
-    // Find current version index
-    const currentVersion = searchParams.get('version');
-    const currentIndex = serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === currentVersion);
+    const { currentIndex } = versionNavigation;
     
-    // If no version selected or at start, use one to latest version
+    // If no version selected or at start, use second to latest version
     if (currentIndex === -1 || currentIndex === 0) {
-      setSearchParams({ version: serviceAreasHistory[serviceAreasHistory.length - 2]?.service_area_version_id.toString() });
+      const secondToLast = serviceAreasHistory[serviceAreasHistory.length - 2];
+      if (secondToLast) {
+        setSearchParams({ version: secondToLast.service_area_version_id.toString() });
+      }
       return;
     }
     
     // Go to previous version
-    setSearchParams({ version: serviceAreasHistory[currentIndex - 1]?.service_area_version_id.toString() });
-  }
+    const previous = serviceAreasHistory[currentIndex - 1];
+    if (previous) {
+      setSearchParams({ version: previous.service_area_version_id.toString() });
+    }
+  }, [serviceAreasHistory, versionNavigation, setSearchParams]);
 
-  const clickNextVersion = () => {
+  const clickNextVersion = useCallback(() => {
     if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
     
-    // Find current version index
-    const currentVersion = searchParams.get('version');
-    const currentIndex = serviceAreasHistory.findIndex(x => x?.service_area_version_id.toString() === currentVersion);
+    const { currentIndex, isAtLatest } = versionNavigation;
     
-    // If no historic version found, use latest version
-    if (currentIndex === -1 || currentIndex === serviceAreasHistory.length - 1) {
-      // Get version of latest service area
-      const latestServiceArea = serviceAreas.pop();
-      // If no latest service area, return
-      if(! latestServiceArea) return;
-      setSearchParams({ version: latestServiceArea?.service_area_version_id.toString() });
+    // If at latest or no version selected, go to latest
+    if (isAtLatest) {
+      // Find latest service area version
+      const latestServiceArea = serviceAreas.length > 0 ? serviceAreas[serviceAreas.length - 1] : null;
+      if (latestServiceArea?.service_area_version_id) {
+        setSearchParams({ version: latestServiceArea.service_area_version_id.toString() });
+      }
       return;
     }
     
-    // Go to previous version
-    setSearchParams({ version: serviceAreasHistory[currentIndex + 1]?.service_area_version_id.toString() });
-  }
+    // Go to next version
+    const next = serviceAreasHistory[currentIndex + 1];
+    if (next) {
+      setSearchParams({ version: next.service_area_version_id.toString() });
+    }
+  }, [serviceAreas, serviceAreasHistory, versionNavigation, setSearchParams]);
 
-  const doesHavePreviousVersion = () => !searchParams.get('version') || (serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) > 0);
-  const doesHaveNextVersion = () => serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) < serviceAreasHistory.length - 1;
+  const doesHavePreviousVersion = useCallback(() => {
+    return versionNavigation.hasPrevious;
+  }, [versionNavigation]);
+
+  const doesHaveNextVersion = useCallback(() => {
+    return versionNavigation.hasNext || versionNavigation.isAtLatest;
+  }, [versionNavigation]);
 
   return <>
     {/* LeftTop InfoCard */}
@@ -259,7 +326,7 @@ const DdServiceAreasLayer = ({
     </div>}
 
     {/* CenterBottom InfoCard */}
-    {searchParams.get('version') && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
+    {versionParam && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
       <CenterBottom>
         <InfoCard>
           <Legend onActiveTypesChange={setActiveTypes} />
