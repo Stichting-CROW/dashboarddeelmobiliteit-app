@@ -256,8 +256,8 @@ function Filterbar({
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
         2025-11-28
       </a><br />
+      - Servicegebieden laden sneller<br />
       - X-as van grafieken weer correct<br />
-      - Aanbod laadt veel sneller<br />
     </div>
 
   </>

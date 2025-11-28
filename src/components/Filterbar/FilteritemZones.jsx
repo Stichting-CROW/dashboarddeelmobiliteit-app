@@ -60,7 +60,7 @@ function FilteritemZones({
   
   const zone_groups = [
     {name: 'Stadsdelen', zone_type: 'residential_area'},
-    {name: 'Maatwerkzones', zone_type: 'custom'},
+    {name: 'Beleidszones', zone_type: 'custom'},
     {name: 'Wijken', zone_type: 'neighborhood'},
     // {name: 'Anders', zone_type: 'municipality'},
   ];
@@ -77,7 +77,6 @@ function FilteritemZones({
   
   const renderSelectZonesGroup = (group, zones) => {
     const groupZones = zones.filter(zone=>zone.zone_type===group.zone_type);
-    
     if(groupZones.length===0) { return null }
     
     const sortedZones = groupZones.sort((a,b) => a.name.localeCompare(b.name));

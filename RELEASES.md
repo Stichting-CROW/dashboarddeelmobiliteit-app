@@ -1,5 +1,15 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2025-11-28
+
+**Servicegebieden**
+
+- De Servicegebieden-kaart laadt sneller
+- Verbeterde legenda:
+  - Nu 1 laagkleur voor 'Onveranderd'
+  - Klik op de legenda-items om lagen te verbergen/tonen
+- Bij het laden van een gemeente wordt automatisch tenminste 1 beschikbare aanbieder aangevinkt (de eerste in de lijst)
+
 ## Release 2025-11-27
 
 - 🐛 Fix: De x-as van [Ontwikkeling](https://dashboarddeelmobiliteit.nl/stats/overview)-grafieken was onjuist bij selectie van maatwerkzones<br />
