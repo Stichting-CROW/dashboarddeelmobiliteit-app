@@ -65,7 +65,7 @@ async function renderPolygons_fill(map, geojson) {
     layerId,
     'fill-color',
     ['match', ['get', 'type'],
-      'unchanged', '#666',
+      'unchanged', '#c06427',
       'removed', '#f00',
       'added', '#0f0',
       '#8f3af8'
