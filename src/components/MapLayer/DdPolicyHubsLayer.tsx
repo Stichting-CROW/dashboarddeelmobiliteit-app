@@ -278,6 +278,16 @@ const DdPolicyHubsLayer = ({
     hub_refetch_counter,
   ]);
 
+  // Always refetch hubs when the global hub_refetch_counter changes,
+  // regardless of visible layers, so map stays in sync with actions
+  // like deletions triggered from other components (e.g. the table).
+  useEffect(() => {
+    if(! filter.gebied) return;
+    fetchHubs();
+  }, [
+    hub_refetch_counter,
+  ]);
+
   // Render hubs if 'policyHubs' or 'selected_policy_hubs' or 'hubs_in_drawing_mode' change
   useEffect(() => {
     // Return
