@@ -173,6 +173,24 @@ const ActionHeader = ({
       return are_the_same;
     }
 
+    // Function that checks if all selected hubs are in a deletable phase
+    const canDeleteSelectedHubs = () => {
+      if (!policyHubs || policyHubs.length === 0) return false;
+      if (!selected_policy_hubs || selected_policy_hubs.length === 0) return false;
+
+      const allowedPhases = [
+        'concept',
+        'committed_concept',
+        'committed_retirement_concept'
+      ];
+
+      return selected_policy_hubs.every((hubId) => {
+        const hubData = policyHubs.find(x => x.zone_id === hubId);
+        if (!hubData) return false;
+        return allowedPhases.indexOf(hubData.phase) > -1;
+      });
+    }
+
     return <>
         <div className="flex justify-between" style={{minHeight: '55px'}}>
             {canEditHubs(acl) && <div className="flex justify-start">
@@ -182,7 +200,7 @@ const ActionHeader = ({
                 {<Button theme="white" onClick={editHandler} disabled={! haveSameGeoType(selected_policy_hubs)}>
                     Bewerk
                 </Button>}
-                {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
+                {canDeleteSelectedHubs() && <Button theme="white" onClick={deleteHandler}>
                     Verwijder
                 </Button>}
             </div>}
