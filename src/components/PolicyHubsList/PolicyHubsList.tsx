@@ -65,6 +65,7 @@ const PolicyHubsList = () => {
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
 
+
   const uniqueComponentId = Math.random()*9000000;
 
   // On load: Hide edit modal
@@ -110,7 +111,12 @@ const PolicyHubsList = () => {
   // Populate table data if policyHubs change
   useEffect(() => {
     if(! active_phase) return;
-    if(! policyHubs || policyHubs.length === 0) return;
+    if(! policyHubs || policyHubs.length === 0) {
+      // If no hubs are available (e.g. after deleting the last one),
+      // make sure the table is cleared instead of showing stale data.
+      setTableData([]);
+      return;
+    }
 
     // Only keep hubs in active phase
     const filteredHubs = filterVisible(
