@@ -1,5 +1,18 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-01-05
+
+**Aanbod**
+
+- 🐛 De kaart update niet als je filterde en er geen voertuigen werden gevonden met de gebruikte filters. Hierdoor kon het zijn dat je bijvoorbeeld op voertuigtype 'fiets' filterde, maar de voertuigen op de kaart niet verdwenen omdat er 0 voertuigen met voertuigtype 'fiets' waren gevonden. Dit is opgelost: ook als er een lege dataset terugkomt na toepassen van filters, wordt de kaartdata geupdate.
+
+## Release 2025-12-15
+
+**Zones**
+
+- 🐛 Na verwijderen van een zone: update de tabellijst en kaart, zodat de verwijderde zone direct na verwijderen van de lijst en kaartweergave weg is
+- 🐛 Toon de 'verwijder'-knop alleen (boven de tabel) als verwijderen van de geselecteerde zones mogelijk is. De bug was dat de verwijder-knop getoond werd als zones geselecteerd waren waarbij het verwijderen al ingepland was
+
 ## Release 2025-11-28
 
 **Servicegebieden**

@@ -254,10 +254,9 @@ function Filterbar({
 
     <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px', width: '210px'}}>
       versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
-        2025-11-28
+        2026-01-05
       </a><br />
-      - Servicegebieden laden sneller<br />
-      - X-as van grafieken weer correct<br />
+      - Bugje voertuigfilters opgelost<br />
     </div>
 
   </>

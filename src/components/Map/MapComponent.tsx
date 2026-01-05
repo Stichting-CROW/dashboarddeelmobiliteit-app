@@ -384,7 +384,7 @@ const MapComponent = (props): JSX.Element => {
   // Set vehicles sources
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    if(! vehicles.data || !vehicles.data.features || vehicles.data.features.length <= 0) return;
+    if(! vehicles.data || !vehicles.data.features) return;
     if(! map.current) return;
     if(! map.current.U) return;
 
