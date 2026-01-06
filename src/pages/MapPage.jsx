@@ -25,7 +25,7 @@ import { selectActiveDataLayers } from '../helpers/layerSelectors';
 
 import './MapPage.css';
 
-function Map({mode, mapContainer}) {
+function Map({mapContainer}) {
   const showZones = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
   });

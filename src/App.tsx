@@ -1,20 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
- BrowserRouter,
- Routes,
- Route,
- useLocation,
-} from "react-router-dom";
+  Routes,
+  Route,
+  useLocation,
+} from 'react-router-dom';
 import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
-import {AnimatePresence, motion} from 'framer-motion'
-import {getAcl} from './api/acl';
+import { AnimatePresence, motion } from 'framer-motion';
+import { getAcl } from './api/acl';
 
-import {StateType} from './types/StateType';
+import { StateType } from './types/StateType';
 
 import ContentPage from './pages/ContentPage.jsx';
-import StatsPage from './pages/StatsPage.tsx';
+import StatsPage from './pages/StatsPage';
 import StartPage from './pages/StartPage';
 import VergunningEisenPage from './pages/dashboard/VergunningEisenPage';
 import Login from './pages/Login.jsx';
@@ -80,83 +79,130 @@ import {
 
 import './App.css';
 
-const Notification = ({ doShowNotification, setDoShowNotification, isFilterBarOpen }) => {
-  return <AnimatePresence>
-    {doShowNotification && <motion.div
-      key="notification"
-      initial={{ opacity: 0.5 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed top-5 z-20 left-5 right-5"
-    >
-      <motion.div
-        drag
-        dragConstraints={{
-          top: -10,
-          left: -50,
-          right: 50,
-          bottom: 10,
-        }}
-        className="relative bg-white/60 backdrop-blur-xl w-max-w-md rounded-lg mx-auto p-6 shadow hover:opacity-75" style={{
-          width: window.innerWidth > 640 ? '322px' : '100%',
-          left: (isFilterBarOpen && window.innerWidth > 640) ? '162px' : 0,
-          cursor: 'pointer'
-        }}
-        onClick={() => setDoShowNotification(false)}
-      >
-        <h1 className="text-lg text-slate-700 font-medium text-center">
-          {doShowNotification}
-        </h1>
-        <div className="flex justify-between items-center">
-          <a href="#" className="hidden text-slate-500 hover:text-slate-700 text-sm inline-flex space-x-1 items-center">
-            <span>Go to Dashboard</span>
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-          </a>
-        </div>
-      </motion.div>
-    </motion.div>}
-  </AnimatePresence>
+declare global {
+  interface Window {
+    notify?: (msg: string) => void;
+  }
 }
+
+interface NotificationProps {
+  doShowNotification: string | false;
+  setDoShowNotification: React.Dispatch<React.SetStateAction<string | false>>;
+  isFilterBarOpen: boolean;
+}
+
+interface Acl {
+  privileges?: string[];
+  is_admin?: boolean;
+  [key: string]: unknown;
+}
+
+const Notification: React.FC<NotificationProps> = ({
+  doShowNotification,
+  setDoShowNotification,
+  isFilterBarOpen,
+}) => {
+  return (
+    <AnimatePresence>
+      {doShowNotification && (
+        <motion.div
+          key="notification"
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-5 z-20 left-5 right-5"
+        >
+          <motion.div
+            drag
+            dragConstraints={{
+              top: -10,
+              left: -50,
+              right: 50,
+              bottom: 10,
+            }}
+            className="relative bg-white/60 backdrop-blur-xl w-max-w-md rounded-lg mx-auto p-6 shadow hover:opacity-75"
+            style={{
+              width: window.innerWidth > 640 ? '322px' : '100%',
+              left: isFilterBarOpen && window.innerWidth > 640 ? '162px' : 0,
+              cursor: 'pointer',
+            }}
+            onClick={() => setDoShowNotification(false)}
+          >
+            <h1 className="text-lg text-slate-700 font-medium text-center">
+              {doShowNotification}
+            </h1>
+            <div className="flex justify-between items-center">
+              <a
+                href="#"
+                className="hidden text-slate-500 hover:text-slate-700 text-sm inline-flex space-x-1 items-center"
+              >
+                <span>Go to Dashboard</span>
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 function App() {
   // Our state variables
-  const [pathName, setPathName] = useState(document.location.pathname);
-  const [uriParams, setUriParams] = useState(document.location.search);
-  const [delayTimeout, setDelayTimeout] = useState(null);
-  const [doShowNotification, setDoShowNotification] = useState('');
-  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [acl, setAcl] = useState({});
+  const [pathName, setPathName] = useState<string>(document.location.pathname);
+  const [uriParams, setUriParams] = useState<string>(document.location.search);
+  const [delayTimeout, setDelayTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [doShowNotification, setDoShowNotification] = useState<string | false>('');
+  const [isOrganisationAdmin, setIsOrganisationAdmin] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [acl, setAcl] = useState<Acl>({});
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const token = useSelector(state => (state.authentication.user_data && state.authentication.user_data.token)||null)
+  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token) || null);
   
-  const mapContainer = useRef(null);
+  const mapContainer = useRef<HTMLDivElement | null>(null);
 
-  let DELAY_TIMEOUT_IN_MS = 250;
+  const DELAY_TIMEOUT_IN_MS = 250;
 
-  const exportState = useSelector((state) => {
-    return { filter: state.filter, layers: state.layers, ui:state.ui };
+  const exportState = useSelector((state: StateType) => {
+    return { filter: state.filter, layers: state.layers, ui: state.ui };
   });
-  const isFilterBarOpen = exportState && exportState.ui && exportState.ui.FILTERBAR;
+  const isFilterBarOpen = Boolean(exportState && exportState.ui && exportState.ui.FILTERBAR);
 
   // Store window location in a local variable
-  let location = useLocation();
+  const location = useLocation();
   useEffect(() => {
-    setPathName(location ? location.pathname : null);
-    setUriParams(location ? location.search : null);
+    setPathName(location?.pathname ?? '');
+    setUriParams(location?.search ?? '');
   }, [location]);
   
   // Init notify bar logic
   useEffect(() => {
-    window.notify = (msg) => {
+    window.notify = (msg: string) => {
       showNotification(msg, setDoShowNotification);
-    }
-  }, [])
+    };
+
+    return () => {
+      window.notify = undefined;
+    };
+  }, []);
 
   useEffect(() => {
-    if(uriParams!==null) {
+    if (uriParams !== null) {
       let params = new URLSearchParams(uriParams);
       let view = params.get('view')
       if(view) {
@@ -240,23 +286,23 @@ function App() {
   //   return state.authentication;
   // });
 
-  const isLoggedIn = useSelector((state) => {
+  const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
   
-  const filterDate = useSelector((state) => {
+  const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
   });
 
-  const isLayersMobileVisible = useSelector((state) => {
+  const isLayersMobileVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['MenuSecondary.layers'] : false;
   });
 
-  const isFilterBarVisible = useSelector((state) => {
+  const isFilterBarVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR'] : false;
   });
 
-  const filter = useSelector((state) => {
+  const filter = useSelector((state: StateType) => {
     return state.filter;
   });
   
@@ -264,11 +310,11 @@ function App() {
   //   return state.layers;
   // });
 
-  const displayMode = useSelector((state) => {
+  const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;
   });
   
-  const metadata = useSelector((state) => {
+  const metadata = useSelector((state: StateType) => {
     return state.metadata;
   });
 
@@ -348,7 +394,7 @@ function App() {
 
     if(delayTimeout) clearTimeout(delayTimeout);
 
-    setDelayTimeout(setTimeout(x => {
+    setDelayTimeout(setTimeout(() => {
       initUpdateParkingData(store);
     }, DELAY_TIMEOUT_IN_MS))
   }, [
@@ -367,7 +413,7 @@ function App() {
 
     if(delayTimeout) clearTimeout(delayTimeout);
 
-    setDelayTimeout(setTimeout(x => {
+    setDelayTimeout(setTimeout(() => {
       initUpdateVerhuringenData(store);
     }, DELAY_TIMEOUT_IN_MS))
   }, [
@@ -412,21 +458,21 @@ function App() {
           <>
             { (isAdmin || isOrganisationAdmin) ?
               <>
-                <Route exact path="/admin" element={
+                <Route path="/admin" element={
                   <Overlay>
                     <Admin>
                       <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/users" element={
+                <Route path="/admin/users" element={
                   <Overlay>
                     <Admin>
                       <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/users/new" element={
+                <Route path="/admin/users/new" element={
                   <Overlay>
                     <Admin>
                       <UserList
@@ -435,66 +481,66 @@ function App() {
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/users/:username" element={
+                <Route path="/admin/users/:username" element={
                   <Overlay>
                     <Admin>
                       <UserList acl={acl} />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/shared" element={
+                <Route path="/admin/shared" element={
                   <Overlay>
                     <Admin>
-                      <SharedDataOverview acl={acl} />
+                      <SharedDataOverview />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/organisations" element={
+                <Route path="/admin/organisations" element={
                   <Overlay>
                     <Admin>
                       <OrganisationList />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/organisations/new" element={
+                <Route path="/admin/organisations/new" element={
                   <Overlay>
                     <Admin>
                       <OrganisationList showAddOrganisationModule={true} />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/organisations/:organisationId" element={
+                <Route path="/admin/organisations/:organisationId" element={
                   <Overlay>
                     <Admin>
                       <OrganisationList />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/stats" element={
+                <Route path="/admin/stats" element={
                   <Overlay>
                     <Admin>
                       <LoginStats />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/yearly-costs" element={
+                <Route path="/admin/yearly-costs" element={
                   <Overlay>
                     <Admin>
-                      <YearlyCostsExport acl={acl} />
+                      <YearlyCostsExport />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/mail-templates" element={
+                <Route path="/admin/mail-templates" element={
                   <Overlay>
                     <Admin>
-                      <MailTemplateList acl={acl} />
+                      <MailTemplateList />
                     </Admin>
                   </Overlay>
                 } />
-                <Route exact path="/admin/mail-templates/new" element={
+                <Route path="/admin/mail-templates/new" element={
                   <Overlay>
                     <Admin>
-                      <MailTemplateList acl={acl} showAddMailTemplateModule={true}  />
+                      <MailTemplateList showAddMailTemplateModule={true}  />
                     </Admin>
                   </Overlay>
                 } />
@@ -506,112 +552,112 @@ function App() {
               </ContentPage>
               {renderMapElements()}
             </>} /> */}
-            <Route exact path="/" element={renderMapElements()} />
-            <Route exact path="/map/park" element={renderMapElements()} />
-            <Route exact path="/map/rentals" element={renderMapElements()} />
-            <Route exact path="/map/servicegebieden" element={renderMapElements()} />
-            <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+            <Route path="/" element={renderMapElements()} />
+            <Route path="/map/park" element={renderMapElements()} />
+            <Route path="/map/rentals" element={renderMapElements()} />
+            <Route path="/map/servicegebieden" element={renderMapElements()} />
+            <Route path="/map/beleidshubs" element={renderMapElements()} />
 
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
 
-            <Route exact path="/start" element={<>
+            <Route path="/start" element={<>
               <ContentPage>
                 <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
             </>} />
-            <Route exact path="/dashboard/vergunningseisen" element={<>
+            <Route path="/dashboard/vergunningseisen" element={<>
               <ContentPage>
                 <VergunningEisenPage />
               </ContentPage>
               {renderMapElements()}
             </>} />
-            <Route exact path="/stats/overview" element={<>
+            <Route path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
               </ContentPage>
               {renderMapElements()}
             </>} />
-            <Route exact path="/monitoring" element={
+            <Route path="/monitoring" element={
               <ContentPage>
                 <Monitoring />
               </ContentPage>
             } />
-            <Route exact path="/rondleiding" element={
+            <Route path="/rondleiding" element={
               <ContentPage forceFullWidth={true}>
                 <Tour />
               </ContentPage>
             } />
-            <Route exact path="/misc" element={
+            <Route path="/misc" element={
               <Overlay>
-                <Misc />
+                <Misc><></></Misc>
               </Overlay>
             } />
-            <Route exact path="/profile" element={
+            <Route path="/profile" element={
               <Overlay>
                 <Misc>
                   <Profile />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/profile/api" element={
+            <Route path="/profile/api" element={
               <Overlay>
                 <Misc>
                   <ApiKeys />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/over" element={
+            <Route path="/over" element={
               <Overlay>
                 <Misc>
                   <About />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/export" element={
+            <Route path="/export" element={
               <Overlay>
                 <Misc>
                   <Export />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/faq" element={
+            <Route path="/faq" element={
               <Overlay>
                 <Misc>
                   <Faq />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/faq/:path" element={
+            <Route path="/faq/:path" element={
               <Overlay>
                 <Misc>
                   <Faq />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/docs" element={
+            <Route path="/docs" element={
               <Overlay>
                 <Misc>
                   <Docs />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/docs/:category" element={
+            <Route path="/docs/:category" element={
               <Overlay>
                 <Misc>
                   <Docs />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/docs/:category/:doc" element={
+            <Route path="/docs/:category/:doc" element={
               <Overlay>
                 <Misc>
                   <Docs />
                 </Misc>
               </Overlay>
             } />
-            <Route exact path="/active_feeds" element={
+            <Route path="/active_feeds" element={
               <Overlay>
                 <Misc>
                   <ActiveFeeds />
@@ -630,32 +676,32 @@ function App() {
               </ContentPage>
               {renderMapElements()}
             </>} /> */}
-          <Route exact path="/" element={renderMapElements()} />
-          <Route exact path="/map/park" element={renderMapElements()} />
-          <Route exact path="/map/rentals" element={renderMapElements()} />
-          <Route exact path="/map/servicegebieden" element={renderMapElements()} />
-          <Route exact path="/map/beleidshubs" element={renderMapElements()} />
+          <Route path="/" element={renderMapElements()} />
+          <Route path="/map/park" element={renderMapElements()} />
+          <Route path="/map/rentals" element={renderMapElements()} />
+          <Route path="/map/servicegebieden" element={renderMapElements()} />
+          <Route path="/map/beleidshubs" element={renderMapElements()} />
           <Route path="/map/zones" element={renderMapElements()} />
-          <Route exact path="/misc" element={
+          <Route path="/misc" element={
             <Overlay>
-              <Misc />
+              <Misc><></></Misc>
             </Overlay>
           } />
-          <Route exact path="/profile" element={
+          <Route path="/profile" element={
             <Overlay>
               <Misc>
                 <Profile />
               </Misc>
             </Overlay>
           } />
-          <Route exact path="/faq" element={
+          <Route path="/faq" element={
             <Overlay>
               <Misc>
                 <Faq />
               </Misc>
             </Overlay>
           } />
-          <Route exact path="/faq/:path" element={
+          <Route path="/faq/:path" element={
             <Overlay>
               <Misc>
                 <Faq />
@@ -664,56 +710,56 @@ function App() {
           } />
         </> : '' }
 
-        <Route exact path="/over" element={
+        <Route path="/over" element={
           <Overlay>
             <Misc>
               <About />
             </Misc>
           </Overlay>
         } />
-        <Route exact path="/stats/overview" element={<>
+        <Route path="/stats/overview" element={<>
           <Overlay>
             <Login />
           </Overlay>
           {renderMapElements()}
         </>} />
-        <Route exact path="/rondleiding" element={
+        <Route path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
           </ContentPage>
         } />
-        <Route exact path="/login" element={
+        <Route path="/login" element={
           <Overlay>
             <Login />
           </Overlay>
         } />
-        <Route exact path="/reset-password/:changePasswordCode" element={
+        <Route path="/reset-password/:changePasswordCode" element={
           <Overlay>
             <SetPassword />
           </Overlay>
         } />
-        <Route exact path="/docs" element={
+        <Route path="/docs" element={
           <Overlay>
             <Misc>
               <Docs />
             </Misc>
           </Overlay>
         } />
-        <Route exact path="/docs/:category" element={
+        <Route path="/docs/:category" element={
           <Overlay>
             <Misc>
               <Docs />
             </Misc>
           </Overlay>
         } />
-        <Route exact path="/docs/:category/:doc" element={
+        <Route path="/docs/:category/:doc" element={
           <Overlay>
             <Misc>
               <Docs />
             </Misc>
           </Overlay>
         } />
-        <Route exact path="/active_feeds" element={
+        <Route path="/active_feeds" element={
           <Overlay>
             <Misc>
               <ActiveFeeds />
