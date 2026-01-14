@@ -50,7 +50,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     return (
       <div>
         <h1 className="permits-page-title">
-          Vergunningseisen
+          Prestaties aanbieders
         </h1>
         <span className="permits-empty-state">
           Selecteer een gemeente om vergunningseisen te bekijken
@@ -62,7 +62,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-loading-state">Laden...</div>
       </div>
     );
@@ -71,7 +71,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -147,7 +147,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   return (
     <div>
       <div className="permits-page-title">
-        Vergunningseisen
+        Prestaties aanbieders
         <button
           className="permits-add-button"
           title="Voeg nieuwe vergunningseis toe"

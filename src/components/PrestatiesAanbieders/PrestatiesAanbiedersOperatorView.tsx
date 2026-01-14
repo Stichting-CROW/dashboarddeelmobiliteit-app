@@ -21,7 +21,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   if (availableOperators.length === 0) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-empty-state">Geen aanbieders beschikbaar</div>
       </div>
     );
@@ -30,8 +30,8 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
-        <div className="permits-loading-state">Vergunningseisen laden...</div>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
+        <div className="permits-loading-state">Prestaties aanbieders laden...</div>
       </div>
     );
   }
@@ -39,7 +39,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen per aanbieder</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders per aanbieder</h1>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -113,7 +113,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   return (
     <div>
       <div className="permits-page-title">
-        Vergunningseisen voor {activeoperatorName}
+      Prestaties aanbieders voor {activeoperatorName}
       </div>
       
       <div className="mb-6">

@@ -78,7 +78,7 @@ function Filterbar({
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
   const isStart=displayMode===DISPLAYMODE_START;
-  const isVergunningseisen=displayMode===DISPLAYMODE_PERMITS;
+  const isPrestatiesAanbieders=displayMode===DISPLAYMODE_PERMITS;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;
@@ -167,8 +167,8 @@ function Filterbar({
         />
     }
 
-    {/* Vergunningseisen */
-      (isVergunningseisen) && 
+    {/* Prestaties aanbieders */
+      (isPrestatiesAanbieders) && 
         <FilterbarPermits 
           hideLogo={hideLogo}
           displayMode={displayMode}
@@ -180,7 +180,7 @@ function Filterbar({
       && ! isservicegebieden
       && ! isPolicyHubs
       && ! isrentals
-      && ! isVergunningseisen
+      && ! isPrestatiesAanbieders
       && ! isStart
     ) &&
       <div className="filter-bar-inner py-2">
