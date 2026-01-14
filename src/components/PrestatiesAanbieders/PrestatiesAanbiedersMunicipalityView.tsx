@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import '../../styles/permits.css';
-import PermitsCard from './PermitsCard';
+import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import EditLimitsDialog from './EditLimitsDialog';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
@@ -14,11 +14,11 @@ import type { PermitLimitRecord } from '../../api/permitLimits';
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 
-interface PermitsMunicipalityViewProps {  
+interface PrestatiesAanbiedersMunicipalityViewProps {  
   activeorganisation?: string;
 }
 
-const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityViewProps) => {
+const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: PrestatiesAanbiedersMunicipalityViewProps) => {
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
 
   // Use the generic data hook
@@ -50,7 +50,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
     return (
       <div>
         <h1 className="permits-page-title">
-          Vergunningseisen
+          Prestaties aanbieders
         </h1>
         <span className="permits-empty-state">
           Selecteer een gemeente om vergunningseisen te bekijken
@@ -62,7 +62,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-loading-state">Laden...</div>
       </div>
     );
@@ -71,7 +71,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -134,7 +134,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
       });
   
       return (
-        <PermitsCard 
+        <PrestatiesAanbiederCard 
           label={providerName}
           logo={providerLogo}
           key={'permits-card-' + permit.permit_limit.permit_limit_id} 
@@ -147,7 +147,7 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   return (
     <div>
       <div className="permits-page-title">
-        Vergunningseisen
+        Prestaties aanbieders
         <button
           className="permits-add-button"
           title="Voeg nieuwe vergunningseis toe"
@@ -208,4 +208,4 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   );
 };
 
-export default PermitsMunicipalityView;
+export default PrestatiesAanbiedersMunicipalityView;

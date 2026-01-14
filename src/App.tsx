@@ -15,7 +15,7 @@ import { StateType } from './types/StateType';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage';
 import StartPage from './pages/StartPage';
-import VergunningEisenPage from './pages/dashboard/VergunningEisenPage';
+import DashboardPrestatiesAanbieders from './pages/dashboard/DashboardPrestatiesAanbieders';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
@@ -548,7 +548,7 @@ function App() {
             }
             {/* <Route exact path="/" element={<>
               <ContentPage>
-                <VergunningEisenPage />
+                <DashboardPrestatiesAanbieders />
               </ContentPage>
               {renderMapElements()}
             </>} /> */}
@@ -563,13 +563,13 @@ function App() {
 
             <Route path="/start" element={<>
               <ContentPage>
-                <VergunningEisenPage />
+                <DashboardPrestatiesAanbieders />
               </ContentPage>
               {renderMapElements()}
             </>} />
             <Route path="/dashboard/vergunningseisen" element={<>
               <ContentPage>
-                <VergunningEisenPage />
+                <DashboardPrestatiesAanbieders />
               </ContentPage>
               {renderMapElements()}
             </>} />
@@ -672,7 +672,7 @@ function App() {
         { ! isLoggedIn ? <>
           {/* <Route exact path="/" element={<>
               <ContentPage>
-                <VergunningEisenPage />
+                <DashboardPrestatiesAanbieders />
               </ContentPage>
               {renderMapElements()}
             </>} /> */}

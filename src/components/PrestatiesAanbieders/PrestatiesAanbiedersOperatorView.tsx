@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import PermitsCard from './PermitsCard';
+import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import '../../styles/permits.css';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
 import { usePermitData } from './usePermitData';
@@ -8,10 +8,10 @@ import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 
-interface PermitsOperatorViewProps {
+interface PrestatiesAanbiedersOperatorViewProps {
   activeoperator: string;
 }
-const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
+const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbiedersOperatorViewProps) => {
 
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
 
@@ -21,7 +21,7 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   if (availableOperators.length === 0) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
         <div className="permits-empty-state">Geen aanbieders beschikbaar</div>
       </div>
     );
@@ -30,8 +30,8 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen</h1>
-        <div className="permits-loading-state">Vergunningseisen laden...</div>
+        <h1 className="permits-page-title">Prestaties aanbieders</h1>
+        <div className="permits-loading-state">Prestaties aanbieders laden...</div>
       </div>
     );
   }
@@ -39,7 +39,7 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Vergunningseisen per aanbieder</h1>
+        <h1 className="permits-page-title">Prestaties aanbieders per aanbieder</h1>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -93,7 +93,7 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
         textColor: '#7FDBFF',
       });
       return(
-        <PermitsCard
+        <PrestatiesAanbiederCard
           key={`${permit.permit_limit.permit_limit_id}-${permit.municipality.gmcode}-${index}`}
           label={municipalityName}
           logo={municipalityLogo}
@@ -113,7 +113,7 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   return (
     <div>
       <div className="permits-page-title">
-        Vergunningseisen voor {activeoperatorName}
+      Prestaties aanbieders voor {activeoperatorName}
       </div>
       
       <div className="mb-6">
@@ -137,4 +137,4 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   );
 };
 
-export default PermitsOperatorView;
+export default PrestatiesAanbiedersOperatorView;

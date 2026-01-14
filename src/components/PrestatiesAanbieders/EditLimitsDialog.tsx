@@ -238,9 +238,9 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       {/* Restore van / tot en met row */}
       <div className="flex flex-col items-center">
         {currentRecord ? (
-          <span>Voertuigplafond actief vanaf {moment(currentRecord.effective_date).format('L')} {currentRecord.end_date ? `tot en met ${moment(currentRecord.end_date).format('L')}` : ''}</span>
+          <span>Laatste configuratie is actief sinds {moment(currentRecord.effective_date).format('L')} {currentRecord.end_date ? `tot en met ${moment(currentRecord.end_date).format('L')}` : ''}</span>
         ) : (
-          <span>Geen voertuigplafond actief</span>
+          <span>Geen configuratie actief</span>
         )}
       </div>
       {/* Date controls row, aligned as a form row */}
@@ -260,25 +260,9 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       {/* Other fields: label, input, and actief checkbox on a single line, left aligned */}
       <div className="flex flex-col gap-2 mb-2">
         <div className="permits-form-row">
-          <label htmlFor="min-capacity" className="permits-form-label">Minimum capaciteit</label>
-          <input
-            id="min-capacity"
-            type="number"
-            className="permits-form-input"
-            value={minimumVehiculesActive ? minimumVehicules : ''}
-            min={0}
-            onChange={e => setMinimumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!minimumVehiculesActive}
-            readOnly={!minimumVehiculesActive}
-          />
-          <label className="permits-form-checkbox-label">
-            <input type="checkbox" checked={minimumVehiculesActive} onChange={e => setMinimumVehiculesActive(e.target.checked)} />
-            actief
+          <label htmlFor="max-capacity" className="permits-form-label">
+            Maximaal aantal onverhuurde voertuigen
           </label>
-          <span className="permits-form-message">{minCapacityMessage}</span>
-        </div>
-        <div className="permits-form-row">
-          <label htmlFor="max-capacity" className="permits-form-label">Maximum capaciteit</label>
           <input
             id="max-capacity"
             type="number"
@@ -296,6 +280,26 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
           <span className="permits-form-message">{maxCapacityMessage}</span>
         </div>
         <div className="permits-form-row">
+          <label htmlFor="min-capacity" className="permits-form-label">
+            Minimum aantal voertuigen beschikbaar
+          </label>
+          <input
+            id="min-capacity"
+            type="number"
+            className="permits-form-input"
+            value={minimumVehiculesActive ? minimumVehicules : ''}
+            min={0}
+            onChange={e => setMinimumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
+            disabled={!minimumVehiculesActive}
+            readOnly={!minimumVehiculesActive}
+          />
+          <label className="permits-form-checkbox-label">
+            <input type="checkbox" checked={minimumVehiculesActive} onChange={e => setMinimumVehiculesActive(e.target.checked)} />
+            actief
+          </label>
+          <span className="permits-form-message">{minCapacityMessage}</span>
+        </div>
+        {/* <div className="permits-form-row">
           <label htmlFor="min-pct-duration" className="permits-form-label">Maximale parkeerduur (dagen)</label>
           <input
             id="min-pct-duration"
@@ -332,7 +336,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
             actief
           </label>
           <span className="permits-form-message">{minNumberOfTripsPerVehicleMessage}</span>
-        </div>
+        </div> */}
       </div>
       <div className="permits-form-actions">
         <button className="permits-form-cancel-button" onClick={onCancel}>Afbreken</button>
@@ -365,8 +369,6 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
       max_parking_duration_days: (rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? null : isoDurationToDays(rec.max_parking_duration),
       minimal_number_of_trips_per_vehicle: rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? null : rec.minimal_number_of_trips_per_vehicle,
     }));
-
-
     
     return (
       <>
@@ -375,10 +377,10 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
             <thead>
               <tr className="permits-table-header">
                 <th className="permits-table-header-cell">Ingangsdatum</th>
-                <th className="permits-table-header-cell">Minimum</th>
                 <th className="permits-table-header-cell">Maximum</th>
-                <th className="permits-table-header-cell">Max. parkeerduur</th>
-                <th className="permits-table-header-cell">Min. % ritten</th>
+                <th className="permits-table-header-cell">Minimum</th>
+                {/* <th className="permits-table-header-cell">Max. parkeerduur</th> */}
+                {/* <th className="permits-table-header-cell">Min. % ritten</th> */}
                 <th className="permits-table-header-cell">Acties</th>
               </tr>
             </thead>
@@ -386,8 +388,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
               {sortedHistory.length > 0 ? sortedHistory.map((rec) => { 
                 const allowChange = mode==='admin' || (moment(rec.effective_date).isAfter(moment().startOf('day')));
 
-                const data1 = rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : rec.minimum_vehicles.toString()
-                const data2 = rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : rec.maximum_vehicles
+                const data1 = rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : rec.maximum_vehicles
+                const data2 = rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : rec.minimum_vehicles.toString()
                 // Note: max_parking_duration is undefined for new records, so we need to check for that
                 const data3 = (rec.max_parking_duration === undefined || rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? 'niet actief' : rec.max_parking_duration.replace('P','').replace('D',' dagen')
                 const data4 = rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : rec.minimal_number_of_trips_per_vehicle
@@ -403,8 +405,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
                     <td className="permits-table-cell-nowrap">{moment(rec.effective_date).format('L')}</td>
                     <td className="permits-table-cell-center">{data1}</td>
                     <td className="permits-table-cell-center">{data2}</td>
-                    <td className="permits-table-cell-center">{data3}</td>
-                    <td className="permits-table-cell-center">{data4}</td>
+                    {/* <td className="permits-table-cell-center">{data3}</td> */}
+                    {/* <td className="permits-table-cell-center">{data4}</td> */}
                     <td className="permits-table-cell-center">
                       { allowChange && <button title="Aanpassen" className="permits-table-action-button" onClick={() => handleEditRecord(rec.effective_date)}>
                         {/* Pencil SVG */}
