@@ -2,14 +2,14 @@ import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 
-interface PermitsCardProps {
+interface PrestatiesAanbiederCardProps {
     label: string;
     logo: string;
     permit: PermitLimitRecord;
     onEditLimits?: () => void;
 }
 
-export default function PermitsCard({ label, logo, permit, onEditLimits }: PermitsCardProps) {
+export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
     return (
       <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="permits-card">
         {/* Sprocket icon for editing limits */}
@@ -56,7 +56,7 @@ export default function PermitsCard({ label, logo, permit, onEditLimits }: Permi
         </div>
 
         <RangeBarIndicator 
-          title="Aantal Voertuigen" 
+          title="Aantal onverhuurde voertuigen"
           current={permit.stats?.number_of_vehicles_in_public_space} 
           min={permit.permit_limit.minimum_vehicles} 
           max={permit.permit_limit.maximum_vehicles} 
@@ -64,7 +64,7 @@ export default function PermitsCard({ label, logo, permit, onEditLimits }: Permi
           onClick={()=>alert('Toon hier een detailgrafiek voor aantal voertuigen')} 
           />
         <RangeBarIndicator 
-          title="Aantal te lang geparkeerd" 
+          title="Aantal voertuigen beschikbaar" 
           current={permit.stats?.number_of_vehicles_in_public_space_parked_to_long} 
           max={0} 
           explanation="Deze balk toont of het aantal voertuigen buiten de vergunningseis ligt"

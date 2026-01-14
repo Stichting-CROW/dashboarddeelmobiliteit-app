@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import PermitsCard from './PermitsCard';
+import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import '../../styles/permits.css';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
 import { usePermitData } from './usePermitData';
@@ -93,7 +93,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
         textColor: '#7FDBFF',
       });
       return(
-        <PermitsCard
+        <PrestatiesAanbiederCard
           key={`${permit.permit_limit.permit_limit_id}-${permit.municipality.gmcode}-${index}`}
           label={municipalityName}
           logo={municipalityLogo}

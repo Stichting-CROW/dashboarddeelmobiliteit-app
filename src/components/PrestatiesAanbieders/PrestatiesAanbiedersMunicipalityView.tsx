@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import '../../styles/permits.css';
-import PermitsCard from './PermitsCard';
+import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import EditLimitsDialog from './EditLimitsDialog';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
@@ -134,7 +134,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
       });
   
       return (
-        <PermitsCard 
+        <PrestatiesAanbiederCard 
           label={providerName}
           logo={providerLogo}
           key={'permits-card-' + permit.permit_limit.permit_limit_id} 
