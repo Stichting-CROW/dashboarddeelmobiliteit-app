@@ -1,7 +1,7 @@
 import React from 'react'; // , {useEffect, useState }
 import './DashboardPrestatiesAanbieders.css'
-import PermitsMunicipalityView from '../../components/Permits/PermitsMunicipalityView';
-import PermitsOperatorView from '../../components/Permits/PermitsOperatorView';
+import PermitsMunicipalityView from '../../components/PrestatiesAanbieders/PermitsMunicipalityView';
+import PermitsOperatorView from '../../components/PrestatiesAanbieders/PermitsOperatorView';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 
