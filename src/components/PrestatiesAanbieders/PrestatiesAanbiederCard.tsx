@@ -1,6 +1,7 @@
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord } from '../../api/permitLimits';
+import PerformanceIndicator from './PerformanceIndicator';
 
 interface PrestatiesAanbiederCardProps {
     label: string;
@@ -55,6 +56,15 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           </div>
         </div>
 
+        <div data-name="indicator-container" className="flex flex-col gap-2">
+          <PerformanceIndicator
+            title="Aantal onverhuurde voertuigen"
+          />
+          <PerformanceIndicator
+            title="Aantal voertuigen beschikbaar"
+          />
+        </div>
+{/* 
         <RangeBarIndicator 
           title="Aantal onverhuurde voertuigen"
           current={permit.stats?.number_of_vehicles_in_public_space} 
@@ -69,7 +79,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           max={0} 
           explanation="Deze balk toont of het aantal voertuigen buiten de vergunningseis ligt"
           onClick={()=>alert('Toon hier een detailgrafiek voor aantal te lang geparkeerd')} 
-        />
+        /> */}
         {/* <RangeBarIndicator 
           title="Gem. Aantal Verhuringen" 
           current={permit.stats.number_of_rentals_per_vehicle} 

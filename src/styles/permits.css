@@ -79,7 +79,7 @@
 
 /* Card styles */
 .permits-card {
-  @apply bg-gray-50 rounded-lg shadow-md p-4 w-48 h-auto relative border border-gray-400;
+  @apply bg-gray-50 rounded-lg shadow-md p-4 w-80 h-auto relative border border-gray-400;
 }
 
 .permits-card-edit-button {
