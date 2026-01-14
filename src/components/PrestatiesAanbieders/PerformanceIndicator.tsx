@@ -24,6 +24,9 @@ const blocks = [
   },
 ]
 
+const kpiValue = '< 100';
+const avgValue = 300;
+
 const PerformanceIndicatorTooltip = () => {
   return (
     <TooltipProvider delayDuration={500}>
@@ -78,8 +81,8 @@ const PerformanceIndicator = ({ title }: PerformanceIndicatorProps) => {
         </div>
       </section>
       <section className="font-bold text-xs">
-        KPI: &lt; 100<br />
-        Gem.: 300
+        KPI: {kpiValue}<br />
+        Gem.: {avgValue}
       </section>
     </div>
   );
