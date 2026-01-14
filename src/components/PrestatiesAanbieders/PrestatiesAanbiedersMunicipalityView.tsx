@@ -14,11 +14,11 @@ import type { PermitLimitRecord } from '../../api/permitLimits';
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 
-interface PermitsMunicipalityViewProps {  
+interface PrestatiesAanbiedersMunicipalityViewProps {  
   activeorganisation?: string;
 }
 
-const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityViewProps) => {
+const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: PrestatiesAanbiedersMunicipalityViewProps) => {
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
 
   // Use the generic data hook
@@ -208,4 +208,4 @@ const PermitsMunicipalityView = ({activeorganisation = ''}: PermitsMunicipalityV
   );
 };
 
-export default PermitsMunicipalityView;
+export default PrestatiesAanbiedersMunicipalityView;

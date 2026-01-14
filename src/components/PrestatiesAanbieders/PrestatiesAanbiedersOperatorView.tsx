@@ -8,10 +8,10 @@ import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 
-interface PermitsOperatorViewProps {
+interface PrestatiesAanbiedersOperatorViewProps {
   activeoperator: string;
 }
-const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
+const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbiedersOperatorViewProps) => {
 
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
 
@@ -137,4 +137,4 @@ const PermitsOperatorView = ({activeoperator}: PermitsOperatorViewProps) => {
   );
 };
 
-export default PermitsOperatorView;
+export default PrestatiesAanbiedersOperatorView;

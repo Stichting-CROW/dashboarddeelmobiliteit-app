@@ -1,7 +1,7 @@
 import React from 'react'; // , {useEffect, useState }
 import './DashboardPrestatiesAanbieders.css'
-import PermitsMunicipalityView from '../../components/PrestatiesAanbieders/PermitsMunicipalityView';
-import PermitsOperatorView from '../../components/PrestatiesAanbieders/PermitsOperatorView';
+import PermitsMunicipalityView from '../../components/PrestatiesAanbieders/PrestatiesAanbiedersMunicipalityView';
+import PermitsOperatorView from '../../components/PrestatiesAanbieders/PrestatiesAanbiedersOperatorView';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 
@@ -9,7 +9,7 @@ interface DashboardPrestatiesAanbiedersProps {
 
 }
 
-function DashboardPresetatiesAanbieders(props: DashboardPrestatiesAanbiedersProps) {
+function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps) {
   const activeorganisation = useSelector((state: StateType) => state.filter.gebied);
 
   // Get query parameters from URL
@@ -32,4 +32,4 @@ function DashboardPresetatiesAanbieders(props: DashboardPrestatiesAanbiedersProp
   }
 }
 
-export default DashboardPresetatiesAanbieders;
+export default DashboardPrestatiesAanbieders;
