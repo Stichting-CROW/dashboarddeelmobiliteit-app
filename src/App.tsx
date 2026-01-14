@@ -227,7 +227,7 @@ function App() {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
-    } else if(pathName.includes("/dashboard/vergunningseisen")) {
+    } else if(pathName.includes("/dashboard/prestaties-aanbieders")) {
       payload=DISPLAYMODE_PERMITS;
     } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
@@ -567,7 +567,7 @@ function App() {
               </ContentPage>
               {renderMapElements()}
             </>} />
-            <Route path="/dashboard/vergunningseisen" element={<>
+            <Route path="/dashboard/prestaties-aanbieders" element={<>
               <ContentPage>
                 <DashboardPrestatiesAanbieders />
               </ContentPage>
