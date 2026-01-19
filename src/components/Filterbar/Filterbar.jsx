@@ -252,10 +252,12 @@ function Filterbar({
       </div>
     }
 
-    <div className="absolute text-xs text-purple-800" style={{left: '102px', fontSize: '0.75rem', top: '16px', width: '210px'}}>
-      versie <a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases" target='_blank' rel="external noreferrer" className="underline">
-        2026-01-14
-      </a><br />
+    <div className="absolute hover:z-[1000]" style={{left: '102px', top: '16px', maxWidth: 'calc(100% - 120px)'}}>
+      <div className="inline-block bg-yellow-100 border border-yellow-400 text-yellow-800 px-2 py-2 rounded-lg relative" role="alert">
+        <span className="block sm:inline-block text-xs" style={{lineHeight: '13px'}}>
+          <b>2026-01-19</b> Onze data toont te veel geparkeerde voertuigen - we werken aan een oplossing.
+        </span>
+      </div>
     </div>
 
   </>
