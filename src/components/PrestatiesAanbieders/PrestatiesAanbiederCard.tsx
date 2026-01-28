@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
-import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse } from '../../api/permitLimits';
+import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse, PerformanceIndicatorDescription } from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
 import Button from '../Button/Button';
@@ -28,6 +28,7 @@ const DetailsButton = ({ detailsUrl }: { detailsUrl: string }) => {
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
+    const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
 
     const token = useSelector((state: StateType) => 
@@ -47,13 +48,18 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         setLoading(true);
         try {
           const data = await getOperatorPerformanceIndicators(token, municipality, operator, formFactor);
-          if (data && data.municipality_modality_operators.length > 0) {
-            // Find matching operator/form_factor combination
-            const match = data.municipality_modality_operators.find(
-              item => item.operator === operator && item.form_factor === formFactor
-            );
-            if (match) {
-              setKpis(match.kpis);
+          if (data) {
+            if (data.performance_indicator_description) {
+              setPerformanceIndicatorDescriptions(data.performance_indicator_description);
+            }
+            if (data.municipality_modality_operators.length > 0) {
+              // Find matching operator/form_factor combination
+              const match = data.municipality_modality_operators.find(
+                item => item.operator === operator && item.form_factor === formFactor
+              );
+              if (match) {
+                setKpis(match.kpis);
+              }
             }
           }
         } catch (error) {
@@ -121,6 +127,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               <PerformanceIndicator
                 key={kpi.kpi_key}
                 kpi={kpi}
+                performanceIndicatorDescriptions={performanceIndicatorDescriptions}
               />
             ))
           )}
