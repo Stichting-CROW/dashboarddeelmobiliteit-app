@@ -23,7 +23,7 @@ import {
 // Import components
 import Button from '../Button/Button';
 import EditUser from '../EditUser/EditUser';
-import H1Title from '../H1Title/H1Title';
+import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 const DELIMITER  = ';';
@@ -196,7 +196,7 @@ const UserList = ({
 
   return (
     <div className="" style={{maxWidth: '800px'}}>
-      <H1Title>Gebruikers</H1Title>
+      <PageTitle>Gebruikers</PageTitle>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download' onClick={() => downloadCsv(

@@ -23,7 +23,7 @@ import {getAcl} from '../../api/acl';
 
 // Import components
 import Button from '../Button/Button';
-import H1Title from '../H1Title/H1Title';
+import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 const TableRow = ({
@@ -127,9 +127,9 @@ const ApiKeys = ({
   return (
     <div className="ApiKeys" style={{maxWidth: '800px'}}>
       <div className="flex justify-between flex-wrap">
-        <H1Title style={{marginTop: 0}}>
+        <PageTitle style={{marginTop: 0}}>
           API keys
-        </H1Title>
+        </PageTitle>
       </div>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 pt-4 pb-4 rounded relative" role="alert">

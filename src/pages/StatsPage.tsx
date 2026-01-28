@@ -21,6 +21,7 @@ import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuige
 import FormInput from '../components/FormInput/FormInput';
 import TimeGrid_VehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
 import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
+import PageTitle from '../components/common/PageTitle';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -189,9 +190,9 @@ function StatsPage(props) {
       </div>
 
       {/* Show a title for the chart, that is the area currently selected (gebied or zones) */}
-      <h1 className="text-4xl my-2">
+      <PageTitle className="my-2">
         {getPageTitle}
-      </h1>
+      </PageTitle>
 
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">

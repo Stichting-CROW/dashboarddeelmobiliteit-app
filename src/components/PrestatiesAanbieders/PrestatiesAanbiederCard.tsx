@@ -1,4 +1,4 @@
-import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import { useNavigate } from 'react-router-dom';import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
@@ -9,6 +9,16 @@ interface PrestatiesAanbiederCardProps {
     permit: PermitLimitRecord;
     onEditLimits?: () => void;
 }
+
+const DetailsButton = ({ detailsUrl }: { detailsUrl: string }) => {
+  const navigate = useNavigate();
+  
+  return (
+    <button type="button" aria-label="Details" title="Details" className="bg-gray-500 text-white permits-card-details-button" onClick={() => navigate(detailsUrl)}>
+      Details
+    </button>
+  );
+};
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
     return (
@@ -63,6 +73,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           <PerformanceIndicator
             title="Aantal voertuigen beschikbaar"
           />
+          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details/${permit.permit_limit.permit_limit_id}`} />
         </div>
 {/* 
         <RangeBarIndicator 

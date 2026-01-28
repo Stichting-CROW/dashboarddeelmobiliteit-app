@@ -18,7 +18,7 @@ import Button from '../Button/Button';
 import FormInput from '../FormInput/FormInput';
 import FormLabel from '../FormLabel/FormLabel';
 // import EditOrganisation from '../EditOrganisation/EditOrganisation';
-import H1Title from '../H1Title/H1Title';
+import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 // YearlyCostsExport
@@ -47,7 +47,7 @@ const YearlyCostsExport = ({
 
   return (
     <div className="YearlyCostsExport" style={{maxWidth: '800px'}}>
-      <H1Title>Exporteer jaarbijdrage</H1Title>
+      <PageTitle>Exporteer jaarbijdrage</PageTitle>
       <p>
         Op deze pagina kun je een spreadsheet exporteren met daarin een overzicht van de jaarbijdrage per gemeente, gebaseerd op het aantal voertuigen op een bepaalde datum.
       </p>

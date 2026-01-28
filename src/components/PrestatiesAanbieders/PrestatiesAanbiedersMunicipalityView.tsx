@@ -13,6 +13,7 @@ import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import PageTitle from '../common/PageTitle';
 
 interface PrestatiesAanbiedersMunicipalityViewProps {  
   activeorganisation?: string;
@@ -49,9 +50,9 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if ((activeorganisation === "")) {
     return (
       <div>
-        <h1 className="permits-page-title">
+        <PageTitle>
           Prestaties aanbieders
-        </h1>
+        </PageTitle>
         <span className="permits-empty-state">
           Selecteer een gemeente om vergunningseisen te bekijken
         </span>
@@ -62,7 +63,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Prestaties aanbieders</h1>
+        <PageTitle>Prestaties aanbieders</PageTitle>
         <div className="permits-loading-state">Laden...</div>
       </div>
     );
@@ -71,7 +72,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Prestaties aanbieders</h1>
+        <PageTitle>Prestaties aanbieders</PageTitle>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -146,8 +147,10 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
 
   return (
     <div>
-      <div className="permits-page-title">
-        Prestaties aanbieders
+      <div className="flex items-center flex-start mb-8">
+        <PageTitle className="mb-0 mr-4">
+          Prestaties aanbieders
+        </PageTitle>
         <button
           className="permits-add-button"
           title="Voeg nieuwe vergunningseis toe"
