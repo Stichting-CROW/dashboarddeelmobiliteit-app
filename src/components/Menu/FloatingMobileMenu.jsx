@@ -4,13 +4,13 @@ import { useLocation } from "react-router-dom";
 
 import {StateType} from '../../types/StateType';
 
-import './MenuSecondaryItem.css';
+import './FloatingMobileMenuItem.css';
 
-function MenuSecondaryItem(props) {
+function FloatingMobileMenuItem(props) {
   return (
     <a
       href="goForIt"
-      className="MenuSecondaryItem cursor-pointer mx-1"
+      className="FloatingMobileMenuItem cursor-pointer mx-1"
       onClick={props.onClick}
     >
       {props.text}
@@ -18,7 +18,7 @@ function MenuSecondaryItem(props) {
   )
 }
 
-function MenuSecondary() {
+function FloatingMobileMenu() {
   const dispatch = useDispatch()
 
   const displayMode = useSelector((state: StateType) => {
@@ -61,15 +61,15 @@ function MenuSecondary() {
   }
 
   return (
-    <div className="MenuSecondary block sm:hidden absolute left-0 z-10">
-      {displayMode !== 'displaymode-other' && <MenuSecondaryItem
+    <div className="FloatingMobileMenu block sm:hidden absolute left-0 z-10">
+      {displayMode !== 'displaymode-other' && <FloatingMobileMenuItem
         text="🕓"
         onClick={(e) => {
           e.preventDefault();
           setFilterDatum(new Date())
         }}
       />}
-      <MenuSecondaryItem
+      <FloatingMobileMenuItem
         text={displayMode.indexOf('displaymode-zones-') > -1 ? 'Opties' : 'Filters'}
         onClick={(e) => {
           e.preventDefault();
@@ -77,7 +77,7 @@ function MenuSecondary() {
         }}
       />
       {/*
-      <MenuSecondaryItem
+      <FloatingMobileMenuItem
         text="Info"
         onClick={() => {
           setVisibility('METASTATS', true)
@@ -88,5 +88,5 @@ function MenuSecondary() {
   )
 }
 
-export default MenuSecondary;
+export default FloatingMobileMenu;
 

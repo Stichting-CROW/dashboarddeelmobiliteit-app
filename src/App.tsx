@@ -36,7 +36,7 @@ import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
 import Menu from './components/Menu';
-import MenuSecondary from './components/Menu/MenuSecondary.jsx';
+import FloatingMobileMenu from './components/Menu/FloatingMobileMenu.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
 import LoginStats from './components/LoginStats/LoginStats';
@@ -295,7 +295,7 @@ function App() {
   });
 
   const isLayersMobileVisible = useSelector((state: StateType) => {
-    return state.ui ? state.ui['MenuSecondary.layers'] : false;
+    return state.ui ? state.ui['FloatingMobileMenu.layers'] : false;
   });
 
   const isFilterBarVisible = useSelector((state: StateType) => {
@@ -426,7 +426,7 @@ function App() {
   ]);
 
   // Mobile menu: Filters / Layers
-  const renderMobileMenus = () => {
+  const renderFilterbar = () => {
     return <div className="MobileMenus">
       <div className="hidden sm:block relative h-full z-10">
         <FilterbarDesktop isVisible={isFilterBarVisible} displayMode={displayMode} />
@@ -439,8 +439,8 @@ function App() {
 
   const renderMapElements = () => {
     return <>
-      <MenuSecondary />
-      {renderMobileMenus()}
+      {renderFilterbar()}
+      <FloatingMobileMenu />
     </>
   }
 
@@ -546,12 +546,7 @@ function App() {
                 } />
               </> : null
             }
-            {/* <Route exact path="/" element={<>
-              <ContentPage>
-                <DashboardPrestatiesAanbieders />
-              </ContentPage>
-              {renderMapElements()}
-            </>} /> */}
+
             <Route path="/" element={renderMapElements()} />
             <Route path="/map/park" element={renderMapElements()} />
             <Route path="/map/rentals" element={renderMapElements()} />
@@ -561,12 +556,6 @@ function App() {
             <Route path="/map/zones" element={renderMapElements()} />
             <Route path="/admin/zones" element={renderMapElements()} />
 
-            <Route path="/start" element={<>
-              <ContentPage>
-                <DashboardPrestatiesAanbieders />
-              </ContentPage>
-              {renderMapElements()}
-            </>} />
             <Route path="/dashboard/prestaties-aanbieders" element={<>
               <ContentPage>
                 <DashboardPrestatiesAanbieders />
@@ -670,12 +659,6 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          {/* <Route exact path="/" element={<>
-              <ContentPage>
-                <DashboardPrestatiesAanbieders />
-              </ContentPage>
-              {renderMapElements()}
-            </>} /> */}
           <Route path="/" element={renderMapElements()} />
           <Route path="/map/park" element={renderMapElements()} />
           <Route path="/map/rentals" element={renderMapElements()} />

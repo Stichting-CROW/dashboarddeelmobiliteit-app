@@ -1,11 +1,11 @@
-.MenuSecondary {
+.FloatingMobileMenu {
   bottom: 90px;
   /*left: 24px;*/
   left: 12px;
   width: calc(100% - 90px);
 }
 
-.MenuSecondaryItem {
+.FloatingMobileMenuItem {
   display: inline-block;
   background: #FFFFFF 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000029;
