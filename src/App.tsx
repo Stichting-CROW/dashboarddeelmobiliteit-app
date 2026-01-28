@@ -437,7 +437,7 @@ function App() {
     </div>
   }
 
-  const renderMapElements = () => {
+  const renderFilterbarElements = () => {
     return <>
       {renderFilterbar()}
       <FloatingMobileMenu />
@@ -547,26 +547,26 @@ function App() {
               </> : null
             }
 
-            <Route path="/" element={renderMapElements()} />
-            <Route path="/map/park" element={renderMapElements()} />
-            <Route path="/map/rentals" element={renderMapElements()} />
-            <Route path="/map/servicegebieden" element={renderMapElements()} />
-            <Route path="/map/beleidshubs" element={renderMapElements()} />
+            <Route path="/" element={renderFilterbarElements()} />
+            <Route path="/map/park" element={renderFilterbarElements()} />
+            <Route path="/map/rentals" element={renderFilterbarElements()} />
+            <Route path="/map/servicegebieden" element={renderFilterbarElements()} />
+            <Route path="/map/beleidshubs" element={renderFilterbarElements()} />
 
-            <Route path="/map/zones" element={renderMapElements()} />
-            <Route path="/admin/zones" element={renderMapElements()} />
+            <Route path="/map/zones" element={renderFilterbarElements()} />
+            <Route path="/admin/zones" element={renderFilterbarElements()} />
 
             <Route path="/dashboard/prestaties-aanbieders" element={<>
               <ContentPage>
                 <DashboardPrestatiesAanbieders />
               </ContentPage>
-              {renderMapElements()}
+              {renderFilterbarElements()}
             </>} />
             <Route path="/stats/overview" element={<>
               <ContentPage>
                 <StatsPage />
               </ContentPage>
-              {renderMapElements()}
+              {renderFilterbarElements()}
             </>} />
             <Route path="/monitoring" element={
               <ContentPage>
@@ -659,12 +659,12 @@ function App() {
         }
 
         { ! isLoggedIn ? <>
-          <Route path="/" element={renderMapElements()} />
-          <Route path="/map/park" element={renderMapElements()} />
-          <Route path="/map/rentals" element={renderMapElements()} />
-          <Route path="/map/servicegebieden" element={renderMapElements()} />
-          <Route path="/map/beleidshubs" element={renderMapElements()} />
-          <Route path="/map/zones" element={renderMapElements()} />
+          <Route path="/" element={renderFilterbarElements()} />
+          <Route path="/map/park" element={renderFilterbarElements()} />
+          <Route path="/map/rentals" element={renderFilterbarElements()} />
+          <Route path="/map/servicegebieden" element={renderFilterbarElements()} />
+          <Route path="/map/beleidshubs" element={renderFilterbarElements()} />
+          <Route path="/map/zones" element={renderFilterbarElements()} />
           <Route path="/misc" element={
             <Overlay>
               <Misc><></></Misc>
@@ -704,7 +704,7 @@ function App() {
           <Overlay>
             <Login />
           </Overlay>
-          {renderMapElements()}
+          {renderFilterbarElements()}
         </>} />
         <Route path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
@@ -749,7 +749,7 @@ function App() {
             </Misc>
           </Overlay>
         } />
-        <Route element={renderMapElements()} />
+        <Route element={renderFilterbarElements()} />
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>

@@ -1,15 +1,18 @@
 import React from 'react';
 import './css/FilterbarPermits.css';
+import './css/FilteritemGebieden.css';
 
-import {useSelector} from 'react-redux';
-import { Link } from "react-router-dom";
+import {useSelector, useDispatch} from 'react-redux';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
+import FilterbarExtended from './FilterbarExtended.jsx';
 
 import Logo from '../Logo.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
+import FilteritemDatumVanTot from './FilteritemDatumVanTot';
 
 interface FilterbarPermitsProps {
   hideLogo: boolean;
@@ -43,8 +46,75 @@ function FilterbarPermits({
   //   return state.filter ? state.filter.gebied : null
   // });
 
-
   const hidePlaats = gebieden.length <= 1;
+
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathname = location.pathname;
+
+  const isPrestatiesAanbieders = pathname === '/dashboard/prestaties-aanbieders';
+  const isPrestatiesAanbiedersDetails = pathname === '/dashboard/prestaties-aanbieders-details';
+
+  const filterBarExtendedView = useSelector((state: StateType) => {
+    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
+  });
+
+  const setVisibility = (name: string, visibility: any) => {
+    dispatch({
+      type: `SET_VISIBILITY`,
+      payload: {
+        name: name,
+        visibility: visibility
+      }
+    });
+  };
+
+  const toggleDashboardType = (val: string | false) => {
+    setVisibility('FILTERBAR_EXTENDED', val);
+  };
+
+  const handleSelectDashboardType = (path: string) => {
+    navigate(path);
+    toggleDashboardType(false);
+  };
+
+  const getCurrentSelection = () => {
+    if (isPrestatiesAanbieders) {
+      return 'Prestaties aanbieders';
+    } else if (isPrestatiesAanbiedersDetails) {
+      return 'Prestaties aanbieders details';
+    }
+    return 'Prestaties aanbieders';
+  };
+
+  const renderSelectDashboardType = () => {
+    return (
+      <FilterbarExtended
+        title="Selecteer dashboard type"
+        closeFunction={() => toggleDashboardType(false)}
+      >
+        <div className="filter-form-selectie">
+          <div className="filter-form-values">
+            <div
+              key={'item-prestaties-aanbieders'}
+              className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
+              onClick={() => handleSelectDashboardType('/dashboard/prestaties-aanbieders')}
+            >
+              Prestaties aanbieders
+            </div>
+            <div
+              key={'item-prestaties-aanbieders-details'}
+              className={`form-item ${isPrestatiesAanbiedersDetails ? 'form-item-selected' : ''}`}
+              onClick={() => handleSelectDashboardType('/dashboard/prestaties-aanbieders-details')}
+            >
+              Prestaties aanbieders details
+            </div>
+          </div>
+        </div>
+      </FilterbarExtended>
+    );
+  };
 
   return (
     <div className="filter-bar-inner py-2">
@@ -56,6 +126,24 @@ function FilterbarPermits({
       </div>
       
       {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}
+
+      <Fieldset title="Dashboard type">
+        <div className="filter-plaats-container">
+          <div className="filter-plaats-box-row">
+            <div
+              className={`filter-plaats-value ${isPrestatiesAanbieders || isPrestatiesAanbiedersDetails ? '' : 'text-black'}`}
+              onClick={() => toggleDashboardType('dashboard-type')}
+            >
+              {getCurrentSelection()}
+            </div>
+            {filterBarExtendedView === 'dashboard-type' ? renderSelectDashboardType() : null}
+          </div>
+        </div>
+      </Fieldset>
+
+      {<Fieldset title="Periode">
+        <FilteritemDatumVanTot />
+      </Fieldset>}
 
       {! hidePlaats && <Fieldset title="Plaats">
         <FilteritemGebieden />

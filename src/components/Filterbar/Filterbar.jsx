@@ -175,6 +175,7 @@ function Filterbar({
           visible={visible}
         />
     }
+
     {/* Default: */
     (! (iszonespublic || iszonesadmin)
       && ! isservicegebieden
