@@ -16,7 +16,7 @@ import {
   DISPLAYMODE_ZONES_PUBLIC,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
-  DISPLAYMODE_PERMITS,
+  DISPLAYMODE_DASHBOARD,
 } from '../reducers/layers.js';
 
 import {StateType} from '../types/StateType';
@@ -120,9 +120,9 @@ function Map({mapContainer}) {
     // Nothing to add specifically
   }
 
-  const showSelectLayer = displayMode !== DISPLAYMODE_START && displayMode !== DISPLAYMODE_PERMITS;
+  const showSelectLayer = displayMode !== DISPLAYMODE_START && displayMode !== DISPLAYMODE_DASHBOARD;
 
-  const showMap = displayMode !== DISPLAYMODE_PERMITS;
+  const showMap = displayMode !== DISPLAYMODE_DASHBOARD;
 
   return (
     <div className="flex flex-col">

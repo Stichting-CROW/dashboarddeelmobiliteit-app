@@ -39,7 +39,7 @@ import {
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
-  DISPLAYMODE_PERMITS,
+  DISPLAYMODE_DASHBOARD,
   DISPLAYMODE_OTHER,
   DISPLAYMODE_VERHUURDATA_HB
 } from '../../reducers/layers.js';
@@ -78,7 +78,7 @@ function Filterbar({
   const isservicegebieden=displayMode===DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs=displayMode===DISPLAYMODE_POLICY_HUBS;
   const isStart=displayMode===DISPLAYMODE_START;
-  const isPrestatiesAanbieders=displayMode===DISPLAYMODE_PERMITS;
+  const isPrestatiesAanbieders=displayMode===DISPLAYMODE_DASHBOARD;
   const isontwikkeling=displayMode===DISPLAYMODE_OTHER;
 
   const showdatum=isrentals||ispark||!isLoggedIn;

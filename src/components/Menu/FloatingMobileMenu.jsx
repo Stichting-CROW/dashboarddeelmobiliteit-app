@@ -70,7 +70,7 @@ function FloatingMobileMenu() {
         }}
       />}
       <FloatingMobileMenuItem
-        text={displayMode.indexOf('displaymode-zones-') > -1 ? 'Opties' : 'Filters'}
+        text={displayMode && displayMode.indexOf('displaymode-zones-') > -1 ? 'Opties' : 'Filters'}
         onClick={(e) => {
           e.preventDefault();
           setVisibility('FILTERBAR', true)
