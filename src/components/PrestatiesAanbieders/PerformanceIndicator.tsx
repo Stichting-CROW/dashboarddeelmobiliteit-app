@@ -2,31 +2,11 @@ import PerformanceIndicatorBlock from "./PerformanceIndicatorBlock";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import type { PerformanceIndicatorKPI } from "../../api/permitLimits";
 
 interface PerformanceIndicatorProps {
-  title: string;
+  kpi: PerformanceIndicatorKPI;
 }
-
-const blocks = [
-  {
-    value: 100,
-    kpi: '> 100',
-    success: true,
-  },
-  {
-    value: 200,
-    kpi: '> 100',
-    success: false,
-  },
-  {
-    value: 300,
-    kpi: '> 100',
-    success: true,
-  },
-]
-
-const kpiValue = '< 100';
-const avgValue = 300;
 
 const PerformanceIndicatorTooltip = () => {
   const [open, setOpen] = useState(false);
@@ -67,29 +47,39 @@ const PerformanceIndicatorTooltip = () => {
   );
 };
 
-const PerformanceIndicator = ({ title }: PerformanceIndicatorProps) => {
+const PerformanceIndicator = ({ kpi }: PerformanceIndicatorProps) => {
+  // Filter values to only show dates 2025-12-16 to 2025-12-20
+  const filteredValues = kpi.values.filter(v => {
+    const date = new Date(v.date);
+    return date >= new Date('2025-12-16') && date <= new Date('2025-12-20');
+  });
+
+  // Calculate average
+  const avgValue = filteredValues.length > 0
+    ? (filteredValues.reduce((sum, v) => sum + v.measured, 0) / filteredValues.length).toFixed(1)
+    : 0;
+
   return (
     <div data-name="performance-indicator" className="flex gap-2">
       <section className="flex-1">
         <header>
           <div className="performance-indicator-title font-bold text-xs flex items-center">
-            {title}
+            {kpi.kpi_key}
             <PerformanceIndicatorTooltip />
           </div>
         </header>
         <div className="performance-indicator-blocks flex gap-1">
-          {blocks.map((block) => (
+          {filteredValues.map((value, index) => (
             <PerformanceIndicatorBlock
-              key={block.kpi}
-              value={block.value}
-              kpi={block.kpi}
-              success={block.success}
+              key={`${value.date}-${index}`}
+              date={value.date}
+              measured={value.measured}
             />
           ))}
         </div>
       </section>
       <section className="font-bold text-xs">
-        KPI: {kpiValue}<br />
+        KPI: -<br />
         Gem.: {avgValue}
       </section>
     </div>

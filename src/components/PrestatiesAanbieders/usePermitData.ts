@@ -87,4 +87,4 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     reloadPermits,
     token
   };
-}; 
+};

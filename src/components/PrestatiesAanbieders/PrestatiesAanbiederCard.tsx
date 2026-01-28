@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
-import type { PermitLimitRecord } from '../../api/permitLimits';
+import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse } from '../../api/permitLimits';
+import { getOperatorPerformanceIndicators } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
 import Button from '../Button/Button';
+import { StateType } from '../../types/StateType';
 
 interface PrestatiesAanbiederCardProps {
     label: string;
@@ -23,6 +27,45 @@ const DetailsButton = ({ detailsUrl }: { detailsUrl: string }) => {
 };
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
+    const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    const token = useSelector((state: StateType) => 
+      (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
+    );
+
+    useEffect(() => {
+      const fetchPerformanceIndicators = async () => {
+        if (!token || !permit.permit_limit) return;
+
+        const operator = permit.operator?.system_id || permit.permit_limit.system_id;
+        const formFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
+        const municipality = permit.municipality?.gmcode || permit.permit_limit.municipality;
+
+        if (!operator || !formFactor || !municipality) return;
+
+        setLoading(true);
+        try {
+          const data = await getOperatorPerformanceIndicators(token, municipality, operator, formFactor);
+          if (data && data.municipality_modality_operators.length > 0) {
+            // Find matching operator/form_factor combination
+            const match = data.municipality_modality_operators.find(
+              item => item.operator === operator && item.form_factor === formFactor
+            );
+            if (match) {
+              setKpis(match.kpis);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching performance indicators:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPerformanceIndicators();
+    }, [token, permit]);
+
     return (
       <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="permits-card">
         {/* Sprocket icon for editing limits */}
@@ -71,12 +114,16 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         </div>
 
         <div data-name="indicator-container" className="flex flex-col gap-2">
-          <PerformanceIndicator
-            title="Aantal onverhuurde voertuigen"
-          />
-          <PerformanceIndicator
-            title="Aantal voertuigen beschikbaar"
-          />
+          {loading ? (
+            <div>Laden...</div>
+          ) : (
+            kpis.map((kpi) => (
+              <PerformanceIndicator
+                key={kpi.kpi_key}
+                kpi={kpi}
+              />
+            ))
+          )}
           <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details/${permit.permit_limit.permit_limit_id}`} />
         </div>
 {/* 
@@ -104,5 +151,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           title="Verkeerd geparkeerd" 
           current={permit.stats.number_of_vehicles_illegally_parked_last_month} 
           max={permit.permit_limit.maximum_vehicles} /> */}
-        </div>);
+      </div>
+    );
 }

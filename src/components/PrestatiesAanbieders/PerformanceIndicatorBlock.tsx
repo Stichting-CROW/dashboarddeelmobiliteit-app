@@ -2,12 +2,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 import { useState } from "react";
 
 interface PerformanceIndicatorBlockProps {
-  value: number;
-  kpi: string;
-  success: boolean;
+  date: string;
+  measured: number;
 }
 
-const PerformanceIndicatorBlock = ({ value, kpi, success }: PerformanceIndicatorBlockProps) => {
+const PerformanceIndicatorBlock = ({ date, measured }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,7 +21,7 @@ const PerformanceIndicatorBlock = ({ value, kpi, success }: PerformanceIndicator
         >
           <div
             className="performance-indicator-block w-4 h-4"
-            style={{ backgroundColor: success ? 'green' : 'red' }}
+            style={{ backgroundColor: 'gray' }}
           />
         </TooltipTrigger>
         <TooltipContent 
@@ -30,9 +29,9 @@ const PerformanceIndicatorBlock = ({ value, kpi, success }: PerformanceIndicator
           align="center"
           className="max-w-[200px] text-sm whitespace-normal text-left p-2"
         >
-          <p className="text-sm leading-tight">
-            {`${value} | ${kpi}`}
-          </p>
+          <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
+            __html: `${date}: <b>${measured}</b>`
+          }} />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
