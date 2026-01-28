@@ -20,7 +20,7 @@ const PerformanceIndicatorBlock = ({ date, measured }: PerformanceIndicatorBlock
           }}
         >
           <div
-            className="performance-indicator-block w-4 h-4"
+            className="performance-indicator-block w-4 h-4 transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative"
             style={{ backgroundColor: 'gray' }}
           />
         </TooltipTrigger>
@@ -30,7 +30,7 @@ const PerformanceIndicatorBlock = ({ date, measured }: PerformanceIndicatorBlock
           className="max-w-[200px] text-sm whitespace-normal text-left p-2"
         >
           <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
-            __html: `${date}: <b>${measured}</b>`
+            __html: `<b>${measured}</b> (${date})`
           }} />
         </TooltipContent>
       </Tooltip>

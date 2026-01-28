@@ -78,7 +78,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
           ))}
         </div>
       </section>
-      <section className="font-bold text-xs w-20 text-right text-ellipsis overflow-hidden">
+      <section className="font-bold text-xs w-20 text-left text-ellipsis overflow-hidden">
         KPI: -<br />
         Gem.: {avgValue}
       </section>

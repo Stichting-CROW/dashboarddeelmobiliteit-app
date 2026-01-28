@@ -131,7 +131,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               />
             ))
           )}
-          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details/${permit.permit_limit.permit_limit_id}`} />
+          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?geometry_ref=cbs:${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}`} />
         </div>
 {/* 
         <RangeBarIndicator 
