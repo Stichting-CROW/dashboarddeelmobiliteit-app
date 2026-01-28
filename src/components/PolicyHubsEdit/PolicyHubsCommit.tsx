@@ -56,6 +56,7 @@ const PolicyHubsCommit = ({
 
     const [geographyIds, setGeographyIds] = useState([]);
     const [errors, setErrors] = useState<any>({});
+    const [tooltipOpen, setTooltipOpen] = useState<Record<string, boolean>>({});
 
     let publish_on_relative = localStorage.getItem("last_publish_on_relative_used") || "1week";
     let effective_on_relative = localStorage.getItem("last_effective_on_relative_used") || "1week";
@@ -223,8 +224,13 @@ const PolicyHubsCommit = ({
                 <FormLabel classes="mt-2 mb-2 font-bold">
                     Wanneer publiceren?
                     <TooltipProvider delayDuration={500}>
-                    <Tooltip>
-                        <TooltipTrigger>
+                    <Tooltip open={tooltipOpen.publish} onOpenChange={(open) => setTooltipOpen({ ...tooltipOpen, publish: open })}>
+                        <TooltipTrigger
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTooltipOpen({ ...tooltipOpen, publish: !tooltipOpen.publish });
+                          }}
+                        >
                         <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
                         </TooltipTrigger>
                         <TooltipContent 
@@ -307,8 +313,13 @@ const PolicyHubsCommit = ({
                 <FormLabel classes="mt-8 mb-2 font-bold">
                     Activeren na publicatie
                     <TooltipProvider delayDuration={500}>
-                    <Tooltip>
-                        <TooltipTrigger>
+                    <Tooltip open={tooltipOpen.effective} onOpenChange={(open) => setTooltipOpen({ ...tooltipOpen, effective: open })}>
+                        <TooltipTrigger
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTooltipOpen({ ...tooltipOpen, effective: !tooltipOpen.effective });
+                          }}
+                        >
                         <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
                         </TooltipTrigger>
                         <TooltipContent 

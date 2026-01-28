@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { useState } from "react";
 
 interface PerformanceIndicatorBlockProps {
   value: number;
@@ -7,10 +8,18 @@ interface PerformanceIndicatorBlockProps {
 }
 
 const PerformanceIndicatorBlock = ({ value, kpi, success }: PerformanceIndicatorBlockProps) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <TooltipProvider delayDuration={500}>
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <Tooltip open={open} onOpenChange={setOpen}>
+        <TooltipTrigger
+          asChild
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
+        >
           <div
             className="performance-indicator-block w-4 h-4"
             style={{ backgroundColor: success ? 'green' : 'red' }}

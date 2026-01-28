@@ -1,6 +1,7 @@
 import PerformanceIndicatorBlock from "./PerformanceIndicatorBlock";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 
 interface PerformanceIndicatorProps {
   title: string;
@@ -28,10 +29,17 @@ const kpiValue = '< 100';
 const avgValue = 300;
 
 const PerformanceIndicatorTooltip = () => {
+  const [open, setOpen] = useState(false);
+
   return (
     <TooltipProvider delayDuration={500}>
-      <Tooltip>
-        <TooltipTrigger>
+      <Tooltip open={open} onOpenChange={setOpen}>
+        <TooltipTrigger
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
+        >
           <span className="inline-block">
             <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
           </span>

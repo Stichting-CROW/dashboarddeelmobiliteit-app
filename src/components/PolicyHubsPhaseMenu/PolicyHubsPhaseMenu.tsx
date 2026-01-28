@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { setActivePhase } from '../../actions/policy-hubs';
 import { useDispatch, useSelector } from 'react-redux';
 import {StateType} from '../../types/StateType';
@@ -28,6 +28,8 @@ const PolicyHubsPhaseMenu = () => {
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
 
   const policyHubPhases = get_phases();
+  
+  const [tooltipOpen, setTooltipOpen] = useState<Record<string, boolean>>({});
 
   const tooltipText = (name: string) => {
     const texts = {
@@ -75,8 +77,13 @@ const PolicyHubsPhaseMenu = () => {
           }}>
             {title}
             <TooltipProvider delayDuration={500}>
-              <Tooltip>
-                <TooltipTrigger>
+              <Tooltip open={tooltipOpen[name]} onOpenChange={(open) => setTooltipOpen({ ...tooltipOpen, [name]: open })}>
+                <TooltipTrigger
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTooltipOpen({ ...tooltipOpen, [name]: !tooltipOpen[name] });
+                  }}
+                >
                   <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
                 </TooltipTrigger>
                 <TooltipContent 

@@ -11,6 +11,7 @@ function MenuItem(props) {
   const pathName = props.pathName;
   const isActive = pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
     <>
@@ -29,8 +30,13 @@ function MenuItem(props) {
             <>
               {props.text}
               <TooltipProvider delayDuration={500}>
-                <Tooltip>
-                  <TooltipTrigger>
+                <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+                  <TooltipTrigger
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTooltipOpen(!tooltipOpen);
+                    }}
+                  >
                     <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
                       <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
                     </span>
