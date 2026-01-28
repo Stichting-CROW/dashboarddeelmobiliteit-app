@@ -19,13 +19,13 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   const activeoperator = queryParams.get("operator");
   if(activeoperator !== null) {
     return (
-      <div className="DashboardPresetatiesAanbieders pt-4 pb-24">
+      <div className="DashboardPrestatiesAanbieders pt-4 pb-24">
         <PermitsOperatorView activeoperator={activeoperator} />
       </div>
     )
   } else {
     return (
-      <div className="DashboardPresetatiesAanbieders pt-4 pb-24">
+      <div className="DashboardPrestatiesAanbieders pt-4 pb-24">
         <PermitsMunicipalityView activeorganisation={activeorganisation} />
       </div>
     )

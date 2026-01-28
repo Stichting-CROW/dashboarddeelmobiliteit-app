@@ -15,7 +15,7 @@ import { StateType } from './types/StateType';
 import ContentPage from './pages/ContentPage.jsx';
 import StatsPage from './pages/StatsPage';
 import StartPage from './pages/StartPage';
-import DashboardPrestatiesAanbieders from './pages/dashboard/DashboardPrestatiesAanbieders';
+import DashboardPage from './pages/dashboard/DashboardPage';
 import Login from './pages/Login.jsx';
 import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
@@ -74,7 +74,7 @@ import {
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
-  DISPLAYMODE_PERMITS,
+  DISPLAYMODE_DASHBOARD,
 } from './reducers/layers.js';
 
 import './App.css';
@@ -227,8 +227,8 @@ function App() {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
-    } else if(pathName.includes("/dashboard/prestaties-aanbieders")) {
-      payload=DISPLAYMODE_PERMITS;
+    } else if(pathName.startsWith("/dashboard/")) {
+      payload=DISPLAYMODE_DASHBOARD;
     } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/map/rentals")) {
@@ -556,9 +556,9 @@ function App() {
             <Route path="/map/zones" element={renderFilterbarElements()} />
             <Route path="/admin/zones" element={renderFilterbarElements()} />
 
-            <Route path="/dashboard/prestaties-aanbieders" element={<>
+            <Route path="/dashboard/:dashboard" element={<>
               <ContentPage>
-                <DashboardPrestatiesAanbieders />
+                <DashboardPage />
               </ContentPage>
               {renderFilterbarElements()}
             </>} />

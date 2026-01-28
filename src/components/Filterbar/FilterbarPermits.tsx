@@ -127,7 +127,7 @@ function FilterbarPermits({
       
       {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}
 
-      <Fieldset title="Dashboard type">
+      <Fieldset title="Dashboard">
         <div className="filter-plaats-container">
           <div className="filter-plaats-box-row">
             <div
