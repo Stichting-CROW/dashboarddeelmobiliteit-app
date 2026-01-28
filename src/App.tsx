@@ -189,6 +189,133 @@ function App() {
     setPathName(location?.pathname ?? '');
     setUriParams(location?.search ?? '');
   }, [location]);
+
+  // Update page title based on route
+  useEffect(() => {
+    const baseTitle = 'Dashboard Deelmobiliteit | Een project van en voor overheden';
+    
+    const getPageTitle = (pathname: string): string => {
+      // Exact matches first
+      if (pathname === '/' || pathname === '/map/park') {
+        return `Aanbod - ${baseTitle}`;
+      }
+      if (pathname === '/map/rentals') {
+        return `Verhuringen - ${baseTitle}`;
+      }
+      if (pathname === '/map/zones') {
+        return `Zones - ${baseTitle}`;
+      }
+      if (pathname === '/map/servicegebieden') {
+        return `Servicegebieden - ${baseTitle}`;
+      }
+      if (pathname === '/map/beleidshubs') {
+        return `Zones - ${baseTitle}`;
+      }
+      if (pathname === '/stats/overview') {
+        return `Ontwikkeling - ${baseTitle}`;
+      }
+      if (pathname === '/over') {
+        return `Over - ${baseTitle}`;
+      }
+      if (pathname === '/faq') {
+        return `Veelgestelde vragen - ${baseTitle}`;
+      }
+      if (pathname === '/docs') {
+        return `Documentatie - ${baseTitle}`;
+      }
+      if (pathname === '/export') {
+        return `Export - ${baseTitle}`;
+      }
+      if (pathname === '/active_feeds') {
+        return `Actieve feeds - ${baseTitle}`;
+      }
+      if (pathname === '/rondleiding') {
+        return `Rondleiding - ${baseTitle}`;
+      }
+      if (pathname === '/monitoring') {
+        return `Monitoring - ${baseTitle}`;
+      }
+      if (pathname === '/login') {
+        return `Inloggen - ${baseTitle}`;
+      }
+      if (pathname === '/profile') {
+        return `Profiel - ${baseTitle}`;
+      }
+      if (pathname === '/profile/api') {
+        return `API-sleutels - ${baseTitle}`;
+      }
+      
+      // Dynamic routes
+      if (pathname.startsWith('/dashboard/')) {
+        const dashboard = pathname.split('/dashboard/')[1]?.split('/')[0];
+        if (dashboard === 'prestaties-aanbieders') {
+          return `Prestaties aanbieders - ${baseTitle}`;
+        }
+        if (dashboard === 'prestaties-aanbieders-details') {
+          return `Prestaties aanbieders details - ${baseTitle}`;
+        }
+        return `Dashboard - ${baseTitle}`;
+      }
+      
+      if (pathname.startsWith('/admin')) {
+        if (pathname === '/admin' || pathname === '/admin/users') {
+          return `Gebruikers - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/users/new') {
+          return `Nieuwe gebruiker - Beheer - ${baseTitle}`;
+        }
+        if (pathname.startsWith('/admin/users/')) {
+          return `Gebruiker - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/organisations') {
+          return `Organisaties - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/organisations/new') {
+          return `Nieuwe organisatie - Beheer - ${baseTitle}`;
+        }
+        if (pathname.startsWith('/admin/organisations/')) {
+          return `Organisatie - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/shared') {
+          return `Gedeelde data - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/stats') {
+          return `Statistieken - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/yearly-costs') {
+          return `Jaarlijkse kosten - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/mail-templates') {
+          return `E-mail templates - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/mail-templates/new') {
+          return `Nieuw e-mail template - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/zones') {
+          return `Zones - Beheer - ${baseTitle}`;
+        }
+        return `Beheer - ${baseTitle}`;
+      }
+      
+      if (pathname.startsWith('/reset-password/')) {
+        return `Wachtwoord instellen - ${baseTitle}`;
+      }
+      
+      if (pathname.startsWith('/faq/')) {
+        return `Veelgestelde vragen - ${baseTitle}`;
+      }
+      
+      if (pathname.startsWith('/docs/')) {
+        return `Documentatie - ${baseTitle}`;
+      }
+      
+      // Default fallback
+      return baseTitle;
+    };
+    
+    const newTitle = getPageTitle(location.pathname);
+    document.title = newTitle;
+  }, [location.pathname]);
   
   // Init notify bar logic
   useEffect(() => {
