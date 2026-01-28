@@ -7,13 +7,7 @@ import {
 import {
   prepareAggregatedStatsData,
   prepareAggregatedStatsData_timescaleDB,
-  sumAggregatedStats,
   doShowDetailledAggregatedData,
-  didSelectAtLeastOneCustomZone,
-  aggregationFunctionButtonsToRender,
-  getDateFormat,
-  prepareDataForCsv,
-  downloadCsv,
   keepActiveOperators
 } from './index';
 
