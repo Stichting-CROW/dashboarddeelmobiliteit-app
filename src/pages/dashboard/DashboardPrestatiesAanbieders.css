@@ -2,3 +2,11 @@
 .StatsPage h2 {
   margin-left: 58px;
 }
+
+.DashboardPrestatiesAanbiedersDetails a {
+  text-decoration: none;
+  color: #009fe3;
+}
+.DashboardPrestatiesAanbiedersDetails a:hover {
+  text-decoration: underline;
+}
