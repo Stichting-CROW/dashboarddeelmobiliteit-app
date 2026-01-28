@@ -4,8 +4,6 @@ import {themes} from '../../themes';
 
 import $ from 'jquery';
 
-import Button from '../Form/Button.jsx';
-
 const weekDays = [
   'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'
 ];

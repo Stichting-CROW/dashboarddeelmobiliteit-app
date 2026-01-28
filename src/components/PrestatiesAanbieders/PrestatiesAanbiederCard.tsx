@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router-dom';import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import { useNavigate } from 'react-router-dom';
+import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
+import Button from '../Button/Button';
 
 interface PrestatiesAanbiederCardProps {
     label: string;
@@ -14,9 +16,9 @@ const DetailsButton = ({ detailsUrl }: { detailsUrl: string }) => {
   const navigate = useNavigate();
   
   return (
-    <button type="button" aria-label="Details" title="Details" className="bg-gray-500 text-white permits-card-details-button" onClick={() => navigate(detailsUrl)}>
+    <Button theme='gray' title="Details" onClick={() => navigate(detailsUrl)} classes="permits-card-details-button">
       Details
-    </button>
+    </Button>
   );
 };
 
@@ -36,31 +38,33 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         </button>}
         {/* End Sprocket icon */}
         <div className="permits-card-content">
-          { logo ? 
-            <img 
-              src={logo}
-              alt={`${label} logo`}
-              className="permits-card-logo"
-              onError={(e) => {
-                e.currentTarget.src = createSvgPlaceholder({
-                  width: 36,
-                  height: 36,
-                  text: label.slice(0, 2),
-                  bgColor: '#0F1C3F',
-                  textColor: '#7FDBFF',
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  fontFamily: 'Arial, sans-serif',
-                  dy: 5,
-                  radius: 3,
-                });
-              }}
-            />
-            : 
-            <div className="permits-card-fallback">
-              <span className="permits-card-fallback-text">{label.slice(0, 2)}{label}</span> 
-            </div> 
-          }
+          <div className="hidden">
+            { logo ? 
+              <img 
+                src={logo}
+                alt={`${label} logo`}
+                className="permits-card-logo"
+                onError={(e) => {
+                  e.currentTarget.src = createSvgPlaceholder({
+                    width: 36,
+                    height: 36,
+                    text: label.slice(0, 2),
+                    bgColor: '#0F1C3F',
+                    textColor: '#7FDBFF',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    fontFamily: 'Arial, sans-serif',
+                    dy: 5,
+                    radius: 3,
+                  });
+                }}
+              />
+              : 
+              <div className="permits-card-fallback">
+                <span className="permits-card-fallback-text">{label.slice(0, 2)}{label}</span> 
+              </div> 
+            }
+          </div>
           <div title={label} className="permits-card-label">
             {label}
           </div>

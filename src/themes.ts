@@ -30,6 +30,11 @@ export const themes = {
     backgroundColor: '#00ff008c',
     borderColor: '#CCCCCC',
   },
+  gray: {
+    backgroundColor: '#d1d5db',
+    borderColor: '#d1d5db',
+    color: '#fff'
+  },
   zone: {
     monitoring: {
       primaryColor: '#15AEEF',

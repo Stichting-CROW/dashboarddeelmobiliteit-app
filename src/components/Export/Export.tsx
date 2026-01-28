@@ -14,7 +14,7 @@ import Logo from '../Logo.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
-import Button from '../Form/Button.jsx';
+import Button from '../Button/Button';
 import PillMenu from '../PillMenu/PillMenu';
 import Section from '../Section/Section';
 import ExportParkeertelling from './ExportParkeertelling';
@@ -152,7 +152,7 @@ function Export() {
               }
             })}
           />
-          <Button classes="" color="blue" onClick={() => handleDownloadReportClick()}>
+          <Button classes="" theme="blue" onClick={() => handleDownloadReportClick()}>
             Download rapportage
           </Button>
         </Section>
@@ -181,7 +181,7 @@ function Export() {
             />
           </div>
 
-          <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
+          <Button classes="" theme="blue" onClick={() => handleDownloadRawDataClick()}>
             Vraag ruwe data export aan (.csv)
           </Button>
 

@@ -14,7 +14,7 @@ import Logo from '../Logo.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
-import Button from '../Form/Button.jsx';
+import Button from '../Button/Button';
 import Section from '../Section/Section';
 import ActiveUserStats from '../ActiveUserStats/ActiveUserStats';
 
@@ -78,10 +78,10 @@ function Profile() {
       </Link>
 
       <div className="flex">
-        <Button classes="mr-2" color="blue" href="mailto:info@dashboarddeelmobiliteit.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: ">
+        <Button classes="mr-2" theme="blue" onClick={() => window.location.href = "mailto:info@dashboarddeelmobiliteit.nl?subject=Feedback Dashboard Deelmobiliteit&body=Ik heb feedback: "}>
           Zend feedback
         </Button>
-        <Button color="gray" onClick={() => {
+        <Button theme="gray" onClick={() => {
           if(window.confirm('Wil je uitloggen?')) {
             logOut();
           }
