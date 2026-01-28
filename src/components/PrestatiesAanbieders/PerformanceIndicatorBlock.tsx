@@ -6,8 +6,33 @@ interface PerformanceIndicatorBlockProps {
   measured: number;
 }
 
+const getDutchDayAbbreviation = (dateString: string): string => {
+  const date = new Date(dateString);
+  const dayOfWeek = date.getDay();
+  const dayAbbreviations: Record<number, string> = {
+    0: 'zo', // Sunday
+    1: 'ma', // Monday
+    2: 'di', // Tuesday
+    3: 'wo', // Wednesday
+    4: 'do', // Thursday
+    5: 'vr', // Friday
+    6: 'za', // Saturday
+  };
+  return dayAbbreviations[dayOfWeek] || '';
+};
+
+const formatDutchDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'long'
+  });
+};
+
 const PerformanceIndicatorBlock = ({ date, measured }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
+  const dayAbbreviation = getDutchDayAbbreviation(date);
+  const formattedDate = formatDutchDate(date);
 
   return (
     <TooltipProvider delayDuration={500}>
@@ -30,7 +55,7 @@ const PerformanceIndicatorBlock = ({ date, measured }: PerformanceIndicatorBlock
           className="max-w-[200px] text-sm whitespace-normal text-left p-2"
         >
           <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
-            __html: `<b>${measured}</b> (${date})`
+            __html: `<b>${measured}</b> (${dayAbbreviation}. ${formattedDate})`
           }} />
         </TooltipContent>
       </Tooltip>
