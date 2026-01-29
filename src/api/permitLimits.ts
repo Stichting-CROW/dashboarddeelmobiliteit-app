@@ -63,39 +63,123 @@ export const getPermitLimitOverviewForMunicipality = async (
     token: string, 
     municipality: string) => {
     try {
-        const params = new URLSearchParams({municipality}).toString();
-        const url = `${MDS_BASE_URL}/public/permit_limit_overview?${params}`;
+        // Use the new kpi_overview_operators endpoint
+        // Default to last 90 days if no dates provided
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 90);
+        
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+        
+        const params = new URLSearchParams({
+            start_date: startDateStr,
+            end_date: endDateStr,
+            municipality: municipality
+        }).toString();
+        
+        const url = `${MDS_BASE_URL}/kpi_overview_operators?${params}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
                 "authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
         });
 
         if(response.status === 500) {
-            const message = `No permit limit found (status: ${response.status}) for [${municipality}]`;
+            const message = `No KPI data found (status: ${response.status}) for [${municipality}]`;
             console.warn(message);
             return null;
         }
 
         if(response.status !== 200 && response.status !== 500) {
-            const message = `Error fetching permit limit overview (status: ${response.status}/${response.statusText}) for [${municipality}]`;
+            const message = `Error fetching KPI overview (status: ${response.status}/${response.statusText}) for [${municipality}]`;
             console.error(message);
             return null;
         }
 
-        const results = await response.json() as PermitLimitRecord[];
+        const kpiData = await response.json();
+        
+        // Transform KPI response to PermitLimitRecord[] format
+        if (!kpiData.municipality_modality_operators || kpiData.municipality_modality_operators.length === 0) {
+            return null;
+        }
+
+        // Fetch operators to get operator details
+        let operatorsMap = new Map<string, { system_id: string; name: string; color?: string; operator_url?: string }>();
+        try {
+            const operatorsResponse = await fetch('https://mds.dashboarddeelmobiliteit.nl/operators');
+            if (operatorsResponse.ok) {
+                const operatorsData = await operatorsResponse.json();
+                operatorsMap = new Map(
+                    (operatorsData.operators || []).map((op: { system_id: string; name: string; color?: string; operator_url?: string }) => [op.system_id, op])
+                );
+            }
+        } catch (error) {
+            console.warn('Failed to fetch operators, using fallback data', error);
+        }
+
+        // Transform each operator/modality combination into a PermitLimitRecord
+        const results: PermitLimitRecord[] = (kpiData.municipality_modality_operators || []).map((item: MunicipalityModalityOperator) => {
+            const operator = operatorsMap.get(item.operator);
+            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+            
+            // Create a minimal permit_limit record
+            // Generate a unique ID based on operator + form_factor + municipality combination
+            // This allows the component to display the record even if actual permit limit data isn't available
+            const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
+            const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
+                const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
+                return hashValue | 0; // Convert to 32-bit integer
+            }, 0));
+            
+            const permitLimit: PermitLimit = {
+                permit_limit_id: permitLimitId,
+                modality: item.form_factor,
+                effective_date: startDateStr,
+                municipality: geometryRef,
+                system_id: item.operator,
+                minimum_vehicles: 0,
+                maximum_vehicles: 99999999,
+                minimal_number_of_trips_per_vehicle: 0,
+                max_parking_duration: 'P0D',
+            };
+
+            const record: PermitLimitRecord = {
+                municipality: {
+                    gmcode: geometryRef,
+                    name: geometryRef, // Municipality name would need to be fetched separately
+                },
+                operator: operator ? {
+                    system_id: operator.system_id,
+                    name: operator.name,
+                    color: operator.color || '#000000',
+                    operator_url: operator.operator_url || '',
+                } : {
+                    system_id: item.operator,
+                    name: item.operator,
+                    color: '#000000',
+                    operator_url: '',
+                },
+                vehicle_type: {
+                    id: item.form_factor,
+                    name: item.form_factor, // Will be enhanced by usePermitData hook
+                    icon: '', // Will be set by usePermitData hook
+                },
+                permit_limit: permitLimit,
+            };
+
+            return record;
+        });
+
         if(results.length > 0) {
-            // const message = `**** Found ${results.length} permit limits for [${municipality}]`;
-            // console.log(message, results);
             return results;
         } else {
-            // const message = `**** Found no ${results.length} permit limits for [${municipality}]`;
-            // console.log(message, results);
-            return null // no permit limit found
+            return null;
         }
     } catch (error) {
-        console.error("Error fetching permit limit overview", error);
+        console.error("Error fetching KPI overview", error);
         return null;
     }
 }
