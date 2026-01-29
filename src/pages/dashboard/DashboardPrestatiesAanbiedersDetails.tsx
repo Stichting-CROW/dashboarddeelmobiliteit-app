@@ -184,19 +184,6 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     }
   }, [startDate, endDate]);
 
-  // Chart titles matching the screenshot
-  const chartTitles = [
-    'Aantal onverhuurde voertuigen',
-    'Aantal beschikbare voertuigen',
-    'Aantal defecte voertuigen',
-    'Voertuigen met parkeerduur langer dan < 7 dagen >',
-    'Aantal voertuigen in verbodsgebied',
-    'Aantal verhuringen per voertuig',
-    'Data-kwaliteit',
-    'PM',
-    'PM'
-  ];
-
   // Generate chart data for each chart (stored in state to prevent regeneration)
   const [chartsData, setChartsData] = useState<Array<{ title: string; series: LineChartData[] }>>([]);
 
@@ -216,52 +203,63 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       setChartsData([]);
       return;
     }
+    // Extract performance indicator descriptions and operator KPI data
+    const performanceIndicators = kpiData?.performance_indicator_description || [];
+    const operatorData = kpiData?.municipality_modality_operators?.[0];
+    const kpiValues = operatorData?.kpis || [];
 
-    // TODO: Transform kpiData to chart format based on actual API response structure
-    // For now, keeping the structure but this should be updated once we know the API response format
-    // The API response structure needs to be mapped to the chart data format
-    
-    // Example transformation (adjust based on actual API response):
-    // Assuming API returns data in format like:
-    // { 
-    //   dates: ['2025-09-16', ...],
-    //   kpis: [
-    //     { name: 'unrented_vehicles', values: [...], kpi_threshold: 10 },
-    //     ...
-    //   ]
-    // }
-    
-    // For now, if kpiData exists but structure is unknown, show empty charts
-    // This will be updated once we see the actual API response
-    if (kpiData && typeof kpiData === 'object') {
-      // Placeholder: Generate chart data structure
-      // Replace this with actual data transformation based on API response
-      const newChartsData = chartTitles.map((title, index) => {
-        // This is a placeholder - replace with actual data mapping
-        const performanceData = validDateRange.map(() => 0);
-        const kpiValue = 0;
-        
-        return {
-          title,
-          series: [
-            {
-              name: operatorName || 'Prestatie aanbieder',
-              data: performanceData,
-              dashArray: 0 // Solid line
-            },
-            {
-              name: 'KPI',
-              data: validDateRange.map(() => kpiValue),
-              dashArray: 5 // Dashed line
-            }
-          ] as LineChartData[]
-        };
+    if (performanceIndicators.length === 0) {
+      setChartsData([]);
+      return;
+    }
+
+    // Create a map of kpi_key to values for quick lookup
+    const kpiValuesMap = new Map<string, Array<{ date: string; measured: number }>>();
+    kpiValues.forEach((kpi: any) => {
+      if (kpi.kpi_key && kpi.values) {
+        kpiValuesMap.set(kpi.kpi_key, kpi.values);
+      }
+    });
+
+    // Transform each performance indicator to chart data
+    const newChartsData = performanceIndicators.map((indicator: any) => {
+      const { kpi_key, title } = indicator;
+      const values = kpiValuesMap.get(kpi_key) || [];
+
+      // Create a map of date strings to measured values
+      const valuesByDate = new Map<string, number>();
+      values.forEach((item: { date: string; measured: number }) => {
+        valuesByDate.set(item.date, item.measured);
       });
 
-      setChartsData(newChartsData);
-    } else {
-      setChartsData([]);
-    }
+      // Map dateRange timestamps to measured values
+      const measuredData = validDateRange.map((timestamp) => {
+        const dateStr = moment(timestamp).format('YYYY-MM-DD');
+        return valuesByDate.get(dateStr) ?? null;
+      });
+
+      // Filter out null values and create [x, y] pairs
+      const seriesData: [number, number][] = [];
+      validDateRange.forEach((timestamp, index) => {
+        const value = measuredData[index];
+        if (value !== null && typeof value === 'number' && isFinite(value)) {
+          seriesData.push([timestamp, value]);
+        }
+      });
+
+      return {
+        title: title || kpi_key,
+        series: [
+          {
+            name: operatorName || 'Prestatie aanbieder',
+            data: seriesData.length > 0 ? seriesData : [],
+            dashArray: 0 // Solid line
+          }
+        ] as LineChartData[]
+      };
+    });
+
+    setChartsData(newChartsData);
   }, [kpiData, dateRange, operatorName]);
 
   return (
