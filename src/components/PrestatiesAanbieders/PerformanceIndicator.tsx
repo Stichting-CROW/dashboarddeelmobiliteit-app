@@ -160,6 +160,29 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
     ? (filteredValues.reduce((sum, v) => sum + v.measured, 0) / filteredValues.length).toFixed(1)
     : 0;
 
+  // Calculate threshold display value
+  const thresholdDisplay = useMemo(() => {
+    if (filteredValues.length === 0) return '-';
+    
+    // Get all threshold values (filter out undefined/null)
+    const thresholds = filteredValues
+      .map(v => v.threshold)
+      .filter((t): t is number => t !== undefined && t !== null);
+    
+    // If no thresholds available, show '-'
+    if (thresholds.length === 0) return '-';
+    
+    // Check if all thresholds are the same
+    const firstThreshold = thresholds[0];
+    const allSame = thresholds.every(t => t === firstThreshold);
+    
+    if (allSame) {
+      return firstThreshold.toString();
+    } else {
+      return 'div.';
+    }
+  }, [filteredValues]);
+
   // Find title based on kpi_key
   const description = performanceIndicatorDescriptions.find(desc => desc.kpi_key === kpi.kpi_key);
   const title = description?.title || kpi.kpi_key;
@@ -192,7 +215,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
         )}
       </section>
       <section className="font-bold text-xs w-20 text-left text-ellipsis overflow-hidden">
-        KPI: -<br />
+        KPI: {thresholdDisplay}<br />
         Gem.: {avgValue}
       </section>
     </div>

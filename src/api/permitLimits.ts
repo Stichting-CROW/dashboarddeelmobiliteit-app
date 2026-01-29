@@ -121,57 +121,74 @@ export const getPermitLimitOverviewForMunicipality = async (
         }
 
         // Transform each operator/modality combination into a PermitLimitRecord
-        const results: PermitLimitRecord[] = (kpiData.municipality_modality_operators || []).map((item: MunicipalityModalityOperator) => {
-            const operator = operatorsMap.get(item.operator);
-            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
-            
-            // Create a minimal permit_limit record
-            // Generate a unique ID based on operator + form_factor + municipality combination
-            // This allows the component to display the record even if actual permit limit data isn't available
-            const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
-            const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
-                const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
-                return hashValue | 0; // Convert to 32-bit integer
-            }, 0));
-            
-            const permitLimit: PermitLimit = {
-                permit_limit_id: permitLimitId,
-                modality: item.form_factor,
-                effective_date: startDateStr,
-                municipality: geometryRef,
-                system_id: item.operator,
-                minimum_vehicles: 0,
-                maximum_vehicles: 99999999,
-                minimal_number_of_trips_per_vehicle: 0,
-                max_parking_duration: 'P0D',
-            };
-
-            const record: PermitLimitRecord = {
-                municipality: {
-                    gmcode: geometryRef,
-                    name: geometryRef, // Municipality name would need to be fetched separately
-                },
-                operator: operator ? {
-                    system_id: operator.system_id,
-                    name: operator.name,
-                    color: operator.color || '#000000',
-                    operator_url: operator.operator_url || '',
-                } : {
+        // Deduplicate by operator + form_factor + municipality (ignoring propulsion_type)
+        const seenCombinations = new Map<string, boolean>();
+        const results: PermitLimitRecord[] = (kpiData.municipality_modality_operators || [])
+            .filter((item: MunicipalityModalityOperator) => {
+                const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+                // Create a unique key based on operator + form_factor + municipality (excluding propulsion_type)
+                const uniqueKey = `${item.operator}_${item.form_factor}_${geometryRef}`;
+                
+                // If we've already seen this combination, skip it
+                if (seenCombinations.has(uniqueKey)) {
+                    return false;
+                }
+                
+                // Mark this combination as seen
+                seenCombinations.set(uniqueKey, true);
+                return true;
+            })
+            .map((item: MunicipalityModalityOperator) => {
+                const operator = operatorsMap.get(item.operator);
+                const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+                
+                // Create a minimal permit_limit record
+                // Generate a unique ID based on operator + form_factor + municipality combination
+                // This allows the component to display the record even if actual permit limit data isn't available
+                const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
+                const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
+                    const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
+                    return hashValue | 0; // Convert to 32-bit integer
+                }, 0));
+                
+                const permitLimit: PermitLimit = {
+                    permit_limit_id: permitLimitId,
+                    modality: item.form_factor,
+                    effective_date: startDateStr,
+                    municipality: geometryRef,
                     system_id: item.operator,
-                    name: item.operator,
-                    color: '#000000',
-                    operator_url: '',
-                },
-                vehicle_type: {
-                    id: item.form_factor,
-                    name: item.form_factor, // Will be enhanced by usePermitData hook
-                    icon: '', // Will be set by usePermitData hook
-                },
-                permit_limit: permitLimit,
-            };
+                    minimum_vehicles: 0,
+                    maximum_vehicles: 99999999,
+                    minimal_number_of_trips_per_vehicle: 0,
+                    max_parking_duration: 'P0D',
+                };
 
-            return record;
-        });
+                const record: PermitLimitRecord = {
+                    municipality: {
+                        gmcode: geometryRef,
+                        name: geometryRef, // Municipality name would need to be fetched separately
+                    },
+                    operator: operator ? {
+                        system_id: operator.system_id,
+                        name: operator.name,
+                        color: operator.color || '#000000',
+                        operator_url: operator.operator_url || '',
+                    } : {
+                        system_id: item.operator,
+                        name: item.operator,
+                        color: '#000000',
+                        operator_url: '',
+                    },
+                    vehicle_type: {
+                        id: item.form_factor,
+                        name: item.form_factor, // Will be enhanced by usePermitData hook
+                        icon: '', // Will be set by usePermitData hook
+                    },
+                    permit_limit: permitLimit,
+                };
+
+                return record;
+            });
 
         if(results.length > 0) {
             return results;
@@ -374,16 +391,26 @@ export const getOperatorPerformanceIndicators = async (
     token: string,
     municipality: string,
     operator?: string,
-    form_factor?: string
+    form_factor?: string,
+    startDate?: string,
+    endDate?: string
 ): Promise<OperatorPerformanceIndicatorsResponse | null> => {
     try {
-        // Default to last 90 days if no dates provided
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 90);
+        // Use provided dates or default to last 90 days if no dates provided
+        let startDateStr: string;
+        let endDateStr: string;
         
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
+        if (startDate && endDate) {
+            startDateStr = startDate;
+            endDateStr = endDate;
+        } else {
+            const endDateDefault = new Date();
+            const startDateDefault = new Date();
+            startDateDefault.setDate(startDateDefault.getDate() - 90);
+            
+            startDateStr = startDateDefault.toISOString().split('T')[0];
+            endDateStr = endDateDefault.toISOString().split('T')[0];
+        }
         
         const params = new URLSearchParams({
             start_date: startDateStr,
