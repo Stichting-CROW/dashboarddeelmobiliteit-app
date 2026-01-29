@@ -144,9 +144,6 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     ? getPrettyVehicleTypeName(formFactorCode) || formFactorCode
     : 'onbekend voertuigtype';
 
-  // Build the message
-  const message = `Hier zie je de data van gemeente ${municipalityName}, specifiek over de <b>${formFactorName}en</b> van <b>${operatorName}</b>.`;
-
   // Get date range from local state (memoized to prevent recalculation)
   const dateRange = useMemo(() => {
     try {
@@ -214,7 +211,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     }
 
     // Create a map of kpi_key to values for quick lookup
-    const kpiValuesMap = new Map<string, Array<{ date: string; measured: number }>>();
+    const kpiValuesMap = new Map<string, Array<{ date: string; measured: number; threshold?: number }>>();
     kpiValues.forEach((kpi: any) => {
       if (kpi.kpi_key && kpi.values) {
         kpiValuesMap.set(kpi.kpi_key, kpi.values);
@@ -226,10 +223,18 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       const { kpi_key, title } = indicator;
       const values = kpiValuesMap.get(kpi_key) || [];
 
-      // Create a map of date strings to measured values
+      // Create maps of date strings to measured values and threshold values
       const valuesByDate = new Map<string, number>();
-      values.forEach((item: { date: string; measured: number }) => {
-        valuesByDate.set(item.date, item.measured);
+      const thresholdsByDate = new Map<string, number>();
+      values.forEach((item: { date: string; measured: number; threshold?: number }) => {
+        if (item.date) {
+          if (item.measured !== undefined && item.measured !== null) {
+            valuesByDate.set(item.date, item.measured);
+          }
+          if (item.threshold !== undefined && item.threshold !== null) {
+            thresholdsByDate.set(item.date, item.threshold);
+          }
+        }
       });
 
       // Map dateRange timestamps to measured values
@@ -238,7 +243,13 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
         return valuesByDate.get(dateStr) ?? null;
       });
 
-      // Filter out null values and create [x, y] pairs
+      // Map dateRange timestamps to threshold values
+      const thresholdData = validDateRange.map((timestamp) => {
+        const dateStr = moment(timestamp).format('YYYY-MM-DD');
+        return thresholdsByDate.get(dateStr) ?? null;
+      });
+
+      // Filter out null values and create [x, y] pairs for measured data
       const seriesData: [number, number][] = [];
       validDateRange.forEach((timestamp, index) => {
         const value = measuredData[index];
@@ -247,15 +258,36 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
         }
       });
 
+      // Filter out null values and create [x, y] pairs for threshold data
+      const thresholdSeriesData: [number, number][] = [];
+      validDateRange.forEach((timestamp, index) => {
+        const threshold = thresholdData[index];
+        if (threshold !== null && typeof threshold === 'number' && isFinite(threshold)) {
+          thresholdSeriesData.push([timestamp, threshold]);
+        }
+      });
+
+      // Build series array with measured data and threshold (if available)
+      const series: LineChartData[] = [
+        {
+          name: operatorName || 'Prestatie aanbieder',
+          data: seriesData.length > 0 ? seriesData : [],
+          dashArray: 0 // Solid line
+        }
+      ];
+
+      // Add threshold line if threshold data is available
+      if (thresholdSeriesData.length > 0) {
+        series.push({
+          name: 'Drempelwaarde',
+          data: thresholdSeriesData,
+          dashArray: 5 // Dashed line
+        });
+      }
+
       return {
         title: title || kpi_key,
-        series: [
-          {
-            name: operatorName || 'Prestatie aanbieder',
-            data: seriesData.length > 0 ? seriesData : [],
-            dashArray: 0 // Solid line
-          }
-        ] as LineChartData[]
+        series: series
       };
     });
 
@@ -266,7 +298,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
       <p className="my-4">
-        {message}
+        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{formFactorName}en</b> van <b>{operatorName}</b>.
       </p>
       <p className="my-4">
         Ga naar <Link to="/dashboard/prestaties-aanbieders">Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
@@ -289,7 +321,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
               series={chart.series}
               xAxisCategories={dateRange}
               height={250}
-              colors={['#ef4444', '#ef4444']}
+              colors={chart.series.length > 1 ? ['#ef4444', '#6b7280'] : ['#ef4444']}
             />
           ))}
         </div>
