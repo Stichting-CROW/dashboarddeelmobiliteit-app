@@ -6,6 +6,7 @@ interface PerformanceIndicatorBlockProps {
   measured: number;
   threshold?: number;
   complies?: boolean;
+  size?: number; // Size in pixels (default: 16px for w-4 h-4)
 }
 
 const getDutchDayAbbreviation = (dateString: string): string => {
@@ -31,7 +32,7 @@ const formatDutchDate = (dateString: string): string => {
   });
 };
 
-const PerformanceIndicatorBlock = ({ date, measured, threshold, complies }: PerformanceIndicatorBlockProps) => {
+const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16 }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
   const dayAbbreviation = getDutchDayAbbreviation(date);
   const formattedDate = formatDutchDate(date);
@@ -53,8 +54,14 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies }: Perf
           }}
         >
           <div
-            className="performance-indicator-block w-4 h-4 transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative"
-            style={{ backgroundColor: getBackgroundColor() }}
+            className="performance-indicator-block transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative"
+            style={{ 
+              backgroundColor: getBackgroundColor(),
+              width: `${size}px`,
+              height: `${size}px`,
+              minWidth: `${size}px`,
+              minHeight: `${size}px`
+            }}
           />
         </TooltipTrigger>
         <TooltipContent 
