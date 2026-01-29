@@ -52,7 +52,7 @@ import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
 
 // Set language for momentJS
-moment.updateLocale('nl', moment.locale);
+moment.locale('nl');
 
 const MapComponent = (props): JSX.Element => {
   const [pathName, setPathName] = useState(document.location.pathname);
