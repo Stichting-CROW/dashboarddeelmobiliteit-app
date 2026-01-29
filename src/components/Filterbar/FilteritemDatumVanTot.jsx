@@ -8,6 +8,23 @@ import moment from 'moment';
 
 import {StateType} from '../../types/StateType';
 
+const setQueryParam = (key, val) => {
+  let searchParams = new URLSearchParams(window.location.search);
+  if(! val) {
+    searchParams.delete(key);
+  } else {
+    searchParams.set(key, val);
+  }
+  if (window.history.replaceState) {
+    const url = window.location.protocol 
+                + "//" + window.location.host 
+                + window.location.pathname 
+                + (searchParams.toString() ? "?" : "")
+                + searchParams.toString();
+    window.history.replaceState({ path: url }, "", url)
+  }
+}
+
 function FilterItemDatumVanTot() {
   const dispatch = useDispatch()
 
@@ -45,6 +62,10 @@ function FilterItemDatumVanTot() {
       type: 'SET_FILTER_ONTWIKKELING_VANTOT',
       payload: { van: van.toISOString(), tot: tot.toISOString() }
     })
+    
+    // Update URL parameters
+    setQueryParam('start_date', moment(van).format('YYYY-MM-DD'));
+    setQueryParam('end_date', moment(tot).format('YYYY-MM-DD'));
     
     if(aggregatie!==false) {
       dispatch({
