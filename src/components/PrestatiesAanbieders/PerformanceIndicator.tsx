@@ -107,11 +107,12 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
     const startDateParam = searchParams.get('start_date');
     const endDateParam = searchParams.get('end_date');
     
+    // Parse dates and normalize to start of day for accurate comparison
     const start = startDateParam && moment(startDateParam).isValid() 
-      ? moment(startDateParam).toDate() 
+      ? moment(startDateParam).startOf('day').toDate() 
       : null;
     const end = endDateParam && moment(endDateParam).isValid() 
-      ? moment(endDateParam).toDate() 
+      ? moment(endDateParam).startOf('day').toDate() 
       : null;
     
     return { startDate: start, endDate: end };
@@ -124,7 +125,8 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
     }
     
     return kpi.values.filter(v => {
-      const date = moment(v.date).toDate();
+      // Normalize the value date to start of day for comparison
+      const date = moment(v.date).startOf('day').toDate();
       return date >= startDate && date <= endDate;
     });
   }, [kpi.values, startDate, endDate]);

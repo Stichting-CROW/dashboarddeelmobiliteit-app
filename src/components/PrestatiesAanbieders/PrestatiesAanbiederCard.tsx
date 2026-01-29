@@ -1,6 +1,7 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse, PerformanceIndicatorDescription } from '../../api/permitLimits';
@@ -30,10 +31,51 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
+    const location = useLocation();
+    const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
 
     const token = useSelector((state: StateType) => 
       (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
     );
+
+    // Watch for URL changes (triggered by Filterbar using window.history.replaceState)
+    useEffect(() => {
+      // Update from React Router location first
+      setUrlSearch(location.search);
+      
+      const checkUrlChange = () => {
+        const currentSearch = window.location.search;
+        setUrlSearch(prevSearch => {
+          if (currentSearch !== prevSearch) {
+            return currentSearch;
+          }
+          return prevSearch;
+        });
+      };
+
+      // Check periodically for URL changes (since replaceState doesn't trigger popstate)
+      const interval = setInterval(checkUrlChange, 200);
+      
+      // Also listen to popstate for back/forward navigation
+      window.addEventListener('popstate', checkUrlChange);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('popstate', checkUrlChange);
+      };
+    }, [location.search]);
+
+    // Get dates from URL params
+    const { startDate, endDate } = useMemo(() => {
+      const searchParams = new URLSearchParams(urlSearch);
+      const startDateParam = searchParams.get('start_date');
+      const endDateParam = searchParams.get('end_date');
+      
+      return { 
+        startDate: startDateParam || undefined, 
+        endDate: endDateParam || undefined 
+      };
+    }, [urlSearch]);
 
     useEffect(() => {
       const fetchPerformanceIndicators = async () => {
@@ -47,7 +89,14 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
 
         setLoading(true);
         try {
-          const data = await getOperatorPerformanceIndicators(token, municipality, operator, formFactor);
+          const data = await getOperatorPerformanceIndicators(
+            token, 
+            municipality, 
+            operator, 
+            formFactor,
+            startDate,
+            endDate
+          );
           if (data) {
             if (data.performance_indicator_description) {
               setPerformanceIndicatorDescriptions(data.performance_indicator_description);
@@ -70,7 +119,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       };
 
       fetchPerformanceIndicators();
-    }, [token, permit]);
+    }, [token, permit, startDate, endDate]);
 
     return (
       <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="permits-card">
@@ -131,7 +180,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               />
             ))
           )}
-          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?geometry_ref=cbs:${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}`} />
+          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}`} />
         </div>
 {/* 
         <RangeBarIndicator 

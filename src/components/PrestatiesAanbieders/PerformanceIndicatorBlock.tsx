@@ -71,8 +71,8 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
         >
           <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
             __html: threshold !== undefined 
-              ? `<b>${measured}</b>/${threshold} (${dayAbbreviation}. ${formattedDate})`
-              : `<b>${measured}</b> (${dayAbbreviation}. ${formattedDate})`
+              ? `<b>${measured}</b> / ${threshold}<br />${dayAbbreviation}. ${formattedDate}`
+              : `<b>${measured}</b><br />${dayAbbreviation}. ${formattedDate}`
           }} />
         </TooltipContent>
       </Tooltip>
