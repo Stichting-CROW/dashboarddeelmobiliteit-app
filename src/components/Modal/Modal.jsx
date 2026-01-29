@@ -33,7 +33,7 @@ const Modal = ({
         aria-modal="true"
         style={{
           'display': isVisible ? 'block' : 'none',
-          zIndex: 100,
+          zIndex: 9999,
           padding: '50px 0'
         }}
         role="dialog"
@@ -57,12 +57,12 @@ const Modal = ({
           height: '90%'
         }}>
           <div className="
-,            modal-content border-none shadow-lg relative flex flex-col pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current
+            modal-content border-none shadow-lg relative flex flex-col pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current
             mx-auto w-11/12
             max-w-full
           " style={{
             width: config && config.fullWidth ? '96%' : 'fit-content',
-            maxWidth: '96%',
+            maxWidth: config && config.maxWidth ? config.maxWidth : (config && config.fullWidth ? '96%' : '600px'),
             maxHeight: '100%'
           }}>
             <div className="modal-header flex flex-shrink-0 items-center justify-between p-4 border-b border-gray-200 rounded-t-md">

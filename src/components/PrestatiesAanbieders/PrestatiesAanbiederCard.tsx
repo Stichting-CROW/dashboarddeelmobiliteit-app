@@ -168,7 +168,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           </div>
         </div>
 
-        <div data-name="indicator-container" className="flex flex-col gap-2">
+        <div data-name="indicator-container" className="flex flex-col gap-2 flex-1">
           {loading ? (
             <div>Laden...</div>
           ) : (
@@ -180,6 +180,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               />
             ))
           )}
+        </div>
+        <div className="w-full text-center" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
           <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}`} />
         </div>
 {/* 

@@ -470,18 +470,6 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
 
   return (
     <div className="flex flex-col gap-4 min-h-[600px] relative">
-      {/* Close icon in top right */}
-      <button
-        onClick={onCancel}
-        title="Sluiten"
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none"
-        style={{ zIndex: 10 }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="11" stroke="#888" strokeWidth="1.5" fill="#fff"/>
-          <path d="M8 8l8 8M16 8l-8 8" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </button>
       {/* Provider and vehicle type side by side */}
       <div className="flex flex-row justify-center items-start gap-12 mb-2">
         {/* Provider column */}

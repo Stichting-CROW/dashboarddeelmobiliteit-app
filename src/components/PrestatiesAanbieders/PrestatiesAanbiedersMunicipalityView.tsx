@@ -14,6 +14,7 @@ import type { PermitLimitRecord } from '../../api/permitLimits';
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import PageTitle from '../common/PageTitle';
+import Modal from '../Modal/Modal.jsx';
 
 interface PrestatiesAanbiedersMunicipalityViewProps {  
   activeorganisation?: string;
@@ -174,38 +175,67 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
 
       {/* Add Permit: Select Provider Dialog */}
       {showMainAddDialog && !showVehicleTypeSelection && (
-        <SelectProviderDialog
-          modality={null}
-          availableProviders={availableOperators}
-          onSelect={handleMainAddSelectProvider}
-          onCancel={handleMainAddCancel}
-        />
+        <Modal
+          isVisible={true}
+          title="Selecteer aanbieder"
+          button1Title=""
+          button1Handler={() => {}}
+          button2Title="Annuleren"
+          button2Handler={handleMainAddCancel}
+          hideModalHandler={handleMainAddCancel}
+          config={{ maxWidth: '600px' }}
+        >
+          <SelectProviderDialog
+            modality={null}
+            availableProviders={availableOperators}
+            onSelect={handleMainAddSelectProvider}
+            onCancel={handleMainAddCancel}
+          />
+        </Modal>
       )}
       
       {/* Main Add Workflow: Select Vehicle Type Dialog */}
       {showMainAddDialog && showVehicleTypeSelection && (
-        <SelectVehicleTypeDialog
-          vehicleTypes={voertuigtypes}
-          onSelect={(vehicleTypeId) => handleMainAddSelectVehicleType(vehicleTypeId, activeorganisation)}
-          onCancel={handleMainAddCancel}
-        />
+        <Modal
+          isVisible={true}
+          title="Selecteer voertuigtype"
+          button1Title=""
+          button1Handler={() => {}}
+          button2Title="Annuleren"
+          button2Handler={handleMainAddCancel}
+          hideModalHandler={handleMainAddCancel}
+          config={{ maxWidth: '600px' }}
+        >
+          <SelectVehicleTypeDialog
+            vehicleTypes={voertuigtypes}
+            onSelect={(vehicleTypeId) => handleMainAddSelectVehicleType(vehicleTypeId, activeorganisation)}
+            onCancel={handleMainAddCancel}
+          />
+        </Modal>
       )}
       
       {/* Edit Limits Modal Dialog */}
       {editDialogPermit && (
-        <div className="permits-modal-overlay">
-          <div className="permits-modal-content">
-            <EditLimitsDialog
-              token={token}
-              municipality={editDialogPermit.permit_limit.municipality}
-              provider_system_id={editDialogPermit.permit_limit.system_id}
-              vehicle_type={editDialogPermit.permit_limit.modality}
-              mode={mode}
-              onOk={handleEditDialogOk}
-              onCancel={handleCloseEditDialog}
-            />
-          </div>
-        </div>
+        <Modal
+          isVisible={true}
+          title="Bewerk vergunningseisen"
+          button1Title=""
+          button1Handler={() => {}}
+          button2Title="Sluiten"
+          button2Handler={handleCloseEditDialog}
+          hideModalHandler={handleCloseEditDialog}
+          config={{ maxWidth: '600px' }}
+        >
+          <EditLimitsDialog
+            token={token}
+            municipality={editDialogPermit.permit_limit.municipality}
+            provider_system_id={editDialogPermit.permit_limit.system_id}
+            vehicle_type={editDialogPermit.permit_limit.modality}
+            mode={mode}
+            onOk={handleEditDialogOk}
+            onCancel={handleCloseEditDialog}
+          />
+        </Modal>
       )}
     </div>
   );

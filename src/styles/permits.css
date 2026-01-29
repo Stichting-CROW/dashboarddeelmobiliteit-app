@@ -79,7 +79,7 @@
 
 /* Card styles */
 .permits-card {
-  @apply rounded-lg p-4 w-80 h-auto relative border;
+  @apply rounded-lg p-4 w-80 h-auto relative border flex flex-col;
   background-color: #F6F5F4;
   border-color: #ccc;
 }
@@ -111,6 +111,8 @@
 
 .permits-card-details-button {
   transition: all 0.2s ease-in-out;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .permits-card-details-button:hover {
