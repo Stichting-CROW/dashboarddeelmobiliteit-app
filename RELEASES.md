@@ -1,5 +1,37 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-01-29
+
+**Prestaties aanbieders**
+
+- 🪄 Nieuwe pagina 'Prestaties aanbieders' (voorheen 'Vergunningseisen') voor het monitoren van prestaties van aanbieders
+- 🪄 Nieuwe detailpagina met grafieken voor gedetailleerde analyse van prestaties per aanbieder
+- 🪄 Toon prestatie-indicatoren (KPI's) per aanbieder met visuele indicatorblokken
+- 🪄 Toon drempelwaarden (threshold) in KPI-blok tooltips
+- 🪄 Toon drempelwaarden in grafieken op de detailpagina
+- 🪄 Toon indicatorblok voor elke datum in de geselecteerde periode
+- 🪄 Toon dagnaam bij hover over indicatorblokken
+- 🪄 Filterbar uitgebreid met Dashboard- en Plaatsselectie voor 'Prestaties aanbieders'
+- 🪄 Route aangepast: `vergunningseisen` → `prestaties-aanbieders`
+
+**Gebruikersinterface**
+
+- 🪄 Tooltips zijn nu klikbaar: klik op het tooltip-icoon om de tooltip te openen
+- 🪄 Elke pagina heeft nu een specifieke paginatitel in de browser (metatags)
+- 🪄 Nieuwe gemeenschappelijke PageTitle-component gebruikt op meerdere pagina's voor consistentie
+- 🪄 FilterbarExtended sluit automatisch wanneer je buiten de filterbar klikt
+- 🪄 MenuSecondary hernoemd naar FloatingMobileMenu voor duidelijkere naamgeving
+
+**Kaart**
+
+- 🐛 Opgelost: Browser console errors in MapComponent zijn verholpen
+
+**Diverse**
+
+- 🧹 Code cleanup in `src/helpers/stats/rental-data.ts`
+- 🧹 App.jsx geconverteerd naar App.tsx (TypeScript)
+- 🧹 DISPLAYMODE_PERMITS vervangen door DISPLAYMODE_DASHBOARD
+
 ## Release 2026-01-05
 
 **Aanbod**

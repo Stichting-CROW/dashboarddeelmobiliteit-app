@@ -1,0 +1,100 @@
+# Update Release Notes Workflow
+
+## Purpose
+This workflow automates the creation and update of release notes in RELEASES.md based on git commits since the last release date.
+
+## How to Use
+Run the command: `update-release-notes` or ask Cursor to "update release notes"
+
+## Workflow Steps
+
+1. **Read RELEASES.md** to find the date of the most recent release (look for the latest "## Release YYYY-MM-DD" heading)
+
+2. **Get git commits** since that date:
+   ```bash
+   git log --since="<last-release-date>" --pretty=format:"%h|%s|%an" --date=short --no-merges
+   ```
+
+3. **Analyze commits** and categorize them into:
+   - **Nieuwe features** (🪄): New functionality, new pages, new components
+   - **Verbeteringen** (✨): UI/UX improvements, performance improvements
+   - **Bug fixes** (🐛): Bug fixes and error corrections
+   - **Technische wijzigingen** (🧹): Refactoring, code cleanup, technical improvements
+   - **Diverse**: Other changes
+
+4. **Group by feature area** when applicable:
+   - Prestaties aanbieders
+   - Gebruikersinterface
+   - Kaart
+   - Aanbod
+   - Zones/Beleidszones
+   - Servicegebieden
+   - Export
+   - etc.
+
+5. **Write release notes in Dutch** following the format:
+   ```markdown
+   ## Release YYYY-MM-DD
+   
+   **Feature Area** (if applicable)
+   
+   - 🪄 Description of new feature in Dutch
+   - ✨ Description of improvement in Dutch
+   - 🐛 Description of bug fix in Dutch
+   - 🧹 Description of technical change in Dutch
+   ```
+
+6. **Insert the new release section** at the top of RELEASES.md, right after the "# Dashboard Deelmobiliteit app Releases" heading
+
+7. **Use appropriate emojis**:
+   - 🪄 for new features
+   - ✨ for improvements
+   - 🐛 for bug fixes
+   - 🧹 for technical/refactoring changes
+
+## Rules
+
+- All release notes must be in **Dutch**
+- Use clear, user-friendly language (not too technical)
+- Group related changes together
+- Use the current date as the release date (format: YYYY-MM-DD)
+- Include context about what changed and why it matters to users
+- For technical changes, explain the user-facing impact if any
+- Keep descriptions concise but informative
+
+## Example Output Format
+
+```markdown
+## Release 2026-01-29
+
+**Prestaties aanbieders**
+
+- 🪄 Nieuwe pagina 'Prestaties aanbieders' voor het monitoren van prestaties van aanbieders
+- 🪄 Nieuwe detailpagina met grafieken voor gedetailleerde analyse
+
+**Gebruikersinterface**
+
+- 🪄 Tooltips zijn nu klikbaar: klik op het tooltip-icoon om de tooltip te openen
+- ✨ Elke pagina heeft nu een specifieke paginatitel in de browser
+
+**Kaart**
+
+- 🐛 Opgelost: Browser console errors in MapComponent zijn verholpen
+```
+
+## Commit Message Patterns to Recognize
+
+- `feat(...)`: New feature → 🪄
+- `fix(...)`: Bug fix → 🐛
+- `refactor(...)`: Refactoring → 🧹
+- `style(...)`: Styling changes → ✨
+- `chore(...)`: Maintenance → 🧹
+- `perf(...)`: Performance → ✨
+- `docs(...)`: Documentation → ✨
+
+## Notes
+
+- Skip merge commits (they're usually just "Merge pull request #X")
+- Combine related commits into single bullet points when appropriate
+- Focus on user-facing changes, but include important technical improvements
+- If a commit message is unclear, look at the actual code changes to understand what was done
