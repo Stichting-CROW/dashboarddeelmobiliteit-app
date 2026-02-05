@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
@@ -31,6 +31,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
+    const hasLoadedOnce = useRef(false);
     const location = useLocation();
     const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
 
@@ -108,8 +109,16 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               );
               if (match) {
                 setKpis(match.kpis);
+              } else {
+                // Clear kpis if no match found (e.g., data was removed)
+                setKpis([]);
               }
+            } else {
+              // Clear kpis if no operators found
+              setKpis([]);
             }
+            // Mark as loaded once after successful fetch, regardless of whether data was found
+            hasLoadedOnce.current = true;
           }
         } catch (error) {
           console.error('Error fetching performance indicators:', error);
@@ -169,7 +178,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         </div>
 
         <div data-name="indicator-container" className="flex flex-col gap-2 flex-1">
-          {loading ? (
+          {loading && kpis.length === 0 ? (
             <div>Laden...</div>
           ) : (
             kpis.map((kpi) => (

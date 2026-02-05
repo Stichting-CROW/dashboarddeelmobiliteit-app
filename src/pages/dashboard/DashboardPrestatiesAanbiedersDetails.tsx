@@ -5,7 +5,7 @@ import './DashboardPrestatiesAanbieders.css';
 import PageTitle from '../../components/common/PageTitle';
 import { StateType } from '../../types/StateType';
 import { fetchOperators, type OperatorData } from '../../api/operators';
-import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import { getPrettyVehicleTypeName, getPluralFormFactorName } from '../../helpers/vehicleTypes';
 import LineChart, { LineChartData } from '../../components/Chart/LineChart';
 import moment from 'moment';
 import { getKpiOverviewOperators } from '../../api/kpiOverview';
@@ -308,7 +308,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
       <p className="my-4">
-        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{formFactorName}en</b> van <b>{operatorName}</b>.
+        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
       </p>
       <p className="my-4">
         Ga naar <Link to={prestatiesAanbiedersLink}>Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
