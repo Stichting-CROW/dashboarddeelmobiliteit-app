@@ -200,7 +200,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
           </div>
         </header>
         {shouldShowBlocks && (
-          <div className="performance-indicator-blocks mt-1 flex gap-1">
+          <div className="performance-indicator-blocks mt-1 flex">
             {filteredValues.map((value, index) => (
               <PerformanceIndicatorBlock
                 key={`${value.date}-${index}`}

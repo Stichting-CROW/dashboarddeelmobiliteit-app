@@ -44,7 +44,7 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
   };
 
   return (
-    <TooltipProvider delayDuration={500}>
+    <TooltipProvider delayDuration={0}>
       <Tooltip open={open} onOpenChange={setOpen}>
         <TooltipTrigger
           asChild
@@ -54,13 +54,17 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
           }}
         >
           <div
-            className="performance-indicator-block transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative"
+            className="
+              performance-indicator-block
+              transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative
+              mx-[1px]
+            "
             style={{ 
               backgroundColor: getBackgroundColor(),
               width: `${size}px`,
               height: `${size}px`,
               minWidth: `${size}px`,
-              minHeight: `${size}px`
+              minHeight: `${size}px`,
             }}
           />
         </TooltipTrigger>

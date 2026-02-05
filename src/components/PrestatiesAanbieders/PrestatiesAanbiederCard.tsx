@@ -182,7 +182,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           )}
         </div>
         <div className="w-full text-center" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}`} />
+          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
         </div>
 {/* 
         <RangeBarIndicator 

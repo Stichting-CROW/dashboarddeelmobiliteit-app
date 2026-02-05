@@ -294,6 +294,16 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     setChartsData(newChartsData);
   }, [kpiData, dateRange, operatorName]);
 
+  // Build link URL with query parameters if present
+  const prestatiesAanbiedersLink = useMemo(() => {
+    const params = new URLSearchParams();
+    if (municipalityCode) params.set('gm_code', municipalityCode);
+    if (startDateParam) params.set('start_date', startDateParam);
+    if (endDateParam) params.set('end_date', endDateParam);
+    const queryString = params.toString();
+    return `/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`;
+  }, [municipalityCode, startDateParam, endDateParam]);
+
   return (
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
@@ -301,7 +311,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
         Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{formFactorName}en</b> van <b>{operatorName}</b>.
       </p>
       <p className="my-4">
-        Ga naar <Link to="/dashboard/prestaties-aanbieders">Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
+        Ga naar <Link to={prestatiesAanbiedersLink}>Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
       </p>
 
       {loading && (
