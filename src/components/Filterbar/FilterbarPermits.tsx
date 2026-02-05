@@ -142,7 +142,14 @@ function FilterbarPermits({
       </Fieldset>
 
       <Fieldset title="Periode">
-        <FilteritemDatumVanTot />
+        <FilteritemDatumVanTot 
+          presetButtons={[
+            { key: 'fdvt-po1', view: 'laatste7dagen_yesterday', label: 'Laatste 7 dagen' },
+            { key: 'fdvt-po2', view: 'laatste14dagen_yesterday', label: 'Laatste 14 dagen' },
+            { key: 'fdvt-po3', view: 'laatste30dagen_yesterday', label: 'Laatste 30 dagen' },
+            { key: 'fdvt-po4', view: 'laatste90dagen_yesterday', label: 'Laatste 90 dagen' },
+          ]}
+        />
       </Fieldset>
 
       {! hidePlaats && <Fieldset title="Plaats">

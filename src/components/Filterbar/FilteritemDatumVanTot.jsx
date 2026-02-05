@@ -25,7 +25,7 @@ const setQueryParam = (key, val) => {
   }
 }
 
-function FilterItemDatumVanTot() {
+function FilterItemDatumVanTot({ presetButtons }) {
   const dispatch = useDispatch()
 
   const filterOntwikkelingVan = useSelector((state: StateType) => {
@@ -185,6 +185,11 @@ function FilterItemDatumVanTot() {
         end = today;
         agg='day';
         break;
+      case 'laatste14dagen':
+        start = addDays(today,-13);
+        end = today;
+        agg='day';
+        break;
       case 'laatste30dagen':
         start = addDays(today,-30);
         end = today;
@@ -193,6 +198,26 @@ function FilterItemDatumVanTot() {
       case 'laatste90dagen':
         start = addDays(today,-90);
         end = today;
+        agg='day';
+        break;
+      case 'laatste7dagen_yesterday':
+        start = addDays(today,-7);
+        end = addDays(today,-1);
+        agg='day';
+        break;
+      case 'laatste14dagen_yesterday':
+        start = addDays(today,-14);
+        end = addDays(today,-1);
+        agg='day';
+        break;
+      case 'laatste30dagen_yesterday':
+        start = addDays(today,-30);
+        end = addDays(today,-1);
+        agg='day';
+        break;
+      case 'laatste90dagen_yesterday':
+        start = addDays(today,-90);
+        end = addDays(today,-1);
         agg='day';
         break;
       case 'laatste12maanden':
@@ -225,6 +250,21 @@ function FilterItemDatumVanTot() {
   }
 
   const renderPickerInline = () => {
+    // Default preset buttons
+    const defaultPresets = [
+      { key: 'fdvt-po1', view: 'vandaag', label: 'Vandaag' },
+      { key: 'fdvt-po2', view: 'laatste2dagen', label: 'Laatste 2 dagen' },
+      { key: 'fdvt-po3', view: 'laatste7dagen', label: 'Laatste 7 dagen' },
+      { key: 'fdvt-po4', view: 'laatste30dagen', label: 'Laatste 30 dagen' },
+      { key: 'fdvt-po5', view: 'laatste90dagen', label: 'Laatste 90 dagen' },
+      { key: 'fdvt-po6', view: 'laatste12maanden', label: 'Laatste 12 maanden' },
+      { key: 'fdvt-po7', view: 'ditjaar', label: 'Dit jaar' },
+      { key: 'fdvt-po8', view: 'vorigjaar', label: 'Vorig jaar' },
+    ];
+
+    // Use custom preset buttons if provided, otherwise use defaults
+    const presetsToRender = presetButtons || defaultPresets;
+
     return (
       <div className="filter-datum-van-tot-pickercontainer">
         <DatePicker
@@ -239,14 +279,15 @@ function FilterItemDatumVanTot() {
           inline
         />
         <div className="filter-datum-van-tot-picker-options">
-          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={() => { setView('vandaag')}}>Vandaag</div>
-          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={() => { setView('laatste2dagen')}}>Laatste 2 dagen</div>
-          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={() => { setView('laatste7dagen')}}>Laatste 7 dagen</div>
-          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={() => { setView('laatste30dagen')}}>Laatste 30 dagen</div>
-          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={() => { setView('laatste90dagen')}}>Laatste 90 dagen</div>
-          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={() => { setView('laatste12maanden')}}>Laatste 12 maanden</div>
-          <div key="fdvt-po7" className="filter-datum-van-tot-option" onClick={() => { setView('ditjaar')}}>Dit jaar</div>
-          <div key="fdvt-po8" className="filter-datum-van-tot-option" onClick={() => { setView('vorigjaar')}}>Vorig jaar </div>
+          {presetsToRender.map((preset, index) => (
+            <div 
+              key={preset.key || `fdvt-po${index + 1}`} 
+              className="filter-datum-van-tot-option" 
+              onClick={() => { setView(preset.view) }}
+            >
+              {preset.label}
+            </div>
+          ))}
         </div>
       </div>
     )
