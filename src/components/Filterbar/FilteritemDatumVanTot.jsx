@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './css/FilteritemDatumVanTot.css';
 import { useDispatch, useSelector } from 'react-redux';
 import "react-datepicker/dist/react-datepicker.css";
@@ -74,6 +74,34 @@ function FilterItemDatumVanTot() {
       })
     }
   }
+
+  // Initialize from URL parameters on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const startDateParam = searchParams.get('start_date');
+    const endDateParam = searchParams.get('end_date');
+    
+    if (startDateParam && endDateParam) {
+      const start = moment(startDateParam, 'YYYY-MM-DD');
+      const end = moment(endDateParam, 'YYYY-MM-DD');
+      
+      if (start.isValid() && end.isValid()) {
+        const startDateObj = start.toDate();
+        const endDateObj = end.toDate();
+        
+        // Only update if URL params differ from current Redux state
+        const currentStart = moment(filterOntwikkelingVan).format('YYYY-MM-DD');
+        const currentEnd = moment(filterOntwikkelingTot).format('YYYY-MM-DD');
+        
+        if (startDateParam !== currentStart || endDateParam !== currentEnd) {
+          setStartDate(startDateObj);
+          setEndDate(endDateObj);
+          updateFilter(startDateObj, endDateObj);
+        }
+      }
+    }
+  }, []); // Only run on mount
+
   const onChange = (dates) => {
     const [start, end] = dates;
     setStartDate(start);

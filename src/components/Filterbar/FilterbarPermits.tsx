@@ -141,9 +141,9 @@ function FilterbarPermits({
         </div>
       </Fieldset>
 
-      {<Fieldset title="Periode">
+      <Fieldset title="Periode">
         <FilteritemDatumVanTot />
-      </Fieldset>}
+      </Fieldset>
 
       {! hidePlaats && <Fieldset title="Plaats">
         <FilteritemGebieden />
