@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardPrestatiesAanbieders from './DashboardPrestatiesAanbieders';
 import DashboardPrestatiesAanbiedersDetails from './DashboardPrestatiesAanbiedersDetails';
+import StatsPage from '../StatsPage';
 
 interface DashboardPageProps {
 
@@ -10,11 +11,15 @@ interface DashboardPageProps {
 function DashboardPage(props: DashboardPageProps) {
   const { dashboard } = useParams<{ dashboard: string }>();
 
-  if (dashboard === 'prestaties-aanbieders') {
+  if (dashboard === 'beleidsinfo') {
+    return <StatsPage />;
+  }
+
+  else if (dashboard === 'prestaties-aanbieders') {
     return <DashboardPrestatiesAanbieders />;
   }
 
-  if (dashboard === 'prestaties-aanbieders-details') {
+  else if (dashboard === 'prestaties-aanbieders-details') {
     return <DashboardPrestatiesAanbiedersDetails />;
   }
 

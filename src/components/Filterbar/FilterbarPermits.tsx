@@ -62,6 +62,7 @@ function FilterbarPermits({
   const navigate = useNavigate();
   const pathname = location.pathname;
 
+  const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/dashboard/prestaties-aanbieders';
   const isPrestatiesAanbiedersDetails = pathname === '/dashboard/prestaties-aanbieders-details';
 
@@ -109,7 +110,9 @@ function FilterbarPermits({
   };
 
   const getCurrentSelection = () => {
-    if (isPrestatiesAanbieders) {
+    if (isBeleidsinfo) {
+      return 'Beleidsinfo';
+    } else if (isPrestatiesAanbieders) {
       return 'Prestaties aanbieders';
     } else if (isPrestatiesAanbiedersDetails) {
       return 'Prestaties aanbieders details';
@@ -120,11 +123,18 @@ function FilterbarPermits({
   const renderSelectDashboardType = () => {
     return (
       <FilterbarExtended
-        title="Selecteer dashboard type"
+        title="Selecteer statistiek"
         closeFunction={() => toggleDashboardType(false)}
       >
         <div className="filter-form-selectie">
           <div className="filter-form-values">
+          <div
+              key={'item-beleidsinfo'}
+              className={`form-item ${isBeleidsinfo ? 'form-item-selected' : ''}`}
+              onClick={() => handleSelectDashboardType('/dashboard/beleidsinfo')}
+            >
+              Beleidsinfo
+            </div>
             <div
               key={'item-prestaties-aanbieders'}
               className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
@@ -156,7 +166,7 @@ function FilterbarPermits({
       
       {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}
 
-      <Fieldset title="Dashboard">
+      <Fieldset title="Statistiek">
         <div className="filter-plaats-container">
           <div className="filter-plaats-box-row">
             <div
