@@ -1,5 +1,19 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-02-05
+
+**Prestaties aanbieders**
+
+- 🪄 Selecteer aanbieder en voertuigtype op de detailpagina voor gefilterde weergave van prestaties
+- 🪄 Standaard toon laatste 7 dagen in de filterbar (was voorheen 60 dagen)
+- 🪄 Verbeterde navigatie tussen pagina's: query parameters worden behouden bij navigatie
+- 🪄 Periode wordt nu automatisch ingesteld op basis van URL query parameters (start_date/end_date)
+- 🪄 Preset-knoppen voor datumselectie kunnen nu handmatig worden ingesteld
+- 🪄 Alleen grafieken worden geladen die beschikbaar zijn in de API-resultaten
+- 🐛 Opgelost: Voorkomt knipperen van divs tijdens het laden van data
+- 🐛 Opgelost: Geen aparte indicatorblokken meer voor verschillende aandrijvingstypes (propulsion_types)
+- 🧹 Gebruik gemeenschappelijke Overlay-component in plaats van aangepaste implementatie
+
 ## Release 2026-01-29
 
 **Prestaties aanbieders**
