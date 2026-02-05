@@ -6,6 +6,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilterbarExtended from './FilterbarExtended.jsx';
+import { addDays } from 'date-fns';
 
 import Logo from '../Logo.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
@@ -149,6 +150,8 @@ function FilterbarPermits({
             { key: 'fdvt-po3', view: 'laatste30dagen_yesterday', label: 'Laatste 30 dagen' },
             { key: 'fdvt-po4', view: 'laatste90dagen_yesterday', label: 'Laatste 90 dagen' },
           ]}
+          defaultStartDate={new Date(addDays(new Date(), -7).toDateString())}
+          defaultEndDate={new Date(addDays(new Date(), -1).toDateString())}
         />
       </Fieldset>
 

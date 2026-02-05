@@ -25,7 +25,7 @@ const setQueryParam = (key, val) => {
   }
 }
 
-function FilterItemDatumVanTot({ presetButtons }) {
+function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate }) {
   const dispatch = useDispatch()
 
   const filterOntwikkelingVan = useSelector((state: StateType) => {
@@ -40,8 +40,12 @@ function FilterItemDatumVanTot({ presetButtons }) {
     return state.filter && state.filter.ontwikkelingaggregatie ? state.filter.ontwikkelingaggregatie : 'day';
   });
 
-  const [startDate, setStartDate] = useState(filterOntwikkelingVan);
-  const [endDate, setEndDate] = useState(filterOntwikkelingTot);
+  // Use default dates if provided, otherwise fall back to Redux state
+  const initialStartDate = defaultStartDate || filterOntwikkelingVan;
+  const initialEndDate = defaultEndDate || filterOntwikkelingTot;
+
+  const [startDate, setStartDate] = useState(initialStartDate);
+  const [endDate, setEndDate] = useState(initialEndDate);
   const [isOpen, setIsOpen] = useState(false);
 
   const setAggregationLevel = (newlevel) => {
@@ -75,7 +79,7 @@ function FilterItemDatumVanTot({ presetButtons }) {
     }
   }
 
-  // Initialize from URL parameters on mount
+  // Initialize from URL parameters on mount, or use defaults if no URL params
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const startDateParam = searchParams.get('start_date');
@@ -98,6 +102,20 @@ function FilterItemDatumVanTot({ presetButtons }) {
           setEndDate(endDateObj);
           updateFilter(startDateObj, endDateObj);
         }
+      }
+    } else if (defaultStartDate && defaultEndDate) {
+      // No URL params, but defaults are provided - use them
+      // Check if current Redux state differs from defaults
+      const currentStart = moment(filterOntwikkelingVan).format('YYYY-MM-DD');
+      const currentEnd = moment(filterOntwikkelingTot).format('YYYY-MM-DD');
+      const defaultStartStr = moment(defaultStartDate).format('YYYY-MM-DD');
+      const defaultEndStr = moment(defaultEndDate).format('YYYY-MM-DD');
+      
+      // Update if Redux state differs from defaults, or if state hasn't been initialized yet
+      if (currentStart !== defaultStartStr || currentEnd !== defaultEndStr) {
+        setStartDate(defaultStartDate);
+        setEndDate(defaultEndDate);
+        updateFilter(defaultStartDate, defaultEndDate);
       }
     }
   }, []); // Only run on mount
