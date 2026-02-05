@@ -104,19 +104,11 @@ function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate
         }
       }
     } else if (defaultStartDate && defaultEndDate) {
-      // No URL params, but defaults are provided - use them
-      // Check if current Redux state differs from defaults
-      const currentStart = moment(filterOntwikkelingVan).format('YYYY-MM-DD');
-      const currentEnd = moment(filterOntwikkelingTot).format('YYYY-MM-DD');
-      const defaultStartStr = moment(defaultStartDate).format('YYYY-MM-DD');
-      const defaultEndStr = moment(defaultEndDate).format('YYYY-MM-DD');
-      
-      // Update if Redux state differs from defaults, or if state hasn't been initialized yet
-      if (currentStart !== defaultStartStr || currentEnd !== defaultEndStr) {
-        setStartDate(defaultStartDate);
-        setEndDate(defaultEndDate);
-        updateFilter(defaultStartDate, defaultEndDate);
-      }
+      // No URL params, but defaults are provided - always use them to ensure consistency
+      // This ensures that when visiting the page without URL params, defaults are always set
+      setStartDate(defaultStartDate);
+      setEndDate(defaultEndDate);
+      updateFilter(defaultStartDate, defaultEndDate);
     }
   }, []); // Only run on mount
 
