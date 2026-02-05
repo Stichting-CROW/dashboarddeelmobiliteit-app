@@ -9,6 +9,9 @@ import { getPrettyVehicleTypeName, getPluralFormFactorName } from '../../helpers
 import LineChart, { LineChartData } from '../../components/Chart/LineChart';
 import moment from 'moment';
 import { getKpiOverviewOperators } from '../../api/kpiOverview';
+import Modal from '../../components/Modal/Modal.jsx';
+import SelectProviderDialog from '../../components/PrestatiesAanbieders/SelectProviderDialog';
+import SelectVehicleTypeDialog from '../../components/PrestatiesAanbieders/SelectVehicleTypeDialog';
 
 interface DashboardPrestatiesAanbiedersDetailsProps {
 
@@ -16,6 +19,7 @@ interface DashboardPrestatiesAanbiedersDetailsProps {
 
 function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiedersDetailsProps) {
   const gebieden = useSelector((state: StateType) => state.metadata.gebieden);
+  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
   const token = useSelector((state: StateType) => 
     (state.authentication.user_data && state.authentication.user_data.token) || null
   );
@@ -24,6 +28,8 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
+  const [showProviderModal, setShowProviderModal] = useState<boolean>(false);
+  const [showVehicleTypeModal, setShowVehicleTypeModal] = useState<boolean>(false);
 
   // Watch for URL changes (triggered by Filterbar using window.history.replaceState)
   const location = useLocation();
@@ -304,12 +310,82 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     return `/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`;
   }, [municipalityCode, startDateParam, endDateParam]);
 
+  // Function to update query parameters in URL
+  const updateQueryParam = (key: string, value: string | null) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (!value) {
+      searchParams.delete(key);
+    } else {
+      searchParams.set(key, value);
+    }
+    const url = window.location.protocol 
+      + "//" + window.location.host 
+      + window.location.pathname 
+      + (searchParams.toString() ? "?" : "")
+      + searchParams.toString();
+    if (window.history.replaceState) {
+      window.history.replaceState({ path: url }, "", url);
+      // Trigger URL search update
+      setUrlSearch(searchParams.toString() ? `?${searchParams.toString()}` : '');
+    }
+  };
+
+  // Handler for selecting a provider
+  const handleSelectProvider = (provider: OperatorData) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('system_id', provider.system_id);
+    // Also set operator for backward compatibility
+    searchParams.set('operator', provider.system_id);
+    const url = window.location.protocol 
+      + "//" + window.location.host 
+      + window.location.pathname 
+      + (searchParams.toString() ? "?" : "")
+      + searchParams.toString();
+    if (window.history.replaceState) {
+      window.history.replaceState({ path: url }, "", url);
+      setUrlSearch(searchParams.toString() ? `?${searchParams.toString()}` : '');
+    }
+    setShowProviderModal(false);
+  };
+
+  // Handler for selecting a vehicle type
+  const handleSelectVehicleType = (vehicleTypeId: string) => {
+    updateQueryParam('form_factor', vehicleTypeId);
+    setShowVehicleTypeModal(false);
+  };
+
+  // Handler for canceling modals
+  const handleCancelModal = () => {
+    setShowProviderModal(false);
+    setShowVehicleTypeModal(false);
+  };
+
   return (
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
       <p className="my-4">
         Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
       </p>
+      {(!operatorCode || !formFactorCode) && (
+        <div className="my-4">
+          {!operatorCode && (
+            <button
+              className="inline-block px-4 py-2 bg-blue-600 text-white font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out mr-2 mb-2"
+              onClick={() => setShowProviderModal(true)}
+            >
+              Selecteer aanbieder
+            </button>
+          )}
+          {!formFactorCode && (
+            <button
+              className="inline-block px-4 py-2 bg-blue-600 text-white font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out mr-2 mb-2"
+              onClick={() => setShowVehicleTypeModal(true)}
+            >
+              Selecteer voertuigtype
+            </button>
+          )}
+        </div>
+      )}
       <p className="my-4">
         Ga naar <Link to={prestatiesAanbiedersLink}>Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
       </p>
@@ -322,7 +398,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
         <div className="my-4 text-red-600">Fout: {error}</div>
       )}
       
-      {!loading && !error && chartsData.length > 0 && dateRange.length > 0 && (
+      {operatorCode && formFactorCode && !loading && !error && chartsData.length > 0 && dateRange.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-8">
           {chartsData.map((chart, index) => (
             <LineChart
@@ -335,6 +411,47 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
             />
           ))}
         </div>
+      )}
+
+      {/* Select Provider Modal */}
+      {showProviderModal && (
+        <Modal
+          isVisible={true}
+          title="Selecteer aanbieder"
+          button1Title=""
+          button1Handler={() => {}}
+          button2Title="Annuleren"
+          button2Handler={handleCancelModal}
+          hideModalHandler={handleCancelModal}
+          config={{ maxWidth: '600px' }}
+        >
+          <SelectProviderDialog
+            modality={null}
+            availableProviders={operators}
+            onSelect={handleSelectProvider}
+            onCancel={handleCancelModal}
+          />
+        </Modal>
+      )}
+
+      {/* Select Vehicle Type Modal */}
+      {showVehicleTypeModal && (
+        <Modal
+          isVisible={true}
+          title="Selecteer voertuigtype"
+          button1Title=""
+          button1Handler={() => {}}
+          button2Title="Annuleren"
+          button2Handler={handleCancelModal}
+          hideModalHandler={handleCancelModal}
+          config={{ maxWidth: '600px' }}
+        >
+          <SelectVehicleTypeDialog
+            vehicleTypes={voertuigtypes}
+            onSelect={handleSelectVehicleType}
+            onCancel={handleCancelModal}
+          />
+        </Modal>
       )}
     </div>
   );

@@ -6,7 +6,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilterbarExtended from './FilterbarExtended.jsx';
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 
 import Logo from '../Logo.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
@@ -43,9 +43,17 @@ function FilterbarPermits({
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
 
-  // const filterGebied = useSelector((state: StateType) => {
-  //   return state.filter ? state.filter.gebied : null
-  // });
+  const filterGebied = useSelector((state: StateType) => {
+    return state.filter ? state.filter.gebied : "";
+  });
+
+  const filterOntwikkelingVan = useSelector((state: StateType) => {
+    return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : null;
+  });
+
+  const filterOntwikkelingTot = useSelector((state: StateType) => {
+    return state.filter && state.filter.ontwikkelingtot ? new Date(state.filter.ontwikkelingtot) : null;
+  });
 
   const hidePlaats = gebieden.length <= 1;
 
@@ -76,7 +84,27 @@ function FilterbarPermits({
   };
 
   const handleSelectDashboardType = (path: string) => {
-    navigate(path);
+    const searchParams = new URLSearchParams();
+    
+    // Add gm_code if available
+    if (filterGebied) {
+      searchParams.set('gm_code', filterGebied);
+    }
+    
+    // Add start_date and end_date if available
+    if (filterOntwikkelingVan) {
+      searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
+    }
+    
+    if (filterOntwikkelingTot) {
+      searchParams.set('end_date', format(filterOntwikkelingTot, 'yyyy-MM-dd'));
+    }
+    
+    // Build the URL with query parameters
+    const queryString = searchParams.toString();
+    const url = queryString ? `${path}?${queryString}` : path;
+    
+    navigate(url);
     toggleDashboardType(false);
   };
 
