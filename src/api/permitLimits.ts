@@ -49,6 +49,15 @@ export interface PermitLimitRecord {
     vehicle_type?: PermitVehicleType; /* not yet available via the API now, filled in by the frontend */
     permit_limit?: PermitLimit;
     stats?: PermitStats;
+    /**
+     * Summary of KPI compliance for this permit, derived from performance indicator data.
+     * 'red'   => at least one KPI value is non-compliant (complies === false)
+     * 'green' => no red values, but at least one KPI value is compliant (complies === true)
+     * 'grey'  => only undefined / missing compliance information
+     *
+     * This field is primarily used for sorting rows in the permit card collections.
+     */
+    overallCompliance?: 'red' | 'green' | 'grey';
 }
 
 // Helper: get 'niet actief' value for each field
@@ -141,6 +150,17 @@ export const getPermitLimitOverviewForMunicipality = async (
             .map((item: MunicipalityModalityOperator) => {
                 const operator = operatorsMap.get(item.operator);
                 const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+
+                // Derive an overall compliance summary from all KPI values for this operator+form_factor+municipality
+                const kpis = item.kpis || [];
+                const hasRed = kpis.some(kpi =>
+                    (kpi.values || []).some(value => value.complies === false)
+                );
+                const hasGreen = !hasRed && kpis.some(kpi =>
+                    (kpi.values || []).some(value => value.complies === true)
+                );
+                const overallCompliance: 'red' | 'green' | 'grey' =
+                    hasRed ? 'red' : hasGreen ? 'green' : 'grey';
                 
                 // Create a minimal permit_limit record
                 // Generate a unique ID based on operator + form_factor + municipality combination
@@ -185,6 +205,7 @@ export const getPermitLimitOverviewForMunicipality = async (
                         icon: '', // Will be set by usePermitData hook
                     },
                     permit_limit: permitLimit,
+                    overallCompliance,
                 };
 
                 return record;
