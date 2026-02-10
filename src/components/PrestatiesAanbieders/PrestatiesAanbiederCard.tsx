@@ -9,6 +9,8 @@ import { getOperatorPerformanceIndicators } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
 import Button from '../Button/Button';
 import { StateType } from '../../types/StateType';
+import ProviderLabel from './ProviderLabel';
+import { getProviderColorForProvider } from '../../helpers/providers';
 
 interface PrestatiesAanbiederCardProps {
     label: string;
@@ -34,6 +36,9 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const hasLoadedOnce = useRef(false);
     const location = useLocation();
     const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
+
+    const providerSystemId = permit.operator?.system_id || permit.permit_limit.system_id;
+    const providerColor = getProviderColorForProvider(providerSystemId);
 
     const token = useSelector((state: StateType) => 
       (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
@@ -132,18 +137,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
 
     return (
       <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="permits-card">
-        {/* Sprocket icon for editing limits */}
-        { onEditLimits && <button
-          type="button"
-          aria-label="Verguningseisen bewerken"
-          title="Verguningseisen bewerken"
-          className="permits-card-edit-button"
-          onClick={onEditLimits}
-        >
-          {/* Use settings.svg icon */}
-          <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" width={16} height={16} />
-        </button>}
-        {/* End Sprocket icon */}
         <div className="permits-card-content">
           <div className="hidden">
             { logo ? 
@@ -172,8 +165,22 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               </div> 
             }
           </div>
-          <div title={label} className="permits-card-label">
-            {label}
+          <div className="flex justify-between">
+            <ProviderLabel label={label} color={providerColor} />
+            <div className="flex items-center gap-1">
+              <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
+              {/* Sprocket icon for editing limits */}
+              { onEditLimits && <button
+                type="button"
+                aria-label="Verguningseisen bewerken"
+                title="Verguningseisen bewerken"
+                className="permits-card-edit-button"
+                onClick={onEditLimits}
+              >
+                {/* Use settings.svg icon */}
+                <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" width={16} height={16} />
+              </button>}
+            </div>
           </div>
         </div>
 
@@ -189,9 +196,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               />
             ))
           )}
-        </div>
-        <div className="w-full text-center" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-          <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
         </div>
 {/* 
         <RangeBarIndicator 

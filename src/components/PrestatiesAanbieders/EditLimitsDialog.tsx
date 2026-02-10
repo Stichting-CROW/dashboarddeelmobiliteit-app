@@ -1,9 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import moment from 'moment';
-import { getVehicleIconUrl, getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
-import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
-import { getPermitLimitHistory, PERMIT_LIMITS_NIET_ACTIEF, PermitLimitData, deletePermitLimit } from '../../api/permitLimits';
-import { getProvider } from '../../helpers/providers'; // TODO: use operators from parent component (has no logo info now)
+import { Link } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -12,213 +9,73 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
-  ReferenceLine
 } from 'recharts';
+import { Table2, FormInput } from 'lucide-react';
+import { getVehicleIconUrl, getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import { getProvider } from '../../helpers/providers';
+import Modal from '../Modal/Modal.jsx';
+import type {
+  GeometryOperatorModalityLimit,
+  PerformanceIndicatorDescription,
+} from '../../api/permitLimits';
+import {
+  addGeometryOperatorModalityLimit,
+  updateGeometryOperatorModalityLimit,
+  getOperatorPerformanceIndicators,
+  getGeometryOperatorModalityLimitHistory,
+  deleteGeometryOperatorModalityLimit,
+  toGeometryRef,
+} from '../../api/permitLimits';
+import { toDateOnly, formatBound, formatUnit, type HistoryTableRow } from './permitLimitsUtils';
+import PermitLimitsTable from './PermitLimitsTable';
+import PermitLimitsEditor from './PermitLimitsEditor';
+import {
+  planSetFullRecordAtDate,
+  planDeleteRecord,
+  findRecordContainingDate,
+  randomKpiValue,
+  pickRandomSubset,
+  type OperationContext,
+  type PlannedOp,
+} from './permitLimitsOperations';
+
 interface EditLimitsDialogProps {
-  token: string;
+  isVisible: boolean;
   municipality: string;
   provider_system_id: string;
   vehicle_type: string;
+  tableRows: HistoryTableRow[];
+  limitHistory: GeometryOperatorModalityLimit[] | null;
+  kpiDescriptions: PerformanceIndicatorDescription[];
   mode: 'normal' | 'admin';
-  onOk: (formData: PermitLimitData) => void;
-  onCancel: () => void;
-  onHistoryChanged?: () => void;
+  token: string;
+  propulsion_type?: string;
+  showPermitLimitsEditor?: boolean;
+  onClose: () => void;
+  onRecordUpdated: () => void;
+  onProviderClick?: () => void;
+  onVehicleTypeClick?: () => void;
 }
-const isNumber = (v: any) => typeof v === 'number' && !isNaN(v);
-// Parse ISO8601 duration to number of days (hours rounded down)
-const isoDurationToDays = (duration: string | undefined): number | false => {
-  if(!duration) return false;
-  // Example: P1Y2M3W4DT5H6M7S
-  const regex = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/;
-  const match = duration.match(regex);
-  if (!match) return false;
 
-  const [
-    ,
-    years,
-    months,
-    weeks,
-    days,
-    hours,
-    minutes,
-    seconds,
-  ] = match.map((v) => (v ? parseInt(v, 10) : 0));
-
-  // Convert all to days, hours/minutes/seconds as fractions
-  let totalDays =
-    (years || 0) * 365 +
-    (months || 0) * 30 +
-    (weeks || 0) * 7 +
-    (days || 0);
-
-  // Add fractional days from time part
-  if (hours || minutes || seconds) {
-    const dayFraction =
-      (hours || 0) / 24 +
-      (minutes || 0) / 1440 +
-      (seconds || 0) / 86400;
-    totalDays += Math.floor(dayFraction);
-  }
-
-  return totalDays;
-};
-
-// Convert number of days to ISO8601 duration (PXD)
-const daysToIsoDuration = (days: number): string => {
-  return `P${Math.floor(days)}D`;
-};
-
-// Add a custom X axis tick renderer for subtle date labels
-const CustomXAxisTick = (props: any) => {
-  const { x, y, payload } = props;
-  return (
-    <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" fontSize="0.8em">
-        {payload.value}
-      </text>
-    </g>
-  );
-};
-
-const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality, provider_system_id, vehicle_type, mode, onOk, onCancel, onHistoryChanged }) => {
-  // Initial date logic
-  const tomorrow = moment().add(1, 'day').format('YYYY-MM-DD');
-  const [selectedDate, setSelectedDate] = useState<string>(tomorrow);
-
-  const [permitHistory, setPermitHistory] = useState<PermitLimitData[]|null>(null);
-  const [currentRecord, setCurrentRecord] = useState<PermitLimitData|null>(null);
-
-  // Add state for all fields
-  const [minimumVehicules, setMinimumVehicules] = useState<number | ''>('');
-  const [maximumVehicules, setMaximumVehicules] = useState<number | ''>('');
-  const [maxParkingDuration, setMaxParkingDuration] = useState<number | ''>('');
-  const [minimalNumberOfTripsPerVehicle, setMinimalNumberOfTripsPerVehicle] = useState<number | ''>('');
-
-  // Add state for 'actief' checkboxes for each field
-  const [minimumVehiculesActive, setMinimumVehiculesActive] = useState(true);
-  const [maximumVehiculesActive, setMaximumVehiculesActive] = useState(true);
-  const [maxParkingDurationActive, setMaxParkingDurationActive] = useState(true);
-  const [minimalNumberOfTripsPerVehicleActive, setMinimalNumberOfTripsPerVehicleActive] = useState(true);
-
-  // Add state for tab selection
-  const [activeTab, setActiveTab] = useState<'aanpassen' | 'historisch'>('aanpassen');
-
-  // State for highlighting table row on chart hover
-  const [highlightedDate, setHighlightedDate] = useState<string | null>(null);
-  // State for hovered table row (for chart indicator)
-  const [hoveredTableDate, setHoveredTableDate] = useState<string | null>(null);
-  // Refs for each row by date
-  const rowRefs = useRef<{ [date: string]: HTMLTableRowElement | null }>({});
-
-  // Scroll highlighted row into view when highlightedDate changes
-  useEffect(() => {
-    if (highlightedDate && rowRefs.current[highlightedDate]) {
-      rowRefs.current[highlightedDate]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-  }, [highlightedDate]);
-
-  // Helper to reload history
-  const reloadHistory = async () => {
-    const history = await getPermitLimitHistory(token, municipality, provider_system_id, vehicle_type);
-    setPermitHistory(history ? history.sort((a, b) => moment(a.effective_date).diff(moment(b.effective_date))) : null);
-    if (typeof onHistoryChanged === 'function') onHistoryChanged();
-  };
-
-  // Fetch current record on mount and when startDate changes
-  useEffect(() => {
-    reloadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [municipality, provider_system_id, vehicle_type, token]);
-
-  useEffect(() => {
-    if(permitHistory) {
-      let data: PermitLimitData|null = null;
-      for(let i = 0; i < permitHistory.length; i++) {
-        const startdate = permitHistory[i].effective_date;
-        const enddate = i<permitHistory.length-1 ? permitHistory[i+1].effective_date: '9999-12-31';
-        if(selectedDate >= startdate && selectedDate <= enddate) {
-          data = permitHistory[i];
-          break;
-        }
-      }
-
-      setCurrentRecord(data);
-
-      setMinimumVehiculesActive(data!==null && data.minimum_vehicles !== PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles);
-      setMaximumVehiculesActive(data!==null && data.maximum_vehicles !== PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles);
-      setMaxParkingDurationActive(data!==null && isoDurationToDays(data.max_parking_duration) !== isoDurationToDays(PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration));
-      setMinimalNumberOfTripsPerVehicleActive(data!==null && data.minimal_number_of_trips_per_vehicle !== PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle);
-    } 
-  }, [permitHistory, selectedDate]);
-
-  useEffect(() => {
-    moment.locale(navigator.language);
-  }, []);
-
-  const handleSelectedDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate(e.target.value);
-  };
-
-  const getNewData = () => {
-    // Compute current values with actief logic, using original value if edit box is empty
-    const newData: PermitLimitData = {
-      municipality: municipality,
-      system_id: provider_system_id,
-      modality: vehicle_type,
-      effective_date: selectedDate,
-      minimum_vehicles: minimumVehiculesActive ? (minimumVehicules !== '' ? minimumVehicules : currentRecord?.minimum_vehicles) : PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles,
-      maximum_vehicles: maximumVehiculesActive ? (maximumVehicules !== '' ? maximumVehicules : currentRecord?.maximum_vehicles) : PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles,
-      max_parking_duration: maxParkingDurationActive ? (maxParkingDuration !== '' ? daysToIsoDuration(maxParkingDuration) : currentRecord?.max_parking_duration) : PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration,
-      minimal_number_of_trips_per_vehicle: minimalNumberOfTripsPerVehicleActive ? (minimalNumberOfTripsPerVehicle !== '' ? minimalNumberOfTripsPerVehicle : currentRecord?.minimal_number_of_trips_per_vehicle) : PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle, 
-    };
-
-    if(currentRecord?.effective_date === selectedDate) {
-      newData.permit_limit_id = currentRecord.permit_limit_id; 
-    }
-
-    return newData;
-  }
-
-  const handleOk = () => {
-    onOk(getNewData());
-  };
-
-  const itemIsValid = (field: string, value: string|number, isActive: boolean) => {
-    const result = (
-      !isActive ||
-      (currentRecord===null && value !== '') ||  // value must be set when there is no earlier record
-      (currentRecord!==null && value !== currentRecord[field]) ||  // value must be set and changed
-      (isNumber(value) && Number(value) > 0)     // value must be a number > 0
-    )
-    return result;
-  }
-
-  let minCapacityMessage = '';
-  let maxCapacityMessage = '';
-  let maxParkingDurationMessage = '';
-  let minNumberOfTripsPerVehicleMessage = '';
-  if(currentRecord!==null) {
-    minCapacityMessage = '(' + (currentRecord.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : currentRecord.minimum_vehicles.toString()) + ')';
-    maxCapacityMessage = '(' + (currentRecord.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : currentRecord.maximum_vehicles.toString()) + ')';
-    maxParkingDurationMessage = '(' + (isoDurationToDays(currentRecord.max_parking_duration) === isoDurationToDays(PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration) ? 'niet actief' : isoDurationToDays(currentRecord.max_parking_duration).toString()) + ')';
-    minNumberOfTripsPerVehicleMessage = '(' + (currentRecord.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : currentRecord.minimal_number_of_trips_per_vehicle.toString()) + ')';
-  }
-
-  let isValid = 
-    itemIsValid('minimumVehicules', minimumVehicules, minimumVehiculesActive) &&
-    itemIsValid('maximumVehicules', maximumVehicules, maximumVehiculesActive) &&
-    itemIsValid('maxParkingDuration', maxParkingDuration, maxParkingDurationActive) &&
-    itemIsValid('minimalNumberOfTripsPerVehicle', minimalNumberOfTripsPerVehicle, minimalNumberOfTripsPerVehicleActive);
-
-  let newData = getNewData();
-  let isChanged = 
-    newData.minimum_vehicles !== currentRecord?.minimum_vehicles ||
-    newData.maximum_vehicles !== currentRecord?.maximum_vehicles ||
-    isoDurationToDays(newData.max_parking_duration) !== isoDurationToDays(currentRecord?.max_parking_duration) ||
-    newData.minimal_number_of_trips_per_vehicle !== currentRecord?.minimal_number_of_trips_per_vehicle;
-
+const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
+  isVisible,
+  municipality,
+  provider_system_id,
+  vehicle_type,
+  tableRows,
+  limitHistory,
+  kpiDescriptions,
+  mode,
+  token,
+  propulsion_type = 'electric',
+  showPermitLimitsEditor = false,
+  onClose,
+  onRecordUpdated,
+  onProviderClick,
+  onVehicleTypeClick,
+}) => {
   const provider = getProvider(provider_system_id);
-
   const providerName = provider?.name || provider_system_id;
   const providerLogo = provider ? provider.logo : createSvgPlaceholder({
     width: 48,
@@ -230,254 +87,392 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
   const vehicleTypeLogo = getVehicleIconUrl(vehicle_type);
   const vehicleTypeName = getPrettyVehicleTypeName(vehicle_type) || vehicle_type;
 
-  const isNormalMode = mode === 'normal';
+  const [activeTab, setActiveTab] = useState<'main' | 'test' | 'kpilist'>('main');
+  const [focusDate, setFocusDate] = useState<string | null>(null);
+  const [useEditorMode, setUseEditorMode] = useState(showPermitLimitsEditor);
+  const [showTestTab, setShowTestTab] = useState(false);
 
-  // Render function for the Aanpassen tab content
-  const renderAanpassenTab = () => (
-    <>
-      {/* Restore van / tot en met row */}
-      <div className="flex flex-col items-center">
-        {currentRecord ? (
-          <span>Laatste configuratie is actief sinds {moment(currentRecord.effective_date).format('L')} {currentRecord.end_date ? `tot en met ${moment(currentRecord.end_date).format('L')}` : ''}</span>
-        ) : (
-          <span>Geen configuratie actief</span>
-        )}
-      </div>
-      {/* Date controls row, aligned as a form row */}
-      <div className="flex flex-row items-end gap-3 mb-2">
-        <label className="permits-form-label">Ingangsdatum</label>
-        <div className="flex flex-row items-end gap-4">
-          <input
-            id="start-date"
-            type="date"
-            className="border rounded px-2 py-1 w-full"
-            value={selectedDate}
-            {...(isNormalMode ? { min: tomorrow } : {})}
-            onChange={handleSelectedDateChange}
-          />
-        </div>
-      </div>
-      {/* Other fields: label, input, and actief checkbox on a single line, left aligned */}
-      <div className="flex flex-col gap-2 mb-2">
-        <div className="permits-form-row">
-          <label htmlFor="max-capacity" className="permits-form-label">
-            Maximaal aantal onverhuurde voertuigen
-          </label>
-          <input
-            id="max-capacity"
-            type="number"
-            className="permits-form-input"
-            value={maximumVehiculesActive ? maximumVehicules : ''}
-            min={0}
-            onChange={e => setMaximumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!maximumVehiculesActive}
-            readOnly={!maximumVehiculesActive}
-          />
-          <label className="permits-form-checkbox-label">
-            <input type="checkbox" checked={maximumVehiculesActive} onChange={e => setMaximumVehiculesActive(e.target.checked)} />
-            actief
-          </label>
-          <span className="permits-form-message">{maxCapacityMessage}</span>
-        </div>
-        <div className="permits-form-row">
-          <label htmlFor="min-capacity" className="permits-form-label">
-            Minimum aantal voertuigen beschikbaar
-          </label>
-          <input
-            id="min-capacity"
-            type="number"
-            className="permits-form-input"
-            value={minimumVehiculesActive ? minimumVehicules : ''}
-            min={0}
-            onChange={e => setMinimumVehicules(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!minimumVehiculesActive}
-            readOnly={!minimumVehiculesActive}
-          />
-          <label className="permits-form-checkbox-label">
-            <input type="checkbox" checked={minimumVehiculesActive} onChange={e => setMinimumVehiculesActive(e.target.checked)} />
-            actief
-          </label>
-          <span className="permits-form-message">{minCapacityMessage}</span>
-        </div>
-        {/* <div className="permits-form-row">
-          <label htmlFor="min-pct-duration" className="permits-form-label">Maximale parkeerduur (dagen)</label>
-          <input
-            id="min-pct-duration"
-            type="number"
-            className="permits-form-input"
-            value={maxParkingDurationActive ? maxParkingDuration : ''}
-            min={0}
-            max={100}
-            onChange={e => setMaxParkingDuration(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!maxParkingDurationActive}
-            readOnly={!maxParkingDurationActive}
-          />
-          <label className="permits-form-checkbox-label">
-            <input type="checkbox" checked={maxParkingDurationActive} onChange={e => setMaxParkingDurationActive(e.target.checked)} />
-            actief
-          </label>
-          <span className="permits-form-message">{maxParkingDurationMessage}</span>
-        </div>
-        <div className="permits-form-row">
-          <label htmlFor="min-pct-rides" className="permits-form-label">Min. percentage ritten per voertuig correct</label>
-          <input
-            id="min-pct-rides"
-            type="number"
-            className="permits-form-input"
-            value={minimalNumberOfTripsPerVehicleActive ? minimalNumberOfTripsPerVehicle : ''}
-            min={0}
-            max={100}
-            onChange={e => setMinimalNumberOfTripsPerVehicle(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={!minimalNumberOfTripsPerVehicleActive}
-            readOnly={!minimalNumberOfTripsPerVehicleActive}
-          />
-          <label className="permits-form-checkbox-label">
-            <input type="checkbox" checked={minimalNumberOfTripsPerVehicleActive} onChange={e => setMinimalNumberOfTripsPerVehicleActive(e.target.checked)} />
-            actief
-          </label>
-          <span className="permits-form-message">{minNumberOfTripsPerVehicleMessage}</span>
-        </div> */}
-      </div>
-      <div className="permits-form-actions">
-        <button className="permits-form-cancel-button" onClick={onCancel}>Afbreken</button>
-        <button className={`permits-form-save-button ${isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`} onClick={handleOk} disabled={!isValid}>Opslaan</button>
-      </div>
-    </>
-  );
-
-  // Render function for the Historisch tab content
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const handleEditRecord = (date: string) => {
-    setSelectedDate(date);
-    setActiveTab('aanpassen');
-  };
-  const handleDeleteRecord = async (permit_limit_id: number) => {
-    if (!window.confirm('Weet je zeker dat je deze limiet wilt verwijderen?')) return;
-    setDeletingId(permit_limit_id);
-    await deletePermitLimit(token, permit_limit_id);
-    await reloadHistory();
-    setDeletingId(null);
-  };
-  const renderHistorischTab = () => {
-    // Sort descending by effective_date
-    const sortedHistory = permitHistory ? [...permitHistory].sort((a, b) => moment(b.effective_date).diff(moment(a.effective_date))) : [];
-    // Prepare chart data (ascending for line chart)
-    const chartData = [...sortedHistory].reverse().map(rec => ({
-      date: moment(rec.effective_date).format('YYYY-MM-DD'),
-      minimum_vehicles: rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? null : rec.minimum_vehicles,
-      maximum_vehicles: rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? null : rec.maximum_vehicles,
-      max_parking_duration_days: (rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? null : isoDurationToDays(rec.max_parking_duration),
-      minimal_number_of_trips_per_vehicle: rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? null : rec.minimal_number_of_trips_per_vehicle,
-    }));
-    
-    return (
-      <>
-        <div className="permits-table-container" style={sortedHistory.length > 10 ? { maxHeight: 320, overflowY: 'auto' } : {}}>
-          <table className="permits-table">
-            <thead>
-              <tr className="permits-table-header">
-                <th className="permits-table-header-cell">Ingangsdatum</th>
-                <th className="permits-table-header-cell">Maximum</th>
-                <th className="permits-table-header-cell">Minimum</th>
-                {/* <th className="permits-table-header-cell">Max. parkeerduur</th> */}
-                {/* <th className="permits-table-header-cell">Min. % ritten</th> */}
-                <th className="permits-table-header-cell">Acties</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedHistory.length > 0 ? sortedHistory.map((rec) => { 
-                const allowChange = mode==='admin' || (moment(rec.effective_date).isAfter(moment().startOf('day')));
-
-                const data1 = rec.maximum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles ? 'niet actief' : rec.maximum_vehicles
-                const data2 = rec.minimum_vehicles === PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles ? 'niet actief' : rec.minimum_vehicles.toString()
-                // Note: max_parking_duration is undefined for new records, so we need to check for that
-                const data3 = (rec.max_parking_duration === undefined || rec.max_parking_duration === PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration || rec.max_parking_duration === 'T0S') ? 'niet actief' : rec.max_parking_duration.replace('P','').replace('D',' dagen')
-                const data4 = rec.minimal_number_of_trips_per_vehicle === PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle ? 'niet actief' : rec.minimal_number_of_trips_per_vehicle
-
-                return (
-                  <tr
-                    key={rec.permit_limit_id || rec.effective_date}
-                    ref={el => { rowRefs.current[moment(rec.effective_date).format('YYYY-MM-DD')] = el; }}
-                    className={`permits-table-row${highlightedDate === moment(rec.effective_date).format('YYYY-MM-DD') ? ' bg-blue-100' : ''}`}
-                    onMouseEnter={() => setHoveredTableDate(moment(rec.effective_date).format('YYYY-MM-DD'))}
-                    onMouseLeave={() => setHoveredTableDate(null)}
-                  >
-                    <td className="permits-table-cell-nowrap">{moment(rec.effective_date).format('L')}</td>
-                    <td className="permits-table-cell-center">{data1}</td>
-                    <td className="permits-table-cell-center">{data2}</td>
-                    {/* <td className="permits-table-cell-center">{data3}</td> */}
-                    {/* <td className="permits-table-cell-center">{data4}</td> */}
-                    <td className="permits-table-cell-center">
-                      { allowChange && <button title="Aanpassen" className="permits-table-action-button" onClick={() => handleEditRecord(rec.effective_date)}>
-                        {/* Pencil SVG */}
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M14.85 2.85a2.121 2.121 0 0 1 3 3l-9.193 9.193a2 2 0 0 1-.708.464l-3.5 1.25a.5.5 0 0 1-.637-.637l1.25-3.5a2 2 0 0 1 .464-.708L14.85 2.85zm2.12.88a1.121 1.121 0 0 0-1.586 0l-1.293 1.293 1.586 1.586 1.293-1.293a1.121 1.121 0 0 0 0-1.586zm-2.293 2.293l-8.5 8.5-.75 2.1 2.1-.75 8.5-8.5-1.85-1.85z" fill="#666"/></svg>
-                      </button>}
-                      { allowChange && <button title="Verwijderen" className="permits-table-delete-button" onClick={() => rec.permit_limit_id && handleDeleteRecord(rec.permit_limit_id)} disabled={deletingId === rec.permit_limit_id}>
-                        {/* Trash SVG */}
-                        {deletingId === rec.permit_limit_id ? (
-                          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline animate-spin" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8" stroke="#888" strokeWidth="2" fill="none"/></svg>
-                        ) : (
-                          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg"><path d="M7 8v6m3-6v6m3-8V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1M4 6h12m-1 0v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        )}
-                      </button>}
-                    </td>
-                  </tr>
-                );
-              }) : (
-                <tr><td colSpan={6} className="text-center text-gray-400 py-4">Geen historische limieten gevonden</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {/* Line chart below the table */}
-        <div className="w-full flex flex-row mt-8" style={{ minHeight: 320 }}>
-          <ResponsiveContainer width="75%" height={320}>
-            <LineChart
-              data={chartData}
-              margin={{ top: 16, right: 16, left: 8, bottom: 8 }}
-              onMouseMove={state => {
-                if (state && state.activeLabel) setHighlightedDate(state.activeLabel);
-              }}
-              onMouseLeave={() => setHighlightedDate(null)}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={<CustomXAxisTick />} />
-              <YAxis yAxisId="left" orientation="left" label={{ value: 'Capaciteit', angle: -90, position: 'insideLeft', fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" label={{ value: 'Dagen / %', angle: 90, position: 'insideRight', fontSize: 12 }} />
-              <Tooltip content={() => null} />
-              {hoveredTableDate && (
-                <ReferenceLine x={hoveredTableDate} yAxisId="left" stroke="#888" strokeDasharray="4 2" />
-              )}
-              <Line yAxisId="left" type="linear" dataKey="minimum_vehicles" name="Minimum capaciteit" stroke="#1f77b4" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-              <Line yAxisId="left" type="linear" dataKey="maximum_vehicles" name="Maximum capaciteit" stroke="#ff7f0e" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-              <Line yAxisId="right" type="linear" dataKey="max_parking_duration_days" name="Max. parkeerduur (dagen)" stroke="#2ca02c" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-              <Line yAxisId="right" type="linear" dataKey="minimal_number_of_trips_per_vehicle" name="Min. % ritten" stroke="#d62728" strokeWidth={2} dot={{ r: 4 }} isAnimationActive={false} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="flex flex-col justify-center ml-4">
-            <div className="mb-2 font-semibold">Legenda</div>
-            <div className="flex flex-col gap-2 text-xs">
-              <span className="flex items-center"><span className="inline-block w-4 h-1 rounded bg-[#1f77b4] mr-2"></span>Minimum capaciteit</span>
-              <span className="flex items-center"><span className="inline-block w-4 h-1 rounded bg-[#ff7f0e] mr-2"></span>Maximum capaciteit</span>
-              <span className="flex items-center"><span className="inline-block w-4 h-1 rounded bg-[#2ca02c] mr-2"></span>Max. parkeerduur (dagen)</span>
-              <span className="flex items-center"><span className="inline-block w-4 h-1 rounded bg-[#d62728] mr-2"></span>Min. % ritten</span>
-            </div>
-          </div>
-        </div>
-      </>
+  const formModeDefaultDate = useMemo(() => {
+    const today = moment().format('YYYY-MM-DD');
+    if (!limitHistory || limitHistory.length === 0) return today;
+    const sorted = [...limitHistory].sort((a, b) =>
+      toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date))
     );
+    const onOrBeforeToday = sorted.filter((r) => toDateOnly(r.effective_date) <= today);
+    if (onOrBeforeToday.length > 0) {
+      return toDateOnly(onOrBeforeToday[onOrBeforeToday.length - 1].effective_date);
+    }
+    return toDateOnly(sorted[0].effective_date);
+  }, [limitHistory]);
+  const [showEditor, setShowEditor] = useState(false);
+
+  // Test tab: history state
+  const [historyData, setHistoryData] = useState<GeometryOperatorModalityLimit[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // KPI list for Test tab (Insert/Random)
+  const [kpiListForTest, setKpiListForTest] = useState<PerformanceIndicatorDescription[] | null>(null);
+  const [testActionLoading, setTestActionLoading] = useState<string | null>(null);
+  const [testViewMode, setTestViewMode] = useState<'table' | 'graph'>('table');
+
+  const TEST_DATES = ['2026-01-01', '2026-04-01', '2026-07-01', '2026-10-01'];
+
+  // Chart colors for KPI lines (Recharts-friendly)
+  const CHART_COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f'];
+  const X_AXIS_MAX = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59).getTime();
+
+  // Test tab graph: [(t1+1sec,v1),(t2-1sec,v1),(t2+1sec,v2),(t3-1sec,v2),...] per KPI; absent = null (no segment)
+  const { testChartData, testChartKpiKeys } = useMemo(() => {
+    if (!historyData || historyData.length === 0) {
+      return { testChartData: [], testChartKpiKeys: [] as string[] };
+    }
+    const dateToTs = (d: string) => new Date(toDateOnly(d) + 'T12:00:00Z').getTime();
+    const SEC = 1000;
+    const xAxisMax = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59).getTime();
+    const sorted = [...historyData].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
+    const allKeys = Array.from(new Set(sorted.flatMap((r) => Object.keys(r.limits || {})))).sort();
+    const points: Record<string, string | number | null>[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      const rec = sorted[i];
+      const endDate = toDateOnly(rec.end_date || sorted[i + 1]?.effective_date) || '9999-12-31';
+      const xStart = dateToTs(toDateOnly(rec.effective_date)) + SEC;
+      const rawXEnd = dateToTs(endDate) - SEC;
+      const xEnd = Math.min(rawXEnd, xAxisMax);
+      if (xStart > xAxisMax) continue;
+      const rowStart: Record<string, string | number | null> = { x: xStart, date: rec.effective_date };
+      const rowEnd: Record<string, string | number | null> = { x: xEnd, date: endDate };
+      allKeys.forEach((k) => {
+        const v = rec.limits && k in rec.limits ? rec.limits[k] : null;
+        rowStart[k] = v;
+        rowEnd[k] = v;
+      });
+      points.push(rowStart);
+      if (xEnd > xStart) points.push(rowEnd);
+    }
+    points.sort((a, b) => (a.x as number) - (b.x as number));
+    return { testChartData: points, testChartKpiKeys: allKeys };
+  }, [historyData]);
+
+  const handleTitleClick = useCallback((e?: React.MouseEvent) => {
+    if (e?.shiftKey) {
+      if (process.env.NODE_ENV !== 'production') {
+        setShowTestTab((prev) => !prev);
+      }
+    } else {
+      setUseEditorMode((prev) => !prev);
+      setShowEditor(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!showTestTab && activeTab === 'test') {
+      setActiveTab('main');
+    }
+  }, [showTestTab, activeTab]);
+
+  const handleAddNew = useCallback(() => {
+    setFocusDate(null);
+    setShowEditor(true);
+  }, []);
+
+  const handleEditRow = useCallback((date: string) => {
+    setFocusDate(date);
+    setShowEditor(true);
+  }, []);
+
+  const handleEditorCancel = useCallback(() => {
+    setShowEditor(false);
+    setFocusDate(null);
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setActiveTab('main');
+      setFocusDate(null);
+      setShowEditor(false);
+      setUseEditorMode(showPermitLimitsEditor);
+      setShowTestTab(false);
+      setHistoryData(null);
+      setKpiListForTest(null);
+    }
+  }, [isVisible, showPermitLimitsEditor]);
+
+  // Reset history when municipality, operator or modality changes
+  useEffect(() => {
+    setHistoryData(null);
+    setKpiListForTest(null);
+  }, [municipality, provider_system_id, vehicle_type]);
+
+  // Fetch KPI list when dialog loads (for Test tab)
+  useEffect(() => {
+    if (!isVisible || !token || !municipality || !provider_system_id || !vehicle_type) return;
+    const fetchKpiList = async () => {
+      try {
+        const result = await getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type);
+        setKpiListForTest(result?.performance_indicator_description ?? null);
+      } catch (error) {
+        console.error('Error fetching KPI list for test:', error);
+        setKpiListForTest(null);
+      }
+    };
+    fetchKpiList();
+  }, [isVisible, token, municipality, provider_system_id, vehicle_type]);
+
+  // Fetch history when Test tab is selected
+  useEffect(() => {
+    if (activeTab !== 'test' || !token || !municipality || !provider_system_id || !vehicle_type) return;
+    const fetchHistory = async () => {
+      setHistoryLoading(true);
+      setHistoryData(null);
+      try {
+        const geometry_ref = toGeometryRef(municipality);
+        const result = await getGeometryOperatorModalityLimitHistory(
+          token,
+          provider_system_id,
+          geometry_ref,
+          vehicle_type,
+          propulsion_type ?? 'electric'
+        );
+        setHistoryData(result ?? null);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+        setHistoryData(null);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [activeTab, token, municipality, provider_system_id, vehicle_type, propulsion_type]);
+
+  const getTestContext = useCallback((): OperationContext => ({
+    operator: provider_system_id,
+    geometry_ref: toGeometryRef(municipality),
+    form_factor: vehicle_type,
+    propulsion_type: propulsion_type ?? 'electric',
+  }), [municipality, provider_system_id, vehicle_type, propulsion_type]);
+
+  const handleTestReset = useCallback(async () => {
+    if (!token || !window.confirm('Weet je zeker dat je alle records voor deze context wilt verwijderen?')) return;
+    setTestActionLoading('reset');
+    try {
+      const geometry_ref = toGeometryRef(municipality);
+      const history = await getGeometryOperatorModalityLimitHistory(
+        token,
+        provider_system_id,
+        geometry_ref,
+        vehicle_type,
+        propulsion_type ?? 'electric'
+      );
+      if (history && history.length > 0) {
+        for (const record of history) {
+          if (record.geometry_operator_modality_limit_id) {
+            await deleteGeometryOperatorModalityLimit(token, record.geometry_operator_modality_limit_id);
+          }
+        }
+      }
+      setHistoryData([]);
+      onRecordUpdated();
+    } catch (error) {
+      console.error('Test reset error:', error);
+      alert('Fout bij reset');
+    } finally {
+      setTestActionLoading(null);
+    }
+  }, [token, municipality, provider_system_id, vehicle_type, propulsion_type, onRecordUpdated]);
+
+  const runPlannedOps = useCallback(async (ops: PlannedOp[]): Promise<GeometryOperatorModalityLimit | null> => {
+    if (!token) return null;
+    let lastResult: GeometryOperatorModalityLimit | null = null;
+    for (const op of ops) {
+      if (op.type === 'PUT' && op.record.geometry_operator_modality_limit_id) {
+        lastResult = await updateGeometryOperatorModalityLimit(token, op.record, true); // test tab: always allow
+      } else if (op.type === 'POST') {
+        lastResult = await addGeometryOperatorModalityLimit(token, op.record, true); // test tab: always allow
+      }
+      if (!lastResult && op.type === 'PUT') break;
+    }
+    return lastResult;
+  }, [token]);
+
+  const handleTestDelete = useCallback(async (date: string) => {
+    if (!token || !historyData) return;
+    const found = findRecordContainingDate(historyData, date);
+    if (!found?.record.geometry_operator_modality_limit_id) {
+      alert(`Geen record voor datum ${date}`);
+      return;
+    }
+    const id = found.record.geometry_operator_modality_limit_id;
+    setTestActionLoading(`delete-${date}`);
+    try {
+      const prevToUpdate = planDeleteRecord(historyData, found.record);
+      if (prevToUpdate) {
+        const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, true); // test tab: always allow
+        if (!updated) {
+          alert('Fout bij bijwerken vorige record');
+          return;
+        }
+      }
+      const ok = await deleteGeometryOperatorModalityLimit(token, id);
+      if (ok) {
+        const geometry_ref = toGeometryRef(municipality);
+        const fresh = await getGeometryOperatorModalityLimitHistory(
+          token,
+          provider_system_id,
+          geometry_ref,
+          vehicle_type,
+          propulsion_type ?? 'electric'
+        );
+        setHistoryData(fresh ? fresh.sort((a, b) => a.effective_date.localeCompare(b.effective_date)) : []);
+        onRecordUpdated();
+      } else {
+        alert('Fout bij verwijderen');
+      }
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+    } finally {
+      setTestActionLoading(null);
+    }
+  }, [token, historyData, municipality, provider_system_id, vehicle_type, propulsion_type, onRecordUpdated]);
+
+  const handleTestInsert = useCallback(async (date: string) => {
+    if (!token || !kpiListForTest?.length) {
+      alert('KPI list niet beschikbaar.');
+      return;
+    }
+    setTestActionLoading(`insert-${date}`);
+    try {
+      const geometry_ref = toGeometryRef(municipality);
+      const history = await getGeometryOperatorModalityLimitHistory(
+        token,
+        provider_system_id,
+        geometry_ref,
+        vehicle_type,
+        propulsion_type ?? 'electric'
+      );
+      const limits: Record<string, number> = {};
+      kpiListForTest.forEach((kpi) => {
+        limits[kpi.kpi_key] = randomKpiValue();
+      });
+      const ctx = getTestContext();
+      const ops = planSetFullRecordAtDate(history ?? null, date, limits, ctx);
+      await runPlannedOps(ops);
+      const fresh = await getGeometryOperatorModalityLimitHistory(
+        token,
+        provider_system_id,
+        geometry_ref,
+        vehicle_type,
+        propulsion_type ?? 'electric'
+      );
+      setHistoryData(fresh ? fresh.sort((a, b) => a.effective_date.localeCompare(b.effective_date)) : []);
+      onRecordUpdated();
+    } catch (error) {
+      console.error('Test insert error:', error);
+      alert('Fout bij insert');
+    } finally {
+      setTestActionLoading(null);
+    }
+  }, [token, kpiListForTest, municipality, provider_system_id, vehicle_type, propulsion_type, getTestContext, runPlannedOps, onRecordUpdated]);
+
+  const handleTestRandom = useCallback(async (date: string) => {
+    if (!token || !kpiListForTest?.length) {
+      alert('KPI list niet beschikbaar.');
+      return;
+    }
+    setTestActionLoading(`random-${date}`);
+    try {
+      const geometry_ref = toGeometryRef(municipality);
+      const history = await getGeometryOperatorModalityLimitHistory(
+        token,
+        provider_system_id,
+        geometry_ref,
+        vehicle_type,
+        propulsion_type ?? 'electric'
+      );
+      const found = findRecordContainingDate(history ?? null, date);
+      const baseLimits: Record<string, number> = found ? { ...found.record.limits } : {};
+      const kpiKeys = kpiListForTest.map((k) => k.kpi_key);
+      const inRecord = Object.keys(baseLimits);
+      const notInRecord = kpiKeys.filter((k) => !(k in baseLimits));
+      const MIN_LIMITS = 5;
+      const maxToReset = Math.max(0, inRecord.length - MIN_LIMITS);
+      const toReset = pickRandomSubset(inRecord).slice(0, maxToReset);
+      const toUpdate = pickRandomSubset(inRecord.filter((k) => !toReset.includes(k)));
+      const toAdd = pickRandomSubset(notInRecord);
+      toReset.forEach((k) => delete baseLimits[k]);
+      toUpdate.forEach((k) => { baseLimits[k] = randomKpiValue(); });
+      toAdd.forEach((k) => { baseLimits[k] = randomKpiValue(); });
+      let stillNeed = MIN_LIMITS - Object.keys(baseLimits).length;
+      if (stillNeed > 0) {
+        const pool = kpiKeys.filter((k) => !(k in baseLimits));
+        pickRandomSubset(pool, Math.min(stillNeed, pool.length), pool.length).forEach((k) => { baseLimits[k] = randomKpiValue(); });
+      }
+      const ctx = getTestContext();
+      const ops = planSetFullRecordAtDate(history ?? null, date, baseLimits, ctx);
+      await runPlannedOps(ops);
+      const fresh = await getGeometryOperatorModalityLimitHistory(
+        token,
+        provider_system_id,
+        geometry_ref,
+        vehicle_type,
+        propulsion_type ?? 'electric'
+      );
+      setHistoryData(fresh ? fresh.sort((a, b) => a.effective_date.localeCompare(b.effective_date)) : []);
+      onRecordUpdated();
+    } catch (error) {
+      console.error('Test random error:', error);
+      alert('Fout bij random');
+    } finally {
+      setTestActionLoading(null);
+    }
+  }, [token, kpiListForTest, municipality, provider_system_id, vehicle_type, propulsion_type, getTestContext, runPlannedOps, onRecordUpdated]);
+
+  const handleEditorSave = async (data: GeometryOperatorModalityLimit) => {
+    if (!token) return;
+    const allowChange = mode === 'admin';
+    if (!allowChange && data.effective_date < moment().format('YYYY-MM-DD')) {
+      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      return;
+    }
+    try {
+      const result = data.geometry_operator_modality_limit_id
+        ? await updateGeometryOperatorModalityLimit(token, data, allowChange)
+        : await addGeometryOperatorModalityLimit(token, data, allowChange);
+      if (result) {
+        onRecordUpdated();
+      } else {
+        alert('Fout bij opslaan');
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Fout bij opslaan';
+      alert(msg);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-4 min-h-[600px] relative">
-      {/* Provider and vehicle type side by side */}
-      <div className="flex flex-row justify-center items-start gap-12 mb-2">
-        {/* Provider column */}
-        <div className="flex flex-col items-center">
-          <div className="min-h-[64px] flex items-center justify-center">
-              <img src={providerLogo} alt={providerName} className="w-16 h-16 object-contain mb-1" 
+    <Modal
+      isVisible={isVisible}
+      title="Bewerk vergunningseisen"
+      button1Title=""
+      button1Handler={() => {}}
+      button2Title="Sluiten"
+      button2Handler={onClose}
+      hideModalHandler={onClose}
+      config={{ maxWidth: '1600px', minWidth: '800px' }}
+    >
+      <div className="flex flex-col gap-4 min-h-[600px] relative">
+        {/* Provider and vehicle type side by side */}
+        <div className="flex flex-row justify-center items-start gap-12 mb-2">
+          {/* Provider column */}
+          <div className="flex flex-col items-center">
+            <div className="min-h-[64px] flex items-center justify-center">
+              <img 
+                src={providerLogo} 
+                alt={providerName} 
+                className={`w-16 h-16 object-contain mb-1 ${onProviderClick ? 'cursor-pointer hover:opacity-80' : ''}`}
+                onClick={onProviderClick}
                 onError={(e) => {
-                    e.currentTarget.src = createSvgPlaceholder({
+                  e.currentTarget.src = createSvgPlaceholder({
                     width: 48,
                     height: 48,
                     text: providerName.slice(0, 2),
@@ -488,45 +483,392 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({ token, municipality
                     fontFamily: 'Arial, sans-serif',
                     dy: 7,
                     radius: 4,
-                    });
-                  }}
-               />
+                  });
+                }}
+              />
+            </div>
+            <div className="text-center text-base font-medium text-gray-800 mt-1">{providerName}</div>
           </div>
-          <div className="text-center text-base font-medium text-gray-800 mt-1">{providerName}</div>
+          {/* Vehicle type column */}
+          <div className="flex flex-col items-center">
+            <div className="min-h-[64px] flex items-center justify-center">
+              {vehicleTypeLogo && (
+                <img 
+                  src={vehicleTypeLogo} 
+                  alt={vehicleTypeName} 
+                  className={`w-16 h-16 object-contain mb-1 ${onVehicleTypeClick ? 'cursor-pointer hover:opacity-80' : ''}`}
+                  onClick={onVehicleTypeClick}
+                />
+              )}
+            </div>
+            <div className="text-center text-base font-medium text-gray-800 mt-1">{vehicleTypeName}</div>
+          </div>
         </div>
-        {/* Vehicle type column */}
-        <div className="flex flex-col items-center">
-          <div className="min-h-[64px] flex items-center justify-center">
-            {vehicleTypeLogo && (
-              <img src={vehicleTypeLogo} alt={vehicleTypeName} className="w-16 h-16 object-contain mb-1" />
+
+        {/* Link to dashboard */}
+        <div className="text-sm text-gray-600 mb-4">
+          Bekijk actuele prestaties op het{' '}
+          <Link 
+            to={`/dashboard/prestaties-aanbieders?gm_code=${municipality}&operator=${provider_system_id}&form_factor=${vehicle_type}`}
+            className="text-blue-600 hover:underline"
+          >
+            Prestaties aanbieders
+          </Link>
+          {' '}dashboard.
+        </div>
+
+        {/* Main / Test tabs */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 mb-4">
+          <div className="flex">
+            <button
+              type="button"
+              onClick={() => setActiveTab('main')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors ${
+                activeTab === 'main'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Invoer
+            </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('kpilist')}
+            className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors ${
+              activeTab === 'kpilist'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            KPI definities
+          </button>
+          {showTestTab && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('test')}
+              className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors ${
+                activeTab === 'test'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Test
+            </button>
+          )}
+          </div>
+          {activeTab === 'main' && (
+            <button
+              type="button"
+              onClick={handleTitleClick}
+              className="ml-auto p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+              title={useEditorMode ? 'Inline modus' : 'Formulier modus'}
+            >
+              {useEditorMode ? <Table2 size={20} /> : <FormInput size={20} />}
+            </button>
+          )}
+        </div>
+
+        {activeTab === 'main' && (
+          <>
+            {useEditorMode ? (
+              <PermitLimitsEditor
+                token={token}
+                municipality={municipality}
+                provider_system_id={provider_system_id}
+                vehicle_type={vehicle_type}
+                propulsion_type={propulsion_type}
+                mode={mode}
+                kpiDescriptions={kpiDescriptions}
+                limitHistory={limitHistory}
+                allowChange={mode === 'admin'}
+                defaultDate={formModeDefaultDate}
+                hideCancel
+                onSave={handleEditorSave}
+                onCancel={handleEditorCancel}
+                onRecordUpdated={onRecordUpdated}
+              />
+            ) : (
+              <>
+                {showEditor && (
+                  <PermitLimitsEditor
+                    token={token}
+                    municipality={municipality}
+                    provider_system_id={provider_system_id}
+                    vehicle_type={vehicle_type}
+                    propulsion_type={propulsion_type}
+                    mode={mode}
+                    kpiDescriptions={kpiDescriptions}
+                    limitHistory={limitHistory}
+                    allowChange={mode === 'admin'}
+                    focusDate={focusDate}
+                    onFocusDateConsumed={() => setFocusDate(null)}
+                    onSave={handleEditorSave}
+                    onCancel={handleEditorCancel}
+                    onRecordUpdated={onRecordUpdated}
+                  />
+                )}
+                <PermitLimitsTable
+                  tableRows={tableRows}
+                  limitHistory={limitHistory}
+                  kpiDescriptions={kpiDescriptions}
+                  mode={mode}
+                  token={token}
+                  municipality={municipality}
+                  provider_system_id={provider_system_id}
+                  vehicle_type={vehicle_type}
+                  propulsion_type={propulsion_type}
+                  showPermitLimitsEditor={false}
+                  onAddNew={handleAddNew}
+                  onEditRow={handleEditRow}
+                  onRecordUpdated={onRecordUpdated}
+                />
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === 'test' && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-2 items-center">
+              <button
+                type="button"
+                onClick={handleTestReset}
+                disabled={!!testActionLoading}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                title="Verwijder alle records voor deze context"
+              >
+                {testActionLoading === 'reset' ? 'Bezig…' : 'Alles wissen'}
+              </button>
+              <span className="text-gray-500 text-sm mx-1">|</span>
+              <button
+                type="button"
+                onClick={() => setTestViewMode('table')}
+                className={`px-3 py-1.5 rounded text-sm font-medium ${testViewMode === 'table' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                Tabel
+              </button>
+              <button
+                type="button"
+                onClick={() => setTestViewMode('graph')}
+                className={`px-3 py-1.5 rounded text-sm font-medium ${testViewMode === 'graph' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                Grafiek
+              </button>
+            </div>
+            <div className="border border-gray-200 rounded p-3 bg-gray-50">
+              <div className="text-sm font-semibold text-gray-700 mb-2">voeg / wijzig limieten op datum X</div>
+              {historyLoading && historyData === null ? (
+                <div className="py-4 text-center text-gray-500">Laden…</div>
+              ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse border border-gray-300">
+                  <thead>
+                    <tr>
+                      {TEST_DATES.map((d) => (
+                        <th key={d} className="px-2 py-2 font-mono text-xs font-semibold border border-gray-300">
+                          {d}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      {TEST_DATES.map((d) => {
+                        const relatedRecordExists = historyData?.some((r) => r.effective_date === d) ?? false;
+                        return (
+                          <td key={d} className="px-2 py-1.5 border border-gray-300">
+                            {relatedRecordExists ? (
+                              <div className="flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTestRandom(d)}
+                                  disabled={!!testActionLoading || !kpiListForTest?.length}
+                                  className="flex-1 px-2 py-1.5 bg-amber-600 text-white rounded hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                                >
+                                  {testActionLoading === `random-${d}` ? '…' : 'Random'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleTestDelete(d)}
+                                  disabled={!!testActionLoading}
+                                  className="flex-1 px-2 py-1.5 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                                  title="Verwijder record; vorige record wordt verlengd tot end_date"
+                                >
+                                  {testActionLoading === `delete-${d}` ? '…' : 'Delete'}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleTestInsert(d)}
+                                disabled={!!testActionLoading || !kpiListForTest?.length}
+                                className="w-full px-2 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                              >
+                                {testActionLoading === `insert-${d}` ? '…' : 'Insert'}
+                              </button>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              )}
+            </div>
+
+            {historyData !== null && (
+              <>
+                {testViewMode === 'graph' ? (
+                  <div className="border border-gray-200 rounded overflow-hidden bg-white">
+                    {testChartData.length === 0 || testChartKpiKeys.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-gray-500">Geen limiet-data om te tonen in grafiek.</div>
+                    ) : (
+                      <div className="w-full flex flex-row flex-wrap" style={{ minHeight: 320 }}>
+                        <ResponsiveContainer width="75%" height={320}>
+                          <LineChart
+                            data={testChartData}
+                            margin={{ top: 16, right: 16, left: 8, bottom: 8 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis
+                              dataKey="x"
+                              type="number"
+                              domain={['dataMin', X_AXIS_MAX]}
+                              tickFormatter={(ts) => {
+                                const d = new Date(ts);
+                                return d.toISOString().slice(0, 10);
+                              }}
+                              tick={{ fontSize: 12, fill: '#666' }}
+                              dy={8}
+                            />
+                            <YAxis
+                              label={{ value: 'Waarde', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                              tick={{ fontSize: 11 }}
+                            />
+                            <Tooltip
+                              labelFormatter={(ts) => `Datum: ${new Date(ts).toISOString().slice(0, 10)}`}
+                              formatter={(value: number) => [value, '']}
+                              contentStyle={{ fontSize: 12 }}
+                            />
+                            {testChartKpiKeys.map((kpiKey, idx) => (
+                              <Line
+                                key={kpiKey}
+                                type="linear"
+                                dataKey={kpiKey}
+                                name={kpiListForTest?.find((k) => k.kpi_key === kpiKey)?.title ?? kpiKey}
+                                stroke={CHART_COLORS[idx % CHART_COLORS.length]}
+                                strokeWidth={2}
+                                dot={false}
+                                isAnimationActive={false}
+                                connectNulls={false}
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                        <div className="flex flex-col justify-center ml-4 min-w-[140px]">
+                          <div className="mb-2 font-semibold text-sm">Legenda</div>
+                          <div className="flex flex-col gap-1.5 text-xs">
+                            {testChartKpiKeys.map((kpiKey, idx) => (
+                              <span key={kpiKey} className="flex items-center">
+                                <span
+                                  className="inline-block w-4 h-1 rounded mr-2 flex-shrink-0"
+                                  style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }}
+                                />
+                                {kpiListForTest?.find((k) => k.kpi_key === kpiKey)?.title ?? kpiKey}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-100 border-b border-gray-200">
+                          <th className="text-left px-3 py-2 font-semibold">id</th>
+                          <th className="text-left px-3 py-2 font-semibold">operator</th>
+                          <th className="text-left px-3 py-2 font-semibold">geometry_ref</th>
+                          <th className="text-left px-3 py-2 font-semibold">form_factor</th>
+                          <th className="text-left px-3 py-2 font-semibold">propulsion_type</th>
+                          <th className="text-left px-3 py-2 font-semibold">effective_date</th>
+                          <th className="text-left px-3 py-2 font-semibold">end_date</th>
+                          <th className="text-left px-3 py-2 font-semibold">limits</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historyData.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="px-3 py-4 text-center text-gray-500">
+                              Geen records gevonden
+                            </td>
+                          </tr>
+                        ) : (
+                          historyData.map((record, idx) => (
+                            <tr key={record.geometry_operator_modality_limit_id ?? idx} className="border-b border-gray-100 hover:bg-gray-50">
+                              <td className="px-3 py-2 font-mono text-xs">{record.geometry_operator_modality_limit_id ?? '-'}</td>
+                              <td className="px-3 py-2">{record.operator}</td>
+                              <td className="px-3 py-2">{record.geometry_ref}</td>
+                              <td className="px-3 py-2">{record.form_factor}</td>
+                              <td className="px-3 py-2">{record.propulsion_type}</td>
+                              <td className="px-3 py-2">{record.effective_date}</td>
+                              <td className="px-3 py-2">{record.end_date ?? '-'}</td>
+                              <td className="px-3 py-2 font-mono text-xs whitespace-pre-wrap">{JSON.stringify(record.limits, null, 2)}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
             )}
           </div>
-          <div className="text-center text-base font-medium text-gray-800 mt-1">{vehicleTypeName}</div>
-        </div>
+        )}
+
+        {activeTab === 'kpilist' && (
+          <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            {kpiListForTest === null ? (
+              <div className="px-4 py-8 text-center text-gray-500">Laden…</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700">KPI</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700">Type grens</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700">Eenheid</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700">Beschrijving</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700">Definitie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiListForTest.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                        Geen KPIs gevonden
+                      </td>
+                    </tr>
+                  ) : (
+                    kpiListForTest.map((kpi) => (
+                      <tr key={kpi.kpi_key} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-gray-900">{kpi.title}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatBound(kpi.bound)}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatUnit(kpi.unit)}</td>
+                        <td className="px-4 py-3 text-gray-600">{kpi.bound_description || '—'}</td>
+                        <td className="px-4 py-3 text-gray-600">{kpi.description || '—'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
-      {/* Tab header */}
-      <div className="flex flex-row justify-center gap-4 border-b border-gray-300 mb-2">
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === 'aanpassen' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
-          onClick={() => setActiveTab('aanpassen')}
-        >
-          Aanpassen
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === 'historisch' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
-          onClick={() => setActiveTab('historisch')}
-        >
-          Historisch
-        </button>
-      </div>
-      {/* Tab content */}
-      {activeTab === 'aanpassen' ? (
-        renderAanpassenTab()
-      ) : (
-        renderHistorischTab()
-      )}
-    </div>
+    </Modal>
   );
 };
 
-export default EditLimitsDialog; 
+export default EditLimitsDialog;

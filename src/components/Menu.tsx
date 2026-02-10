@@ -145,7 +145,7 @@ function Menu({
 
       <MenuItem
         pathName={pathName}
-        text={'Ontwikkeling'}
+        text={'Statistiek'}
         path={'/stats/overview'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
       />
@@ -213,8 +213,9 @@ function Menu({
         sm:px-4
         sm:shadow-lg
         sm:m-4
-        sm:mb-1
-        sm:rounded-3xl
+        sm:mb-0
+        sm:rounded-tl-3xl
+        sm:rounded-tr-3xl
       ">
         <div className="
           whitespace-nowrap

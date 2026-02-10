@@ -1,18 +1,14 @@
 import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
-import { 
-  addPermitLimit, 
-  updatePermitLimit, 
-  type PermitLimitRecord, 
-  type PermitLimitData,
-  PERMIT_LIMITS_NIET_ACTIEF 
-} from '../../api/permitLimits';
+import { type PermitLimitRecord, PERMIT_LIMITS_NIET_ACTIEF } from '../../api/permitLimits';
 import { type OperatorData } from '../../api/operators';
 import moment from 'moment';
 
 export const usePermitActions = (reloadPermits: () => Promise<void>) => {
-  const token = useSelector((state: StateType) => 
+  // Token available for future handlers; EditLimitsDialog gets token from parent
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const token = useSelector((state: StateType) =>
     (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
   );
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
@@ -35,25 +31,6 @@ export const usePermitActions = (reloadPermits: () => Promise<void>) => {
   const handleCloseEditDialog = useCallback(() => {
     setEditDialogPermit(null);
   }, []);
-
-  // Handler for OK (updates data and reloads)
-  const handleEditDialogOk = useCallback(async (formData: PermitLimitData) => {
-    if (!editDialogPermit) return;
-
-    let result: false | PermitLimitData = false;
-    if (formData.permit_limit_id === undefined) {
-      result = await addPermitLimit(token, formData);
-    } else {
-      result = await updatePermitLimit(token, formData);
-    }
-
-    if (result !== false) {
-      setEditDialogPermit(null);
-      await reloadPermits();
-    } else {
-      alert("Error adding/updating permit limit");
-    }
-  }, [editDialogPermit, token, reloadPermits]);
 
   // New handlers for main + button workflow
   const handleMainAddClick = useCallback(() => {
@@ -119,7 +96,6 @@ export const usePermitActions = (reloadPermits: () => Promise<void>) => {
     // Handlers
     handleEditLimits,
     handleCloseEditDialog,
-    handleEditDialogOk,
     handleMainAddClick,
     handleMainAddSelectProvider,
     handleMainAddSelectVehicleType,

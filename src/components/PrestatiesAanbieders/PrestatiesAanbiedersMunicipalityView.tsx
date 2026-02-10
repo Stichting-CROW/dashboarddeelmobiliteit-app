@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 import '../../styles/permits.css';
 import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
-import EditLimitsDialog from './EditLimitsDialog';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
@@ -10,11 +10,21 @@ import { usePermitData } from './usePermitData';
 import { usePermitActions } from './usePermitActions';
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
 import { StateType } from '../../types/StateType';
-import type { PermitLimitRecord } from '../../api/permitLimits';
+import type { PermitLimitRecord, PerformanceIndicatorDescription, GeometryOperatorModalityLimit } from '../../api/permitLimits';
+import {
+  PERMIT_LIMITS_NIET_ACTIEF,
+  getGeometryOperatorModalityLimitHistory,
+  getOperatorPerformanceIndicators,
+  toGeometryRef,
+} from '../../api/permitLimits';
+import type { OperatorData } from '../../api/operators';
 import { getProvider } from '../../helpers/providers.js';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import PageTitle from '../common/PageTitle';
 import Modal from '../Modal/Modal.jsx';
+import EditLimitsDialog from './EditLimitsDialog';
+import type { HistoryTableRow } from './permitLimitsUtils';
+import { flattenLimitHistoryToTableRows } from './permitLimitsUtils';
 
 interface PrestatiesAanbiedersMunicipalityViewProps {  
   activeorganisation?: string;
@@ -22,6 +32,7 @@ interface PrestatiesAanbiedersMunicipalityViewProps {
 
 const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: PrestatiesAanbiedersMunicipalityViewProps) => {
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
+  const gebieden = useSelector((state: StateType) => state.metadata?.gebieden || []);
 
   // Use the generic data hook
   const { permits, loading, error, reloadPermits, token, availableOperators } = usePermitData('municipality', activeorganisation);
@@ -35,7 +46,6 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     mode,
     handleEditLimits,
     handleCloseEditDialog,
-    handleEditDialogOk,
     handleMainAddClick,
     handleMainAddSelectProvider,
     handleMainAddSelectVehicleType,
@@ -43,10 +53,175 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     updateMode,
   } = usePermitActions(reloadPermits);
 
+  // State for View dialog
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [limitHistory, setLimitHistory] = useState<GeometryOperatorModalityLimit[] | null>(null);
+  const [kpiDescriptions, setKpiDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
+  const [tableRows, setTableRows] = useState<HistoryTableRow[]>([]);
+  // Store permit info separately so dialogs can render even when editDialogPermit is cleared
+  const [currentPermitInfo, setCurrentPermitInfo] = useState<{ municipality: string; provider_system_id: string; vehicle_type: string } | null>(null);
+  // Track if we're changing provider from the edit dialog (to keep vehicle type)
+  const [isChangingProvider, setIsChangingProvider] = useState(false);
+  // Store vehicle type when changing provider (since currentPermitInfo gets cleared)
+  const [preservedVehicleType, setPreservedVehicleType] = useState<string | null>(null);
+  const [preservedMunicipality, setPreservedMunicipality] = useState<string | null>(null);
+  // Track if we should keep selection dialog backdrop visible until edit dialog is ready
+  const [keepSelectionBackdrop, setKeepSelectionBackdrop] = useState(false);
+
+  // Load data when editDialogPermit changes
+  useEffect(() => {
+    if (editDialogPermit && token) {
+      const loadData = async () => {
+        const municipality = editDialogPermit.permit_limit.municipality;
+        const provider_system_id = editDialogPermit.permit_limit.system_id;
+        const vehicle_type = editDialogPermit.permit_limit.modality;
+        const geometry_ref = toGeometryRef(municipality);
+        const propulsion_type = 'electric';
+
+        // Store permit info so dialogs can render even if editDialogPermit is cleared
+        setCurrentPermitInfo({ municipality, provider_system_id, vehicle_type });
+
+        // Fetch history and KPI descriptions
+        const [history, kpiData] = await Promise.all([
+          getGeometryOperatorModalityLimitHistory(token, provider_system_id, geometry_ref, vehicle_type, propulsion_type),
+          getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type),
+        ]);
+
+        const sortedHistory = history ? history.sort((a, b) => moment(a.effective_date).diff(moment(b.effective_date))) : null;
+        setLimitHistory(sortedHistory);
+
+        if (kpiData?.performance_indicator_description) {
+          setKpiDescriptions(kpiData.performance_indicator_description);
+        }
+
+        // Prepare table rows
+        const organisationName = gebieden.find((g: any) => g.gm_code === municipality)?.name || municipality;
+        const provider = getProvider(provider_system_id);
+        const providerName = provider?.name || provider_system_id;
+        const vehicleTypeName = getPrettyVehicleTypeName(vehicle_type) || vehicle_type;
+
+        if (sortedHistory && kpiData?.performance_indicator_description) {
+          const rows = flattenLimitHistoryToTableRows(sortedHistory, organisationName, providerName, vehicleTypeName, kpiData.performance_indicator_description);
+          setTableRows(rows);
+        }
+
+        // Show view dialog
+        setShowViewDialog(true);
+        // Edit dialog is now ready, can close selection dialog backdrop
+        setKeepSelectionBackdrop(false);
+      };
+
+      loadData();
+    } else if (!editDialogPermit) {
+      // Close dialogs if editDialogPermit becomes null
+      if (!showViewDialog) {
+        setShowViewDialog(false);
+        setCurrentPermitInfo(null);
+      }
+      setKeepSelectionBackdrop(false);
+    }
+  }, [editDialogPermit, token, gebieden, showViewDialog]);
+
+  // Handler for record updated (after inline edit or editor save)
+  const handleRecordUpdated = async () => {
+    if (!token || !currentPermitInfo) return;
+
+    const municipality = currentPermitInfo.municipality;
+    const geometry_ref = toGeometryRef(municipality);
+    const history = await getGeometryOperatorModalityLimitHistory(token, currentPermitInfo.provider_system_id, geometry_ref, currentPermitInfo.vehicle_type, 'electric');
+    const sortedHistory = history ? history.sort((a, b) => moment(a.effective_date).diff(moment(b.effective_date))) : null;
+    setLimitHistory(sortedHistory);
+
+    // Update table rows
+    const organisationName = gebieden.find((g: any) => g.gm_code === municipality)?.name || municipality;
+    const provider = getProvider(currentPermitInfo.provider_system_id);
+    const providerName = provider?.name || currentPermitInfo.provider_system_id;
+    const vehicleTypeName = getPrettyVehicleTypeName(currentPermitInfo.vehicle_type) || currentPermitInfo.vehicle_type;
+
+    if (sortedHistory && kpiDescriptions.length > 0) {
+      const rows = flattenLimitHistoryToTableRows(sortedHistory, organisationName, providerName, vehicleTypeName, kpiDescriptions);
+      setTableRows(rows);
+    }
+
+    reloadPermits();
+  };
+
+  const handleCloseViewDialog = () => {
+    setShowViewDialog(false);
+    setCurrentPermitInfo(null);
+    handleCloseEditDialog();
+  };
+
+  // Handler for provider logo click - return to provider selection
+  const handleProviderLogoClick = () => {
+    if (!currentPermitInfo) return;
+    // Preserve vehicle type and municipality before closing dialog
+    setPreservedVehicleType(currentPermitInfo.vehicle_type);
+    setPreservedMunicipality(currentPermitInfo.municipality);
+    setIsChangingProvider(true);
+    handleCloseViewDialog();
+    handleMainAddClick();
+  };
+
+  // Handler for vehicle type icon click - return to vehicle type selection for current provider
+  const handleVehicleTypeIconClick = () => {
+    if (!currentPermitInfo) return;
+    
+    // Find the current provider in availableOperators
+    const currentProvider = availableOperators.find(op => op.system_id === currentPermitInfo.provider_system_id);
+    
+    if (currentProvider) {
+      setIsChangingProvider(false);
+      handleCloseViewDialog();
+      handleMainAddClick();
+      handleMainAddSelectProvider(currentProvider);
+    }
+  };
+
+  // Wrapper for handleMainAddSelectVehicleType to keep backdrop visible
+  const handleMainAddSelectVehicleTypeWrapper = (vehicleTypeId: string, municipality: string) => {
+    setKeepSelectionBackdrop(true);
+    handleMainAddSelectVehicleType(vehicleTypeId, municipality);
+  };
+
+  // Override handleMainAddSelectProvider to handle provider change from edit dialog
+  const handleProviderSelectFromEdit = (provider: OperatorData) => {
+    if (isChangingProvider && preservedVehicleType && preservedMunicipality) {
+      // Keep the current vehicle type, just change the provider
+      setIsChangingProvider(false);
+      setKeepSelectionBackdrop(true);
+
+      // Create a new permit record with the new provider but same vehicle type
+      handleEditLimits({
+        permit_limit: {
+          permit_limit_id: -1, // new
+          municipality: preservedMunicipality,
+          system_id: provider.system_id,
+          modality: preservedVehicleType,
+          effective_date: moment().add(1, 'day').format('YYYY-MM-DD'),
+          minimum_vehicles: PERMIT_LIMITS_NIET_ACTIEF.minimum_vehicles,
+          maximum_vehicles: PERMIT_LIMITS_NIET_ACTIEF.maximum_vehicles,
+          minimal_number_of_trips_per_vehicle: PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle,
+          max_parking_duration: PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration,
+        },
+      } as PermitLimitRecord);
+      
+      // Reset preserved values (don't close selection dialog yet - backdrop will stay until edit dialog is ready)
+      setPreservedVehicleType(null);
+      setPreservedMunicipality(null);
+    } else {
+      // Normal flow - show vehicle type selection
+      setIsChangingProvider(false);
+      setPreservedVehicleType(null);
+      setPreservedMunicipality(null);
+      handleMainAddSelectProvider(provider);
+    }
+  };
+
   // Update mode when permits change
   useEffect(() => {
     updateMode();
-  }, [permits]); // Remove updateMode from dependencies to prevent infinite loop
+  }, [permits, updateMode]);
 
   if ((activeorganisation === "")) {
     return (
@@ -61,7 +236,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     );
   }
 
-  if (loading) {
+  if (loading && !showViewDialog) {
     return (
       <div>
         <PageTitle>Prestaties aanbieders</PageTitle>
@@ -91,12 +266,9 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     <>
       <img
         src={rowItem.icon}
-        alt={rowItem.name}
+        alt={getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
         className="permits-vehicle-type-header-img"
       />
-      <div className="permits-vehicle-type-header-text">
-        {getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
-      </div>
     </>
   );
 
@@ -141,7 +313,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           logo={providerLogo}
           key={'permits-card-' + permit.permit_limit.permit_limit_id} 
           permit={permit} 
-          onEditLimits={() => handleEditLimits(permit)} 
+          onEditLimits={() => handleEditLimits(permit)}
         />
     )});
   };
@@ -181,62 +353,92 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           button1Title=""
           button1Handler={() => {}}
           button2Title="Annuleren"
-          button2Handler={handleMainAddCancel}
-          hideModalHandler={handleMainAddCancel}
+          button2Handler={() => {
+            setKeepSelectionBackdrop(false);
+            setIsChangingProvider(false);
+            setPreservedVehicleType(null);
+            setPreservedMunicipality(null);
+            handleMainAddCancel();
+          }}
+          hideModalHandler={() => {
+            setKeepSelectionBackdrop(false);
+            setIsChangingProvider(false);
+            setPreservedVehicleType(null);
+            setPreservedMunicipality(null);
+            handleMainAddCancel();
+          }}
           config={{ maxWidth: '600px' }}
         >
           <SelectProviderDialog
             modality={null}
             availableProviders={availableOperators}
-            onSelect={handleMainAddSelectProvider}
-            onCancel={handleMainAddCancel}
+            onSelect={isChangingProvider ? handleProviderSelectFromEdit : handleMainAddSelectProvider}
+            onCancel={() => {
+              setKeepSelectionBackdrop(false);
+              setIsChangingProvider(false);
+              setPreservedVehicleType(null);
+              setPreservedMunicipality(null);
+              handleMainAddCancel();
+            }}
           />
         </Modal>
       )}
       
       {/* Main Add Workflow: Select Vehicle Type Dialog */}
-      {showMainAddDialog && showVehicleTypeSelection && (
+      {(showMainAddDialog && showVehicleTypeSelection) || (keepSelectionBackdrop && !showViewDialog) ? (
         <Modal
-          isVisible={true}
+          isVisible={(showMainAddDialog && showVehicleTypeSelection) || (keepSelectionBackdrop && !showViewDialog)}
           title="Selecteer voertuigtype"
           button1Title=""
           button1Handler={() => {}}
           button2Title="Annuleren"
-          button2Handler={handleMainAddCancel}
-          hideModalHandler={handleMainAddCancel}
+          button2Handler={() => {
+            setKeepSelectionBackdrop(false);
+            handleMainAddCancel();
+          }}
+          hideModalHandler={() => {
+            setKeepSelectionBackdrop(false);
+            handleMainAddCancel();
+          }}
           config={{ maxWidth: '600px' }}
         >
-          <SelectVehicleTypeDialog
-            vehicleTypes={voertuigtypes}
-            onSelect={(vehicleTypeId) => handleMainAddSelectVehicleType(vehicleTypeId, activeorganisation)}
-            onCancel={handleMainAddCancel}
-          />
+          {showMainAddDialog && showVehicleTypeSelection ? (
+            <SelectVehicleTypeDialog
+              vehicleTypes={voertuigtypes}
+              onSelect={(vehicleTypeId) => handleMainAddSelectVehicleTypeWrapper(vehicleTypeId, activeorganisation)}
+              onCancel={() => {
+                setKeepSelectionBackdrop(false);
+                handleMainAddCancel();
+              }}
+            />
+          ) : (
+            // Empty content when just keeping backdrop visible
+            <div style={{ display: 'none' }} />
+          )}
         </Modal>
-      )}
+      ) : null}
       
-      {/* Edit Limits Modal Dialog */}
-      {editDialogPermit && (
-        <Modal
-          isVisible={true}
-          title="Bewerk vergunningseisen"
-          button1Title=""
-          button1Handler={() => {}}
-          button2Title="Sluiten"
-          button2Handler={handleCloseEditDialog}
-          hideModalHandler={handleCloseEditDialog}
-          config={{ maxWidth: '600px' }}
-        >
-          <EditLimitsDialog
-            token={token}
-            municipality={editDialogPermit.permit_limit.municipality}
-            provider_system_id={editDialogPermit.permit_limit.system_id}
-            vehicle_type={editDialogPermit.permit_limit.modality}
-            mode={mode}
-            onOk={handleEditDialogOk}
-            onCancel={handleCloseEditDialog}
-          />
-        </Modal>
+      {/* Edit Permit Limits Dialog */}
+      {currentPermitInfo && showViewDialog && token && (
+        <EditLimitsDialog
+          isVisible={showViewDialog}
+          municipality={currentPermitInfo.municipality}
+          provider_system_id={currentPermitInfo.provider_system_id}
+          vehicle_type={currentPermitInfo.vehicle_type}
+          tableRows={tableRows}
+          limitHistory={limitHistory}
+          kpiDescriptions={kpiDescriptions}
+          mode={mode}
+          token={token}
+          propulsion_type="electric"
+          showPermitLimitsEditor={false}
+          onClose={handleCloseViewDialog}
+          onRecordUpdated={handleRecordUpdated}
+          onProviderClick={handleProviderLogoClick}
+          onVehicleTypeClick={handleVehicleTypeIconClick}
+        />
       )}
+
     </div>
   );
 };

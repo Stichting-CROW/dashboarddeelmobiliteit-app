@@ -49,9 +49,34 @@ export interface PermitLimitRecord {
     vehicle_type?: PermitVehicleType; /* not yet available via the API now, filled in by the frontend */
     permit_limit?: PermitLimit;
     stats?: PermitStats;
+    /**
+     * Summary of KPI compliance for this permit, derived from performance indicator data.
+     * 'red'   => at least one KPI value is non-compliant (complies === false)
+     * 'green' => no red values, but at least one KPI value is compliant (complies === true)
+     * 'grey'  => only undefined / missing compliance information
+     *
+     * This field is primarily used for sorting rows in the permit card collections.
+     */
+    overallCompliance?: 'red' | 'green' | 'grey';
 }
 
-// Helper: get 'niet actief' value for each field
+/** New geometry_operator_modality_limit API types */
+export interface GeometryOperatorModalityLimit {
+    geometry_operator_modality_limit_id?: number;
+    operator: string;
+    geometry_ref: string;
+    form_factor: string;
+    propulsion_type: string;
+    effective_date: string;
+    end_date?: string;
+    limits: Record<string, number>;
+}
+
+/** Build geometry_ref from municipality (add cbs: prefix if missing) */
+export const toGeometryRef = (municipality: string): string =>
+    municipality.startsWith('cbs:') ? municipality : `cbs:${municipality}`;
+
+// Helper: get 'niet actief' value for each field (used by usePermitActions for add flow)
 export const PERMIT_LIMITS_NIET_ACTIEF = {
     minimum_vehicles: 0,
     maximum_vehicles: 99999999,
@@ -141,6 +166,17 @@ export const getPermitLimitOverviewForMunicipality = async (
             .map((item: MunicipalityModalityOperator) => {
                 const operator = operatorsMap.get(item.operator);
                 const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+
+                // Derive an overall compliance summary from all KPI values for this operator+form_factor+municipality
+                const kpis = item.kpis || [];
+                const hasRed = kpis.some(kpi =>
+                    (kpi.values || []).some(value => value.complies === false)
+                );
+                const hasGreen = !hasRed && kpis.some(kpi =>
+                    (kpi.values || []).some(value => value.complies === true)
+                );
+                const overallCompliance: 'red' | 'green' | 'grey' =
+                    hasRed ? 'red' : hasGreen ? 'green' : 'grey';
                 
                 // Create a minimal permit_limit record
                 // Generate a unique ID based on operator + form_factor + municipality combination
@@ -185,6 +221,7 @@ export const getPermitLimitOverviewForMunicipality = async (
                         icon: '', // Will be set by usePermitData hook
                     },
                     permit_limit: permitLimit,
+                    overallCompliance,
                 };
 
                 return record;
@@ -230,11 +267,9 @@ export const getPermitLimitOverviewForOperator = async (
         
         if(results.length > 0) {
             // const message = `**** Found ${results.length} permit limits for [${system_id}]`;
-            // console.log(message, results);
             return results;
         } else {
             // const message = `**** Found no ${results.length} permit limits for [${system_id}]`;
-            // console.log(message, results);
             return null // no permit limit found
         }
     } catch (error) {
@@ -243,113 +278,180 @@ export const getPermitLimitOverviewForOperator = async (
     }
 }
 
-export const addPermitLimit = async (token: string, permitLimitData: PermitLimitData) => {
-    try {
-        const url = `${MDS_BASE_URL}/admin/permit_limit`;
+// --- geometry_operator_modality_limit API ---
 
+export const getGeometryOperatorModalityLimitHistory = async (
+    token: string,
+    operator: string,
+    geometry_ref: string,
+    form_factor: string,
+    propulsion_type: string
+): Promise<GeometryOperatorModalityLimit[] | null> => {
+    try {
+        const params = new URLSearchParams({
+            operator,
+            geometry_ref,
+            form_factor,
+            propulsion_type,
+        }).toString();
+        const url = `${MDS_BASE_URL}/public/geometry_operator_modality_limit_history?${params}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.status !== 200) {
+            const message = `Error fetching geometry_operator_modality_limit history (status: ${response.status}/${response.statusText})`;
+            console.error(message);
+            return null;
+        }
+
+        const results = await response.json();
+        return Array.isArray(results) ? results : null;
+    } catch (error) {
+        console.error("Error fetching geometry_operator_modality_limit history", error);
+        return null;
+    }
+};
+
+/** Validate effective_date when allowChange is false - only future dates allowed */
+function validateEffectiveDate(data: GeometryOperatorModalityLimit, allowChange: boolean): void {
+    if (allowChange) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (data.effective_date < today) {
+        throw new Error('Alleen toekomstige datums kunnen worden gewijzigd.');
+    }
+}
+
+export const addGeometryOperatorModalityLimit = async (
+    token: string,
+    data: GeometryOperatorModalityLimit,
+    allowChange = true
+): Promise<GeometryOperatorModalityLimit | null> => {
+    validateEffectiveDate(data, allowChange);
+    try {
+        const url = `${MDS_BASE_URL}/admin/geometry_operator_modality_limit`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 "authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(permitLimitData),
+            body: JSON.stringify(data),
         });
 
-        if(response.status !== 201) {
-            const message = `Error adding permit limit (status: ${response.status}/${response.statusText})`;
-            console.error(message);
-            return null;
+        if (response.status !== 201) {
+            const bodyText = await response.text();
+            console.error(`[addGeometryOperatorModalityLimit] failed status=${response.status} ${response.statusText}`, {
+                url: `${MDS_BASE_URL}/admin/geometry_operator_modality_limit`,
+                body: bodyText || '(no body)',
+            });
+            const errMsg = parseApiErrorMessage(bodyText) || `HTTP ${response.status}: ${response.statusText}`;
+            throw new Error(errMsg);
         }
 
-        const result = await response.json() as PermitLimitData;
-        return result;
+        return await response.json();
     } catch (error) {
-        console.error("Error adding permit limit", error);
-        return false;
+        if (error instanceof Error) throw error;
+        console.error("[addGeometryOperatorModalityLimit] exception", error);
+        throw new Error('Onbekende fout bij toevoegen');
     }
-}
+};
 
-export const updatePermitLimit = async (token: string, permitLimitData: PermitLimitData) => {
+export const updateGeometryOperatorModalityLimit = async (
+    token: string,
+    data: GeometryOperatorModalityLimit,
+    allowChange = true
+): Promise<GeometryOperatorModalityLimit | null> => {
+    if (!data.geometry_operator_modality_limit_id) {
+        console.error('Cannot update geometry_operator_modality_limit without geometry_operator_modality_limit_id');
+        return null;
+    }
+    validateEffectiveDate(data, allowChange);
+
+    const url = `${MDS_BASE_URL}/admin/geometry_operator_modality_limit`;
+
     try {
-        const url = `${MDS_BASE_URL}/admin/permit_limit`;
-
         const response = await fetch(url, {
             method: 'PUT',
             headers: {
                 "authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(permitLimitData),
+            body: JSON.stringify(data),
         });
 
-        if(response.status !== 200) {
-            const message = `Error updating permit limit (status: ${response.status}/${response.statusText})`;
-            console.error(message);
-            return null;
+        const bodyText = await response.text();
+
+        if (response.status !== 200 && response.status !== 204) {
+            console.error(`[updateGeometryOperatorModalityLimit] failed status=${response.status} ${response.statusText}`, {
+                url,
+                body: bodyText || '(no body)',
+            });
+            const errMsg = parseApiErrorMessage(bodyText) || `HTTP ${response.status}: ${response.statusText}`;
+            throw new Error(errMsg);
         }
 
-        const result = await response.json() as PermitLimitData;
+        // 204 No Content: success with no body
+        if (response.status === 204) {
+            return data;
+        }
+        const result = bodyText ? JSON.parse(bodyText) : null;
         return result;
     } catch (error) {
-        console.error("Error updating permit limit", error);
-        return false;
+        if (error instanceof Error) throw error;
+        console.error('[updateGeometryOperatorModalityLimit] exception', { url, error });
+        throw new Error('Onbekende fout bij bijwerken');
     }
-}
+};
 
-export const getPermitLimitHistory = async (token: string, municipality: string, provider_system_id: string, modality: string) => {
+/** Extract a user-friendly error message from API error response body */
+function parseApiErrorMessage(bodyText: string): string | null {
+    if (!bodyText?.trim()) return null;
     try {
-        const params = new URLSearchParams({municipality, system_id: provider_system_id, modality}).toString();
-        const url = `${MDS_BASE_URL}/public/permit_limit_history?${params}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                "authorization": `Bearer ${token}`,
+        const j = JSON.parse(bodyText);
+        if (j && typeof j === 'object') {
+            const msg = j.message ?? j.error ?? j.detail ?? j.msg;
+            if (typeof msg === 'string') return msg;
+            if (Array.isArray(j.errors) && j.errors.length > 0) {
+                const first = j.errors[0];
+                return typeof first === 'string' ? first : (first?.message ?? first?.msg ?? JSON.stringify(first));
             }
-        });
-
-        if(response.status !== 200) {
-            const message = `Error fetching permit limit history (status: ${response.status}/${response.statusText}) for [${municipality}/${provider_system_id}/${modality}]`;
-            console.error(message);
-            return null;
         }
-
-        const results = await response.json() as PermitLimitData[];
-        if(results.length > 0) {
-            // const message = `**** Found ${results.length} permit limits for [${municipality}/${provider_system_id}/${modality}]`;
-            // console.log(message, results);
-            return results;
-        } else {
-            // const message = `**** Found no ${results.length} permit limits for [${municipality}/${provider_system_id}/${modality}]`;
-            // console.log(message, results);
-            return null // no permit limit found
-        }
-    } catch (error) {
-        console.error("Error fetching permit limit overview", error);
-        return null;
+    } catch {
+        // not JSON, use raw text if short enough
+        if (bodyText.length <= 200) return bodyText;
     }
+    return null;
 }
 
-export const deletePermitLimit = async (token: string, permit_limit_id: number) => {
+export const deleteGeometryOperatorModalityLimit = async (
+    token: string,
+    id: number
+): Promise<boolean> => {
     try {
-        const url = `${MDS_BASE_URL}/admin/permit_limit/${permit_limit_id}`;
+        const url = `${MDS_BASE_URL}/admin/geometry_operator_modality_limit/${id}`;
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
                 "authorization": `Bearer ${token}`,
-            }
+                "Content-Type": "application/json",
+            },
         });
+
         if (response.status !== 200 && response.status !== 204) {
-            const message = `Error deleting permit limit (status: ${response.status}/${response.statusText})`;
-            console.error(message);
+            console.error(`Error deleting geometry_operator_modality_limit (status: ${response.status}/${response.statusText})`);
             return false;
         }
         return true;
     } catch (error) {
-        console.error("Error deleting permit limit", error);
+        console.error("Error deleting geometry_operator_modality_limit", error);
         return false;
     }
-}
+};
 
 // Performance Indicators Types
 export interface PerformanceIndicatorValue {

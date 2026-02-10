@@ -10,6 +10,10 @@ import {
 } from '../../../helpers/providers.js';
 
 import {
+  buildProviderLabelHtml
+} from '../../PrestatiesAanbieders/ProviderLabel';
+
+import {
   getPrettyVehicleTypeName
 } from '../../../helpers/vehicleTypes';
 
@@ -75,21 +79,12 @@ export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) =
 
       const providerWebsiteUrl = getProviderWebsiteUrl(vehicleProperties.system_id);
       const prettyVehicleTypeName = getPrettyVehicleTypeName(vehicleProperties.form_factor);
+      const headerLabel = `${getPrettyProviderName(vehicleProperties.system_id)} ${prettyVehicleTypeName ? prettyVehicleTypeName : ''}`;
 
       popup = new maplibregl.Popup()
         .setLngLat(coordinates)
         .setHTML(`
-          <h1 class="mb-2">
-            <span
-              class="rounded-full inline-block w-4 h-4"
-              style="background-color: ${providerColor};position: relative;top: 2px"
-              onClick="window.showConfetti()"
-              >
-            </span>
-            <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-              ${getPrettyProviderName(vehicleProperties.system_id)} ${prettyVehicleTypeName ? prettyVehicleTypeName : ''}
-            </span>
-          </h1>
+          ${buildProviderLabelHtml(headerLabel, providerColor)}
           <div class="Map-popup-body">
             ${vehicleProperties.in_public_space_since ? `<div>
               Staat hier sinds ${moment(vehicleProperties.in_public_space_since).locale('nl').from(filterDate)}<br />
