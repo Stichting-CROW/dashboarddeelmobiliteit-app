@@ -7,6 +7,8 @@ interface PerformanceIndicatorBlockProps {
   threshold?: number;
   complies?: boolean;
   size?: number; // Size in pixels (default: 16px for w-4 h-4)
+  isFirst?: boolean; // Whether this is the first block in the row
+  isLast?: boolean; // Whether this is the last block in the row
 }
 
 const getDutchDayAbbreviation = (dateString: string): string => {
@@ -32,14 +34,14 @@ const formatDutchDate = (dateString: string): string => {
   });
 };
 
-const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16 }: PerformanceIndicatorBlockProps) => {
+const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16, isFirst = false, isLast = false }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
   const dayAbbreviation = getDutchDayAbbreviation(date);
   const formattedDate = formatDutchDate(date);
 
   const getBackgroundColor = (): string => {
-    if (complies === true) return 'green';
-    if (complies === false) return 'red';
+    if (complies === true) return '#48E248';
+    if (complies === false) return '#FD3E48';
     return 'gray';
   };
 
@@ -54,11 +56,11 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
           }}
         >
           <div
-            className="
+            className={`
               performance-indicator-block
               transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative
-              mx-[1px]
-            "
+              ${isFirst && isLast ? 'mx-0' : isFirst ? 'ml-0 mr-[2.5px]' : isLast ? 'ml-[2.5px] mr-0' : 'mx-[2.5px]'}
+            `}
             style={{ 
               backgroundColor: getBackgroundColor(),
               width: `${size}px`,

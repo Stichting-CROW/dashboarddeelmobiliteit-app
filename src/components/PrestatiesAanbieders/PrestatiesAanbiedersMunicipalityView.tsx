@@ -91,12 +91,9 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     <>
       <img
         src={rowItem.icon}
-        alt={rowItem.name}
+        alt={getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
         className="permits-vehicle-type-header-img"
       />
-      <div className="permits-vehicle-type-header-text">
-        {getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
-      </div>
     </>
   );
 

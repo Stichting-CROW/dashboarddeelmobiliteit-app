@@ -26,7 +26,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats.js';
 import {
   getProviderColor,
   getUniqueProviderNames

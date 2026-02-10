@@ -58,12 +58,9 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
     <>
       <img
         src={rowItem.icon}
-        alt={rowItem.name}
+        alt={getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
         className="permits-vehicle-type-header-img"
       />
-      <div className="permits-vehicle-type-header-text">
-        {getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
-      </div>
     </>
   );
 
@@ -113,14 +110,14 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   return (
     <div>
       <div className="permits-page-title">
-      Prestaties aanbieders voor {activeoperatorName}
+        Prestaties aanbieders voor {activeoperatorName}
       </div>
       
       <div className="mb-6">
         {permits.length === 0 && (
-                  <div className="permits-empty-state">
-          Geen vergunningseisen gevonden voor deze operator.
-        </div>
+          <div className="permits-empty-state">
+            Geen vergunningseisen gevonden voor deze operator.
+          </div>
         )}
       </div>
 

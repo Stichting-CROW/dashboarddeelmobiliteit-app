@@ -145,7 +145,7 @@ function Menu({
 
       <MenuItem
         pathName={pathName}
-        text={'Ontwikkeling'}
+        text={'Statistiek'}
         path={'/stats/overview'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
       />

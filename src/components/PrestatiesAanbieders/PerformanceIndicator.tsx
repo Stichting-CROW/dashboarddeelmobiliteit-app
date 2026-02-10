@@ -191,10 +191,10 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
   const shouldShowBlocks = periodDays <= 30;
 
   return (
-    <div data-name="performance-indicator" className="flex gap-2">
-      <section ref={containerRef} className="flex-1">
-        <header>
-          <div className="performance-indicator-title font-bold text-xs flex items-center">
+    <div data-name="performance-indicator" className="flex">
+      <section ref={containerRef} className="flex gap-4 justify-between flex-1">
+        <header className="flex-1">
+          <div className="font-inter text-sm flex items-center flex-1">
             {title}
             <PerformanceIndicatorTooltip description={description?.description} />
           </div>
@@ -209,15 +209,17 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
                 threshold={value.threshold}
                 complies={value.complies}
                 size={blockSize}
+                isFirst={index === 0}
+                isLast={index === filteredValues.length - 1}
               />
             ))}
           </div>
         )}
       </section>
-      <section className="font-bold text-xs w-20 text-left text-ellipsis overflow-hidden">
+      {/* <section className="font-bold text-xs w-20 text-left text-ellipsis overflow-hidden">
         KPI: {thresholdDisplay}<br />
         Gem.: {avgValue}
-      </section>
+      </section> */}
     </div>
   );
 };
