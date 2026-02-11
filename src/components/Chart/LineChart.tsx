@@ -178,11 +178,11 @@ const LineChart: React.FC<LineChartProps> = ({
         formatter: (value: number) => {
           try {
             if (!isFinite(value)) {
-              return '0.0';
+              return '0';
             }
-            return value.toFixed(1);
+            return Math.round(value).toString();
           } catch (error) {
-            return '0.0';
+            return '0';
           }
         }
       }
