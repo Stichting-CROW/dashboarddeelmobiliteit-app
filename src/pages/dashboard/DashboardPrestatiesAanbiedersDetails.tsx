@@ -188,10 +188,11 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
   }, [startDate, endDate]);
 
   // Generate chart data for each chart (stored in state to prevent regeneration)
-  const [chartsData, setChartsData] = useState<Array<{ title: string; series: LineChartData[] }>>([]);
+  const [chartsData, setChartsData] = useState<Array<{ title: string; series: LineChartData[]; averageValue: number | null }>>([]);
 
   // Transform API data to chart format
   useEffect(() => {
+    console.log('[chartsData effect] kpiData=', !!kpiData, 'dateRange.length=', dateRange?.length ?? 0);
     if (!kpiData || !dateRange || dateRange.length === 0) {
       setChartsData([]);
       return;
@@ -212,10 +213,12 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     const kpiValues = operatorData?.kpis || [];
 
     if (performanceIndicators.length === 0) {
+      console.log('[chartsData effect] early return: no performanceIndicators');
       setChartsData([]);
       return;
     }
 
+    console.log('[chartsData effect] processing', performanceIndicators.length, 'indicators');
     // Create a map of kpi_key to values for quick lookup
     const kpiValuesMap = new Map<string, Array<{ date: string; measured: number; threshold?: number }>>();
     kpiValues.forEach((kpi: any) => {
@@ -257,12 +260,20 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
 
       // Filter out null values and create [x, y] pairs for measured data
       const seriesData: [number, number][] = [];
+      const measuredValues: number[] = [];
       validDateRange.forEach((timestamp, index) => {
         const value = measuredData[index];
         if (value !== null && typeof value === 'number' && isFinite(value)) {
           seriesData.push([timestamp, value]);
+          measuredValues.push(value);
         }
       });
+
+      const averageValue = measuredValues.length > 0
+        ? measuredValues.reduce((sum, v) => sum + v, 0) / measuredValues.length
+        : null;
+
+console.log('averageValue', averageValue);
 
       // Filter out null values and create [x, y] pairs for threshold data
       const thresholdSeriesData: [number, number][] = [];
@@ -293,7 +304,8 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
 
       return {
         title: title || kpi_key,
-        series: series
+        series: series,
+        averageValue
       };
     });
 
@@ -389,7 +401,6 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       <p className="my-4">
         Ga naar <Link to={prestatiesAanbiedersLink}>Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
       </p>
-      1rem 1.5rem
       {loading && (
         <div className="my-4">Laden...</div>
       )}
@@ -401,14 +412,15 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       {operatorCode && formFactorCode && !loading && !error && chartsData.length > 0 && dateRange.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-8">
           {chartsData.map((chart, index) => (
-            <LineChart
-              key={index}
-              title={chart.title}
-              series={chart.series}
-              xAxisCategories={dateRange}
-              height={250}
-              colors={chart.series.length > 1 ? ['#15AEEF', '#6b7280'] : ['#15AEEF']}
-            />
+              <LineChart
+                key={index}
+                title={chart.title}
+                subtitle={chart.averageValue != null ? `Gemiddelde ${chart.averageValue.toFixed(1)}` : undefined}
+                series={chart.series}
+                xAxisCategories={dateRange}
+                height={250}
+                colors={chart.series.length > 1 ? ['#15AEEF', '#6b7280'] : ['#15AEEF']}
+              />
           ))}
         </div>
       )}

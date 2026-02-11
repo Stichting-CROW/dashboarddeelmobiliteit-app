@@ -10,6 +10,8 @@ export interface LineChartData {
 
 export interface LineChartProps {
   title: string;
+  /** Optional subtitle shown on the right side of the header */
+  subtitle?: string;
   series: LineChartData[];
   xAxisCategories: number[];
   height?: number;
@@ -20,6 +22,7 @@ export interface LineChartProps {
 
 const LineChart: React.FC<LineChartProps> = ({
   title,
+  subtitle,
   series,
   xAxisCategories,
   height = 300,
@@ -30,7 +33,10 @@ const LineChart: React.FC<LineChartProps> = ({
   if (!series || series.length === 0 || !xAxisCategories || xAxisCategories.length === 0) {
     return (
       <div className="line-chart-container bg-white p-6">
-        <h4 className="text-sm font-semibold mb-2">{title}</h4>
+        <div className="flex justify-between">
+          <h4 className="text-sm font-semibold mb-2">{title}</h4>
+          {subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>{subtitle}</h4>}
+        </div>
         <div className="text-sm text-gray-500">Geen data beschikbaar</div>
       </div>
     );
@@ -82,7 +88,10 @@ const LineChart: React.FC<LineChartProps> = ({
   if (seriesWithNumericData.length === 0) {
     return (
       <div className="line-chart-container bg-white p-6">
-        <h4 className="text-sm font-semibold mb-2">{title}</h4>
+        <div className="flex justify-between">
+          <h4 className="text-sm font-semibold mb-2">{title}</h4>
+          {subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>{subtitle}</h4>}
+        </div>
         <div className="text-sm text-gray-500">Geen geldige data beschikbaar</div>
       </div>
     );
@@ -267,7 +276,11 @@ const LineChart: React.FC<LineChartProps> = ({
 
   return (
     <div className="line-chart-container bg-white p-6" style={{ marginBottom: getBottomMargin(rotationAngle) }}>
-      <h4 className="text-sm font-semibold mb-2">{title}</h4>
+      <div className="flex justify-between">
+        <h4 className="text-sm font-semibold mb-2">{title}</h4>
+        {subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>{subtitle}</h4>}
+        {! subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>Gemiddelde x</h4>}
+      </div>
       <Chart
         options={options}
         series={seriesWithNumericData}
