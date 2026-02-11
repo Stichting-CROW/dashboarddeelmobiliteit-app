@@ -14,6 +14,8 @@ export interface LineChartProps {
   xAxisCategories: number[];
   height?: number;
   colors?: string[];
+  /** When 'percentage', appends '%' to tooltip and y-axis values */
+  unit?: string;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
@@ -21,7 +23,8 @@ const LineChart: React.FC<LineChartProps> = ({
   series,
   xAxisCategories,
   height = 300,
-  colors = ['#ef4444', '#3b82f6']
+  colors = ['#ef4444', '#3b82f6'],
+  unit
 }) => {
   // Validate inputs
   if (!series || series.length === 0 || !xAxisCategories || xAxisCategories.length === 0) {
@@ -178,11 +181,12 @@ const LineChart: React.FC<LineChartProps> = ({
         formatter: (value: number) => {
           try {
             if (!isFinite(value)) {
-              return '0';
+              return (unit?.toLowerCase() === 'percentage' ? '0%' : '0');
             }
-            return Math.round(value).toString();
+            const str = Math.round(value).toString();
+            return unit?.toLowerCase() === 'percentage' ? `${str}%` : str;
           } catch (error) {
-            return '0';
+            return (unit?.toLowerCase() === 'percentage' ? '0%' : '0');
           }
         }
       }
@@ -227,6 +231,13 @@ const LineChart: React.FC<LineChartProps> = ({
           } catch (error) {
             return '';
           }
+        }
+      },
+      y: {
+        formatter: (value: number) => {
+          if (value == null || !isFinite(value)) return '-';
+          const str = Math.round(value).toString();
+          return unit?.toLowerCase() === 'percentage' ? `${str}%` : str;
         }
       }
     },

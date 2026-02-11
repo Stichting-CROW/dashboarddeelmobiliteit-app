@@ -152,7 +152,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
     }
   }, [startDate, endDate]);
 
-  const [chartsData, setChartsData] = useState<Array<{ title: string; series: LineChartData[] }>>([]);
+  const [chartsData, setChartsData] = useState<Array<{ title: string; series: LineChartData[]; unit?: string }>>([]);
 
   useEffect(() => {
     if (!kpiData || !dateRange || dateRange.length === 0) {
@@ -186,7 +186,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
     });
 
     const newChartsData = performanceIndicators.map((indicator: any) => {
-      const { kpi_key, title } = indicator;
+      const { kpi_key, title, unit } = indicator;
       const values = kpiValuesMap.get(kpi_key) || [];
 
       const valuesByDate = new Map<string, number>();
@@ -248,7 +248,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
         });
       }
 
-      return { title: title || kpi_key, series };
+      return { title: title || kpi_key, series, unit };
     });
 
     setChartsData(newChartsData);
@@ -365,6 +365,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
                 xAxisCategories={dateRange}
                 height={250}
                 colors={chart.series.length > 1 ? ['#15AEEF', '#6b7280'] : ['#15AEEF']}
+                unit={chart.unit}
               />
             ))}
           </div>

@@ -214,31 +214,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             ))
           )}
         </div>
-{/* 
-        <RangeBarIndicator 
-          title="Aantal onverhuurde voertuigen"
-          current={permit.stats?.number_of_vehicles_in_public_space} 
-          min={permit.permit_limit.minimum_vehicles} 
-          max={permit.permit_limit.maximum_vehicles} 
-          explanation="Deze balk toont of het aantal voertuigen binnen de vergunningseis ligt"
-          onClick={()=>alert('Toon hier een detailgrafiek voor aantal voertuigen')} 
-          />
-        <RangeBarIndicator 
-          title="Aantal voertuigen beschikbaar" 
-          current={permit.stats?.number_of_vehicles_in_public_space_parked_to_long} 
-          max={0} 
-          explanation="Deze balk toont of het aantal voertuigen buiten de vergunningseis ligt"
-          onClick={()=>alert('Toon hier een detailgrafiek voor aantal te lang geparkeerd')} 
-        /> */}
-        {/* <RangeBarIndicator 
-          title="Gem. Aantal Verhuringen" 
-          current={permit.stats.number_of_rentals_per_vehicle} 
-          min={permit.permit_limit.minimal_number_of_trips_per_vehicle} 
-        /> */}
-        {/* <RangeBarIndicator 
-          title="Verkeerd geparkeerd" 
-          current={permit.stats.number_of_vehicles_illegally_parked_last_month} 
-          max={permit.permit_limit.maximum_vehicles} /> */}
       </div>
     );
 }

@@ -89,13 +89,11 @@
 
 .prestaties-aanbieders-details-panel__charts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(452px, 100%), 1fr));
+  gap: 24px;
   margin-top: 1rem;
 }
 
-@media (min-width: 1200px) {
-  .prestaties-aanbieders-details-panel__charts {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.line-chart-container {
+  min-width: 452px;
 }
