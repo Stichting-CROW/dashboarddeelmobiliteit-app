@@ -407,7 +407,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
               series={chart.series}
               xAxisCategories={dateRange}
               height={250}
-              colors={chart.series.length > 1 ? ['#ef4444', '#6b7280'] : ['#ef4444']}
+              colors={chart.series.length > 1 ? ['#15AEEF', '#6b7280'] : ['#15AEEF']}
             />
           ))}
         </div>
