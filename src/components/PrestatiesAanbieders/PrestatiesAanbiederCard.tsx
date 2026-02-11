@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
@@ -7,7 +7,6 @@ import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse, PerformanceIndicatorDescription } from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
-import Button from '../Button/Button';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
 import { getProviderColorForProvider } from '../../helpers/providers';
@@ -19,15 +18,15 @@ interface PrestatiesAanbiederCardProps {
     onEditLimits?: () => void;
 }
 
-const DetailsButton = ({ detailsUrl }: { detailsUrl: string }) => {
-  const navigate = useNavigate();
-  
-  return (
-    <Button theme='gray' title="Details" onClick={() => navigate(detailsUrl)} classes="permits-card-details-button">
-      Details
-    </Button>
-  );
-};
+const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
+  <Link
+    to={detailsUrl}
+    title="Details"
+    className="font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2] hover:underline"
+  >
+    detail
+  </Link>
+);
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
@@ -167,8 +166,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           </div>
           <div className="flex justify-between">
             <ProviderLabel label={label} color={providerColor} />
-            <div className="flex items-center gap-1">
-              <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
+            <div className="flex items-center gap-2">
+              <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
               {/* Sprocket icon for editing limits */}
               { onEditLimits && <button
                 type="button"
@@ -178,7 +177,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                 onClick={onEditLimits}
               >
                 {/* Use settings.svg icon */}
-                <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" width={16} height={16} />
+                <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" className="w-[18px] h-[18px] invert-[0.8]" />
               </button>}
             </div>
           </div>

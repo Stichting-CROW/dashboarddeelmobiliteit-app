@@ -80,6 +80,7 @@
 /* Card styles */
 .permits-card {
   @apply rounded-lg p-5 h-auto relative border flex flex-col;
+  background-color: #F6F5F4;
   border-color: #ccc;
 }
 

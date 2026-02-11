@@ -381,8 +381,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
   return (
     <>
       <div
-        className={`permits-table-container ${sortedRows.length > 10 ? 'permits-table-scrollable' : ''}`}
-        style={sortedRows.length > 10 ? { maxHeight: 400, overflowY: 'auto' } : {}}
+        className={`permits-table-container`}
       >
         <table className="permits-table">
           <thead>

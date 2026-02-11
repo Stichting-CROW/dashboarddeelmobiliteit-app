@@ -42,7 +42,7 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
   const getBackgroundColor = (): string => {
     if (complies === true) return '#48E248';
     if (complies === false) return '#FD3E48';
-    return 'gray';
+    return '#fff';
   };
 
   return (
@@ -59,6 +59,8 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
             className={`
               performance-indicator-block
               transition-all duration-200 cursor-pointer hover:brightness-125 hover:shadow-lg hover:z-10 relative
+              rounded-sm
+              ${getBackgroundColor() === '#fff' ? 'border border-gray-300' : ''}
               ${isFirst && isLast ? 'mx-0' : isFirst ? 'ml-0 mr-[2.5px]' : isLast ? 'ml-[2.5px] mr-0' : 'mx-[2.5px]'}
             `}
             style={{ 
