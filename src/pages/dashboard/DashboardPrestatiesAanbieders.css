@@ -10,3 +10,63 @@
 .DashboardPrestatiesAanbiedersDetails a:hover {
   text-decoration: underline;
 }
+
+/* Split layout: overview on left, details panel on right */
+.DashboardPrestatiesAanbieders--split {
+  display: flex;
+  flex-direction: row;
+  /* gap: 1rem; */
+  align-items: flex-start;
+}
+
+.DashboardPrestatiesAanbieders__overview {
+  flex: 1 1 45%;
+  min-width: 521px;
+  @apply h-full overflow-auto pb-20;
+}
+.DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__overview {
+  flex: 0;
+}
+  
+
+.DashboardPrestatiesAanbieders__details {
+  flex: 0 1 55%;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background-color: #F6F5F4;
+}
+
+/* When details panel is shown: stack permit cards vertically, 1 per row */
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+/* Active card: extend background to the right to connect with details panel */
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-right: 1rem;
+  width: calc(100% + 1rem);
+}
+@media (min-width: 640px) {
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active {
+    padding-right: 3rem;
+    width: calc(100% + 3rem);
+    }
+}
+
+/* Remove left border on details when connected to active card */
+.DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__details {
+  border-left: none;
+}

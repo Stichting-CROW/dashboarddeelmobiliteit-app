@@ -1,26 +1,26 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, Navigate } from 'react-router-dom';
 import DashboardPrestatiesAanbieders from './DashboardPrestatiesAanbieders';
-import DashboardPrestatiesAanbiedersDetails from './DashboardPrestatiesAanbiedersDetails';
 import StatsPage from '../StatsPage';
 
-interface DashboardPageProps {
-
-}
+interface DashboardPageProps {}
 
 function DashboardPage(props: DashboardPageProps) {
   const { dashboard } = useParams<{ dashboard: string }>();
+  const location = useLocation();
 
   if (dashboard === 'beleidsinfo') {
     return <StatsPage />;
   }
 
-  else if (dashboard === 'prestaties-aanbieders') {
+  if (dashboard === 'prestaties-aanbieders') {
     return <DashboardPrestatiesAanbieders />;
   }
 
-  else if (dashboard === 'prestaties-aanbieders-details') {
-    return <DashboardPrestatiesAanbiedersDetails />;
+  /* Redirect prestaties-aanbieders-details to prestaties-aanbieders with same query params (unified view) */
+  if (dashboard === 'prestaties-aanbieders-details') {
+    const search = location.search || '';
+    return <Navigate to={`/dashboard/prestaties-aanbieders${search}`} replace />;
   }
 
   // Default fallback for unknown dashboard types

@@ -69,7 +69,12 @@ function FilterbarPermits({
 
   const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/dashboard/prestaties-aanbieders';
-  const isPrestatiesAanbiedersDetails = pathname === '/dashboard/prestaties-aanbieders-details';
+  const hasDetailParams = Boolean(
+    searchParams.get('gm_code') &&
+    (searchParams.get('operator') || searchParams.get('system_id')) &&
+    searchParams.get('form_factor')
+  );
+  const isPrestatiesDetailsView = isPrestatiesAanbieders && hasDetailParams;
 
   const token = useSelector((state: StateType) => 
     (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
@@ -82,9 +87,9 @@ function FilterbarPermits({
   const currentOperator = searchParams.get('system_id') || searchParams.get('operator');
   const currentFormFactor = searchParams.get('form_factor');
 
-  // Fetch available operator/form_factor combinations when municipality changes and we're on details page
+  // Fetch available operator/form_factor combinations when municipality is selected
   useEffect(() => {
-    if (!isPrestatiesAanbiedersDetails || !filterGebied || !token) {
+    if (!isPrestatiesAanbieders || !filterGebied || !token) {
       setAvailableCombinations([]);
       return;
     }
@@ -115,7 +120,7 @@ function FilterbarPermits({
     };
 
     fetchCombinations();
-  }, [isPrestatiesAanbiedersDetails, filterGebied, token]);
+  }, [isPrestatiesAanbieders, filterGebied, token]);
 
   // Handler for clicking a combination checkbox
   const handleCombinationClick = (operatorId: string, formFactor: string) => {
@@ -173,13 +178,8 @@ function FilterbarPermits({
   };
 
   const getCurrentSelection = () => {
-    if (isBeleidsinfo) {
-      return 'Beleidsinfo';
-    } else if (isPrestatiesAanbieders) {
-      return 'Prestaties aanbieders';
-    } else if (isPrestatiesAanbiedersDetails) {
-      return 'Prestaties aanbieders details';
-    }
+    if (isBeleidsinfo) return 'Beleidsinfo';
+    if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
     return 'Prestaties aanbieders';
   };
 
@@ -205,13 +205,6 @@ function FilterbarPermits({
             >
               Prestaties aanbieders
             </div>
-            <div
-              key={'item-prestaties-aanbieders-details'}
-              className={`form-item ${isPrestatiesAanbiedersDetails ? 'form-item-selected' : ''}`}
-              onClick={() => handleSelectDashboardType('/dashboard/prestaties-aanbieders-details')}
-            >
-              Prestaties aanbieders details
-            </div>
           </div>
         </div>
       </FilterbarExtended>
@@ -233,7 +226,7 @@ function FilterbarPermits({
         <div className="filter-plaats-container">
           <div className="filter-plaats-box-row">
             <div
-              className={`filter-plaats-value ${isPrestatiesAanbieders || isPrestatiesAanbiedersDetails ? '' : 'text-black'}`}
+              className={`filter-plaats-value ${isPrestatiesAanbieders ? '' : 'text-black'}`}
               onClick={() => toggleDashboardType('dashboard-type')}
             >
               {getCurrentSelection()}
@@ -260,7 +253,7 @@ function FilterbarPermits({
         <FilteritemGebieden />
       </Fieldset>}
 
-      {isPrestatiesAanbiedersDetails && (
+      {isPrestatiesDetailsView && (
         <Fieldset title="Aanbieders">
           {loadingCombinations ? (
             <div className="text-sm text-gray-500">Laden...</div>

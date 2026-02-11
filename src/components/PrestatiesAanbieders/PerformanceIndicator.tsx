@@ -192,7 +192,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
 
   return (
     <div data-name="performance-indicator" className="flex">
-      <section ref={containerRef} className="flex gap-4 justify-between flex-1">
+      <section ref={containerRef} className="flex gap-4 justify-between flex-1 items-center">
         <header className="flex-1">
           <div className="font-inter text-sm flex items-center flex-1">
             {title}
@@ -200,7 +200,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
           </div>
         </header>
         {shouldShowBlocks && (
-          <div className="performance-indicator-blocks mt-1 flex">
+          <div className="performance-indicator-blocks flex items-center">
             {filteredValues.map((value, index) => (
               <PerformanceIndicatorBlock
                 key={`${value.date}-${index}`}

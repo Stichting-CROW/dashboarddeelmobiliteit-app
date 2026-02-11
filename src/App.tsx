@@ -684,7 +684,10 @@ function App() {
             <Route path="/admin/zones" element={renderFilterbarElements()} />
 
             <Route path="/dashboard/:dashboard" element={<>
-              <ContentPage>
+              <ContentPage
+                style={{ paddingBottom: 0 }}
+                innerStyle={{ paddingTop: 0, paddingRight: 0, paddingBottom: 0
+              }}>
                 <DashboardPage />
               </ContentPage>
               {renderFilterbarElements()}

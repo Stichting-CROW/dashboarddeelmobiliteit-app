@@ -82,6 +82,21 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       };
     }, [urlSearch]);
 
+    // Card is "active" when details panel is shown for this permit (URL params match)
+    const isActive = useMemo(() => {
+      const searchParams = new URLSearchParams(urlSearch);
+      const urlGmCode = searchParams.get('gm_code');
+      const urlOperator = searchParams.get('operator') || searchParams.get('system_id');
+      const urlFormFactor = searchParams.get('form_factor');
+      if (!urlGmCode || !urlOperator || !urlFormFactor) return false;
+
+      const cardGmCode = permit.municipality?.gmcode || permit.permit_limit.municipality;
+      const cardOperator = permit.operator?.system_id || permit.permit_limit.system_id;
+      const cardFormFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
+
+      return urlGmCode === cardGmCode && urlOperator === cardOperator && urlFormFactor === cardFormFactor;
+    }, [urlSearch, permit]);
+
     useEffect(() => {
       const fetchPerformanceIndicators = async () => {
         if (!token || !permit.permit_limit) return;
@@ -135,7 +150,10 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     }, [token, permit, startDate, endDate]);
 
     return (
-      <div id={'permits-card-' + permit.permit_limit.permit_limit_id} className="permits-card">
+      <div
+        id={'permits-card-' + permit.permit_limit.permit_limit_id}
+        className={`permits-card${isActive ? ' permits-card--active' : ''}`}
+      >
         <div className="permits-card-content">
           <div className="hidden">
             { logo ? 
@@ -167,7 +185,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           <div className="flex justify-between">
             <ProviderLabel label={label} color={providerColor} />
             <div className="flex items-center gap-2">
-              <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
+              <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
               {/* Sprocket icon for editing limits */}
               { onEditLimits && <button
                 type="button"

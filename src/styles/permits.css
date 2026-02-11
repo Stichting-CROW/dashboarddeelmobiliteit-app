@@ -79,7 +79,7 @@
 
 /* Card styles */
 .permits-card {
-  @apply rounded-lg p-5 h-auto relative border flex flex-col;
+  @apply rounded-lg p-4 h-auto w-fit relative flex flex-col;
   background-color: #F6F5F4;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .permits-collection-cards-content {
-  @apply flex flex-wrap gap-6 w-full px-4 pl-0 pb-4;
+  @apply flex flex-wrap gap-6 w-full pb-4;
 }
 
 /* Form styles */
