@@ -17,9 +17,11 @@ import './PrestatiesAanbiedersDetailsPanel.css';
 
 interface PrestatiesAanbiedersDetailsPanelProps {
   onClose: () => void;
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
 }
 
-function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetailsPanelProps) {
+function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFullscreen = false }: PrestatiesAanbiedersDetailsPanelProps) {
   const gebieden = useSelector((state: StateType) => state.metadata.gebieden);
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
   const token = useSelector((state: StateType) =>
@@ -313,17 +315,32 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
           )}
         </div>
         <div className="prestaties-aanbieders-details-panel__actions">
-          <button
-            type="button"
-            aria-label="Sluiten"
-            title="Sluiten"
-            className="prestaties-aanbieders-details-panel__close-btn"
-            onClick={onClose}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          {onToggleFullscreen && (
+            <button
+              type="button"
+              aria-label={isFullscreen ? 'Normaal weergave' : 'Volledig scherm'}
+              title={isFullscreen ? 'Normaal weergave' : 'Volledig scherm'}
+              className="prestaties-aanbieders-details-panel__fullscreen-btn"
+              onClick={onToggleFullscreen}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6V3h3M17 6V3h-3M3 14v3h3M17 14v3h-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+          {!isFullscreen && (
+            <button
+              type="button"
+              aria-label="Sluiten"
+              title="Sluiten"
+              className="prestaties-aanbieders-details-panel__close-btn"
+              onClick={onClose}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

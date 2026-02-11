@@ -29,6 +29,7 @@
   gap: 0.5rem;
 }
 
+.prestaties-aanbieders-details-panel__fullscreen-btn,
 .prestaties-aanbieders-details-panel__close-btn {
   display: flex;
   align-items: center;
@@ -44,6 +45,7 @@
   transition: background 0.15s, color 0.15s;
 }
 
+.prestaties-aanbieders-details-panel__fullscreen-btn:hover,
 .prestaties-aanbieders-details-panel__close-btn:hover {
   background: #f3f4f6;
   color: #374151;

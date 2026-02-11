@@ -19,6 +19,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   const detailGmCode = searchParams.get('gm_code');
   const detailOperator = searchParams.get('operator') || searchParams.get('system_id');
   const detailFormFactor = searchParams.get('form_factor');
+  const isFullscreen = searchParams.get('fullscreen') === '1';
 
   const showDetailsPanel = Boolean(detailGmCode && detailOperator && detailFormFactor);
 
@@ -27,8 +28,20 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     newParams.delete('operator');
     newParams.delete('system_id');
     newParams.delete('form_factor');
+    newParams.delete('fullscreen');
     const queryString = newParams.toString();
     navigate(`/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`);
+  };
+
+  const handleToggleFullscreen = () => {
+    const newParams = new URLSearchParams(searchParams);
+    if (isFullscreen) {
+      newParams.delete('fullscreen');
+    } else {
+      newParams.set('fullscreen', '1');
+    }
+    const queryString = newParams.toString();
+    navigate(`/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`, { replace: true });
   };
 
   const overviewContent =
@@ -39,13 +52,27 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     );
 
   if (showDetailsPanel) {
+    const splitClassNames = [
+      'DashboardPrestatiesAanbieders',
+      'DashboardPrestatiesAanbieders--split',
+      isFullscreen && 'DashboardPrestatiesAanbieders--fullscreen',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
     return (
-      <div className="DashboardPrestatiesAanbieders DashboardPrestatiesAanbieders--split h-screen overflow-hidden">
-        <div className="DashboardPrestatiesAanbieders__overview pr-4 sm:pr-12">
-          {overviewContent}
-        </div>
+      <div className={`${splitClassNames} h-screen overflow-hidden`}>
+        {!isFullscreen && (
+          <div className="DashboardPrestatiesAanbieders__overview pr-4 sm:pr-12">
+            {overviewContent}
+          </div>
+        )}
         <div className="DashboardPrestatiesAanbieders__details flex-1 h-full overflow-y-auto pb-20">
-          <PrestatiesAanbiedersDetailsPanel onClose={handleCloseDetailsPanel} />
+          <PrestatiesAanbiedersDetailsPanel
+            onClose={handleCloseDetailsPanel}
+            onToggleFullscreen={handleToggleFullscreen}
+            isFullscreen={isFullscreen}
+          />
         </div>
       </div>
     );

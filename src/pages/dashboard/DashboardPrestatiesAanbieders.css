@@ -72,3 +72,9 @@
   border-left: none;
   padding: 4rem 3rem;
 }
+
+/* Fullscreen: details take full width, overview hidden */
+.DashboardPrestatiesAanbieders--fullscreen .DashboardPrestatiesAanbieders__details {
+  flex: 1 1 100%;
+  min-width: 0;
+}
