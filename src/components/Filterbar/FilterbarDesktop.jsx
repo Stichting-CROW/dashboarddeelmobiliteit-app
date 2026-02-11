@@ -3,7 +3,7 @@ import {
   useSelector
 } from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
-import Filterbar from '../Filterbar/Filterbar.jsx';
+import Filterbar from './Filterbar';
 
 import {StateType} from '../../types/StateType';
 

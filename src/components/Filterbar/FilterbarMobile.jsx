@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
-import Filterbar from '../Filterbar/Filterbar.jsx';
+import Filterbar from './Filterbar';
 
 // import './FilterbarMobile.css';
 
