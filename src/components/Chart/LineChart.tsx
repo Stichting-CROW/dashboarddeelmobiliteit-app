@@ -26,31 +26,16 @@ const LineChart: React.FC<LineChartProps> = ({
   // Validate inputs
   if (!series || series.length === 0 || !xAxisCategories || xAxisCategories.length === 0) {
     return (
-      <div className="line-chart-container">
+      <div className="line-chart-container bg-white p-6">
         <h4 className="text-sm font-semibold mb-2">{title}</h4>
         <div className="text-sm text-gray-500">Geen data beschikbaar</div>
       </div>
     );
   }
 
-  // Helper to sanitize a number for ApexCharts (prevents SVG path "Expected number" errors)
-  // - Coerces strings to numbers; rejects NaN/Infinity
-  // - Rounds to avoid floating-point precision issues that break SVG path parsing
-  const sanitizeNumber = (value: unknown, decimals = 4): number | null => {
-    if (value === null || value === undefined) return null;
-    const num = typeof value === 'number' ? value : Number(value);
-    if (!Number.isFinite(num)) return null;
-    // Round to avoid floating-point artifacts (e.g. 0.1+0.2 = 0.30000000000000004)
-    return parseFloat(num.toFixed(decimals));
-  };
-
-  // Helper to validate and sanitize a chart point [x, y]
-  const sanitizePoint = (point: unknown): [number, number] | null => {
-    if (!Array.isArray(point) || point.length < 2) return null;
-    const x = sanitizeNumber(point[0], 0); // timestamps: whole numbers
-    const y = sanitizeNumber(point[1]); // y-values: allow decimals
-    if (x === null || y === null) return null;
-    return [x, y];
+  // Helper function to check if a value is a valid number
+  const isValidNumber = (value: any): value is number => {
+    return typeof value === 'number' && !isNaN(value) && isFinite(value);
   };
 
   // Convert series data to [x, y] format for numeric x-axis
@@ -61,13 +46,13 @@ const LineChart: React.FC<LineChartProps> = ({
 
     // Check if already in [x, y] format
     if (Array.isArray(s.data[0]) && s.data[0].length === 2) {
-      const validData = (s.data as [number, number][]).reduce<[number, number][]>((acc, point) => {
-        const sanitized = sanitizePoint(point);
-        if (sanitized) acc.push(sanitized);
-        return acc;
-      }, []);
-      // Sort by x to ensure correct line drawing order
-      validData.sort((a, b) => a[0] - b[0]);
+      // Validate all points are valid numbers
+      const validData = (s.data as [number, number][]).filter((point) => {
+        return Array.isArray(point) && 
+               point.length === 2 && 
+               isValidNumber(point[0]) && 
+               isValidNumber(point[1]);
+      });
       return { ...s, data: validData };
     }
 
@@ -76,14 +61,13 @@ const LineChart: React.FC<LineChartProps> = ({
     const dataArray = s.data as number[];
     
     for (let i = 0; i < Math.min(dataArray.length, xAxisCategories.length); i++) {
-      const x = sanitizeNumber(xAxisCategories[i], 0);
-      const y = sanitizeNumber(dataArray[i]);
-      if (x !== null && y !== null) {
+      const x = xAxisCategories[i];
+      const y = dataArray[i];
+      
+      if (isValidNumber(x) && isValidNumber(y)) {
         validData.push([x, y]);
       }
     }
-
-    validData.sort((a, b) => a[0] - b[0]);
 
     return {
       ...s,
@@ -94,24 +78,12 @@ const LineChart: React.FC<LineChartProps> = ({
   // Don't render if no valid series
   if (seriesWithNumericData.length === 0) {
     return (
-      <div className="line-chart-container">
+      <div className="line-chart-container bg-white p-6">
         <h4 className="text-sm font-semibold mb-2">{title}</h4>
         <div className="text-sm text-gray-500">Geen geldige data beschikbaar</div>
       </div>
     );
   }
-
-  // When all y-values are equal, ApexCharts can produce NaN in SVG paths. Force a range.
-  const allYValues = seriesWithNumericData.flatMap((s) => (s.data as [number, number][]).map((p) => p[1]));
-  const yMin = Math.min(...allYValues);
-  const yMax = Math.max(...allYValues);
-  const yRange = yMax - yMin;
-  const forceYRange = yRange === 0;
-  const yAxisMin = forceYRange ? yMin - 0.5 : undefined;
-  const yAxisMax = forceYRange ? yMax + 0.5 : undefined;
-  const yAxisConfig = forceYRange && yAxisMin != null && yAxisMax != null
-    ? { min: yAxisMin, max: yAxisMax }
-    : {};
 
   // Calculate data density to determine label strategy
   const dataPointCount = xAxisCategories.length;
@@ -202,7 +174,6 @@ const LineChart: React.FC<LineChartProps> = ({
       }
     },
     yaxis: {
-      ...yAxisConfig,
       labels: {
         formatter: (value: number) => {
           try {
@@ -271,7 +242,7 @@ const LineChart: React.FC<LineChartProps> = ({
   };
 
   return (
-    <div className="line-chart-container" style={{ marginBottom: getBottomMargin(rotationAngle) }}>
+    <div className="line-chart-container bg-white p-6" style={{ marginBottom: getBottomMargin(rotationAngle) }}>
       <h4 className="text-sm font-semibold mb-2">{title}</h4>
       <Chart
         options={options}
