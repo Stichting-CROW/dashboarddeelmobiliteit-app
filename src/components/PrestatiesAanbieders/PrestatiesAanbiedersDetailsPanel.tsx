@@ -191,13 +191,15 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
 
       const valuesByDate = new Map<string, number>();
       const thresholdsByDate = new Map<string, number>();
-      values.forEach((item: { date: string; measured: number; threshold?: number }) => {
+      values.forEach((item: { date: string; measured: number | string; threshold?: number | string }) => {
         if (item.date) {
           if (item.measured !== undefined && item.measured !== null) {
-            valuesByDate.set(item.date, item.measured);
+            const n = Number(item.measured);
+            if (Number.isFinite(n)) valuesByDate.set(item.date, n);
           }
           if (item.threshold !== undefined && item.threshold !== null) {
-            thresholdsByDate.set(item.date, item.threshold);
+            const n = Number(item.threshold);
+            if (Number.isFinite(n)) thresholdsByDate.set(item.date, n);
           }
         }
       });
