@@ -15,11 +15,11 @@ export const formatUnit = (unit: string | undefined): string => {
   return u === 'number' ? 'nummer' : u === 'percentage' ? 'percentage' : unit;
 };
 
-/** Map bound to display: upper -> bovengrens, lower -> ondergrens */
+/** Map bound to display: upper -> max, lower -> min */
 export const formatBound = (bound: string | undefined): string => {
   if (!bound) return '';
   const b = bound.toLowerCase();
-  return b === 'upper' ? 'bovengrens' : b === 'lower' ? 'ondergrens' : bound;
+  return b === 'upper' ? 'max' : b === 'lower' ? 'min' : bound;
 };
 
 // Export HistoryTableRow type for use in other components
@@ -99,16 +99,14 @@ export const flattenLimitHistoryToTableRows = (
       const value = record.limits[kpiDesc.kpi_key];
       const isActive = value !== undefined && value !== null && typeof value === 'number' && !isNaN(value);
 
-      const maxOrMin: 'max' | 'min' =
-        kpiDesc.kpi_key.includes('max') || kpiDesc.kpi_key === 'vehicle_cap' || kpiDesc.kpi_key === 'maximum_vehicles'
-          ? 'max'
-          : 'min';
+      const maxOrMin: 'max' | 'min' = (kpiDesc.bound || '').toLowerCase() === 'lower' ? 'min' : 'max';
 
       rows.push({
         organisationName,
         providerName,
         vehicleTypeName,
-        kpiDescription: kpiDesc.title + (formatBound(kpiDesc.bound) ? ` (${formatBound(kpiDesc.bound)})` : ''),
+        // kpiDescription: kpiDesc.title + (formatBound(kpiDesc.bound) ? ` (${formatBound(kpiDesc.bound)})` : ''),
+        kpiDescription: kpiDesc.title,
         effectiveDate: moment(toDateOnly(record.effective_date) + 'T12:00:00Z').format('DD-MM-YYYY'),
         maxOrMin,
         thresholdValue: isActive ? value : null,

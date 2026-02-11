@@ -3,7 +3,7 @@ import moment from 'moment';
 import type { GeometryOperatorModalityLimit, PerformanceIndicatorDescription } from '../../api/permitLimits';
 import { updateGeometryOperatorModalityLimit, addGeometryOperatorModalityLimit, toGeometryRef } from '../../api/permitLimits';
 import type { HistoryTableRow } from './permitLimitsUtils';
-import { getAllKpis, toDateOnly } from './permitLimitsUtils';
+import { getAllKpis, toDateOnly, formatBound } from './permitLimitsUtils';
 
 type SortColumn = 'date' | 'kpi' | 'value';
 type SortDirection = 'asc' | 'desc' | null;
@@ -402,7 +402,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                 {renderSortIndicator('kpi')}
               </th>
               <th
-                className="permits-table-header-cell cursor-pointer hover:bg-gray-100 select-none"
+                className="permits-table-header-cell cursor-pointer hover:bg-gray-100 select-none text-left"
                 onClick={() => handleSort('value')}
               >
                 grenswaarde
@@ -446,6 +446,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                 </td>
                 <td className="permits-table-cell-center">
                   <span className="inline-flex items-center gap-1">
+                    {newRowKpiKey && `${formatBound(availableKpis.find(k => k.kpiKey === newRowKpiKey)?.description.bound)} `}
                     <input
                       ref={newRowInputRef}
                       type="number"
@@ -533,9 +534,10 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                 >
                   <td className="permits-table-cell-nowrap">{row.effectiveDate}</td>
                   <td className="permits-table-cell">{row.kpiDescription}</td>
-                  <td className="permits-table-cell-center">
+                  <td className="permits-table-cell">
                     {isEditing ? (
                       <span className="inline-flex items-center gap-1">
+                        {row.maxOrMin}
                         <input
                           ref={inputRef}
                           type="number"
@@ -568,7 +570,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                         )}
                       </span>
                     ) : (
-                      row.isActive ? (row.thresholdValue != null ? `${row.thresholdValue}${row.eenheid === 'percentage' ? '%' : ''}` : '') : <span className="font-bold">---</span>
+                      row.isActive ? (row.thresholdValue != null ? `${row.maxOrMin} ${row.thresholdValue}${row.eenheid === 'percentage' ? '%' : ''}` : '') : <span className="font-bold">---</span>
                     )}
                   </td>
                   <td className="permits-table-cell-center">
