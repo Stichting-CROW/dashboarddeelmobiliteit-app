@@ -7,6 +7,7 @@ import {StateType} from '../../types/StateType';
 import LogoCrow from '../LogoCrow.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 
 export default function Admin({
   children
@@ -59,7 +60,7 @@ export default function Admin({
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <LogoCrow title="Admin" />
+        <LogoDashboardDeelmobiliteit />
 
         <div className="mt-8">
           <PillMenu items={pillMenuItems} />

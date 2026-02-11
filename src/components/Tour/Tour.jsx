@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import { useNavigate } from "react-router-dom";
 import { Fade } from 'react-slideshow-image';
 
-import LogoCrow from '../LogoCrow.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 import './react-slideshow-image.css';
@@ -60,7 +60,7 @@ const Tour = () => {
       />
       <div className="mx-auto py-8 w-full justify-between flex-col flex">
 
-        <LogoCrow />
+        <LogoDashboardDeelmobiliteit />
 
         <div className="slide-container flex-1">
           <Fade ref={slideRef} {...sliderProperties}>

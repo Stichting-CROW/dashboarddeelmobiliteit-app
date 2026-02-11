@@ -15,9 +15,8 @@ import {
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
-import LogoCrow from '../LogoCrow.jsx';
-// import Button from '../Button/Button';
-// import FormInput from '../FormInput/FormInput';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
+
 import Fieldset from '../Fieldset/Fieldset';
 
 import {StateType} from '../../types/StateType';
@@ -87,15 +86,15 @@ function Filterbar({
   }
 
   return (
-    <div className="filter-bar-inner py-2">
+    <div className="filter-bar-inner">
       <div className="justify-between hidden sm:flex" style={{
-        paddingBottom: '24px'
+        paddingBottom: '48px'
       }}>
         <div style={{minWidth: '82px'}}>
           {! hideLogo && (
             ispark
-              ? <LogoCrow  />
-              : <Link to="/"><LogoCrow /></Link>
+              ? <LogoDashboardDeelmobiliteit  />
+              : <Link to="/"><LogoDashboardDeelmobiliteit /></Link>
           )}
         </div>
         <div className="ml-4 text-sm flex justify-center flex-col" style={{

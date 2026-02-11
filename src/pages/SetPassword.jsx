@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import LogoCrow from '../components/LogoCrow.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
+import LogoDashboardDeelmobiliteit from '../components/Logo/LogoDashboardDeelmobiliteit';
 
 const SetPassword = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ const SetPassword = () => {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <LogoCrow />
+        <LogoDashboardDeelmobiliteit />
 
         <h2 className="mt-4 mb-4 text-4xl font-bold">
           Dashboard Deelmobiliteit

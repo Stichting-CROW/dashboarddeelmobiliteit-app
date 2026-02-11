@@ -14,7 +14,7 @@ import {
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
-import LogoCrow from '../LogoCrow.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Fieldset from '../Fieldset/Fieldset';
 import { isRentalsLayerActive, selectActiveDataLayers } from '../../helpers/layerSelectors';
 
@@ -169,18 +169,18 @@ function Filterbar({
         isPrestatiesAanbieders ||
         isStart
       ) && (
-        <div className="filter-bar-inner py-2">
+        <div className="filter-bar-inner">
           <div
             className="justify-between hidden sm:flex"
-            style={{ paddingBottom: '24px' }}
+            style={{ paddingBottom: '48px' }}
           >
             <div style={{ minWidth: '82px' }}>
               {!hideLogo &&
                 (ispark ? (
-                  <LogoCrow />
+                  <LogoDashboardDeelmobiliteit />
                 ) : (
                   <Link to="/">
-                    <LogoCrow />
+                    <LogoDashboardDeelmobiliteit />
                   </Link>
                 ))}
             </div>
@@ -258,7 +258,7 @@ function Filterbar({
         </div>
       )}
 
-      <div
+      {/* <div
         className="absolute text-xs text-purple-800"
         style={{
           left: '102px',
@@ -277,7 +277,7 @@ function Filterbar({
           2026-02-11
         </a>
         <br />
-      </div>
+      </div> */}
     </>
   );
 }

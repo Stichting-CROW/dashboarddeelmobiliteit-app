@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 
-import LogoCrow from '../LogoCrow.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
@@ -157,13 +157,13 @@ function FilterbarPolicyHubs({
 
   return (
     <>
-      <div className="filter-bar-inner py-2">
+      <div className="filter-bar-inner">
 
         <div style={{
-          paddingBottom: '24px'
+          paddingBottom: '48px'
         }}>
           {! hideLogo && <Link to="/">
-            <LogoCrow />
+            <LogoDashboardDeelmobiliteit />
           </Link>}
         </div>
 

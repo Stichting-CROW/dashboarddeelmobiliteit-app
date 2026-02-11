@@ -24,7 +24,7 @@ function FilterbarDesktop({isVisible, displayMode}) {
       position: 'fixed'
     }}
     >
-      <div className="py-2 mx-3 h-full">
+      <div className="py-5 mx-5 h-full">
         <Filterbar displayMode={displayMode} />
       </div>
     </SlideBox>

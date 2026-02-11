@@ -17,7 +17,7 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
 import {getAcl} from '../../api/acl';
 
-import LogoCrow from '../LogoCrow.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -649,12 +649,12 @@ function FilterbarZones({
   const isNewZone = ! activeZone.geography_id;
 
   return (
-    <div className="filter-bar-inner py-2">
+    <div className="filter-bar-inner">
 
       <div style={{
-        paddingBottom: '24px'
+        paddingBottom: '48px'
       }}>
-        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
+        {! hideLogo && <Link to="/"><LogoDashboardDeelmobiliteit /></Link>}
       </div>
       
       <FilteritemDatum disabled={true} />

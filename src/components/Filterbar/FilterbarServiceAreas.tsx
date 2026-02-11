@@ -26,7 +26,7 @@ import moment from 'moment';
 
 import { ServiceAreaDelta } from '../../types/ServiceAreaDelta';
 
-import LogoCrow from '../LogoCrow.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
 
@@ -145,12 +145,12 @@ function FilterbarServiceAreas({
   }, [availableOperators, visible_operators, dispatch]);
 
   return (
-    <div className="filter-bar-inner py-2">
+    <div className="filter-bar-inner">
 
       <div style={{
-        paddingBottom: '24px'
+        paddingBottom: '48px'
       }}>
-        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
+        {! hideLogo && <Link to="/"><LogoDashboardDeelmobiliteit /></Link>}
       </div>
       
       <Fieldset title="Plaats">

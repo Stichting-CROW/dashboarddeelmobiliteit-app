@@ -6,6 +6,7 @@ import {StateType} from '../../types/StateType';
 import LogoCrow from '../LogoCrow.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 
 export default function Misc({children}) {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export default function Misc({children}) {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <LogoCrow title="" />
+        <LogoDashboardDeelmobiliteit />
 
         <div className="mt-8">
           <PillMenu items={allowedPillMenuItems} />
