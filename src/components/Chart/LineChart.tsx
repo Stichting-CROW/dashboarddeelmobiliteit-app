@@ -104,6 +104,17 @@ const LineChart: React.FC<LineChartProps> = ({
 
   const tickAmount = shouldShowFewerLabels ? getOptimalTickAmount(dataPointCount) : undefined;
 
+  // Calculate max y value across all series to add headroom above the highest line
+  const maxDataValue = Math.max(
+    ...seriesWithNumericData.flatMap((s) =>
+      (s.data as [number, number][]).map(([, y]) => y)
+    ),
+    0
+  );
+  // Add ~15% headroom above the highest value, minimum 5 units (ensures space above highest line)
+  const headroom = Math.max(maxDataValue * 0.15, 5);
+  const yAxisMax = maxDataValue + headroom;
+
   // Always rotate at 325 degrees for all periods
   const rotationAngle = 325;
 
@@ -177,6 +188,8 @@ const LineChart: React.FC<LineChartProps> = ({
       }
     },
     yaxis: {
+      max: yAxisMax,
+      min: 0,
       labels: {
         formatter: (value: number) => {
           try {
