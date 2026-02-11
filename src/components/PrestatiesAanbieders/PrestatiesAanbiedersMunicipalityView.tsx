@@ -262,15 +262,22 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   }));
 
   // Render header for vehicle type rows
-  const renderVehicleTypeHeader = (rowItem: RowData) => (
-    <>
-      <img
-        src={rowItem.icon}
-        alt={getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
-        className="permits-vehicle-type-header-img"
-      />
-    </>
-  );
+  const renderVehicleTypeHeader = (rowItem: RowData) => {
+    const name = getPrettyVehicleTypeName(rowItem.id) || 'Onbekend';
+    const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
+    return (
+      <div className="flex items-center gap-3 mb-3">
+        <img
+          src={rowItem.icon}
+          alt={capitalized}
+          className="permits-vehicle-type-header-img"
+        />
+        <div className="permits-vehicle-type-header-text">
+          {capitalized}
+        </div>
+      </div>
+    );
+  };
 
   // Filter permits for vehicle type rows
   const filterVehicleTypePermits = (permits: PermitLimitRecord[], rowItem: RowData) => {

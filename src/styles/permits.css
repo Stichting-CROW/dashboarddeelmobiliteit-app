@@ -29,11 +29,11 @@
 } 
 
 .permits-vehicle-type-header-img {
-    @apply h-6 object-contain mb-2;
+    @apply h-6 object-contain;
 }
 
 .permits-vehicle-type-header-text {
-    @apply text-sm font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden;
+    @apply font-normal text-[18px] leading-[21px] font-[Inter] text-[#343E47] text-center;
 }
 
 .permits-add-button {
@@ -81,7 +81,6 @@
 .permits-card {
   @apply rounded-lg p-5 h-auto relative border flex flex-col;
   background-color: #F6F5F4;
-  border-color: #ccc;
 }
 
 .permits-card-edit-button {
@@ -141,11 +140,11 @@
 }
 
 .permits-collection-cards {
-  @apply flex-1 overflow-x-auto;
+  @apply w-full;
 }
 
 .permits-collection-cards-content {
-  @apply flex gap-6 min-w-max px-4 pl-0 pb-4;
+  @apply flex flex-wrap gap-6 w-full px-4 pl-0 pb-4;
 }
 
 /* Form styles */
