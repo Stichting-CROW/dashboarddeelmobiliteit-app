@@ -148,24 +148,47 @@
 }
 
 /* Form styles */
+.permits-form-grid {
+  display: grid;
+  grid-template-columns: auto minmax(140px, auto) 1fr;
+  gap: 0.75rem 0.5rem;
+  align-items: center;
+}
+
 .permits-form-row {
-  @apply flex flex-row items-center gap-3;
+  display: contents;
 }
 
 .permits-form-label {
-  @apply w-56 text-sm text-gray-700;
+  @apply text-sm text-gray-700;
+}
+
+.permits-form-input-wrap {
+  @apply flex items-center gap-1;
+}
+
+.permits-form-input-wrap-with-pill {
+  justify-content: flex-start;
 }
 
 .permits-form-input {
-  @apply border rounded px-2 py-1 w-32;
+  @apply border rounded px-2 py-1 w-20;
+}
+
+.permits-form-input[type="date"] {
+  min-width: 8.5rem;
+}
+
+.permits-form-unit {
+  @apply text-sm text-gray-500 w-6 shrink-0;
 }
 
 .permits-form-checkbox-label {
-  @apply flex items-center gap-1 ml-2 text-xs text-gray-600;
+  @apply flex items-center gap-1 text-xs text-gray-600;
 }
 
 .permits-form-message {
-  @apply ml-2 text-xs text-gray-400;
+  @apply text-xs text-gray-400;
 }
 
 .permits-form-actions {
@@ -193,6 +216,10 @@
 
 .permits-table-header {
   @apply bg-gray-100;
+}
+
+.permits-table-scrollable .permits-table-header th {
+  @apply sticky top-0 z-10 bg-gray-100;
 }
 
 .permits-table-header-cell {

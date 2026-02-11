@@ -37,8 +37,6 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     setLoading(true);
     setError(null);
 
-    console.log('Reloading permits for viewType:', viewType, 'with filterValue:', filterValue);
-
     try {
       let results: PermitLimitRecord[] | null = null;
       

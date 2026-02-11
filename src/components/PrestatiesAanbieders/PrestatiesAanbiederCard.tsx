@@ -167,7 +167,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
           </div>
           <div className="flex justify-between">
             <ProviderLabel label={label} color={providerColor} />
-            <div><DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
+            <div className="flex items-center gap-1">
+              <DetailsButton detailsUrl={`/dashboard/prestaties-aanbieders-details?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
               {/* Sprocket icon for editing limits */}
               { onEditLimits && <button
                 type="button"
@@ -179,7 +180,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                 {/* Use settings.svg icon */}
                 <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" width={16} height={16} />
               </button>}
-              {/* End Sprocket icon */}
             </div>
           </div>
         </div>
