@@ -232,15 +232,13 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       // Create maps of date strings to measured values and threshold values
       const valuesByDate = new Map<string, number>();
       const thresholdsByDate = new Map<string, number>();
-      values.forEach((item: { date: string; measured: number | string; threshold?: number | string }) => {
+      values.forEach((item: { date: string; measured: number; threshold?: number }) => {
         if (item.date) {
           if (item.measured !== undefined && item.measured !== null) {
-            const n = Number(item.measured);
-            if (Number.isFinite(n)) valuesByDate.set(item.date, n);
+            valuesByDate.set(item.date, item.measured);
           }
           if (item.threshold !== undefined && item.threshold !== null) {
-            const n = Number(item.threshold);
-            if (Number.isFinite(n)) thresholdsByDate.set(item.date, n);
+            thresholdsByDate.set(item.date, item.threshold);
           }
         }
       });
@@ -391,7 +389,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
       <p className="my-4">
         Ga naar <Link to={prestatiesAanbiedersLink}>Prestaties aanbieders</Link> voor een andere combinatie van aanbieder en voertuigtype.
       </p>
-
+      1rem 1.5rem
       {loading && (
         <div className="my-4">Laden...</div>
       )}

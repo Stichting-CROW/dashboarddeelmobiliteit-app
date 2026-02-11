@@ -36,7 +36,7 @@ const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color }) => {
   };
 
   return (
-    <div className="permits-card-label mb-2 flex items-center">
+    <div className="permits-card-label flex items-center">
       <span
         className="rounded-full inline-block w-4 h-4"
         style={{ backgroundColor: color, position: 'relative' }}

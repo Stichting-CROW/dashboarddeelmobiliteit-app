@@ -23,6 +23,7 @@
   flex: 1 1 45%;
   min-width: 521px;
   @apply h-full overflow-auto pb-20;
+  padding-top: 3rem;
 }
 .DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__overview {
   flex: 0;
@@ -69,4 +70,5 @@
 /* Remove left border on details when connected to active card */
 .DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__details {
   border-left: none;
+  padding: 4rem 3rem;
 }

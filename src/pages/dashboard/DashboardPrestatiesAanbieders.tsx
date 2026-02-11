@@ -52,7 +52,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   }
 
   return (
-    <div className="DashboardPrestatiesAanbieders pt-4 pb-24">
+    <div className="DashboardPrestatiesAanbieders pt-12 pb-24">
       {overviewContent}
     </div>
   );

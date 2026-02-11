@@ -191,15 +191,13 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
 
       const valuesByDate = new Map<string, number>();
       const thresholdsByDate = new Map<string, number>();
-      values.forEach((item: { date: string; measured: number | string; threshold?: number | string }) => {
+      values.forEach((item: { date: string; measured: number; threshold?: number }) => {
         if (item.date) {
           if (item.measured !== undefined && item.measured !== null) {
-            const n = Number(item.measured);
-            if (Number.isFinite(n)) valuesByDate.set(item.date, n);
+            valuesByDate.set(item.date, item.measured);
           }
           if (item.threshold !== undefined && item.threshold !== null) {
-            const n = Number(item.threshold);
-            if (Number.isFinite(n)) thresholdsByDate.set(item.date, n);
+            thresholdsByDate.set(item.date, item.threshold);
           }
         }
       });
@@ -305,6 +303,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
     <div className="prestaties-aanbieders-details-panel">
       <div className="prestaties-aanbieders-details-panel__header">
         <div className="prestaties-aanbieders-details-panel__title">
+          <ProviderLabel label={operatorName} color={providerColor} />
           {vehicleIconUrl && (
             <img
               src={vehicleIconUrl}
@@ -312,7 +311,6 @@ function PrestatiesAanbiedersDetailsPanel({ onClose }: PrestatiesAanbiedersDetai
               className="prestaties-aanbieders-details-panel__vehicle-icon"
             />
           )}
-          <ProviderLabel label={operatorName} color={providerColor} />
         </div>
         <div className="prestaties-aanbieders-details-panel__actions">
           <button
