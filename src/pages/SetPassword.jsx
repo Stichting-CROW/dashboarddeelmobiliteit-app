@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-import Logo from '../components/Logo.jsx';
+import LogoCrow from '../components/LogoCrow.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 
 const SetPassword = () => {
@@ -59,7 +59,7 @@ const SetPassword = () => {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo />
+        <LogoCrow />
 
         <h2 className="mt-4 mb-4 text-4xl font-bold">
           Dashboard Deelmobiliteit

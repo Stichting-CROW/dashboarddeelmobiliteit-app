@@ -14,7 +14,7 @@ import {
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 import { isRentalsLayerActive, selectActiveDataLayers } from '../../helpers/layerSelectors';
 
@@ -177,10 +177,10 @@ function Filterbar({
             <div style={{ minWidth: '82px' }}>
               {!hideLogo &&
                 (ispark ? (
-                  <Logo />
+                  <LogoCrow />
                 ) : (
                   <Link to="/">
-                    <Logo />
+                    <LogoCrow />
                   </Link>
                 ))}
             </div>

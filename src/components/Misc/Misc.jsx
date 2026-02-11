@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import {StateType} from '../../types/StateType';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
@@ -64,7 +64,7 @@ export default function Misc({children}) {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo title="" />
+        <LogoCrow title="" />
 
         <div className="mt-8">
           <PillMenu items={allowedPillMenuItems} />

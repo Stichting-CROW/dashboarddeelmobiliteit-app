@@ -26,7 +26,7 @@ import moment from 'moment';
 
 import { ServiceAreaDelta } from '../../types/ServiceAreaDelta';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
 
@@ -150,7 +150,7 @@ function FilterbarServiceAreas({
       <div style={{
         paddingBottom: '24px'
       }}>
-        {! hideLogo && <Link to="/"><Logo /></Link>}
+        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
       </div>
       
       <Fieldset title="Plaats">

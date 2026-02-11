@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {marked} from 'marked'
 import { useNavigate } from "react-router-dom";
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 const About = () => {

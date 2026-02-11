@@ -1,4 +1,4 @@
-function Logo({
+function LogoCrow({
   title = ''
 }) {
   return (
@@ -14,4 +14,4 @@ function Logo({
   )
 }
 
-export default Logo;
+export default LogoCrow;

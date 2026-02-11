@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
@@ -163,7 +163,7 @@ function FilterbarPolicyHubs({
           paddingBottom: '24px'
         }}>
           {! hideLogo && <Link to="/">
-            <Logo />
+            <LogoCrow />
           </Link>}
         </div>
 

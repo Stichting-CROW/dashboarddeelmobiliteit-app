@@ -4,7 +4,7 @@ import { useNavigate, useLocation,  } from "react-router-dom";
 import {getAcl} from '../../api/acl';
 import {StateType} from '../../types/StateType';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 
@@ -59,7 +59,7 @@ export default function Admin({
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo title="Admin" />
+        <LogoCrow title="Admin" />
 
         <div className="mt-8">
           <PillMenu items={pillMenuItems} />

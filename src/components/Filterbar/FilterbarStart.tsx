@@ -8,7 +8,7 @@ import {useSelector} from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
@@ -57,7 +57,7 @@ function FilterbarStart({
       <div style={{
         paddingBottom: '24px'
       }}>
-        {! hideLogo && <Link to="/"><Logo /></Link>}
+        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
       </div>
       
       {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}

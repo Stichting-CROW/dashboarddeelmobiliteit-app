@@ -10,7 +10,7 @@ import {StateType} from '../../types/StateType';
 
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';

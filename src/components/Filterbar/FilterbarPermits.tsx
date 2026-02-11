@@ -8,7 +8,7 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import { addDays, format } from 'date-fns';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
 
@@ -224,7 +224,7 @@ function FilterbarPermits({
       <div style={{
         paddingBottom: '24px'
       }}>
-        {! hideLogo && <Link to="/"><Logo /></Link>}
+        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
       </div>
       
       {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}

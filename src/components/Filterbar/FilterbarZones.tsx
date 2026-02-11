@@ -17,7 +17,7 @@ import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
 import {getAcl} from '../../api/acl';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import {renderZoneTag} from '../Tag/Tag';
 import Button from '../Button/Button';
 import Text from '../Text/Text';
@@ -654,7 +654,7 @@ function FilterbarZones({
       <div style={{
         paddingBottom: '24px'
       }}>
-        {! hideLogo && <Link to="/"><Logo /></Link>}
+        {! hideLogo && <Link to="/"><LogoCrow /></Link>}
       </div>
       
       <FilteritemDatum disabled={true} />

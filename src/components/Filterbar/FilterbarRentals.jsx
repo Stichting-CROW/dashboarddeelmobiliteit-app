@@ -15,7 +15,7 @@ import {
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 // import Button from '../Button/Button';
 // import FormInput from '../FormInput/FormInput';
 import Fieldset from '../Fieldset/Fieldset';
@@ -94,8 +94,8 @@ function Filterbar({
         <div style={{minWidth: '82px'}}>
           {! hideLogo && (
             ispark
-              ? <Logo  />
-              : <Link to="/"><Logo /></Link>
+              ? <LogoCrow  />
+              : <Link to="/"><LogoCrow /></Link>
           )}
         </div>
         <div className="ml-4 text-sm flex justify-center flex-col" style={{
