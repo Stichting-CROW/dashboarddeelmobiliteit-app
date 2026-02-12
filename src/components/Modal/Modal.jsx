@@ -103,7 +103,7 @@ const Modal = ({
               {button1Title && <button type="button"
                 className="inline-block px-6 py-2.5 bg-gray-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-gray-700 hover:shadow-lg focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg transition duration-150 ease-in-out cursor-pointer"
                 data-bs-dismiss="modal"
-                onClick={() => blurThen(button1Handler)}>
+                onClick={(e) => blurThen(() => button1Handler?.(e))}>
                 {button1Title}
               </button>}
               {button2Title && <button type="button"
@@ -112,7 +112,7 @@ const Modal = ({
                   ${button2Options && button2Options.isLoading === true ? 'cursor-wait' : ''}
                   ${button2Options && button2Options.disabled === true ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
-                onClick={() => blurThen(button2Handler)}
+                onClick={(e) => blurThen(() => button2Handler?.(e))}
                 disabled={(button2Options && button2Options.isLoading === true) || (button2Options && button2Options.disabled === true)}
                 >
                 {button2Title}
