@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import moment from 'moment';
 import type { GeometryOperatorModalityLimit, PerformanceIndicatorDescription } from '../../api/permitLimits';
-import { updateGeometryOperatorModalityLimit, addGeometryOperatorModalityLimit, toGeometryRef } from '../../api/permitLimits';
+import { updateGeometryOperatorModalityLimit, addGeometryOperatorModalityLimit, deleteGeometryOperatorModalityLimit, toGeometryRef } from '../../api/permitLimits';
+import { planDeleteRecord } from './permitLimitsOperations';
 import type { HistoryTableRow } from './permitLimitsUtils';
 import { getAllKpis, toDateOnly, formatBound } from './permitLimitsUtils';
 
@@ -48,6 +49,9 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
   const [editingValue, setEditingValue] = useState<number | ''>('');
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Add new row state
   const [isAddingNewRow, setIsAddingNewRow] = useState(false);
@@ -218,6 +222,78 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
   const handleCancelClick = () => {
     setEditingRowKey(null);
     setEditingValue('');
+  };
+
+  const handleDeleteClick = async (row: HistoryTableRow) => {
+    if (!limitHistory || !token) {
+      alert('Fout: Kan record niet verwijderen');
+      return;
+    }
+
+    const fullRecord = limitHistory.find(
+      (r) =>
+        toDateOnly(r.effective_date) === row.effective_date &&
+        r.geometry_operator_modality_limit_id === row.geometry_operator_modality_limit_id
+    );
+
+    if (!fullRecord || !fullRecord.geometry_operator_modality_limit_id) {
+      alert('Fout: Record niet gevonden');
+      return;
+    }
+
+    if (mode !== 'admin' && moment(fullRecord.effective_date).isBefore(moment(), 'day')) {
+      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      return;
+    }
+
+    if (!window.confirm('Weet je zeker dat je deze KPI-waarde wilt verwijderen?')) {
+      return;
+    }
+
+    const newLimits = { ...fullRecord.limits };
+    delete newLimits[row.kpiKey];
+    const hasOtherConfiguredValues = Object.keys(newLimits).length > 0;
+
+    const id = fullRecord.geometry_operator_modality_limit_id;
+    setDeletingId(id);
+
+    try {
+      if (hasOtherConfiguredValues) {
+        // Same as "geen" + save: update record to remove this KPI from limits
+        const updatedRecord: GeometryOperatorModalityLimit = {
+          ...fullRecord,
+          limits: newLimits,
+        };
+        const result = await updateGeometryOperatorModalityLimit(token, updatedRecord, mode === 'admin');
+        if (result) {
+          onRecordUpdated();
+        } else {
+          alert('Fout bij bijwerken van record');
+        }
+      } else {
+        // Last value: delete the full geometry_operator_modality_limit record
+        const prevToUpdate = planDeleteRecord(limitHistory, fullRecord);
+        if (prevToUpdate) {
+          const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, mode === 'admin');
+          if (!updated) {
+            alert('Fout bij bijwerken vorige record');
+            return;
+          }
+        }
+
+        const ok = await deleteGeometryOperatorModalityLimit(token, id);
+        if (ok) {
+          onRecordUpdated();
+        } else {
+          alert('Fout bij verwijderen');
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const availableKpis = useMemo(() => getAllKpis(kpiDescriptions), [kpiDescriptions]);
@@ -621,16 +697,25 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                       <>
                         <button
                           title="Aanpassen"
-                          className="permits-table-action-button"
+                          className="permits-table-action-button permits-table-edit-icon"
                           onClick={() =>
                             showPermitLimitsEditor && onEditRow
                               ? onEditRow(row.effective_date)
                               : handleEditClick(row)
                           }
+                        />
+                        <button
+                          title="Verwijderen"
+                          className={`permits-table-delete-button permits-table-delete-icon ${deletingId === (fullRecord.geometry_operator_modality_limit_id ?? null) ? 'loading' : ''}`}
+                          onClick={() => handleDeleteClick(row)}
+                          disabled={deletingId === (fullRecord.geometry_operator_modality_limit_id ?? null)}
+                          style={{ opacity: deletingId === (fullRecord.geometry_operator_modality_limit_id ?? null) ? 0.5 : 1 }}
                         >
-                          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14.85 2.85a2.121 2.121 0 0 1 3 3l-9.193 9.193a2 2 0 0 1-.708.464l-3.5 1.25a.5.5 0 0 1-.637-.637l1.25-3.5a2 2 0 0 1 .464-.708L14.85 2.85zm2.12.88a1.121 1.121 0 0 0-1.586 0l-1.293 1.293 1.586 1.586 1.293-1.293a1.121 1.121 0 0 0 0-1.586zm-2.293 2.293l-8.5 8.5-.75 2.1 2.1-.75 8.5-8.5-1.85-1.85z" fill="#666"/>
-                          </svg>
+                          {deletingId === (fullRecord.geometry_operator_modality_limit_id ?? null) && (
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="inline animate-spin" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="10" cy="10" r="8" stroke="#888" strokeWidth="2" fill="none"/>
+                            </svg>
+                          )}
                         </button>
                       </>
                     )}

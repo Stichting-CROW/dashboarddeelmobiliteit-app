@@ -252,3 +252,25 @@
   @apply inline-block align-middle p-1 hover:bg-gray-200 rounded;
 }
 
+.permits-table-edit-icon {
+  background: center center url('../images/UserList/noun-edit-684936.svg');
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
+  min-width: 20px;
+  display: inline-block;
+}
+
+.permits-table-delete-icon {
+  background: center center url('../images/UserList/delete-object.svg');
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  min-width: 20px;
+}
+
+.permits-table-delete-icon.loading {
+  background-image: none;
+}
+
