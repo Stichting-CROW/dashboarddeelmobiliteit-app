@@ -335,7 +335,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
         <PageTitle className="mb-0 mr-4">
           Prestaties aanbieders
         </PageTitle>
-        <button
+        {/* <button
           className="permits-add-button"
           title="Voeg nieuwe vergunningseis toe"
           onClick={handleMainAddClick}
@@ -343,7 +343,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 4v12M4 10h12" stroke="white" strokeWidth="2" strokeLinecap="round" fill="white"/>
           </svg>
-        </button>
+        </button> */}
       </div>
       
       <div id="permits-container" className="permits-container">

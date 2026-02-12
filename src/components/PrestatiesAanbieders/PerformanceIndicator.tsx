@@ -1,4 +1,5 @@
 import PerformanceIndicatorBlock from "./PerformanceIndicatorBlock";
+import PerformanceIndicatorBar from "./PerformanceIndicatorBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -187,8 +188,9 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
   const description = performanceIndicatorDescriptions.find(desc => desc.kpi_key === kpi.kpi_key);
   const title = description?.title || kpi.kpi_key;
 
-  // Only show blocks if period <= 30 days
-  const shouldShowBlocks = periodDays <= 30;
+  // Show blocks if period <= 7 days, bar if >= 8 days
+  const shouldShowBlocks = periodDays <= 7;
+  const shouldShowBar = periodDays >= 8;
 
   return (
     <div data-name="performance-indicator" className="flex">
@@ -213,6 +215,11 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
                 isLast={index === filteredValues.length - 1}
               />
             ))}
+          </div>
+        )}
+        {shouldShowBar && (
+          <div className="performance-indicator-bar-wrapper flex items-center">
+            <PerformanceIndicatorBar values={filteredValues} />
           </div>
         )}
       </section>
