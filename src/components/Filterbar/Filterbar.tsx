@@ -56,7 +56,7 @@ function Filterbar({
 }: FilterbarProps) {
   const location = useLocation();
   const pathname = location.pathname;
-  const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
+  const isBeleidsinfo = pathname === '/stats/beleidsinfo';
 
   const activeDataLayers = useSelector(selectActiveDataLayers);
 

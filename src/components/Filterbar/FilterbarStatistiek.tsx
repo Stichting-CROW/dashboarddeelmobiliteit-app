@@ -13,8 +13,8 @@ function FilterbarStatistiek() {
   const dispatch = useDispatch();
   const pathname = location.pathname;
 
-  const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
-  const isPrestatiesAanbieders = pathname === '/dashboard/prestaties-aanbieders';
+  const isBeleidsinfo = pathname === '/stats/beleidsinfo';
+  const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
 
   const filterGebied = useSelector((state: StateType) =>
     state.filter ? state.filter.gebied : null
@@ -75,7 +75,7 @@ function FilterbarStatistiek() {
           <div
             key="item-beleidsinfo"
             className={`form-item ${isBeleidsinfo ? 'form-item-selected' : ''}`}
-            onClick={() => handleSelectDashboardType('/dashboard/beleidsinfo')}
+            onClick={() => handleSelectDashboardType('/stats/beleidsinfo')}
           >
             Beleidsinfo
           </div>
@@ -83,7 +83,7 @@ function FilterbarStatistiek() {
             key="item-prestaties-aanbieders"
             className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
             onClick={() =>
-              handleSelectDashboardType('/dashboard/prestaties-aanbieders')
+              handleSelectDashboardType('/stats/prestaties-aanbieders')
             }
           >
             Prestaties aanbieders

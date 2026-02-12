@@ -512,7 +512,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
         <div className="text-sm text-gray-600 mb-4">
           Bekijk actuele prestaties op het{' '}
           <Link 
-            to={`/dashboard/prestaties-aanbieders?gm_code=${municipality}&operator=${provider_system_id}&form_factor=${vehicle_type}`}
+            to={`/stats/prestaties-aanbieders?gm_code=${municipality}&operator=${provider_system_id}&form_factor=${vehicle_type}`}
             className="text-blue-600 hover:underline"
           >
             Prestaties aanbieders

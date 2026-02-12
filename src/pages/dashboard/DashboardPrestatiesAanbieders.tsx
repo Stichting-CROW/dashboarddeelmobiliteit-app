@@ -31,7 +31,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     newParams.delete('propulsion_type');
     newParams.delete('fullscreen');
     const queryString = newParams.toString();
-    navigate(`/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`);
+    navigate(`/stats/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`);
   };
 
   const handleToggleFullscreen = () => {
@@ -42,7 +42,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
       newParams.set('fullscreen', '1');
     }
     const queryString = newParams.toString();
-    navigate(`/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`, { replace: true });
+    navigate(`/stats/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`, { replace: true });
   };
 
   const overviewContent =

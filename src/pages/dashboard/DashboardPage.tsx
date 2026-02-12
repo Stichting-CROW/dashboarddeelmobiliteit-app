@@ -20,7 +20,7 @@ function DashboardPage(props: DashboardPageProps) {
   /* Redirect prestaties-aanbieders-details to prestaties-aanbieders with same query params (unified view) */
   if (dashboard === 'prestaties-aanbieders-details') {
     const search = location.search || '';
-    return <Navigate to={`/dashboard/prestaties-aanbieders${search}`} replace />;
+    return <Navigate to={`/stats/prestaties-aanbieders${search}`} replace />;
   }
 
   // Default fallback for unknown dashboard types

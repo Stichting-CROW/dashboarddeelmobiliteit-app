@@ -211,7 +211,7 @@ function App() {
       if (pathname === '/map/beleidshubs') {
         return `Zones - ${baseTitle}`;
       }
-      if (pathname === '/stats/overview') {
+      if (pathname === '/stats/beleidsinfo') {
         return `Ontwikkeling - ${baseTitle}`;
       }
       if (pathname === '/over') {
@@ -246,8 +246,8 @@ function App() {
       }
       
       // Dynamic routes
-      if (pathname.startsWith('/dashboard/')) {
-        const dashboard = pathname.split('/dashboard/')[1]?.split('/')[0];
+      if (pathname.startsWith('/stats/')) {
+        const dashboard = pathname.split('/stats/')[1]?.split('/')[0];
         if (dashboard === 'prestaties-aanbieders') {
           return `Prestaties aanbieders - ${baseTitle}`;
         }
@@ -354,9 +354,9 @@ function App() {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
-    } else if(pathName === "/dashboard/beleidsinfo") {
+    } else if(pathName === "/stats/beleidsinfo") {
       payload=DISPLAYMODE_OTHER;
-    } else if(pathName.startsWith("/dashboard/")) {
+    } else if(pathName.startsWith("/stats/")) {
       payload=DISPLAYMODE_DASHBOARD;
     } else if(pathName.includes("/map/park")) {
       payload=DISPLAYMODE_PARK;
@@ -685,18 +685,18 @@ function App() {
             <Route path="/map/zones" element={renderFilterbarElements()} />
             <Route path="/admin/zones" element={renderFilterbarElements()} />
 
-            <Route path="/dashboard/:dashboard" element={<>
+            <Route path="/stats/beleidsinfo" element={<>
+              <ContentPage>
+                <StatsPage />
+              </ContentPage>
+              {renderFilterbarElements()}
+            </>} />
+            <Route path="/stats/:dashboard" element={<>
               <ContentPage
                 style={{ paddingBottom: 0 }}
                 innerStyle={{ paddingTop: 0, paddingRight: 0, paddingBottom: 0
               }}>
                 <DashboardPage />
-              </ContentPage>
-              {renderFilterbarElements()}
-            </>} />
-            <Route path="/stats/overview" element={<>
-              <ContentPage>
-                <StatsPage />
               </ContentPage>
               {renderFilterbarElements()}
             </>} />
@@ -832,7 +832,7 @@ function App() {
             </Misc>
           </Overlay>
         } />
-        <Route path="/stats/overview" element={<>
+        <Route path="/stats/beleidsinfo" element={<>
           <Overlay>
             <Login />
           </Overlay>
@@ -885,7 +885,7 @@ function App() {
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
-      {/* {pathName !== '/stats/overview' && <MapPage mapContainer={mapContainer} />} */}
+      {/* {pathName !== '/stats/beleidsinfo' && <MapPage mapContainer={mapContainer} />} */}
       <MapPage mapContainer={mapContainer} />
 
       <Menu acl={acl} pathName={pathName} />

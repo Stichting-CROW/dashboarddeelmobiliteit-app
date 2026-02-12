@@ -1,6 +1,6 @@
 # DEMO Mode for Prestaties Aanbieders
 
-This document describes the DEMO mode feature for the `/dashboard/prestaties-aanbieders` page, which allows presenting a demo without showing real operator names, colors, or values.
+This document describes the DEMO mode feature for the `/stats/prestaties-aanbieders` page, which allows presenting a demo without showing real operator names, colors, or values.
 
 ## Enabling DEMO Mode
 
@@ -80,4 +80,4 @@ Then reload the page.
 
 1. Set `REACT_APP_DEMO_MODE=true` in `.env`.
 2. Build the app: `npm run build`.
-3. Go to `/dashboard/prestaties-aanbieders`, select a municipality, and you will see anonymized data.
+3. Go to `/stats/prestaties-aanbieders`, select a municipality, and you will see anonymized data.

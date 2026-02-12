@@ -9,7 +9,9 @@ import { InfoCircledIcon } from "@radix-ui/react-icons"
 
 function MenuItem(props) {
   const pathName = props.pathName;
-  const isActive = pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
+  const isActive = props.pathPrefix
+    ? pathName.startsWith(props.pathPrefix)
+    : pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
@@ -146,7 +148,8 @@ function Menu({
       <MenuItem
         pathName={pathName}
         text={'Statistiek'}
-        path={'/stats/overview'}
+        path={'/stats/beleidsinfo'}
+        pathPrefix={'/stats'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
       />
 

@@ -325,7 +325,7 @@ console.log('averageValue', averageValue);
     if (startDateParam) params.set('start_date', startDateParam);
     if (endDateParam) params.set('end_date', endDateParam);
     const queryString = params.toString();
-    return `/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`;
+    return `/stats/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`;
   }, [municipalityCode, startDateParam, endDateParam]);
 
   // Function to update query parameters in URL

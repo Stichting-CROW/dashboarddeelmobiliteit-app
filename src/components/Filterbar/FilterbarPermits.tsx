@@ -59,8 +59,8 @@ function FilterbarPermits({
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
-  const isPrestatiesAanbieders = pathname === '/dashboard/prestaties-aanbieders';
+  const isBeleidsinfo = pathname === '/stats/beleidsinfo';
+  const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
   const hasDetailParams = Boolean(
     searchParams.get('gm_code') &&
     (searchParams.get('operator') || searchParams.get('system_id')) &&
