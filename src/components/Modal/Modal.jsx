@@ -1,3 +1,5 @@
+import ReactDOM from 'react-dom';
+
 const Modal = ({
   isVisible,
   title,
@@ -30,9 +32,8 @@ const Modal = ({
     fn?.();
   };
   const handleHide = () => blurThen(hideModalHandler);
-  return (
-    <>
-      <div className={`
+  const modalContent = (
+    <div className={`
           modal fade ${isVisible ? 'show' : ''} fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto
         `}
         id="exampleModalCenteredScrollable"
@@ -120,8 +121,9 @@ const Modal = ({
           </div>
         </div>
       </div>
-    </>
-  )
+  );
+  const rootEl = document.getElementById('root');
+  return ReactDOM.createPortal(modalContent, rootEl || document.body);
 }
 
 
