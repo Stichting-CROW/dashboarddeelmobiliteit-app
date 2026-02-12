@@ -354,6 +354,8 @@ function App() {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
+    } else if(pathName === "/dashboard/beleidsinfo") {
+      payload=DISPLAYMODE_OTHER;
     } else if(pathName.startsWith("/dashboard/")) {
       payload=DISPLAYMODE_DASHBOARD;
     } else if(pathName.includes("/map/park")) {

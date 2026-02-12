@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import './css/FilterbarPermits.css';
 import './css/FilteritemGebieden.css';
 
-import {useSelector, useDispatch} from 'react-redux';
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
-import FilterbarExtended from './FilterbarExtended.jsx';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import FilteritemDatum from './FilteritemDatum.jsx';
 import Fieldset from '../Fieldset/Fieldset';
+import FilterbarStatistiek from './FilterbarStatistiek';
 
-import {StateType} from '../../types/StateType';
+import { StateType } from '../../types/StateType';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot';
 import { getPermitLimitOverviewForMunicipality, type PermitLimitRecord } from '../../api/permitLimits';
 import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
@@ -50,22 +50,12 @@ function FilterbarPermits({
   });
 
   const filterGebied = useSelector((state: StateType) => {
-    return state.filter ? state.filter.gebied : "";
-  });
-
-  const filterOntwikkelingVan = useSelector((state: StateType) => {
-    return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : null;
-  });
-
-  const filterOntwikkelingTot = useSelector((state: StateType) => {
-    return state.filter && state.filter.ontwikkelingtot ? new Date(state.filter.ontwikkelingtot) : null;
+    return state.filter ? state.filter.gebied : '';
   });
 
   const hidePlaats = gebieden.length <= 1;
 
-  const dispatch = useDispatch();
   const location = useLocation();
-  const navigate = useNavigate();
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -136,83 +126,6 @@ function FilterbarPermits({
     setSearchParams(newSearchParams);
   };
 
-  const filterBarExtendedView = useSelector((state: StateType) => {
-    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
-  });
-
-  const setVisibility = (name: string, visibility: any) => {
-    dispatch({
-      type: `SET_VISIBILITY`,
-      payload: {
-        name: name,
-        visibility: visibility
-      }
-    });
-  };
-
-  const toggleDashboardType = (val: string | false) => {
-    setVisibility('FILTERBAR_EXTENDED', val);
-  };
-
-  const handleSelectDashboardType = (path: string) => {
-    const searchParams = new URLSearchParams();
-    
-    // Add gm_code if available
-    if (filterGebied) {
-      searchParams.set('gm_code', filterGebied);
-    }
-    
-    // Add start_date and end_date if available
-    if (filterOntwikkelingVan) {
-      searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
-    }
-    
-    if (filterOntwikkelingTot) {
-      searchParams.set('end_date', format(filterOntwikkelingTot, 'yyyy-MM-dd'));
-    }
-    
-    // Build the URL with query parameters
-    const queryString = searchParams.toString();
-    const url = queryString ? `${path}?${queryString}` : path;
-    
-    navigate(url);
-    toggleDashboardType(false);
-  };
-
-  const getCurrentSelection = () => {
-    if (isBeleidsinfo) return 'Beleidsinfo';
-    if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
-    return 'Prestaties aanbieders';
-  };
-
-  const renderSelectDashboardType = () => {
-    return (
-      <FilterbarExtended
-        title="Selecteer statistiek"
-        closeFunction={() => toggleDashboardType(false)}
-      >
-        <div className="filter-form-selectie">
-          <div className="filter-form-values">
-          <div
-              key={'item-beleidsinfo'}
-              className={`form-item ${isBeleidsinfo ? 'form-item-selected' : ''}`}
-              onClick={() => handleSelectDashboardType('/dashboard/beleidsinfo')}
-            >
-              Beleidsinfo
-            </div>
-            <div
-              key={'item-prestaties-aanbieders'}
-              className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
-              onClick={() => handleSelectDashboardType('/dashboard/prestaties-aanbieders')}
-            >
-              Prestaties aanbieders
-            </div>
-          </div>
-        </div>
-      </FilterbarExtended>
-    );
-  };
-
   return (
     <div className="filter-bar-inner">
 
@@ -222,21 +135,9 @@ function FilterbarPermits({
         {! hideLogo && <Link to="/"><LogoDashboardDeelmobiliteit /></Link>}
       </div>
       
-      {! hideDatumTijd &&  <FilteritemDatum disabled={true} />}
+      {!hideDatumTijd && <FilteritemDatum disabled={true} />}
 
-      <Fieldset title="Statistiek">
-        <div className="filter-plaats-container">
-          <div className="filter-plaats-box-row">
-            <div
-              className={`filter-plaats-value ${isPrestatiesAanbieders ? '' : 'text-black'}`}
-              onClick={() => toggleDashboardType('dashboard-type')}
-            >
-              {getCurrentSelection()}
-            </div>
-            {filterBarExtendedView === 'dashboard-type' ? renderSelectDashboardType() : null}
-          </div>
-        </div>
-      </Fieldset>
+      <FilterbarStatistiek />
 
       <Fieldset title="Periode">
         <FilteritemDatumVanTot 

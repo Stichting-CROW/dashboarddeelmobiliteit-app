@@ -1,5 +1,6 @@
 import './css/Filterbar.css';
-import { Link } from 'react-router-dom';
+import './css/FilterbarPermits.css';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
@@ -27,6 +28,7 @@ import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
 import FilterbarPermits from './FilterbarPermits';
 import FilterbarStart from './FilterbarStart';
+import FilterbarStatistiek from './FilterbarStatistiek';
 
 import {
   DISPLAYMODE_PARK,
@@ -52,6 +54,10 @@ function Filterbar({
   visible,
   hideLogo
 }: FilterbarProps) {
+  const location = useLocation();
+  const pathname = location.pathname;
+  const isBeleidsinfo = pathname === '/dashboard/beleidsinfo';
+
   const activeDataLayers = useSelector(selectActiveDataLayers);
 
   const isLoggedIn = useSelector((state: StateType) => {
@@ -191,6 +197,8 @@ function Filterbar({
               {/* INFO */}
             </div>
           </div>
+
+          {isBeleidsinfo && <FilterbarStatistiek />}
 
           {isLoggedIn && showdatum && <FilteritemDatum disabled={false} />}
 
