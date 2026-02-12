@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useState } from 'react';
 
 interface PerformanceIndicatorBarValue {
   date: string;
@@ -21,6 +22,7 @@ const COLORS = {
 };
 
 const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
+  const [open, setOpen] = useState(false);
   const totalCount = values.length;
 
   const { redCount, greenCount, whiteCount } = values.reduce(
@@ -48,9 +50,15 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
       : 'Geen data in deze periode';
 
   return (
-    <TooltipProvider delayDuration={500}>
-      <Tooltip>
-        <TooltipTrigger asChild>
+    <TooltipProvider delayDuration={0}>
+      <Tooltip open={open} onOpenChange={setOpen}>
+        <TooltipTrigger
+          asChild
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
+        >
           <div
             className="performance-indicator-bar flex overflow-hidden rounded-sm cursor-pointer hover:brightness-110 transition-all duration-200 border border-gray-300"
             style={{

@@ -9,9 +9,11 @@ import { getPrettyVehicleTypeName, getPluralFormFactorName } from '../../helpers
 import LineChart, { LineChartData } from '../../components/Chart/LineChart';
 import moment from 'moment';
 import { getKpiOverviewOperators } from '../../api/kpiOverview';
+import { findOperatorMatch } from '../../api/permitLimits';
 import Modal from '../../components/Modal/Modal.jsx';
 import SelectProviderDialog from '../../components/PrestatiesAanbieders/SelectProviderDialog';
 import SelectVehicleTypeDialog from '../../components/PrestatiesAanbieders/SelectVehicleTypeDialog';
+import { PROPULSION_EMOJI, PROPULSION_TITLE } from '../../components/PrestatiesAanbieders/ProviderLabel';
 
 interface DashboardPrestatiesAanbiedersDetailsProps {
 
@@ -68,6 +70,7 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
   // Check for system_id first, fall back to operator for backward compatibility
   const operatorCode = queryParams.get('system_id') || queryParams.get('operator');
   const formFactorCode = queryParams.get('form_factor');
+  const propulsionTypeCode = queryParams.get('propulsion_type');
   const startDateParam = queryParams.get('start_date');
   const endDateParam = queryParams.get('end_date');
 
@@ -209,7 +212,10 @@ function DashboardPrestatiesAanbiedersDetails(props: DashboardPrestatiesAanbiede
     }
     // Extract performance indicator descriptions and operator KPI data
     const performanceIndicators = kpiData?.performance_indicator_description || [];
-    const operatorData = kpiData?.municipality_modality_operators?.[0];
+    const operators = kpiData?.municipality_modality_operators || [];
+    const operatorData = operatorCode && formFactorCode
+      ? findOperatorMatch(operators, operatorCode, formFactorCode, propulsionTypeCode || undefined)
+      : operators[0];
     const kpiValues = operatorData?.kpis || [];
 
     if (performanceIndicators.length === 0) {
@@ -310,7 +316,7 @@ console.log('averageValue', averageValue);
     });
 
     setChartsData(newChartsData);
-  }, [kpiData, dateRange, operatorName]);
+  }, [kpiData, dateRange, operatorName, operatorCode, formFactorCode, propulsionTypeCode]);
 
   // Build link URL with query parameters if present
   const prestatiesAanbiedersLink = useMemo(() => {
@@ -376,7 +382,12 @@ console.log('averageValue', averageValue);
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
       <p className="my-4">
-        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
+        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>
+            {operatorName}
+            {propulsionTypeCode && PROPULSION_EMOJI[propulsionTypeCode] && PROPULSION_TITLE[propulsionTypeCode] && (
+              <span title={PROPULSION_TITLE[propulsionTypeCode]}>{PROPULSION_EMOJI[propulsionTypeCode]}</span>
+            )}
+          </b>.
       </p>
       {(!operatorCode || !formFactorCode) && (
         <div className="my-4">

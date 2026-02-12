@@ -58,6 +58,8 @@ export interface PermitLimitRecord {
      * This field is primarily used for sorting rows in the permit card collections.
      */
     overallCompliance?: 'red' | 'green' | 'grey';
+    /** Propulsion type (e.g. 'electric', 'combustion') when operator has multiple entries per form_factor */
+    propulsion_type?: string;
 }
 
 /** New geometry_operator_modality_limit API types */
@@ -145,29 +147,14 @@ export const getPermitLimitOverviewForMunicipality = async (
             console.warn('Failed to fetch operators, using fallback data', error);
         }
 
-        // Transform each operator/modality combination into a PermitLimitRecord
-        // Deduplicate by operator + form_factor + municipality (ignoring propulsion_type)
-        const seenCombinations = new Map<string, boolean>();
-        const results: PermitLimitRecord[] = (kpiData.municipality_modality_operators || [])
-            .filter((item: MunicipalityModalityOperator) => {
-                const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
-                // Create a unique key based on operator + form_factor + municipality (excluding propulsion_type)
-                const uniqueKey = `${item.operator}_${item.form_factor}_${geometryRef}`;
-                
-                // If we've already seen this combination, skip it
-                if (seenCombinations.has(uniqueKey)) {
-                    return false;
-                }
-                
-                // Mark this combination as seen
-                seenCombinations.set(uniqueKey, true);
-                return true;
-            })
-            .map((item: MunicipalityModalityOperator) => {
+        // Transform each operator/modality/propulsion combination into a PermitLimitRecord
+        // Show separate cards for each propulsion type (e.g. greenwheels combustion + greenwheels electric)
+        const operators = kpiData.municipality_modality_operators || [];
+        const results: PermitLimitRecord[] = operators.map((item: MunicipalityModalityOperator) => {
                 const operator = operatorsMap.get(item.operator);
                 const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
 
-                // Derive an overall compliance summary from all KPI values for this operator+form_factor+municipality
+                // Derive an overall compliance summary from all KPI values for this operator+form_factor+propulsion
                 const kpis = item.kpis || [];
                 const hasRed = kpis.some(kpi =>
                     (kpi.values || []).some(value => value.complies === false)
@@ -179,9 +166,8 @@ export const getPermitLimitOverviewForMunicipality = async (
                     hasRed ? 'red' : hasGreen ? 'green' : 'grey';
                 
                 // Create a minimal permit_limit record
-                // Generate a unique ID based on operator + form_factor + municipality combination
-                // This allows the component to display the record even if actual permit limit data isn't available
-                const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
+                // Generate a unique ID including propulsion_type so each combination has its own card
+                const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}_${item.propulsion_type || ''}`;
                 const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
                     const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
                     return hashValue | 0; // Convert to 32-bit integer
@@ -222,6 +208,7 @@ export const getPermitLimitOverviewForMunicipality = async (
                     },
                     permit_limit: permitLimit,
                     overallCompliance,
+                    propulsion_type: item.propulsion_type,
                 };
 
                 return record;
@@ -487,6 +474,26 @@ export interface MunicipalityModalityOperator {
 export interface OperatorPerformanceIndicatorsResponse {
     performance_indicator_description: PerformanceIndicatorDescription[];
     municipality_modality_operators: MunicipalityModalityOperator[];
+}
+
+/**
+ * Find operator data matching operator, form_factor and optionally propulsion_type.
+ */
+export function findOperatorMatch(
+    operators: MunicipalityModalityOperator[],
+    operator: string,
+    formFactor: string,
+    propulsionType?: string
+): MunicipalityModalityOperator | undefined {
+    const matches = operators.filter(
+        item => item.operator === operator && item.form_factor === formFactor
+    );
+    if (matches.length === 0) return undefined;
+    if (propulsionType) {
+        const match = matches.find(m => m.propulsion_type === propulsionType);
+        return match ?? matches[0];
+    }
+    return matches[0];
 }
 
 export const getOperatorPerformanceIndicators = async (

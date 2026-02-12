@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { RangeBarIndicator } from './RangeBarIndicator';
-import type { PermitLimitRecord, PerformanceIndicatorKPI, OperatorPerformanceIndicatorsResponse, PerformanceIndicatorDescription } from '../../api/permitLimits';
-import { getOperatorPerformanceIndicators } from '../../api/permitLimits';
+import type { PermitLimitRecord, PerformanceIndicatorKPI, PerformanceIndicatorDescription } from '../../api/permitLimits';
+import { getOperatorPerformanceIndicators, findOperatorMatch } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
@@ -40,6 +40,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
 
     const providerSystemId = permit.operator?.system_id || permit.permit_limit.system_id;
     const realLabel = label;
+    const propulsionType = permit.propulsion_type;
     const displayLabel = getDisplayOperatorName(providerSystemId, realLabel, isDemoMode());
     const providerColor = getDisplayProviderColor(
       providerSystemId,
@@ -96,13 +97,18 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       const urlGmCode = searchParams.get('gm_code');
       const urlOperator = searchParams.get('operator') || searchParams.get('system_id');
       const urlFormFactor = searchParams.get('form_factor');
+      const urlPropulsion = searchParams.get('propulsion_type');
       if (!urlGmCode || !urlOperator || !urlFormFactor) return false;
 
       const cardGmCode = permit.municipality?.gmcode || permit.permit_limit.municipality;
       const cardOperator = permit.operator?.system_id || permit.permit_limit.system_id;
       const cardFormFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
 
-      return urlGmCode === cardGmCode && urlOperator === cardOperator && urlFormFactor === cardFormFactor;
+      const baseMatch = urlGmCode === cardGmCode && urlOperator === cardOperator && urlFormFactor === cardFormFactor;
+      if (propulsionType) {
+        return baseMatch && urlPropulsion === propulsionType;
+      }
+      return baseMatch && !urlPropulsion;
     }, [urlSearch, permit]);
 
     useEffect(() => {
@@ -130,9 +136,11 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               setPerformanceIndicatorDescriptions(data.performance_indicator_description);
             }
             if (data.municipality_modality_operators.length > 0) {
-              // Find matching operator/form_factor combination
-              const match = data.municipality_modality_operators.find(
-                item => item.operator === operator && item.form_factor === formFactor
+              const match = findOperatorMatch(
+                data.municipality_modality_operators,
+                operator,
+                formFactor,
+                propulsionType
               );
               if (match) {
                 setKpis(match.kpis);
@@ -155,7 +163,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       };
 
       fetchPerformanceIndicators();
-    }, [token, permit, startDate, endDate]);
+    }, [token, permit, startDate, endDate, propulsionType]);
 
     return (
       <div
@@ -191,9 +199,9 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             }
           </div>
           <div className="flex justify-between">
-            <ProviderLabel label={displayLabel} color={providerColor} />
+            <ProviderLabel label={displayLabel} color={providerColor} propulsionType={propulsionType} />
             <div className="flex items-center gap-2">
-              <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
+              <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
               {/* Sprocket icon for editing limits */}
               { onEditLimits && <button
                 type="button"

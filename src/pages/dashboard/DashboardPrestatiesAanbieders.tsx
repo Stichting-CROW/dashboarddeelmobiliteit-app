@@ -28,6 +28,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     newParams.delete('operator');
     newParams.delete('system_id');
     newParams.delete('form_factor');
+    newParams.delete('propulsion_type');
     newParams.delete('fullscreen');
     const queryString = newParams.toString();
     navigate(`/dashboard/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`);

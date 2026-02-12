@@ -7,6 +7,7 @@ import { fetchOperators, type OperatorData } from '../../api/operators';
 import { getPrettyVehicleTypeName, getPluralFormFactorName } from '../../helpers/vehicleTypes';
 import LineChart, { LineChartData } from '../Chart/LineChart';
 import { getKpiOverviewOperators } from '../../api/kpiOverview';
+import { findOperatorMatch } from '../../api/permitLimits';
 import Modal from '../Modal/Modal.jsx';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
@@ -63,6 +64,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
   const municipalityCode = queryParams.get('gm_code');
   const operatorCode = queryParams.get('system_id') || queryParams.get('operator');
   const formFactorCode = queryParams.get('form_factor');
+  const propulsionTypeCode = queryParams.get('propulsion_type');
   const startDateParam = queryParams.get('start_date');
   const endDateParam = queryParams.get('end_date');
 
@@ -178,7 +180,10 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     }
 
     const performanceIndicators = kpiData?.performance_indicator_description || [];
-    const operatorData = kpiData?.municipality_modality_operators?.[0];
+    const operators = kpiData?.municipality_modality_operators || [];
+    const operatorData = operatorCode && formFactorCode
+      ? findOperatorMatch(operators, operatorCode, formFactorCode, propulsionTypeCode || undefined)
+      : operators[0];
     const kpiValues = operatorData?.kpis || [];
 
     if (performanceIndicators.length === 0) {
@@ -262,7 +267,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     });
 
     setChartsData(newChartsData);
-  }, [kpiData, dateRange, operatorName]);
+  }, [kpiData, dateRange, operatorName, operatorCode, formFactorCode, propulsionTypeCode]);
 
   const updateQueryParam = (key: string, value: string | null) => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -313,7 +318,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     <div className="prestaties-aanbieders-details-panel">
       <div className="prestaties-aanbieders-details-panel__header">
         <div className="prestaties-aanbieders-details-panel__title">
-          <ProviderLabel label={operatorName} color={providerColor} />
+          <ProviderLabel label={operatorName} color={providerColor} propulsionType={propulsionTypeCode || undefined} />
           {vehicleIconUrl && (
             <img
               src={vehicleIconUrl}
