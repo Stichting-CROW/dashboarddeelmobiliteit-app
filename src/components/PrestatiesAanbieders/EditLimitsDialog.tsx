@@ -461,7 +461,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       button2Title="Sluiten"
       button2Handler={onClose}
       hideModalHandler={onClose}
-      config={{ maxWidth: '1600px', minWidth: '800px' }}
+      config={{ maxWidth: '98%', minWidth: '800px' }}
     >
       <div className="flex flex-col gap-4 min-h-[600px] relative">
         {/* Provider and vehicle type side by side */}

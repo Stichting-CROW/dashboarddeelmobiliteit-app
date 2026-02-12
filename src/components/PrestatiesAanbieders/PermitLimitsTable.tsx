@@ -411,6 +411,20 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
             </tr>
           </thead>
           <tbody>
+            {(showPermitLimitsEditor || (editingRowKey === null && !isAddingNewRow)) && (
+              <tr className="permits-table-row">
+                <td colSpan={4} className="permits-table-cell text-center py-2">
+                  <button
+                    type="button"
+                    className="font-bold text-blue-600 hover:text-blue-800 hover:underline bg-transparent border-0 p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={showPermitLimitsEditor ? onAddNew : handleAddNewRowClick}
+                    disabled={showPermitLimitsEditor ? false : isAddingNewRow}
+                  >
+                    + Grenswaarde toevoegen
+                  </button>
+                </td>
+              </tr>
+            )}
             {!showPermitLimitsEditor && isAddingNewRow && (
               <tr className="permits-table-row bg-blue-50">
                 <td className="permits-table-cell-nowrap">
@@ -623,7 +637,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                   </td>
                 </tr>
               );
-            }) : (
+            }            ) : (
               <tr>
                 <td colSpan={4} className="text-center text-gray-400 py-4">
                   Geen historische limieten gevonden
@@ -633,18 +647,6 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
           </tbody>
         </table>
       </div>
-
-      {(showPermitLimitsEditor || (editingRowKey === null && !isAddingNewRow)) ? (
-        <div className="flex flex-row justify-center mt-4">
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={showPermitLimitsEditor ? onAddNew : handleAddNewRowClick}
-            disabled={showPermitLimitsEditor ? false : isAddingNewRow}
-          >
-            + Grenswaarde toevoegen
-          </button>
-        </div>
-      ) : null}
     </>
   );
 };
