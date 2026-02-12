@@ -10,6 +10,8 @@ import PerformanceIndicator from './PerformanceIndicator';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
 import { getProviderColorForProvider } from '../../helpers/providers';
+import { isDemoMode } from '../../config/demo';
+import { getDisplayOperatorName, getDisplayProviderColor } from '../../helpers/demoMode';
 
 interface PrestatiesAanbiederCardProps {
     label: string;
@@ -37,7 +39,13 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
 
     const providerSystemId = permit.operator?.system_id || permit.permit_limit.system_id;
-    const providerColor = getProviderColorForProvider(providerSystemId);
+    const realLabel = label;
+    const displayLabel = getDisplayOperatorName(providerSystemId, realLabel, isDemoMode());
+    const providerColor = getDisplayProviderColor(
+      providerSystemId,
+      getProviderColorForProvider(providerSystemId),
+      isDemoMode()
+    );
 
     const token = useSelector((state: StateType) => 
       (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
@@ -183,7 +191,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             }
           </div>
           <div className="flex justify-between">
-            <ProviderLabel label={label} color={providerColor} />
+            <ProviderLabel label={displayLabel} color={providerColor} />
             <div className="flex items-center gap-2">
               <DetailsLink detailsUrl={`/dashboard/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
               {/* Sprocket icon for editing limits */}

@@ -19,6 +19,8 @@ import {
 } from '../../api/permitLimits';
 import type { OperatorData } from '../../api/operators';
 import { getProvider } from '../../helpers/providers.js';
+import { isDemoMode } from '../../config/demo';
+import { getDemoOperatorName } from '../../helpers/demoMode';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import PageTitle from '../common/PageTitle';
 import Modal from '../Modal/Modal.jsx';
@@ -97,7 +99,8 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
         // Prepare table rows
         const organisationName = gebieden.find((g: any) => g.gm_code === municipality)?.name || municipality;
         const provider = getProvider(provider_system_id);
-        const providerName = provider?.name || provider_system_id;
+        const realProviderName = provider?.name || provider_system_id;
+        const providerName = isDemoMode() ? getDemoOperatorName(provider_system_id) : realProviderName;
         const vehicleTypeName = getPrettyVehicleTypeName(vehicle_type) || vehicle_type;
 
         if (sortedHistory && kpiData?.performance_indicator_description) {
@@ -135,7 +138,8 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     // Update table rows
     const organisationName = gebieden.find((g: any) => g.gm_code === municipality)?.name || municipality;
     const provider = getProvider(currentPermitInfo.provider_system_id);
-    const providerName = provider?.name || currentPermitInfo.provider_system_id;
+    const realProviderName = provider?.name || currentPermitInfo.provider_system_id;
+    const providerName = isDemoMode() ? getDemoOperatorName(currentPermitInfo.provider_system_id) : realProviderName;
     const vehicleTypeName = getPrettyVehicleTypeName(currentPermitInfo.vehicle_type) || currentPermitInfo.vehicle_type;
 
     if (sortedHistory && kpiDescriptions.length > 0) {

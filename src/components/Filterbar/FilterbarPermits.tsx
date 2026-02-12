@@ -16,6 +16,8 @@ import {StateType} from '../../types/StateType';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot';
 import { getPermitLimitOverviewForMunicipality, type PermitLimitRecord } from '../../api/permitLimits';
 import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
+import { isDemoMode } from '../../config/demo';
+import { getDisplayOperatorName, getDisplayProviderColor } from '../../helpers/demoMode';
 import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
 import { Checkbox } from '../ui/checkbox';
 
@@ -264,7 +266,8 @@ function FilterbarPermits({
               const operatorId = record.operator.system_id;
               const formFactor = record.vehicle_type.id;
               const isSelected = currentOperator === operatorId && currentFormFactor === formFactor;
-              const operatorName = getPrettyProviderName(operatorId);
+              const realOperatorName = getPrettyProviderName(operatorId);
+              const operatorName = getDisplayOperatorName(operatorId, realOperatorName, isDemoMode());
               const formFactorName = getPrettyVehicleTypeName(formFactor) || formFactor;
               const combinationKey = `${operatorId}_${formFactor}`;
               
@@ -283,7 +286,7 @@ function FilterbarPermits({
                   <Checkbox
                     id={`aanbieder-${combinationKey}`}
                     checked={isSelected}
-                    color={getProviderColorForProvider(operatorId)}
+                    color={getDisplayProviderColor(operatorId, getProviderColorForProvider(operatorId), isDemoMode())}
                   />
                   <label
                     htmlFor={`aanbieder-${combinationKey}`}

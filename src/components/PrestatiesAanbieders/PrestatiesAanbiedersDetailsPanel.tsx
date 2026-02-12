@@ -11,6 +11,8 @@ import Modal from '../Modal/Modal.jsx';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
 import { getProviderColorForProvider } from '../../helpers/providers';
+import { isDemoMode } from '../../config/demo';
+import { getDisplayOperatorName, getDisplayProviderColor, applyDemoValueFactor } from '../../helpers/demoMode';
 import { getVehicleIconUrl } from '../../helpers/vehicleTypes';
 import ProviderLabel from './ProviderLabel';
 import './PrestatiesAanbiedersDetailsPanel.css';
@@ -119,13 +121,18 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
   const municipalityName = municipality?.name || municipalityCode || 'onbekende gemeente';
 
   const operator = operatorCode ? operators.find((op) => op.system_id === operatorCode) : null;
-  const operatorName = operator?.name || operatorCode || 'onbekende aanbieder';
+  const realOperatorName = operator?.name || operatorCode || 'onbekende aanbieder';
+  const operatorName = getDisplayOperatorName(operatorCode || '', realOperatorName, isDemoMode());
 
   const formFactorName = formFactorCode
     ? getPrettyVehicleTypeName(formFactorCode) || formFactorCode
     : 'onbekend voertuigtype';
 
-  const providerColor = getProviderColorForProvider(operatorCode || '');
+  const providerColor = getDisplayProviderColor(
+    operatorCode || '',
+    getProviderColorForProvider(operatorCode || ''),
+    isDemoMode()
+  );
   const vehicleIconUrl = formFactorCode ? getVehicleIconUrl(formFactorCode) : null;
 
   const dateRange = useMemo(() => {
@@ -196,7 +203,8 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
       values.forEach((item: { date: string; measured: number; threshold?: number }) => {
         if (item.date) {
           if (item.measured !== undefined && item.measured !== null) {
-            valuesByDate.set(item.date, item.measured);
+            const measuredValue = applyDemoValueFactor(item.measured, kpi_key);
+            valuesByDate.set(item.date, measuredValue);
           }
           if (item.threshold !== undefined && item.threshold !== null) {
             thresholdsByDate.set(item.date, item.threshold);

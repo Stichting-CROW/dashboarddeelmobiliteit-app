@@ -14,6 +14,8 @@ import { Table2, FormInput } from 'lucide-react';
 import { getVehicleIconUrl, getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import { getProvider } from '../../helpers/providers';
+import { isDemoMode } from '../../config/demo';
+import { getDemoOperatorName } from '../../helpers/demoMode';
 import Modal from '../Modal/Modal.jsx';
 import type {
   GeometryOperatorModalityLimit,
@@ -76,7 +78,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
   onVehicleTypeClick,
 }) => {
   const provider = getProvider(provider_system_id);
-  const providerName = provider?.name || provider_system_id;
+  const realProviderName = provider?.name || provider_system_id;
+  const providerName = isDemoMode() ? getDemoOperatorName(provider_system_id) : realProviderName;
   const providerLogo = provider ? provider.logo : createSvgPlaceholder({
     width: 48,
     height: 48,

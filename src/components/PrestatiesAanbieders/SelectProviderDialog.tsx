@@ -1,5 +1,7 @@
 import React from 'react';
 import { getProvider } from '../../helpers/providers.js';
+import { isDemoMode } from '../../config/demo';
+import { getDemoOperatorName } from '../../helpers/demoMode';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import type { OperatorData } from '../../api/operators';
 
@@ -23,7 +25,8 @@ const SelectProviderDialog: React.FC<SelectProviderDialogProps> = ({ modality, a
         )}
         {availableProviders.map((provider) => {
           const providerData = getProvider(provider.system_id);
-          const providerName = providerData ? providerData.name : provider.system_id;
+          const realName = providerData ? providerData.name : provider.system_id;
+          const providerName = isDemoMode() ? getDemoOperatorName(provider.system_id) : realName;
           const providerLogo = providerData && providerData.logo ? providerData.logo : createSvgPlaceholder({
             width: 48,
             height: 48,
