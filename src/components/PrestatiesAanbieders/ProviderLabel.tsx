@@ -3,11 +3,13 @@ import React from 'react';
 export const PROPULSION_EMOJI: Record<string, string> = {
   electric: ' ⚡',
   combustion: ' 🛢️',
+  electric_assist: ' ⚡',
 };
 
 export const PROPULSION_TITLE: Record<string, string> = {
   electric: 'elektrisch',
   combustion: 'verbrandingsmotor',
+  electric_assist: 'elektrisch ondersteund',
 };
 
 interface ProviderLabelProps {
@@ -60,7 +62,7 @@ const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color, propulsionT
       <span className="Map-popup-title ml-2" style={{ color }}>
         {label}
         {emoji && tooltip && (
-          <span title={tooltip}>{emoji}</span>
+          <span title={tooltip} className="inline-block text-base leading-none ml-0.5">{emoji}</span>
         )}
       </span>
     </div>

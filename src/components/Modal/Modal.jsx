@@ -71,7 +71,7 @@ const Modal = ({
             "modal-content border-none shadow-lg relative flex flex-col pointer-events-auto bg-white bg-clip-padding rounded-md outline-none text-current mx-auto max-w-full" +
             (config && config.fullWidth ? " w-11/12" : "")
           } style={{
-            width: config && config.fullWidth ? '96%' : 'fit-content',
+            width: config && config.width ? config.width : (config && config.fullWidth ? '96%' : 'fit-content'),
             minWidth: config && config.minWidth ? config.minWidth : 'auto',
             maxWidth: config && config.maxWidth ? config.maxWidth : (config && config.fullWidth ? '96%' : '600px'),
             maxHeight: '100%'
@@ -91,11 +91,11 @@ const Modal = ({
                 onClick={handleHide}
                 ></button>
             </div>
-            {children && <div className="
+            {children && <div className={`
               modal-body relative p-4
-              overflow-auto
               flex-1
-            ">
+              ${config && config.noBodyScroll ? 'overflow-hidden min-h-0' : 'overflow-auto'}
+            `}>
               {children}
             </div>}
             <div
