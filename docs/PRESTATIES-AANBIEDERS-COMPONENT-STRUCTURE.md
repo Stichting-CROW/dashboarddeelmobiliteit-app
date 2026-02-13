@@ -594,32 +594,6 @@ Create or identify the following combinations. Use the KPI overview test dialog 
 | 5.x | Limit map key or `geometry_operator_modality_limit_history` fetch using wrong propulsion |
 | 6.x | Edit dialog: wrong propulsion_type passed to `getGeometryOperatorModalityLimitHistory`, or permit missing propulsion_type |
 
-# Test results for Rotterdam GM0599
-
-## limits set for a single provider
-- Greenwheels /car / combustion only returns data for 2 kpi indicators (vehicle cap + percentage parked longer than 24 hours)
-- mywheels /car / combustion only returns data for 4 kpi indicators (vehicle cap + percentage parked longer than 3, 7, 24 hours)
-- Lime bicycles has two cards (electric assist / human), but only data for electric assist is returned by the api (correct data)
-  - both dashboard cards show colored bars and the same detail data
-- mywheels cars has two cards (combustion / electric), but only data for electric is returned by the api (correct data)
-- other provider / dashboard shows colors / limits in the graph for the other rows
-
-## limits set for two cards
-- check/scooter/electric + felix/scooter/electric -> felix correct, check no limit values
-- check/bicycle/electric_assist + lime/bicycle/electric_assist -> check correct, check no limit values
-- felix/bicycle/electric_assist + lime/bicycle/electric_assist -> lime correct, felix no limit values
-- greenwheels/car/electric + mywheels/car/electric -> greenwheels correct, mywheels no limit values
-- check/scooter/electric + greenwheels/combustion -> 3 kpis on dashboard while data has 2 kpis?
-
-## other remarks
-- add volt icon behind provider for electric_assist bicycles
-
-Conclusion: 
-- Defining kpis for two (or more) two different operators with the same combination of [formfactor/propulsion_type] causes problems. (Tested only within a municipality)
-- Some other quirks found.
-
----
-
 # Testresultaten voor Rotterdam GM0599
 
 ## Limits ingesteld voor één aanbieder
@@ -639,6 +613,12 @@ Conclusion:
 
 ## Overige opmerkingen
 - volt-icoon toevoegen achter aanbieder voor electric_assist fietsen
+
+## nog niet getest
+- mogelijke interacties met data uit andere municipalities
+- effect van wel / niet aanwezig zijn van kpi in limits veld
+- meerdere geldigheidsintervallen (alleen getest met 1 interval van 2026/1/1 en later)
+- bij alle testen gekeken in de test dialoog of de data klopt, niet in alle gevallen gecontroleerd of de weergave van de data op het dashboard klopt
 
 Conclusies tot nu toe:
 - Het definiëren van kpi's voor twee (of meer) verschillende aanbieders met dezelfde combinatie van [formfactor/propulsion_type] veroorzaakt problemen. (Alleen getest binnen één gemeente)
