@@ -249,12 +249,6 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
         <span className="permits-empty-state">
           Selecteer een gemeente om vergunningseisen te bekijken
         </span>
-        <KpiOverviewTestDialog
-          isVisible={showKpiTestDialog}
-          onClose={() => setShowKpiTestDialog(false)}
-          token={token}
-          municipality={activeorganisation || ''}
-        />
       </div>
     );
   }
@@ -266,12 +260,6 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           <PageTitle>Prestaties aanbieders</PageTitle>
         </span>
         <div className="permits-loading-state">Laden...</div>
-        <KpiOverviewTestDialog
-          isVisible={showKpiTestDialog}
-          onClose={() => setShowKpiTestDialog(false)}
-          token={token}
-          municipality={activeorganisation || ''}
-        />
       </div>
     );
   }
@@ -283,12 +271,6 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           <PageTitle>Prestaties aanbieders</PageTitle>
         </span>
         <div className="permits-error-state">Fout: {error}</div>
-        <KpiOverviewTestDialog
-          isVisible={showKpiTestDialog}
-          onClose={() => setShowKpiTestDialog(false)}
-          token={token}
-          municipality={activeorganisation || ''}
-        />
       </div>
     );
   }
