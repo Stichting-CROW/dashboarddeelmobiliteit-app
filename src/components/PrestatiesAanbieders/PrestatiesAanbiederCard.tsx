@@ -200,7 +200,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               }
             </div>
             <div className="flex justify-between">
-              <ProviderLabel label={displayLabel} color={providerColor} propulsionType={propulsionType} />
+              <ProviderLabel label={displayLabel} color={providerColor} />
               <div className="flex items-center gap-2">
                 <DetailsLink
                   detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`}

@@ -1,22 +1,8 @@
 import React from 'react';
 
-export const PROPULSION_EMOJI: Record<string, string> = {
-  electric: ' ⚡',
-  combustion: ' 🛢️',
-  electric_assist: ' ⚡',
-};
-
-export const PROPULSION_TITLE: Record<string, string> = {
-  electric: 'elektrisch',
-  combustion: 'verbrandingsmotor',
-  electric_assist: 'elektrisch ondersteund',
-};
-
 interface ProviderLabelProps {
   label: string;
   color: string;
-  /** When set, appends emoji with tooltip (⚡/🛢️) */
-  propulsionType?: string;
 }
 
 /**
@@ -41,16 +27,13 @@ export const buildProviderLabelHtml = (label: string, color: string): string => 
  * Provider label styled to match the map popup title (colored dot + colored title text).
  * Used inside React components (cards etc.).
  */
-const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color, propulsionType }) => {
+const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color }) => {
   const handleConfettiClick = () => {
     // Only trigger if the global confetti helper exists (it is registered in map popups)
     if (typeof window !== 'undefined' && (window as any).showConfetti) {
       (window as any).showConfetti();
     }
   };
-
-  const emoji = propulsionType && PROPULSION_EMOJI[propulsionType];
-  const tooltip = propulsionType && PROPULSION_TITLE[propulsionType];
 
   return (
     <div className="permits-card-label flex items-center">
@@ -61,9 +44,6 @@ const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color, propulsionT
       />
       <span className="Map-popup-title ml-2" style={{ color }}>
         {label}
-        {emoji && tooltip && (
-          <span title={tooltip} className="inline-block text-base leading-none ml-0.5">{emoji}</span>
-        )}
       </span>
     </div>
   );

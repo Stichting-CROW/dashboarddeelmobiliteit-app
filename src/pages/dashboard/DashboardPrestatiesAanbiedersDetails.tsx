@@ -13,7 +13,6 @@ import { findOperatorMatch } from '../../api/permitLimits';
 import Modal from '../../components/Modal/Modal.jsx';
 import SelectProviderDialog from '../../components/PrestatiesAanbieders/SelectProviderDialog';
 import SelectVehicleTypeDialog from '../../components/PrestatiesAanbieders/SelectVehicleTypeDialog';
-import { PROPULSION_EMOJI, PROPULSION_TITLE } from '../../components/PrestatiesAanbieders/ProviderLabel';
 
 interface DashboardPrestatiesAanbiedersDetailsProps {
 
@@ -382,12 +381,7 @@ console.log('averageValue', averageValue);
     <div className="DashboardPrestatiesAanbiedersDetails pt-4 pb-24">
       <PageTitle>Prestaties aanbieders details</PageTitle>
       <p className="my-4">
-        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>
-            {operatorName}
-            {propulsionTypeCode && PROPULSION_EMOJI[propulsionTypeCode] && PROPULSION_TITLE[propulsionTypeCode] && (
-              <span title={PROPULSION_TITLE[propulsionTypeCode]}>{PROPULSION_EMOJI[propulsionTypeCode]}</span>
-            )}
-          </b>.
+        Hier zie je de data van gemeente {municipalityName}, specifiek over de <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
       </p>
       {(!operatorCode || !formFactorCode) && (
         <div className="my-4">

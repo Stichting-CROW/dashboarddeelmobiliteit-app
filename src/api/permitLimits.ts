@@ -147,72 +147,86 @@ export const getPermitLimitOverviewForMunicipality = async (
             console.warn('Failed to fetch operators, using fallback data', error);
         }
 
-        // Transform each operator/modality/propulsion combination into a PermitLimitRecord
-        // Show separate cards for each propulsion type (e.g. greenwheels combustion + greenwheels electric)
+        // Group by operator/vehicle_type (form_factor) so we show 1 card per combination,
+        // even when multiple propulsion types exist (e.g. electric + combustion)
         const operators = kpiData.municipality_modality_operators || [];
-        const results: PermitLimitRecord[] = operators.map((item: MunicipalityModalityOperator) => {
-                const operator = operatorsMap.get(item.operator);
-                const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+        const groupKey = (item: MunicipalityModalityOperator) => {
+            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
+            return `${item.operator}_${item.form_factor}_${geometryRef}`;
+        };
+        const groupMap = new Map<string, MunicipalityModalityOperator[]>();
+        for (const item of operators) {
+            const key = groupKey(item);
+            const existing = groupMap.get(key) || [];
+            existing.push(item);
+            groupMap.set(key, existing);
+        }
 
-                // Derive an overall compliance summary from all KPI values for this operator+form_factor+propulsion
-                const kpis = item.kpis || [];
-                const hasRed = kpis.some(kpi =>
-                    (kpi.values || []).some(value => value.complies === false)
-                );
-                const hasGreen = !hasRed && kpis.some(kpi =>
-                    (kpi.values || []).some(value => value.complies === true)
-                );
-                const overallCompliance: 'red' | 'green' | 'grey' =
-                    hasRed ? 'red' : hasGreen ? 'green' : 'grey';
-                
-                // Create a minimal permit_limit record
-                // Generate a unique ID including propulsion_type so each combination has its own card
-                const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}_${item.propulsion_type || ''}`;
-                const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
-                    const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
-                    return hashValue | 0; // Convert to 32-bit integer
-                }, 0));
-                
-                const permitLimit: PermitLimit = {
-                    permit_limit_id: permitLimitId,
-                    modality: item.form_factor,
-                    effective_date: startDateStr,
-                    municipality: geometryRef,
-                    system_id: item.operator,
-                    minimum_vehicles: 0,
-                    maximum_vehicles: 99999999,
-                    minimal_number_of_trips_per_vehicle: 0,
-                    max_parking_duration: 'P0D',
-                };
+        const results: PermitLimitRecord[] = [];
+        for (const items of Array.from(groupMap.values())) {
+            const item = items[0]; // Use first item for operator/form_factor/municipality
+            const operator = operatorsMap.get(item.operator);
+            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
 
-                const record: PermitLimitRecord = {
-                    municipality: {
-                        gmcode: geometryRef,
-                        name: geometryRef, // Municipality name would need to be fetched separately
-                    },
-                    operator: operator ? {
-                        system_id: operator.system_id,
-                        name: operator.name,
-                        color: operator.color || '#000000',
-                        operator_url: operator.operator_url || '',
-                    } : {
-                        system_id: item.operator,
-                        name: item.operator,
-                        color: '#000000',
-                        operator_url: '',
-                    },
-                    vehicle_type: {
-                        id: item.form_factor,
-                        name: item.form_factor, // Will be enhanced by usePermitData hook
-                        icon: '', // Will be set by usePermitData hook
-                    },
-                    permit_limit: permitLimit,
-                    overallCompliance,
-                    propulsion_type: item.propulsion_type,
-                };
+            // Merge overall compliance across all propulsion types: red if any red, else green if any green
+            let hasRed = false;
+            let hasGreen = false;
+            for (const i of items) {
+                const kpis = i.kpis || [];
+                if (kpis.some(kpi => (kpi.values || []).some(v => v.complies === false))) hasRed = true;
+                if (kpis.some(kpi => (kpi.values || []).some(v => v.complies === true))) hasGreen = true;
+            }
+            const overallCompliance: 'red' | 'green' | 'grey' =
+                hasRed ? 'red' : hasGreen ? 'green' : 'grey';
 
-                return record;
+            // Use first propulsion_type for edit/details (prefer electric when both exist)
+            const sorted = [...items].sort((a, b) => {
+                const order = { electric: 0, combustion: 1, human: 2 };
+                return (order[a.propulsion_type as keyof typeof order] ?? 99) - (order[b.propulsion_type as keyof typeof order] ?? 99);
             });
+            const propulsion_type = sorted[0].propulsion_type;
+
+            const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
+            const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
+                const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
+                return hashValue | 0;
+            }, 0));
+
+            const permitLimit: PermitLimit = {
+                permit_limit_id: permitLimitId,
+                modality: item.form_factor,
+                effective_date: startDateStr,
+                municipality: geometryRef,
+                system_id: item.operator,
+                minimum_vehicles: 0,
+                maximum_vehicles: 99999999,
+                minimal_number_of_trips_per_vehicle: 0,
+                max_parking_duration: 'P0D',
+            };
+
+            results.push({
+                municipality: { gmcode: geometryRef, name: geometryRef },
+                operator: operator ? {
+                    system_id: operator.system_id,
+                    name: operator.name,
+                    color: operator.color || '#000000',
+                    operator_url: operator.operator_url || '',
+                } : {
+                    system_id: item.operator,
+                    name: item.operator,
+                    color: '#000000',
+                    operator_url: '',
+                },
+                vehicle_type: {
+                    id: item.form_factor,
+                    name: item.form_factor,
+                    icon: '',
+                },
+                permit_limit: permitLimit,
+                overallCompliance,
+                propulsion_type,
+            });
+        }
 
         if(results.length > 0) {
             return results;

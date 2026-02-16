@@ -318,7 +318,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     <div className="prestaties-aanbieders-details-panel">
       <div className="prestaties-aanbieders-details-panel__header">
         <div className="prestaties-aanbieders-details-panel__title">
-          <ProviderLabel label={operatorName} color={providerColor} propulsionType={propulsionTypeCode || undefined} />
+          <ProviderLabel label={operatorName} color={providerColor} />
           {vehicleIconUrl && (
             <img
               src={vehicleIconUrl}
