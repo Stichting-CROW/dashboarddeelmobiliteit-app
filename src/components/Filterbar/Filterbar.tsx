@@ -198,7 +198,7 @@ function Filterbar({
             </div>
           </div>
 
-          {isBeleidsinfo && <FilterbarStatistiek />}
+          {/* {isBeleidsinfo && <FilterbarStatistiek />} */}
 
           {isLoggedIn && showdatum && <FilteritemDatum disabled={false} />}
 
