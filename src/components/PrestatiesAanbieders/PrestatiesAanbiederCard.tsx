@@ -31,6 +31,7 @@ const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
 );
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
+    const [showKpiRawDialog, setShowKpiRawDialog] = useState(false);
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
@@ -166,70 +167,81 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     }, [token, permit, startDate, endDate, propulsionType]);
 
     return (
-      <div
-        id={'permits-card-' + permit.permit_limit.permit_limit_id}
-        className={`permits-card${isActive ? ' permits-card--active' : ''}`}
-      >
-        <div className="permits-card-content">
-          <div className="hidden">
-            { logo ? 
-              <img 
-                src={logo}
-                alt={`${label} logo`}
-                className="permits-card-logo"
-                onError={(e) => {
-                  e.currentTarget.src = createSvgPlaceholder({
-                    width: 36,
-                    height: 36,
-                    text: label.slice(0, 2),
-                    bgColor: '#0F1C3F',
-                    textColor: '#7FDBFF',
-                    fontSize: 18,
-                    fontWeight: 'bold',
-                    fontFamily: 'Arial, sans-serif',
-                    dy: 5,
-                    radius: 3,
-                  });
-                }}
-              />
-              : 
-              <div className="permits-card-fallback">
-                <span className="permits-card-fallback-text">{label.slice(0, 2)}{label}</span> 
-              </div> 
-            }
-          </div>
-          <div className="flex justify-between">
-            <ProviderLabel label={displayLabel} color={providerColor} propulsionType={propulsionType} />
-            <div className="flex items-center gap-2">
-              <DetailsLink detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`} />
-              {/* Sprocket icon for editing limits */}
-              { onEditLimits && <button
-                type="button"
-                aria-label="Verguningseisen bewerken"
-                title="Verguningseisen bewerken"
-                className="permits-card-edit-button"
-                onClick={onEditLimits}
-              >
-                {/* Use settings.svg icon */}
-                <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" className="w-[18px] h-[18px] invert-[0.8]" />
-              </button>}
+        <div
+          id={'permits-card-' + permit.permit_limit.permit_limit_id}
+          className={`permits-card${isActive ? ' permits-card--active' : ''}`}
+        >
+          <div className="permits-card-content">
+            <div className="hidden">
+              { logo ? 
+                <img 
+                  src={logo}
+                  alt={`${label} logo`}
+                  className="permits-card-logo"
+                  onError={(e) => {
+                    e.currentTarget.src = createSvgPlaceholder({
+                      width: 36,
+                      height: 36,
+                      text: label.slice(0, 2),
+                      bgColor: '#0F1C3F',
+                      textColor: '#7FDBFF',
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      fontFamily: 'Arial, sans-serif',
+                      dy: 5,
+                      radius: 3,
+                    });
+                  }}
+                />
+                : 
+                <div className="permits-card-fallback">
+                  <span className="permits-card-fallback-text">{label.slice(0, 2)}{label}</span> 
+                </div> 
+              }
+            </div>
+            <div className="flex justify-between">
+              <ProviderLabel label={displayLabel} color={providerColor} propulsionType={propulsionType} />
+              <div className="flex items-center gap-2">
+                <DetailsLink
+                  detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`}
+                />
+                {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}
+                { onEditLimits && <button
+                  type="button"
+                  aria-label="Verguningseisen bewerken"
+                  title="Verguningseisen bewerken (Shift+click: KPI overview raw)"
+                  className="permits-card-edit-button"
+                  onClick={(e) => {
+                    if (e.shiftKey) {
+                      e.preventDefault();
+                      setShowKpiRawDialog(true);
+                    } else if (permit.propulsion_type) {
+                      onEditLimits();
+                    } else {
+                      alert('Geen propulsion_type – bewerken niet mogelijk.');
+                    }
+                  }}
+                >
+                  {/* Use settings.svg icon */}
+                  <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" className="w-[18px] h-[18px] invert-[0.8]" />
+                </button>}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div data-name="indicator-container" className="flex flex-col gap-2 flex-1">
-          {loading && kpis.length === 0 ? (
-            <div>Laden...</div>
-          ) : (
-            kpis.map((kpi) => (
-              <PerformanceIndicator
-                key={kpi.kpi_key}
-                kpi={kpi}
-                performanceIndicatorDescriptions={performanceIndicatorDescriptions}
-              />
-            ))
-          )}
+          <div data-name="indicator-container" className="flex flex-col gap-2 flex-1">
+            {loading && kpis.length === 0 ? (
+              <div>Laden...</div>
+            ) : (
+              kpis.map((kpi) => (
+                <PerformanceIndicator
+                  key={kpi.kpi_key}
+                  kpi={kpi}
+                  performanceIndicatorDescriptions={performanceIndicatorDescriptions}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
     );
 }

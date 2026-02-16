@@ -304,6 +304,68 @@ export const getGeometryOperatorModalityLimitHistory = async (
     }
 };
 
+/**
+ * Fetch all geometry_operator_modality_limit records for a municipality.
+ * Tries GET /public/geometry_operator_modality_limit?geometry_ref=X first.
+ * If that endpoint does not exist (404), falls back to fetching limit history
+ * for each (operator, form_factor, propulsion_type) from permit overview.
+ */
+export const getAllGeometryOperatorModalityLimitsForMunicipality = async (
+    token: string,
+    municipality: string
+): Promise<GeometryOperatorModalityLimit[]> => {
+    const geometryRef = toGeometryRef(municipality);
+
+    // Try dedicated endpoint first (if backend supports it)
+    try {
+        const url = `${MDS_BASE_URL}/public/geometry_operator_modality_limit?geometry_ref=${encodeURIComponent(geometryRef)}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        if (response.ok) {
+            const results = await response.json();
+            return Array.isArray(results) ? results : (results ? [results] : []);
+        }
+    } catch {
+        // Fall through to fallback
+    }
+
+    // Fallback: get combinations from permit overview, fetch history for each
+    const overview = await getPermitLimitOverviewForMunicipality(token, municipality);
+    if (!overview || overview.length === 0) return [];
+
+    const seen = new Set<string>();
+    const allRecords: GeometryOperatorModalityLimit[] = [];
+
+    for (const record of overview) {
+        const operator = record.permit_limit?.system_id || record.operator?.system_id;
+        const formFactor = record.vehicle_type?.id || record.permit_limit?.modality;
+        const propulsionType = record.propulsion_type ?? '';
+        if (!operator || !formFactor) continue;
+
+        const key = `${operator}|${formFactor}|${propulsionType}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        const history = await getGeometryOperatorModalityLimitHistory(
+            token,
+            operator,
+            geometryRef,
+            formFactor,
+            propulsionType
+        );
+        if (Array.isArray(history)) {
+            allRecords.push(...history);
+        }
+    }
+
+    return allRecords;
+};
+
 /** Validate effective_date when allowChange is false - only future dates allowed */
 function validateEffectiveDate(data: GeometryOperatorModalityLimit, allowChange: boolean): void {
     if (allowChange) return;

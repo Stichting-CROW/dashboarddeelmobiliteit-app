@@ -204,7 +204,6 @@ function FilterbarPermits({
           )}
         </Fieldset>
       )}
-
     </div>
   )
 }

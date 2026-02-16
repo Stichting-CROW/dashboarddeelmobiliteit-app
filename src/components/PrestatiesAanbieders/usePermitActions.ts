@@ -59,6 +59,7 @@ export const usePermitActions = (reloadPermits: () => Promise<void>) => {
         minimal_number_of_trips_per_vehicle: PERMIT_LIMITS_NIET_ACTIEF.minimal_number_of_trips_per_vehicle,
         max_parking_duration: PERMIT_LIMITS_NIET_ACTIEF.max_parking_duration,
       },
+      propulsion_type: 'electric',
     } as PermitLimitRecord);
     
     // Reset the workflow state

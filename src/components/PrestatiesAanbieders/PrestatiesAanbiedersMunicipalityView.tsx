@@ -25,6 +25,7 @@ import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
 import PageTitle from '../common/PageTitle';
 import Modal from '../Modal/Modal.jsx';
 import EditLimitsDialog from './EditLimitsDialog';
+import KpiOverviewTestDialog from './KpiOverviewTestDialog';
 import type { HistoryTableRow } from './permitLimitsUtils';
 import { flattenLimitHistoryToTableRows } from './permitLimitsUtils';
 
@@ -61,7 +62,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   const [kpiDescriptions, setKpiDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
   const [tableRows, setTableRows] = useState<HistoryTableRow[]>([]);
   // Store permit info separately so dialogs can render even when editDialogPermit is cleared
-  const [currentPermitInfo, setCurrentPermitInfo] = useState<{ municipality: string; provider_system_id: string; vehicle_type: string } | null>(null);
+  const [currentPermitInfo, setCurrentPermitInfo] = useState<{ municipality: string; provider_system_id: string; vehicle_type: string; propulsion_type: string } | null>(null);
   // Track if we're changing provider from the edit dialog (to keep vehicle type)
   const [isChangingProvider, setIsChangingProvider] = useState(false);
   // Store vehicle type when changing provider (since currentPermitInfo gets cleared)
@@ -69,19 +70,25 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   const [preservedMunicipality, setPreservedMunicipality] = useState<string | null>(null);
   // Track if we should keep selection dialog backdrop visible until edit dialog is ready
   const [keepSelectionBackdrop, setKeepSelectionBackdrop] = useState(false);
+  const [showKpiTestDialog, setShowKpiTestDialog] = useState(false);
 
   // Load data when editDialogPermit changes
   useEffect(() => {
     if (editDialogPermit && token) {
+      if (!editDialogPermit.propulsion_type) {
+        alert('Geen propulsion_type – bewerken niet mogelijk.');
+        handleCloseEditDialog();
+        return;
+      }
       const loadData = async () => {
-        const municipality = editDialogPermit.permit_limit.municipality;
-        const provider_system_id = editDialogPermit.permit_limit.system_id;
-        const vehicle_type = editDialogPermit.permit_limit.modality;
+        const municipality = editDialogPermit!.permit_limit.municipality;
+        const provider_system_id = editDialogPermit!.permit_limit.system_id;
+        const vehicle_type = editDialogPermit!.permit_limit.modality;
+        const propulsion_type = editDialogPermit!.propulsion_type!;
         const geometry_ref = toGeometryRef(municipality);
-        const propulsion_type = 'electric';
 
         // Store permit info so dialogs can render even if editDialogPermit is cleared
-        setCurrentPermitInfo({ municipality, provider_system_id, vehicle_type });
+        setCurrentPermitInfo({ municipality, provider_system_id, vehicle_type, propulsion_type });
 
         // Fetch history and KPI descriptions
         const [history, kpiData] = await Promise.all([
@@ -123,15 +130,15 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
       }
       setKeepSelectionBackdrop(false);
     }
-  }, [editDialogPermit, token, gebieden, showViewDialog]);
+  }, [editDialogPermit, token, gebieden, showViewDialog, handleCloseEditDialog]);
 
   // Handler for record updated (after inline edit or editor save)
   const handleRecordUpdated = async () => {
-    if (!token || !currentPermitInfo) return;
+    if (!token || !currentPermitInfo || !currentPermitInfo.propulsion_type) return;
 
     const municipality = currentPermitInfo.municipality;
     const geometry_ref = toGeometryRef(municipality);
-    const history = await getGeometryOperatorModalityLimitHistory(token, currentPermitInfo.provider_system_id, geometry_ref, currentPermitInfo.vehicle_type, 'electric');
+    const history = await getGeometryOperatorModalityLimitHistory(token, currentPermitInfo.provider_system_id, geometry_ref, currentPermitInfo.vehicle_type, currentPermitInfo.propulsion_type);
     const sortedHistory = history ? history.sort((a, b) => moment(a.effective_date).diff(moment(b.effective_date))) : null;
     setLimitHistory(sortedHistory);
 
@@ -227,12 +234,18 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
     updateMode();
   }, [permits, updateMode]);
 
+  const handleTitleClick = (e: React.MouseEvent) => {
+    if (e.shiftKey) setShowKpiTestDialog(true);
+  };
+
   if ((activeorganisation === "")) {
     return (
       <div>
-        <PageTitle>
-          Prestaties aanbieders
-        </PageTitle>
+        <span onClick={handleTitleClick} onKeyDown={(e) => e.shiftKey && e.key === 'Enter' && setShowKpiTestDialog(true)} role="button" tabIndex={0} className="select-none cursor-default">
+          <PageTitle>
+            Prestaties aanbieders
+          </PageTitle>
+        </span>
         <span className="permits-empty-state">
           Selecteer een gemeente om vergunningseisen te bekijken
         </span>
@@ -243,7 +256,9 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (loading && !showViewDialog) {
     return (
       <div>
-        <PageTitle>Prestaties aanbieders</PageTitle>
+        <span onClick={handleTitleClick} onKeyDown={(e) => e.shiftKey && e.key === 'Enter' && setShowKpiTestDialog(true)} role="button" tabIndex={0} className="select-none cursor-default">
+          <PageTitle>Prestaties aanbieders</PageTitle>
+        </span>
         <div className="permits-loading-state">Laden...</div>
       </div>
     );
@@ -252,7 +267,9 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   if (error) {
     return (
       <div>
-        <PageTitle>Prestaties aanbieders</PageTitle>
+        <span onClick={handleTitleClick} onKeyDown={(e) => e.shiftKey && e.key === 'Enter' && setShowKpiTestDialog(true)} role="button" tabIndex={0} className="select-none cursor-default">
+          <PageTitle>Prestaties aanbieders</PageTitle>
+        </span>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
@@ -332,9 +349,11 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   return (
     <div>
       <div className="flex items-center flex-start mb-8">
-        <PageTitle className="mb-0 mr-4">
-          Prestaties aanbieders
-        </PageTitle>
+        <span onClick={handleTitleClick} onKeyDown={(e) => e.shiftKey && e.key === 'Enter' && setShowKpiTestDialog(true)} role="button" tabIndex={0} className="select-none cursor-default">
+          <PageTitle className="mb-0 mr-4">
+            Prestaties aanbieders
+          </PageTitle>
+        </span>
         {/* <button
           className="permits-add-button"
           title="Voeg nieuwe vergunningseis toe"
@@ -441,7 +460,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           kpiDescriptions={kpiDescriptions}
           mode={mode}
           token={token}
-          propulsion_type="electric"
+          propulsion_type={currentPermitInfo.propulsion_type}
           showPermitLimitsEditor={false}
           onClose={handleCloseViewDialog}
           onRecordUpdated={handleRecordUpdated}
@@ -450,6 +469,12 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
         />
       )}
 
+      <KpiOverviewTestDialog
+        isVisible={showKpiTestDialog}
+        onClose={() => setShowKpiTestDialog(false)}
+        token={token}
+        municipality={activeorganisation || ''}
+      />
     </div>
   );
 };
