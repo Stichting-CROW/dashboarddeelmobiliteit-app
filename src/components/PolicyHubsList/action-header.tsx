@@ -226,6 +226,7 @@ const ActionHeader = ({
         <Modal
             isVisible={doShowExportModal}
             title="Exporteer zones"
+            config={{ zIndex: 10000 }}
             button1Title={false}
             button1Handler={(e) => {
                 setDoShowExportModal(false);

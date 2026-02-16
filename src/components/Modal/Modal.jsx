@@ -43,7 +43,7 @@ const Modal = ({
         aria-modal="true"
         style={{
           'display': isVisible ? 'block' : 'none',
-          zIndex: 9999,
+          zIndex: (config && config.zIndex != null) ? config.zIndex : 9999,
           padding: '50px 0'
         }}
         role="dialog"
