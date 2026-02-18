@@ -27,6 +27,7 @@ import FilterbarRentals from './FilterbarRentals';
 import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
 import FilterbarPermits from './FilterbarPermits';
+import FilterbarBeleidszones from './FilterbarBeleidszones';
 import FilterbarStart from './FilterbarStart';
 import FilterbarStatistiek from './FilterbarStatistiek';
 
@@ -87,7 +88,9 @@ function Filterbar({
   const isservicegebieden = displayMode === DISPLAYMODE_SERVICE_AREAS;
   const isPolicyHubs = displayMode === DISPLAYMODE_POLICY_HUBS;
   const isStart = displayMode === DISPLAYMODE_START;
-  const isPrestatiesAanbieders = displayMode === DISPLAYMODE_DASHBOARD;
+  const isPrestatiesAanbieders =
+    displayMode === DISPLAYMODE_DASHBOARD && pathname === '/stats/prestaties-aanbieders';
+  const isBeleidszones = pathname === '/stats/beleidszones';
   const isontwikkeling = displayMode === DISPLAYMODE_OTHER;
 
   const showdatum = isrentals || ispark || !isLoggedIn;
@@ -165,6 +168,11 @@ function Filterbar({
         <FilterbarPermits hideLogo={hideLogo ?? false} hideDatumTijd={true} />
       )}
 
+      {/* Beleidszones */}
+      {isBeleidszones && (
+        <FilterbarBeleidszones hideLogo={hideLogo ?? false} />
+      )}
+
       {/* Default */}
       {!(
         iszonespublic ||
@@ -173,6 +181,7 @@ function Filterbar({
         isPolicyHubs ||
         isrentals ||
         isPrestatiesAanbieders ||
+        isBeleidszones ||
         isStart
       ) && (
         <div className="filter-bar-inner">

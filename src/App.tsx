@@ -254,6 +254,9 @@ function App() {
         if (dashboard === 'prestaties-aanbieders-details') {
           return `Prestaties aanbieders details - ${baseTitle}`;
         }
+        if (dashboard === 'beleidszones') {
+          return `Beleidszones - ${baseTitle}`;
+        }
         return `Dashboard - ${baseTitle}`;
       }
       

@@ -15,6 +15,7 @@ function FilterbarStatistiek() {
 
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
+  const isBeleidszones = pathname === '/stats/beleidszones';
 
   const filterGebied = useSelector((state: StateType) =>
     state.filter ? state.filter.gebied : null
@@ -62,6 +63,7 @@ function FilterbarStatistiek() {
   const getCurrentSelection = () => {
     if (isBeleidsinfo) return 'Beleidsinfo';
     if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
+    if (isBeleidszones) return 'Beleidszones';
     return 'Prestaties aanbieders';
   };
 
@@ -88,6 +90,13 @@ function FilterbarStatistiek() {
           >
             Prestaties aanbieders
           </div>
+          <div
+            key="item-beleidszones"
+            className={`form-item ${isBeleidszones ? 'form-item-selected' : ''}`}
+            onClick={() => handleSelectDashboardType('/stats/beleidszones')}
+          >
+            Beleidszones
+          </div>
         </div>
       </div>
     </FilterbarExtended>
@@ -98,7 +107,7 @@ function FilterbarStatistiek() {
       <div className="filter-plaats-container">
         <div className="filter-plaats-box-row">
           <div
-            className={`filter-plaats-value ${isPrestatiesAanbieders ? '' : 'text-black'}`}
+            className={`filter-plaats-value ${isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
             onClick={() => toggleDashboardType('dashboard-type')}
           >
             {getCurrentSelection()}
