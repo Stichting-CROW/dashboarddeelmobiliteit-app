@@ -53,7 +53,7 @@ function HubStatsWidget({
         filter={chartFilter}
         config={{
           height: '200px',
-          sumTotal: true
+          sumTotal: true,
         }}
         />
     </div>

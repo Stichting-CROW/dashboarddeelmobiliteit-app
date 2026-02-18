@@ -28,6 +28,7 @@ import {
 
 import {
   getProviderColor,
+  getPrettyProviderName,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
 import {
@@ -159,7 +160,7 @@ function BeschikbareVoertuigenChart({
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<CustomizedTooltip />} />
-        {config && config.sumTotal === true ? '' : <Legend />}
+        {config?.sumTotal !== true && <Legend />}
         {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
           const providerColor = getProviderColor(metadata.aanbieders, x)
           if(x === 'time') return;
@@ -169,8 +170,8 @@ function BeschikbareVoertuigenChart({
               stackId="1"
               type="monotone"
               dataKey={x}
-              stroke="#fff"
-              strokeWidth={2}
+              name={getPrettyProviderName(x)}
+              stroke={providerColor}
               fill={providerColor}
               isAnimationActive={false}
             />
@@ -193,7 +194,7 @@ function BeschikbareVoertuigenChart({
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} />
-      {config && config.sumTotal === true ? '' : <Legend />}
+      {config?.sumTotal !== true && <Legend />}
       {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
         const providerColor = getProviderColor(metadata.aanbieders, x)
         if(x === 'time') return;
@@ -203,6 +204,7 @@ function BeschikbareVoertuigenChart({
             stackId="1"
             type="monotone"
             dataKey={x}
+            name={getPrettyProviderName(x)}
             stroke={providerColor}
             fill={providerColor}
             isAnimationActive={false}

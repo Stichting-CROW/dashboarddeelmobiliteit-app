@@ -31,6 +31,7 @@ import {
 } from '../../api/aggregatedStats';
 import {
   getProviderColor,
+  getPrettyProviderName,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
 import {
@@ -154,6 +155,7 @@ function VerhuringenChart(props) {
               stackId="1"
               type="monotone"
               dataKey={x}
+              name={getPrettyProviderName(x)}
               stroke={providerColor}
               fill={providerColor}
               isAnimationActive={false}
@@ -187,6 +189,7 @@ function VerhuringenChart(props) {
             stackId="1"
             type="monotone"
             dataKey={x}
+            name={getPrettyProviderName(x)}
             stroke={providerColor}
             fill={providerColor}
             isAnimationActive={false}

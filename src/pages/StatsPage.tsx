@@ -198,7 +198,9 @@ function StatsPage(props) {
         <div className="xl:flex-1 mt-8 xl:mt-0">
           <BeschikbareVoertuigenChart
             filter={filter}
-            config={{}}
+            config={{
+              showLegend: true
+            }}
             title="Beschikbare voertuigen"
             />
         </div>
