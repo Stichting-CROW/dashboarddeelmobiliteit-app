@@ -1,5 +1,50 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-02-18
+
+**Statistieken en Beleidsinfo**
+
+- 🪄 Nieuwe grafiek 'Verhuringen per voertuig' op de statistiekenpagina
+- 🪄 Grafiek 'Aanbod' heeft nu een legenda en verbeterde aanbiedernamen
+- 🪄 In de filterbar kun je nu schakelen tussen verschillende statistiekpagina's (Beleidsinfo, Aanbod, Verhuringen)
+- ✨ Route wijziging: `/stats/overview` is hernoemd naar `/stats/beleidsinfo`
+
+**Prestaties aanbieders**
+
+- 🪄 Gebruik een balk in plaats van blokken wanneer de geselecteerde periode langer is dan 7 dagen
+- 🪄 Toon gemiddelde waarde in grafieken op de detailpagina
+- 🪄 Grafieken ondersteunen nu percentage als eenheid (met %-teken)
+- 🪄 Demo-modus toegevoegd met geanonymiseerde namen en kleuren
+- 🪄 Toon meerdere aandrijvingstypes (combustie) per aanbieder
+- 🪄 Alleen één kaart per combinatie aanbieder/voertuigtype
+- 🪄 Vergunningseisen-dialoog herschreven met nieuwe API en verbeterd beheer van records
+- 🪄 Mogelijkheid om KPI-configuratie te verwijderen in de grenswaarde-tabel
+- 🪄 Grenswaarde (min/max) wordt nu voor het invoerveld getoond
+- 🪄 Ophalen van geometrie operator-modaliteitslimieten voor gemeente met fallback-logica
+- ✨ Verbeterde volgorde van compliance-indicatoren: rood (niet-compliant) eerst, dan groen, dan grijs
+- ✨ Detailpagina ondersteunt fullscreen-weergave en gesplitste layout
+- ✨ Verbeterd ontwerp van de 'Grenswaarde toevoegen'-sectie
+- ✨ Actieve geselecteerde aanbieder/voertuigtype wordt nu duidelijk getoond
+- ✨ Filterbar: optie 'Prestaties aanbieders' tijdelijk verborgen
+
+**Grafieken**
+
+- ✨ LineChart: soepelere lijn, blauwe kleur en altijd 15% ruimte aan de bovenkant
+- 🐛 Opgelost: Y-as toont geen decimale getallen meer bij hele getallen
+
+**Modals en dialogen**
+
+- 🪄 Modals worden nu boven alle app-elementen geladen
+- 🐛 Opgelost: 'Exporteer'-modal werd getoond onder de Lijst-modal (PolicyHubsList)
+- 🐛 Opgelost: Button-actie in modal gaf een fout
+
+**Gebruikersinterface**
+
+- ✨ Nieuw Dashboard Deelmobiliteit-logo in plaats van CROW-logo
+- ✨ Vernieuwd menu-ontwerp
+- ✨ Verbeterde stijlen voor voertuigtype-kopteksten en prestatie-indicatorblokken
+- 🧹 Filterbar geconverteerd van JSX naar TypeScript
+
 ## Release 2026-02-05
 
 **Prestaties aanbieders**
