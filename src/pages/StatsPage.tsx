@@ -18,6 +18,7 @@ import {
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuigenChart';
+import VerhuringenPerVoertuigChart from '../components/Chart/VerhuringenPerVoertuigChart';
 import FormInput from '../components/FormInput/FormInput';
 import TimeGrid_VehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
 import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
@@ -209,6 +210,10 @@ function StatsPage(props) {
             title="Verhuringen"
             />
         </div>
+      </div>
+
+      <div className="xl:flex-1 mt-8">
+        <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
       </div>
 
       <div className="xl:flex">
