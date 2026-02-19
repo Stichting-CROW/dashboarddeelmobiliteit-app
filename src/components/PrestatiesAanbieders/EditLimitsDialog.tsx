@@ -36,11 +36,13 @@ import {
   planSetFullRecordAtDate,
   planDeleteRecord,
   findRecordContainingDate,
+  getPreviousRecordForDate,
   randomKpiValue,
   pickRandomSubset,
   type OperationContext,
   type PlannedOp,
 } from './permitLimitsOperations';
+import type { OnAddNewForDateWithNoRecord } from './PermitLimitsTable';
 
 interface EditLimitsDialogProps {
   isVisible: boolean;
@@ -92,6 +94,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
 
   const [activeTab, setActiveTab] = useState<'main' | 'test' | 'kpilist'>('main');
   const [focusDate, setFocusDate] = useState<string | null>(null);
+  const [addNewInitialKpiValues, setAddNewInitialKpiValues] = useState<Record<string, number | ''> | null>(null);
   const [useEditorMode, setUseEditorMode] = useState(showPermitLimitsEditor);
   const [showTestTab, setShowTestTab] = useState(false);
 
@@ -178,6 +181,25 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     setShowEditor(true);
   }, []);
 
+  const handleAddNewInListMode = useCallback(() => {
+    const defaultDate = moment().add(1, 'day').format('YYYY-MM-DD');
+    const found = findRecordContainingDate(limitHistory ?? null, defaultDate);
+    if (!found) {
+      const prevRecord = getPreviousRecordForDate(limitHistory ?? null, defaultDate);
+      const initialLimits: Record<string, number | ''> = {};
+      kpiDescriptions.forEach((kpi) => {
+        const prevVal = prevRecord?.limits?.[kpi.kpi_key];
+        initialLimits[kpi.kpi_key] = typeof prevVal === 'number' ? prevVal : '';
+      });
+      setAddNewInitialKpiValues(initialLimits);
+    } else {
+      setAddNewInitialKpiValues(null);
+    }
+    setFocusDate(defaultDate);
+    setShowEditor(true);
+    setUseEditorMode(true);
+  }, [limitHistory, kpiDescriptions]);
+
   const handleEditRow = useCallback((date: string) => {
     setFocusDate(date);
     setShowEditor(true);
@@ -186,12 +208,49 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
   const handleEditorCancel = useCallback(() => {
     setShowEditor(false);
     setFocusDate(null);
+    setAddNewInitialKpiValues(null);
+  }, []);
+
+  const handleEditorDelete = useCallback(async (record: GeometryOperatorModalityLimit) => {
+    if (!token || !record.geometry_operator_modality_limit_id) return;
+    const allowChange = mode === 'admin';
+    if (!allowChange && record.effective_date < moment().format('YYYY-MM-DD')) {
+      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      return;
+    }
+    try {
+      const prevToUpdate = planDeleteRecord(limitHistory ?? null, record);
+      if (prevToUpdate) {
+        const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, allowChange);
+        if (!updated) {
+          alert('Fout bij bijwerken vorige record');
+          return;
+        }
+      }
+      const ok = await deleteGeometryOperatorModalityLimit(token, record.geometry_operator_modality_limit_id);
+      if (ok) {
+        setAddNewInitialKpiValues(null);
+        onRecordUpdated();
+      } else {
+        alert('Fout bij verwijderen');
+      }
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+    }
+  }, [token, limitHistory, mode, onRecordUpdated]);
+
+  const handleAddNewForDateWithNoRecord: OnAddNewForDateWithNoRecord = useCallback((date, _kpiKey, _value, initialLimits) => {
+    setFocusDate(date);
+    setAddNewInitialKpiValues(initialLimits);
+    setShowEditor(true);
   }, []);
 
   useEffect(() => {
     if (!isVisible) {
       setActiveTab('main');
       setFocusDate(null);
+      setAddNewInitialKpiValues(null);
       setShowEditor(false);
       setUseEditorMode(showPermitLimitsEditor);
       setShowTestTab(false);
@@ -283,14 +342,15 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     }
   }, [token, municipality, provider_system_id, vehicle_type, propulsion_type, onRecordUpdated]);
 
-  const runPlannedOps = useCallback(async (ops: PlannedOp[]): Promise<GeometryOperatorModalityLimit | null> => {
+  const runPlannedOps = useCallback(async (ops: PlannedOp[], allowChangeOverride?: boolean): Promise<GeometryOperatorModalityLimit | null> => {
     if (!token) return null;
+    const allow = allowChangeOverride ?? true;
     let lastResult: GeometryOperatorModalityLimit | null = null;
     for (const op of ops) {
       if (op.type === 'PUT' && op.record.geometry_operator_modality_limit_id) {
-        lastResult = await updateGeometryOperatorModalityLimit(token, op.record, true); // test tab: always allow
+        lastResult = await updateGeometryOperatorModalityLimit(token, op.record, allow);
       } else if (op.type === 'POST') {
-        lastResult = await addGeometryOperatorModalityLimit(token, op.record, true); // test tab: always allow
+        lastResult = await addGeometryOperatorModalityLimit(token, op.record, allow);
       }
       if (!lastResult && op.type === 'PUT') break;
     }
@@ -438,13 +498,29 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       return;
     }
     try {
-      const result = data.geometry_operator_modality_limit_id
-        ? await updateGeometryOperatorModalityLimit(token, data, allowChange)
-        : await addGeometryOperatorModalityLimit(token, data, allowChange);
-      if (result) {
-        onRecordUpdated();
+      if (data.geometry_operator_modality_limit_id) {
+        const result = await updateGeometryOperatorModalityLimit(token, data, allowChange);
+        if (result) {
+          setAddNewInitialKpiValues(null);
+          onRecordUpdated();
+        } else {
+          alert('Fout bij opslaan');
+        }
       } else {
-        alert('Fout bij opslaan');
+        const ctx: OperationContext = {
+          operator: provider_system_id,
+          geometry_ref: toGeometryRef(municipality),
+          form_factor: vehicle_type,
+          propulsion_type: propulsion_type ?? 'electric',
+        };
+        const ops = planSetFullRecordAtDate(limitHistory ?? null, data.effective_date, data.limits ?? {}, ctx);
+        const result = await runPlannedOps(ops, allowChange);
+        if (result != null) {
+          setAddNewInitialKpiValues(null);
+          onRecordUpdated();
+        } else {
+          alert('Fout bij opslaan');
+        }
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Fout bij opslaan';
@@ -585,10 +661,14 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
                 limitHistory={limitHistory}
                 allowChange={mode === 'admin'}
                 defaultDate={formModeDefaultDate}
+                focusDate={focusDate}
+                onFocusDateConsumed={() => setFocusDate(null)}
+                initialKpiValuesWhenNoRecord={addNewInitialKpiValues ?? undefined}
                 hideCancel
                 onSave={handleEditorSave}
                 onCancel={handleEditorCancel}
                 onRecordUpdated={onRecordUpdated}
+                onDelete={handleEditorDelete}
               />
             ) : (
               <>
@@ -605,9 +685,11 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
                     allowChange={mode === 'admin'}
                     focusDate={focusDate}
                     onFocusDateConsumed={() => setFocusDate(null)}
+                    initialKpiValuesWhenNoRecord={addNewInitialKpiValues ?? undefined}
                     onSave={handleEditorSave}
                     onCancel={handleEditorCancel}
                     onRecordUpdated={onRecordUpdated}
+                    onDelete={handleEditorDelete}
                   />
                 )}
                 <PermitLimitsTable
@@ -623,6 +705,8 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
                   showPermitLimitsEditor={false}
                   onAddNew={handleAddNew}
                   onEditRow={handleEditRow}
+                  onAddNewForDateWithNoRecord={handleAddNewForDateWithNoRecord}
+                  onAddNewInListMode={handleAddNewInListMode}
                   onRecordUpdated={onRecordUpdated}
                 />
               </>

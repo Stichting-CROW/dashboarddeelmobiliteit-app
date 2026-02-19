@@ -26,9 +26,13 @@ interface PermitLimitsEditorProps {
   hideCancel?: boolean;
   /** Min date for date input; when not set, uses first record's effective_date or today */
   minDate?: string;
+  /** When adding for a date with no record, pre-fill KPI values from previous record (or empty) */
+  initialKpiValuesWhenNoRecord?: Record<string, number | ''>;
   onSave: (data: GeometryOperatorModalityLimit) => void | Promise<void>;
   onCancel: () => void;
   onRecordUpdated: () => void;
+  /** Called when user confirms deletion of current record; only shown when currentRecord exists */
+  onDelete?: (record: GeometryOperatorModalityLimit) => void | Promise<void>;
 }
 
 const isNumber = (v: unknown): v is number => typeof v === 'number' && !isNaN(v);
@@ -47,14 +51,16 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
   defaultDate,
   hideCancel,
   minDate,
+  initialKpiValuesWhenNoRecord,
   onSave,
   onCancel,
+  onDelete,
 }) => {
   const today = moment().format('YYYY-MM-DD');
   const [selectedDate, setSelectedDate] = useState<string>(defaultDate ?? focusDate ?? today);
 
   const firstRecordDate = useMemo(() => {
-    if (!limitHistory || limitHistory.length === 0) return moment().format('YYYY-MM-DD');
+    if (!limitHistory || limitHistory.length === 0) return undefined;
     const sorted = [...limitHistory].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
     return toDateOnly(sorted[0].effective_date);
   }, [limitHistory]);
@@ -70,9 +76,14 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
   const [kpiValues, setKpiValues] = useState<Record<string, number | ''>>({});
   const [focusedKpiKey, setFocusedKpiKey] = useState<string | null>(null);
 
-  const { currentRecord, currentRecordIndex, sortedHistory } = useMemo(() => {
+  const { currentRecord, currentRecordIndex, sortedHistory, prevRecordForGap } = useMemo(() => {
     if (!limitHistory || limitHistory.length === 0) {
-      return { currentRecord: null as GeometryOperatorModalityLimit | null, currentRecordIndex: -1, sortedHistory: [] as GeometryOperatorModalityLimit[] };
+      return {
+        currentRecord: null as GeometryOperatorModalityLimit | null,
+        currentRecordIndex: -1,
+        sortedHistory: [] as GeometryOperatorModalityLimit[],
+        prevRecordForGap: null as GeometryOperatorModalityLimit | null,
+      };
     }
     const sorted = [...limitHistory].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
     const sel = toDateOnly(selectedDate);
@@ -80,10 +91,22 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
       const startdate = toDateOnly(sorted[i].effective_date);
       const nextStart = i < sorted.length - 1 ? toDateOnly(sorted[i + 1].effective_date) : '9999-12-31';
       if (sel >= startdate && (nextStart === '9999-12-31' ? sel <= nextStart : sel < nextStart)) {
-        return { currentRecord: sorted[i], currentRecordIndex: i, sortedHistory: sorted };
+        return {
+          currentRecord: sorted[i],
+          currentRecordIndex: i,
+          sortedHistory: sorted,
+          prevRecordForGap: null,
+        };
       }
     }
-    return { currentRecord: null, currentRecordIndex: -1, sortedHistory: sorted };
+    const before = sorted.filter((r) => toDateOnly(r.effective_date) < sel);
+    const prev = before.length > 0 ? before[before.length - 1] : null;
+    return {
+      currentRecord: null,
+      currentRecordIndex: -1,
+      sortedHistory: sorted,
+      prevRecordForGap: prev,
+    };
   }, [limitHistory, selectedDate]);
 
   const prevRecordDate = useMemo(() => {
@@ -99,13 +122,26 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
 
   useEffect(() => {
     const next: Record<string, number | ''> = {};
-    kpiDescriptions.forEach((kpi) => {
-      const hasValue = currentRecord && currentRecord.limits[kpi.kpi_key] !== undefined;
-      const val = hasValue ? currentRecord!.limits[kpi.kpi_key] : undefined;
-      next[kpi.kpi_key] = typeof val === 'number' ? val : '';
-    });
+    const hasNoRecords = !limitHistory || limitHistory.length === 0;
+    const sourceRecord = currentRecord ?? prevRecordForGap ?? null;
+    const sourceLimits = sourceRecord?.limits;
+
+    if (hasNoRecords || !sourceRecord) {
+      kpiDescriptions.forEach((kpi) => { next[kpi.kpi_key] = ''; });
+    } else {
+      kpiDescriptions.forEach((kpi) => {
+        if (sourceLimits && kpi.kpi_key in sourceLimits) {
+          const val = sourceLimits[kpi.kpi_key];
+          next[kpi.kpi_key] = typeof val === 'number' ? val : '';
+        } else if (initialKpiValuesWhenNoRecord && kpi.kpi_key in initialKpiValuesWhenNoRecord) {
+          next[kpi.kpi_key] = initialKpiValuesWhenNoRecord[kpi.kpi_key];
+        } else {
+          next[kpi.kpi_key] = '';
+        }
+      });
+    }
     setKpiValues(next);
-  }, [currentRecord, kpiDescriptions]);
+  }, [limitHistory, currentRecord, prevRecordForGap, kpiDescriptions, initialKpiValuesWhenNoRecord]);
 
   const handleSelectedDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
@@ -190,25 +226,54 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
     });
   }, [kpiDescriptions, kpiValues]);
 
-  const dateMin = minDate ?? firstRecordDate;
+  const dateMin = minDate ?? firstRecordDate ?? undefined;
   const canEdit = allowChange || toDateOnly(selectedDate) >= today;
+
+  const isEditingExistingRecord =
+    currentRecord?.geometry_operator_modality_limit_id &&
+    toDateOnly(selectedDate) === toDateOnly(currentRecord.effective_date);
+  const saveButtonLabel = isEditingExistingRecord ? 'Wijzigen' : 'Toevoegen';
+
+  const statusText = useMemo(() => {
+    const isNewRecord = !isEditingExistingRecord;
+    if (isNewRecord) {
+      const startDate = toDateOnly(selectedDate);
+      const endDate = nextRecordDate ?? null;
+      if (endDate) {
+        return `Deze configuratie wordt actief van ${moment(startDate).format('L')} tot ${moment(endDate).format('L')}`;
+      }
+      return `Deze configuratie wordt actief vanaf ${moment(startDate).format('L')}`;
+    }
+    if (!currentRecord) return 'Geen configuratie actief';
+    const effectiveEnd = currentRecord.end_date ??
+      (currentRecordIndex < sortedHistory.length - 1 ? toDateOnly(sortedHistory[currentRecordIndex + 1].effective_date) : undefined);
+    return effectiveEnd
+      ? `Deze configuratie is actief van ${moment(currentRecord.effective_date).format('L')} tot ${moment(effectiveEnd).format('L')}`
+      : `Deze configuratie is actief vanaf ${moment(currentRecord.effective_date).format('L')}`;
+  }, [currentRecord, currentRecordIndex, sortedHistory, isEditingExistingRecord, selectedDate, nextRecordDate]);
+
+  const handleDeleteClick = () => {
+    if (!currentRecord || !currentRecord.geometry_operator_modality_limit_id || !onDelete) return;
+    const baseMsg = `Hiermee verwijdert u de complete configuratie die ingaat op ${moment(currentRecord.effective_date).format('L')}.`;
+    let extraMsg: string;
+    if (!prevRecordDate && !nextRecordDate) {
+      extraMsg = 'Er is hierna geen configuratie meer actief.';
+    } else if (!prevRecordDate && nextRecordDate) {
+      extraMsg = `De eerstvolgende configuratie gaat in op ${moment(nextRecordDate).format('L')}.`;
+    } else if (prevRecordDate && nextRecordDate) {
+      extraMsg = `De configuratie van ${moment(prevRecordDate).format('L')} wordt verlengd tot ${moment(nextRecordDate).format('L')}.`;
+    } else {
+      extraMsg = `De configuratie van ${moment(prevRecordDate).format('L')} wordt onbeperkt verlengd.`;
+    }
+    if (window.confirm(`${baseMsg}\n\n${extraMsg}\n\nWeet u zeker dat u wilt doorgaan?`)) {
+      onDelete(currentRecord);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 mb-6">
       <div className="flex flex-col items-center">
-        {currentRecord ? (
-          <span>
-            {(() => {
-              const effectiveEnd = currentRecord.end_date ??
-                (currentRecordIndex < sortedHistory.length - 1 ? toDateOnly(sortedHistory[currentRecordIndex + 1].effective_date) : undefined);
-              return effectiveEnd
-                ? `Deze configuratie is actief van ${moment(currentRecord.effective_date).format('L')} tot ${moment(effectiveEnd).format('L')}`
-                : `Deze configuratie is actief vanaf ${moment(currentRecord.effective_date).format('L')}`;
-            })()}
-          </span>
-        ) : (
-          <span>Geen configuratie actief</span>
-        )}
+        <span>{statusText}</span>
       </div>
 
       <div className="permits-form-grid mb-2">
@@ -295,18 +360,31 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
       )}
 
       <div className="permits-form-actions">
-        {!hideCancel && (
-          <button className="permits-form-cancel-button" onClick={onCancel}>
-            Afbreken
+        <div className="flex-1">
+          {isEditingExistingRecord && currentRecord?.geometry_operator_modality_limit_id && onDelete && canEdit && (
+            <button
+              type="button"
+              className="permits-form-delete-button"
+              onClick={handleDeleteClick}
+            >
+              Configuratie Verwijderen
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {!hideCancel && (
+            <button className="permits-form-cancel-button" onClick={onCancel}>
+              Afbreken
+            </button>
+          )}
+          <button
+            className={`permits-form-save-button ${canEdit && isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
+            onClick={handleOk}
+            disabled={!canEdit || !isValid || !isChanged}
+          >
+            {saveButtonLabel}
           </button>
-        )}
-        <button
-          className={`permits-form-save-button ${canEdit && isValid && isChanged ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
-          onClick={handleOk}
-          disabled={!canEdit || !isValid || !isChanged}
-        >
-          Opslaan
-        </button>
+        </div>
       </div>
     </div>
   );
