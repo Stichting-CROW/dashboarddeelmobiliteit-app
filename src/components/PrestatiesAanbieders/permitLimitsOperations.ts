@@ -53,6 +53,18 @@ export function findRecordContainingDate(
   return null;
 }
 
+/** Most recent record before date (for pre-filling when adding at a date with no record) */
+export function getPreviousRecordForDate(
+  history: GeometryOperatorModalityLimit[] | null,
+  date: string
+): GeometryOperatorModalityLimit | null {
+  if (!history || history.length === 0) return null;
+  const sorted = sortHistory(history);
+  const d = toDateOnly(date);
+  const before = sorted.filter((r) => toDateOnly(r.effective_date) < d);
+  return before.length > 0 ? before[before.length - 1] : null;
+}
+
 /**
  * end_date for a record: explicit end_date or next.effective_date. Last record has no end (infinity).
  */

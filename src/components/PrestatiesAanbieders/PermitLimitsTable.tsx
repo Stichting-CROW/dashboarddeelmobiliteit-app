@@ -2,12 +2,20 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import moment from 'moment';
 import type { GeometryOperatorModalityLimit, PerformanceIndicatorDescription } from '../../api/permitLimits';
 import { updateGeometryOperatorModalityLimit, addGeometryOperatorModalityLimit, deleteGeometryOperatorModalityLimit, toGeometryRef } from '../../api/permitLimits';
-import { planDeleteRecord } from './permitLimitsOperations';
+import { planDeleteRecord, getPreviousRecordForDate } from './permitLimitsOperations';
 import type { HistoryTableRow } from './permitLimitsUtils';
 import { getAllKpis, toDateOnly, formatBound } from './permitLimitsUtils';
 
 type SortColumn = 'date' | 'kpi' | 'value';
 type SortDirection = 'asc' | 'desc' | null;
+
+/** Called when adding a KPI for a date with no record - opens full editor with all values pre-filled from previous record */
+export type OnAddNewForDateWithNoRecord = (
+  date: string,
+  kpiKey: string,
+  value: number | '',
+  initialLimits: Record<string, number | ''>
+) => void;
 
 interface PermitLimitsTableProps {
   tableRows: HistoryTableRow[];
@@ -22,6 +30,10 @@ interface PermitLimitsTableProps {
   showPermitLimitsEditor?: boolean;
   onAddNew?: () => void;
   onEditRow?: (date: string) => void;
+  /** When adding for a date with no record, open full editor instead of saving inline */
+  onAddNewForDateWithNoRecord?: OnAddNewForDateWithNoRecord;
+  /** When provided, add button opens form directly instead of inline row */
+  onAddNewInListMode?: () => void;
   onRecordUpdated: () => void;
 }
 
@@ -38,6 +50,8 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
   showPermitLimitsEditor = false,
   onAddNew,
   onEditRow,
+  onAddNewForDateWithNoRecord,
+  onAddNewInListMode,
   onRecordUpdated,
 }) => {
   // Sorting state - default to date descending
@@ -375,23 +389,43 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
       return;
     }
 
+    let existingRecord: GeometryOperatorModalityLimit | null = null;
+    if (limitHistory) {
+      const sorted = [...limitHistory].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
+      const d = toDateOnly(newRowDate);
+      for (let i = 0; i < sorted.length; i++) {
+        const startdate = toDateOnly(sorted[i].effective_date);
+        const nextStart = i < sorted.length - 1 ? toDateOnly(sorted[i + 1].effective_date) : '9999-12-31';
+        if (d >= startdate && (nextStart === '9999-12-31' ? d <= nextStart : d < nextStart)) {
+          existingRecord = sorted[i];
+          break;
+        }
+      }
+    }
+
+    if (!existingRecord && onAddNewForDateWithNoRecord) {
+      const prevRecord = getPreviousRecordForDate(limitHistory, newRowDate);
+      const initialLimits: Record<string, number | ''> = {};
+      availableKpis.forEach((kpi) => {
+        const prevVal = prevRecord?.limits[kpi.kpiKey];
+        initialLimits[kpi.kpiKey] = typeof prevVal === 'number' ? prevVal : '';
+      });
+      if (newRowValue !== '' && typeof newRowValue === 'number') {
+        initialLimits[newRowKpiKey] = newRowValue;
+      } else {
+        initialLimits[newRowKpiKey] = '';
+      }
+      onAddNewForDateWithNoRecord(newRowDate, newRowKpiKey, newRowValue, initialLimits);
+      setIsAddingNewRow(false);
+      setNewRowDate(moment().add(1, 'day').format('YYYY-MM-DD'));
+      setNewRowKpiKey('');
+      setNewRowValue('');
+      return;
+    }
+
     setIsAdding(true);
 
     try {
-      let existingRecord: GeometryOperatorModalityLimit | null = null;
-      if (limitHistory) {
-        const sorted = [...limitHistory].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
-        const d = toDateOnly(newRowDate);
-        for (let i = 0; i < sorted.length; i++) {
-          const startdate = toDateOnly(sorted[i].effective_date);
-          const nextStart = i < sorted.length - 1 ? toDateOnly(sorted[i + 1].effective_date) : '9999-12-31';
-          if (d >= startdate && (nextStart === '9999-12-31' ? d <= nextStart : d < nextStart)) {
-            existingRecord = sorted[i];
-            break;
-          }
-        }
-      }
-
       const geometry_ref = toGeometryRef(municipality);
       const limits: Record<string, number> = existingRecord ? { ...existingRecord.limits } : {};
 
@@ -493,7 +527,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
                   <button
                     type="button"
                     className="font-bold text-blue-600 hover:text-blue-800 hover:underline bg-transparent border-0 p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={showPermitLimitsEditor ? onAddNew : handleAddNewRowClick}
+                    onClick={showPermitLimitsEditor ? onAddNew : (onAddNewInListMode ?? handleAddNewRowClick)}
                     disabled={showPermitLimitsEditor ? false : isAddingNewRow}
                   >
                     + Grenswaarde toevoegen
