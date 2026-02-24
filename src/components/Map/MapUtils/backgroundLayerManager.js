@@ -354,6 +354,9 @@ export const setBackgroundLayer = (map, layerName, onSuccess = null, onError = n
       return;
     }
 
+    // When satellite is active, hide streets at neighbourhood zoom to avoid obscuring aerial imagery
+    updateStreetVisibilityForSatellite(map, layerName);
+
     if (DEBUG) console.log(`Background layer set to: ${layerName}`);
     
     // Execute success callback
@@ -364,6 +367,70 @@ export const setBackgroundLayer = (map, layerName, onSuccess = null, onError = n
     console.error('Error setting background layer:', error);
     if (onError) onError(error.message);
   }
+};
+
+/**
+ * Street layer IDs that render white/grey streets on the base map.
+ * These are hidden when satellite is active and zoomed in to neighbourhood level (zoom >= 15)
+ * to avoid obscuring the aerial imagery.
+ */
+const STREET_LAYER_IDS = [
+  'road-simple',
+  'bridge-case-simple',
+  'bridge-simple',
+  'tunnel-simple',
+  'road-path',
+  'road-steps',
+  'road-pedestrian',
+  'bridge-path',
+  'bridge-steps',
+  'bridge-pedestrian',
+  'tunnel-path',
+  'tunnel-steps',
+  'tunnel-pedestrian'
+];
+
+/** Zoom level at which streets start fading out (satellite mode) */
+const STREET_FADE_ZOOM_START = 14;
+
+/** Zoom level at which streets are fully hidden (satellite mode) */
+const STREET_FADE_ZOOM_END = 16;
+
+/**
+ * Update street layer visibility based on map style and zoom.
+ * When satellite is active: streets fade out gradually between zoom 14–15 (during zoom).
+ * Otherwise: streets are fully visible.
+ * Uses line-opacity driven by zoom level for a smooth fade while zooming.
+ *
+ * @param {Object} map - The map instance
+ * @param {string} mapStyle - Current map style ('base' or 'satellite')
+ */
+export const updateStreetVisibilityForSatellite = (map, mapStyle) => {
+  if (!map || !map.isStyleLoaded()) return;
+
+  const zoom = map.getZoom();
+
+  let opacity;
+  if (mapStyle !== 'satellite') {
+    opacity = 1;
+  } else if (zoom <= STREET_FADE_ZOOM_START) {
+    opacity = 1;
+  } else if (zoom >= STREET_FADE_ZOOM_END) {
+    opacity = 0;
+  } else {
+    // Linear fade between STREET_FADE_ZOOM_START and STREET_FADE_ZOOM_END
+    opacity = 1 - (zoom - STREET_FADE_ZOOM_START) / (STREET_FADE_ZOOM_END - STREET_FADE_ZOOM_START);
+  }
+
+  STREET_LAYER_IDS.forEach((layerId) => {
+    try {
+      if (map.getLayer(layerId)) {
+        map.setPaintProperty(layerId, 'line-opacity', opacity);
+      }
+    } catch (e) {
+      // Layer may not exist in current style or may not support line-opacity
+    }
+  });
 };
 
 /**

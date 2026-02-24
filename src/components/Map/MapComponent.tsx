@@ -49,7 +49,7 @@ import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
-import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
+import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -362,6 +362,38 @@ const MapComponent = (props): JSX.Element => {
   useEffect(() => {
     setDidApplyMapStyle(false);
   }, [mapStyle]);
+
+  // Update street visibility when zooming/moving on satellite (fade streets at neighbourhood level)
+  const mapStyleRef = useRef(mapStyle);
+  mapStyleRef.current = mapStyle;
+  useEffect(() => {
+    if (!didMapLoad || !map.current) return;
+    const updateStreets = () => {
+      if (map.current?.isStyleLoaded() && mapStyleRef.current) {
+        updateStreetVisibilityForSatellite(map.current, mapStyleRef.current);
+      }
+    };
+    // Throttle zoom handler with rAF so we update during zoom (smooth fade) without flooding
+    let zoomRafId = null;
+    const zoomHandler = () => {
+      if (zoomRafId == null) {
+        zoomRafId = requestAnimationFrame(() => {
+          updateStreets();
+          zoomRafId = null;
+        });
+      }
+    };
+    map.current.on('zoom', zoomHandler);
+    map.current.on('zoomend', updateStreets);
+    map.current.on('moveend', updateStreets);
+    updateStreets(); // Run on mount
+    return () => {
+      if (zoomRafId != null) cancelAnimationFrame(zoomRafId);
+      map.current?.off('zoom', zoomHandler);
+      map.current?.off('zoomend', updateStreets);
+      map.current?.off('moveend', updateStreets);
+    };
+  }, [didMapLoad]);
 
   // Data layer management is now handled by MapPage based on active_data_layers
   // The layers are passed via props.layers and activated by the existing activateLayers logic
