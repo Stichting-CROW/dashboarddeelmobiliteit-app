@@ -14,12 +14,28 @@ import {
 } from '../Map/MapUtils/zones.js';
 
 function HubStatsWidget({
-  zone_id
+  zone_id,
+  ontwikkelingVan: controlledOntwikkelingVan,
+  ontwikkelingTot: controlledOntwikkelingTot,
+  onOntwikkelingChange,
 }) {
   const [counter, setCounter] = useState(0)
   const [publicZones, setPublicZones] = useState(null)
-  const [ontwikkelingVan, setOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
-  const [ontwikkelingTot, setOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
+  const [internalOntwikkelingVan, setInternalOntwikkelingVan] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
+  const [internalOntwikkelingTot, setInternalOntwikkelingTot] = useState(moment(moment().format('YYYY-MM-DD 00:00')))
+
+  const isControlled = controlledOntwikkelingVan != null && controlledOntwikkelingTot != null
+  const ontwikkelingVan = isControlled ? controlledOntwikkelingVan : internalOntwikkelingVan
+  const ontwikkelingTot = isControlled ? controlledOntwikkelingTot : internalOntwikkelingTot
+
+  const setDates = (van, tot) => {
+    if (isControlled && onOntwikkelingChange) {
+      onOntwikkelingChange(van, tot)
+    } else {
+      setInternalOntwikkelingVan(van)
+      setInternalOntwikkelingTot(tot)
+    }
+  }
 
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : 0;
@@ -63,20 +79,18 @@ function HubStatsWidget({
     {
       title: '<',
       link: () => {
-        const newOntwikkelingVan = ontwikkelingVan.subtract(1, 'day');
-        const newOntwikkelingTot = ontwikkelingTot.subtract(1, 'day');
-        setOntwikkelingVan(newOntwikkelingVan)
-        setOntwikkelingTot(newOntwikkelingTot)
+        const newOntwikkelingVan = ontwikkelingVan.clone().subtract(1, 'day');
+        const newOntwikkelingTot = ontwikkelingTot.clone().subtract(1, 'day');
+        setDates(newOntwikkelingVan, newOntwikkelingTot);
         setCounter(counter+1);
       }
     },
     {
       title: '>',
       link: () => {
-        const newOntwikkelingVan = ontwikkelingVan.add(1, 'day');
-        const newOntwikkelingTot = ontwikkelingTot.add(1, 'day');
-        setOntwikkelingVan(newOntwikkelingVan)
-        setOntwikkelingTot(newOntwikkelingTot)
+        const newOntwikkelingVan = ontwikkelingVan.clone().add(1, 'day');
+        const newOntwikkelingTot = ontwikkelingTot.clone().add(1, 'day');
+        setDates(newOntwikkelingVan, newOntwikkelingTot);
         setCounter(counter+1);
       }
     }

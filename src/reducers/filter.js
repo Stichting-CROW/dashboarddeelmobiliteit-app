@@ -230,6 +230,15 @@ export default function filter(state = initialState, action) {
           zones: ''
       };
     }
+    case 'SET_FILTER_ZONES': {
+      const zonesValue = Array.isArray(action.payload)
+        ? action.payload.join(',')
+        : (action.payload || '');
+      return {
+        ...state,
+        zones: zonesValue
+      };
+    }
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {
       let parkeerduurexclude = [];
       try {

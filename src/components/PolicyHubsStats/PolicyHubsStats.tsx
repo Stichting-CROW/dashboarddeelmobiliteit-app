@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "../ui/use-toast"
 import {getVehicleIconUrl} from '../../helpers/vehicleTypes';
 
@@ -270,10 +271,19 @@ const PolicyHubsStats = ({
     selected_policy_hubs: any,
     cancelHandler: Function,
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Get gebied / municipality code
+  // Get gebied / municipality code from filter
   const gm_code = useSelector((state: StateType) => state.filter.gebied);
+
+  // Date range for HubStatsWidget (and Ontwikkeling button) - synced with what the widget displays
+  const [widgetOntwikkelingVan, setWidgetOntwikkelingVan] = useState(() =>
+    moment(moment().format('YYYY-MM-DD 00:00'))
+  );
+  const [widgetOntwikkelingTot, setWidgetOntwikkelingTot] = useState(() =>
+    moment(moment().format('YYYY-MM-DD 00:00'))
+  );
 
   const [hubData, setHubData] = useState<HubType>({
     stop: defaultStopProperties,
@@ -351,7 +361,15 @@ const PolicyHubsStats = ({
       </Section>
 
       <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
-        <HubStatsWidget zone_id={hubData.zone_id} />
+        <HubStatsWidget
+          zone_id={hubData.zone_id}
+          ontwikkelingVan={widgetOntwikkelingVan}
+          ontwikkelingTot={widgetOntwikkelingTot}
+          onOntwikkelingChange={(van, tot) => {
+            setWidgetOntwikkelingVan(van);
+            setWidgetOntwikkelingTot(tot);
+          }}
+        />
       </Section>
 
       <div className="flex w-full justify-between">
@@ -361,6 +379,30 @@ const PolicyHubsStats = ({
           onClick={cancelHandler}
         >
           Sluiten
+        </Button>
+        <Button
+          theme="white"
+          style={{marginLeft: 0}}
+          onClick={() => {
+            const params = new URLSearchParams();
+            if (gm_code) params.set('gm_code', gm_code);
+            if (selected_policy_hubs?.[0] !== 'new' && hubData.zone_id) {
+              params.set('zones', String(hubData.zone_id));
+            }
+            if (widgetOntwikkelingVan) {
+              params.set('start_date', widgetOntwikkelingVan.format('YYYY-MM-DD'));
+            }
+            if (widgetOntwikkelingTot) {
+              params.set('end_date', widgetOntwikkelingTot.format('YYYY-MM-DD'));
+            }
+            const query = params.toString();
+            const targetPath = `/stats/beleidszones${query ? `?${query}` : ''}`;
+            cancelHandler();
+            navigate(targetPath, { replace: false });
+          }}
+        >
+          <img src="/images/components/Menu/ontwikkeling.svg" alt="" className="inline-block w-4 h-4 mr-1.5 align-middle" />
+          Ontwikkeling
         </Button>
       </div>
     </div>

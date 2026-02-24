@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './css/FilterbarPermits.css';
 import './css/FilteritemGebieden.css';
 
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
 import { addDays } from 'date-fns';
 
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
@@ -21,6 +21,8 @@ interface FilterbarBeleidszonesProps {
 }
 
 function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
+  const dispatch = useDispatch();
+  const location = useLocation();
   const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
@@ -30,6 +32,20 @@ function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
   );
 
   const hidePlaats = gebieden.length <= 1;
+
+  // Initialize filter from URL params when navigating to beleidszones with preselected hub/date
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlGmCode = params.get('gm_code');
+    const urlZones = params.get('zones');
+
+    if (urlGmCode && urlGmCode !== filterGebied) {
+      dispatch({ type: 'SET_FILTER_GEBIED', payload: urlGmCode });
+    }
+    if (urlZones) {
+      dispatch({ type: 'SET_FILTER_ZONES', payload: urlZones });
+    }
+  }, [location.search]); // Only run when URL search changes (e.g. initial nav or back)
 
   return (
     <div className="filter-bar-inner">

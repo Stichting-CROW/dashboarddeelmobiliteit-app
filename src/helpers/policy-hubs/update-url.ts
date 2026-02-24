@@ -37,5 +37,5 @@ export const update_url = (params) => {
             url.searchParams.append('selected', x);
         })
     }
-    window.history.pushState({}, '', url.href)
+    window.history.replaceState({}, '', url.href)
 }
