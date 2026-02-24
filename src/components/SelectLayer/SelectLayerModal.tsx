@@ -113,6 +113,7 @@ const SelectLayerModal = () => {
         </div>
       </>}
 
+      {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <>
       <h2>Data</h2>
 
       { displayMode===DISPLAYMODE_PARK ?
@@ -176,7 +177,6 @@ const SelectLayerModal = () => {
         </div>: null }
 
       {displayMode===DISPLAYMODE_ZONES_PUBLIC && false && <>
-
         <div
           data-type="monitoring"
           className={`layer`}
@@ -206,6 +206,8 @@ const SelectLayerModal = () => {
             No parking
           </span>
         </div>
+
+      </>}
 
       </>}
 
