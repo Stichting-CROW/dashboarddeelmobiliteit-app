@@ -270,98 +270,98 @@ const PolicyHubsStats = ({
     selected_policy_hubs: any,
     cancelHandler: Function,
 }) => {
-    const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
-    // Get gebied / municipality code
-    const gm_code = useSelector((state: StateType) => state.filter.gebied);
+  // Get gebied / municipality code
+  const gm_code = useSelector((state: StateType) => state.filter.gebied);
 
-    const [hubData, setHubData] = useState<HubType>({
-        stop: defaultStopProperties,
-        name: '',
-        geography_type: 'stop',
-        zone_availability: 'auto',
-        municipality: gm_code,
-        description: 'Hub',
-        internal_id: '',
-        area: {},
-        phase: 'concept'
-    });
+  const [hubData, setHubData] = useState<HubType>({
+    stop: defaultStopProperties,
+    name: '',
+    geography_type: 'stop',
+    zone_availability: 'auto',
+    municipality: gm_code,
+    description: 'Hub',
+    internal_id: '',
+    area: {},
+    phase: 'concept'
+  });
 
-    // If selected policy hubs changes: Load data of hub
-    useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
+  // If selected policy hubs changes: Load data of hub
+  useEffect(() => {
+    if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+    const zone_id = selected_policy_hubs[0];
 
-        // Don't do anything if we changed to the same hub
-        if(hubData.zone_id === zone_id) {
-            return;
-        }
-
-        // If we selected an existing hub: Stop being in drawing mode 
-        if(zone_id !== 'new') {
-            // Stop being in drawing mode
-            dispatch(setHubsInDrawingMode([]));
-            dispatch(setIsDrawingEnabled(false));
-        }
-
-        // Load hub data
-        setTimeout(() => {
-           loadHubData(zone_id);
-        }, 25);
-    }, [
-        selected_policy_hubs,
-        selected_policy_hubs.length
-    ]);
-
-    // If amount of policy hubs changes: (Re)load data of hub
-    useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
-        
-        if(! zone_id) return;
-        if(zone_id === 'new') return;
-
-        // Load hub data
-        loadHubData(zone_id);
-    }, [
-        all_policy_hubs.length// If there's a new hub added
-    ]);
-
-    const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
-
-    // Find hub data in array with all policy hubs
-    const loadHubData = async (hub_id) => {
-        const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
-        if(foundHub) {
-            // Set hub data in local state
-            setHubData(foundHub);
-        }
+    // Don't do anything if we changed to the same hub
+    if(hubData.zone_id === zone_id) {
+      return;
     }
 
-    const labelClassNames = 'mb-2';
-        
-    return (
-      <div>
-        <div className={`${labelClassNames} font-bold`}>
-            Zone statistieken
-        </div>
+    // If we selected an existing hub: Stop being in drawing mode 
+    if(zone_id !== 'new') {
+      // Stop being in drawing mode
+      dispatch(setHubsInDrawingMode([]));
+      dispatch(setIsDrawingEnabled(false));
+    }
 
-        <Section>
-          <HubStats hubData={hubData} />
-        </Section>
+    // Load hub data
+    setTimeout(() => {
+      loadHubData(zone_id);
+    }, 25);
+  }, [
+    selected_policy_hubs,
+    selected_policy_hubs.length
+  ]);
 
-        <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
-          <HubStatsWidget zone_id={hubData.zone_id} />
-        </Section>
+  // If amount of policy hubs changes: (Re)load data of hub
+  useEffect(() => {
+    if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+    const zone_id = selected_policy_hubs[0];
+    
+    if(! zone_id) return;
+    if(zone_id === 'new') return;
 
-        <div className="flex w-full justify-between">
-          <Button
-              theme="white"
-              style={{marginLeft: 0}}
-              onClick={cancelHandler}
-          >
-              Sluiten
-          </Button>
+    // Load hub data
+    loadHubData(zone_id);
+  }, [
+    all_policy_hubs.length// If there's a new hub added
+  ]);
+
+  const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
+
+  // Find hub data in array with all policy hubs
+  const loadHubData = async (hub_id) => {
+    const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
+    if(foundHub) {
+      // Set hub data in local state
+      setHubData(foundHub);
+    }
+  }
+
+  const labelClassNames = 'mb-2';
+      
+  return (
+    <div>
+      <div className={`${labelClassNames} font-bold`}>
+        Zone statistieken
+      </div>
+
+      <Section>
+        <HubStats hubData={hubData} />
+      </Section>
+
+      <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
+        <HubStatsWidget zone_id={hubData.zone_id} />
+      </Section>
+
+      <div className="flex w-full justify-between">
+        <Button
+          theme="white"
+          style={{marginLeft: 0}}
+          onClick={cancelHandler}
+        >
+          Sluiten
+        </Button>
       </div>
     </div>
   )
