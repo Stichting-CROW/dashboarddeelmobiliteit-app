@@ -107,7 +107,7 @@ function FilterbarStatistiek() {
       <div className="filter-plaats-container">
         <div className="filter-plaats-box-row">
           <div
-            className={`filter-plaats-value ${isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
+            className={`filter-plaats-value ${isBeleidsinfo || isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
             onClick={() => toggleDashboardType('dashboard-type')}
           >
             {getCurrentSelection()}

@@ -359,6 +359,8 @@ function App() {
       payload=DISPLAYMODE_START;
     } else if(pathName === "/stats/beleidsinfo") {
       payload=DISPLAYMODE_OTHER;
+    } else if(pathName === "/stats/beleidszones") {
+      payload=DISPLAYMODE_OTHER;
     } else if(pathName.startsWith("/stats/")) {
       payload=DISPLAYMODE_DASHBOARD;
     } else if(pathName.includes("/map/park")) {
@@ -689,7 +691,10 @@ function App() {
             <Route path="/admin/zones" element={renderFilterbarElements()} />
 
             <Route path="/stats/beleidsinfo" element={<>
-              <ContentPage>
+              <ContentPage
+                style={{ paddingBottom: 0 }}
+                innerStyle={{ paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0, maxWidth: '100%' }}
+              >
                 <StatsPage />
               </ContentPage>
               {renderFilterbarElements()}
