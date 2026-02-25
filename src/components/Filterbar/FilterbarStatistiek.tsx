@@ -63,7 +63,7 @@ function FilterbarStatistiek() {
   const getCurrentSelection = () => {
     if (isBeleidsinfo) return 'Beleidsinfo';
     if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
-    if (isBeleidszones) return 'Beleidszones';
+    if (isBeleidszones) return 'Hubs en verbodsgebieden';
     return 'Prestaties aanbieders';
   };
 
@@ -81,7 +81,7 @@ function FilterbarStatistiek() {
           >
             Beleidsinfo
           </div>
-          <div
+          {/* <div
             key="item-prestaties-aanbieders"
             className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
             onClick={() =>
@@ -89,13 +89,13 @@ function FilterbarStatistiek() {
             }
           >
             Prestaties aanbieders
-          </div>
+          </div> */}
           <div
             key="item-beleidszones"
             className={`form-item ${isBeleidszones ? 'form-item-selected' : ''}`}
             onClick={() => handleSelectDashboardType('/stats/beleidszones')}
           >
-            Beleidszones
+            Hubs en verbodsgebieden
           </div>
         </div>
       </div>

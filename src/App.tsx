@@ -700,8 +700,10 @@ function App() {
             <Route path="/stats/beleidsinfo" element={<>
               <ContentPage
                 style={{ paddingBottom: 0 }}
-                innerStyle={{ paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0, maxWidth: '100%' }}
-              >
+                innerStyle={{
+                  paddingTop: 0, paddingRight: 0, paddingBottom: 0
+                }}
+                  >
                 <StatsPage />
               </ContentPage>
               {renderFilterbarElements()}
