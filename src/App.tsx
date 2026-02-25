@@ -508,7 +508,8 @@ function App() {
     pathName,
     isLoggedIn,
     metadata.metadata_loaded,
-    filter.gebied
+    filter.gebied,
+    ...(pathName?.includes('/stats/beleidszones') ? [filter.zones] : []),
   ])
 
   useEffect(() => {

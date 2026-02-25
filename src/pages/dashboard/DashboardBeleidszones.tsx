@@ -8,7 +8,7 @@ import {
   didSelectAtLeastOneCustomZone
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
-import { getBeleidszonesZones } from '../../api/beleidszones';
+import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -78,7 +78,7 @@ function DashboardBeleidszones() {
     }
     const fetchZones = async () => {
       try {
-        const zonesList = await getBeleidszonesZones(filter.gebied);
+        const zonesList = await getBeleidszonesZonesForMetadata(filter.gebied);
         setMdsZones(zonesList ?? []);
       } catch {
         setMdsZones([]);

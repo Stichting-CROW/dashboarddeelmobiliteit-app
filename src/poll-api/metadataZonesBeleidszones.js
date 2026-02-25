@@ -9,6 +9,14 @@
 import { getBeleidszonesZones } from '../api/beleidszones';
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
 
+function parseZoneIds(str) {
+  if (!str || typeof str !== 'string') return [];
+  return str
+    .split(',')
+    .map((id) => parseInt(id.trim(), 10))
+    .filter((n) => !Number.isNaN(n));
+}
+
 export const updateBeleidszonesZones = async (store) => {
   try {
     if (!store) return false;
@@ -26,7 +34,14 @@ export const updateBeleidszonesZones = async (store) => {
 
     store.dispatch({ type: 'SET_ZONES_LOADED', payload: false });
 
-    const zones = await getBeleidszonesZones(gmCode);
+    const zoneIdsFromFilter = parseZoneIds(state.filter?.zones);
+    const zoneIdsFromUrl = typeof window !== 'undefined'
+      ? parseZoneIds(new URLSearchParams(window.location.search).get('zones'))
+      : [];
+    const zoneIdsToInclude = [
+      ...new Set([...zoneIdsFromFilter, ...zoneIdsFromUrl]),
+    ];
+    const zones = await getBeleidszonesZones(gmCode, zoneIdsToInclude);
     store.dispatch({ type: 'SET_ZONES', payload: zones });
     store.dispatch({ type: 'SET_ZONES_LOADED', payload: true });
   } catch (ex) {
