@@ -1,5 +1,31 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-02-25
+
+**Zones/Beleidszones**
+
+- 🪄 Nieuw statistiekendashboard voor beleidszones met overzicht van hubs en verbodsgebieden
+- 🪄 Kaartpreview toegevoegd op de Beleidszones-pagina, met nieuwe API's
+- 🪄 Geselecteerde zones worden nu opgeslagen in de URL, zodat je de weergave kunt delen
+- 🪄 Zone-data wordt gecachet voor snellere laadtijden
+- 🪄 Gearchiveerde zones tonen nu de vervaldatum wanneer ze worden getoond
+- 🪄 Link vanuit de hub-statistiekwidget naar de statistiekendetailpagina
+- ✨ Automatisch verbergen van straatlaag bij inzoomen op satellietkaart
+- ✨ Mapbox-label standaard verborgen op kaartpreview
+- 🐛 Opgelost: Gearchiveerde hubs worden niet meer getoond in de filterbar
+- 🧹 Refactor: PolicyHubsStats-code opgeschoond
+
+**Statistieken en Beleidsinfo**
+
+- 🪄 Grafieken gebruiken nu niet-gestapelde lijnen voor betere leesbaarheid
+- 🪄 Lijnen in grafieken worden verbonden bij ontbrekende waarden
+- ✨ Opvulkleur verwijderd bij lijn grafieken voor strakker ontwerp
+- ✨ Link naar 'Prestaties aanbieders' tijdelijk verborgen in de filterbar
+
+**Kaart**
+
+- 🐛 Opgelost: 'Data'-titel wordt niet meer getoond in lagenselectie als er geen datalagen beschikbaar zijn
+
 ## Release 2026-02-18
 
 **Statistieken en Beleidsinfo**
