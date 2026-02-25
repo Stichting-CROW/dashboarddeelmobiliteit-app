@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 
 import { StateType } from '../../types/StateType';
@@ -8,6 +7,8 @@ import {
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone
 } from '../../helpers/stats/index';
+import { getZoneById } from '../../components/Map/MapUtils/zones';
+import { getBeleidszonesZones } from '../../api/beleidszones';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -15,8 +16,41 @@ import VerhuringenPerVoertuigChart from '../../components/Chart/VerhuringenPerVo
 import TimeGrid_VehicleAvailability from '../../components/TimeGrid/TimeGrid_VehicleAvailability';
 import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
 import PageTitle from '../../components/common/PageTitle';
+import ZonePreviewMap from '../../components/ZonePreviewMap/ZonePreviewMap';
 
 import '../../pages/StatsPage.css';
+
+/** Get zone that was replaced by this one (has this zone's geography_id in prev_geographies). */
+const getCurrentVersionOf = (
+  zones: { zone_id?: number; geography_id?: string; prev_geographies?: string[] }[],
+  zone: { geography_id?: string } | undefined
+): { zone_id?: number; name?: string; effective_date?: string } | undefined => {
+  if (!zones?.length || !zone?.geography_id) return undefined;
+  return zones.find(
+    (z) => Array.isArray(z.prev_geographies) && z.prev_geographies.includes(zone.geography_id!)
+  );
+};
+
+/** Get previous version zone (geography_id in this zone's prev_geographies). */
+const getPreviousVersionOf = (
+  zones: { zone_id?: number; geography_id?: string; prev_geographies?: string[] }[],
+  zone: { prev_geographies?: string[] } | undefined
+): { zone_id?: number; name?: string; effective_date?: string } | undefined => {
+  if (!zones?.length || !zone?.prev_geographies?.[0]) return undefined;
+  const prevGeoId = zone.prev_geographies[0];
+  return zones.find((z) => z.geography_id === prevGeoId);
+};
+
+/** Zone from MDS with prev_geographies, effective_date, etc. */
+interface MdsZone {
+  zone_id?: number;
+  geography_id?: string;
+  prev_geographies?: string[];
+  effective_date?: string;
+  published_date?: string;
+  modified_at?: string;
+  name?: string;
+}
 
 function DashboardBeleidszones() {
   const dispatch = useDispatch();
@@ -26,6 +60,8 @@ function DashboardBeleidszones() {
     state.metadata && state.metadata.zones ? state.metadata.zones : []
   );
 
+  const [mdsZones, setMdsZones] = useState<MdsZone[]>([]);
+
   const filterZones = useSelector((state: StateType) =>
     state.filter ? state.filter.zones : null
   );
@@ -33,6 +69,23 @@ function DashboardBeleidszones() {
   const gebieden = useSelector((state: StateType) => state.metadata?.gebieden);
 
   const hasSelectedBeleidszone = didSelectAtLeastOneCustomZone(filter, zones);
+
+  // Fetch zones from MDS for zone metadata (prev_geographies, effective_date)
+  useEffect(() => {
+    if (!hasSelectedBeleidszone || !filter?.gebied) {
+      setMdsZones([]);
+      return;
+    }
+    const fetchZones = async () => {
+      try {
+        const zonesList = await getBeleidszonesZones(filter.gebied);
+        setMdsZones(zonesList ?? []);
+      } catch {
+        setMdsZones([]);
+      }
+    };
+    fetchZones();
+  }, [hasSelectedBeleidszone, filter?.gebied]);
 
   const setAggregationLevel = (newlevel: string) => {
     dispatch({
@@ -90,7 +143,7 @@ function DashboardBeleidszones() {
 
   const getPageTitle = useMemo(() => {
     if (filterZones) {
-      const zoneIds = filterZones.split(',').map((id) => parseInt(id, 10));
+      const zoneIds = filterZones.split(',').map((id) => parseInt(id.trim(), 10)).filter(Boolean);
       const zoneObjects = zones.filter((zone) => zoneIds.includes(zone.zone_id));
       return zoneObjects?.map((zone) => zone.name).join(', ') ?? '';
     }
@@ -100,6 +153,46 @@ function DashboardBeleidszones() {
     }
     return '';
   }, [filterZones, filter.gebied, zones, gebieden]);
+
+  const selectedZoneIds =
+    filterZones && typeof filterZones === 'string'
+      ? filterZones
+          .split(',')
+          .map((id) => parseInt(id.trim(), 10))
+          .filter(Boolean)
+      : [];
+  const hasExactlyOneZone = selectedZoneIds.length === 1;
+  // Prefer MDS zones for metadata (prev_geographies, effective_date); fallback to metadata.zones
+  const zonesForMetadata = mdsZones.length > 0 ? mdsZones : zones;
+  const selectedZone = hasExactlyOneZone
+    ? (getZoneById(zonesForMetadata as { zone_id?: number }[], selectedZoneIds[0]) as MdsZone | undefined)
+    : undefined;
+  const prevZone = getPreviousVersionOf(
+    zonesForMetadata as { zone_id?: number; geography_id?: string; prev_geographies?: string[] }[],
+    selectedZone
+  );
+  const currentZone = getCurrentVersionOf(
+    zonesForMetadata as { zone_id?: number; geography_id?: string; prev_geographies?: string[] }[],
+    selectedZone
+  );
+  const isViewingPreviousVersion = Boolean(
+    hasExactlyOneZone && selectedZone && currentZone
+  );
+  const displayedZoneDate =
+    selectedZone?.effective_date || selectedZone?.published_date || selectedZone?.modified_at;
+  const hasValidZoneDate =
+    displayedZoneDate && moment(displayedZoneDate).isValid();
+
+  const handleViewPreviousVersion = () => {
+    if (prevZone?.zone_id) {
+      dispatch({ type: 'SET_FILTER_ZONES', payload: String(prevZone.zone_id) });
+    }
+  };
+  const handleViewCurrentVersion = () => {
+    if (currentZone?.zone_id) {
+      dispatch({ type: 'SET_FILTER_ZONES', payload: String(currentZone.zone_id) });
+    }
+  };
 
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
@@ -152,6 +245,37 @@ function DashboardBeleidszones() {
       </div>
 
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
+
+      <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600">
+        {hasExactlyOneZone && hasValidZoneDate && (
+          <span>
+            Zone actief vanaf{' '}
+            {moment(displayedZoneDate).format('DD-MM-YYYY HH:mm')}
+          </span>
+        )}
+        {hasExactlyOneZone && !isViewingPreviousVersion && prevZone && (
+          <button
+            type="button"
+            onClick={handleViewPreviousVersion}
+            className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Vorige versie
+          </button>
+        )}
+        {isViewingPreviousVersion && currentZone && (
+          <button
+            type="button"
+            onClick={handleViewCurrentVersion}
+            className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Huidige versie
+          </button>
+        )}
+      </div>
+
+      <div style={{marginLeft: '58px'}}>
+        <ZonePreviewMap className="my-4" />
+      </div>
 
       <div className="xl:flex">
         <div className="xl:flex-1 mt-8 xl:mt-0">

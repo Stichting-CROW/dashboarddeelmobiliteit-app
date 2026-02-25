@@ -48,6 +48,7 @@ import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
 import { updateZones } from './poll-api/metadataZones.js';
+import { updateBeleidszonesZones } from './poll-api/metadataZonesBeleidszones.js';
 import { updateZonesgeodata } from './poll-api/metadataZonesgeodata.js';
 
 import {setAclInRedux} from './actions/authentication.js';
@@ -498,8 +499,13 @@ function App() {
     if(process && process.env.DEBUG) console.log('useEffect zones', filter.gebied)
     if(! metadata.metadata_loaded) return;
 
-    updateZones(store);
+    if (pathName?.includes('/stats/beleidszones')) {
+      updateBeleidszonesZones(store);
+    } else {
+      updateZones(store);
+    }
   }, [
+    pathName,
     isLoggedIn,
     metadata.metadata_loaded,
     filter.gebied

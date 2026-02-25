@@ -3,6 +3,7 @@ import {
   getAggregatedStats,
   getAggregatedStats_timescaleDB
  } from '../../api/aggregatedStats';
+import { getBeleidszonesRentalStats } from '../../api/beleidszones';
 
 import {
   prepareAggregatedStatsData,
@@ -10,6 +11,11 @@ import {
   doShowDetailledAggregatedData,
   keepActiveOperators
 } from './index';
+
+const parseZoneIdsFromFilter = (filter: { zones?: string }) => {
+  if (!filter?.zones) return [];
+  return filter.zones.split(',').map((id) => parseInt(id.trim(), 10)).filter((n) => !isNaN(n));
+};
 
 export const getAggregatedRentalsData = async (token, filter, zones, metadata) => {
   let aggregatedVehicleData;
@@ -19,9 +25,23 @@ export const getAggregatedRentalsData = async (token, filter, zones, metadata) =
     aggregationLevel: filter.ontwikkelingaggregatie,
     aggregationTime: filter.ontwikkelingaggregatie_tijd,
     aggregationFunction: filter.ontwikkelingaggregatie_function
-  }
-  if(doShowDetailledAggregatedData(filter, zones)) {
-    aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'rentals', options);
+  };
+  if (doShowDetailledAggregatedData(filter, zones)) {
+    const zoneIds = parseZoneIdsFromFilter(filter);
+    if (zoneIds.length > 0) {
+      const van = filter.ontwikkelingvan ? new Date(filter.ontwikkelingvan) : new Date();
+      const tot = filter.ontwikkelingtot ? moment(filter.ontwikkelingtot).add(1, 'day').toDate() : new Date();
+      aggregatedVehicleData = await getBeleidszonesRentalStats(token, {
+        zoneIds,
+        startTime: van.toISOString(),
+        endTime: tot.toISOString(),
+        aggregationLevel: filter.ontwikkelingaggregatie,
+        aggregationFunction: filter.ontwikkelingaggregatie_function || 'MAX',
+      });
+    }
+    if (!aggregatedVehicleData) {
+      aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'rentals', options);
+    }
   } else {
     aggregatedVehicleData = await getAggregatedStats(token, 'rentals', options);
   }
