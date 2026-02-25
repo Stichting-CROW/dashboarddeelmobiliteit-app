@@ -1,6 +1,6 @@
 import React, {useEffect, useState } from 'react';
 
-import { getOperatorStatsForChart } from './chartTools.js';
+import { getOperatorStatsForChart, transformZerosToNullForChart } from './chartTools.js';
 
 import {StateType} from '../../types/StateType';
 
@@ -113,7 +113,11 @@ function VerhuringenChart(props) {
       return { ...x, time: timeFormatted, [TOTAAL_KEY]: totaal };
     });
   };
-  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData);
+  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const valueKeys = chartDataWithNiceDatesRaw?.[0]
+    ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
+    : [];
+  const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
 
   const setAggregationFunction = (value) => {
     dispatch({
@@ -152,6 +156,7 @@ function VerhuringenChart(props) {
           strokeWidth={1.5}
           dot={false}
           isAnimationActive={false}
+          connectNulls
         />
       );
     });
@@ -166,6 +171,7 @@ function VerhuringenChart(props) {
           strokeWidth={2.5}
           dot={false}
           isAnimationActive={false}
+          connectNulls
         />
       );
     }

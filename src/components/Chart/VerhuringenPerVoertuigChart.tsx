@@ -19,6 +19,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
+import { transformZerosToNullForChart } from './chartTools.js';
 import {
   getProviderColor,
   getPrettyProviderName,
@@ -72,29 +73,51 @@ function mergeRentalsPerVehicle(
 }
 
 const tooltipTextColor = '#333333';
-const getLineColor = (x: {fill?: string; stroke?: string}) =>
-  (x.fill && x.fill !== 'transparent' ? x.fill : x.stroke) || tooltipTextColor;
+
+const isLightColor = (c: string | undefined): boolean => {
+  if (!c || typeof c !== 'string') return true;
+  const s = c.replace(/\s/g, '').toLowerCase();
+  if (s === 'white' || s === '#fff' || s === '#ffffff' || s.startsWith('rgb(255,255,255')) return true;
+  if (s.startsWith('#')) {
+    const hex = s.slice(1);
+    if (hex.length <= 4) return parseInt(hex, 16) > 0xff0;
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6) || 'ff', 16);
+    return (r + g + b) / 3 > 240;
+  }
+  return false;
+};
+
+const getLineColor = (x: {name?: string; value?: number; fill?: string; stroke?: string; color?: string}) => {
+  const c = x.color || (x.fill && x.fill !== 'transparent' ? x.fill : x.stroke) || tooltipTextColor;
+  return isLightColor(c) ? tooltipTextColor : c;
+};
 
 const RatioTooltip = ({
   active,
   payload,
-  label
+  label,
+  contentStyle = {}
 }: {
   active?: boolean;
-  payload?: Array<{name: string; value: number; fill?: string; stroke?: string}>;
+  payload?: Array<{name: string; value: number; fill?: string; stroke?: string; color?: string}>;
   label?: string;
+  contentStyle?: React.CSSProperties;
 }) => {
   if (active && payload && payload.length) {
-    const displayValue = (v: number) => (Number.isInteger(v) ? v.toString() : v.toFixed(2));
+    const displayValue = (v: number | null | undefined) =>
+      v == null ? '0' : Number.isInteger(v) ? v.toString() : v.toFixed(1);
+    const rootStyle = {color: tooltipTextColor, background: '#FFFFFF', ...contentStyle};
 
     return (
-      <div className="CustomizedTooltip">
+      <div className="CustomizedTooltip" style={rootStyle}>
         <div className="my-0" style={{color: tooltipTextColor}}>
           <b>{label}</b>
         </div>
         <ul className="my-0 py-0">
           {payload.map((x, i) => (
-            <li key={'c-' + i} style={{color: getLineColor(x)}}>
+            <li key={'c-' + i} className="CustomizedTooltip-item" style={{color: getLineColor(x)}}>
               {x.name}: {displayValue(x.value)}
             </li>
           ))}
@@ -168,7 +191,11 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
       time: moment((x.time ?? x.name) as string).format(dateFormat)
     }));
   };
-  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData);
+  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const valueKeys = chartDataWithNiceDatesRaw?.[0]
+    ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
+    : [];
+  const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
 
   const numberOfPointsOnXAxis = chartData?.length ?? 0;
   const providerNames = getUniqueProviderNames(chartDataWithNiceDates).filter(
@@ -190,7 +217,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
           <CartesianGrid strokeDasharray="3 0" vertical={false} />
           <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
           <YAxis tick={<CustomizedYAxisTick />} />
-          <Tooltip content={<RatioTooltip />} />
+          <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
           <Legend />
           {providerNames.map((x) => {
             const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
@@ -204,6 +231,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
                 strokeWidth={1.5}
                 fill="transparent"
                 isAnimationActive={false}
+                connectNulls
               />
             );
           })}
@@ -219,11 +247,11 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip content={<RatioTooltip />} />
+        <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
         <Legend />
         {providerNames.map((x) => {
           const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
-          return (
+            return (
             <Line
               key={x}
               type="monotone"
@@ -233,6 +261,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
               strokeWidth={1.5}
               dot={false}
               isAnimationActive={false}
+              connectNulls
             />
           );
         })}

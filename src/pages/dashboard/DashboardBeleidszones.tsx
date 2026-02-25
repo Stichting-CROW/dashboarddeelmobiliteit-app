@@ -251,7 +251,7 @@ function DashboardBeleidszones() {
 
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
-      <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600">
+      <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
         {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
             {isArchived
