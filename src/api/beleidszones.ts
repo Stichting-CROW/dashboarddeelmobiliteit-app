@@ -104,10 +104,17 @@ const getFetchOptions = (token: string | null) => {
 const phasesParam =
   'phases=active&phases=retirement_concept&phases=published_retirement&phases=committed_retirement_concept';
 
+/** Cache for MDS public/zones responses by (gmCode, phases). Avoids refetch when only filter.zones changes. */
+const mdsZonesCache = new Map<string, Beleidszone[]>();
+
 async function fetchZonesFromMds(
   gmCode: string,
   phases: string
 ): Promise<Beleidszone[]> {
+  const cacheKey = `${gmCode}|${phases}`;
+  const cached = mdsZonesCache.get(cacheKey);
+  if (cached) return cached;
+
   const url = `${MDS_URL}/public/zones?municipality=${encodeURIComponent(gmCode)}&geography_types=no_parking&geography_types=stop&geography_types=monitoring&${phases}`;
   const response = await fetch(url, getFetchOptions(null));
   if (!response.ok) {
@@ -117,7 +124,9 @@ async function fetchZonesFromMds(
   const zonesArray = Array.isArray(raw)
     ? raw
     : raw?.zones ?? raw?.data?.zones ?? [];
-  return Array.isArray(zonesArray) ? zonesArray : [];
+  const zones = Array.isArray(zonesArray) ? zonesArray : [];
+  mdsZonesCache.set(cacheKey, zones);
+  return zones;
 }
 
 /**

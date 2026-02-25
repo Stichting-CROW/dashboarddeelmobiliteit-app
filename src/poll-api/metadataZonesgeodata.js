@@ -10,6 +10,9 @@ export const getEmptyZonesGeodataPayload = () => {
   }
 }
 
+/** Cache for MDS public/zones responses by municipality code. Avoids refetch when only filter.zones changes. */
+const mdsZonesCache = new Map();
+
 const buildGeodataFromMdsZones = (zones, selectedZoneIds, store, state) => {
   const st = require('geojson-bounds');
   const geojson = { type: 'FeatureCollection', features: [] };
@@ -113,9 +116,19 @@ export const updateZonesgeodata = (store) => {
         return;
       }
 
+      const gmCode = state.filter.gebied;
+      const cachedZones = mdsZonesCache.get(gmCode);
+
+      if (cachedZones) {
+        const selectedZoneIds = state.filter.zones
+          ? state.filter.zones.split(',').map((id) => id.trim()).filter(Boolean)
+          : null;
+        buildGeodataFromMdsZones(cachedZones, selectedZoneIds, store, state);
+        return;
+      }
+
       store.dispatch({ type: 'SHOW_LOADING', payload: true });
 
-      const gmCode = state.filter.gebied;
       const url = `${process.env.REACT_APP_MDS_URL}/public/zones?municipality=${encodeURIComponent(gmCode)}&geography_types=no_parking&geography_types=stop&geography_types=monitoring&phases=active&phases=retirement_concept&phases=committed_retirement_concept&phases=published_retirement&phases=archived`;
 
       fetch(url)
@@ -128,6 +141,7 @@ export const updateZonesgeodata = (store) => {
         })
         .then((raw) => {
           const zones = Array.isArray(raw) ? raw : raw?.zones ?? raw?.data ?? [];
+          mdsZonesCache.set(gmCode, zones);
           const selectedZoneIds = state.filter.zones
             ? state.filter.zones.split(',').map((id) => id.trim()).filter(Boolean)
             : null;
