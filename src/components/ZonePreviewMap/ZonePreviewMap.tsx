@@ -87,8 +87,12 @@ function ZonePreviewMap({ className = '' }: ZonePreviewMapProps) {
       style: mapStyles.base as maplibregl.StyleSpecification,
       center: [0, 0],
       zoom: 10,
-      interactive: false
+      interactive: false,
+      attributionControl: false
     });
+
+    // Add compact attribution: info icon only by default, "Mapbox" on click
+    map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
     mapRef.current = map;
 
@@ -127,6 +131,14 @@ function ZonePreviewMap({ className = '' }: ZonePreviewMapProps) {
           }
         );
       }
+
+      // Hide Mapbox label by default; user can click info icon to reveal it.
+      // Defer so we run after MapLibre's sourcedata-triggered _updateCompact.
+      setTimeout(() => {
+        map.getContainer().querySelectorAll('.maplibregl-ctrl-attrib').forEach((el) => {
+          el.classList.remove('maplibregl-compact-show', 'mapboxgl-compact-show');
+        });
+      }, 0);
     });
 
     return () => {
