@@ -71,13 +71,17 @@ function mergeRentalsPerVehicle(
   });
 }
 
+const tooltipTextColor = '#333333';
+const getLineColor = (x: {fill?: string; stroke?: string}) =>
+  (x.fill && x.fill !== 'transparent' ? x.fill : x.stroke) || tooltipTextColor;
+
 const RatioTooltip = ({
   active,
   payload,
   label
 }: {
   active?: boolean;
-  payload?: Array<{name: string; value: number; fill: string}>;
+  payload?: Array<{name: string; value: number; fill?: string; stroke?: string}>;
   label?: string;
 }) => {
   if (active && payload && payload.length) {
@@ -85,12 +89,12 @@ const RatioTooltip = ({
 
     return (
       <div className="CustomizedTooltip">
-        <div className="my-0">
+        <div className="my-0" style={{color: tooltipTextColor}}>
           <b>{label}</b>
         </div>
         <ul className="my-0 py-0">
           {payload.map((x, i) => (
-            <li key={'c-' + i} style={{color: x.fill}}>
+            <li key={'c-' + i} style={{color: getLineColor(x)}}>
               {x.name}: {displayValue(x.value)}
             </li>
           ))}
@@ -197,7 +201,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
                 dataKey={x}
                 name={getPrettyProviderName(x)}
                 stroke={providerColor}
-                fill={providerColor}
+                fill="transparent"
                 isAnimationActive={false}
               />
             );
