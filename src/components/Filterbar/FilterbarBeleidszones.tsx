@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './css/FilterbarPermits.css';
 import './css/FilteritemGebieden.css';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { addDays } from 'date-fns';
 
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
@@ -23,6 +23,7 @@ interface FilterbarBeleidszonesProps {
 function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
@@ -31,7 +32,45 @@ function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
     state.filter ? state.filter.gebied : null
   );
 
+  const filterZones = useSelector((state: StateType) =>
+    state.filter ? state.filter.zones : null
+  );
+
   const hidePlaats = gebieden.length <= 1;
+  const hasSkippedInitialSync = useRef(false);
+
+  // Sync active zones (and plaats) to URL when user selects in Filterbar
+  useEffect(() => {
+    if (location.pathname !== '/stats/beleidszones') return;
+
+    const currentParams = new URLSearchParams(location.search);
+    if (
+      !hasSkippedInitialSync.current &&
+      (currentParams.has('zones') || currentParams.has('gm_code'))
+    ) {
+      hasSkippedInitialSync.current = true;
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    if (filterGebied) {
+      params.set('gm_code', filterGebied);
+    } else {
+      params.delete('gm_code');
+    }
+    if (filterZones && String(filterZones).trim()) {
+      params.set('zones', String(filterZones).trim());
+    } else {
+      params.delete('zones');
+    }
+    const newSearch = params.toString();
+    const currentSearch = location.search ? location.search.slice(1) : '';
+    if (newSearch !== currentSearch) {
+      navigate(`/stats/beleidszones${newSearch ? `?${newSearch}` : ''}`, {
+        replace: true
+      });
+    }
+  }, [filterGebied, filterZones]);
 
   // Initialize filter from URL params when navigating to beleidszones with preselected hub/date
   useEffect(() => {
