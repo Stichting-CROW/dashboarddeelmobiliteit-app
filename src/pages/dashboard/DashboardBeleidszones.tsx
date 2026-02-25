@@ -41,7 +41,7 @@ const getPreviousVersionOf = (
   return zones.find((z) => z.geography_id === prevGeoId);
 };
 
-/** Zone from MDS with prev_geographies, effective_date, etc. */
+/** Zone from MDS with prev_geographies, effective_date, retire_date, etc. */
 interface MdsZone {
   zone_id?: number;
   geography_id?: string;
@@ -49,6 +49,7 @@ interface MdsZone {
   effective_date?: string;
   published_date?: string;
   modified_at?: string;
+  retire_date?: string;
   name?: string;
 }
 
@@ -178,10 +179,14 @@ function DashboardBeleidszones() {
   const isViewingPreviousVersion = Boolean(
     hasExactlyOneZone && selectedZone && currentZone
   );
-  const displayedZoneDate =
+  const effectiveDate =
     selectedZone?.effective_date || selectedZone?.published_date || selectedZone?.modified_at;
-  const hasValidZoneDate =
-    displayedZoneDate && moment(displayedZoneDate).isValid();
+  const hasValidEffectiveDate = effectiveDate && moment(effectiveDate).isValid();
+  const retireDate = selectedZone?.retire_date;
+  const isArchived =
+    retireDate &&
+    moment(retireDate).isValid() &&
+    moment(retireDate).isBefore(moment());
 
   const handleViewPreviousVersion = () => {
     if (prevZone?.zone_id) {
@@ -247,10 +252,11 @@ function DashboardBeleidszones() {
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600">
-        {hasExactlyOneZone && hasValidZoneDate && (
+        {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
-            Zone actief vanaf{' '}
-            {moment(displayedZoneDate).format('DD-MM-YYYY HH:mm')}
+            {isArchived
+              ? `Gearchiveerde zone was actief van ${moment(effectiveDate).format('DD-MM-YYYY HH:mm')} tot ${moment(retireDate).format('DD-MM-YYYY HH:mm')}`
+              : `Zone actief vanaf ${moment(effectiveDate).format('DD-MM-YYYY HH:mm')}`}
           </span>
         )}
         {hasExactlyOneZone && !isViewingPreviousVersion && prevZone && (
