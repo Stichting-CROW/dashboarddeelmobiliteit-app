@@ -12,12 +12,8 @@ import {
 import moment from 'moment';
 
 import {
-  AreaChart,
-  // LineChart,
-  Area,
-  BarChart,
-  Bar,
-  // Line,
+  LineChart,
+  Line,
   XAxis,
   Legend,
   YAxis,
@@ -49,6 +45,8 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+
+const TOTAAL_KEY = 'Totaal';
 
 function VerhuringenChart(props) {
   const dispatch = useDispatch()
@@ -105,13 +103,17 @@ function VerhuringenChart(props) {
   const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones, aanbieders);
 
   const getChartDataWithNiceDates = (data) => {
+    if (!data?.length) return [];
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);
+    const providerKeys = Object.keys(data[0]).filter(k => k !== 'time' && k !== 'name');
     return data.map(x => {
-      return {...x, ...{ time: moment(x.time ? x.time : x.name).format(dateFormat) }}
-    })
-  }
-  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)
+      const timeFormatted = moment(x.time ? x.time : x.name).format(dateFormat);
+      const totaal = providerKeys.reduce((sum, k) => sum + (Number(x[k]) || 0), 0);
+      return { ...x, time: timeFormatted, [TOTAAL_KEY]: totaal };
+    });
+  };
+  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData);
 
   const setAggregationFunction = (value) => {
     dispatch({
@@ -128,45 +130,50 @@ function VerhuringenChart(props) {
     )
   }
 
-  const numberOfPointsOnXAxis = rentalsData ? Object.keys(rentalsData).length : 0;
+  const getSeriesKeys = () => {
+    const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
+    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name');
+    const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
+    const hasTotaal = providerKeys.indexOf(TOTAAL_KEY) >= 0;
+    return { providersOnly, hasTotaal };
+  };
 
-  const renderChart = () => {
-    if(numberOfPointsOnXAxis > 24 && filter.ontwikkelingaggregatie !== '15m' && filter.ontwikkelingaggregatie !== '5m' && filter.ontwikkelingaggregatie !== 'hour') {
-      return <AreaChart
-        data={chartDataWithNiceDates}
-        margin={{
-          top: 10,
-          right: 30,
-          left: 0,
-          bottom: 0,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 0" vertical={false} />
-        <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
-        <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip content={<CustomizedTooltip />} />
-        <Legend />
-        {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
-          const providerColor = getProviderColor(metadata.aanbieders, x)
-          if(x === 'time') return;
-          return (
-            <Area
-              key={x}
-              stackId="1"
-              type="monotone"
-              dataKey={x}
-              name={getPrettyProviderName(x)}
-              stroke={providerColor}
-              fill={providerColor}
-              isAnimationActive={false}
-            />
-          )
-        })}
-      </AreaChart>
+  const renderLineSeries = () => {
+    const { providersOnly, hasTotaal } = getSeriesKeys();
+    const series: React.ReactNode[] = [];
+    providersOnly.forEach(x => {
+      series.push(
+        <Line
+          key={x}
+          type="monotone"
+          dataKey={x}
+          name={getPrettyProviderName(x)}
+          stroke={getProviderColor(metadata.aanbieders, x)}
+          strokeWidth={1.5}
+          dot={false}
+          isAnimationActive={false}
+        />
+      );
+    });
+    if (hasTotaal) {
+      series.push(
+        <Line
+          key={TOTAAL_KEY}
+          type="monotone"
+          dataKey={TOTAAL_KEY}
+          name={TOTAAL_KEY}
+          stroke="#1a1a1a"
+          strokeWidth={2.5}
+          dot={false}
+          isAnimationActive={false}
+        />
+      );
     }
+    return series;
+  };
 
-    // Or render bar chart
-    return <BarChart
+  const renderChart = () => (
+    <LineChart
       data={chartDataWithNiceDates}
       margin={{
         top: 10,
@@ -178,26 +185,11 @@ function VerhuringenChart(props) {
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
-      <Tooltip content={<CustomizedTooltip />} />
-      <Legend></Legend>
-      {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
-        const providerColor = getProviderColor(metadata.aanbieders, x)
-        if(x === 'time') return;
-        return (
-          <Bar
-            key={x}
-            stackId="1"
-            type="monotone"
-            dataKey={x}
-            name={getPrettyProviderName(x)}
-            stroke={providerColor}
-            fill={providerColor}
-            isAnimationActive={false}
-          />
-        )
-      })}
-    </BarChart>
-  }
+      <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
+      <Legend />
+      {renderLineSeries()}
+    </LineChart>
+  );
 
   return (
     <div className="relative">

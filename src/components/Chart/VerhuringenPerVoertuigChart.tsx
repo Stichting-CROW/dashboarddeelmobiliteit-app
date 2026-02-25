@@ -9,8 +9,8 @@ import moment from 'moment';
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   Legend,
   YAxis,
@@ -201,6 +201,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
                 dataKey={x}
                 name={getPrettyProviderName(x)}
                 stroke={providerColor}
+                strokeWidth={1.5}
                 fill="transparent"
                 isAnimationActive={false}
               />
@@ -211,7 +212,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     }
 
     return (
-      <BarChart
+      <LineChart
         data={chartDataWithNiceDates}
         margin={{top: 10, right: 30, left: 0, bottom: 0}}
       >
@@ -223,18 +224,19 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
         {providerNames.map((x) => {
           const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
           return (
-            <Bar
+            <Line
               key={x}
               type="monotone"
               dataKey={x}
               name={getPrettyProviderName(x)}
               stroke={providerColor}
-              fill={providerColor}
+              strokeWidth={1.5}
+              dot={false}
               isAnimationActive={false}
             />
           );
         })}
-      </BarChart>
+      </LineChart>
     );
   };
 
