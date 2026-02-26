@@ -161,11 +161,13 @@ function BeschikbareVoertuigenChart({
       series.push(
         <Line
           key={x}
-          type="monotone"
+          type="natural"
           dataKey={x}
           name={getPrettyProviderName(x)}
           stroke={getProviderColor(metadata.aanbieders, x)}
-          strokeWidth={1.5}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
           dot={false}
           isAnimationActive={false}
           connectNulls
@@ -176,11 +178,13 @@ function BeschikbareVoertuigenChart({
       series.push(
         <Line
           key={TOTAAL_KEY}
-          type="monotone"
+          type="natural"
           dataKey={TOTAAL_KEY}
           name={TOTAAL_KEY}
           stroke="#1a1a1a"
-          strokeWidth={2.5}
+          strokeWidth={3}
+          strokeLinejoin="round"
+          strokeLinecap="round"
           dot={false}
           isAnimationActive={false}
           connectNulls

@@ -224,11 +224,13 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
             return (
               <Area
                 key={x}
-                type="monotone"
+                type="natural"
                 dataKey={x}
                 name={getPrettyProviderName(x)}
                 stroke={providerColor}
-                strokeWidth={1.5}
+                strokeWidth={2.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
                 fill="transparent"
                 isAnimationActive={false}
                 connectNulls
@@ -254,11 +256,13 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
             return (
             <Line
               key={x}
-              type="monotone"
+              type="natural"
               dataKey={x}
               name={getPrettyProviderName(x)}
               stroke={providerColor}
-              strokeWidth={1.5}
+              strokeWidth={2.5}
+              strokeLinejoin="round"
+              strokeLinecap="round"
               dot={false}
               isAnimationActive={false}
               connectNulls
