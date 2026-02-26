@@ -283,20 +283,13 @@ function DashboardBeleidszones() {
         <ZonePreviewMap className="my-4" />
       </div>
 
-      <div className="xl:flex">
-        <div className="xl:flex-1 mt-8 xl:mt-0">
-          <BeschikbareVoertuigenChart
-            filter={filter}
-            config={{ showLegend: true }}
-            title="Beschikbare voertuigen"
-          />
-        </div>
-        <div className="xl:flex-1 mt-8 xl:mt-0">
-          <VerhuringenChart title="Verhuringen" />
-        </div>
-      </div>
-
-      <div className="xl:flex-1 mt-8">
+      <div className="StatsPage-chart-grid">
+        <BeschikbareVoertuigenChart
+          filter={filter}
+          config={{ showLegend: true }}
+          title="Beschikbare voertuigen"
+        />
+        <VerhuringenChart title="Verhuringen" />
         <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
       </div>
 

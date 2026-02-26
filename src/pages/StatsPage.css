@@ -2,3 +2,11 @@
 .StatsPage h2 {
   margin-left: 58px;
 }
+
+/* Chart grid: 2 columns when each chart can be at least 800px, otherwise stacked */
+.StatsPage-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(800px, 100%), 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
