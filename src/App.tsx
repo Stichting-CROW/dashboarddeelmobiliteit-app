@@ -510,7 +510,34 @@ function App() {
     metadata.metadata_loaded,
     filter.gebied,
     ...(pathName?.includes('/stats/beleidszones') ? [filter.zones] : []),
-  ])
+  ]);
+
+  /**
+   * When navigating away from /stats/beleidszones to a page that doesn't show archived
+   * zones (e.g. /stats/beleidsinfo), remove any selected zones from Redux that are
+   * not in the current page's zone list. This prevents "1 zone selected" with no
+   * visible zone when an archived zone was selected on beleidszones.
+   */
+  useEffect(() => {
+    if (pathName?.includes('/stats/beleidszones')) return;
+    if (!metadata.zones_loaded || !metadata.zones?.length) return;
+    const zonesStr = filter?.zones;
+    if (!zonesStr || typeof zonesStr !== 'string' || !zonesStr.trim()) return;
+
+    const availableZoneIds = new Set(
+      metadata.zones.map((z: { zone_id?: number | string }) =>
+        z.zone_id != null ? String(z.zone_id) : null
+      ).filter(Boolean)
+    );
+    const selectedIds = zonesStr.split(',').map((id) => id.trim()).filter(Boolean);
+    const validIds = selectedIds.filter((id) => availableZoneIds.has(id));
+    if (validIds.length < selectedIds.length) {
+      store.dispatch({
+        type: 'SET_FILTER_ZONES',
+        payload: validIds.length > 0 ? validIds.join(',') : ''
+      });
+    }
+  }, [pathName, metadata.zones_loaded, metadata.zones, filter?.zones]);
 
   useEffect(() => {
     if(process && process.env.DEBUG) console.log('useEffect zones geodata')
