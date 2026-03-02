@@ -380,16 +380,10 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
     try {
       let existingRecord: GeometryOperatorModalityLimit | null = null;
       if (limitHistory) {
-        const sorted = [...limitHistory].sort((a, b) => toDateOnly(a.effective_date).localeCompare(toDateOnly(b.effective_date)));
-        const d = toDateOnly(newRowDate);
-        for (let i = 0; i < sorted.length; i++) {
-          const startdate = toDateOnly(sorted[i].effective_date);
-          const nextStart = i < sorted.length - 1 ? toDateOnly(sorted[i + 1].effective_date) : '9999-12-31';
-          if (d >= startdate && (nextStart === '9999-12-31' ? d <= nextStart : d < nextStart)) {
-            existingRecord = sorted[i];
-            break;
-          }
-        }
+        const targetDate = toDateOnly(newRowDate);
+        existingRecord = limitHistory.find(
+          (record) => toDateOnly(record.effective_date) === targetDate
+        ) ?? null;
       }
 
       const geometry_ref = toGeometryRef(municipality);
