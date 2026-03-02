@@ -192,7 +192,11 @@
 }
 
 .permits-form-actions {
-  @apply flex justify-end gap-2 mt-4;
+  @apply flex justify-between items-center gap-2 mt-4;
+}
+
+.permits-form-delete-button {
+  @apply px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm font-medium;
 }
 
 .permits-form-cancel-button {
