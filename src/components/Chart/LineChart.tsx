@@ -153,7 +153,7 @@ const LineChart: React.FC<LineChartProps> = ({
       offsetY: 0
     },
     stroke: {
-      curve: 'smooth',
+      // curve: 'smooth',
       width: 3,
       dashArray: series.map((s) => s.dashArray || 0)
     },
