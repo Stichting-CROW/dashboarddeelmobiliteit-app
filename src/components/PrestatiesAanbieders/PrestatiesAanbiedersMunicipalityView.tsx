@@ -84,17 +84,27 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
         const municipality = editDialogPermit!.permit_limit.municipality;
         const provider_system_id = editDialogPermit!.permit_limit.system_id;
         const vehicle_type = editDialogPermit!.permit_limit.modality;
-        const propulsion_type = editDialogPermit!.propulsion_type!;
         const geometry_ref = toGeometryRef(municipality);
+
+        // Fetch KPI data first to get the correct propulsion_type from the API response
+        // (e.g. LIME bicycle uses electric_assist, not electric)
+        const kpiData = await getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type);
+        const propulsion_type =
+          kpiData?.municipality_modality_operators?.[0]?.propulsion_type ??
+          editDialogPermit!.propulsion_type ??
+          'electric';
 
         // Store permit info so dialogs can render even if editDialogPermit is cleared
         setCurrentPermitInfo({ municipality, provider_system_id, vehicle_type, propulsion_type });
 
-        // Fetch history and KPI descriptions
-        const [history, kpiData] = await Promise.all([
-          getGeometryOperatorModalityLimitHistory(token, provider_system_id, geometry_ref, vehicle_type, propulsion_type),
-          getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type),
-        ]);
+        // Fetch history using the API-derived propulsion_type
+        const history = await getGeometryOperatorModalityLimitHistory(
+          token,
+          provider_system_id,
+          geometry_ref,
+          vehicle_type,
+          propulsion_type
+        );
 
         const sortedHistory = history ? history.sort((a, b) => moment(a.effective_date).diff(moment(b.effective_date))) : null;
         setLimitHistory(sortedHistory);
