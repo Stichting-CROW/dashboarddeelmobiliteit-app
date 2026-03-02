@@ -1,9 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import moment from 'moment';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
-import { RangeBarIndicator } from './RangeBarIndicator';
 import type { PermitLimitRecord, PerformanceIndicatorKPI, PerformanceIndicatorDescription } from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators, findOperatorMatch } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
@@ -40,7 +38,6 @@ const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
 );
 
 export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
-    const [showKpiRawDialog, setShowKpiRawDialog] = useState(false);
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
@@ -169,26 +166,27 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             endDate
           );
           if (data) {
-            if (data.performance_indicator_description) {
-              setPerformanceIndicatorDescriptions(data.performance_indicator_description);
+            const descriptions = data.performance_indicator_description || [];
+            if (descriptions.length > 0) {
+              setPerformanceIndicatorDescriptions(descriptions);
             }
-            if (data.municipality_modality_operators.length > 0) {
-              const match = findOperatorMatch(
-                data.municipality_modality_operators,
-                operator,
-                formFactor,
-                propulsionType
-              );
-              if (match) {
-                setKpis(match.kpis);
-              } else {
-                // Clear kpis if no match found (e.g., data was removed)
-                setKpis([]);
-              }
-            } else {
-              // Clear kpis if no operators found
-              setKpis([]);
-            }
+            const match = data.municipality_modality_operators?.length > 0
+              ? findOperatorMatch(
+                  data.municipality_modality_operators,
+                  operator,
+                  formFactor,
+                  propulsionType
+                )
+              : undefined;
+            const backendKpis = match?.kpis ?? [];
+            // Always show all KPIs from performance_indicator_description; use backend data when available, else empty
+            const allKpis: PerformanceIndicatorKPI[] = descriptions.length > 0
+              ? descriptions.map((desc) => {
+                  const found = backendKpis.find((k) => k.kpi_key === desc.kpi_key);
+                  return found ?? { kpi_key: desc.kpi_key, granularity: '', values: [] };
+                })
+              : backendKpis;
+            setKpis(allKpis);
             // Mark as loaded once after successful fetch, regardless of whether data was found
             hasLoadedOnce.current = true;
           }
@@ -247,13 +245,10 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                 { onEditLimits && <button
                   type="button"
                   aria-label="Verguningseisen bewerken"
-                  title="Verguningseisen bewerken (Shift+click: KPI overview raw)"
+                  title="Bewerk vergunningseisen"
                   className="permits-card-edit-button"
                   onClick={(e) => {
-                    if (e.shiftKey) {
-                      e.preventDefault();
-                      setShowKpiRawDialog(true);
-                    } else if (permit.propulsion_type) {
+                    if (permit.propulsion_type) {
                       onEditLimits();
                     } else {
                       alert('Geen propulsion_type – bewerken niet mogelijk.');

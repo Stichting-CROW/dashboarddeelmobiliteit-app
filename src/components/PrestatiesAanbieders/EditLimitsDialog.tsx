@@ -58,8 +58,6 @@ interface EditLimitsDialogProps {
   showPermitLimitsEditor?: boolean;
   onClose: () => void;
   onRecordUpdated: () => void;
-  onProviderClick?: () => void;
-  onVehicleTypeClick?: () => void;
 }
 
 const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
@@ -72,13 +70,12 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
   kpiDescriptions,
   mode,
   token,
-  propulsion_type = 'electric',
+  propulsion_type,
   showPermitLimitsEditor = false,
   onClose,
   onRecordUpdated,
-  onProviderClick,
-  onVehicleTypeClick,
 }) => {
+  const hasPropulsionType = Boolean(propulsion_type);
   const provider = getProvider(provider_system_id);
   const realProviderName = provider?.name || provider_system_id;
   const providerName = isDemoMode() ? getDemoOperatorName(provider_system_id) : realProviderName;
@@ -282,7 +279,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
 
   // Fetch history when Test tab is selected
   useEffect(() => {
-    if (activeTab !== 'test' || !token || !municipality || !provider_system_id || !vehicle_type) return;
+    if (activeTab !== 'test' || !token || !municipality || !provider_system_id || !vehicle_type || !propulsion_type) return;
     const fetchHistory = async () => {
       setHistoryLoading(true);
       setHistoryData(null);
@@ -293,7 +290,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
           provider_system_id,
           geometry_ref,
           vehicle_type,
-          propulsion_type ?? 'electric'
+          propulsion_type
         );
         setHistoryData(result ?? null);
       } catch (error) {
@@ -358,7 +355,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
   }, [token]);
 
   const handleTestDelete = useCallback(async (date: string) => {
-    if (!token || !historyData) return;
+    if (!token || !historyData || !propulsion_type) return;
     const found = findRecordContainingDate(historyData, date);
     if (!found?.record.geometry_operator_modality_limit_id) {
       alert(`Geen record voor datum ${date}`);
@@ -383,7 +380,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
           provider_system_id,
           geometry_ref,
           vehicle_type,
-          propulsion_type ?? 'electric'
+          propulsion_type
         );
         setHistoryData(fresh ? fresh.sort((a, b) => a.effective_date.localeCompare(b.effective_date)) : []);
         onRecordUpdated();
@@ -528,6 +525,22 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     }
   };
 
+  if (!hasPropulsionType) {
+    return (
+      <Modal
+        isVisible={isVisible}
+        title="Bewerk vergunningseisen"
+        button2Title="Sluiten"
+        button2Handler={onClose}
+        hideModalHandler={onClose}
+      >
+        <div className="p-4 text-red-600">
+          Geen propulsion_type – bewerken niet mogelijk.
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       isVisible={isVisible}
@@ -548,8 +561,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
               <img 
                 src={providerLogo} 
                 alt={providerName} 
-                className={`w-16 h-16 object-contain mb-1 ${onProviderClick ? 'cursor-pointer hover:opacity-80' : ''}`}
-                onClick={onProviderClick}
+                className="w-16 h-16 object-contain mb-1"
                 onError={(e) => {
                   e.currentTarget.src = createSvgPlaceholder({
                     width: 48,
@@ -575,8 +587,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
                 <img 
                   src={vehicleTypeLogo} 
                   alt={vehicleTypeName} 
-                  className={`w-16 h-16 object-contain mb-1 ${onVehicleTypeClick ? 'cursor-pointer hover:opacity-80' : ''}`}
-                  onClick={onVehicleTypeClick}
+                  className="w-16 h-16 object-contain mb-1"
                 />
               )}
             </div>

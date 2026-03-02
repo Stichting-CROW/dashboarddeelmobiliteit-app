@@ -106,18 +106,26 @@ function formatActiveLimitRecord(record: GeometryOperatorModalityLimit | null): 
 const OverviewTabContent: React.FC<{
   obj: Record<string, unknown>;
   limitMap: Map<string, Record<string, number>>;
+  limitData: LimitHistoryEntry[];
   municipality: string;
   kpiKeyFilter?: string;
-}> = ({ obj, limitMap, municipality, kpiKeyFilter = '' }) => {
+}> = ({ obj, limitMap, limitData, municipality, kpiKeyFilter = '' }) => {
   const pid = obj.performance_indicator_description;
   const pidCount = Array.isArray(pid) ? pid.length : 0;
+  const kpiKeys = Array.isArray(pid)
+    ? (pid as { kpi_key: string }[]).map((x) => x.kpi_key)
+    : [];
 
   const operators = obj.municipality_modality_operators;
+  const kpiOperatorKeys = new Set<string>();
   const rows: OverviewRow[] = [];
+  const includeLimitOnly = true; // shows entries that have no datavalues but do have limits set in the limit history
+
   if (Array.isArray(operators)) {
     for (const op of operators) {
       const o = op as { operator: string; form_factor: string; propulsion_type: string; geometry_ref?: string; kpis?: unknown[] };
       const geometryRef = o.geometry_ref || toGeometryRef(municipality);
+      kpiOperatorKeys.add(limitKey(o.operator, geometryRef, o.form_factor, o.propulsion_type));
       const kpis = o.kpis || [];
       for (const kpi of kpis) {
         const k = kpi as { kpi_key: string; granularity?: string; values?: unknown[] };
@@ -140,6 +148,32 @@ const OverviewTabContent: React.FC<{
           numRecords: values.length,
           numDataValues,
           numLimitValues,
+          hasLimit: limitVal !== null,
+          limitValue: limitVal ?? null,
+        });
+      }
+    }
+  }
+
+  // Add rows for limit-only combinations (when includeLimitOnly is true)
+  if (includeLimitOnly) {
+    for (const entry of limitData) {
+      const key = limitKey(entry.operator, entry.geometry_ref, entry.form_factor, entry.propulsion_type);
+      if (kpiOperatorKeys.has(key)) continue;
+      const limits = limitMap.get(key);
+      const keysToShow = kpiKeys.length > 0 ? kpiKeys : (limits ? Object.keys(limits) : []);
+      for (const kpiKey of keysToShow) {
+        const limitVal = limits && kpiKey in limits ? limits[kpiKey] : null;
+        rows.push({
+          operator: entry.operator,
+          geometry_ref: entry.geometry_ref,
+          form_factor: entry.form_factor,
+          propulsion_type: entry.propulsion_type,
+          kpi_key: kpiKey,
+          granularity: '',
+          numRecords: 0,
+          numDataValues: 0,
+          numLimitValues: 0,
           hasLimit: limitVal !== null,
           limitValue: limitVal ?? null,
         });
@@ -623,6 +657,25 @@ const KpiOverviewTestDialog: React.FC<KpiOverviewTestDialogProps> = ({
         }
       }
 
+      const limitRecords = await getAllGeometryOperatorModalityLimitsForMunicipality(token, municipality);
+      for (const rec of limitRecords) {
+        const geometryRef = rec.geometry_ref || geometryRefBase;
+        const key = limitKey(rec.operator, geometryRef, rec.form_factor, rec.propulsion_type);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const history = await getGeometryOperatorModalityLimitHistory(
+          token, rec.operator, geometryRef, rec.form_factor, rec.propulsion_type
+        );
+        const found = history ? findRecordContainingDate(history, today) : null;
+        const currentRecord = found?.record ?? null;
+        const limits = currentRecord?.limits ?? {};
+        map.set(key, limits);
+        entries.push({
+          operator: rec.operator, geometry_ref: geometryRef, form_factor: rec.form_factor,
+          propulsion_type: rec.propulsion_type, history: history ?? [], currentRecord,
+        });
+      }
+
       setLimitMap(map);
       setLimitData(entries);
     } catch (err) {
@@ -817,7 +870,7 @@ const KpiOverviewTestDialog: React.FC<KpiOverviewTestDialogProps> = ({
             </div>
             <div className="p-4 bg-gray-50 flex-1 min-h-0 overflow-auto">
               {isOverviewTab ? (
-                <OverviewTabContent obj={obj} limitMap={limitMap} municipality={municipality} kpiKeyFilter={kpiKeyFilter} />
+                <OverviewTabContent obj={obj} limitMap={limitMap} limitData={limitData} municipality={municipality} kpiKeyFilter={kpiKeyFilter} />
               ) : isKpiLimitsTab ? (
                 <KpiLimitsTabContent
                   limitData={limitData}

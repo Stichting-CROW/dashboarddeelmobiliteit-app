@@ -368,6 +368,11 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
       return;
     }
 
+    if (!propulsion_type) {
+      alert('Geen propulsion_type – bewerken niet mogelijk.');
+      return;
+    }
+
     if (!newRowKpiKey) {
       alert('Fout: Selecteer een KPI');
       return;

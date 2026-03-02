@@ -127,7 +127,13 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
     const sourceLimits = sourceRecord?.limits;
 
     if (hasNoRecords || !sourceRecord) {
-      kpiDescriptions.forEach((kpi) => { next[kpi.kpi_key] = ''; });
+      kpiDescriptions.forEach((kpi) => {
+        if (initialKpiValuesWhenNoRecord && kpi.kpi_key in initialKpiValuesWhenNoRecord) {
+          next[kpi.kpi_key] = initialKpiValuesWhenNoRecord[kpi.kpi_key];
+        } else {
+          next[kpi.kpi_key] = '';
+        }
+      });
     } else {
       kpiDescriptions.forEach((kpi) => {
         if (sourceLimits && kpi.kpi_key in sourceLimits) {
@@ -190,6 +196,10 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
   };
 
   const handleOk = () => {
+    if (!propulsion_type) {
+      alert('Geen propulsion_type – bewerken niet mogelijk.');
+      return;
+    }
     onSave(getNewData());
   };
 
