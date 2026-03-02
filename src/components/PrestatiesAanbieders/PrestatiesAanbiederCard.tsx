@@ -20,6 +20,14 @@ interface PrestatiesAanbiederCardProps {
     onEditLimits?: () => void;
 }
 
+const KPI_TITLE_ORDER = [
+  'Aantal onverhuurde voertuigen',
+  'Parkeerduur > 1 dag',
+  'Parkeerduur > 3 dagen',
+  'Parkeerduur > 7 dagen',
+  'Parkeerduur > 14 dagen',
+] as const;
+
 const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
   <Link
     to={detailsUrl}
@@ -49,9 +57,36 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       isDemoMode()
     );
 
-    const token = useSelector((state: StateType) => 
+    const token = useSelector((state: StateType) =>
       (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
     );
+
+    const sortedKpis = useMemo(() => {
+      if (!kpis || kpis.length === 0) return [];
+
+      const titleByKey = new Map<string, string>(
+        performanceIndicatorDescriptions.map((desc) => [desc.kpi_key, desc.title])
+      );
+
+      const getOrderIndex = (kpi: PerformanceIndicatorKPI): number => {
+        const title = titleByKey.get(kpi.kpi_key) || '';
+        const index = KPI_TITLE_ORDER.indexOf(title as (typeof KPI_TITLE_ORDER)[number]);
+        return index === -1 ? KPI_TITLE_ORDER.length : index;
+      };
+
+      return [...kpis].sort((a, b) => {
+        const orderA = getOrderIndex(a);
+        const orderB = getOrderIndex(b);
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        const titleA = titleByKey.get(a.kpi_key) || a.kpi_key;
+        const titleB = titleByKey.get(b.kpi_key) || b.kpi_key;
+
+        return titleA.localeCompare(titleB, 'nl');
+      });
+    }, [kpis, performanceIndicatorDescriptions]);
 
     // Watch for URL changes (triggered by Filterbar using window.history.replaceState)
     useEffect(() => {
@@ -202,9 +237,11 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             <div className="flex justify-between">
               <ProviderLabel label={displayLabel} color={providerColor} />
               <div className="flex items-center gap-2">
-                <DetailsLink
-                  detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`}
-                />
+                {!isActive && (
+                  <DetailsLink
+                    detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`}
+                  />
+                )}
                 {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}
                 { onEditLimits && <button
                   type="button"
@@ -233,7 +270,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             {loading && kpis.length === 0 ? (
               <div>Laden...</div>
             ) : (
-              kpis.map((kpi) => (
+              sortedKpis.map((kpi) => (
                 <PerformanceIndicator
                   key={kpi.kpi_key}
                   kpi={kpi}
