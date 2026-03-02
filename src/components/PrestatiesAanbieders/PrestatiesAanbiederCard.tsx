@@ -22,6 +22,7 @@ interface PrestatiesAanbiederCardProps {
 
 const KPI_TITLE_ORDER = [
   'Aantal onverhuurde voertuigen',
+  'Voertuigen in verbodsgebieden',
   'Parkeerduur > 1 dag',
   'Parkeerduur > 3 dagen',
   'Parkeerduur > 7 dagen',

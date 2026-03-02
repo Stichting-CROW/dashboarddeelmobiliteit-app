@@ -81,7 +81,7 @@ function FilterbarStatistiek() {
           >
             Beleidsinfo
           </div>
-          {/* <div
+          <div
             key="item-prestaties-aanbieders"
             className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
             onClick={() =>
@@ -89,7 +89,7 @@ function FilterbarStatistiek() {
             }
           >
             Prestaties aanbieders
-          </div> */}
+          </div>
           <div
             key="item-beleidszones"
             className={`form-item ${isBeleidszones ? 'form-item-selected' : ''}`}
