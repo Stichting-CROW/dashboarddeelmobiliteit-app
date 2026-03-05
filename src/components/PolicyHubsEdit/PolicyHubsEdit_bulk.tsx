@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../ui/use-toast"
 import { StateType } from '../../types/StateType';
 import { readable_geotype, defaultStopProperties } from "../../helpers/policy-hubs/common"
-import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
+import { PolicyHubsEditIsVirtual } from './PolicyHubsEdit_isVirtual';
 import { useEffect, useState } from "react";
 import { HubType } from "../../types/HubType";
 import { patchHub } from '../../helpers/policy-hubs/patch-hub';
@@ -10,11 +10,11 @@ import { patchHub } from '../../helpers/policy-hubs/patch-hub';
 import Button from '../Button/Button';
 import { setSelectedPolicyHubs, setShowEditForm } from "../../actions/policy-hubs";
 import { notify } from "../../helpers/notify";
-import { PolicyHubsEdit_geographyType } from "./PolicyHubsEdit_geographyType";
+import { PolicyHubsEditGeographyType } from "./PolicyHubsEdit_geographyType";
 import { canEditHubs } from "../../helpers/authentication";
 import { deleteZoneHandler } from "./utils/delete_zone";
 
-const PolicyHubsEdit_bulk = ({
+const PolicyHubsEditBulk = ({
     fetchHubs,
     all_policy_hubs,
     selected_policy_hubs,
@@ -159,7 +159,7 @@ const PolicyHubsEdit_bulk = ({
 
         {selectedHubsPhase === 'concept' && <div className="relative">
             {/* <div className="absolute top-0 right-0 bottom-0 left-0" /> */}
-            <PolicyHubsEdit_geographyType
+            <PolicyHubsEditGeographyType
                 defaultStopProperties={defaultStopProperties}
                 hubData={hubsData}
                 setHubData={setHubsData}
@@ -167,7 +167,7 @@ const PolicyHubsEdit_bulk = ({
             />
         </div>}
 
-        {selectedHubsPhase === 'concept' && <PolicyHubsEdit_isVirtual
+        {selectedHubsPhase === 'concept' && <PolicyHubsEditIsVirtual
             hubData={hubsData}
             setHubData={setHubsData}
         />}
@@ -203,4 +203,4 @@ const PolicyHubsEdit_bulk = ({
     </div>
 }
 
-export default PolicyHubsEdit_bulk;
+export default PolicyHubsEditBulk;

@@ -20,8 +20,7 @@ import TimeGrid from './TimeGrid';
 
 import {themes} from '../../themes';
 
-function TimeGrid_VehicleAvailability({
-}) {
+function TimeGridVehicleAvailability({}) {
 
   const dispatch = useDispatch()
 
@@ -72,4 +71,4 @@ function TimeGrid_VehicleAvailability({
   </div>
 }
 
-export default TimeGrid_VehicleAvailability;
+export default TimeGridVehicleAvailability;

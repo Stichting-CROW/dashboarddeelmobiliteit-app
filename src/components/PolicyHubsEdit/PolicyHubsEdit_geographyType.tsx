@@ -6,7 +6,7 @@ import {StateType} from '../../types/StateType';
 import VoertuigTypeSelector from '../VoertuigTypesSelector/VoertuigTypesSelector';
 import { useEffect, useState } from 'react';
 
-export const PolicyHubsEdit_geographyType = ({
+export const PolicyHubsEditGeographyType = ({
   defaultStopProperties,
   hubData,
   setHubData,

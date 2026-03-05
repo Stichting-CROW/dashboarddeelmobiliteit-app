@@ -19,14 +19,14 @@ import Button from '../Button/Button';
 import Text from '../Text/Text';
 import FormInput from '../FormInput/FormInput';
 import ModalityRow from './ModalityRow';
-import PolicyHubsEdit_bulk from './PolicyHubsEdit_bulk';
 import { useDispatch, useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 import center from '@turf/center';
 import { notify } from '../../helpers/notify';
 import { setHubsInDrawingMode, setIsDrawingEnabled, setSelectedPolicyHubs, setShowEditForm } from '../../actions/policy-hubs';
-import { PolicyHubsEdit_geographyType } from './PolicyHubsEdit_geographyType';
-import { PolicyHubsEdit_isVirtual } from './PolicyHubsEdit_isVirtual';
+import PolicyHubsEditBulk from './PolicyHubsEdit_bulk';
+import { PolicyHubsEditGeographyType } from './PolicyHubsEdit_geographyType';
+import { PolicyHubsEditIsVirtual } from './PolicyHubsEdit_isVirtual';
 import moment from 'moment';
 import { canEditHubs } from '../../helpers/authentication';
 
@@ -426,7 +426,7 @@ const PolicyHubsEdit = ({
 
   if(! selected_policy_hubs) return <></>;
   if(selected_policy_hubs.length > 1) {
-    return <PolicyHubsEdit_bulk
+    return <PolicyHubsEditBulk
       fetchHubs={fetchHubs}
       all_policy_hubs={all_policy_hubs}
       selected_policy_hubs={selected_policy_hubs}
@@ -655,7 +655,7 @@ const PolicyHubsEdit = ({
 
         {can_edit_hub_data && <div className="relative">
             {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
-            <PolicyHubsEdit_geographyType
+            <PolicyHubsEditGeographyType
                 defaultStopProperties={defaultStopProperties}
                 hubData={hubData}
                 setHubData={setHubData}
@@ -665,7 +665,7 @@ const PolicyHubsEdit = ({
           
         <div className="relative">
             {! canEditHubs(acl) && <div className="absolute top-0 right-0 bottom-0 left-0" />}
-            <PolicyHubsEdit_isVirtual
+            <PolicyHubsEditIsVirtual
                 hubData={hubData}
                 setHubData={setHubData}
             />

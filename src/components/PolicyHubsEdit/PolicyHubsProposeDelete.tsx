@@ -280,7 +280,7 @@ const PolicyHubsProposeDelete = ({
             onClick={() => {
               setFormData({
                 ...formData,
-                ["publish_on_relative"]: x.name 
+                publish_on_relative: x.name 
               });
             }}
           >
@@ -364,7 +364,7 @@ const PolicyHubsProposeDelete = ({
             onClick={() => {
               setFormData({
                 ...formData,
-                ["effective_on_relative"]: x.name 
+                effective_on_relative: x.name 
               });
             }}
           >

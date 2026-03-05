@@ -609,17 +609,20 @@ const fetchPublicZones = async (filterGebied) => {
 
 // Color between green and red
 const perc2color = (perc) => {
-  var perc = 100 - perc;
-  var r, g, b = 0;
-  if(perc < 50) {
+  const invertedPerc = 100 - perc;
+  let r;
+  let g;
+  const b = 0;
+
+  if (invertedPerc < 50) {
     r = 255;
-    g = Math.round(5.1 * perc);
-  }
-  else {
+    g = Math.round(5.1 * invertedPerc);
+  } else {
     g = 255;
-    r = Math.round(510 - 5.10 * perc);
+    r = Math.round(510 - 5.1 * invertedPerc);
   }
-  var h = r * 0x10000 + g * 0x100 + b * 0x1;
+
+  const h = r * 0x10000 + g * 0x100 + b * 0x1;
   return '#' + ('000000' + h.toString(16)).slice(-6);
 }
 

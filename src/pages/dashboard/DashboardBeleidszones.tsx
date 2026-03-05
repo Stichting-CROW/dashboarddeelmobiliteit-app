@@ -13,7 +13,7 @@ import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
 import VerhuringenPerVoertuigChart from '../../components/Chart/VerhuringenPerVoertuigChart';
-import TimeGrid_VehicleAvailability from '../../components/TimeGrid/TimeGrid_VehicleAvailability';
+import TimeGridVehicleAvailability from '../../components/TimeGrid/TimeGrid_VehicleAvailability';
 import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
 import PageTitle from '../../components/common/PageTitle';
 import ZonePreviewMap from '../../components/ZonePreviewMap/ZonePreviewMap';
@@ -298,7 +298,7 @@ function DashboardBeleidszones() {
           <div className="my-16 xl:flex-1">
             <h2 className="text-4xl my-2">Gemiddelde bezetting</h2>
             <div className="my-8 mr-8 ml-16 max-w-3xl">
-              <TimeGrid_VehicleAvailability />
+              <TimeGridVehicleAvailability />
             </div>
           </div>
         )}

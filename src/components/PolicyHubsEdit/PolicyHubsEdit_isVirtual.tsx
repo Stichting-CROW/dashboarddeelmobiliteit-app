@@ -1,6 +1,6 @@
 import center from '@turf/center';
 
-export const PolicyHubsEdit_isVirtual = ({
+export const PolicyHubsEditIsVirtual = ({
     hubData,
     setHubData,
 }) => {
