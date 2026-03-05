@@ -60,3 +60,9 @@ Elke rij bevat de volgende waardes:
 - **Verhuurduur in seconden**<br />"1560.572472"
 
 </small>
+
+## Waar vind ik informatie over de datakwaliteit?
+
+Bij <a href="https://dashboarddeelmobiliteit.nl/docs/Over_het_Dashboard_Deelmobiliteit/Data_in_het_dashboard.md">Data in het dashboard</a> lees je over de opgeslagen data in het Dashboard Deelmobiliteit.
+
+De datakwaliteit houden we bij [op GitHub](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit#dashboard-deelmobiliteit-data-quality). Je ziet in het overzicht snel hoe aanbieders voldoen aan de verschillende eisen die we gesteld hebben voor het aanleveren van een datafeed. Per aanbieder is er een pagina met logs, waarin je door tijd heen de uitvallen en opmerkingen ziet. Als laatst zijn er [jaaroverzichten](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/tree/main/year-overview) met de belangrijkste opmerkingen die handig zijn bij analyse van data van een specifiek jaar.
