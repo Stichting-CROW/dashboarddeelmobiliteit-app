@@ -3,20 +3,25 @@ export const isLoggedIn = (state) => {
 };
 
 export const canEditHubs = (acl) => {
-  if(! acl) return false;
+  if (!acl) return false;
 
-  const allowedRoles = [
-    'MICROHUB_EDIT'
-  ];
+  const allowedRoles = ['MICROHUB_EDIT'];
 
-  let canEdit = false;
-  acl.privileges?.forEach((role) => {
-    if(allowedRoles.indexOf(role) > -1) {
-      canEdit = true;
-    }
-  });
+  const hasEditPrivilege = Array.isArray(acl.privileges)
+    && acl.privileges.some((role) => allowedRoles.indexOf(role) > -1);
 
-  return canEdit;
+  if (!hasEditPrivilege) {
+    return false;
+  }
+
+  // Only allow editing hubs for users whose organisation is a municipality
+  const organisationType =
+    acl.type_of_organisation ||
+    acl.part_of_organisation_type ||
+    acl.organisation_type_of_organisation ||
+    (acl.organisation && acl.organisation.type_of_organisation);
+
+  return organisationType === 'MUNICIPALITY';
 }
 
 // Checks if user is admin
