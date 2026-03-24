@@ -25,7 +25,12 @@ const setQueryParam = (key, val) => {
   }
 }
 
-function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate }) {
+function FilterItemDatumVanTot({
+  presetButtons,
+  defaultStartDate,
+  defaultEndDate,
+  showPresetOptionsByDefault = false,
+}) {
   const dispatch = useDispatch()
 
   const filterOntwikkelingVan = useSelector((state: StateType) => {
@@ -290,9 +295,9 @@ function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate
         />
         <div className="filter-datum-van-tot-picker-options">
           {presetsToRender.map((preset, index) => (
-            <div 
-              key={preset.key || `fdvt-po${index + 1}`} 
-              className="filter-datum-van-tot-option" 
+            <div
+              key={preset.key || `fdvt-po${index + 1}`}
+              className="filter-datum-van-tot-option"
               onClick={() => { setView(preset.view) }}
             >
               {preset.label}
@@ -301,6 +306,36 @@ function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate
         </div>
       </div>
     )
+  }
+
+  const renderPickerOptions = () => {
+    // Default preset buttons
+    const defaultPresets = [
+      { key: 'fdvt-po1', view: 'vandaag', label: 'Vandaag' },
+      { key: 'fdvt-po2', view: 'laatste2dagen', label: 'Laatste 2 dagen' },
+      { key: 'fdvt-po3', view: 'laatste7dagen', label: 'Laatste 7 dagen' },
+      { key: 'fdvt-po4', view: 'laatste30dagen', label: 'Laatste 30 dagen' },
+      { key: 'fdvt-po5', view: 'laatste90dagen', label: 'Laatste 90 dagen' },
+      { key: 'fdvt-po6', view: 'laatste12maanden', label: 'Laatste 12 maanden' },
+      { key: 'fdvt-po7', view: 'ditjaar', label: 'Dit jaar' },
+      { key: 'fdvt-po8', view: 'vorigjaar', label: 'Vorig jaar' },
+    ];
+
+    const presetsToRender = presetButtons || defaultPresets;
+
+    return (
+      <div className="filter-datum-van-tot-picker-options">
+        {presetsToRender.map((preset, index) => (
+          <div
+            key={preset.key || `fdvt-po${index + 1}`}
+            className="filter-datum-van-tot-option"
+            onClick={() => { setView(preset.view) }}
+          >
+            {preset.label}
+          </div>
+        ))}
+      </div>
+    );
   }
     
   return (
@@ -339,6 +374,7 @@ function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate
           </div>
         </div>
       </div>
+      {showPresetOptionsByDefault && !isOpen && renderPickerOptions()}
       { isOpen && renderPickerInline() }
     </div>
   )

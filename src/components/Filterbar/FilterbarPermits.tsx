@@ -149,6 +149,7 @@ function FilterbarPermits({
           ]}
           defaultStartDate={new Date(addDays(new Date(), -7).toDateString())}
           defaultEndDate={new Date(addDays(new Date(), -1).toDateString())}
+          showPresetOptionsByDefault={isPrestatiesAanbieders}
         />
       </Fieldset>
 
