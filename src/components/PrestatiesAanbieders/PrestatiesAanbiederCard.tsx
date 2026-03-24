@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
@@ -43,6 +43,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [loading, setLoading] = useState(false);
     const hasLoadedOnce = useRef(false);
     const location = useLocation();
+    const navigate = useNavigate();
     const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
 
     const providerSystemId = permit.operator?.system_id || permit.permit_limit.system_id;
@@ -145,6 +146,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       return baseMatch && !urlPropulsion;
     }, [urlSearch, permit]);
 
+    const detailsUrl = `/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
+
     useEffect(() => {
       const fetchPerformanceIndicators = async () => {
         if (!token || !permit.permit_limit) return;
@@ -204,6 +207,18 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         <div
           id={'permits-card-' + permit.permit_limit.permit_limit_id}
           className={`permits-card${isActive ? ' permits-card--active' : ''}`}
+          onClick={(event) => {
+            const target = event.target as HTMLElement;
+            if (target.closest('[data-name="indicator-container"]')) {
+              return;
+            }
+
+            if (target.closest('a, button')) {
+              return;
+            }
+
+            navigate(detailsUrl);
+          }}
         >
           <div className="permits-card-content">
             <div className="hidden">
@@ -238,7 +253,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               <div className="flex items-center gap-2">
                 {!isActive && (
                   <DetailsLink
-                    detailsUrl={`/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`}
+                    detailsUrl={detailsUrl}
                   />
                 )}
                 {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}

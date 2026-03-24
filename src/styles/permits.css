@@ -81,6 +81,17 @@
 .permits-card {
   @apply min-w-96 rounded-lg p-4 h-auto w-fit relative flex flex-col;
   background-color: #F6F5F4;
+  border: 1px solid #F6F5F4;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.permits-card:hover:not(.permits-card--active):not(:has([data-name='indicator-container']:hover)) {
+  border: 1px solid #CCCCCC;
+}
+
+.permits-card [data-name='indicator-container'] {
+  cursor: default;
 }
 
 .permits-card-edit-button {
