@@ -4,7 +4,7 @@
   box-sizing: border-box;
   
   background-color: transparent;
-  
+ 
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -47,28 +47,28 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   height: auto;
   width: 100%;
   max-width: 100%;
   background: transparent;
   box-sizing: border-box;
+  margin-top: 10px;
   padding-left: 0;
   padding-right: 0;
-  gap: 0.4rem;
+  gap: 10px;
   overflow-x: hidden;
 }
 
 .filter-datum-van-tot-option {
   cursor: pointer;
-  width: calc(50% - 0.4rem);
-  max-width: 125px;
+  width: calc((100% - 10px) / 2);
   min-width: 0;
   height: auto;
-  border-radius: 0.5em;
+  border-radius: 3px;
   text-align: center;
-  font-size: 11px;
+  font: normal normal normal 14px/17px Inter;
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -78,9 +78,7 @@
   background-color: #15AEEF;
   box-sizing: border-box;
   margin: 0;
-  padding: 0.5rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding: 6px 10px;
 }
 
 .filter-datum-van-tot-input {
