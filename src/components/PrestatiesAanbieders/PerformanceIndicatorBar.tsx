@@ -48,19 +48,31 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
     totalCount > 0
       ? `Voldeed goed: ${greenCount} (${greenPercent.toFixed(0)}%)\nVoldeed niet: ${redCount} (${redPercent.toFixed(0)}%)\nOnbekend: ${whiteCount} (${whitePercent.toFixed(0)}%)`
       : 'Geen data in deze periode';
+  const hasDefinedKpiValue = greenCount + redCount > 0;
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Tooltip open={open} onOpenChange={setOpen}>
+      <Tooltip
+        open={hasDefinedKpiValue ? open : false}
+        onOpenChange={(nextOpen) => {
+          if (hasDefinedKpiValue) {
+            setOpen(nextOpen);
+          }
+        }}
+      >
         <TooltipTrigger
           asChild
           onClick={(e) => {
             e.stopPropagation();
-            setOpen(!open);
+            if (hasDefinedKpiValue) {
+              setOpen(!open);
+            }
           }}
         >
           <div
-            className="performance-indicator-bar flex overflow-hidden rounded-sm cursor-pointer hover:brightness-110 transition-all duration-200 border border-gray-300"
+            className={`performance-indicator-bar flex overflow-hidden rounded-sm transition-all duration-200 border border-gray-300 ${
+              hasDefinedKpiValue ? 'cursor-pointer hover:brightness-110' : 'cursor-default'
+            }`}
             style={{
               width: `${BAR_WIDTH}px`,
               height: `${BAR_HEIGHT}px`,
@@ -78,13 +90,15 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
             )}
           </div>
         </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          align="center"
-          className="max-w-[240px] text-sm whitespace-normal text-left p-2"
-        >
-          <p className="text-sm leading-tight whitespace-pre-line">{tooltipContent}</p>
-        </TooltipContent>
+        {hasDefinedKpiValue && (
+          <TooltipContent
+            side="top"
+            align="center"
+            className="max-w-[240px] text-sm whitespace-normal text-left p-2"
+          >
+            <p className="text-sm leading-tight whitespace-pre-line">{tooltipContent}</p>
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   );
