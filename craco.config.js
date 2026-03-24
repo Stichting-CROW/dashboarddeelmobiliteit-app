@@ -9,6 +9,11 @@ module.exports = {
   },
   webpack: {
     configure: (webpackConfig) => {
+      webpackConfig.watchOptions = {
+        ...(webpackConfig.watchOptions || {}),
+        poll: 1000,
+      };
+
       const sourceMapLoaderRule = webpackConfig.module.rules.find(
         (rule) =>
           rule.enforce === 'pre' &&
