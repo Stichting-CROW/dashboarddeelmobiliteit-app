@@ -306,23 +306,38 @@ function FilterItemDatumVanTot({ presetButtons, defaultStartDate, defaultEndDate
   return (
     <div className="filter-datum-van-tot-container">
       <div className="filter-datum-van-tot-box-row">
-        <div className="flex flex-col justify-center"><div
-          className="filter-datum-caret"
-          onClick={() => {moveFilterDatum(true)}}>
-          &lsaquo;
-        </div></div>
         <div className="filter-datum-van-tot-input"
-          onClick={handleClick}
-          >
-          {startDate!==null?format(startDate, "yyyy-MM-dd"):""}
-          &nbsp;t/m&nbsp;
-          {endDate!==null?format(endDate, "yyyy-MM-dd"):""} </div>
-        <div className="flex flex-col justify-center"><div
-          className="filter-datum-caret"
-          onClick={() => {moveFilterDatum(false)}}
-          >
-          &rsaquo;
-        </div></div>
+          onClick={handleClick}>
+          <div
+            className="filter-datum-van-tot-caret"
+            onClick={(e) => {
+              e.stopPropagation();
+              moveFilterDatum(true);
+            }}>
+            &lsaquo;
+          </div>
+          <div className="flex gap-2">
+            <img
+              className="filter-datum-van-tot-img-now"
+              src="/components/FilteritemDuur/calendar-alt.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span className="filter-datum-van-tot-period">
+              {startDate!==null?format(startDate, "dd-MM-''yy"):""}
+            &nbsp;t/m&nbsp;
+              {endDate!==null?format(endDate, "dd-MM-''yy"):""}
+            </span>
+          </div>
+          <div
+            className="filter-datum-van-tot-caret"
+            onClick={(e) => {
+              e.stopPropagation();
+              moveFilterDatum(false);
+            }}>
+            &rsaquo;
+          </div>
+        </div>
       </div>
       { isOpen && renderPickerInline() }
     </div>
