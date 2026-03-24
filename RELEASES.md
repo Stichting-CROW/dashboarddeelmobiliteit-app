@@ -1,5 +1,52 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-03-24
+
+**Prestaties aanbieders**
+
+- 🪄 KPI-beheer verbeterd: grenswaarden bewerken werkt nu betrouwbaarder
+- 🪄 KPI-volgorde op aanbiederkaarten is nu vast en consistent
+- 🪄 Tooltip bij prestatie-indicatoren wordt niet meer getoond als er geen KPI-waarde beschikbaar is
+- 🪄 Vergunningseisen sluiten nu beter aan op het juiste voertuigtype per aanbieder
+- ✨ Detailweergave van prestaties heeft een verbeterd fullscreen-ontwerp en vloeiendere overgangen
+- ✨ Hover-states verbeterd voor aanbiederkaarten en de 'details'-link
+- ✨ Tooltips in indicatorbalken verschijnen met een korte vertraging voor rustiger interactie
+
+**Statistieken en Filterbar**
+
+- 🪄 Link naar 'Prestaties aanbieders' is weer beschikbaar in de statistiekfilter
+- 🪄 Datum-presets worden op relevante pagina's standaard getoond
+- 🪄 Actieve datum-preset wordt nu visueel gemarkeerd
+- ✨ Datum-van-tot component vernieuwd met duidelijkere invoervelden, icoon en compactere datumweergave
+- ✨ Preset-knoppen hebben een vernieuwd ontwerp en blijven binnen de beschikbare ruimte
+
+**Grafieken**
+
+- ✨ Breedtes van dashboardgrafieken gelijkgetrokken voor een consistenter overzicht
+- ✨ Y-asverdeling in lijngrafieken verbeterd voor beter leesbare waarden
+- ✨ Lijnweergave afgestemd voor betere balans tussen scherpte en leesbaarheid
+
+**Zones/Beleidszones**
+
+- 🪄 Alleen gebruikers van gemeentelijke organisaties kunnen nog hubs bewerken
+- 🐛 Opgelost: bij navigatie worden geselecteerde gearchiveerde zones nu correct opgeschoond
+
+**Aanbieders**
+
+- 🪄 Bolt toegevoegd als aanbieder, inclusief website, naam en herkenbare kleur
+
+**Documentatie**
+
+- ✨ Nieuwe documentatie voor het dashboard 'Prestaties aanbieders'
+- ✨ Link naar datakwaliteit toegevoegd in documentatie voor ruwe data-download
+- ✨ Nieuwe interne richtlijnen toegevoegd voor consistente overgangen in de interface
+
+**Technisch**
+
+- 🐛 Opgelost: serverwaarschuwingen en -fouten in de console verminderd
+- 🐛 Opgelost: toevoegen van een nieuwe grenswaarde werkt nu ook goed als er nog geen invoer voor die datum bestaat
+- 🧹 Technische stabiliteitsverbetering doorgevoerd om fouten met te veel open bestanden te voorkomen
+
 ## Release 2026-02-25
 
 **Zones/Beleidszones**
