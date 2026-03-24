@@ -27,11 +27,16 @@ const KPI_TITLE_ORDER = [
   'Parkeerduur > 14 dagen',
 ] as const;
 
-const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
+interface DetailsLinkProps {
+  detailsUrl: string;
+  isCardHovered: boolean;
+}
+
+const DetailsLink = ({ detailsUrl, isCardHovered }: DetailsLinkProps) => (
   <Link
     to={detailsUrl}
     title="Details"
-    className="font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2]"
+    className={`font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2]${isCardHovered ? ' underline' : ''}`}
   >
     details
   </Link>
@@ -41,6 +46,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isCardHovered, setIsCardHovered] = useState(false);
     const hasLoadedOnce = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -220,7 +226,11 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             navigate(detailsUrl);
           }}
         >
-          <div className="permits-card-content">
+          <div
+            className="permits-card-content"
+            onMouseEnter={() => setIsCardHovered(true)}
+            onMouseLeave={() => setIsCardHovered(false)}
+          >
             <div className="hidden">
               { logo ? 
                 <img 
@@ -254,6 +264,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                 {!isActive && (
                   <DetailsLink
                     detailsUrl={detailsUrl}
+                    isCardHovered={isCardHovered}
                   />
                 )}
                 {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}
