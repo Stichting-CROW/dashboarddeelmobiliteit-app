@@ -30,13 +30,16 @@ const KPI_TITLE_ORDER = [
 interface DetailsLinkProps {
   detailsUrl: string;
   isCardHovered: boolean;
+  isHidden?: boolean;
 }
 
-const DetailsLink = ({ detailsUrl, isCardHovered }: DetailsLinkProps) => (
+const DetailsLink = ({ detailsUrl, isCardHovered, isHidden = false }: DetailsLinkProps) => (
   <Link
     to={detailsUrl}
     title="Details"
-    className={`font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2]${isCardHovered ? ' underline' : ''}`}
+    aria-hidden={isHidden}
+    tabIndex={isHidden ? -1 : undefined}
+    className={`font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2] transition-opacity duration-200${isCardHovered ? ' underline' : ''}${isHidden ? ' opacity-0 invisible pointer-events-none' : ' opacity-100 visible'}`}
   >
     details
   </Link>
@@ -261,12 +264,11 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
             <div className="flex justify-between">
               <ProviderLabel label={displayLabel} color={providerColor} />
               <div className="flex items-center gap-2">
-                {!isActive && (
-                  <DetailsLink
-                    detailsUrl={detailsUrl}
-                    isCardHovered={isCardHovered}
-                  />
-                )}
+                <DetailsLink
+                  detailsUrl={detailsUrl}
+                  isCardHovered={isCardHovered}
+                  isHidden={isActive}
+                />
                 {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}
                 { onEditLimits && <button
                   type="button"

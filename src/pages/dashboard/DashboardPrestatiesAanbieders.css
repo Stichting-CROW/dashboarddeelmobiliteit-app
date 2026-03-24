@@ -51,6 +51,38 @@
 .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card {
   width: 100%;
   flex: 0 0 auto;
+  will-change: padding-right, border-top-right-radius, border-bottom-right-radius;
+  transition:
+    padding-right 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-top-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-bottom-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: calc(100% - 1px);
+  width: 0;
+  background-color: #F6F5F4;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  pointer-events: none;
+  transition:
+    width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-top-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-bottom-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card {
+    transition: none;
+  }
+
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card::after {
+    transition: none;
+  }
 }
 
 /* Active card: extend background to the right to connect with details panel */
@@ -58,13 +90,22 @@
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   padding-right: 1rem;
-  width: calc(100% + 1rem);
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active::after {
+  width: 1rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 @media (min-width: 640px) {
   .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active {
-    padding-right: 3rem;
-    width: calc(100% + 3rem);
-    }
+
+  }
+
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active::after {
+    width: 3rem;
+    margin-right: -3rem;
+  }
 }
 
 /* Remove left border on details when connected to active card */

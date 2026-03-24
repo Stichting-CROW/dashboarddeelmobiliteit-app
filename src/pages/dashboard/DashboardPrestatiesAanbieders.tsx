@@ -52,22 +52,24 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
       <PermitsMunicipalityView activeorganisation={activeorganisation} />
     );
 
-  if (showDetailsPanel) {
-    const splitClassNames = [
-      'DashboardPrestatiesAanbieders',
-      'DashboardPrestatiesAanbieders--split',
-      isFullscreen && 'DashboardPrestatiesAanbieders--fullscreen',
-    ]
-      .filter(Boolean)
-      .join(' ');
+  const containerClassNames = [
+    'DashboardPrestatiesAanbieders',
+    showDetailsPanel && 'DashboardPrestatiesAanbieders--split',
+    showDetailsPanel && isFullscreen && 'DashboardPrestatiesAanbieders--fullscreen',
+    showDetailsPanel ? 'h-screen overflow-hidden' : 'pt-12 pb-24',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-    return (
-      <div className={`${splitClassNames} h-screen overflow-hidden`}>
-        {!isFullscreen && (
-          <div className="DashboardPrestatiesAanbieders__overview pr-4 sm:pr-12">
-            {overviewContent}
-          </div>
-        )}
+  return (
+    <div className={containerClassNames}>
+      {!isFullscreen && (
+        <div className={showDetailsPanel ? 'DashboardPrestatiesAanbieders__overview pr-4 sm:pr-12' : ''}>
+          {overviewContent}
+        </div>
+      )}
+
+      {showDetailsPanel && (
         <div className="DashboardPrestatiesAanbieders__details flex-1 h-full overflow-y-auto pb-20">
           <PrestatiesAanbiedersDetailsPanel
             onClose={handleCloseDetailsPanel}
@@ -75,13 +77,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
             isFullscreen={isFullscreen}
           />
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="DashboardPrestatiesAanbieders pt-12 pb-24">
-      {overviewContent}
+      )}
     </div>
   );
 }

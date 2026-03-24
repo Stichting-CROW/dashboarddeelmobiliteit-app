@@ -24,6 +24,9 @@ interface PrestatiesAanbiedersDetailsPanelProps {
   isFullscreen?: boolean;
 }
 
+const CHART_RENDER_DELAY_MS = 280;
+const LOADING_INDICATOR_DELAY_MS = 200;
+
 function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFullscreen = false }: PrestatiesAanbiedersDetailsPanelProps) {
   const gebieden = useSelector((state: StateType) => state.metadata.gebieden);
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
@@ -37,6 +40,8 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
   const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
   const [showProviderModal, setShowProviderModal] = useState<boolean>(false);
   const [showVehicleTypeModal, setShowVehicleTypeModal] = useState<boolean>(false);
+  const [canRenderCharts, setCanRenderCharts] = useState<boolean>(false);
+  const [showLoadingIndicator, setShowLoadingIndicator] = useState<boolean>(false);
 
   const location = useLocation();
 
@@ -314,6 +319,32 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     setShowVehicleTypeModal(false);
   };
 
+  useEffect(() => {
+    setCanRenderCharts(false);
+    const timeoutId = window.setTimeout(() => {
+      setCanRenderCharts(true);
+    }, CHART_RENDER_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [urlSearch]);
+
+  useEffect(() => {
+    if (!loading) {
+      setShowLoadingIndicator(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowLoadingIndicator(true);
+    }, LOADING_INDICATOR_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [loading]);
+
   return (
     <div className="prestaties-aanbieders-details-panel">
       <div className="prestaties-aanbieders-details-panel__header">
@@ -377,11 +408,14 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
         </div>
       )}
 
-      {loading && <div className="prestaties-aanbieders-details-panel__loading">Laden...</div>}
+      {showLoadingIndicator && (
+        <div className="prestaties-aanbieders-details-panel__loading">Laden...</div>
+      )}
       {error && <div className="prestaties-aanbieders-details-panel__error">Fout: {error}</div>}
 
       {operatorCode &&
         formFactorCode &&
+        canRenderCharts &&
         !loading &&
         !error &&
         chartsData.length > 0 &&
