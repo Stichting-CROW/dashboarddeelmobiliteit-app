@@ -120,9 +120,20 @@ const LineChart: React.FC<LineChartProps> = ({
     ),
     0
   );
+  const normalizedUnit = unit?.trim().toLowerCase();
+  const isPercentageUnit = normalizedUnit === '%' || normalizedUnit === 'percentage';
   // Add ~15% headroom above the highest value, minimum 5 units (ensures space above highest line)
   const headroom = Math.max(maxDataValue * 0.15, 5);
-  const yAxisMax = maxDataValue + headroom;
+  const defaultYAxisMax = maxDataValue + headroom;
+  const percentageStep = height <= 250 ? 10 : 5;
+  const percentageYAxisMax = Math.max(
+    percentageStep * 2,
+    Math.ceil(maxDataValue / percentageStep) * percentageStep
+  );
+  const yAxisMax = isPercentageUnit ? percentageYAxisMax : defaultYAxisMax;
+  const yAxisTickAmount = isPercentageUnit
+    ? Math.max(1, Math.round(yAxisMax / percentageStep))
+    : undefined;
 
   // Always rotate at 325 degrees for all periods
   const rotationAngle = 325;
@@ -199,16 +210,17 @@ const LineChart: React.FC<LineChartProps> = ({
     yaxis: {
       max: yAxisMax,
       min: 0,
+      tickAmount: yAxisTickAmount,
       labels: {
         formatter: (value: number) => {
           try {
             if (!isFinite(value)) {
-              return (unit?.toLowerCase() === 'percentage' ? '0%' : '0');
+              return isPercentageUnit ? '0%' : '0';
             }
             const str = Math.round(value).toString();
-            return unit?.toLowerCase() === 'percentage' ? `${str}%` : str;
+            return isPercentageUnit ? `${str}%` : str;
           } catch (error) {
-            return (unit?.toLowerCase() === 'percentage' ? '0%' : '0');
+            return isPercentageUnit ? '0%' : '0';
           }
         }
       }
@@ -259,7 +271,7 @@ const LineChart: React.FC<LineChartProps> = ({
         formatter: (value: number) => {
           if (value == null || !isFinite(value)) return '-';
           const str = Math.round(value).toString();
-          return unit?.toLowerCase() === 'percentage' ? `${str}%` : str;
+          return isPercentageUnit ? `${str}%` : str;
         }
       }
     },
