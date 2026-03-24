@@ -74,11 +74,17 @@
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  color: white;
-  background-color: #15AEEF;
+  color: #1F2937;
+  background-color: #CCCCCC;
   box-sizing: border-box;
   margin: 0;
   padding: 6px 10px;
+  font-weight: 500;
+}
+
+.filter-datum-van-tot-option.active {
+  color: #FFFFFF;
+  background-color: #15AEEF;
 }
 
 .filter-datum-van-tot-input {

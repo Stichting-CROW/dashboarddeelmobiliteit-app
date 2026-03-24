@@ -53,6 +53,67 @@ function FilterItemDatumVanTot({
   const [endDate, setEndDate] = useState(initialEndDate);
   const [isOpen, setIsOpen] = useState(false);
 
+  const toDateKey = (date) => format(date, 'yyyy-MM-dd');
+
+  const getPresetDateConfig = (view) => {
+    const today = new Date((new Date()).toDateString());
+
+    switch(view) {
+      case 'vandaag':
+        return { start: today, end: today, agg: '15m' };
+      case 'laatste2dagen':
+        return { start: addDays(today, -1), end: today, agg: '15m' };
+      case 'laatste7dagen':
+        return { start: addDays(today, -6), end: today, agg: 'day' };
+      case 'laatste14dagen':
+        return { start: addDays(today, -13), end: today, agg: 'day' };
+      case 'laatste30dagen':
+        return { start: addDays(today, -30), end: today, agg: 'day' };
+      case 'laatste90dagen':
+        return { start: addDays(today, -90), end: today, agg: 'day' };
+      case 'laatste7dagen_yesterday':
+        return { start: addDays(today, -7), end: addDays(today, -1), agg: 'day' };
+      case 'laatste14dagen_yesterday':
+        return { start: addDays(today, -14), end: addDays(today, -1), agg: 'day' };
+      case 'laatste30dagen_yesterday':
+        return { start: addDays(today, -30), end: addDays(today, -1), agg: 'day' };
+      case 'laatste90dagen_yesterday':
+        return { start: addDays(today, -90), end: addDays(today, -1), agg: 'day' };
+      case 'laatste12maanden':
+        return { start: addDays(today, -365), end: today, agg: 'week' };
+      case 'ditjaar': {
+        const thisYear = today.getFullYear();
+        return { start: new Date(`${thisYear}/1/1`), end: today, agg: 'month' };
+      }
+      case 'vorigjaar': {
+        const previousYear = today.getFullYear() - 1;
+        return {
+          start: new Date(`${previousYear}/1/1`),
+          end: new Date(`${previousYear}/12/31`),
+          agg: 'month'
+        };
+      }
+      default:
+        return null;
+    }
+  };
+
+  const isPresetActive = (view) => {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    const presetConfig = getPresetDateConfig(view);
+    if (!presetConfig) {
+      return false;
+    }
+
+    return (
+      toDateKey(startDate) === toDateKey(presetConfig.start) &&
+      toDateKey(endDate) === toDateKey(presetConfig.end)
+    );
+  };
+
   const setAggregationLevel = (newlevel) => {
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -178,83 +239,11 @@ function FilterItemDatumVanTot({
   
   
   const setView = (view) => {
-    // strip hours
-    const today = new Date((new Date()).toDateString());
-
-    let start;
-    let end;
-    let agg;
-    switch(view) {
-      case 'vandaag':
-        start = today;
-        end = today;
-        agg='15m';
-        break;
-      case 'laatste2dagen':
-        start = addDays(today,-1);
-        end = today;
-        agg='15m';
-        break;
-      case 'laatste7dagen':
-        start = addDays(today,-6);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste14dagen':
-        start = addDays(today,-13);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste30dagen':
-        start = addDays(today,-30);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste90dagen':
-        start = addDays(today,-90);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste7dagen_yesterday':
-        start = addDays(today,-7);
-        end = addDays(today,-1);
-        agg='day';
-        break;
-      case 'laatste14dagen_yesterday':
-        start = addDays(today,-14);
-        end = addDays(today,-1);
-        agg='day';
-        break;
-      case 'laatste30dagen_yesterday':
-        start = addDays(today,-30);
-        end = addDays(today,-1);
-        agg='day';
-        break;
-      case 'laatste90dagen_yesterday':
-        start = addDays(today,-90);
-        end = addDays(today,-1);
-        agg='day';
-        break;
-      case 'laatste12maanden':
-        start = addDays(today,-365);
-        end = today;
-        agg='week';
-        break;
-      case 'ditjaar':
-        let tyear= today.getFullYear();
-        start = new Date(tyear.toString() + '/1/1');
-        end = today;
-        agg='month';
-        break;
-      case 'vorigjaar':
-        let lyear= today.getFullYear()-1;
-        start = new Date(lyear.toString() + '/1/1');
-        end = new Date(lyear.toString() + '/12/31');
-        agg='month';
-        break;
-      default:
-        return; // do nothing
+    const presetConfig = getPresetDateConfig(view);
+    if (!presetConfig) {
+      return;
     }
+    const { start, end, agg } = presetConfig;
     
     setAggregationLevel(agg);
 
@@ -297,7 +286,7 @@ function FilterItemDatumVanTot({
           {presetsToRender.map((preset, index) => (
             <div
               key={preset.key || `fdvt-po${index + 1}`}
-              className="filter-datum-van-tot-option"
+              className={`filter-datum-van-tot-option${isPresetActive(preset.view) ? ' active' : ''}`}
               onClick={() => { setView(preset.view) }}
             >
               {preset.label}
@@ -328,7 +317,7 @@ function FilterItemDatumVanTot({
         {presetsToRender.map((preset, index) => (
           <div
             key={preset.key || `fdvt-po${index + 1}`}
-            className="filter-datum-van-tot-option"
+            className={`filter-datum-van-tot-option${isPresetActive(preset.view) ? ' active' : ''}`}
             onClick={() => { setView(preset.view) }}
           >
             {preset.label}
