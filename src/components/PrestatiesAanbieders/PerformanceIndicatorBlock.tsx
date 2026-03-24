@@ -46,7 +46,7 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
   };
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delayDuration={500}>
       <Tooltip open={open} onOpenChange={setOpen}>
         <TooltipTrigger
           asChild

@@ -31,9 +31,9 @@ const DetailsLink = ({ detailsUrl }: { detailsUrl: string }) => (
   <Link
     to={detailsUrl}
     title="Details"
-    className="font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2] hover:underline"
+    className="font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2]"
   >
-    detail
+    details
   </Link>
 );
 

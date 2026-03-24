@@ -51,7 +51,7 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
   const hasDefinedKpiValue = greenCount + redCount > 0;
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delayDuration={500}>
       <Tooltip
         open={hasDefinedKpiValue ? open : false}
         onOpenChange={(nextOpen) => {
