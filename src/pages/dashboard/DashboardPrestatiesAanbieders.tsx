@@ -56,7 +56,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     'DashboardPrestatiesAanbieders',
     showDetailsPanel && 'DashboardPrestatiesAanbieders--split',
     showDetailsPanel && isFullscreen && 'DashboardPrestatiesAanbieders--fullscreen',
-    showDetailsPanel ? 'h-screen overflow-hidden' : 'pt-12 pb-24',
+    showDetailsPanel ? 'h-screen' : 'pt-12 pb-24',
   ]
     .filter(Boolean)
     .join(' ');

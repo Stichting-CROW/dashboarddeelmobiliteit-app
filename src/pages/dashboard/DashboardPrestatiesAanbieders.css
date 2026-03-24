@@ -119,3 +119,19 @@
   flex: 1 1 100%;
   min-width: 0;
 }
+
+.DashboardPrestatiesAanbieders.DashboardPrestatiesAanbieders--split.DashboardPrestatiesAanbieders--fullscreen {
+  position: relative;
+}
+
+.DashboardPrestatiesAanbieders.DashboardPrestatiesAanbieders--split.DashboardPrestatiesAanbieders--fullscreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3rem;
+  height: 100%;
+  margin-left: -3rem;
+  background-color: #F6F5F4;
+  pointer-events: none;
+}
