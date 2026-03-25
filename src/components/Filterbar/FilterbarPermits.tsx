@@ -19,7 +19,7 @@ import { getPrettyProviderName, getProviderColorForProvider } from '../../helper
 import { isDemoMode } from '../../config/demo';
 import { getDisplayOperatorName, getDisplayProviderColor } from '../../helpers/demoMode';
 import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
-import { Checkbox } from '../ui/checkbox';
+import { RadioButton } from '../ui/radio-button';
 
 interface FilterbarPermitsProps {
   hideLogo: boolean;
@@ -157,7 +157,7 @@ function FilterbarPermits({
         <FilteritemGebieden />
       </Fieldset>}
 
-      {isPrestatiesDetailsView && (
+      {(true || isPrestatiesDetailsView) && (
         <Fieldset title="Aanbieders">
           {loadingCombinations ? (
             <div className="text-sm text-gray-500">Laden...</div>
@@ -185,7 +185,7 @@ function FilterbarPermits({
                     handleCombinationClick(operatorId, formFactor);
                   }}
                 >
-                  <Checkbox
+                  <RadioButton
                     id={`aanbieder-${combinationKey}`}
                     checked={isSelected}
                     color={getDisplayProviderColor(operatorId, getProviderColorForProvider(operatorId), isDemoMode())}
