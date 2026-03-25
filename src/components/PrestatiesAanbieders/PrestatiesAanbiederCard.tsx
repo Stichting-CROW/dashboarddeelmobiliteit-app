@@ -37,9 +37,9 @@ const DetailsLink = ({ detailsUrl, isCardHovered, isHidden = false }: DetailsLin
   <Link
     to={detailsUrl}
     title="Details"
-    aria-hidden={isHidden}
-    tabIndex={isHidden ? -1 : undefined}
-    className={`font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2] transition-opacity duration-200${isCardHovered ? ' underline' : ''}${isHidden ? ' opacity-0 invisible pointer-events-none' : ' opacity-100 visible'}`}
+    aria-hidden={isHidden || !isCardHovered}
+    tabIndex={isHidden || !isCardHovered ? -1 : undefined}
+    className={`font-normal text-[14px] leading-[17px] font-[Inter] text-[#B2B2B2] transition-opacity duration-200${isCardHovered ? ' underline' : ''}${isHidden || !isCardHovered ? ' opacity-0 invisible pointer-events-none' : ' opacity-100 visible'}`}
   >
     details
   </Link>
@@ -50,6 +50,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
     const [isCardHovered, setIsCardHovered] = useState(false);
+    const [isEditButtonHovered, setIsEditButtonHovered] = useState(false);
+    const [isIndicatorContainerHovered, setIsIndicatorContainerHovered] = useState(false);
     const hasLoadedOnce = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -216,6 +218,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         <div
           id={'permits-card-' + permit.permit_limit.permit_limit_id}
           className={`permits-card${isActive ? ' permits-card--active' : ''}`}
+          onMouseEnter={() => setIsCardHovered(true)}
+          onMouseLeave={() => setIsCardHovered(false)}
           onClick={(event) => {
             const target = event.target as HTMLElement;
             if (target.closest('[data-name="indicator-container"]')) {
@@ -231,8 +235,6 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
         >
           <div
             className="permits-card-content"
-            onMouseEnter={() => setIsCardHovered(true)}
-            onMouseLeave={() => setIsCardHovered(false)}
           >
             <div className="hidden">
               { logo ? 
@@ -267,7 +269,7 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                 <DetailsLink
                   detailsUrl={detailsUrl}
                   isCardHovered={isCardHovered}
-                  isHidden={isActive}
+                  isHidden={isActive || isEditButtonHovered || isIndicatorContainerHovered}
                 />
                 {/* Gear icon: normal click = edit limits, Shift+click = KPI overview raw */}
                 { onEditLimits && <button
@@ -275,6 +277,8 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                   aria-label="Verguningseisen bewerken"
                   title="Bewerk vergunningseisen"
                   className="permits-card-edit-button"
+                  onMouseEnter={() => setIsEditButtonHovered(true)}
+                  onMouseLeave={() => setIsEditButtonHovered(false)}
                   onClick={(e) => {
                     if (permit.propulsion_type) {
                       onEditLimits();
@@ -284,13 +288,22 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
                   }}
                 >
                   {/* Use settings.svg icon */}
-                  <img src="/images/components/Menu/settings.svg" alt="Verguningseisen bewerken" className="w-[18px] h-[18px] invert-[0.8]" />
+                  <img
+                    src="/images/components/Menu/settings.svg"
+                    alt="Verguningseisen bewerken"
+                    className={`w-[18px] h-[18px] transition-all duration-200 ${isEditButtonHovered ? 'invert-[0.55]' : 'invert-[0.8]'}`}
+                  />
                 </button>}
               </div>
             </div>
           </div>
 
-          <div data-name="indicator-container" className="flex flex-col gap-2 flex-1">
+          <div
+            data-name="indicator-container"
+            className="flex flex-col gap-2 flex-1"
+            onMouseEnter={() => setIsIndicatorContainerHovered(true)}
+            onMouseLeave={() => setIsIndicatorContainerHovered(false)}
+          >
             {loading && kpis.length === 0 ? (
               <div>Laden...</div>
             ) : (

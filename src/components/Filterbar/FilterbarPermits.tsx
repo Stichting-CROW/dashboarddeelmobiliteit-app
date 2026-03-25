@@ -139,12 +139,22 @@ function FilterbarPermits({
     newSearchParams.set('system_id', operatorId);
     newSearchParams.set('operator', operatorId);
     newSearchParams.set('form_factor', formFactor);
-    
-    setSearchParams(newSearchParams);
+    if (filterGebied) {
+      // Required by card active-state matching logic.
+      newSearchParams.set('gm_code', filterGebied);
+    }
 
     const match = availableCombinations.find(
       (record) => record.operator.system_id === operatorId && record.vehicle_type.id === formFactor
     );
+
+    if (match?.propulsion_type) {
+      newSearchParams.set('propulsion_type', match.propulsion_type);
+    } else {
+      newSearchParams.delete('propulsion_type');
+    }
+    
+    setSearchParams(newSearchParams);
     const permitLimitId = match?.permit_limit?.permit_limit_id;
     if (permitLimitId) {
       // Wait for the URL change to propagate and the cards to re-render.
