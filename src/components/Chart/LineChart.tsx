@@ -84,6 +84,16 @@ const LineChart: React.FC<LineChartProps> = ({
     };
   }).filter((s) => s.data.length > 0); // Remove series with no valid data
 
+  const primaryLineSeries = seriesWithNumericData.find((s) => (s.dashArray ?? 0) === 0);
+  const primaryLineValues = primaryLineSeries
+    ? (primaryLineSeries.data as [number, number][])
+        .map(([, y]) => y)
+        .filter((value) => isValidNumber(value))
+    : [];
+  const primaryLineAverage = primaryLineValues.length > 0
+    ? primaryLineValues.reduce((sum, value) => sum + value, 0) / primaryLineValues.length
+    : null;
+
   // Don't render if no valid series
   if (seriesWithNumericData.length === 0) {
     return (
@@ -122,6 +132,9 @@ const LineChart: React.FC<LineChartProps> = ({
   );
   const normalizedUnit = unit?.trim().toLowerCase();
   const isPercentageUnit = normalizedUnit === '%' || normalizedUnit === 'percentage';
+  const formattedPrimaryLineAverage = primaryLineAverage !== null
+    ? `${Math.round(primaryLineAverage)}${isPercentageUnit ? '%' : ''}`
+    : null;
   // Add ~15% headroom above the highest value, minimum 5 units (ensures space above highest line)
   const headroom = Math.max(maxDataValue * 0.15, 5);
   const defaultYAxisMax = maxDataValue + headroom;
@@ -291,7 +304,11 @@ const LineChart: React.FC<LineChartProps> = ({
       <div className="flex justify-between">
         <h4 className="text-sm font-semibold mb-2">{title}</h4>
         {subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>{subtitle}</h4>}
-        {! subtitle && <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>Gemiddelde x</h4>}
+        {!subtitle && formattedPrimaryLineAverage && (
+          <h4 className="text-sm font-semibold mb-2" style={{ color: '#AFAFAF' }}>
+            Gemiddelde {formattedPrimaryLineAverage}
+          </h4>
+        )}
       </div>
       <Chart
         options={options}
