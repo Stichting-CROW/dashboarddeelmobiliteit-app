@@ -161,7 +161,7 @@ function BeschikbareVoertuigenChart({
       series.push(
         <Line
           key={x}
-          type="natural"
+          type="monotone"
           dataKey={x}
           name={getPrettyProviderName(x)}
           stroke={getProviderColor(metadata.aanbieders, x)}
@@ -178,7 +178,7 @@ function BeschikbareVoertuigenChart({
       series.push(
         <Line
           key={TOTAAL_KEY}
-          type="natural"
+          type="monotone"
           dataKey={TOTAAL_KEY}
           name={TOTAAL_KEY}
           stroke="#1a1a1a"

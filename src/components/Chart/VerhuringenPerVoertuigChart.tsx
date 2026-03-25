@@ -224,7 +224,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
             return (
               <Area
                 key={x}
-                type="natural"
+                type="monotone"
                 dataKey={x}
                 name={getPrettyProviderName(x)}
                 stroke={providerColor}
@@ -256,7 +256,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
             return (
             <Line
               key={x}
-              type="natural"
+              type="monotone"
               dataKey={x}
               name={getPrettyProviderName(x)}
               stroke={providerColor}
