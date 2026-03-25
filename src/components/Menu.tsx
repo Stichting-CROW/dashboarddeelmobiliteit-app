@@ -7,6 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
 import { InfoCircledIcon } from "@radix-ui/react-icons"
 
+function isSubmenuItemPathActive(pathName: string, itemPath: string): boolean {
+  if (pathName === itemPath) return true;
+  if (itemPath === '/docs') return pathName.startsWith('/docs/');
+  return pathName.startsWith(`${itemPath}/`);
+}
+
 function MenuItem(props) {
   const pathName = props.pathName;
   const isActive = props.pathPrefix
@@ -17,7 +23,90 @@ function MenuItem(props) {
 
   return (
     <>
-      {props.path && <Link className={`
+      {props.path && props.subMenuItems && props.subMenuItems.length > 0 && (
+        <div className="Menu-item-wrapper has-submenu">
+          <Link className={`
+              text-menu
+              text-center
+              ${isActive ? 'is-active' : ''}
+            `}
+            to={props.path}
+            onClick={props.onClick}
+            title={props.title}
+            >
+            {icon ? <img alt={props.text} src={icon} /> : ''}
+            {props.text && (
+              isActive && props.text === 'Zones' ? (
+                <>
+                  {props.text}
+                  <TooltipProvider delayDuration={500}>
+                    <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+                      <TooltipTrigger
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTooltipOpen(!tooltipOpen);
+                        }}
+                      >
+                        <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+                          <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="top"
+                        align="center"
+                        className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+                      >
+                        <p className="text-sm leading-tight">
+                          <a 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones" 
+                            className="no-underline text-theme-blue" 
+                            style={{color: '#15AEEF'}}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Lees de documentatie
+                          </a>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              ) : (
+                <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+                  {props.text}
+                </span>
+              )
+            )}
+          </Link>
+
+          {props.subMenuItems && props.subMenuItems.length > 0 && (
+            <div className="Menu-desktop-submenu text-left" role="menu" aria-label={`${props.text} submenu`}>
+              {props.subMenuItems.map((item, index) => {
+                const subItemActive = isSubmenuItemPathActive(pathName, item.path);
+                return (
+                  <React.Fragment key={item.path}>
+                    <Link
+                      className={`Menu-desktop-submenu-item${subItemActive ? ' is-active' : ''}`}
+                      to={item.path}
+                      role="menuitem"
+                      aria-current={subItemActive ? 'page' : undefined}
+                      onClick={props.onClick}
+                    >
+                      {item.text}
+                    </Link>
+                    {index < props.subMenuItems.length - 1 && (
+                      <div className="Menu-desktop-submenu-divider" aria-hidden="true" />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {props.path && (!props.subMenuItems || props.subMenuItems.length === 0) && <Link className={`
           text-menu
           text-center
           ${isActive ? 'is-active' : ''}
@@ -151,6 +240,12 @@ function Menu({
         path={'/stats/beleidsinfo'}
         pathPrefix={'/stats'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
+        subMenuItems={[
+          { text: 'Beleidsinfo', path: '/stats/beleidsinfo' },
+          { text: 'Prestaties aanbieders', path: '/stats/prestaties-aanbieders' },
+          { text: 'Hubs en verbodsgebieden', path: '/stats/beleidszones' },
+          // { text: 'Open data', path: '/docs' },
+        ]}
       />
 
       {(acl && (acl.is_admin || (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1))) && <MenuItem

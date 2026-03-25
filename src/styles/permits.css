@@ -83,6 +83,9 @@
   background-color: #F6F5F4;
   border: 1px solid #F6F5F4;
   border-radius: 10px;
+}
+
+.permits-card:not(.permits-card--active) {
   cursor: pointer;
 }
 

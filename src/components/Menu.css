@@ -38,6 +38,12 @@
     display: inline-block;
     max-width: 100%;
     width: auto;
+    /*
+     * Base rule sets overflow-x: auto. When overflow-x is not visible, browsers
+     * treat overflow-y as auto as well, which clips the desktop submenu that
+     * extends above the bar. Desktop layout does not need horizontal scroll.
+     */
+    overflow: visible;
   }
 
   @media (max-width: 964px) {
@@ -95,6 +101,78 @@
 }
 .text-menu:last-child::after {
   border-right: none;
+}
+
+.Menu-item-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.Menu-item-wrapper.has-submenu .text-menu::after {
+  border-right: solid 1px #000;
+}
+
+.Menu-desktop-submenu {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .Menu-item-wrapper.has-submenu:hover .Menu-desktop-submenu {
+    display: block;
+  }
+}
+
+.Menu-desktop-submenu {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 228px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0 3px 6px #00000029;
+  border-radius: 20px;
+  opacity: 1;
+  padding: 16px 20px;
+  z-index: 120;
+}
+
+/*
+ * Invisible hover bridge: the 16px offset leaves a dead zone between the bar
+ * and the panel. Without this, :hover drops before the cursor reaches links.
+ */
+.Menu-desktop-submenu::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 24px;
+}
+
+.Menu-desktop-submenu-item {
+  display: block;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0;
+  color: #343e47;
+  text-decoration: none;
+  margin: 0;
+  line-height: 1.25rem;
+}
+
+.Menu-desktop-submenu-item:hover {
+  color: #15aeef;
+}
+
+.Menu-desktop-submenu-item.is-active {
+  color: #15aeef;
+}
+
+.Menu-desktop-submenu-divider {
+  width: 30px;
+  height: 0;
+  border: 1px solid #707070;
+  opacity: 1;
+  margin: 10px 0;
 }
 
 .Menu-subMenu {
