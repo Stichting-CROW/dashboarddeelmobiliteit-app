@@ -1,5 +1,28 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-03-25
+
+**Statistieken en Navigatie**
+
+- 🪄 Hoofdmenu uitgebreid met een submenu onder 'Statistiek' voor snellere navigatie binnen statistiekpagina's
+
+**Prestaties aanbieders en Grafieken**
+
+- 🪄 Lijngrafieken tonen nu ook de gemiddelde waarde voor extra context bij trendanalyse
+- 🪄 In de filterbar scrolt de pagina nu vloeiend naar het geselecteerde aanbieder/voertuigtype-blok
+- ✨ Weergave van lijngrafieken aangescherpt voor rustiger en beter leesbaar lijnverloop
+- ✨ Kleine visuele verbeteringen doorgevoerd op aanbiederkaarten voor een consistenter geheel
+- ✨ Selectie-icoon in de filterbar aangepast naar een radio-button stijl voor duidelijkere keuzeweergave
+
+**Aanbod**
+
+- 🪄 Bij overlappende voertuigen op de kaart verschijnt nu bij klikken een lijst met voertuigen, zodat selectie eenvoudiger is
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: superadmins kunnen zones weer bewerken
+- 🐛 Opgelost: knoppen voor bewerken en statistieken bij zones blijven betrouwbaar zichtbaar
+
 ## Release 2026-03-24
 
 **Prestaties aanbieders**
