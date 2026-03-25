@@ -8,7 +8,8 @@ import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
 import { usePermitData } from './usePermitData';
 import { usePermitActions } from './usePermitActions';
-import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
+import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import { getVehicleTypeIconSrc } from '../../helpers/vehicleTypeIconCommon';
 import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord, PerformanceIndicatorDescription, GeometryOperatorModalityLimit } from '../../api/permitLimits';
 import {
@@ -222,7 +223,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   const rowData: RowData[] = voertuigtypes.map((voertuigtype) => ({
     id: voertuigtype.id,
     name: voertuigtype.name,
-    icon: getVehicleIconUrl(voertuigtype.id) || getVehicleIconUrl('other'),
+    icon: getVehicleTypeIconSrc(voertuigtype.id),
   }));
 
   // Render header for vehicle type rows

@@ -55,6 +55,11 @@
   left: -1px;
 }
 
+/* Overlapping-vehicle table (MapLibre popup) */
+.Map-popup-body tr[data-dd-vehicle-row="true"]:hover {
+  background-color: rgba(15, 28, 63, 0.08);
+}
+
 /* CONTROLS */
 
 /* Controls wrapper */

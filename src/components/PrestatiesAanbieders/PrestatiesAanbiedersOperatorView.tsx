@@ -3,7 +3,8 @@ import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import '../../styles/permits.css';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
 import { usePermitData } from './usePermitData';
-import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
+import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import { getVehicleTypeIconAlt, getVehicleTypeIconSrc } from '../../helpers/vehicleTypeIconCommon';
 import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord } from '../../api/permitLimits';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
@@ -50,7 +51,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
     .map((voertuigtype) => ({
     id: voertuigtype.id,
     name: voertuigtype.name,
-    icon: getVehicleIconUrl(voertuigtype.id) || getVehicleIconUrl('other'),
+    icon: getVehicleTypeIconSrc(voertuigtype.id),
   }));
 
   // Render header for vehicle type rows
@@ -58,7 +59,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
     <>
       <img
         src={rowItem.icon}
-        alt={getPrettyVehicleTypeName(rowItem.id) || `Onbekend`}
+        alt={getVehicleTypeIconAlt(rowItem.id)}
         className="permits-vehicle-type-header-img"
       />
     </>
