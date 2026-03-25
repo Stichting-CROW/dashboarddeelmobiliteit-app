@@ -75,6 +75,23 @@ function FilterbarPermits({
   const [availableCombinations, setAvailableCombinations] = useState<PermitLimitRecord[]>([]);
   const [loadingCombinations, setLoadingCombinations] = useState(false);
 
+  const scrollOverviewToPermitCard = (permitLimitId: string) => {
+    const card = document.getElementById(`permits-card-${permitLimitId}`);
+    if (!card) return;
+
+    const overview = document.querySelector('.DashboardPrestatiesAanbieders__overview') as HTMLElement | null;
+    if (!overview) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    const cardRect = card.getBoundingClientRect();
+    const overviewRect = overview.getBoundingClientRect();
+    const paddingTop = 12;
+    const targetTop = overview.scrollTop + (cardRect.top - overviewRect.top) - paddingTop;
+    overview.scrollTo({ top: targetTop, behavior: 'smooth' });
+  };
+
   // Get current selected operator and form_factor from query params
   const currentOperator = searchParams.get('system_id') || searchParams.get('operator');
   const currentFormFactor = searchParams.get('form_factor');
@@ -124,6 +141,19 @@ function FilterbarPermits({
     newSearchParams.set('form_factor', formFactor);
     
     setSearchParams(newSearchParams);
+
+    const match = availableCombinations.find(
+      (record) => record.operator.system_id === operatorId && record.vehicle_type.id === formFactor
+    );
+    const permitLimitId = match?.permit_limit?.permit_limit_id;
+    if (permitLimitId) {
+      // Wait for the URL change to propagate and the cards to re-render.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollOverviewToPermitCard(String(permitLimitId));
+        });
+      });
+    }
   };
 
   return (
