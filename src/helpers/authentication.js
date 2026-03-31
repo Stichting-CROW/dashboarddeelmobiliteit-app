@@ -13,6 +13,8 @@ export const canEditHubs = (acl) => {
   if (!hasEditPrivilege) {
     return false;
   }
+
+  return true;
 }
 
 // Checks if user is admin
