@@ -13,6 +13,7 @@ import {
   FilteritemMarkersAfstand,
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
+import FilteritemNonOperationalVehicles from './FilteritemNonOperationalVehicles';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
@@ -256,6 +257,12 @@ function Filterbar({
           {isLoggedIn && showparkeerduur && (
             <Fieldset title="Parkeerduur">
               <FilteritemMarkersParkeerduur />
+            </Fieldset>
+          )}
+
+          {isLoggedIn && showparkeerduur && (
+            <Fieldset title="Toon alleen defecte voertuigen?">
+              <FilteritemNonOperationalVehicles />
             </Fieldset>
           )}
 

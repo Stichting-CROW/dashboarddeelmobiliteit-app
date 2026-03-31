@@ -112,7 +112,7 @@ export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) =
 
       const formatSinceDateTime = (props) => {
         if(! props || ! props.in_public_space_since) return '-';
-        return moment(props.in_public_space_since).locale('nl').format('DD-MM-\'YY HH:mm');
+        return moment(props.in_public_space_since).locale('nl').format('DD/MM HH:mm');
       };
 
       const buildVehicleBodyHtml = (theVehicleProperties, theProviderColor) => {

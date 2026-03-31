@@ -55,6 +55,7 @@ const processVehiclesResult = (state, vehicles) => {
           "form_factor": v.form_factor || null,
           "in_public_space_since": in_public_space_since,
           "duration_bin": duration_bin,
+          "is_non_operational": v.is_non_operational === true,
        },
        "geometry":{
           "type":"Point",
@@ -73,10 +74,14 @@ const processVehiclesResult = (state, vehicles) => {
 
     // Get parkeerduur length to exclude
     let parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
+    const showOnlyNonOperational = state.filter.non_operational_only === true;
 
     // Filter markers
     let markerVisible = ! isLoggedIn(state) || !parkeerduurexclude.includes(duration_bin.toString());
     markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
+    if (showOnlyNonOperational) {
+      markerVisible = markerVisible && v.is_non_operational === true;
+    }
     if(markerVisible) {
       geoJson.features.push(feature);
     }

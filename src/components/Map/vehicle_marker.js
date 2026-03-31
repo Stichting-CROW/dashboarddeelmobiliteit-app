@@ -10,11 +10,15 @@
 // </div>
 //     `;
 
-async function getVehicleMarkers(operatorColor) {
+async function getVehicleMarkers(operatorColor, isNonOperational = false) {
     var gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48', '#9158DE'];
     var markers = [];
     for (const durationIndicationColor of gradients) {
-        var marker = await styleVehicleMarker(operatorColor, durationIndicationColor);
+        var marker = await styleVehicleMarker(
+            operatorColor,
+            durationIndicationColor,
+            isNonOperational
+        );
         markers.push(marker);
     }
     return markers;
@@ -30,9 +34,10 @@ async function getVehicleMarkers_rentals(operatorColor) {
     return markers;
 }
 
-async function styleVehicleMarker(operatorColor, durationIndicationColor) {
+async function styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational = false) {
     var xmlns = "http://www.w3.org/2000/svg";
     var svgElement = document.createElementNS(xmlns, "svg");
+    const resolvedOperatorColor = operatorColor || '#666';
     
     // outer transparant circle
     var circle_1 = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
@@ -66,14 +71,43 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor) {
     inner_circle.appendChild(child_circle_2);
     svgElement.appendChild(inner_circle);
 
-    // indicator right top
-    var small_circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-    small_circle.setAttribute("cx","4.5");
-    small_circle.setAttribute("cy","4.5");
-    small_circle.setAttribute("r","4.5");
-    small_circle.setAttribute("transform","translate(14 1)");
-    small_circle.setAttribute("fill", operatorColor);
-    svgElement.appendChild(small_circle);
+    // indicator right top:
+    // - operational vehicles: circle
+    // - non-operational vehicles: triangle
+    if (isNonOperational) {
+        var triangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+        triangle.setAttribute("points", "0,9 9,9 4.5,0");
+        triangle.setAttribute("transform", "translate(14 1)");
+        triangle.setAttribute("fill", resolvedOperatorColor);
+        svgElement.appendChild(triangle);
+
+        // Exclamation mark centered inside triangle
+        var exclamationStem = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        exclamationStem.setAttribute("x", "4.1");
+        exclamationStem.setAttribute("y", "2.2");
+        exclamationStem.setAttribute("width", "0.8");
+        exclamationStem.setAttribute("height", "3.5");
+        exclamationStem.setAttribute("rx", "0.3");
+        exclamationStem.setAttribute("transform", "translate(14 1)");
+        exclamationStem.setAttribute("fill", "#FFFFFF");
+        svgElement.appendChild(exclamationStem);
+
+        var exclamationDot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+        exclamationDot.setAttribute("cx", "4.5");
+        exclamationDot.setAttribute("cy", "6.9");
+        exclamationDot.setAttribute("r", "0.55");
+        exclamationDot.setAttribute("transform", "translate(14 1)");
+        exclamationDot.setAttribute("fill", "#FFFFFF");
+        svgElement.appendChild(exclamationDot);
+    } else {
+        var small_circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+        small_circle.setAttribute("cx","4.5");
+        small_circle.setAttribute("cy","4.5");
+        small_circle.setAttribute("r","4.5");
+        small_circle.setAttribute("transform","translate(14 1)");
+        small_circle.setAttribute("fill", resolvedOperatorColor);
+        svgElement.appendChild(small_circle);
+    }
 
     var width = {};
     var height = {};

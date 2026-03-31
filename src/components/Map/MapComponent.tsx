@@ -50,6 +50,7 @@ import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
+import { getProviderColorForProvider } from '../../helpers/providers';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -564,20 +565,33 @@ const MapComponent = (props): JSX.Element => {
   // Add provider images/icons
   useEffect(() => {
     const addProviderImage = async(aanbieder) => {
+      const operatorColor = aanbieder.color || getProviderColorForProvider(aanbieder.system_id);
       let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')
-      if (map.current.hasImage(baselabel + ':0')) {
+      const hasOperationalImages = map.current.hasImage(baselabel + ':0');
+      const hasNonOperationalImages = map.current.hasImage(baselabel + '-n:0');
+      if (
+        (stateLayers.displaymode === 'displaymode-rentals' && hasOperationalImages) ||
+        (stateLayers.displaymode !== 'displaymode-rentals' && hasOperationalImages && hasNonOperationalImages)
+      ) {
         // console.log("provider image for %s already exists", baselabel);
         return;
       }
-      var value;
       if(stateLayers.displaymode === 'displaymode-rentals') {
-        value = await getVehicleMarkers_rentals(aanbieder.color);
+        const rentalMarkers = await getVehicleMarkers_rentals(operatorColor);
+        rentalMarkers.forEach((img, idx) => {
+          map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
+        });
       } else {
-        value = await getVehicleMarkers(aanbieder.color);
+        const operationalMarkers = await getVehicleMarkers(operatorColor, false);
+        const nonOperationalMarkers = await getVehicleMarkers(operatorColor, true);
+
+        operationalMarkers.forEach((img, idx) => {
+          map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
+        });
+        nonOperationalMarkers.forEach((img, idx) => {
+          map.current.addImage(baselabel + `-n:` + idx, { width: 50, height: 50, data: img});
+        });
       }
-      value.forEach((img, idx) => {
-        map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
-      });
       // console.log('Added provider images for:', aanbieder.system_id);
     };
     providers.forEach(aanbieder => {

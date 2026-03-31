@@ -16,7 +16,12 @@ export const clustersPointLayer = {
   'type': 'symbol',
   filter: ['!', ['has', 'point_count']],
   'layout': {
-    'icon-image': ["concat", ['get', 'system_id'], '-p:', ['get', 'duration_bin']],
+    'icon-image': [
+      'concat',
+      ['get', 'system_id'],
+      ['case', ['==', ['get', 'is_non_operational'], true], '-p-n:', '-p:'],
+      ['get', 'duration_bin']
+    ],
     'icon-size': [
       'interpolate',
         ['linear'],
