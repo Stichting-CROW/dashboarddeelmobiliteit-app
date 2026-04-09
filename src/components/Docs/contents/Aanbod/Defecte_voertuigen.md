@@ -14,7 +14,7 @@ Bekijk de voertuigiconen op de kaart: als er een uitroepteken bij een voertuig s
 
 ## Databronnen
 
-De aanbodsdata wordt aangeleverd door de verschillende aanbieders. Op de pagina [datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit?tab=readme-ov-file#dashboard-deelmobiliteit-data-quality) staat een lijst met aanbieders en de datafeed die zij aanleveren.
+De aanbodsdata wordt aangeleverd door de verschillende aanbieders. In de technische documentatie [staat](https://docs.dashboarddeelmobiliteit.nl/data_feeds/for_monitoring/) hoe de datafeed voor het actuele aanbod aangeleverd dient te worden door aanbieders. Op de pagina [datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit?tab=readme-ov-file#dashboard-deelmobiliteit-data-quality) staat een lijst met aanbieders en de datafeed die zij momenteel aanleveren.
 
 Wij bevragen de datafeeds elke 30 seconden en slaan de aanbodsdata op in ons Data Exchange Platform. In het Dashboard Deelmobiliteit kun je de data visueel weergeven. Je kunt de aanbodsdata ook zelf ophalen middels de beschikbare [API's](https://dashboarddeelmobiliteit.nl/docs/APIs) voor je eigen analyses, of voor integratie in je eigen software / andere softwarepakketten.
 
@@ -42,4 +42,4 @@ In de MDS-standaard is [gedocumenteerd](https://github.com/openmobilityfoundatio
 
 ## Vragen?
 
-Vragen over deze functionaliteit? Mail [info@dashboarddeelmobiliteit.nl](mailto:info@dashboarddeelmobiliteit.nl?subject=Defecte voertuigen)
+Vragen over deze functionaliteit? Mail [info@dashboarddeelmobiliteit.nl](mailto:info@dashboarddeelmobiliteit.nl?subject=Defecte%20voertuigen)
