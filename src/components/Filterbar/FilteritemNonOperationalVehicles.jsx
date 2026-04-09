@@ -16,7 +16,8 @@ export default function FilteritemNonOperationalVehicles() {
   };
 
   let classNameAllVehicles = 'filter-herkomst-bestemming-button';
-  let classNameNonOperationalVehicles = 'filter-herkomst-bestemming-button';
+  let classNameNonOperationalVehicles =
+    'filter-herkomst-bestemming-button filter-herkomst-bestemming-button-flex-1';
 
   if (showOnlyNonOperationalVehicles) {
     classNameNonOperationalVehicles += ' filter-herkomst-bestemming-button-active';
