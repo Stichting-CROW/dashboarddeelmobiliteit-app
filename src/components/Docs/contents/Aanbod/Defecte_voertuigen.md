@@ -7,7 +7,7 @@ Bekijk de voertuigiconen op de kaart: als er een uitroepteken bij een voertuig s
 ## Screenshots
 
 **Knop: toon defecte voertuigen**<br />
-![Knop: toon defecte voertuigen](https://files.dashboarddeelmobiliteit.nl/docs/Aanbod/Defecte_voertuigen/toon_defecte_voertuigen.png)
+<img alt="Knop: toon defecte voertuigen" src="https://files.dashboarddeelmobiliteit.nl/docs/Aanbod/Defecte_voertuigen/toon_defecte_voertuigen.png" width="270" />
 
 **Voertuig-icoon met uitroepteken indien defect**<br />
 <img alt="Voertuig-icoon met uitroepteken indien defect" src="https://files.dashboarddeelmobiliteit.nl/docs/Aanbod/Defecte_voertuigen/defect_voertuig.png" width="100" />
@@ -42,4 +42,4 @@ In de MDS-standaard is [gedocumenteerd](https://github.com/openmobilityfoundatio
 
 ## Vragen?
 
-Vragen over deze functionaliteit? Mail [info@dashboarddeelmobiliteit.nl](mailto:info@dashboarddeelmobiliteit.nl?subject=Defecte%20voertuigen)
+Vragen over deze functionaliteit? Mail <a href="mailto:info@dashboarddeelmobiliteit.nl?subject=Defecte voertuigen">info@dashboarddeelmobiliteit.nl</a>
