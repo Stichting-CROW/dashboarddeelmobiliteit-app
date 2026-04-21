@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from "react-router-dom";
 import {StateType} from '../types/StateType';
 
@@ -20,11 +21,74 @@ function MenuItem(props) {
     : pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
+
+  const hasDesktopSubmenu = Boolean(props.path && props.subMenuItems && props.subMenuItems.length > 0);
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const updateSubmenuPosition = () => {
+    if (!wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setSubmenuPosition({
+      left: rect.left + (rect.width / 2),
+      top: rect.top - 16,
+    });
+  };
+
+  const openSubmenu = () => {
+    if (!hasDesktopSubmenu || window.innerWidth < 640) return;
+    clearCloseTimer();
+    updateSubmenuPosition();
+    setSubmenuOpen(true);
+  };
+
+  const closeSubmenuSoon = () => {
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      setSubmenuOpen(false);
+    }, 120);
+  };
+
+  useEffect(() => {
+    if (!submenuOpen) return undefined;
+
+    const handleViewportChange = () => {
+      updateSubmenuPosition();
+    };
+
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [submenuOpen]);
+
+  useEffect(() => {
+    return () => {
+      clearCloseTimer();
+    };
+  }, []);
 
   return (
     <>
       {props.path && props.subMenuItems && props.subMenuItems.length > 0 && (
-        <div className="Menu-item-wrapper has-submenu">
+        <div
+          ref={wrapperRef}
+          className="Menu-item-wrapper has-submenu"
+          onMouseEnter={openSubmenu}
+          onMouseLeave={closeSubmenuSoon}
+        >
           <Link className={`
               text-menu
               text-center
@@ -80,8 +144,15 @@ function MenuItem(props) {
             )}
           </Link>
 
-          {props.subMenuItems && props.subMenuItems.length > 0 && (
-            <div className="Menu-desktop-submenu text-left" role="menu" aria-label={`${props.text} submenu`}>
+          {props.subMenuItems && props.subMenuItems.length > 0 && createPortal(
+            <div
+              className={`Menu-desktop-submenu text-left${submenuOpen ? ' is-open' : ''}`}
+              role="menu"
+              aria-label={`${props.text} submenu`}
+              onMouseEnter={openSubmenu}
+              onMouseLeave={closeSubmenuSoon}
+              style={{ left: `${submenuPosition.left}px`, top: `${submenuPosition.top}px` }}
+            >
               {props.subMenuItems.map((item, index) => {
                 const subItemActive = isSubmenuItemPathActive(pathName, item.path);
                 return (
@@ -101,7 +172,8 @@ function MenuItem(props) {
                   </React.Fragment>
                 );
               })}
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       )}
@@ -316,6 +388,7 @@ function Menu({
         sm:rounded-tr-3xl
       ">
         <div className="
+          Menu-scroll
           whitespace-nowrap
           text-center
         ">

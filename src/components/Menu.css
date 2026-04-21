@@ -12,7 +12,12 @@
 }
 
 .Menu-inner {
+  overflow: visible;
+}
+
+.Menu-scroll {
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 @media (min-width: 640px) {
@@ -38,12 +43,12 @@
     display: inline-block;
     max-width: 100%;
     width: auto;
-    /*
-     * Base rule sets overflow-x: auto. When overflow-x is not visible, browsers
-     * treat overflow-y as auto as well, which clips the desktop submenu that
-     * extends above the bar. Desktop layout does not need horizontal scroll.
-     */
     overflow: visible;
+  }
+
+  .Menu-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   @media (max-width: 964px) {
@@ -114,19 +119,10 @@
 
 .Menu-desktop-submenu {
   display: none;
-}
-
-@media (min-width: 640px) {
-  .Menu-item-wrapper.has-submenu:hover .Menu-desktop-submenu {
-    display: block;
-  }
-}
-
-.Menu-desktop-submenu {
-  position: absolute;
-  bottom: calc(100% + 16px);
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -100%);
   width: 228px;
   background: #ffffff 0% 0% no-repeat padding-box;
   box-shadow: 0 3px 6px #00000029;
@@ -134,6 +130,16 @@
   opacity: 1;
   padding: 16px 20px;
   z-index: 120;
+}
+
+.Menu-desktop-submenu.is-open {
+  display: block;
+}
+
+@media (max-width: 639px) {
+  .Menu-desktop-submenu {
+    display: none !important;
+  }
 }
 
 /*
