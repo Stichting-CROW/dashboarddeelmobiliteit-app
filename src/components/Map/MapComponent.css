@@ -55,8 +55,9 @@
   left: -1px;
 }
 
-/* Overlapping-vehicle table (MapLibre popup) */
-.Map-popup-body tr[data-dd-vehicle-row="true"]:hover {
+/* Overlap-selection tables (MapLibre popups) */
+.Map-popup-body tr[data-dd-vehicle-row="true"]:hover,
+.Map-popup-body tr[data-dd-hub-row="true"]:hover {
   background-color: rgba(15, 28, 63, 0.08);
 }
 
