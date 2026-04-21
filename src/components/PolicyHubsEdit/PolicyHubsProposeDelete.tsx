@@ -95,6 +95,8 @@ const PolicyHubsProposeDelete = ({
 
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
+  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
+
   // If selected policy hubs changes: Load data of hub
   useEffect(() => {
     if(! selected_policy_hubs || selected_policy_hubs.length === 0) return;
@@ -218,7 +220,11 @@ const PolicyHubsProposeDelete = ({
       </div>
 
       <div className="mb-8">
-        Je staat op het punt om <b>{selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`}</b> te gaan verwijderen. Stel nu de gewenste publicatie- en verwijderdatum in.
+        Je staat op het punt om <b>{active_phase === 'active' || active_phase === 'definitief actief'
+          ? (selected_policy_hubs.length === 1 ? '1 definitieve zone' : `${selected_policy_hubs.length} definitieve zones`)
+          : active_phase === 'published' || active_phase === 'definitief gepubliceerd'
+            ? (selected_policy_hubs.length === 1 ? '1 gepubliceerde zone' : `${selected_policy_hubs.length} gepubliceerde zones`)
+            : (selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`)}</b> te gaan verwijderen. Stel nu de gewenste publicatie- en verwijderdatum in.
       </div>
       <div>
         <FormLabel classes="mt-2 mb-2 font-bold">
