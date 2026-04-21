@@ -15,6 +15,7 @@ import {
   setShowEditForm,
   setShowList,
   setShowProposeDeleteForm,
+  setIsStatsOrManageMode,
 } from '../../actions/policy-hubs'
 
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
@@ -48,6 +49,7 @@ import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
+import Button from '../Button/Button';
 
 let TO_fetch_delay;
 
@@ -794,6 +796,15 @@ const DdPolicyHubsLayer = ({
     return selected_hub.geography_type === 'stop';
   }
 
+  const didSelectNoParkingZone = () => {
+    if(! policyHubs || ! policyHubs[0]) return false;
+    if(! selected_policy_hubs || selected_policy_hubs.length !== 1) return false;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+
+    return selected_hub.geography_type === 'no_parking';
+  }
+
   return <>
     <div className="flex items-center gap-2">
       <PolicyHubsPhaseMenu />
@@ -859,6 +870,47 @@ const DdPolicyHubsLayer = ({
             setDrawedArea(undefined);
           }}
         />
+      </ActionModule>
+    </>}
+
+    {(is_stats_or_manage_mode === 'stats' && didSelectNoParkingZone()) && <>
+      <ActionModule>
+        <div>
+          <div className="mb-2 font-bold">
+            Verbodszone details
+          </div>
+          <div className="p-4 bg-white rounded-lg border border-gray-300">
+            <div className="text-lg font-bold">
+              {getSelectedHub()?.name}
+            </div>
+          </div>
+          <div className="flex w-full justify-between mt-2">
+            <Button
+              theme="white"
+              style={{marginLeft: 0}}
+              onClick={() => {
+                dispatch(setIsDrawingEnabled(false));
+                dispatch(setHubsInDrawingMode([]));
+                dispatch(setShowEditForm(false));
+                dispatch(setSelectedPolicyHubs([]));
+                setDrawedArea(undefined);
+              }}
+            >
+              Sluiten
+            </Button>
+            <Button
+              theme="white"
+              style={{marginLeft: 0}}
+              onClick={() => {
+                dispatch(setShowEditForm(true));
+                dispatch(setShowProposeDeleteForm(false));
+                dispatch(setIsStatsOrManageMode('manage'));
+              }}
+            >
+              Bewerk
+            </Button>
+          </div>
+        </div>
       </ActionModule>
     </>}
 
