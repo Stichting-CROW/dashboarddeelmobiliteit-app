@@ -12,10 +12,10 @@ De technische documentatie van alle API's staat op [docs.dashboarddeelmobiliteit
 
 | Naam | Omschrijving | Link |
 | --- | --- | --- |
-| Available Vehicles API | Locaties en metadata van alle onverhuurde deelvoertuigen in Nederland. Open API; geen API-key nodig. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/available_vehicles/) |
-| Zone statistics | Tijdreeksstatistieken voor zones die je in het dashboard hebt getekend, zoals microhubs, parkeerverbodzones en monitorzones. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/zone_statistics/) |
-| Microhubs | Microhubs, capaciteit en bezetting opvragen via MDS-endpoints. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/microhubs/) |
-| Service areas | Servicegebieden van aanbieders opvragen, inclusief historie en wijzigingen. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/service_areas/) |
-| HB-matrices | Herkomst-bestemmingsmatrices van verhuringen, op basis van een H3-raster of gemeentezones. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/hb_matrices/) |
-| Parkeertelling | Aantal geparkeerde voertuigen per modaliteit voor een gekozen gebied en tijdstip. | [Technische documentatie](https://docs.dashboarddeelmobiliteit.nl/api_docs/parkeertelling/) |
-| Ruwe data export | Ruwe parkeer- en verhuurdata downloaden via het dashboard. Momenteel geen API; je ontvangt de export per e-mail. | [Uitleg in het dashboard](https://dashboarddeelmobiliteit.nl/docs/APIs/Ruwe_data_download.md) |
+| Available Vehicles API | Locaties en metadata van alle onverhuurde deelvoertuigen in Nederland. Open API; geen API-key nodig. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/available_vehicles/" target="_blank" rel="external">Technische documentatie</a> |
+| Zone statistics | Tijdreeksstatistieken voor zones die je in het dashboard hebt getekend, zoals microhubs, parkeerverbodzones en monitorzones. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/zone_statistics/" target="_blank" rel="external">Technische documentatie</a> |
+| Microhubs | Microhubs, capaciteit en bezetting opvragen via MDS-endpoints. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/microhubs/" target="_blank" rel="external">Technische documentatie</a> |
+| Service areas | Servicegebieden van aanbieders opvragen, inclusief historie en wijzigingen. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/service_areas/" target="_blank" rel="external">Technische documentatie</a> |
+| HB-matrices | Herkomst-bestemmingsmatrices van verhuringen, op basis van een H3-raster of gemeentezones. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/hb_matrices/" target="_blank" rel="external">Technische documentatie</a> |
+| Parkeertelling | Aantal geparkeerde voertuigen per modaliteit voor een gekozen gebied en tijdstip. | <a href="https://docs.dashboarddeelmobiliteit.nl/api_docs/parkeertelling/" target="_blank" rel="external">Technische documentatie</a> |
+| Ruwe data export | Ruwe parkeer- en verhuurdata downloaden via het dashboard. Momenteel geen API; je ontvangt de export per e-mail. | <a href="https://dashboarddeelmobiliteit.nl/docs/APIs/Ruwe_data_download.md" target="_blank" rel="external">Uitleg in het dashboard</a> |
