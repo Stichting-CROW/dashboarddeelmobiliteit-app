@@ -50,6 +50,12 @@ function TimeGridVehicleAvailability({}) {
     return aggregatedVehicleData;
   }
   useEffect(() => {
+    // Wait until metadata.zones contains zones for the currently selected
+    // plaats. Otherwise the fetch would request without a valid zone filter
+    // and the API returns NL-wide data.
+    if (!metadata?.zones || metadata.zones.length <= 0) return;
+    if (filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) return;
+
     (async () => {
       const vehicleData = await fetchData();
       if(! vehicleData) return;
@@ -61,7 +67,9 @@ function TimeGridVehicleAvailability({}) {
     filter.ontwikkelingvan,
     filter.ontwikkelingtot,
     filter.ontwikkelingaggregatie_function,
+    filter.gebied,
     filter.zones,
+    filter.aanbiedersexclude,
     metadata,
     token
   ]);

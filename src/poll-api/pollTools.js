@@ -29,19 +29,38 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   }
   // If a place is selected, get all zones for this place
   else if (filter.gebied !== "" && hasAccessToFilterGebied) {
-    // create zone filter
+    const municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
     let candidates = [];
-    let municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
-    if (undefined !== municipality) {
+
+    // Prefer an exact name match on a non-custom zone (the municipality's own
+    // boundary). This is what existed historically and works for places that
+    // have exactly one zone with the same name as the municipality.
+    if (municipality !== undefined) {
       candidates = metadata.zones.filter(zone => {
-        return zone.municipality === municipality.gm_code && zone.name === municipality.name && zone.zone_type !== 'custom'
+        return zone.municipality === municipality.gm_code
+          && zone.name === municipality.name
+          && zone.zone_type !== 'custom';
       });
-    } else {
     }
-    if (candidates.length === 1) {
-      filterparams.push("zone_ids=" + candidates[0].zone_id);
-    } else {
-      // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
+
+    // Fallback 1: zones explicitly typed 'municipality' for this gm_code.
+    if (candidates.length === 0) {
+      candidates = metadata.zones.filter(zone => {
+        return zone.municipality === filter.gebied && zone.zone_type === 'municipality';
+      });
+    }
+
+    // Fallback 2: any non-custom zone for this gm_code. Keeps requests scoped
+    // to the selected plaats instead of falling through to NL-wide data.
+    if (candidates.length === 0) {
+      candidates = metadata.zones.filter(zone => {
+        return zone.municipality === filter.gebied && zone.zone_type !== 'custom';
+      });
+    }
+
+    if (candidates.length >= 1) {
+      const zoneIds = [...new Set(candidates.map(zone => zone.zone_id))];
+      filterparams.push("zone_ids=" + zoneIds.join(','));
     }
   }
   // If no place is set, but the user is no admin: Set all places user has access to

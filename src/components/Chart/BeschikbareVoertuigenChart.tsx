@@ -79,7 +79,18 @@ function BeschikbareVoertuigenChart({
   // On updated filter: re-fetch data
   useEffect(() => {
     // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
+    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
+      setVehiclesData([]);
+      return;
+    }
+    // If a plaats is selected but metadata.zones still belongs to a previous
+    // plaats (i.e. no zone for the current gebied has loaded yet), skip the
+    // fetch. Otherwise we would request without a valid zone filter and the
+    // API returns NL-wide data.
+    if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
+      setVehiclesData([]);
+      return;
+    }
 
     async function fetchData() {
       // Get aggregated vehicle data
@@ -105,7 +116,9 @@ function BeschikbareVoertuigenChart({
     filter.ontwikkelingtot,
     filter.ontwikkelingaggregatie,
     filter.ontwikkelingaggregatie_function,
+    filter.gebied,
     filter.zones,
+    filter.aanbiedersexclude,
     metadata,
     token,
     dispatch

@@ -146,7 +146,18 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
   const [rentalsData, setRentalsData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
-    if (!metadata?.zones || metadata.zones.length <= 0) return;
+    if (!metadata?.zones || metadata.zones.length <= 0) {
+      setVehiclesData(null);
+      setRentalsData(null);
+      return;
+    }
+    // If a plaats is selected but metadata.zones still belongs to a previous
+    // plaats, skip the fetch (see BeschikbareVoertuigenChart for rationale).
+    if (filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
+      setVehiclesData(null);
+      setRentalsData(null);
+      return;
+    }
 
     async function fetchData() {
       const [aggregatedVehicleData, aggregatedRentalsData] = await Promise.all([
@@ -163,7 +174,9 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     filter.ontwikkelingtot,
     filter.ontwikkelingaggregatie,
     filter.ontwikkelingaggregatie_function,
+    filter.gebied,
     filter.zones,
+    filter.aanbiedersexclude,
     metadata,
     token,
     zones

@@ -68,7 +68,16 @@ function VerhuringenChart(props) {
 
   useEffect(() => {
     // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
+    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
+      setRentalsData([]);
+      return;
+    }
+    // If a plaats is selected but metadata.zones still belongs to a previous
+    // plaats, skip the fetch (see BeschikbareVoertuigenChart for rationale).
+    if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
+      setRentalsData([]);
+      return;
+    }
     async function fetchData() {
       // Get aggregated vehicle data
       const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
@@ -93,7 +102,9 @@ function VerhuringenChart(props) {
     filter.ontwikkelingtot,
     filter.ontwikkelingaggregatie,
     filter.ontwikkelingaggregatie_function,
+    filter.gebied,
     filter.zones,
+    filter.aanbiedersexclude,
     metadata,
     token,
     dispatch
