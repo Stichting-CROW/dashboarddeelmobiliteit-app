@@ -1,29 +1,19 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import MobileSlideBox from '../SlideBox/MobileSlideBox.jsx';
 import Filterbar from './Filterbar';
+import useUiVisibility from '../../customHooks/useUiVisibility';
 
 // import './FilterbarMobile.css';
 
 function FilterbarMobile({isVisible, displayMode}) {
-  const dispatch = useDispatch()
-
-  const setVisibility = () => {
-    dispatch({
-      type: `SET_VISIBILITY`,
-      payload: {
-        name: 'FILTERBAR',
-        visibility: false
-      }
-    })
-  };
+  const [, setFilterbarVisible] = useUiVisibility('FILTERBAR');
 
   return (
     <MobileSlideBox
       title="Filters"
       isVisible={isVisible}
       closeHandler={() => {
-        setVisibility();
+        setFilterbarVisible(false);
       }}
       classes="
         top-0 overflow-auto

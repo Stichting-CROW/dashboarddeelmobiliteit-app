@@ -1,16 +1,17 @@
 import React from 'react';
 import './css/FilterbarPermits.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import Fieldset from '../Fieldset/Fieldset';
 import FilterbarExtended from './FilterbarExtended.jsx';
+import useFilterbarExtended from '../../customHooks/useFilterbarExtended';
 import { StateType } from '../../types/StateType';
 
 function FilterbarStatistiek() {
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { openView, close, isViewActive } = useFilterbarExtended();
   const pathname = location.pathname;
 
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
@@ -33,17 +34,6 @@ function FilterbarStatistiek() {
       : null
   );
 
-  const filterBarExtendedView = useSelector((state: StateType) =>
-    state.ui ? state.ui['FILTERBAR_EXTENDED'] : false
-  );
-
-  const toggleDashboardType = (val: string | false) => {
-    dispatch({
-      type: 'SET_VISIBILITY',
-      payload: { name: 'FILTERBAR_EXTENDED', visibility: val }
-    });
-  };
-
   const handleSelectDashboardType = (path: string) => {
     const searchParams = new URLSearchParams();
     if (filterGebied) {
@@ -57,7 +47,7 @@ function FilterbarStatistiek() {
     }
     const queryString = searchParams.toString();
     navigate(queryString ? `${path}?${queryString}` : path);
-    toggleDashboardType(false);
+    close();
   };
 
   const getCurrentSelection = () => {
@@ -70,7 +60,7 @@ function FilterbarStatistiek() {
   const renderSelectDashboardType = () => (
     <FilterbarExtended
       title="Selecteer statistiek"
-      closeFunction={() => toggleDashboardType(false)}
+      closeFunction={close}
     >
       <div className="filter-form-selectie">
         <div className="filter-form-values">
@@ -108,11 +98,11 @@ function FilterbarStatistiek() {
         <div className="filter-plaats-box-row">
           <div
             className={`filter-plaats-value ${isBeleidsinfo || isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
-            onClick={() => toggleDashboardType('dashboard-type')}
+            onClick={() => openView('dashboard-type')}
           >
             {getCurrentSelection()}
           </div>
-          {filterBarExtendedView === 'dashboard-type'
+          {isViewActive('dashboard-type')
             ? renderSelectDashboardType()
             : null}
         </div>

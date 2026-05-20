@@ -1,39 +1,30 @@
 import React, {
   useRef,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import useUiVisibility from '../../customHooks/useUiVisibility';
+import { FILTERBAR_EXTENDED_CLOSED } from '../../types/FilterbarExtendedState';
 
 import './SlideBox.css';
-
-import {StateType} from '../../types/StateType';
 
 function SlideBox(props) {
   const dispatch = useDispatch();
   const containerRef = useRef(null);
   const NAME = props.name.toUpperCase();
 
-  const isVisible = useSelector((state: StateType) => {
-    return state.ui ? state.ui[NAME] : false;
-  });
-
-  const setVisibility = (name, visibility) => {
-    dispatch({
-      type: `SET_VISIBILITY`,
-      payload: {
-        name: name,
-        visibility: visibility
-      }
-    })
-  }
+  const [isVisible, setVisible] = useUiVisibility(NAME);
 
   // Show/hide slidebox on toggle click
   const toggleSlideBox = () => {
     // If filterbar was visible, hide extended filterbar
     if(isVisible) {
-      setVisibility('FILTERBAR_EXTENDED', false);
+      dispatch({
+        type: 'SET_FILTERBAR_EXTENDED',
+        payload: FILTERBAR_EXTENDED_CLOSED,
+      });
     }
     // Now toggle slidebox
-    setVisibility(NAME, ! isVisible)
+    setVisible(!isVisible)
   };
 
   const {backgroundColor} = props.options || {};

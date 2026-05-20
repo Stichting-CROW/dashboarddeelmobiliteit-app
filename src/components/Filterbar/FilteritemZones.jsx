@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import FilterbarExtended from './FilterbarExtended.jsx';
+import useFilterbarExtended from '../../customHooks/useFilterbarExtended';
 import './css/FilteritemZones.css';
 
 import {StateType} from '../../types/StateType';
@@ -13,6 +14,7 @@ function FilteritemZones({
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { openView, close, isViewActive } = useFilterbarExtended();
   
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -37,16 +39,12 @@ function FilteritemZones({
       ? new Date(state.filter.ontwikkelingtot)
       : null
   );
-  
-  const filterBarExtendedView = useSelector((state: StateType) => {
-    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
-  });
 
   let [filterSearch, setFilterSearch] = useState("");
 
   // Reset the search field whenever the panel is closed so that reopening it
   // always starts from a clean state.
-  const isPanelOpen = filterBarExtendedView === 'zones';
+  const isPanelOpen = isViewActive('zones');
   useEffect(() => {
     if (!isPanelOpen) {
       setFilterSearch("");
@@ -97,18 +95,12 @@ function FilteritemZones({
     dispatch({ type: 'CLEAR_FILTER_ZONES', payload: null })
   }
 
-  const setVisibility = (name, visibility) => {
-    dispatch({
-      type: `SET_VISIBILITY`,
-      payload: {
-        name: name,
-        visibility: visibility
-      }
-    })
-  }
-
   const toggleZones = (val) => {
-    setVisibility('FILTERBAR_EXTENDED', val)
+    if (val === false) {
+      close();
+      return;
+    }
+    openView(val);
   }
   
   const changeSearchText = e => { setFilterSearch(e.target.value) }
@@ -210,7 +202,7 @@ function FilteritemZones({
     return (
       <FilterbarExtended
         title="Selecteer een zone"
-        closeFunction={(val) => toggleZones(false)}
+        closeFunction={close}
       >
         <div className="filter-form-selectie">
             <div className="filter-form-search-container mb-3">
@@ -291,7 +283,7 @@ function FilteritemZones({
             :
               null
         }
-        { filterBarExtendedView === 'zones' ? renderSelectZones(selectableZones) : null }
+        { isViewActive('zones') ? renderSelectZones(selectableZones) : null }
         <div className="ml-3 flex flex-col justify-center h-full">
           <div className="filter-zones-img-search cursor-pointer" onClick={e=>{toggleZones('zones')}} />
         </div>

@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-  useSelector
-} from 'react-redux';
 import SlideBox from '../SlideBox/SlideBox.jsx';
 import Filterbar from './Filterbar';
-
-import {StateType} from '../../types/StateType';
+import useFilterbarExtended from '../../customHooks/useFilterbarExtended';
 
 function FilterbarDesktop({isVisible, displayMode}) {
-
-  const isFilterBarExtendedVisible = useSelector((state: StateType) => {
-    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
-  });
+  const { isOpen: isFilterBarExtendedVisible } = useFilterbarExtended();
 
   return (
     <SlideBox name="FilterBar" direction="left" options={{

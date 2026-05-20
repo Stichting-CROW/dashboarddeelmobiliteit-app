@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
+import useFilterbarExtended from '../../customHooks/useFilterbarExtended';
 import './css/FilteritemGebieden.css';
 
 import {StateType} from '../../types/StateType';
@@ -24,6 +25,7 @@ const setQueryParam = (key, val) => {
 
 function FilteritemGebieden() {
   const dispatch = useDispatch()
+  const { openView, close, isViewActive } = useFilterbarExtended();
 
   const gebieden = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
@@ -33,30 +35,16 @@ function FilteritemGebieden() {
     return state.filter ? state.filter.gebied : "";
   });
 
-  const filterBarExtendedView = useSelector((state: StateType) => {
-    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
-  });
-
   let [filterSearch, setFilterSearch] = useState("");
 
   // Reset the search field whenever the panel is closed so that reopening it
   // always starts from a clean state.
-  const isPanelOpen = filterBarExtendedView === 'places';
+  const isPanelOpen = isViewActive('places');
   useEffect(() => {
     if (!isPanelOpen) {
       setFilterSearch("");
     }
   }, [isPanelOpen]);
-
-  const setVisibility = (name, visibility) => {
-    dispatch({
-      type: `SET_VISIBILITY`,
-      payload: {
-        name: name,
-        visibility: visibility
-      }
-    })
-  }
 
   const unselectGebied = e => {
     e.preventDefault();
@@ -90,7 +78,11 @@ function FilteritemGebieden() {
   }
   
   const toggleGebieden = (val) => {
-    setVisibility('FILTERBAR_EXTENDED', val)
+    if (val === false) {
+      close();
+      return;
+    }
+    openView(val);
   }
 
   const renderSelectGebieden = (gebieden) => {
@@ -100,7 +92,7 @@ function FilteritemGebieden() {
     return (
       <FilterbarExtended
         title="Selecteer een plaats"
-        closeFunction={() => toggleGebieden(false)}
+        closeFunction={close}
         >
         <div className="filter-form-selectie">
           <div className="filter-form-search-container mb-3">
@@ -169,7 +161,7 @@ function FilteritemGebieden() {
         }}>
           {value === "" ? "Alle plaatsen" : value.name}
         </div>
-        { filterBarExtendedView === 'places' ? renderSelectGebieden(gebieden) : null }
+        { isViewActive('places') ? renderSelectGebieden(gebieden) : null }
         {  filterGebied!=="" ?
               <div className="filter-plaats-img-cancel" onClick={unselectGebied} />
             :
