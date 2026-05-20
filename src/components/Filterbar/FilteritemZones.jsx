@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemZones.css';
 
 import {StateType} from '../../types/StateType';
 
 function FilteritemZones({
-  zonesToShow
+  zonesToShow,
+  beleidszonesRedirect = false
 }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   const zones = useSelector((state: StateType) => {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
@@ -21,12 +25,56 @@ function FilteritemZones({
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : 0;
   });
+
+  const filterOntwikkelingVan = useSelector((state: StateType) =>
+    state.filter && state.filter.ontwikkelingvan
+      ? new Date(state.filter.ontwikkelingvan)
+      : null
+  );
+
+  const filterOntwikkelingTot = useSelector((state: StateType) =>
+    state.filter && state.filter.ontwikkelingtot
+      ? new Date(state.filter.ontwikkelingtot)
+      : null
+  );
   
   const filterBarExtendedView = useSelector((state: StateType) => {
     return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
   });
 
   let [filterSearch, setFilterSearch] = useState("");
+
+  const getBeleidszonesPath = () => {
+    const searchParams = new URLSearchParams();
+    if (filterGebied) {
+      searchParams.set('gm_code', filterGebied);
+    }
+    if (filterOntwikkelingVan) {
+      searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
+    }
+    if (filterOntwikkelingTot) {
+      searchParams.set('end_date', format(filterOntwikkelingTot, 'yyyy-MM-dd'));
+    }
+    const queryString = searchParams.toString();
+    return queryString ? `/stats/beleidszones?${queryString}` : '/stats/beleidszones';
+  };
+
+  useEffect(() => {
+    if (!beleidszonesRedirect || !filterZones) return;
+    const customZoneIds = new Set(
+      zones
+        .filter((z) => z.zone_type === 'custom')
+        .map((z) => z.zone_id.toString())
+    );
+    const selectedIds = filterZones.split(',').map((id) => id.trim()).filter(Boolean);
+    const nonCustomIds = selectedIds.filter((id) => !customZoneIds.has(id));
+    if (nonCustomIds.length < selectedIds.length) {
+      dispatch({
+        type: 'SET_FILTER_ZONES',
+        payload: nonCustomIds.length > 0 ? nonCustomIds.join(',') : ''
+      });
+    }
+  }, [beleidszonesRedirect, zones, filterZones, dispatch]);
 
   const addToFilterZones = (zone) => {
     dispatch({ type: 'ADD_TO_FILTER_ZONES', payload: zone })
@@ -75,8 +123,45 @@ function FilteritemZones({
     if(zone) zone_groups_filtered.push(zone[0]);
   })
   
-  const renderSelectZonesGroup = (group, zones) => {
-    const groupZones = zones.filter(zone=>zone.zone_type===group.zone_type);
+  const renderBeleidszonesRedirect = () => {
+    const beleidszonesPath = getBeleidszonesPath();
+    return (
+      <div key="zg-custom" className="zone-group-container">
+        <span key="zgn-custom" className="zone-group-title">
+          Beleidszones
+        </span>
+        <p className="zone-group-beleidszones-redirect mt-2 text-sm text-gray-600">
+          Beleidszone-statistieken vind je nu{' '}
+          <a
+            href={beleidszonesPath}
+            className="text-[#15AEEF] underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (
+                !e.defaultPrevented &&
+                !e.metaKey &&
+                !e.ctrlKey &&
+                !e.shiftKey &&
+                e.button === 0
+              ) {
+                e.preventDefault();
+                navigate(beleidszonesPath);
+              }
+            }}
+          >
+            Statistiek: Hubs en verbodsgebieden
+          </a>
+        </p>
+      </div>
+    );
+  };
+
+  const renderSelectZonesGroup = (group, zonesList) => {
+    if (beleidszonesRedirect && group.zone_type === 'custom') {
+      return renderBeleidszonesRedirect();
+    }
+
+    const groupZones = zonesList.filter(zone=>zone.zone_type===group.zone_type);
     if(groupZones.length===0) { return null }
     
     const sortedZones = groupZones.sort((a,b) => a.name.localeCompare(b.name));
@@ -145,16 +230,23 @@ function FilteritemZones({
         </div>
       </FilterbarExtended>)
   }
+
+  const selectableZones = beleidszonesRedirect
+    ? zones.filter((zone) => zone.zone_type !== 'custom')
+    : zones;
   
   let selectedzones = [];
   let zonetxt = ""
   try {
-    selectedzones = filterZones.split(',')
-    let aantal = selectedzones.length;
+    selectedzones = filterZones.split(',').map((id) => id.trim()).filter(Boolean);
+    const visibleSelected = selectedzones.filter((id) =>
+      selectableZones.some((zone) => zone.zone_id.toString() === id)
+    );
+    const aantal = visibleSelected.length;
     if(aantal>1) {
       zonetxt = aantal + " zones";
-    } else {
-      let thezone = zones.find(zone=>(zone.zone_id.toString()===selectedzones[0]));
+    } else if (aantal === 1) {
+      let thezone = selectableZones.find(zone=>(zone.zone_id.toString()===visibleSelected[0]));
       zonetxt = (thezone && thezone.name) || '';
     }
   } catch(ex) {
@@ -164,8 +256,8 @@ function FilteritemZones({
   if(zonetxt==="") { zonetxt = "Alle Zones" }
   
   let isActive = filterGebied !== '';
-  
-  const filteredZones = zones.filter(zone=>{
+
+  const filteredZones = selectableZones.filter(zone=>{
     return selectedzones.includes(zone.zone_id.toString())
   })
 
@@ -190,7 +282,7 @@ function FilteritemZones({
             :
               null
         }
-        { filterBarExtendedView === 'zones' ? renderSelectZones(zones) : null }
+        { filterBarExtendedView === 'zones' ? renderSelectZones(selectableZones) : null }
         <div className="ml-3 flex flex-col justify-center h-full">
           <div className="filter-zones-img-search cursor-pointer" onClick={e=>{toggleZones('zones')}} />
         </div>

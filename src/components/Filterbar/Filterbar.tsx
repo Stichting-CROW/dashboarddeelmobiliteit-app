@@ -250,7 +250,10 @@ function Filterbar({
 
           {filterGebied && (
             <Fieldset title="Zones">
-              <FilteritemZones zonesToShow={zonesToShow} />
+              <FilteritemZones
+                zonesToShow={zonesToShow}
+                beleidszonesRedirect={isBeleidsinfo}
+              />
             </Fieldset>
           )}
 
