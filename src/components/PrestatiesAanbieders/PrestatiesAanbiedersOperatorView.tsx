@@ -108,7 +108,7 @@ const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiede
     });
   };
 
-  const renderModalityCards = (rowPermits: PermitLimitRecord[]) => {
+  const renderModalityCards = (rowPermits: PermitLimitRecord[], rowItem: RowData) => {
     const sortedPermits = [...rowPermits].sort((a, b) => {
       const typeA = a.vehicle_type?.id || a.permit_limit.modality;
       const typeB = b.vehicle_type?.id || b.permit_limit.modality;
@@ -121,6 +121,9 @@ const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiede
       const providerName = permit.operator?.name || permit.permit_limit.system_id;
       const formFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
       const vehicleIcon = getVehicleTypeIconSrc(formFactor);
+      const municipalityName =
+        municipalityNameByGmCode.get(permit.municipality?.gmcode || permit.permit_limit.municipality) ||
+        rowItem.name;
 
       return (
         <PrestatiesAanbiederCard
@@ -134,7 +137,7 @@ const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiede
           kpiFetchScope="operator"
           overviewKpiOperators={rawKpiOperators}
           overviewKpiDescriptions={performanceIndicatorDescriptions}
-          hideProviderTitle
+          titleOverride={municipalityName}
         />
       );
     });

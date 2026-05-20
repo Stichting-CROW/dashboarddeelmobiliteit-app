@@ -32,8 +32,12 @@ interface PrestatiesAanbiederCardProps {
     /** Preloaded KPI rows from operator overview fetch (avoids per-card API calls). */
     overviewKpiOperators?: MunicipalityModalityOperator[];
     overviewKpiDescriptions?: PerformanceIndicatorDescription[];
-    /** Operator overview: hide provider name beside the colored dot. */
-    hideProviderTitle?: boolean;
+    /**
+     * Operator overview: override the title shown beside the colored dot.
+     * When set, this replaces the provider name (e.g. with a municipality name).
+     * The colored dot still uses the provider's color.
+     */
+    titleOverride?: string;
 }
 
 const KPI_TITLE_ORDER = [
@@ -101,7 +105,7 @@ export default function PrestatiesAanbiederCard({
   kpiFetchScope = 'municipality',
   overviewKpiOperators,
   overviewKpiDescriptions,
-  hideProviderTitle = false,
+  titleOverride,
 }: PrestatiesAanbiederCardProps) {
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
@@ -352,9 +356,8 @@ export default function PrestatiesAanbiederCard({
             <div className="flex justify-between">
               <div className="flex items-center gap-2">
                 <ProviderLabel
-                  label={displayLabel}
+                  label={titleOverride ?? displayLabel}
                   color={providerColor}
-                  showTitle={!hideProviderTitle}
                 />
                 {vehicleTypeIcon && (
                   <img
