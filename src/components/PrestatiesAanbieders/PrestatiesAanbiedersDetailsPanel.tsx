@@ -404,8 +404,17 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
       </div>
 
       <p className="prestaties-aanbieders-details-panel__description">
-        Hier zie je de data van gemeente {municipalityName}, specifiek over de{' '}
-        <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
+        {isOperatorScope ? (
+          <>
+            Hier zie je de data van gemeente <b>{municipalityName}</b>, specifiek over de{' '}
+            <b>{getPluralFormFactorName(formFactorName)}</b> van {operatorName}.
+          </>
+        ) : (
+          <>
+            Hier zie je de data van gemeente {municipalityName}, specifiek over de{' '}
+            <b>{getPluralFormFactorName(formFactorName)}</b> van <b>{operatorName}</b>.
+          </>
+        )}
       </p>
 
       {(!operatorCode || !formFactorCode) && (
