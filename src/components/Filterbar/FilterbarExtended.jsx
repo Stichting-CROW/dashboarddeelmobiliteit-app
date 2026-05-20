@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import { IconButtonClose } from '../IconButtons.jsx';
+import useDismissOnOutsideInteraction from '../../customHooks/useDismissOnOutsideInteraction';
 
 import './css/FilterbarExtended.css';
 
@@ -8,9 +9,22 @@ function FilterbarExtended({closeFunction, title, children}) {
   const previouslyFocusedRef = useRef(null);
   const titleId = useId();
 
-  // Focus management: remember currently focused element on mount, restore it on
-  // unmount. Move focus into the panel unless a child element (e.g. an input
-  // with autoFocus) has already claimed it.
+  const dismiss = useCallback(() => {
+    closeFunction(false);
+  }, [closeFunction]);
+
+  // Dismiss when the user clicks outside or presses Escape. Scrollbar clicks
+  // on the surrounding SlideBox panel are treated as "inside" so vertical
+  // scrolling of the parent doesn't close the dialog.
+  useDismissOnOutsideInteraction({
+    ref: filterbarRef,
+    onDismiss: dismiss,
+    scrollContainerSelector: '.SlideBox-inner, .MobileSlideBox',
+  });
+
+  // Focus management: remember currently focused element on mount, restore it
+  // on unmount. Move focus into the panel unless a child element (e.g. an
+  // input with autoFocus) has already claimed it.
   useEffect(() => {
     previouslyFocusedRef.current = document.activeElement;
 
@@ -27,40 +41,10 @@ function FilterbarExtended({closeFunction, title, children}) {
     };
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!filterbarRef.current) {
-        return;
-      }
-      if (!filterbarRef.current.contains(event.target)) {
-        closeFunction(false);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        closeFunction(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [closeFunction]);
-
-  const handleContainerMouseDown = (e) => {
-    e.stopPropagation();
-  };
-
   return (
     <div
       className="FilterbarExtended"
       ref={filterbarRef}
-      onMouseDown={handleContainerMouseDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? titleId : undefined}

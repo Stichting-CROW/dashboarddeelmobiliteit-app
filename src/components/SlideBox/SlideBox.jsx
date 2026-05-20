@@ -1,51 +1,20 @@
 import React, {
   useRef,
-  useEffect,
-  // useState
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import './SlideBox.css';
-import isScrollContainerScrollbarInteraction from './isScrollContainerScrollbarInteraction.js';
 
 import {StateType} from '../../types/StateType';
 
 function SlideBox(props) {
   const dispatch = useDispatch();
   const containerRef = useRef(null);
-  const innerRef = useRef(null);
   const NAME = props.name.toUpperCase();
 
   const isVisible = useSelector((state: StateType) => {
     return state.ui ? state.ui[NAME] : false;
   });
-
-  const isFilterBarExtendedVisible = useSelector((state: StateType) => {
-    return state.ui ? state.ui['FILTERBAR_EXTENDED'] : false;
-  });
-
-  useEffect(() => {
-    if (NAME !== 'FILTERBAR' || !isFilterBarExtendedVisible) {
-      return;
-    }
-
-    const inner = innerRef.current;
-    if (!inner) {
-      return;
-    }
-
-    const handleMouseDownCapture = (event) => {
-      if (isScrollContainerScrollbarInteraction(event, inner)) {
-        event.stopPropagation();
-      }
-    };
-
-    document.addEventListener('mousedown', handleMouseDownCapture, true);
-
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDownCapture, true);
-    };
-  }, [NAME, isFilterBarExtendedVisible]);
 
   const setVisibility = (name, visibility) => {
     dispatch({
@@ -79,7 +48,7 @@ function SlideBox(props) {
     <div className="
       SlideBox-inner
       h-full
-    " ref={innerRef} style={{backgroundColor: backgroundColor}}>
+    " style={{backgroundColor: backgroundColor}}>
       {props.children}
     </div>
     <div
