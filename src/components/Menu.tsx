@@ -314,8 +314,8 @@ function Menu({
         icon={'/images/components/Menu/ontwikkeling.svg'}
         subMenuItems={[
           { text: 'Beleidsinfo', path: '/stats/beleidsinfo' },
-          { text: 'Prestaties aanbieders', path: '/stats/prestaties-aanbieders' },
           { text: 'Hubs en verbodsgebieden', path: '/stats/beleidszones' },
+          { text: 'Prestaties aanbieders', path: '/stats/prestaties-aanbieders' },
           // { text: 'Open data', path: '/docs' },
         ]}
       />
