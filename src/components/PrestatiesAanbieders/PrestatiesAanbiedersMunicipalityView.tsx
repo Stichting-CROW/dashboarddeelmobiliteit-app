@@ -82,7 +82,12 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
 
         // Fetch KPI data first to get the correct propulsion_type from the API response
         // (e.g. LIME bicycle uses electric_assist, not electric)
-        const kpiData = await getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type);
+        const kpiData = await getOperatorPerformanceIndicators(token, {
+          scope: 'municipality',
+          municipality,
+          system_id: provider_system_id,
+          form_factor: vehicle_type,
+        });
         const propulsion_type =
           kpiData?.municipality_modality_operators?.[0]?.propulsion_type ??
           editDialogPermit!.propulsion_type ??

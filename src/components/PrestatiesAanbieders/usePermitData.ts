@@ -1,36 +1,85 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
-import { 
-  getPermitLimitOverviewForMunicipality, 
+import {
+  getPermitLimitOverviewForMunicipality,
   getPermitLimitOverviewForOperator,
-  type PermitLimitRecord 
+  type PermitLimitRecord,
+  type MunicipalityModalityOperator,
+  type PerformanceIndicatorDescription,
 } from '../../api/permitLimits';
 import { fetchOperators, type OperatorData } from '../../api/operators';
+import { getMunicipalityList } from '../../api/municipalities';
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from '../../helpers/vehicleTypes';
 
 export type PermitViewType = 'municipality' | 'operator';
 
 export const usePermitData = (viewType: PermitViewType, filterValue: string) => {
   const [permits, setPermits] = useState<PermitLimitRecord[]>([]);
+  const [rawKpiOperators, setRawKpiOperators] = useState<MunicipalityModalityOperator[]>([]);
+  const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<
+    PerformanceIndicatorDescription[]
+  >([]);
   const [availableOperators, setAvailableOperators] = useState<OperatorData[]>([]);
+  const [municipalityNames, setMunicipalityNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const token = useSelector((state: StateType) => 
+  const [searchParams] = useSearchParams();
+  const startDate = searchParams.get('start_date') || undefined;
+  const endDate = searchParams.get('end_date') || undefined;
+
+  const token = useSelector((state: StateType) =>
     (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
   );
 
-  // Fetch operators for operator view
+  const gebieden = useSelector((state: StateType) =>
+    (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : []
+  );
+
   useEffect(() => {
     fetchOperators().then((operators) => {
       if (operators) {
         setAvailableOperators(operators);
       }
     });
-  }, []); // Add empty dependency array to run only once
+  }, []);
 
-  // Helper to reload permits
+  useEffect(() => {
+    if (viewType !== 'operator' || !token) {
+      return;
+    }
+
+    const localNames = new Map<string, string>();
+    gebieden.forEach((g: { gm_code?: string; name?: string }) => {
+      if (g.gm_code && g.name) {
+        localNames.set(g.gm_code, g.name);
+      }
+    });
+
+    if (localNames.size > 0) {
+      setMunicipalityNames(localNames);
+      return;
+    }
+
+    getMunicipalityList(token)
+      .then((list) => {
+        const map = new Map<string, string>();
+        if (Array.isArray(list)) {
+          list.forEach((item: { gm_code?: string; name?: string }) => {
+            if (item.gm_code && item.name) {
+              map.set(item.gm_code, item.name);
+            }
+          });
+        }
+        setMunicipalityNames(map);
+      })
+      .catch(() => {
+        setMunicipalityNames(new Map());
+      });
+  }, [viewType, token, gebieden]);
+
   const reloadPermits = useCallback(async () => {
     if (!token || !filterValue) return;
 
@@ -39,25 +88,43 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
 
     try {
       let results: PermitLimitRecord[] | null = null;
-      
+
       if (viewType === 'municipality') {
-        results = await getPermitLimitOverviewForMunicipality(token, filterValue);
+        results = await getPermitLimitOverviewForMunicipality(
+          token,
+          filterValue,
+          startDate,
+          endDate
+        );
+        setRawKpiOperators([]);
+        setPerformanceIndicatorDescriptions([]);
       } else {
-        results = await getPermitLimitOverviewForOperator(token, filterValue);
+        const operatorResult = await getPermitLimitOverviewForOperator(
+          token,
+          filterValue,
+          startDate,
+          endDate,
+          municipalityNames
+        );
+        results = operatorResult?.records ?? null;
+        setRawKpiOperators(operatorResult?.rawOperators ?? []);
+        setPerformanceIndicatorDescriptions(
+          operatorResult?.performanceIndicatorDescriptions ?? []
+        );
       }
 
-      // there are some exceptions in the backend, so we need to filter them out
-      // drop all records that have no permit_limit 
-      // when not given, create municipality field by copying the municipality from the permit_limit
-      if(results) {
+      if (results) {
         results = results.filter((record) => record.permit_limit);
         results.forEach((record) => {
-          if(!record.municipality) {
-            record.municipality = { name: record.permit_limit.municipality, gmcode: record.permit_limit.municipality };
-          } 
-          if(!record.vehicle_type) {
-            record.vehicle_type = { 
-              id: record.permit_limit.modality, 
+          if (!record.municipality) {
+            record.municipality = {
+              name: record.permit_limit.municipality,
+              gmcode: record.permit_limit.municipality,
+            };
+          }
+          if (!record.vehicle_type) {
+            record.vehicle_type = {
+              id: record.permit_limit.modality,
               name: getPrettyVehicleTypeName(record.permit_limit.modality) || record.permit_limit.modality,
               icon: getVehicleIconUrl(record.permit_limit.modality) || getVehicleIconUrl('other'),
             };
@@ -71,7 +138,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     } finally {
       setLoading(false);
     }
-  }, [token, filterValue, viewType]); // These dependencies are correct
+  }, [token, filterValue, viewType, startDate, endDate, municipalityNames]);
 
   useEffect(() => {
     reloadPermits();
@@ -79,10 +146,12 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
 
   return {
     permits,
+    rawKpiOperators,
+    performanceIndicatorDescriptions,
     availableOperators,
     loading,
     error,
     reloadPermits,
-    token
+    token,
   };
 };

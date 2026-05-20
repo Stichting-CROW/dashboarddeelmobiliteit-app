@@ -86,198 +86,307 @@ export const PERMIT_LIMITS_NIET_ACTIEF = {
     max_parking_duration: 'P0D',
 };
 
-export const getPermitLimitOverviewForMunicipality = async (
-    token: string, 
-    municipality: string) => {
+export type KpiOverviewQueryScope = 'municipality' | 'operator';
+
+export interface KpiOverviewFetchParams {
+    start_date?: string;
+    end_date?: string;
+    municipality?: string;
+    system_id?: string;
+    scope?: KpiOverviewQueryScope;
+}
+
+export interface OperatorPerformanceIndicatorsParams {
+    scope?: KpiOverviewQueryScope;
+    municipality?: string;
+    system_id?: string;
+    form_factor?: string;
+    start_date?: string;
+    end_date?: string;
+}
+
+export const buildKpiOverviewSearchParams = (
+    startDateStr: string,
+    endDateStr: string,
+    query: Pick<OperatorPerformanceIndicatorsParams, 'scope' | 'municipality' | 'system_id' | 'form_factor'>
+): URLSearchParams | null => {
+    const scope: KpiOverviewQueryScope =
+        query.scope ??
+        (query.system_id && !query.municipality ? 'operator' : 'municipality');
+
+    const params = new URLSearchParams({
+        start_date: startDateStr,
+        end_date: endDateStr,
+    });
+
+    if (scope === 'operator') {
+        if (!query.system_id) {
+            return null;
+        }
+        params.set('system_id', query.system_id);
+        if (query.municipality) {
+            params.set('municipality', query.municipality);
+        }
+    } else {
+        if (!query.municipality) {
+            return null;
+        }
+        params.set('municipality', query.municipality);
+        if (query.system_id) {
+            params.set('system_id', query.system_id);
+        }
+    }
+
+    if (query.form_factor) {
+        params.set('form_factor', query.form_factor);
+    }
+
+    return params;
+};
+
+export interface KpiOverviewFetchResult {
+    records: PermitLimitRecord[];
+    rawOperators: MunicipalityModalityOperator[];
+    performanceIndicatorDescriptions: PerformanceIndicatorDescription[];
+}
+
+const defaultKpiDateRange = (): { startDateStr: string; endDateStr: string } => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 90);
+    return {
+        startDateStr: startDate.toISOString().split('T')[0],
+        endDateStr: endDate.toISOString().split('T')[0],
+    };
+};
+
+const fetchOperatorsMap = async () => {
+    let operatorsMap = new Map<string, { system_id: string; name: string; color?: string; operator_url?: string }>();
     try {
-        // Use the new kpi_overview_operators endpoint
-        // Default to last 90 days if no dates provided
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 90);
-        
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
-        
-        const params = new URLSearchParams({
-            start_date: startDateStr,
-            end_date: endDateStr,
-            municipality: municipality
-        }).toString();
-        
-        const url = `${MDS_BASE_URL}/kpi_overview_operators?${params}`;
+        const operatorsResponse = await fetch(`${MDS_BASE_URL}/operators`);
+        if (operatorsResponse.ok) {
+            const operatorsData = await operatorsResponse.json();
+            operatorsMap = new Map(
+                (operatorsData.operators || []).map((op: { system_id: string; name: string; color?: string; operator_url?: string }) => [op.system_id, op])
+            );
+        }
+    } catch (error) {
+        console.warn('Failed to fetch operators, using fallback data', error);
+    }
+    return operatorsMap;
+};
+
+export const transformKpiOverviewToPermitRecords = (
+    kpiData: OperatorPerformanceIndicatorsResponse,
+    options: {
+        startDateStr: string;
+        defaultMunicipality?: string;
+        municipalityNames?: Map<string, string>;
+    }
+): PermitLimitRecord[] => {
+    const { startDateStr, defaultMunicipality = '', municipalityNames } = options;
+    const operators = kpiData.municipality_modality_operators || [];
+    if (operators.length === 0) {
+        return [];
+    }
+
+    const groupKey = (item: MunicipalityModalityOperator) => {
+        const geometryRef = item.geometry_ref?.replace('cbs:', '') || defaultMunicipality;
+        return `${item.operator}_${item.form_factor}_${geometryRef}`;
+    };
+    const groupMap = new Map<string, MunicipalityModalityOperator[]>();
+    for (const item of operators) {
+        const key = groupKey(item);
+        const existing = groupMap.get(key) || [];
+        existing.push(item);
+        groupMap.set(key, existing);
+    }
+
+    return Array.from(groupMap.values()).map((items) => {
+        const item = items[0];
+        const geometryRef = item.geometry_ref?.replace('cbs:', '') || defaultMunicipality;
+        const municipalityName = municipalityNames?.get(geometryRef) || geometryRef;
+
+        let hasRed = false;
+        let hasGreen = false;
+        for (const i of items) {
+            const kpis = i.kpis || [];
+            if (kpis.some((kpi) => (kpi.values || []).some((v) => v.complies === false))) hasRed = true;
+            if (kpis.some((kpi) => (kpi.values || []).some((v) => v.complies === true))) hasGreen = true;
+        }
+        const overallCompliance: 'red' | 'green' | 'grey' =
+            hasRed ? 'red' : hasGreen ? 'green' : 'grey';
+
+        const sorted = [...items].sort((a, b) => {
+            const order = { electric: 0, combustion: 1, human: 2 };
+            return (order[a.propulsion_type as keyof typeof order] ?? 99) - (order[b.propulsion_type as keyof typeof order] ?? 99);
+        });
+        const propulsion_type = sorted[0].propulsion_type;
+
+        const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
+        const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
+            const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
+            return hashValue | 0;
+        }, 0));
+
+        const permitLimit: PermitLimit = {
+            permit_limit_id: permitLimitId,
+            modality: item.form_factor,
+            effective_date: startDateStr,
+            municipality: geometryRef,
+            system_id: item.operator,
+            minimum_vehicles: 0,
+            maximum_vehicles: 99999999,
+            minimal_number_of_trips_per_vehicle: 0,
+            max_parking_duration: 'P0D',
+        };
+
+        return {
+            municipality: { gmcode: geometryRef, name: municipalityName },
+            operator: {
+                system_id: item.operator,
+                name: item.operator,
+                color: '#000000',
+                operator_url: '',
+            },
+            vehicle_type: {
+                id: item.form_factor,
+                name: item.form_factor,
+                icon: '',
+            },
+            permit_limit: permitLimit,
+            overallCompliance,
+            propulsion_type,
+        };
+    });
+};
+
+const enrichPermitRecordsWithOperators = async (
+    records: PermitLimitRecord[]
+): Promise<PermitLimitRecord[]> => {
+    const operatorsMap = await fetchOperatorsMap();
+    return records.map((record) => {
+        const operator = operatorsMap.get(record.operator.system_id);
+        if (!operator) {
+            return record;
+        }
+        return {
+            ...record,
+            operator: {
+                system_id: operator.system_id,
+                name: operator.name,
+                color: operator.color || '#000000',
+                operator_url: operator.operator_url || '',
+            },
+        };
+    });
+};
+
+export const fetchKpiOverviewPermitRecords = async (
+    token: string,
+    params: KpiOverviewFetchParams,
+    municipalityNames?: Map<string, string>
+): Promise<KpiOverviewFetchResult | null> => {
+    try {
+        const { startDateStr, endDateStr } = params.start_date && params.end_date
+            ? { startDateStr: params.start_date, endDateStr: params.end_date }
+            : defaultKpiDateRange();
+
+        const scope: KpiOverviewQueryScope =
+            params.scope ??
+            (params.system_id && !params.municipality ? 'operator' : 'municipality');
+
+        const searchParams = buildKpiOverviewSearchParams(startDateStr, endDateStr, {
+            scope,
+            municipality: params.municipality,
+            system_id: params.system_id,
+        });
+        if (!searchParams) {
+            console.warn('KPI overview request missing required query params', params);
+            return null;
+        }
+
+        const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                "authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+                authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
         });
 
-        if(response.status === 500) {
-            const message = `No KPI data found (status: ${response.status}) for [${municipality}]`;
-            console.warn(message);
+        const scopeLabel = params.municipality || params.system_id || 'unknown';
+        if (response.status === 500) {
+            console.warn(`No KPI data found (status: ${response.status}) for [${scopeLabel}]`);
             return null;
         }
 
-        if(response.status !== 200 && response.status !== 500) {
-            const message = `Error fetching KPI overview (status: ${response.status}/${response.statusText}) for [${municipality}]`;
-            console.error(message);
+        if (response.status !== 200 && response.status !== 500) {
+            console.error(
+                `Error fetching KPI overview (status: ${response.status}/${response.statusText}) for [${scopeLabel}]`
+            );
             return null;
         }
 
-        const kpiData = await response.json();
-        
-        // Transform KPI response to PermitLimitRecord[] format
-        if (!kpiData.municipality_modality_operators || kpiData.municipality_modality_operators.length === 0) {
+        const kpiData: OperatorPerformanceIndicatorsResponse = await response.json();
+        const rawOperators = kpiData.municipality_modality_operators || [];
+        if (rawOperators.length === 0) {
             return null;
         }
 
-        // Fetch operators to get operator details
-        let operatorsMap = new Map<string, { system_id: string; name: string; color?: string; operator_url?: string }>();
-        try {
-            const operatorsResponse = await fetch('https://mds.dashboarddeelmobiliteit.nl/operators');
-            if (operatorsResponse.ok) {
-                const operatorsData = await operatorsResponse.json();
-                operatorsMap = new Map(
-                    (operatorsData.operators || []).map((op: { system_id: string; name: string; color?: string; operator_url?: string }) => [op.system_id, op])
-                );
+        const records = transformKpiOverviewToPermitRecords(kpiData, {
+            startDateStr,
+            defaultMunicipality: params.municipality,
+            municipalityNames,
+        });
+        const enriched = await enrichPermitRecordsWithOperators(records);
+
+        return enriched.length > 0
+            ? {
+                records: enriched,
+                rawOperators,
+                performanceIndicatorDescriptions: kpiData.performance_indicator_description || [],
             }
-        } catch (error) {
-            console.warn('Failed to fetch operators, using fallback data', error);
-        }
-
-        // Group by operator/vehicle_type (form_factor) so we show 1 card per combination,
-        // even when multiple propulsion types exist (e.g. electric + combustion)
-        const operators = kpiData.municipality_modality_operators || [];
-        const groupKey = (item: MunicipalityModalityOperator) => {
-            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
-            return `${item.operator}_${item.form_factor}_${geometryRef}`;
-        };
-        const groupMap = new Map<string, MunicipalityModalityOperator[]>();
-        for (const item of operators) {
-            const key = groupKey(item);
-            const existing = groupMap.get(key) || [];
-            existing.push(item);
-            groupMap.set(key, existing);
-        }
-
-        const results: PermitLimitRecord[] = [];
-        for (const items of Array.from(groupMap.values())) {
-            const item = items[0]; // Use first item for operator/form_factor/municipality
-            const operator = operatorsMap.get(item.operator);
-            const geometryRef = item.geometry_ref?.replace('cbs:', '') || municipality;
-
-            // Merge overall compliance across all propulsion types: red if any red, else green if any green
-            let hasRed = false;
-            let hasGreen = false;
-            for (const i of items) {
-                const kpis = i.kpis || [];
-                if (kpis.some(kpi => (kpi.values || []).some(v => v.complies === false))) hasRed = true;
-                if (kpis.some(kpi => (kpi.values || []).some(v => v.complies === true))) hasGreen = true;
-            }
-            const overallCompliance: 'red' | 'green' | 'grey' =
-                hasRed ? 'red' : hasGreen ? 'green' : 'grey';
-
-            // Use first propulsion_type for edit/details (prefer electric when both exist)
-            const sorted = [...items].sort((a, b) => {
-                const order = { electric: 0, combustion: 1, human: 2 };
-                return (order[a.propulsion_type as keyof typeof order] ?? 99) - (order[b.propulsion_type as keyof typeof order] ?? 99);
-            });
-            const propulsion_type = sorted[0].propulsion_type;
-
-            const uniqueIdString = `${item.operator}_${item.form_factor}_${geometryRef}`;
-            const permitLimitId = Math.abs(uniqueIdString.split('').reduce((hash, char) => {
-                const hashValue = ((hash << 5) - hash) + char.charCodeAt(0);
-                return hashValue | 0;
-            }, 0));
-
-            const permitLimit: PermitLimit = {
-                permit_limit_id: permitLimitId,
-                modality: item.form_factor,
-                effective_date: startDateStr,
-                municipality: geometryRef,
-                system_id: item.operator,
-                minimum_vehicles: 0,
-                maximum_vehicles: 99999999,
-                minimal_number_of_trips_per_vehicle: 0,
-                max_parking_duration: 'P0D',
-            };
-
-            results.push({
-                municipality: { gmcode: geometryRef, name: geometryRef },
-                operator: operator ? {
-                    system_id: operator.system_id,
-                    name: operator.name,
-                    color: operator.color || '#000000',
-                    operator_url: operator.operator_url || '',
-                } : {
-                    system_id: item.operator,
-                    name: item.operator,
-                    color: '#000000',
-                    operator_url: '',
-                },
-                vehicle_type: {
-                    id: item.form_factor,
-                    name: item.form_factor,
-                    icon: '',
-                },
-                permit_limit: permitLimit,
-                overallCompliance,
-                propulsion_type,
-            });
-        }
-
-        if(results.length > 0) {
-            return results;
-        } else {
-            return null;
-        }
+            : null;
     } catch (error) {
-        console.error("Error fetching KPI overview", error);
+        console.error('Error fetching KPI overview', error);
         return null;
     }
-}
+};
+
+export const getPermitLimitOverviewForMunicipality = async (
+    token: string,
+    municipality: string,
+    startDate?: string,
+    endDate?: string
+) => {
+    const result = await fetchKpiOverviewPermitRecords(token, {
+        municipality,
+        start_date: startDate,
+        end_date: endDate,
+    });
+    return result?.records ?? null;
+};
 
 export const getPermitLimitOverviewForOperator = async (
-    token: string, 
-    system_id: string) => {
-    try {
-        const params = new URLSearchParams({system_id}).toString();
-        const url = `${MDS_BASE_URL}/public/permit_limit_overview?${params}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                "authorization": `Bearer ${token}`,
-            }
-        });
-
-        if(response.status === 500) {
-            const message = `No permit limit found (status: ${response.status}) for [${system_id}]`;
-            console.warn(message);
-            return null;
-        }
-
-        if(response.status !== 200 && response.status !== 500) {
-            const message = `Error fetching permit limit overview (status: ${response.status}/${response.statusText}) for [${system_id}]`;
-            console.error(message);
-            return null;
-        }
-
-        const results = await response.json() as PermitLimitRecord[];
-        
-        if(results.length > 0) {
-            // const message = `**** Found ${results.length} permit limits for [${system_id}]`;
-            return results;
-        } else {
-            // const message = `**** Found no ${results.length} permit limits for [${system_id}]`;
-            return null // no permit limit found
-        }
-    } catch (error) {
-        console.error("Error fetching permit limit overview", error);
-        return null;
-    }
-}
+    token: string,
+    system_id: string,
+    startDate?: string,
+    endDate?: string,
+    municipalityNames?: Map<string, string>
+) => {
+    const result = await fetchKpiOverviewPermitRecords(
+        token,
+        {
+            system_id,
+            start_date: startDate,
+            end_date: endDate,
+            scope: 'operator',
+        },
+        municipalityNames
+    );
+    return result;
+};
 
 // --- geometry_operator_modality_limit API ---
 
@@ -574,83 +683,73 @@ export function findOperatorMatch(
 
 export const getOperatorPerformanceIndicators = async (
     token: string,
-    municipality: string,
-    operator?: string,
-    form_factor?: string,
-    startDate?: string,
-    endDate?: string
+    request: OperatorPerformanceIndicatorsParams
 ): Promise<OperatorPerformanceIndicatorsResponse | null> => {
     try {
-        // Use provided dates or default to last 90 days if no dates provided
         let startDateStr: string;
         let endDateStr: string;
-        
-        if (startDate && endDate) {
-            startDateStr = startDate;
-            endDateStr = endDate;
+
+        if (request.start_date && request.end_date) {
+            startDateStr = request.start_date;
+            endDateStr = request.end_date;
         } else {
-            const endDateDefault = new Date();
-            const startDateDefault = new Date();
-            startDateDefault.setDate(startDateDefault.getDate() - 90);
-            
-            startDateStr = startDateDefault.toISOString().split('T')[0];
-            endDateStr = endDateDefault.toISOString().split('T')[0];
+            const { startDateStr: defaultStart, endDateStr: defaultEnd } = defaultKpiDateRange();
+            startDateStr = defaultStart;
+            endDateStr = defaultEnd;
         }
-        
-        const params = new URLSearchParams({
-            start_date: startDateStr,
-            end_date: endDateStr,
-            municipality: municipality
-        });
-        
-        if (operator) {
-            params.append('system_id', operator);
+
+        const searchParams = buildKpiOverviewSearchParams(startDateStr, endDateStr, request);
+        if (!searchParams) {
+            console.warn('KPI indicators request missing required query params', request);
+            return null;
         }
-        
-        if (form_factor) {
-            params.append('form_factor', form_factor);
-        }
-        
-        const url = `${MDS_BASE_URL}/kpi_overview_operators?${params.toString()}`;
+
+        const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                "authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+                authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
         });
 
+        const scopeLabel = request.system_id || request.municipality || 'unknown';
+
         if (response.status === 500) {
-            const message = `No KPI data found (status: ${response.status}) for [${municipality}]`;
-            console.warn(message);
+            console.warn(`No KPI data found (status: ${response.status}) for [${scopeLabel}]`);
             return null;
         }
 
         if (response.status !== 200 && response.status !== 500) {
-            const message = `Error fetching operator performance indicators (status: ${response.status}/${response.statusText}) for [${municipality}]`;
-            console.error(message);
+            console.error(
+                `Error fetching operator performance indicators (status: ${response.status}/${response.statusText}) for [${scopeLabel}]`
+            );
             return null;
         }
 
         const apiData: OperatorPerformanceIndicatorsResponse = await response.json();
-        
-        // Filter by operator and form_factor if provided (in case API doesn't filter)
-        if (operator || form_factor) {
-            const filteredOperators = apiData.municipality_modality_operators.filter(item => {
+        const { system_id: operator, form_factor, municipality } = request;
+
+        if (operator || form_factor || municipality) {
+            const filteredOperators = apiData.municipality_modality_operators.filter((item) => {
                 const operatorMatch = !operator || item.operator === operator;
                 const formFactorMatch = !form_factor || item.form_factor === form_factor;
-                return operatorMatch && formFactorMatch;
+                const municipalityMatch =
+                    !municipality ||
+                    item.geometry_ref?.replace('cbs:', '') === municipality ||
+                    item.geometry_ref === municipality;
+                return operatorMatch && formFactorMatch && municipalityMatch;
             });
-            
+
             return {
                 ...apiData,
-                municipality_modality_operators: filteredOperators
+                municipality_modality_operators: filteredOperators,
             };
         }
-        
+
         return apiData;
     } catch (error) {
-        console.error("Error fetching operator performance indicators", error);
+        console.error('Error fetching operator performance indicators', error);
         return null;
     }
 };

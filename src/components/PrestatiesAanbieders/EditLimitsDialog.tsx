@@ -267,7 +267,12 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     if (!isVisible || !token || !municipality || !provider_system_id || !vehicle_type) return;
     const fetchKpiList = async () => {
       try {
-        const result = await getOperatorPerformanceIndicators(token, municipality, provider_system_id, vehicle_type);
+        const result = await getOperatorPerformanceIndicators(token, {
+          scope: 'municipality',
+          municipality,
+          system_id: provider_system_id,
+          form_factor: vehicle_type,
+        });
         setKpiListForTest(result?.performance_indicator_description ?? null);
       } catch (error) {
         console.error('Error fetching KPI list for test:', error);

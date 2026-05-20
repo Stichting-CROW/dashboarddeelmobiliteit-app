@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
 import '../../styles/permits.css';
@@ -7,23 +8,73 @@ import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
 import { getVehicleTypeIconAlt, getVehicleTypeIconSrc } from '../../helpers/vehicleTypeIconCommon';
 import { StateType } from '../../types/StateType';
 import type { PermitLimitRecord } from '../../api/permitLimits';
-import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import PageTitle from '../common/PageTitle';
+import {
+  buildMunicipalityKpisMapFromPermits,
+  computeMunicipalitySortMetrics,
+  sortMunicipalityRowData,
+} from './permitOverviewSorting';
 
 interface PrestatiesAanbiedersOperatorViewProps {
   activeoperator: string;
 }
-const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbiedersOperatorViewProps) => {
 
-  const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
+const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiedersOperatorViewProps) => {
+  const {
+    permits,
+    loading,
+    error,
+    availableOperators,
+    rawKpiOperators,
+    performanceIndicatorDescriptions,
+  } = usePermitData('operator', activeoperator);
 
-  // Use the generic data hook for operator view
-  const { permits, loading, error, availableOperators } = usePermitData('operator', activeoperator);
+  const gebieden = useSelector((state: StateType) =>
+    (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : []
+  );
 
-  if (availableOperators.length === 0) {
+  const municipalityNameByGmCode = useMemo(() => {
+    const map = new Map<string, string>();
+    gebieden.forEach((g: { gm_code?: string; name?: string }) => {
+      if (g.gm_code && g.name) {
+        map.set(g.gm_code, g.name);
+      }
+    });
+    return map;
+  }, [gebieden]);
+
+  const activeoperatorName =
+    availableOperators.find((op) => op.system_id === activeoperator)?.name || 'Onbekende aanbieder';
+
+  const municipalityRowData: RowData[] = useMemo(() => {
+    const municipalities = new Map<string, RowData>();
+    for (const permit of permits) {
+      const gmcode = permit.municipality?.gmcode || permit.permit_limit.municipality;
+      if (!gmcode || municipalities.has(gmcode)) continue;
+      municipalities.set(gmcode, {
+        id: gmcode,
+        name: municipalityNameByGmCode.get(gmcode) || permit.municipality?.name || gmcode,
+      });
+    }
+    return Array.from(municipalities.values());
+  }, [permits, municipalityNameByGmCode]);
+
+  const sortedMunicipalityRowData = useMemo(() => {
+    const kpiMap = buildMunicipalityKpisMapFromPermits(permits, rawKpiOperators);
+    const metrics = computeMunicipalitySortMetrics(permits, kpiMap);
+    return sortMunicipalityRowData(municipalityRowData, metrics);
+  }, [permits, rawKpiOperators, municipalityRowData]);
+
+  const rowIndexById = useMemo(
+    () => new Map(sortedMunicipalityRowData.map((row, index) => [row.id, index])),
+    [sortedMunicipalityRowData]
+  );
+
+  if (!activeoperator) {
     return (
       <div>
-        <h1 className="permits-page-title">Prestaties aanbieders</h1>
-        <div className="permits-empty-state">Geen aanbieders beschikbaar</div>
+        <PageTitle>Prestaties aanbieders</PageTitle>
+        <div className="permits-empty-state">Geen aanbieder gevonden voor dit account.</div>
       </div>
     );
   }
@@ -31,7 +82,7 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   if (loading) {
     return (
       <div>
-        <h1 className="permits-page-title">Prestaties aanbieders</h1>
+        <PageTitle>Prestaties aanbieders</PageTitle>
         <div className="permits-loading-state">Prestaties aanbieders laden...</div>
       </div>
     );
@@ -40,96 +91,80 @@ const PrestatiesAanbiedersOperatorView = ({activeoperator}: PrestatiesAanbieders
   if (error) {
     return (
       <div>
-        <h1 className="permits-page-title">Prestaties aanbieders per aanbieder</h1>
+        <PageTitle>Prestaties aanbieders</PageTitle>
         <div className="permits-error-state">Fout: {error}</div>
       </div>
     );
   }
 
-  // Convert voertuigtypes to RowData format
-  const rowData: RowData[] = voertuigtypes
-    .map((voertuigtype) => ({
-    id: voertuigtype.id,
-    name: voertuigtype.name,
-    icon: getVehicleTypeIconSrc(voertuigtype.id),
-  }));
-
-  // Render header for vehicle type rows
-  const renderVehicleTypeHeader = (rowItem: RowData) => (
-    <>
-      <img
-        src={rowItem.icon}
-        alt={getVehicleTypeIconAlt(rowItem.id)}
-        className="permits-vehicle-type-header-img"
-      />
-    </>
+  const renderMunicipalityHeader = (rowItem: RowData) => (
+    <div className="permits-vehicle-type-header-text mb-3">{rowItem.name}</div>
   );
 
-  // Filter permits for specific vehicle type
-  const filterVehicleTypePermits = (permits: PermitLimitRecord[], rowItem: RowData) => {
-    // For now, return all permits since vehicle type filtering might not be implemented yet
-    return permits.filter((permit) => { 
-      // dont show if we cant determine the vehicle type
-      // in the future, we will have vehicle info in the permits record
-      return permit.vehicle_type && permit.vehicle_type.id === rowItem.id;
+  const filterPermitsForMunicipality = (allPermits: PermitLimitRecord[], rowItem: RowData) => {
+    return allPermits.filter((permit) => {
+      const gmcode = permit.municipality?.gmcode || permit.permit_limit.municipality;
+      return gmcode === rowItem.id;
     });
   };
 
-  // Render vehicle type cards
-  const renderVehicleTypeCards = (permits: PermitLimitRecord[], rowItem: RowData) => {
-    const filteredPermits = filterVehicleTypePermits(permits, rowItem).sort((a, b) => {
-      return a.municipality.name.localeCompare(b.municipality.name);
+  const renderModalityCards = (rowPermits: PermitLimitRecord[]) => {
+    const sortedPermits = [...rowPermits].sort((a, b) => {
+      const typeA = a.vehicle_type?.id || a.permit_limit.modality;
+      const typeB = b.vehicle_type?.id || b.permit_limit.modality;
+      const nameA = getPrettyVehicleTypeName(typeA) || typeA;
+      const nameB = getPrettyVehicleTypeName(typeB) || typeB;
+      return nameA.localeCompare(nameB, 'nl');
     });
-    
-    return filteredPermits.map((permit, index) => { 
-      const municipalityName = permit.municipality ? permit.municipality.name : permit.permit_limit.municipality;
-      const municipalityLogo = createSvgPlaceholder({
-        width: 48,
-        height: 48,
-        text: municipalityName.slice(0, 2),
-        bgColor: '#0F1C3F',
-        textColor: '#7FDBFF',
-      });
-      return(
+
+    return sortedPermits.map((permit, index) => {
+      const providerName = permit.operator?.name || permit.permit_limit.system_id;
+      const formFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
+      const vehicleIcon = getVehicleTypeIconSrc(formFactor);
+
+      return (
         <PrestatiesAanbiederCard
           key={`${permit.permit_limit.permit_limit_id}-${permit.municipality.gmcode}-${index}`}
-          label={municipalityName}
-          logo={municipalityLogo}
+          label={providerName}
+          logo={vehicleIcon}
           permit={permit}
+          vehicleTypeIcon={vehicleIcon}
+          vehicleTypeIconAlt={getVehicleTypeIconAlt(formFactor)}
+          scopedSystemId={activeoperator}
+          kpiFetchScope="operator"
+          overviewKpiOperators={rawKpiOperators}
+          overviewKpiDescriptions={performanceIndicatorDescriptions}
         />
-      )});
-  };
-
-  const activeoperatorName = availableOperators.find(op => op.system_id === activeoperator)?.name || 'Onbekende aanbieder';
-
-  const filterPermitsForCollection = (permits: PermitLimitRecord[], rowItem: RowData) => { 
-    return permits.filter((permit) => {
-      return permit.vehicle_type && permit.vehicle_type.id === rowItem.id;
+      );
     });
-  }
+  };
 
   return (
     <div>
-      <div className="permits-page-title">
-        Prestaties aanbieders voor {activeoperatorName}
+      <div className="flex items-center flex-start mb-8">
+        <PageTitle className="mb-0 mr-4">Prestaties aanbieders</PageTitle>
       </div>
-      
-      <div className="mb-6">
-        {permits.length === 0 && (
-          <div className="permits-empty-state">
-            Geen vergunningseisen gevonden voor deze operator.
-          </div>
-        )}
-      </div>
+      <p className="text-sm text-gray-600 mb-6">
+        Overzicht voor <strong>{activeoperatorName}</strong> per gemeente en voertuigtype.
+      </p>
 
-      {permits.length > 0 && (
-        <PermitCardCollection
-          rowData={rowData}
-          permits={permits}
-          renderHeader={renderVehicleTypeHeader}
-          renderCards={renderVehicleTypeCards}
-          filterPermits={filterPermitsForCollection}
-        />
+      {permits.length === 0 ? (
+        <div className="permits-empty-state">
+          Geen prestaties gevonden voor deze aanbieder in de geselecteerde periode.
+        </div>
+      ) : (
+        <div id="permits-container" className="permits-container">
+          <PermitCardCollection
+            rowData={sortedMunicipalityRowData}
+            permits={permits}
+            renderHeader={renderMunicipalityHeader}
+            renderCards={renderModalityCards}
+            filterPermits={filterPermitsForMunicipality}
+            compareRows={(a, b) =>
+              (rowIndexById.get(a.rowItem.id) ?? 0) - (rowIndexById.get(b.rowItem.id) ?? 0)
+            }
+          />
+        </div>
       )}
     </div>
   );

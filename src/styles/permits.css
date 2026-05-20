@@ -33,7 +33,7 @@
 }
 
 .permits-vehicle-type-header-text {
-    @apply font-normal text-[18px] leading-[21px] font-[Inter] text-[#343E47] text-center;
+    @apply font-normal text-[18px] leading-[21px] font-[Inter] text-[#343E47];
 }
 
 .permits-add-button {
@@ -145,7 +145,7 @@
 } */
 
 .permits-collection-header {
-  @apply bg-transparent p-0 w-24 min-w-24 h-auto flex flex-col justify-center flex-shrink-0;
+  @apply bg-transparent p-0 min-w-24 h-auto flex flex-col justify-center flex-shrink-0;
 }
 
 .permits-collection-header-content {

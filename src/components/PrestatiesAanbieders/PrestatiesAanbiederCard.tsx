@@ -2,8 +2,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
-import type { PermitLimitRecord, PerformanceIndicatorKPI, PerformanceIndicatorDescription } from '../../api/permitLimits';
+import type {
+  PermitLimitRecord,
+  PerformanceIndicatorKPI,
+  PerformanceIndicatorDescription,
+  MunicipalityModalityOperator,
+} from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators, findOperatorMatch } from '../../api/permitLimits';
+import type { KpiOverviewQueryScope } from '../../api/permitLimits';
 import PerformanceIndicator from './PerformanceIndicator';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
@@ -16,6 +22,15 @@ interface PrestatiesAanbiederCardProps {
     logo: string;
     permit: PermitLimitRecord;
     onEditLimits?: () => void;
+    /** When set, shows a vehicle-type icon beside the provider label (operator overview). */
+    vehicleTypeIcon?: string;
+    vehicleTypeIconAlt?: string;
+    /** Operator overview: use this system_id for KPI API calls (required by backend). */
+    scopedSystemId?: string;
+    kpiFetchScope?: KpiOverviewQueryScope;
+    /** Preloaded KPI rows from operator overview fetch (avoids per-card API calls). */
+    overviewKpiOperators?: MunicipalityModalityOperator[];
+    overviewKpiDescriptions?: PerformanceIndicatorDescription[];
 }
 
 const KPI_TITLE_ORDER = [
@@ -45,7 +60,45 @@ const DetailsLink = ({ detailsUrl, isCardHovered, isHidden = false }: DetailsLin
   </Link>
 );
 
-export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLimits }: PrestatiesAanbiederCardProps) {
+const applyKpiDataToCard = (
+  descriptions: PerformanceIndicatorDescription[],
+  operators: MunicipalityModalityOperator[],
+  operator: string,
+  formFactor: string,
+  propulsionType: string | undefined,
+  setPerformanceIndicatorDescriptions: (d: PerformanceIndicatorDescription[]) => void,
+  setKpis: (k: PerformanceIndicatorKPI[]) => void
+) => {
+  if (descriptions.length > 0) {
+    setPerformanceIndicatorDescriptions(descriptions);
+  }
+  const match =
+    operators.length > 0
+      ? findOperatorMatch(operators, operator, formFactor, propulsionType)
+      : undefined;
+  const backendKpis = match?.kpis ?? [];
+  const allKpis: PerformanceIndicatorKPI[] =
+    descriptions.length > 0
+      ? descriptions.map((desc) => {
+          const found = backendKpis.find((k) => k.kpi_key === desc.kpi_key);
+          return found ?? { kpi_key: desc.kpi_key, granularity: '', values: [] };
+        })
+      : backendKpis;
+  setKpis(allKpis);
+};
+
+export default function PrestatiesAanbiederCard({
+  label,
+  logo,
+  permit,
+  onEditLimits,
+  vehicleTypeIcon,
+  vehicleTypeIconAlt,
+  scopedSystemId,
+  kpiFetchScope = 'municipality',
+  overviewKpiOperators,
+  overviewKpiDescriptions,
+}: PrestatiesAanbiederCardProps) {
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
     const [performanceIndicatorDescriptions, setPerformanceIndicatorDescriptions] = useState<PerformanceIndicatorDescription[]>([]);
     const [loading, setLoading] = useState(false);
@@ -160,48 +213,51 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
     const detailsUrl = `/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
 
     useEffect(() => {
+      const operator = scopedSystemId || permit.operator?.system_id || permit.permit_limit.system_id;
+      const formFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
+      const municipality = permit.municipality?.gmcode || permit.permit_limit.municipality;
+
+      if (!operator || !formFactor) return;
+      if (kpiFetchScope === 'municipality' && !municipality) return;
+
+      if (overviewKpiOperators) {
+        const descriptions = overviewKpiDescriptions ?? [];
+        applyKpiDataToCard(
+          descriptions,
+          overviewKpiOperators,
+          operator,
+          formFactor,
+          propulsionType,
+          setPerformanceIndicatorDescriptions,
+          setKpis
+        );
+        hasLoadedOnce.current = true;
+        return;
+      }
+
       const fetchPerformanceIndicators = async () => {
         if (!token || !permit.permit_limit) return;
 
-        const operator = permit.operator?.system_id || permit.permit_limit.system_id;
-        const formFactor = permit.vehicle_type?.id || permit.permit_limit.modality;
-        const municipality = permit.municipality?.gmcode || permit.permit_limit.municipality;
-
-        if (!operator || !formFactor || !municipality) return;
-
         setLoading(true);
         try {
-          const data = await getOperatorPerformanceIndicators(
-            token, 
-            municipality, 
-            operator, 
-            formFactor,
-            startDate,
-            endDate
-          );
+          const data = await getOperatorPerformanceIndicators(token, {
+            scope: kpiFetchScope,
+            system_id: operator,
+            municipality,
+            form_factor: formFactor,
+            start_date: startDate,
+            end_date: endDate,
+          });
           if (data) {
-            const descriptions = data.performance_indicator_description || [];
-            if (descriptions.length > 0) {
-              setPerformanceIndicatorDescriptions(descriptions);
-            }
-            const match = data.municipality_modality_operators?.length > 0
-              ? findOperatorMatch(
-                  data.municipality_modality_operators,
-                  operator,
-                  formFactor,
-                  propulsionType
-                )
-              : undefined;
-            const backendKpis = match?.kpis ?? [];
-            // Always show all KPIs from performance_indicator_description; use backend data when available, else empty
-            const allKpis: PerformanceIndicatorKPI[] = descriptions.length > 0
-              ? descriptions.map((desc) => {
-                  const found = backendKpis.find((k) => k.kpi_key === desc.kpi_key);
-                  return found ?? { kpi_key: desc.kpi_key, granularity: '', values: [] };
-                })
-              : backendKpis;
-            setKpis(allKpis);
-            // Mark as loaded once after successful fetch, regardless of whether data was found
+            applyKpiDataToCard(
+              data.performance_indicator_description || [],
+              data.municipality_modality_operators || [],
+              operator,
+              formFactor,
+              propulsionType,
+              setPerformanceIndicatorDescriptions,
+              setKpis
+            );
             hasLoadedOnce.current = true;
           }
         } catch (error) {
@@ -212,7 +268,17 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
       };
 
       fetchPerformanceIndicators();
-    }, [token, permit, startDate, endDate, propulsionType]);
+    }, [
+      token,
+      permit,
+      startDate,
+      endDate,
+      propulsionType,
+      scopedSystemId,
+      kpiFetchScope,
+      overviewKpiOperators,
+      overviewKpiDescriptions,
+    ]);
 
     return (
         <div
@@ -264,7 +330,16 @@ export default function PrestatiesAanbiederCard({ label, logo, permit, onEditLim
               }
             </div>
             <div className="flex justify-between">
-              <ProviderLabel label={displayLabel} color={providerColor} />
+              <div className="flex items-center gap-2">
+                <ProviderLabel label={displayLabel} color={providerColor} />
+                {vehicleTypeIcon && (
+                  <img
+                    src={vehicleTypeIcon}
+                    alt={vehicleTypeIconAlt || ''}
+                    className="permits-vehicle-type-header-img w-6 h-6"
+                  />
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <DetailsLink
                   detailsUrl={detailsUrl}

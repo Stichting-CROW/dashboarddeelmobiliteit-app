@@ -8,12 +8,20 @@ export interface RowData {
   [key: string]: any;
 }
 
+export interface RowWithPermits {
+  rowItem: RowData;
+  permitsForRow: PermitLimitRecord[];
+  severity: 'red' | 'green' | 'grey';
+  index: number;
+}
+
 export interface PermitCardCollectionProps {
   rowData: RowData[];
   permits: PermitLimitRecord[];
   renderHeader: (rowItem: RowData) => React.ReactNode;
   renderCards: (permits: PermitLimitRecord[], rowItem: RowData) => React.ReactNode;
   filterPermits?: (permits: PermitLimitRecord[], rowItem: RowData) => PermitLimitRecord[];
+  compareRows?: (a: RowWithPermits, b: RowWithPermits) => number;
   className?: string;
 }
 
@@ -23,14 +31,9 @@ const PermitCardCollection: React.FC<PermitCardCollectionProps> = ({
   renderHeader,
   renderCards,
   filterPermits,
+  compareRows,
   className = ""
 }) => {
-  interface RowWithPermits {
-    rowItem: RowData;
-    permitsForRow: PermitLimitRecord[];
-    severity: 'red' | 'green' | 'grey';
-    index: number;
-  }
 
   // Group permits per row and determine severity based on KPI compliance:
   // - 'red'   => at least one permit in the row has overallCompliance === 'red'
@@ -80,6 +83,9 @@ const PermitCardCollection: React.FC<PermitCardCollectionProps> = ({
   };
 
   const sortedRows = rowsWithPermits.sort((a, b) => {
+    if (compareRows) {
+      return compareRows(a, b);
+    }
     const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
     if (severityDiff !== 0) {
       return severityDiff;

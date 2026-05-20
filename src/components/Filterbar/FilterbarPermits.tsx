@@ -14,11 +14,19 @@ import FilterbarStatistiek from './FilterbarStatistiek';
 
 import { StateType } from '../../types/StateType';
 import FilteritemDatumVanTot from './FilteritemDatumVanTot';
-import { getPermitLimitOverviewForMunicipality, type PermitLimitRecord } from '../../api/permitLimits';
+import {
+  getPermitLimitOverviewForMunicipality,
+  getPermitLimitOverviewForOperator,
+  type PermitLimitRecord,
+} from '../../api/permitLimits';
 import { getPrettyProviderName, getProviderColorForProvider } from '../../helpers/providers';
 import { isDemoMode } from '../../config/demo';
 import { getDisplayOperatorName, getDisplayProviderColor } from '../../helpers/demoMode';
 import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
+import {
+  isOperatorPrestatiesView,
+  resolveOperatorSystemId,
+} from '../../helpers/prestatiesAanbiedersViewMode';
 import { RadioButton } from '../ui/radio-button';
 
 interface FilterbarPermitsProps {
@@ -49,15 +57,39 @@ function FilterbarPermits({
     return (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : [];
   });
 
+  const aanbieders = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
+  });
+
+  const metadataLoaded = useSelector((state: StateType) =>
+    Boolean(state.metadata && state.metadata.metadata_loaded)
+  );
+
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : '';
   });
 
-  const hidePlaats = gebieden.length <= 1;
+  const municipalityNameByGmCode = React.useMemo(() => {
+    const map = new Map<string, string>();
+    gebieden.forEach((g: { gm_code?: string; name?: string }) => {
+      if (g.gm_code && g.name) {
+        map.set(g.gm_code, g.name);
+      }
+    });
+    return map;
+  }, [gebieden]);
 
   const location = useLocation();
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const isMunicipalityView = !isOperatorPrestatiesView(gebieden, aanbieders);
+  const operatorSystemId = resolveOperatorSystemId(
+    aanbieders,
+    searchParams.get('system_id') || searchParams.get('operator')
+  );
+
+  const hidePlaats = gebieden.length <= 1;
 
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
@@ -92,13 +124,24 @@ function FilterbarPermits({
     overview.scrollTo({ top: targetTop, behavior: 'smooth' });
   };
 
-  // Get current selected operator and form_factor from query params
   const currentOperator = searchParams.get('system_id') || searchParams.get('operator');
   const currentFormFactor = searchParams.get('form_factor');
+  const currentGmCode = searchParams.get('gm_code');
+  const startDate = searchParams.get('start_date') || undefined;
+  const endDate = searchParams.get('end_date') || undefined;
 
-  // Fetch available operator/form_factor combinations when municipality is selected
   useEffect(() => {
-    if (!isPrestatiesAanbieders || !filterGebied || !token) {
+    if (!isPrestatiesAanbieders || !token || !metadataLoaded) {
+      setAvailableCombinations([]);
+      return;
+    }
+
+    if (isMunicipalityView && !filterGebied) {
+      setAvailableCombinations([]);
+      return;
+    }
+
+    if (!isMunicipalityView && !operatorSystemId) {
       setAvailableCombinations([]);
       return;
     }
@@ -106,12 +149,31 @@ function FilterbarPermits({
     const fetchCombinations = async () => {
       setLoadingCombinations(true);
       try {
-        const results = await getPermitLimitOverviewForMunicipality(token, filterGebied);
+        let results: PermitLimitRecord[] | null = null;
+
+        if (isMunicipalityView) {
+          results = await getPermitLimitOverviewForMunicipality(
+            token,
+            filterGebied,
+            startDate,
+            endDate
+          );
+        } else {
+          const operatorResult = await getPermitLimitOverviewForOperator(
+            token,
+            operatorSystemId,
+            startDate,
+            endDate
+          );
+          results = operatorResult?.records ?? null;
+        }
+
         if (results) {
-          // Deduplicate combinations by operator + form_factor
           const uniqueCombinations = new Map<string, PermitLimitRecord>();
           results.forEach((record) => {
-            const key = `${record.operator.system_id}_${record.vehicle_type.id}`;
+            const key = isMunicipalityView
+              ? `${record.operator.system_id}_${record.vehicle_type.id}`
+              : `${record.municipality.gmcode}_${record.vehicle_type.id}`;
             if (!uniqueCombinations.has(key)) {
               uniqueCombinations.set(key, record);
             }
@@ -121,7 +183,7 @@ function FilterbarPermits({
           setAvailableCombinations([]);
         }
       } catch (error) {
-        console.error('Error fetching operator/form_factor combinations:', error);
+        console.error('Error fetching permit combinations:', error);
         setAvailableCombinations([]);
       } finally {
         setLoadingCombinations(false);
@@ -129,25 +191,59 @@ function FilterbarPermits({
     };
 
     fetchCombinations();
-  }, [isPrestatiesAanbieders, filterGebied, token]);
+  }, [
+    isPrestatiesAanbieders,
+    isMunicipalityView,
+    filterGebied,
+    operatorSystemId,
+    token,
+    startDate,
+    endDate,
+    metadataLoaded,
+  ]);
 
-  // Handler for clicking a combination checkbox
-  const handleCombinationClick = (operatorId: string, formFactor: string) => {
+  const sortedCombinations = React.useMemo(() => {
+    const combinations = [...availableCombinations];
+    if (isMunicipalityView) return combinations;
+
+    return combinations.sort((a, b) => {
+      const nameA =
+        municipalityNameByGmCode.get(a.municipality.gmcode) ||
+        a.municipality.name ||
+        a.municipality.gmcode;
+      const nameB =
+        municipalityNameByGmCode.get(b.municipality.gmcode) ||
+        b.municipality.name ||
+        b.municipality.gmcode;
+      const byName = nameA.localeCompare(nameB, 'nl', { sensitivity: 'base' });
+      if (byName !== 0) return byName;
+
+      const vehicleA = getPrettyVehicleTypeName(a.vehicle_type.id) || a.vehicle_type.id;
+      const vehicleB = getPrettyVehicleTypeName(b.vehicle_type.id) || b.vehicle_type.id;
+      return vehicleA.localeCompare(vehicleB, 'nl', { sensitivity: 'base' });
+    });
+  }, [availableCombinations, isMunicipalityView, municipalityNameByGmCode]);
+
+  const handleCombinationClick = (operatorId: string, formFactor: string, gmCode?: string) => {
     const newSearchParams = new URLSearchParams(searchParams);
-    
-    // Set operator (both system_id and operator for backward compatibility)
+
     newSearchParams.set('system_id', operatorId);
     newSearchParams.set('operator', operatorId);
     newSearchParams.set('form_factor', formFactor);
-    
+    if (gmCode) {
+      newSearchParams.set('gm_code', gmCode);
+    }
+
     setSearchParams(newSearchParams);
 
-    const match = availableCombinations.find(
-      (record) => record.operator.system_id === operatorId && record.vehicle_type.id === formFactor
-    );
+    const match = availableCombinations.find((record) => {
+      const operatorMatch = record.operator.system_id === operatorId;
+      const formFactorMatch = record.vehicle_type.id === formFactor;
+      const gmMatch = !gmCode || record.municipality.gmcode === gmCode;
+      return operatorMatch && formFactorMatch && gmMatch;
+    });
     const permitLimitId = match?.permit_limit?.permit_limit_id;
     if (permitLimitId) {
-      // Wait for the URL change to propagate and the cards to re-render.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           scrollOverviewToPermitCard(String(permitLimitId));
@@ -188,21 +284,31 @@ function FilterbarPermits({
       </Fieldset>}
 
       {(true || isPrestatiesDetailsView) && (
-        <Fieldset title="Aanbieders">
+        <Fieldset title={isMunicipalityView ? 'Aanbieders' : 'Gemeenten'}>
           {loadingCombinations ? (
             <div className="text-sm text-gray-500">Laden...</div>
-          ) : availableCombinations.length === 0 ? (
+          ) : sortedCombinations.length === 0 ? (
             <div className="text-sm text-gray-500">Geen combinaties beschikbaar</div>
           ) : (
-            availableCombinations.map((record) => {
+            sortedCombinations.map((record) => {
               const operatorId = record.operator.system_id;
               const formFactor = record.vehicle_type.id;
-              const isSelected = currentOperator === operatorId && currentFormFactor === formFactor;
+              const gmCode = record.municipality.gmcode;
+              const isSelected = isMunicipalityView
+                ? currentOperator === operatorId && currentFormFactor === formFactor
+                : currentGmCode === gmCode && currentFormFactor === formFactor;
               const realOperatorName = getPrettyProviderName(operatorId);
               const operatorName = getDisplayOperatorName(operatorId, realOperatorName, isDemoMode());
               const formFactorName = getPrettyVehicleTypeName(formFactor) || formFactor;
-              const combinationKey = `${operatorId}_${formFactor}`;
-              
+              const combinationKey = isMunicipalityView
+                ? `${operatorId}_${formFactor}`
+                : `${gmCode}_${formFactor}`;
+              const municipalityName =
+                municipalityNameByGmCode.get(gmCode) || record.municipality.name || gmCode;
+              const label = isMunicipalityView
+                ? `${operatorName} - ${formFactorName}`
+                : `${municipalityName} - ${formFactorName}`;
+
               return (
                 <div
                   key={combinationKey}
@@ -212,13 +318,17 @@ function FilterbarPermits({
                   "
                   onClick={(e) => {
                     e.preventDefault();
-                    handleCombinationClick(operatorId, formFactor);
+                    handleCombinationClick(operatorId, formFactor, gmCode);
                   }}
                 >
                   <RadioButton
                     id={`aanbieder-${combinationKey}`}
                     checked={isSelected}
-                    color={getDisplayProviderColor(operatorId, getProviderColorForProvider(operatorId), isDemoMode())}
+                    color={getDisplayProviderColor(
+                      operatorId,
+                      getProviderColorForProvider(operatorId),
+                      isDemoMode()
+                    )}
                   />
                   <label
                     htmlFor={`aanbieder-${combinationKey}`}
@@ -227,7 +337,7 @@ function FilterbarPermits({
                       cursor-pointer
                     "
                   >
-                    {operatorName} - {formFactorName}
+                    {label}
                   </label>
                 </div>
               );
