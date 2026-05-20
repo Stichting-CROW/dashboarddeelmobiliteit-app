@@ -1,3 +1,5 @@
+import { fetchOperators } from './operators';
+
 const MDS_BASE_URL = 'https://mds.dashboarddeelmobiliteit.nl';
 export interface PermitMunicipality {
     gmcode: string;
@@ -161,14 +163,11 @@ const defaultKpiDateRange = (): { startDateStr: string; endDateStr: string } => 
 };
 
 const fetchOperatorsMap = async () => {
-    let operatorsMap = new Map<string, { system_id: string; name: string; color?: string; operator_url?: string }>();
+    const operatorsMap = new Map<string, { system_id: string; name: string; color?: string; operator_url?: string }>();
     try {
-        const operatorsResponse = await fetch(`${MDS_BASE_URL}/operators`);
-        if (operatorsResponse.ok) {
-            const operatorsData = await operatorsResponse.json();
-            operatorsMap = new Map(
-                (operatorsData.operators || []).map((op: { system_id: string; name: string; color?: string; operator_url?: string }) => [op.system_id, op])
-            );
+        const operators = await fetchOperators();
+        if (operators) {
+            operators.forEach((op) => operatorsMap.set(op.system_id, op));
         }
     } catch (error) {
         console.warn('Failed to fetch operators, using fallback data', error);
@@ -282,6 +281,68 @@ const enrichPermitRecordsWithOperators = async (
     });
 };
 
+/**
+ * In-flight request deduplication for kpi_overview_operators.
+ *
+ * Concurrent callers (e.g. usePermitData + FilterbarPermits, or React StrictMode's
+ * double-mount in dev) that ask for the exact same URL share the same HTTP request
+ * and parsed response, instead of triggering N independent network calls.
+ *
+ * Each caller still applies its own post-processing (transform / enrichment) on the
+ * shared raw response, so caller-specific arguments such as `municipalityNames` are
+ * honoured per-caller.
+ */
+const inFlightKpiRawFetches = new Map<string, Promise<OperatorPerformanceIndicatorsResponse | null>>();
+
+const fetchKpiOverviewRaw = (
+    token: string,
+    searchParams: URLSearchParams,
+    scopeLabel: string
+): Promise<OperatorPerformanceIndicatorsResponse | null> => {
+    const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
+    const cacheKey = `${token}|${url}`;
+
+    const existing = inFlightKpiRawFetches.get(cacheKey);
+    if (existing) {
+        return existing;
+    }
+
+    const promise = (async () => {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 500) {
+                console.warn(`No KPI data found (status: ${response.status}) for [${scopeLabel}]`);
+                return null;
+            }
+
+            if (response.status !== 200) {
+                console.error(
+                    `Error fetching kpi_overview_operators (status: ${response.status}/${response.statusText}) for [${scopeLabel}]`
+                );
+                return null;
+            }
+
+            return (await response.json()) as OperatorPerformanceIndicatorsResponse;
+        } catch (error) {
+            console.error('Error fetching kpi_overview_operators', error);
+            return null;
+        }
+    })();
+
+    inFlightKpiRawFetches.set(cacheKey, promise);
+    promise.finally(() => {
+        inFlightKpiRawFetches.delete(cacheKey);
+    });
+    return promise;
+};
+
 export const fetchKpiOverviewPermitRecords = async (
     token: string,
     params: KpiOverviewFetchParams,
@@ -306,29 +367,12 @@ export const fetchKpiOverviewPermitRecords = async (
             return null;
         }
 
-        const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
         const scopeLabel = params.municipality || params.system_id || 'unknown';
-        if (response.status === 500) {
-            console.warn(`No KPI data found (status: ${response.status}) for [${scopeLabel}]`);
+        const kpiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        if (!kpiData) {
             return null;
         }
 
-        if (response.status !== 200 && response.status !== 500) {
-            console.error(
-                `Error fetching KPI overview (status: ${response.status}/${response.statusText}) for [${scopeLabel}]`
-            );
-            return null;
-        }
-
-        const kpiData: OperatorPerformanceIndicatorsResponse = await response.json();
         const rawOperators = kpiData.municipality_modality_operators || [];
         if (rawOperators.length === 0) {
             return null;
@@ -704,30 +748,12 @@ export const getOperatorPerformanceIndicators = async (
             return null;
         }
 
-        const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
         const scopeLabel = request.system_id || request.municipality || 'unknown';
-
-        if (response.status === 500) {
-            console.warn(`No KPI data found (status: ${response.status}) for [${scopeLabel}]`);
+        const apiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        if (!apiData) {
             return null;
         }
 
-        if (response.status !== 200 && response.status !== 500) {
-            console.error(
-                `Error fetching operator performance indicators (status: ${response.status}/${response.statusText}) for [${scopeLabel}]`
-            );
-            return null;
-        }
-
-        const apiData: OperatorPerformanceIndicatorsResponse = await response.json();
         const { system_id: operator, form_factor, municipality } = request;
 
         if (operator || form_factor || municipality) {

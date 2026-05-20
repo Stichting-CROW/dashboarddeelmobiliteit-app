@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 import {
-  getPermitLimitOverviewForMunicipality,
+  fetchKpiOverviewPermitRecords,
   getPermitLimitOverviewForOperator,
   type PermitLimitRecord,
   type MunicipalityModalityOperator,
@@ -90,14 +90,17 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
       let results: PermitLimitRecord[] | null = null;
 
       if (viewType === 'municipality') {
-        results = await getPermitLimitOverviewForMunicipality(
-          token,
-          filterValue,
-          startDate,
-          endDate
+        const municipalityResult = await fetchKpiOverviewPermitRecords(token, {
+          scope: 'municipality',
+          municipality: filterValue,
+          start_date: startDate,
+          end_date: endDate,
+        });
+        results = municipalityResult?.records ?? null;
+        setRawKpiOperators(municipalityResult?.rawOperators ?? []);
+        setPerformanceIndicatorDescriptions(
+          municipalityResult?.performanceIndicatorDescriptions ?? []
         );
-        setRawKpiOperators([]);
-        setPerformanceIndicatorDescriptions([]);
       } else {
         const operatorResult = await getPermitLimitOverviewForOperator(
           token,

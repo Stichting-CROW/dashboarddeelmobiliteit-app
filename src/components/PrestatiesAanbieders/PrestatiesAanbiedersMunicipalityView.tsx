@@ -37,7 +37,16 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   const gebieden = useSelector((state: StateType) => state.metadata?.gebieden || []);
 
   // Use the generic data hook
-  const { permits, loading, error, reloadPermits, token, availableOperators } = usePermitData('municipality', activeorganisation);
+  const {
+    permits,
+    loading,
+    error,
+    reloadPermits,
+    token,
+    availableOperators,
+    rawKpiOperators,
+    performanceIndicatorDescriptions,
+  } = usePermitData('municipality', activeorganisation);
   
   // Use the generic actions hook
   const {
@@ -291,6 +300,8 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           key={'permits-card-' + permit.permit_limit.permit_limit_id} 
           permit={permit} 
           onEditLimits={() => handleEditLimits(permit)}
+          overviewKpiOperators={rawKpiOperators}
+          overviewKpiDescriptions={performanceIndicatorDescriptions}
         />
     )});
   };
