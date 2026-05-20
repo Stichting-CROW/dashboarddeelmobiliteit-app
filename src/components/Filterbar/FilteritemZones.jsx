@@ -44,6 +44,15 @@ function FilteritemZones({
 
   let [filterSearch, setFilterSearch] = useState("");
 
+  // Reset the search field whenever the panel is closed so that reopening it
+  // always starts from a clean state.
+  const isPanelOpen = filterBarExtendedView === 'zones';
+  useEffect(() => {
+    if (!isPanelOpen) {
+      setFilterSearch("");
+    }
+  }, [isPanelOpen]);
+
   const getBeleidszonesPath = () => {
     const searchParams = new URLSearchParams();
     if (filterGebied) {

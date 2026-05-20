@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import './css/FilteritemGebieden.css';
@@ -38,7 +38,16 @@ function FilteritemGebieden() {
   });
 
   let [filterSearch, setFilterSearch] = useState("");
-  
+
+  // Reset the search field whenever the panel is closed so that reopening it
+  // always starts from a clean state.
+  const isPanelOpen = filterBarExtendedView === 'places';
+  useEffect(() => {
+    if (!isPanelOpen) {
+      setFilterSearch("");
+    }
+  }, [isPanelOpen]);
+
   const setVisibility = (name, visibility) => {
     dispatch({
       type: `SET_VISIBILITY`,
