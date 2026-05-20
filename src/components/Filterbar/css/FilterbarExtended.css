@@ -2,16 +2,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 300px;
+  width: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 10;
   background: #F6F5F4;
-  width: 100%;
   min-height: 100%;
-  overflow-x: hidden;
   padding-left: 1rem; /* 16px */
   padding-right: 1rem; /* 16px */
-  padding-bottom:  2rem;/* 32px */;
+  padding-bottom: 2rem; /* 32px */
+  outline: none;
 }
 .FilterbarExtended h1.title {
   padding: 15px 0;
