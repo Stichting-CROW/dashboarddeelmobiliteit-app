@@ -44,7 +44,14 @@ const removeExistingPopups = () => {
   }
 }
 
-export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) => {
+export const initPopupLogic = (
+  theMap,
+  providers,
+  canSeeVehicleId,
+  filterDate,
+  hidePopupProviderTitle = false
+) => {
+  const providerLabelOptions = hidePopupProviderTitle ? { showTitle: false } : undefined;
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
     'vehicles-point',
@@ -204,7 +211,7 @@ export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) =
       popup = new maplibregl.Popup()
         .setLngLat(coordinates)
         .setHTML(`
-          ${buildProviderLabelHtml(headerLabel, providerColor)}
+          ${buildProviderLabelHtml(headerLabel, providerColor, providerLabelOptions)}
           ${
             shouldShowOverlappingVehiclesTable
               ? buildOverlappingVehiclesTableHtml()
@@ -250,7 +257,7 @@ export const initPopupLogic = (theMap, providers, canSeeVehicleId, filterDate) =
             popup
               .setLngLat(clickedCoordinates)
               .setHTML(`
-                ${buildProviderLabelHtml(clickedHeaderLabel, clickedProviderColor)}
+                ${buildProviderLabelHtml(clickedHeaderLabel, clickedProviderColor, providerLabelOptions)}
                 ${buildVehicleBodyHtml(clickedVehicleProperties, clickedProviderColor)}
               `);
           })

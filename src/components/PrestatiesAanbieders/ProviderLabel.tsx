@@ -3,13 +3,32 @@ import React from 'react';
 interface ProviderLabelProps {
   label: string;
   color: string;
+  /** When false, only the colored dot is shown (operator prestaties cards/popups). */
+  showTitle?: boolean;
+}
+
+export interface BuildProviderLabelHtmlOptions {
+  /** When false, only the colored dot is shown (operator prestaties map popups). */
+  showTitle?: boolean;
 }
 
 /**
  * HTML snippet used in map popups (for maplibre's setHTML).
  * Kept here so both the map popup and the React component share the same structure.
  */
-export const buildProviderLabelHtml = (label: string, color: string): string => `
+export const buildProviderLabelHtml = (
+  label: string,
+  color: string,
+  options?: BuildProviderLabelHtmlOptions
+): string => {
+  const showTitle = options?.showTitle !== false;
+  const titleHtml = showTitle
+    ? `<span class="Map-popup-title ml-2" style="color: ${color};">
+              ${label}
+            </span>`
+    : '';
+
+  return `
           <h1 class="mb-2">
             <span
               class="rounded-full inline-block w-4 h-4"
@@ -17,17 +36,20 @@ export const buildProviderLabelHtml = (label: string, color: string): string => 
               onClick="window.showConfetti()"
               >
             </span>
-            <span class="Map-popup-title ml-2" style="color: ${color};">
-              ${label}
-            </span>
+            ${titleHtml}
           </h1>
 `;
+};
 
 /**
  * Provider label styled to match the map popup title (colored dot + colored title text).
  * Used inside React components (cards etc.).
  */
-const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color }) => {
+const ProviderLabel: React.FC<ProviderLabelProps> = ({
+  label,
+  color,
+  showTitle = true,
+}) => {
   const handleConfettiClick = () => {
     // Only trigger if the global confetti helper exists (it is registered in map popups)
     if (typeof window !== 'undefined' && (window as any).showConfetti) {
@@ -42,9 +64,11 @@ const ProviderLabel: React.FC<ProviderLabelProps> = ({ label, color }) => {
         style={{ backgroundColor: color, position: 'relative' }}
         onClick={handleConfettiClick}
       />
-      <span className="Map-popup-title ml-2" style={{ color }}>
-        {label}
-      </span>
+      {showTitle && (
+        <span className="Map-popup-title ml-2" style={{ color }}>
+          {label}
+        </span>
+      )}
     </div>
   );
 };

@@ -134,6 +134,7 @@ const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiede
           kpiFetchScope="operator"
           overviewKpiOperators={rawKpiOperators}
           overviewKpiDescriptions={performanceIndicatorDescriptions}
+          hideProviderTitle
         />
       );
     });

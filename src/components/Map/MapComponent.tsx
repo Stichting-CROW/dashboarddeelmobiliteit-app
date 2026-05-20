@@ -51,6 +51,7 @@ import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 import { getProviderColorForProvider } from '../../helpers/providers';
+import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -81,6 +82,9 @@ const MapComponent = (props): JSX.Element => {
   const stateLayers = useSelector((state: StateType) => state.layers || null);
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
   const providers = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+  const gebieden = useSelector((state: StateType) =>
+    state.metadata?.gebieden ? state.metadata.gebieden : []
+  );
   const extent/* map boundaries */ = useSelector((state: StateType) => state.layers ? state.layers.extent : null);
   const [counter, setCounter] = useState(0);
   const zones_geodata = useSelector((state: StateType) => {
@@ -546,11 +550,23 @@ const MapComponent = (props): JSX.Element => {
       return true;
     }
 
-    initPopupLogic(map.current, providers, canSeeVehicleId(), filter.datum)
+    const hidePopupProviderTitle =
+      location.pathname === '/stats/prestaties-aanbieders' &&
+      isOperatorPrestatiesView(gebieden, providers);
+
+    initPopupLogic(
+      map.current,
+      providers,
+      canSeeVehicleId(),
+      filter.datum,
+      hidePopupProviderTitle
+    );
   }, [
     didInitSourcesAndLayers,
     providers,
-    filter.datum
+    gebieden,
+    filter.datum,
+    location.pathname,
   ])
 
   // Init clusters click handler
