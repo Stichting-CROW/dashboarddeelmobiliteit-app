@@ -10,6 +10,7 @@ import type {
 } from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators, findOperatorMatch } from '../../api/permitLimits';
 import type { KpiOverviewQueryScope } from '../../api/permitLimits';
+import { PRESTATIES_VIEW_URL_PARAM } from '../../helpers/prestatiesAanbiedersViewMode';
 import PerformanceIndicator from './PerformanceIndicator';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
@@ -213,7 +214,23 @@ export default function PrestatiesAanbiederCard({
       return baseMatch && !urlPropulsion;
     }, [urlSearch, permit]);
 
-    const detailsUrl = `/stats/prestaties-aanbieders?gm_code=${permit.municipality?.gmcode || permit.permit_limit.municipality}&operator=${permit.operator?.system_id || permit.permit_limit.system_id}&form_factor=${permit.vehicle_type?.id || permit.permit_limit.modality}${propulsionType ? `&propulsion_type=${propulsionType}` : ''}${startDate ? `&start_date=${startDate}` : ''}${endDate ? `&end_date=${endDate}` : ''}`;
+    const detailsUrl = useMemo(() => {
+      const params = new URLSearchParams();
+      params.set('gm_code', permit.municipality?.gmcode || permit.permit_limit.municipality);
+      params.set('operator', permit.operator?.system_id || permit.permit_limit.system_id);
+      params.set('form_factor', permit.vehicle_type?.id || permit.permit_limit.modality);
+      if (propulsionType) params.set('propulsion_type', propulsionType);
+      if (startDate) params.set('start_date', startDate);
+      if (endDate) params.set('end_date', endDate);
+
+      // Preserve the view mode (?weergave=) when navigating to a card's details,
+      // so admins stay in their currently selected view.
+      const currentParams = new URLSearchParams(urlSearch);
+      const weergave = currentParams.get(PRESTATIES_VIEW_URL_PARAM);
+      if (weergave) params.set(PRESTATIES_VIEW_URL_PARAM, weergave);
+
+      return `/stats/prestaties-aanbieders?${params.toString()}`;
+    }, [permit, propulsionType, startDate, endDate, urlSearch]);
 
     useEffect(() => {
       const operator = scopedSystemId || permit.operator?.system_id || permit.permit_limit.system_id;

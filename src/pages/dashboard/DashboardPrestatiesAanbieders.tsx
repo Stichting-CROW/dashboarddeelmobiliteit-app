@@ -7,53 +7,87 @@ import PrestatiesAanbiedersDetailsPanel from '../../components/PrestatiesAanbied
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 import {
-  isOperatorPrestatiesView,
+  PRESTATIES_VIEW_URL_PARAM,
+  canToggleViewMode,
+  getAanbiederSystemId,
   resolveOperatorSystemId,
+  resolvePrestatiesViewMode,
 } from '../../helpers/prestatiesAanbiedersViewMode';
 
 interface DashboardPrestatiesAanbiedersProps {}
 
 function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps) {
   const activeorganisation = useSelector((state: StateType) => state.filter.gebied);
-  const gebieden = useSelector((state: StateType) =>
-    state.metadata?.gebieden ? state.metadata.gebieden : []
-  );
   const aanbieders = useSelector((state: StateType) =>
     state.metadata?.aanbieders ? state.metadata.aanbieders : []
   );
   const metadataLoaded = useSelector(
     (state: StateType) => Boolean(state.metadata?.metadata_loaded)
   );
+  const isAdmin = useSelector((state: StateType) =>
+    Boolean(state.authentication?.user_data?.acl?.is_admin)
+  );
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const isMunicipalityView = !isOperatorPrestatiesView(gebieden, aanbieders);
-  const activeoperator = resolveOperatorSystemId(
-    aanbieders,
-    searchParams.get('system_id') || searchParams.get('operator')
-  );
+  const urlView = searchParams.get(PRESTATIES_VIEW_URL_PARAM);
+  const viewMode = resolvePrestatiesViewMode(aanbieders, isAdmin, urlView);
+  const isMunicipalityView = viewMode === 'municipality';
+  const adminCanToggle = canToggleViewMode(isAdmin, aanbieders);
 
   const urlSystemId = searchParams.get('system_id');
   const urlOperator = searchParams.get('operator');
+  const activeoperator = resolveOperatorSystemId(
+    aanbieders,
+    urlSystemId || urlOperator
+  );
 
   useEffect(() => {
     if (!metadataLoaded) return;
-    if (!isMunicipalityView && activeoperator) {
-      if (urlSystemId === activeoperator && urlOperator === activeoperator) {
-        return;
-      }
-      const next = new URLSearchParams(searchParams);
-      next.set('system_id', activeoperator);
-      next.set('operator', activeoperator);
-      navigate(`/stats/prestaties-aanbieders?${next.toString()}`, { replace: true });
+    if (isMunicipalityView) return;
+    if (!activeoperator) return;
+
+    if (urlSystemId === activeoperator && urlOperator === activeoperator) {
+      return;
     }
+    const next = new URLSearchParams(searchParams);
+    next.set('system_id', activeoperator);
+    next.set('operator', activeoperator);
+    navigate(`/stats/prestaties-aanbieders?${next.toString()}`, { replace: true });
   }, [
     metadataLoaded,
     isMunicipalityView,
     activeoperator,
     urlSystemId,
     urlOperator,
+    searchParams,
+    navigate,
+  ]);
+
+  // When admin switches into operator view but no operator is selected yet,
+  // default to the first available operator so the view has something to render.
+  useEffect(() => {
+    if (!metadataLoaded) return;
+    if (!adminCanToggle) return;
+    if (isMunicipalityView) return;
+    if (urlSystemId || urlOperator) return;
+    if (aanbieders.length === 0) return;
+
+    const firstOperator = getAanbiederSystemId(aanbieders[0]);
+    if (!firstOperator) return;
+
+    const next = new URLSearchParams(searchParams);
+    next.set('system_id', firstOperator);
+    next.set('operator', firstOperator);
+    navigate(`/stats/prestaties-aanbieders?${next.toString()}`, { replace: true });
+  }, [
+    metadataLoaded,
+    adminCanToggle,
+    isMunicipalityView,
+    urlSystemId,
+    urlOperator,
+    aanbieders,
     searchParams,
     navigate,
   ]);
@@ -67,11 +101,18 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
 
   const handleCloseDetailsPanel = () => {
     const newParams = new URLSearchParams(searchParams);
-    newParams.delete('operator');
-    newParams.delete('system_id');
+    newParams.delete('gm_code');
     newParams.delete('form_factor');
     newParams.delete('propulsion_type');
     newParams.delete('fullscreen');
+    // In municipality view, also clear the operator so we return to a clean
+    // overview. In operator view the URL needs `system_id`/`operator` to keep
+    // showing the selected operator's data – otherwise the auto-populate
+    // effect would silently switch us to the first operator in the list.
+    if (isMunicipalityView) {
+      newParams.delete('operator');
+      newParams.delete('system_id');
+    }
     const queryString = newParams.toString();
     navigate(`/stats/prestaties-aanbieders${queryString ? `?${queryString}` : ''}`);
   };

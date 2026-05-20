@@ -24,8 +24,11 @@ import { isDemoMode } from '../../config/demo';
 import { getDisplayOperatorName, getDisplayProviderColor } from '../../helpers/demoMode';
 import { getPrettyVehicleTypeName } from '../../helpers/vehicleTypes';
 import {
-  isOperatorPrestatiesView,
+  PRESTATIES_VIEW_URL_PARAM,
+  canToggleViewMode,
+  getAanbiederSystemId,
   resolveOperatorSystemId,
+  resolvePrestatiesViewMode,
 } from '../../helpers/prestatiesAanbiedersViewMode';
 import { RadioButton } from '../ui/radio-button';
 
@@ -65,6 +68,10 @@ function FilterbarPermits({
     Boolean(state.metadata && state.metadata.metadata_loaded)
   );
 
+  const isAdmin = useSelector((state: StateType) =>
+    Boolean(state.authentication?.user_data?.acl?.is_admin)
+  );
+
   const filterGebied = useSelector((state: StateType) => {
     return state.filter ? state.filter.gebied : '';
   });
@@ -83,13 +90,18 @@ function FilterbarPermits({
   const pathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const isMunicipalityView = !isOperatorPrestatiesView(gebieden, aanbieders);
+  const urlView = searchParams.get(PRESTATIES_VIEW_URL_PARAM);
+  const viewMode = resolvePrestatiesViewMode(aanbieders, isAdmin, urlView);
+  const isMunicipalityView = viewMode === 'municipality';
+  const adminCanToggleView = canToggleViewMode(isAdmin, aanbieders);
   const operatorSystemId = resolveOperatorSystemId(
     aanbieders,
     searchParams.get('system_id') || searchParams.get('operator')
   );
 
-  const hidePlaats = gebieden.length <= 1;
+  // Hide the "Plaats" fieldset in operator view (we group by municipality there)
+  // and when the user only has access to a single municipality.
+  const hidePlaats = !isMunicipalityView || gebieden.length <= 1;
 
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
@@ -224,6 +236,38 @@ function FilterbarPermits({
     });
   }, [availableCombinations, isMunicipalityView, municipalityNameByGmCode]);
 
+  const handleViewModeChange = (nextViewMode: 'municipality' | 'operator') => {
+    if (nextViewMode === viewMode) return;
+
+    const next = new URLSearchParams(searchParams);
+    if (nextViewMode === 'operator') {
+      next.set(PRESTATIES_VIEW_URL_PARAM, 'operator');
+    } else {
+      next.delete(PRESTATIES_VIEW_URL_PARAM);
+      // Clear the operator-scoped selection when switching to municipality view
+      // so the dashboard doesn't auto-open a details panel from a stale operator.
+      next.delete('system_id');
+      next.delete('operator');
+      next.delete('form_factor');
+      next.delete('propulsion_type');
+    }
+    // Clear any drill-down so we land on the overview after switching.
+    next.delete('gm_code');
+    setSearchParams(next);
+  };
+
+  const handleOperatorSelect = (operatorId: string) => {
+    if (operatorId === operatorSystemId) return;
+
+    const next = new URLSearchParams(searchParams);
+    next.set('system_id', operatorId);
+    next.set('operator', operatorId);
+    next.delete('gm_code');
+    next.delete('form_factor');
+    next.delete('propulsion_type');
+    setSearchParams(next);
+  };
+
   const handleCombinationClick = (operatorId: string, formFactor: string, gmCode?: string) => {
     const newSearchParams = new URLSearchParams(searchParams);
 
@@ -282,6 +326,84 @@ function FilterbarPermits({
       {! hidePlaats && <Fieldset title="Plaats">
         <FilteritemGebieden />
       </Fieldset>}
+
+      {adminCanToggleView && (
+        <Fieldset title="Weergave">
+          {(
+            [
+              { id: 'municipality', label: 'Bekijk als gemeente' },
+              { id: 'operator', label: 'Bekijk als aanbieder' },
+            ] as const
+          ).map((option) => (
+            <div
+              key={`view-mode-${option.id}`}
+              className="flex items-center space-x-2 my-2"
+              onClick={(e) => {
+                e.preventDefault();
+                handleViewModeChange(option.id);
+              }}
+            >
+              <RadioButton
+                id={`view-mode-${option.id}`}
+                checked={viewMode === option.id}
+              />
+              <label
+                htmlFor={`view-mode-${option.id}`}
+                className="
+                  text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70
+                  cursor-pointer
+                "
+              >
+                {option.label}
+              </label>
+            </div>
+          ))}
+        </Fieldset>
+      )}
+
+      {adminCanToggleView && !isMunicipalityView && (
+        <Fieldset title="Aanbieder">
+          {aanbieders.length === 0 ? (
+            <div className="text-sm text-gray-500">Geen aanbieders beschikbaar</div>
+          ) : (
+            aanbieders.map((aanbieder: { system_id?: string; value?: string; name?: string }) => {
+              const operatorId = getAanbiederSystemId(aanbieder);
+              if (!operatorId) return null;
+              const realName = aanbieder.name || getPrettyProviderName(operatorId) || operatorId;
+              const displayName = getDisplayOperatorName(operatorId, realName, isDemoMode());
+              return (
+                <div
+                  key={`admin-operator-${operatorId}`}
+                  className="flex items-center space-x-2 my-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOperatorSelect(operatorId);
+                  }}
+                >
+                  <RadioButton
+                    id={`admin-operator-${operatorId}`}
+                    checked={operatorSystemId === operatorId}
+                    color={getDisplayProviderColor(
+                      operatorId,
+                      getProviderColorForProvider(operatorId),
+                      isDemoMode()
+                    )}
+                  />
+                  <label
+                    htmlFor={`admin-operator-${operatorId}`}
+                    className="
+                      text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70
+                      cursor-pointer
+                    "
+                  >
+                    {displayName}
+                  </label>
+                </div>
+              );
+            })
+          )}
+        </Fieldset>
+      )}
 
       {(true || isPrestatiesDetailsView) && (
         <Fieldset title={isMunicipalityView ? 'Aanbieders' : 'Gemeenten'}>
