@@ -1,5 +1,49 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-05-20
+
+**Aanbod**
+
+- 🪄 Defecte (niet-operationele) voertuigen zijn nu zichtbaar op de kaart, met een apart filter om ze te tonen of te verbergen
+
+**Prestaties aanbieders**
+
+- 🪄 Nieuwe KPI-pagina voor aanbieders met overzicht van prestaties per gemeente
+- 🪄 Admins kunnen schakelen tussen gemeente- en aanbiederweergave
+- ✨ In gemeenteweergave worden gemeentenamen getoond op aanbiederkaarten en in grafieken
+- ✨ 'Prestaties aanbieders' staat nu als laatste item in het Statistiek-submenu
+
+**Statistieken en Filterbar**
+
+- 🪄 Beleidszones-knoppen zijn uit de filterbar op Beleidsinfo verwijderd
+- 🪄 Filterbar sluit met Escape-toets
+- 🪄 Zoekstatus in de uitgebreide filterbar wordt gereset bij sluiten
+- 🐛 Opgelost: na wisselen van plaats werden soms nog Nederland-brede waarden getoond in grafieken
+- 🐛 Opgelost: filterbar sloot onbedoeld bij klikken op de scrollbar of buiten de filterbar
+- ✨ Verbeterde toegankelijkheid: aria-label op sluitknop van de filterbar
+
+**Zones/Beleidszones**
+
+- 🪄 Rechtermuisklik op overlappende zones opent een contextmenu voor eenvoudigere zone-selectie
+- 🪄 In hub-statistiekenmodus verschijnt bij klik op een verbodsgebied informatie over dat gebied
+- 🐛 Opgelost: bij verwijderen van een zone wordt nu de juiste fase getoond in het bevestigingsscherm
+
+**Gebruikersinterface**
+
+- 🐛 Opgelost: horizontaal scrollen in het desktopmenu werkt weer
+
+**Documentatie**
+
+- ✨ Nieuw API-overzicht met links naar alle beschikbare API's
+- ✨ Documentatie toegevoegd voor defecte voertuigen op de kaart
+- ✨ API-links in documentatie openen in een nieuw tabblad
+
+## Release 2026-03-31
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: gebruikers met bewerkrechten voor hubs kunnen hubs weer bewerken
+
 ## Release 2026-03-25
 
 **Statistieken en Navigatie**
