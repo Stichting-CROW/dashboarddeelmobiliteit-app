@@ -1,6 +1,8 @@
-import { buildKpiOverviewSearchParams, type KpiOverviewQueryScope } from './permitLimits';
-
-const MDS_BASE_URL = 'https://mds.dashboarddeelmobiliteit.nl';
+import {
+  buildKpiOverviewSearchParams,
+  fetchKpiOverviewRaw,
+  type KpiOverviewQueryScope,
+} from './permitLimits';
 
 export interface KpiOverviewParams {
   start_date: string;
@@ -10,15 +12,6 @@ export interface KpiOverviewParams {
   system_id?: string;
   scope?: KpiOverviewQueryScope;
 }
-
-const getFetchOptions = (token: string) => {
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  };
-};
 
 export const getKpiOverviewOperators = async (token: string, params: KpiOverviewParams) => {
   const searchParams = buildKpiOverviewSearchParams(params.start_date, params.end_date, {
@@ -32,15 +25,17 @@ export const getKpiOverviewOperators = async (token: string, params: KpiOverview
     throw new Error('KPI overview request missing required query params');
   }
 
-  const url = `${MDS_BASE_URL}/kpi_overview_operators?${searchParams.toString()}`;
+  // Route through the shared raw fetcher so this request participates in the
+  // in-flight dedup cache used by usePermitData / fetchKpiOverviewPermitRecords.
+  // When the page loads with all filter params pre-filled, the overview and
+  // the details panel kick off the same URL concurrently and now share a
+  // single network call instead of issuing two.
+  const scopeLabel = params.municipality || params.system_id || 'unknown';
+  const responseJson = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
 
-  const fetchOptions = getFetchOptions(token);
-  const response = await fetch(url, fetchOptions);
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  if (!responseJson) {
+    throw new Error('Failed to fetch kpi_overview_operators');
   }
 
-  const responseJson = await response.json();
   return responseJson;
 };

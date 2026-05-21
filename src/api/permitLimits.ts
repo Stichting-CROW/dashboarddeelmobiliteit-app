@@ -294,7 +294,7 @@ const enrichPermitRecordsWithOperators = async (
  */
 const inFlightKpiRawFetches = new Map<string, Promise<OperatorPerformanceIndicatorsResponse | null>>();
 
-const fetchKpiOverviewRaw = (
+export const fetchKpiOverviewRaw = (
     token: string,
     searchParams: URLSearchParams,
     scopeLabel: string

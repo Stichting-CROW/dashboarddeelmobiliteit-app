@@ -112,18 +112,25 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
       setLoading(true);
       setError(null);
       try {
-        const params = {
-          start_date: moment(startDate).format('YYYY-MM-DD'),
-          end_date: moment(endDate).format('YYYY-MM-DD'),
-          form_factor: formFactorCode,
-          system_id: operatorCode,
-          scope: isOperatorScope ? ('operator' as const) : ('municipality' as const),
-          ...(isOperatorScope
-            ? municipalityCode
-              ? { municipality: municipalityCode }
-              : {}
-            : { municipality: municipalityCode! }),
-        };
+        // Intentionally omit `form_factor` and (in municipality scope) `system_id`
+        // from the request. The chart renderer filters the response client-side
+        // via `findOperatorMatch`, and dropping the filters lets this fetch share
+        // a URL (and the in-flight dedup cache) with the overview fetch in
+        // usePermitData, avoiding a redundant scoped request.
+        const params = isOperatorScope
+          ? {
+              start_date: moment(startDate).format('YYYY-MM-DD'),
+              end_date: moment(endDate).format('YYYY-MM-DD'),
+              system_id: operatorCode,
+              scope: 'operator' as const,
+              ...(municipalityCode ? { municipality: municipalityCode } : {}),
+            }
+          : {
+              start_date: moment(startDate).format('YYYY-MM-DD'),
+              end_date: moment(endDate).format('YYYY-MM-DD'),
+              municipality: municipalityCode!,
+              scope: 'municipality' as const,
+            };
         const data = await getKpiOverviewOperators(token, params);
         setKpiData(data);
       } catch (err: any) {
