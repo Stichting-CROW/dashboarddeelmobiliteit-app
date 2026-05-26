@@ -5,12 +5,7 @@ import { useEffect, useState } from "react";
 import {marked} from 'marked'
 
 import './Doc.css';
-
-type Doc = {
-  name: string,
-  path: string,
-  download_url: string
-}
+import { DocItem } from "./types";
 
 const Video = ({url}: {url: string}) => {
   return <ReactPlayer
@@ -30,41 +25,29 @@ const Video = ({url}: {url: string}) => {
 function Doc({
   docs
 }: {
-  docs: Array<Doc>
+  docs: Array<DocItem>
 }) {
   const location = useLocation();
 
-  const [activeDoc, setActiveDoc] = useState<Doc>()
+  const [activeDoc, setActiveDoc] = useState<DocItem | undefined>()
   const [markdown, setMarkdown] = useState('')
 
-  // On component load: Load doc contents
   useEffect(() => {
     if(! docs || docs.length <= 0) return;
 
     const active = getActiveDoc(docs);
 
     setActiveDoc(active);
-    loadDocContents(active);
+    setMarkdown(active?.content ?? '');
   }, [location, docs]);
 
-  const getActiveDoc = (docs) => {
+  const getActiveDoc = (docs: Array<DocItem>) => {
     const currentPathName = location.pathname.replace('/docs/', '');
 
-    return docs.find(x => {
-      return x?.path === currentPathName;
-    });
+    return docs.find(x => x?.path === currentPathName);
   }
 
-  const loadDocContents = async (active) => {
-    if(! active || ! active.download_url) return;
-
-    const response = await fetch(active.download_url);
-    const text = await response.text();
-
-    setMarkdown(text);
-  }
-  
-  const getFolderName = (path) => path?.split('/')[0];
+  const getFolderName = (path?: string) => path?.split('/')[0];
 
   const gitHubEditPage = `https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/edit/main/src/components/Docs/contents/${activeDoc?.path}`
 

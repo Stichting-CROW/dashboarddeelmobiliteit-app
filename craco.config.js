@@ -14,45 +14,19 @@ module.exports = {
         poll: 1000,
       };
 
-      const sourceMapLoaderRule = webpackConfig.module.rules.find(
-        (rule) =>
-          rule.enforce === 'pre' &&
-          (
-            (rule.loader &&
-              typeof rule.loader === 'string' &&
-              rule.loader.includes('source-map-loader')) ||
-            (rule.use &&
-              rule.use.some((use) => {
-                if (typeof use === 'string') {
-                  return use.includes('source-map-loader');
-                }
-
-                return (
-                  use &&
-                  use.loader &&
-                  typeof use.loader === 'string' &&
-                  use.loader.includes('source-map-loader')
-                );
-              }))
-          )
+      // Load *.md files as raw strings so the Docs pages can bundle
+      // their content at build time (no runtime GitHub API calls).
+      // Must be inserted into CRA's `oneOf` chain before the
+      // fallback asset/resource rule, otherwise markdown files get
+      // emitted as static files and `require()` returns a URL.
+      const oneOfRule = webpackConfig.module.rules.find((rule) =>
+        Array.isArray(rule.oneOf)
       );
-
-      if (sourceMapLoaderRule) {
-        const currentExclude = sourceMapLoaderRule.exclude;
-
-        if (Array.isArray(currentExclude)) {
-          sourceMapLoaderRule.exclude = [
-            ...currentExclude,
-            /github-folder-tree/,
-          ];
-        } else if (currentExclude) {
-          sourceMapLoaderRule.exclude = [
-            currentExclude,
-            /github-folder-tree/,
-          ];
-        } else {
-          sourceMapLoaderRule.exclude = [/github-folder-tree/];
-        }
+      if (oneOfRule) {
+        oneOfRule.oneOf.unshift({
+          test: /\.md$/,
+          type: 'asset/source',
+        });
       }
 
       return webpackConfig;

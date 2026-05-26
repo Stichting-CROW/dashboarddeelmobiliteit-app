@@ -44,7 +44,6 @@ jobs:
           REACT_APP_FUSIONAUTH_URL: ${{ vars.REACT_APP_FUSIONAUTH_URL }}
           REACT_APP_MAIN_API_URL: ${{ vars.REACT_APP_MAIN_API_URL }}
           REACT_APP_MDS_URL: ${{ vars.REACT_APP_MDS_URL }}
-          REACT_APP_DOCS_GITHUB_API_KEY: ${{ secrets.REACT_APP_DOCS_GITHUB_API_KEY }}
 
       - name: Prepare Pages artifact
         run: |

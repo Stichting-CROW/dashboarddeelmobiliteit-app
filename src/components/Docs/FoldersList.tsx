@@ -1,24 +1,17 @@
 import { Link } from "react-router-dom";
-import Section from '../Section/Section';
-import {marked} from 'marked'
 import { useEffect, useState } from "react";
+import { DocItem } from "./types";
 
 type Folder = {
   name: string,
   path: string
 }
 
-type Doc = {
-  name: string,
-  path: string,
-  download_url: string
-}
-
 // Generates a list of folders
 function FoldersList({
   docs
 }: {
-  docs: Array<Doc>
+  docs: Array<DocItem>
 }) {
   const [folders, setFolders] = useState([])
 
@@ -30,7 +23,7 @@ function FoldersList({
 
     setFolders(
       // Convert doc to folder
-      docs?.map((x: Doc) => {
+      docs?.map((x: DocItem) => {
         const folderName = x.path.split('/')[0];
 
         return {
