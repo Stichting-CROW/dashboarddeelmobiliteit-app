@@ -285,6 +285,8 @@ function Filterbar({
         </div>
       )}
 
+      .
+
       {/* <div
         className="absolute text-xs text-purple-800"
         style={{
