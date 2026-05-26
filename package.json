@@ -1,6 +1,6 @@
 {
   "name": "dashboarddeelmobiliteit-app",
-  "homepage": "https://test.dashboarddeelmobiliteit.nl/",
+  "homepage": "https://dashboarddeelmobiliteit.nl/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
