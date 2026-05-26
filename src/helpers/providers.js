@@ -53,7 +53,8 @@ export const getPrettyProviderName = (system_id) => {
     'lime': 'Lime',
     'tier': 'TIER',
     'dott': 'Dott',
-    'uwdeelfiets': 'Uw Deelfiets'
+    'uwdeelfiets': 'Uw Deelfiets',
+    'voi': 'Voi'
   }
   return providerPrettyNames[system_id]
     ? providerPrettyNames[system_id]
@@ -86,6 +87,7 @@ export const getProviderWebsiteUrl = (system_id) => {
     'tier': 'https://www.tier.app/',
     'dott': 'https://ridedott.com/',
     'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
+    'voi': 'https://voi.com/nl',
   }
   return providerWebsiteUrls[system_id]
     ? providerWebsiteUrls[system_id]
@@ -209,6 +211,11 @@ export const getProvider = (system_id) => {
       website: 'https://www.uwdeelfiets.nl/',
       logo: 'https://raw.githubusercontent.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/main/logos/uwdeelfiets.png',
     },
+    'voi': {
+      name: 'Voi',
+      website: 'https://voi.com/nl',
+      logo: 'https://voi.com/logos/voi-coral.svg',
+    },
   }
   return providerData[system_id]
     ? providerData[system_id]
@@ -239,6 +246,7 @@ export const getProviderColors = () => {
     'hely': '#fd645c',
     'tier': '#0d123f',
     'dott': '#00a8e9',
+    'voi': '#f26961',
   }
 }
 

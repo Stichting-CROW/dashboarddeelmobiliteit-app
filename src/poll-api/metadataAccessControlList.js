@@ -21,6 +21,7 @@ const cPublicAanbieders = [
   { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
   { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
   { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
+  { value:"voi", system_id:"voi", name:"Voi" },
 ];
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
