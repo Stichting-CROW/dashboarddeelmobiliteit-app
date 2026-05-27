@@ -40,7 +40,9 @@ const dispatchCachedAanbieders = (store_accesscontrollist) => {
 // nothing is cached, we leave aanbieders as-is so the app keeps working with
 // whatever is already in state.
 const dispatchPublicAanbiedersFromApi = (store_accesscontrollist) => {
-  return fetchOperators()
+  // Always refresh from the network on app init so a stale localStorage entry
+  // (or a prior in-memory cache) cannot block the full operators list.
+  return fetchOperators({ refresh: true })
     .then((operators) => {
       if (operators && operators.length > 0) {
         store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: operators });
@@ -80,10 +82,10 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       
       store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: true});
 
-      // Render the cached operators list immediately so logged-in users see
-      // the filters without waiting for the ACL request. The ACL response
-      // below will overwrite this with the user-scoped operator list.
+      // Instant paint from cache, then always refresh from the public operators
+      // API (same source as anonymous users). ACL only scopes municipalities.
       dispatchCachedAanbieders(store_accesscontrollist);
+      dispatchPublicAanbiedersFromApi(store_accesscontrollist);
 
       fetch(url, options).then((response) => {
         if(!response.ok) {
@@ -116,12 +118,7 @@ export const initAccessControlList = (store_accesscontrollist)  => {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
             }
             
-            // If not admin, filter out certain operators
-            // if(!state.authentication.user_data.acl || !state.authentication.user_data.acl.is_admin) {
-            //   const hideOperators = ['mywheels', 'greenwheels'];
-            //   metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
-            // }
-            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: metadata.operators});
+            // Aanbieders come from the public /operators API (see dispatchPublicAanbiedersFromApi).
 
             // items -> {"id": 1, "name": "asdfasdfadfa" }
             let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented

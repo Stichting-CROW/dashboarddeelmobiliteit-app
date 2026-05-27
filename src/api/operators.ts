@@ -25,6 +25,11 @@ const LS_CACHE_TS_KEY = 'ddm-operators-cache-v1-ts';
 // refresh so the UI gets the latest data without making the user wait.
 const CACHE_FRESH_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
+export interface FetchOperatorsOptions {
+    /** When true, always fetch from the network and update caches (used on app init). */
+    refresh?: boolean;
+}
+
 let cachedOperators: OperatorData[] | null = null;
 let inFlightOperatorsRequest: Promise<OperatorData[] | false> | null = null;
 
@@ -61,18 +66,17 @@ const writeLocalStorageCache = (operators: OperatorData[]) => {
 };
 
 /**
- * Synchronously returns operators from the in-memory or localStorage cache so
- * callers can paint the UI on first render without awaiting the network. The
- * caller is expected to follow up with `fetchOperators()` to refresh the data.
+ * Synchronously returns operators from localStorage (or the in-memory cache if
+ * a fetch already completed this session) so callers can paint the UI on first
+ * render without awaiting the network.
+ *
+ * Does NOT hydrate `cachedOperators` — that would cause a subsequent
+ * `fetchOperators()` call to skip the network refresh.
  */
 export const getCachedOperators = (): OperatorData[] | null => {
-    if (cachedOperators) return cachedOperators;
     const stored = readLocalStorageCache();
-    if (stored) {
-        cachedOperators = stored.operators;
-        return stored.operators;
-    }
-    return null;
+    if (stored) return stored.operators;
+    return cachedOperators;
 };
 
 const fetchOperatorsFromNetwork = async (): Promise<OperatorData[] | false> => {
@@ -90,31 +94,39 @@ const fetchOperatorsFromNetwork = async (): Promise<OperatorData[] | false> => {
     }
 };
 
-export const fetchOperators = async (): Promise<OperatorData[] | false> => {
-    if (cachedOperators) {
+export const fetchOperators = async (
+    options?: FetchOperatorsOptions
+): Promise<OperatorData[] | false> => {
+    const forceRefresh = options?.refresh === true;
+
+    if (!forceRefresh && cachedOperators) {
         return cachedOperators;
     }
 
-    // If localStorage holds a fresh cache, hydrate the in-memory cache from it
-    // and skip the network entirely. This keeps subsequent page loads instant.
-    const stored = readLocalStorageCache();
-    if (stored) {
-        cachedOperators = stored.operators;
-        const isFresh = stored.timestamp > 0 && Date.now() - stored.timestamp < CACHE_FRESH_TTL_MS;
-        if (isFresh) {
+    if (!forceRefresh) {
+        // If localStorage holds a fresh cache, hydrate the in-memory cache from it
+        // and skip the network entirely. This keeps subsequent page loads instant
+        // for components that only need a quick read (not app init).
+        const stored = readLocalStorageCache();
+        if (stored) {
+            cachedOperators = stored.operators;
+            const isFresh =
+                stored.timestamp > 0 && Date.now() - stored.timestamp < CACHE_FRESH_TTL_MS;
+            if (isFresh) {
+                return stored.operators;
+            }
+            // Stale: return cached value immediately, but kick off a background
+            // refresh so the next read sees the latest data.
+            if (!inFlightOperatorsRequest) {
+                const refresh = fetchOperatorsFromNetwork().finally(() => {
+                    if (inFlightOperatorsRequest === refresh) {
+                        inFlightOperatorsRequest = null;
+                    }
+                });
+                inFlightOperatorsRequest = refresh;
+            }
             return stored.operators;
         }
-        // Stale: return cached value immediately, but kick off a background
-        // refresh so the next read sees the latest data.
-        if (!inFlightOperatorsRequest) {
-            const refresh = fetchOperatorsFromNetwork().finally(() => {
-                if (inFlightOperatorsRequest === refresh) {
-                    inFlightOperatorsRequest = null;
-                }
-            });
-            inFlightOperatorsRequest = refresh;
-        }
-        return stored.operators;
     }
 
     if (inFlightOperatorsRequest) {
