@@ -119,10 +119,15 @@ function VerhuringenChart(props) {
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);
     const providerKeys = Object.keys(data[0]).filter(k => k !== 'time' && k !== 'name');
+    const showTotaal = providerKeys.length > 1;
     return data.map(x => {
       const timeFormatted = moment(x.time ? x.time : x.name).format(dateFormat);
-      const totaal = providerKeys.reduce((sum, k) => sum + (Number(x[k]) || 0), 0);
-      return { ...x, time: timeFormatted, [TOTAAL_KEY]: totaal };
+      const row = { ...x, time: timeFormatted };
+      if (showTotaal) {
+        const totaal = providerKeys.reduce((sum, k) => sum + (Number(x[k]) || 0), 0);
+        row[TOTAAL_KEY] = totaal;
+      }
+      return row;
     });
   };
   const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
@@ -174,7 +179,7 @@ function VerhuringenChart(props) {
         />
       );
     });
-    if (hasTotaal) {
+    if (hasTotaal && providersOnly.length > 1) {
       series.push(
         <Line
           key={TOTAAL_KEY}

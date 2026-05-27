@@ -60,7 +60,7 @@ const CustomizedTooltip = ({
             </li>
           ))}
         </ul>
-        {!hasTotaalSeries && (
+        {!hasTotaalSeries && payload.length > 1 && (
           <div className="my-0" style={{ color: tooltipTextColor }}>
             Totaal: {displayValue(sumValue())}
           </div>
