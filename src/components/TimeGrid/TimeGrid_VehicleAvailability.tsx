@@ -49,6 +49,9 @@ function TimeGridVehicleAvailability({}) {
     // setVehiclesData(aggregatedVehicleData);
     return aggregatedVehicleData;
   }
+  // See BeschikbareVoertuigenChart for the rationale behind the
+  // metadata sub-reference deps (prevents extra refetches when the metadata
+  // top-level reference changes but no relevant slice did).
   useEffect(() => {
     // Wait until metadata.zones contains zones for the currently selected
     // plaats. Otherwise the fetch would request without a valid zone filter
@@ -70,7 +73,11 @@ function TimeGridVehicleAvailability({}) {
     filter.gebied,
     filter.zones,
     filter.aanbiedersexclude,
-    metadata,
+    metadata?.aanbieders,
+    metadata?.aclOperators,
+    metadata?.zones,
+    metadata?.gebieden,
+    metadata?.vehicle_types,
     token
   ]);
 

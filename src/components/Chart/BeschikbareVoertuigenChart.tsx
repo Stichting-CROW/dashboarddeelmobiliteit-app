@@ -77,6 +77,13 @@ function BeschikbareVoertuigenChart({
   const [vehiclesData, setVehiclesData] = useState([])
 
   // On updated filter: re-fetch data
+  //
+  // NOTE: we intentionally depend on individual metadata sub-references
+  // (`metadata.aanbieders`, `metadata.zones`, etc.) instead of the whole
+  // `metadata` object. The metadata reducer creates a new top-level reference
+  // on every dispatch, even when nothing relevant to this chart changed,
+  // which used to cause duplicate refetches. The sub-references are kept
+  // stable by md5-guarded reducer cases.
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
@@ -119,8 +126,11 @@ function BeschikbareVoertuigenChart({
     filter.gebied,
     filter.zones,
     filter.aanbiedersexclude,
-    metadata,
+    metadata.aanbieders,
     metadata.aclOperators,
+    metadata.zones,
+    metadata.gebieden,
+    metadata.vehicle_types,
     token,
     dispatch
   ]);

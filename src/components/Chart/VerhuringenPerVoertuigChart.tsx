@@ -145,6 +145,11 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
   const [vehiclesData, setVehiclesData] = useState<Record<string, unknown> | null>(null);
   const [rentalsData, setRentalsData] = useState<Record<string, unknown> | null>(null);
 
+  // See BeschikbareVoertuigenChart for the rationale behind the
+  // metadata sub-reference deps. The actual API calls are deduplicated in the
+  // shared dedupedFetch helper, so even though this component requests the
+  // same vehicle/rental endpoints as BeschikbareVoertuigenChart and
+  // VerhuringenChart, only one HTTP request is sent for each.
   useEffect(() => {
     if (!metadata?.zones || metadata.zones.length <= 0) {
       setVehiclesData(null);
@@ -177,7 +182,11 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     filter.gebied,
     filter.zones,
     filter.aanbiedersexclude,
-    metadata,
+    metadata?.aanbieders,
+    metadata?.aclOperators,
+    metadata?.zones,
+    metadata?.gebieden,
+    metadata?.vehicle_types,
     token,
     zones
   ]);

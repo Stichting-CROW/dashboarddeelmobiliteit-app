@@ -253,6 +253,37 @@ const MapComponent = (props): JSX.Element => {
       map.current.touchZoomRotate.disableRotation();
     }
     initMap();
+
+    // Cleanup on unmount: when the user navigates to a non-map route, MapPage
+    // (and thus MapComponent) unmounts. Properly destroy the MapLibre instance
+    // so its WebGL context, DOM nodes, event listeners and tile requests are
+    // released. Without this we leak a full MapLibre map per visit.
+    //
+    // IMPORTANT: in a deleted React subtree, parent effect cleanups run
+    // BEFORE the children's cleanups. Several child layers (e.g.
+    // DdServiceAreasLayer, DdPolicyHubsLayer) call `map.getLayer` /
+    // `map.removeLayer` in their own cleanup. After `map.remove()` the
+    // MapLibre instance's internal style is destroyed and those calls throw
+    // ("Cannot read properties of undefined (reading 'getLayer')"). We
+    // therefore defer the actual `.remove()` to a microtask so child
+    // cleanups run against a still-alive map.
+    return () => {
+      const toRemove = map.current;
+      if (!toRemove) return;
+      if (window['ddMap'] === toRemove) {
+        window['ddMap'] = null;
+      }
+      map.current = null;
+      queueMicrotask(() => {
+        try {
+          toRemove.remove();
+        } catch (e) {
+          // Ignore: MapLibre sometimes throws during teardown if a request
+          // was already aborted; the goal is to not leak, not to be perfectly
+          // clean.
+        }
+      });
+    };
   }, [
     lng,
     lat,

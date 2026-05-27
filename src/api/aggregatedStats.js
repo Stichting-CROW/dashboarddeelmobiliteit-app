@@ -1,6 +1,7 @@
 import { createFilterparameters } from '../poll-api/pollTools.js';
 import { DISPLAYMODE_OTHER } from '../reducers/layers.js';
 import saveAs from 'file-saver';
+import { dedupedFetch } from './dedupedFetch';
 
 const getFetchOptions = (token) => {
   return {
@@ -20,9 +21,9 @@ export const getAggregatedStats = async (token, key, options) => {
   let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
-  // Get API response  
+  // Get API response (deduped: concurrent identical requests share a single network call)
   const fetchOptions = getFetchOptions(token)
-  const response = await fetch(url, fetchOptions);
+  const response = await dedupedFetch(url, fetchOptions);
   const responseJson = await response.json();
 
   // Return
@@ -43,9 +44,9 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
   let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
-  // Get API response  
+  // Get API response (deduped: concurrent identical requests share a single network call)
   const fetchOptions = getFetchOptions(token)
-  const response = await fetch(url, fetchOptions);
+  const response = await dedupedFetch(url, fetchOptions);
   const responseJson = await response.json();
 
   // Return

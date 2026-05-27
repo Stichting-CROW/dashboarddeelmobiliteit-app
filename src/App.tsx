@@ -60,6 +60,7 @@ import {
 import {
   showNotification,
 } from './helpers/notify';
+import { pathRequiresBackgroundMap } from './helpers/routes';
 
 import {
   isValidAuthState,
@@ -931,8 +932,15 @@ function App() {
       </Routes>
 
       <div key="mapContainer" ref={mapContainer} className="map-layer top-0"></div>
-      {/* {pathName !== '/stats/beleidsinfo' && <MapPage mapContainer={mapContainer} />} */}
-      <MapPage mapContainer={mapContainer} />
+      {/*
+       * Only mount the heavy background MapLibre map on routes that actually
+       * show it. On routes like /stats/beleidsinfo the map sits behind an
+       * opaque ContentPage overlay, so initializing MapLibre and downloading
+       * its style/glyphs/sprites/tiles (including satellite tiles when the
+       * user previously selected the satellite style) is pure waste. See
+       * `src/helpers/routes.ts` for the allow-list.
+       */}
+      {pathRequiresBackgroundMap(pathName) && <MapPage mapContainer={mapContainer} />}
 
       <Menu acl={acl} pathName={pathName} />
 

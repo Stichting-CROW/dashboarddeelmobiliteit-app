@@ -56,9 +56,12 @@ function Map({mapContainer}) {
 
   layers.push('zones-isochrones');
 
-  // Add luchtfoto background layer
-  layers.push('luchtfoto-pdok');
-  activeSources.push('luchtfoto-pdok');
+  // NOTE: do NOT push `luchtfoto-pdok` here. The satellite layer/source is
+  // managed exclusively by `backgroundLayerManager.setBackgroundLayer`, which
+  // is invoked from the `useBackgroundLayer` hook in `MapComponent` based on
+  // the user's `map_style` preference. Pushing it here used to call
+  // `map.U.showSource('luchtfoto-pdok')` even when the user selected the base
+  // map, which made MapLibre start fetching satellite tiles for nothing.
 
   // Active layers for vehicles page
   if(displayMode===DISPLAYMODE_PARK) {

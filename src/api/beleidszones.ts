@@ -10,6 +10,7 @@
  */
 
 import moment from 'moment';
+import { dedupedFetch } from './dedupedFetch';
 
 const ALLOWED_PHASES = [
   'active',
@@ -116,7 +117,7 @@ async function fetchZonesFromMds(
   if (cached) return cached;
 
   const url = `${MDS_URL}/public/zones?municipality=${encodeURIComponent(gmCode)}&geography_types=no_parking&geography_types=stop&geography_types=monitoring&${phases}`;
-  const response = await fetch(url, getFetchOptions(null));
+  const response = await dedupedFetch(url, getFetchOptions(null));
   if (!response.ok) {
     return [];
   }
@@ -219,7 +220,7 @@ export const getBeleidszonesAvailabilityStats = async (
   });
 
   const url = `${DASHBOARD_API_URL}/dashboard-api/stats_v2/availability_stats?${params.toString()}&zone_ids=${options.zoneIds.join(',')}`;
-  const response = await fetch(url, getFetchOptions(token));
+  const response = await dedupedFetch(url, getFetchOptions(token));
 
   if (!response.ok) {
     console.error('getBeleidszonesAvailabilityStats failed:', response.status);
@@ -254,7 +255,7 @@ export const getBeleidszonesRentalStats = async (
   });
 
   const url = `${DASHBOARD_API_URL}/dashboard-api/stats_v2/rental_stats?${params.toString()}&zone_ids=${options.zoneIds.join(',')}`;
-  const response = await fetch(url, getFetchOptions(token));
+  const response = await dedupedFetch(url, getFetchOptions(token));
 
   if (!response.ok) {
     console.error('getBeleidszonesRentalStats failed:', response.status);

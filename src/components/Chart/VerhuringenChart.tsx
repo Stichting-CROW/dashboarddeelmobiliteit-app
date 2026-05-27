@@ -66,6 +66,9 @@ function VerhuringenChart(props) {
 
   const [rentalsData, setRentalsData] = useState([])
 
+  // See BeschikbareVoertuigenChart for the rationale behind the
+  // metadata sub-reference deps (avoids duplicate refetches when metadata
+  // gets a new top-level reference but the relevant slices did not change).
   useEffect(() => {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
@@ -105,8 +108,11 @@ function VerhuringenChart(props) {
     filter.gebied,
     filter.zones,
     filter.aanbiedersexclude,
-    metadata,
+    metadata.aanbieders,
     metadata.aclOperators,
+    metadata.zones,
+    metadata.gebieden,
+    metadata.vehicle_types,
     token,
     dispatch
   ]);
