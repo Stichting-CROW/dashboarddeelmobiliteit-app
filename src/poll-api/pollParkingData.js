@@ -126,14 +126,14 @@ const doApiCall = (
 
   // Set query params for logged in users
   else {
-    if(null!==state.filter&&null!==state.authenticationdata) {
+    if (canfetchdata) {
       url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`;
-      if(filterparams.length>0) {
+      if (filterparams.length > 0) {
         url += "?" + filterparams.join("&");
       }
       options = {
-        headers: { "authorization": "Bearer " + state.authentication.user_data.token }
-      }
+        headers: { authorization: "Bearer " + state.authentication.user_data.token }
+      };
     }
   }
   

@@ -3,7 +3,8 @@ import maplibregl from 'maplibre-gl';
 import center from '@turf/center'
 
 import {
-  abortableFetch
+  abortableFetch,
+  appendAclOperatorsToUrl
 } from '../../../poll-api/pollTools.js';
 
 const config = ({
@@ -103,7 +104,7 @@ const findSymbolLayer = (map) => {
 //   '88283082a1fffff': 0.5669828486310873
 // }
 
-const fetchHbData = async (token: string, filter: any) => {
+const fetchHbData = async (token: string, filter: any, metadata?: any) => {
   // Abort previous fetch
   if(theFetch) {
     theFetch.abort();
@@ -124,7 +125,7 @@ const fetchHbData = async (token: string, filter: any) => {
   const includedModalities = allModalities.filter(x => excludedModalities.split(',').indexOf(x) <= -1);
 
   // Get API response
-  const url = encodeURI(`${process.env.REACT_APP_MAIN_API_URL}/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/od-api/${filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins'}/${filter.h3niveau === 'wijk' ? 'geometry' : 'h3'}`+
               (filter.h3niveau === 7 || filter.h3niveau === 8 ? `?h3_resolution=${filter.h3niveau || 8}` : '')+
               (filter.h3niveau === 'wijk' ? `?${filter.herkomstbestemming === 'bestemming' ? 'origin' : 'destination'}_stat_refs=${filter.h3hexeswijk}` : '')+
               `&start_date=${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`+
@@ -134,14 +135,15 @@ const fetchHbData = async (token: string, filter: any) => {
               `&modalities=${includedModalities}`+
               (filter.herkomstbestemming === 'bestemming'
                 ? `&origin_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`
-                : `&destination_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`)
-  );
+                : `&destination_cells=${filter.h3niveau === 7 ? filter.h3hexes7.join(',') : filter.h3hexes8.join(',')}`);
+  url = appendAclOperatorsToUrl(url, metadata);
+  const encodedUrl = encodeURI(url);
 
   let response, responseJson;
 
   try {
     // Do a fetch
-    theFetch = abortableFetch(url, getFetchOptions());
+    theFetch = abortableFetch(encodedUrl, getFetchOptions());
     const response = await theFetch.ready;
     // Set theFetch to null, so next request is not aborted
     theFetch = null;

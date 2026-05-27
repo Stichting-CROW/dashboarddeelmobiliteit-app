@@ -104,17 +104,16 @@ const doApiCall = (
 
   let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
   let options = {};
-  if(null!==state.filter&&null!==state.authenticationdata) {
-    url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/v2/trips/${type}`;
+  if (canfetchdata) {
     let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata, {
       show_global: is_admin
     });
-    if(filterparams.length>0) {
+    if (filterparams.length > 0) {
       url += "?" + filterparams.join("&");
     }
     options = {
-      headers : { "authorization": "Bearer " + state.authentication.user_data.token }
-    }
+      headers: { authorization: "Bearer " + state.authentication.user_data.token }
+    };
   }
   
   store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: true});

@@ -44,6 +44,7 @@ const DdH3HexagonLayer = ({
   // const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
   const is_hb_view=checkRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB);
   const filter = useSelector((state: StateType) => state.filter || null);
+  const metadata = useSelector((state: StateType) => state.metadata || null);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
 
   // Make sure h3hexes7 and h3hexes8 are available as array
@@ -77,13 +78,14 @@ const DdH3HexagonLayer = ({
     }
     // If HB map is active: render hexagons
     if(filter.h3niveau === 'wijk') {
-      renderGeometriesGrid(map, token, filter);
+      renderGeometriesGrid(map, token, filter, metadata);
     } else {
-      renderH3Grid(map, token, filter);
+      renderH3Grid(map, token, filter, metadata);
     }
   }, [
     map,
     is_hb_view,
+    metadata?.aclOperators,
     stateLayers.displaymode,
     filter.gebied,
     filter.h3niveau,

@@ -568,6 +568,7 @@ function App() {
   }, [
     isLoggedIn,
     metadata.zones_loaded,
+    metadata.aclOperators,
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,
@@ -587,6 +588,7 @@ function App() {
   }, [
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded
+    metadata.aclOperators,
     filter,
     DELAY_TIMEOUT_IN_MS,
     displayMode,

@@ -84,7 +84,8 @@ const createFeatureCollection = (filter, allGeometries, geometriesHbData) => {
 const renderGeometriesGrid = async (
   map: any,
   token: string,
-  filter: any
+  filter: any,
+  metadata: any
 ) => {
   // Render grid for full map
   const geometriesForUser = await getGeometriesForUser(map, token, filter)
@@ -92,7 +93,7 @@ const renderGeometriesGrid = async (
   
   // Get OD data
   let hbData;
-  const hbDataResponse = await fetchHbData(token, filter);
+  const hbDataResponse = await fetchHbData(token, filter, metadata);
   if(hbDataResponse && hbDataResponse.result) {
     hbData = hbDataResponse.result.destinations || hbDataResponse.result.origins;
   }

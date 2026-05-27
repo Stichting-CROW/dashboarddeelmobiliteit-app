@@ -8,6 +8,24 @@ import {
 
 export const vehiclesAbortController = new AbortController();
 
+/** system_ids from /menu/acl (operator accounts have a restricted list). */
+export const getAclOperatorSystemIds = (metadata) => {
+  const aclOperators = metadata?.aclOperators || [];
+  return aclOperators
+    .map((operator) => operator.system_id)
+    .filter(Boolean);
+};
+
+/** Append `operators=` when the logged-in user is scoped to specific operators. */
+export const appendAclOperatorsToUrl = (url, metadata) => {
+  const systemIds = getAclOperatorSystemIds(metadata);
+  if (systemIds.length === 0) {
+    return url;
+  }
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}operators=${systemIds.join(',')}`;
+};
+
 export const createFilterparameters = (displayMode, filter, metadata, options) => {
   const isParkingData = displayMode === DISPLAYMODE_PARK;
   const isRentalData = displayMode === DISPLAYMODE_RENTALS;
@@ -82,16 +100,13 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // filterparams.push("zone_ids=51233");
   }
 
-  const aclOperators = metadata.aclOperators || [];
   const hasOperatorsParam = () => filterparams.some((p) => p.startsWith('operators='));
 
   const appendOperatorsFromAcl = () => {
-    if (hasOperatorsParam() || aclOperators.length === 0) {
+    if (hasOperatorsParam()) {
       return;
     }
-    const systemIds = aclOperators
-      .map((operator) => operator.system_id)
-      .filter(Boolean);
+    const systemIds = getAclOperatorSystemIds(metadata);
     if (systemIds.length > 0) {
       filterparams.push('operators=' + systemIds.join(','));
     }

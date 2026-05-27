@@ -120,6 +120,7 @@ function BeschikbareVoertuigenChart({
     filter.zones,
     filter.aanbiedersexclude,
     metadata,
+    metadata.aclOperators,
     token,
     dispatch
   ]);

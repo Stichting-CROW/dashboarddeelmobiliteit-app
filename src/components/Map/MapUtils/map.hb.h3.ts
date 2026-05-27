@@ -143,7 +143,8 @@ const getHexesForUser = async (map, token, filter) => {
 const renderH3Grid = async (
   map: any,
   token: string,
-  filter: any
+  filter: any,
+  metadata: any
 ) => {
   let features = [];
 
@@ -152,7 +153,7 @@ const renderH3Grid = async (
 
   // Get OD data
   let hbData;
-  const hbDataResponse = await fetchHbData(token, filter);
+  const hbDataResponse = await fetchHbData(token, filter, metadata);
   if(hbDataResponse && hbDataResponse.result) {
     hbData = hbDataResponse.result.destinations || hbDataResponse.result.origins;
   }

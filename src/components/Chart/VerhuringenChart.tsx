@@ -106,6 +106,7 @@ function VerhuringenChart(props) {
     filter.zones,
     filter.aanbiedersexclude,
     metadata,
+    metadata.aclOperators,
     token,
     dispatch
   ]);
