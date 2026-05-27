@@ -110,6 +110,7 @@ export const initAccessControlList = (store_accesscontrollist)  => {
           .then((metadata) => {
             // items -> {"name": "Cykl","system_id": "cykl"}
             // console.log("dispatch gebieden ", metadata.municipalities);
+            store_accesscontrollist.dispatch({ type: 'SET_ACL_OPERATORS', payload: metadata.operators || [] });
             store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
             if(metadata.municipalities.length===1) {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});

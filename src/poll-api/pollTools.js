@@ -82,6 +82,21 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // filterparams.push("zone_ids=51233");
   }
 
+  const aclOperators = metadata.aclOperators || [];
+  const hasOperatorsParam = () => filterparams.some((p) => p.startsWith('operators='));
+
+  const appendOperatorsFromAcl = () => {
+    if (hasOperatorsParam() || aclOperators.length === 0) {
+      return;
+    }
+    const systemIds = aclOperators
+      .map((operator) => operator.system_id)
+      .filter(Boolean);
+    if (systemIds.length > 0) {
+      filterparams.push('operators=' + systemIds.join(','));
+    }
+  };
+
   if (options.includeOperators === true) {
     // Add provider filter
     if (filter.aanbiedersexclude !== "" && filter.aanbiedersexclude !== undefined) {
@@ -91,15 +106,19 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
         .map(aanbieder => aanbieder.system_id).join(",");
 
       filterparams.push("operators=" + selectedaanbieders);
-    } else if (metadata.aanbieders.length === 1) {
-      filterparams.push("operators=" + metadata.aanbieders[0].system_id);
+    } else {
+      appendOperatorsFromAcl();
+      if (!hasOperatorsParam() && metadata.aanbieders.length === 1) {
+        filterparams.push("operators=" + metadata.aanbieders[0].system_id);
+      }
     }
   } else {
     // filtering is done client side
   }
 
-  // only apply here if there is one aanbieder set
-  if (metadata.aanbieders.length === 1) {
+  // Operator accounts: ACL lists allowed operators (public aanbieders list is NL-wide).
+  appendOperatorsFromAcl();
+  if (!hasOperatorsParam() && metadata.aanbieders.length === 1) {
     filterparams.push("operators=" + metadata.aanbieders[0].system_id);
   }
 

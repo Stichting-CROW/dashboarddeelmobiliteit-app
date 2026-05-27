@@ -4,6 +4,7 @@ const md5 = require('md5');
 
 const initialState = {
   aanbieders: [],
+  aclOperators: [],
   gebieden: [],
   zones: [],
   vehicle_types: [],
@@ -55,6 +56,19 @@ export default function filter(state = initialState, action) {
         ...state,
         aanbieders
       }
+    }
+    case 'SET_ACL_OPERATORS': {
+      const aclOperators = action.payload || [];
+      const current = state.aclOperators || [];
+
+      if (md5(JSON.stringify(current)) === md5(JSON.stringify(aclOperators))) {
+        return state;
+      }
+
+      return {
+        ...state,
+        aclOperators,
+      };
     }
     case 'SET_GEBIEDEN': {
       let current = state.gebieden ? state.gebieden: [];
