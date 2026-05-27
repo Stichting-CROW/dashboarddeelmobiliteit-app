@@ -1,28 +1,4 @@
-const cPublicAanbieders = [
-  { value:"cykl", system_id:"cykl", name:"Cykl" },
-  { value:"donkey", system_id:"donkey", name:"Donkey" },
-  { value:"htm", system_id:"htm", name:"HTM" },
-  { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
-  // { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels" },
-  { value:"check", system_id:"check", name:"CHECK" },
-  { value:"felyx_mds", system_id:"felyx", name:"Felyx" },
-  { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
-  { value:"keobike", system_id:"keobike", name:"Keobike" },
-  { value:"lime", system_id:"lime", name:"Lime" },
-  { value:"baqme", system_id:"baqme", name:"BAQME" },
-  { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
-  { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
-  { value:"hely", system_id:"hely", name:"Hely" },
-  { value:"tier", system_id:"tier", name:"TIER" },
-  { value:"bird", system_id:"bird", name:"Bird" },
-  { value:"bolt", system_id:"bolt", name:"Bolt" },
-  { value:"bondi", system_id:"bondi", name:"Bondi" },
-  { value:"dott", system_id:"dott", name:"Dott" },
-  { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
-  { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
-  { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
-  { value:"voi", system_id:"voi", name:"Voi" },
-];
+import { fetchOperators, getCachedOperators } from '../api/operators';
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
@@ -49,6 +25,32 @@ const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
+// Synchronously dispatch operators from the in-memory/localStorage cache when
+// available, so the filter bar paints immediately on (subsequent) loads.
+const dispatchCachedAanbieders = (store_accesscontrollist) => {
+  const cached = getCachedOperators();
+  if (cached && cached.length > 0) {
+    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cached });
+    return true;
+  }
+  return false;
+};
+
+// Resolve the public operators list from the API. If the network fails and
+// nothing is cached, we leave aanbieders as-is so the app keeps working with
+// whatever is already in state.
+const dispatchPublicAanbiedersFromApi = (store_accesscontrollist) => {
+  return fetchOperators()
+    .then((operators) => {
+      if (operators && operators.length > 0) {
+        store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: operators });
+      }
+    })
+    .catch((ex) => {
+      console.error('Unable to fetch operators', ex);
+    });
+};
+
 export const initAccessControlList = (store_accesscontrollist)  => {
   try {
     if(undefined===store_accesscontrollist) {
@@ -59,11 +61,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
     const state = store_accesscontrollist.getState();
     if(!isLoggedIn(state)) {
       // console.log("initialize ACL Data (not logged in)")
-      // items -> {"name": "Cykl","system_id": "cykl"}
+
       store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-      
-      // items -> {"name": "Cykl","system_id": "cykl"}
-      store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+
+      // Render whatever we already have cached for instant paint, then refresh
+      // from the operators API in the background.
+      dispatchCachedAanbieders(store_accesscontrollist);
+      dispatchPublicAanbiedersFromApi(store_accesscontrollist);
 
       let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented
       store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: types});
@@ -75,7 +79,12 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
       store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: true});
-      
+
+      // Render the cached operators list immediately so logged-in users see
+      // the filters without waiting for the ACL request. The ACL response
+      // below will overwrite this with the user-scoped operator list.
+      dispatchCachedAanbieders(store_accesscontrollist);
+
       fetch(url, options).then((response) => {
         if(!response.ok) {
           console.error("unable to fetch: %o", response);
@@ -85,9 +94,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             console.warn("Authentication failed, clearing user data");
             store_accesscontrollist.dispatch({ type: 'CLEAR_USER' });
             
-            // Fall back to public data
+            // Fall back to public data (operators come from the API).
             store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+            dispatchPublicAanbiedersFromApi(store_accesscontrollist);
             store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
             store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
           }
@@ -122,10 +131,11 @@ export const initAccessControlList = (store_accesscontrollist)  => {
           })
         }).catch(ex=>{
           console.error("unable to decode JSON", ex);
-          
-          // Handle network errors by falling back to public data
+
+          // Handle network errors by falling back to public data (operators
+          // come from the public operators API).
           store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-          store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+          dispatchPublicAanbiedersFromApi(store_accesscontrollist);
           store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
           store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
         }).finally(()=>{
@@ -137,9 +147,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
     // console.error("Unable to update ACL", ex)
     store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
     
-    // Handle any other errors by falling back to public data
+    // Handle any other errors by falling back to public data.
     store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+    dispatchPublicAanbiedersFromApi(store_accesscontrollist);
     store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
     store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     
