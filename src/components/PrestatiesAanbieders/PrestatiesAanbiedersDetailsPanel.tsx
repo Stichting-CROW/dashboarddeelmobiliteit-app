@@ -33,7 +33,7 @@ const LOADING_INDICATOR_DELAY_MS = 200;
 
 function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFullscreen = false }: PrestatiesAanbiedersDetailsPanelProps) {
   const gebieden = useSelector((state: StateType) => state.metadata.gebieden);
-  const aanbieders = useSelector((state: StateType) => state.metadata.aanbieders);
+  const aclOperators = useSelector((state: StateType) => state.metadata.aclOperators ?? []);
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
   const token = useSelector((state: StateType) =>
     (state.authentication.user_data && state.authentication.user_data.token) || null
@@ -73,10 +73,10 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
   const queryParams = useMemo(() => new URLSearchParams(urlSearch), [urlSearch]);
   const municipalityCode = queryParams.get('gm_code');
   const operatorCode = resolveOperatorSystemId(
-    aanbieders,
+    aclOperators,
     queryParams.get('system_id') || queryParams.get('operator')
   );
-  const isOperatorScope = isOperatorPrestatiesView(gebieden, aanbieders);
+  const isOperatorScope = isOperatorPrestatiesView(aclOperators);
   const formFactorCode = queryParams.get('form_factor');
   const propulsionTypeCode = queryParams.get('propulsion_type');
   const startDateParam = queryParams.get('start_date');
@@ -123,6 +123,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
               end_date: moment(endDate).format('YYYY-MM-DD'),
               system_id: operatorCode,
               scope: 'operator' as const,
+              aclOperators,
               ...(municipalityCode ? { municipality: municipalityCode } : {}),
             }
           : {
@@ -130,6 +131,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
               end_date: moment(endDate).format('YYYY-MM-DD'),
               municipality: municipalityCode!,
               scope: 'municipality' as const,
+              aclOperators,
             };
         const data = await getKpiOverviewOperators(token, params);
         setKpiData(data);
@@ -142,7 +144,7 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     };
 
     fetchKpiData();
-  }, [token, municipalityCode, formFactorCode, operatorCode, startDate, endDate, isOperatorScope]);
+  }, [token, municipalityCode, formFactorCode, operatorCode, startDate, endDate, isOperatorScope, aclOperators]);
 
   const municipality = municipalityCode
     ? gebieden.find((g: any) => g.gm_code === municipalityCode)

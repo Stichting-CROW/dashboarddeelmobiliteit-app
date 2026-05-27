@@ -38,6 +38,10 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     (state.metadata && state.metadata.gebieden) ? state.metadata.gebieden : []
   );
 
+  const aclOperators = useSelector((state: StateType) =>
+    (state.metadata && state.metadata.aclOperators) ? state.metadata.aclOperators : []
+  );
+
   useEffect(() => {
     fetchOperators().then((operators) => {
       if (operators) {
@@ -95,6 +99,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
           municipality: filterValue,
           start_date: startDate,
           end_date: endDate,
+          aclOperators,
         });
         results = municipalityResult?.records ?? null;
         setRawKpiOperators(municipalityResult?.rawOperators ?? []);
@@ -107,7 +112,8 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
           filterValue,
           startDate,
           endDate,
-          municipalityNames
+          municipalityNames,
+          aclOperators
         );
         results = operatorResult?.records ?? null;
         setRawKpiOperators(operatorResult?.rawOperators ?? []);
@@ -141,7 +147,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     } finally {
       setLoading(false);
     }
-  }, [token, filterValue, viewType, startDate, endDate, municipalityNames]);
+  }, [token, filterValue, viewType, startDate, endDate, municipalityNames, aclOperators]);
 
   useEffect(() => {
     reloadPermits();

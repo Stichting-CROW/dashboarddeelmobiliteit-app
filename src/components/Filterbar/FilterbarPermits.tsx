@@ -64,6 +64,10 @@ function FilterbarPermits({
     return (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : [];
   });
 
+  const aclOperators = useSelector((state: StateType) => {
+    return (state.metadata && state.metadata.aclOperators) ? state.metadata.aclOperators : [];
+  });
+
   const metadataLoaded = useSelector((state: StateType) =>
     Boolean(state.metadata && state.metadata.metadata_loaded)
   );
@@ -91,11 +95,11 @@ function FilterbarPermits({
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlView = searchParams.get(PRESTATIES_VIEW_URL_PARAM);
-  const viewMode = resolvePrestatiesViewMode(aanbieders, isAdmin, urlView);
+  const viewMode = resolvePrestatiesViewMode(aclOperators, isAdmin, urlView);
   const isMunicipalityView = viewMode === 'municipality';
-  const adminCanToggleView = canToggleViewMode(isAdmin, aanbieders);
+  const adminCanToggleView = canToggleViewMode(isAdmin, aclOperators);
   const operatorSystemId = resolveOperatorSystemId(
-    aanbieders,
+    aclOperators,
     searchParams.get('system_id') || searchParams.get('operator')
   );
 
@@ -175,7 +179,9 @@ function FilterbarPermits({
             token,
             operatorSystemId,
             startDate,
-            endDate
+            endDate,
+            undefined,
+            aclOperators
           );
           results = operatorResult?.records ?? null;
         }
@@ -212,6 +218,7 @@ function FilterbarPermits({
     startDate,
     endDate,
     metadataLoaded,
+    aclOperators,
   ]);
 
   const sortedCombinations = React.useMemo(() => {

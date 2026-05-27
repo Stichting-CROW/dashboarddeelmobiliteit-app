@@ -3,6 +3,7 @@ import {
   fetchKpiOverviewRaw,
   type KpiOverviewQueryScope,
 } from './permitLimits';
+import { resolveKpiOverviewSystemId } from '../helpers/prestatiesAanbiedersViewMode';
 
 export interface KpiOverviewParams {
   start_date: string;
@@ -11,13 +12,15 @@ export interface KpiOverviewParams {
   form_factor?: string;
   system_id?: string;
   scope?: KpiOverviewQueryScope;
+  aclOperators?: Array<{ system_id?: string; value?: string }>;
 }
 
 export const getKpiOverviewOperators = async (token: string, params: KpiOverviewParams) => {
+  const systemId = resolveKpiOverviewSystemId(params.aclOperators ?? [], params.system_id);
   const searchParams = buildKpiOverviewSearchParams(params.start_date, params.end_date, {
     scope: params.scope,
     municipality: params.municipality,
-    system_id: params.system_id,
+    system_id: systemId,
     form_factor: params.form_factor,
   });
 
@@ -30,7 +33,7 @@ export const getKpiOverviewOperators = async (token: string, params: KpiOverview
   // When the page loads with all filter params pre-filled, the overview and
   // the details panel kick off the same URL concurrently and now share a
   // single network call instead of issuing two.
-  const scopeLabel = params.municipality || params.system_id || 'unknown';
+  const scopeLabel = params.municipality || systemId || 'unknown';
   const responseJson = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
 
   if (!responseJson) {

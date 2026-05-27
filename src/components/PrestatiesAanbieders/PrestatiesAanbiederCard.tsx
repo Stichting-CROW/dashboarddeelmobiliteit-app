@@ -131,6 +131,9 @@ export default function PrestatiesAanbiederCard({
     const token = useSelector((state: StateType) =>
       (state.authentication && state.authentication.user_data && state.authentication.user_data.token) || null
     );
+    const aclOperators = useSelector((state: StateType) =>
+      state.metadata?.aclOperators ? state.metadata.aclOperators : []
+    );
 
     const sortedKpis = useMemo(() => {
       if (!kpis || kpis.length === 0) return [];
@@ -271,6 +274,7 @@ export default function PrestatiesAanbiederCard({
             form_factor: formFactor,
             start_date: startDate,
             end_date: endDate,
+            aclOperators,
           });
           if (data) {
             applyKpiDataToCard(
@@ -302,6 +306,7 @@ export default function PrestatiesAanbiederCard({
       kpiFetchScope,
       overviewKpiOperators,
       overviewKpiDescriptions,
+      aclOperators,
     ]);
 
     return (

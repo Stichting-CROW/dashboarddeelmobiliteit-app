@@ -21,6 +21,9 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   const aanbieders = useSelector((state: StateType) =>
     state.metadata?.aanbieders ? state.metadata.aanbieders : []
   );
+  const aclOperators = useSelector((state: StateType) =>
+    state.metadata?.aclOperators ? state.metadata.aclOperators : []
+  );
   const metadataLoaded = useSelector(
     (state: StateType) => Boolean(state.metadata?.metadata_loaded)
   );
@@ -32,14 +35,14 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   const navigate = useNavigate();
 
   const urlView = searchParams.get(PRESTATIES_VIEW_URL_PARAM);
-  const viewMode = resolvePrestatiesViewMode(aanbieders, isAdmin, urlView);
+  const viewMode = resolvePrestatiesViewMode(aclOperators, isAdmin, urlView);
   const isMunicipalityView = viewMode === 'municipality';
-  const adminCanToggle = canToggleViewMode(isAdmin, aanbieders);
+  const adminCanToggle = canToggleViewMode(isAdmin, aclOperators);
 
   const urlSystemId = searchParams.get('system_id');
   const urlOperator = searchParams.get('operator');
   const activeoperator = resolveOperatorSystemId(
-    aanbieders,
+    aclOperators,
     urlSystemId || urlOperator
   );
 

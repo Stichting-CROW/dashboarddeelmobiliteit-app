@@ -35,30 +35,29 @@ export const hasMunicipalityScope = (gebieden: GebiedOption[]): boolean => {
  *   they may have access to view, but kpi_overview_operators requires their system_id.
  * - Admin / public defaults: many operators (full provider list).
  *
- * This matches the existing heuristic used elsewhere in the codebase
- * (see src/poll-api/pollTools.js: `metadata.aanbieders.length === 1`).
+ * Use `aclOperators` (from SET_ACL_OPERATORS), not `aanbieders`: the public
+ * /operators list is NL-wide and does not reflect the logged-in account scope.
  */
 export const isOperatorPrestatiesView = (
-  _gebieden: GebiedOption[],
-  aanbieders: AanbiederOption[]
+  aclOperators: AanbiederOption[]
 ): boolean => {
-  if (aanbieders.length !== 1) return false;
-  return Boolean(getAanbiederSystemId(aanbieders[0]));
+  if (aclOperators.length !== 1) return false;
+  return Boolean(getAanbiederSystemId(aclOperators[0]));
 };
 
 /**
  * Resolve the active view mode for the "Prestaties aanbieders" page.
  *
  * - Single-operator account (operator user): always 'operator'.
- * - Admin: respects the `?view=` URL parameter; defaults to 'municipality'.
+ * - Admin: respects the `?weergave=operator` URL parameter; defaults to 'municipality'.
  * - Anyone else (municipality account): always 'municipality'.
  */
 export const resolvePrestatiesViewMode = (
-  aanbieders: AanbiederOption[],
+  aclOperators: AanbiederOption[],
   isAdmin: boolean,
   urlView: string | null
 ): PrestatiesViewMode => {
-  if (isOperatorPrestatiesView([], aanbieders)) {
+  if (isOperatorPrestatiesView(aclOperators)) {
     return 'operator';
   }
   if (isAdmin && urlView === 'operator') {
@@ -73,23 +72,41 @@ export const resolvePrestatiesViewMode = (
  */
 export const canToggleViewMode = (
   isAdmin: boolean,
-  aanbieders: AanbiederOption[]
+  aclOperators: AanbiederOption[]
 ): boolean => {
   if (!isAdmin) return false;
   // Operator-only accounts are pinned to operator view.
-  if (isOperatorPrestatiesView([], aanbieders)) return false;
+  if (isOperatorPrestatiesView(aclOperators)) return false;
   return true;
 };
 
 export const resolveOperatorSystemId = (
-  aanbieders: AanbiederOption[],
+  aclOperators: AanbiederOption[],
   urlOperator: string | null
 ): string => {
   if (urlOperator) {
     return urlOperator;
   }
-  if (aanbieders.length === 1) {
-    return getAanbiederSystemId(aanbieders[0]);
+  if (aclOperators.length === 1) {
+    return getAanbiederSystemId(aclOperators[0]);
   }
   return '';
+};
+
+/**
+ * Operator accounts must pass system_id on every kpi_overview_operators request.
+ * Returns an explicit system_id when provided, otherwise the ACL operator id.
+ */
+export const resolveKpiOverviewSystemId = (
+  aclOperators: AanbiederOption[],
+  systemId?: string
+): string | undefined => {
+  if (systemId) {
+    return systemId;
+  }
+  if (isOperatorPrestatiesView(aclOperators)) {
+    const aclSystemId = getAanbiederSystemId(aclOperators[0]);
+    return aclSystemId || undefined;
+  }
+  return undefined;
 };

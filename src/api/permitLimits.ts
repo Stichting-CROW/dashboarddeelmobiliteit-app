@@ -1,4 +1,5 @@
 import { fetchOperators } from './operators';
+import { resolveKpiOverviewSystemId } from '../helpers/prestatiesAanbiedersViewMode';
 
 const MDS_BASE_URL = 'https://mds.dashboarddeelmobiliteit.nl';
 export interface PermitMunicipality {
@@ -96,6 +97,8 @@ export interface KpiOverviewFetchParams {
     municipality?: string;
     system_id?: string;
     scope?: KpiOverviewQueryScope;
+    /** ACL-scoped operators from /menu/acl; used to inject system_id for operator accounts. */
+    aclOperators?: Array<{ system_id?: string; value?: string }>;
 }
 
 export interface OperatorPerformanceIndicatorsParams {
@@ -105,6 +108,8 @@ export interface OperatorPerformanceIndicatorsParams {
     form_factor?: string;
     start_date?: string;
     end_date?: string;
+    /** ACL-scoped operators from /menu/acl; used to inject system_id for operator accounts. */
+    aclOperators?: Array<{ system_id?: string; value?: string }>;
 }
 
 export const buildKpiOverviewSearchParams = (
@@ -353,14 +358,19 @@ export const fetchKpiOverviewPermitRecords = async (
             ? { startDateStr: params.start_date, endDateStr: params.end_date }
             : defaultKpiDateRange();
 
+        const systemId = resolveKpiOverviewSystemId(
+            params.aclOperators ?? [],
+            params.system_id
+        );
+
         const scope: KpiOverviewQueryScope =
             params.scope ??
-            (params.system_id && !params.municipality ? 'operator' : 'municipality');
+            (systemId && !params.municipality ? 'operator' : 'municipality');
 
         const searchParams = buildKpiOverviewSearchParams(startDateStr, endDateStr, {
             scope,
             municipality: params.municipality,
-            system_id: params.system_id,
+            system_id: systemId,
         });
         if (!searchParams) {
             console.warn('KPI overview request missing required query params', params);
@@ -417,7 +427,8 @@ export const getPermitLimitOverviewForOperator = async (
     system_id: string,
     startDate?: string,
     endDate?: string,
-    municipalityNames?: Map<string, string>
+    municipalityNames?: Map<string, string>,
+    aclOperators?: Array<{ system_id?: string; value?: string }>
 ) => {
     const result = await fetchKpiOverviewPermitRecords(
         token,
@@ -426,6 +437,7 @@ export const getPermitLimitOverviewForOperator = async (
             start_date: startDate,
             end_date: endDate,
             scope: 'operator',
+            aclOperators,
         },
         municipalityNames
     );
@@ -742,19 +754,25 @@ export const getOperatorPerformanceIndicators = async (
             endDateStr = defaultEnd;
         }
 
-        const searchParams = buildKpiOverviewSearchParams(startDateStr, endDateStr, request);
+        const systemId = resolveKpiOverviewSystemId(
+            request.aclOperators ?? [],
+            request.system_id
+        );
+        const scopedRequest = { ...request, system_id: systemId };
+
+        const searchParams = buildKpiOverviewSearchParams(startDateStr, endDateStr, scopedRequest);
         if (!searchParams) {
-            console.warn('KPI indicators request missing required query params', request);
+            console.warn('KPI indicators request missing required query params', scopedRequest);
             return null;
         }
 
-        const scopeLabel = request.system_id || request.municipality || 'unknown';
+        const scopeLabel = systemId || request.municipality || 'unknown';
         const apiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
         if (!apiData) {
             return null;
         }
 
-        const { system_id: operator, form_factor, municipality } = request;
+        const { system_id: operator, form_factor, municipality } = scopedRequest;
 
         if (operator || form_factor || municipality) {
             const filteredOperators = apiData.municipality_modality_operators.filter((item) => {

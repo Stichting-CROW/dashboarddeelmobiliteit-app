@@ -82,6 +82,9 @@ const MapComponent = (props): JSX.Element => {
   const stateLayers = useSelector((state: StateType) => state.layers || null);
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
   const providers = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+  const aclOperators = useSelector((state: StateType) =>
+    state.metadata?.aclOperators ? state.metadata.aclOperators : []
+  );
   const gebieden = useSelector((state: StateType) =>
     state.metadata?.gebieden ? state.metadata.gebieden : []
   );
@@ -583,7 +586,7 @@ const MapComponent = (props): JSX.Element => {
 
     const hidePopupProviderTitle =
       location.pathname === '/stats/prestaties-aanbieders' &&
-      isOperatorPrestatiesView(gebieden, providers);
+      isOperatorPrestatiesView(aclOperators);
 
     initPopupLogic(
       map.current,
@@ -595,7 +598,7 @@ const MapComponent = (props): JSX.Element => {
   }, [
     didInitSourcesAndLayers,
     providers,
-    gebieden,
+    aclOperators,
     filter.datum,
     location.pathname,
   ])
