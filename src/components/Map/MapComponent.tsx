@@ -634,42 +634,75 @@ const MapComponent = (props): JSX.Element => {
     didInitSourcesAndLayers
   ])
 
-  // Add provider images/icons
+  // Add provider images/icons (batched to avoid blocking the main thread)
   useEffect(() => {
+    if (!didMapLoad || !map.current) {
+      return;
+    }
+
+    let cancelled = false;
+    const PROVIDER_IMAGE_BATCH_SIZE = 4;
+
     const addProviderImage = async(aanbieder) => {
+      if (cancelled || !map.current) {
+        return;
+      }
+
       const operatorColor = aanbieder.color || getProviderColorForProvider(aanbieder.system_id);
-      let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')
+      const baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p');
       const hasOperationalImages = map.current.hasImage(baselabel + ':0');
       const hasNonOperationalImages = map.current.hasImage(baselabel + '-n:0');
       if (
         (stateLayers.displaymode === 'displaymode-rentals' && hasOperationalImages) ||
         (stateLayers.displaymode !== 'displaymode-rentals' && hasOperationalImages && hasNonOperationalImages)
       ) {
-        // console.log("provider image for %s already exists", baselabel);
         return;
       }
-      if(stateLayers.displaymode === 'displaymode-rentals') {
+
+      if (stateLayers.displaymode === 'displaymode-rentals') {
         const rentalMarkers = await getVehicleMarkers_rentals(operatorColor);
+        if (cancelled || !map.current) {
+          return;
+        }
         rentalMarkers.forEach((img, idx) => {
           map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
         });
-      } else {
-        const operationalMarkers = await getVehicleMarkers(operatorColor, false);
-        const nonOperationalMarkers = await getVehicleMarkers(operatorColor, true);
-
-        operationalMarkers.forEach((img, idx) => {
-          map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
-        });
-        nonOperationalMarkers.forEach((img, idx) => {
-          map.current.addImage(baselabel + `-n:` + idx, { width: 50, height: 50, data: img});
-        });
+        return;
       }
-      // console.log('Added provider images for:', aanbieder.system_id);
+
+      const [operationalMarkers, nonOperationalMarkers] = await Promise.all([
+        getVehicleMarkers(operatorColor, false),
+        getVehicleMarkers(operatorColor, true),
+      ]);
+      if (cancelled || !map.current) {
+        return;
+      }
+
+      operationalMarkers.forEach((img, idx) => {
+        map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
+      });
+      nonOperationalMarkers.forEach((img, idx) => {
+        map.current.addImage(baselabel + `-n:` + idx, { width: 50, height: 50, data: img});
+      });
     };
-    providers.forEach(aanbieder => {
-      addProviderImage(aanbieder);
-    });
+
+    const loadProviderImages = async() => {
+      for (let i = 0; i < providers.length; i += PROVIDER_IMAGE_BATCH_SIZE) {
+        if (cancelled) {
+          return;
+        }
+        const batch = providers.slice(i, i + PROVIDER_IMAGE_BATCH_SIZE);
+        await Promise.all(batch.map((aanbieder) => addProviderImage(aanbieder)));
+      }
+    };
+
+    loadProviderImages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    didMapLoad,
     providers,
     stateLayers.displaymode
   ]);
