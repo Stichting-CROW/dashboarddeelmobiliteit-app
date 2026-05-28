@@ -9,7 +9,14 @@
   box-sizing: border-box;
   border-width: 2px;
   border-color: rgb(255 255 255);
-  background-color: rgb(255 255 255);
+  /*
+   * Paint the container in the same color MapLibre uses for its "land"
+   * background (see `nine3030.js`). This eliminates the flash from white
+   * to map color when MapLibre's WebGL canvas paints for the first time,
+   * making the map appear to be "ready" the moment this element mounts -
+   * even before tiles, sprite or glyphs are downloaded.
+   */
+  background-color: hsl(40, 8%, 96%);
 }
 
 .Map-popup-title {

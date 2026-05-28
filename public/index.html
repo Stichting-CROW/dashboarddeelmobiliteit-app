@@ -12,6 +12,28 @@
     <link href='https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.css' rel='stylesheet' />
     <link href="%PUBLIC_URL%/css/fonts.css" rel="stylesheet" />
 
+    <!--
+      Warm up TCP/TLS to the basemap hosts as soon as the HTML is parsed.
+      This way MapLibre's first style/sprite/glyph/tile request doesn't have
+      to wait for the connection handshake, which shaves ~100-300ms on a
+      cold load and helps the basemap appear before any API responses come
+      back.
+    -->
+    <link rel="preconnect" href="https://a.tiles.mapbox.com" crossorigin />
+    <link rel="preconnect" href="https://api.mapbox.com" crossorigin />
+
+    <!--
+      Paint the map area with the basemap's "land" color BEFORE the JS bundle
+      parses and React mounts. This makes the page look like the map is
+      already loading from the very first frame, instead of a stark blank
+      screen until MapLibre takes over. The color matches the "land" layer
+      in `src/components/Map/MapStyles/nine3030.js`, so when MapLibre
+      eventually paints its WebGL canvas there is no visible color jump.
+    -->
+    <style>
+      html, body, #root { background-color: hsl(40, 8%, 96%); }
+    </style>
+
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a

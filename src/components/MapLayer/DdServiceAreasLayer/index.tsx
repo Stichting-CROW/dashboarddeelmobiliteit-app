@@ -82,21 +82,44 @@ const DdServiceAreasLayer = ({
     removeServiceAreasFromMap(map);
     removeServiceAreaDeltaFromMap(map);
 
-    // Load service areas and history in parallel for better performance
+    // Fire both fetches in parallel but update state independently so the
+    // current service area polygons paint as soon as `loadServiceAreas`
+    // resolves, instead of waiting for the (much heavier and slower)
+    // history endpoint to also come back. This is the main reason the map
+    // used to feel "stuck" on cold load - both calls were awaited
+    // together via Promise.all and the polygons only rendered once both
+    // finished.
     setIsLoading(true);
-    Promise.all([
-      loadServiceAreas(filter.gebied, visible_operators),
-      loadServiceAreasHistory(filter.gebied, visible_operators)
-    ])
-      .then(([service_areas, service_area_history]) => {
+    let serviceAreasDone = false;
+    let historyDone = false;
+    const maybeFinishLoading = () => {
+      if (serviceAreasDone && historyDone) {
+        setIsLoading(false);
+      }
+    };
+
+    loadServiceAreas(filter.gebied, visible_operators)
+      .then((service_areas) => {
         setServiceAreas(service_areas);
-        setServiceAreasHistory(service_area_history);
       })
       .catch((error) => {
         console.error('Error loading service areas:', error);
       })
       .finally(() => {
-        setIsLoading(false);
+        serviceAreasDone = true;
+        maybeFinishLoading();
+      });
+
+    loadServiceAreasHistory(filter.gebied, visible_operators)
+      .then((service_area_history) => {
+        setServiceAreasHistory(service_area_history);
+      })
+      .catch((error) => {
+        console.error('Error loading service areas history:', error);
+      })
+      .finally(() => {
+        historyDone = true;
+        maybeFinishLoading();
       });
 
   }, [

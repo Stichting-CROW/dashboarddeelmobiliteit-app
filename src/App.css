@@ -10,7 +10,14 @@
   width: 100vw;
   height: 100%;
   z-index: 0;
-  background-color: #fff;
+  /*
+   * Match the basemap's "land" color (see `nine3030.js`) so that on map
+   * routes the user perceives the map area as already painted from the
+   * very first frame, even before MapLibre's WebGL canvas takes over.
+   * Routes that render an opaque overlay (stats, admin, docs, etc.) draw
+   * their own background on top of this.
+   */
+  background-color: hsl(40, 8%, 96%);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -27,7 +34,8 @@
   position: fixed;
   width: 100vw;
   z-index: 0;
-  background-color: #f6f5f4;
+  /* Match MapLibre's land color so the map area looks "ready" instantly. */
+  background-color: hsl(40, 8%, 96%);
   height: calc(100% - 60px);
 }
 @media(min-width: 640px) {
