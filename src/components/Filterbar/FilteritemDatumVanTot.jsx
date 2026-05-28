@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './css/FilteritemDatumVanTot.css';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from 'react-datepicker';
 import { format, addDays, addMonths } from 'date-fns';
@@ -8,22 +9,29 @@ import moment from 'moment';
 
 import {StateType} from '../../types/StateType';
 
-const setQueryParam = (key, val) => {
-  let searchParams = new URLSearchParams(window.location.search);
-  if(! val) {
-    searchParams.delete(key);
-  } else {
-    searchParams.set(key, val);
+const parseUrlDate = (dateParam) => {
+  const parsed = moment(dateParam, 'YYYY-MM-DD', true);
+  return parsed.isValid() ? parsed.toDate() : null;
+};
+
+const getInitialDatesFromUrl = (defaultStartDate, defaultEndDate, filterOntwikkelingVan, filterOntwikkelingTot) => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const startDateParam = searchParams.get('start_date');
+  const endDateParam = searchParams.get('end_date');
+
+  if (startDateParam && endDateParam) {
+    const start = parseUrlDate(startDateParam);
+    const end = parseUrlDate(endDateParam);
+    if (start && end) {
+      return { startDate: start, endDate: end };
+    }
   }
-  if (window.history.replaceState) {
-    const url = window.location.protocol 
-                + "//" + window.location.host 
-                + window.location.pathname 
-                + (searchParams.toString() ? "?" : "")
-                + searchParams.toString();
-    window.history.replaceState({ path: url }, "", url)
-  }
-}
+
+  return {
+    startDate: defaultStartDate || filterOntwikkelingVan,
+    endDate: defaultEndDate || filterOntwikkelingTot,
+  };
+};
 
 function FilterItemDatumVanTot({
   presetButtons,
@@ -31,7 +39,8 @@ function FilterItemDatumVanTot({
   defaultEndDate,
   showPresetOptionsByDefault = false,
 }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const filterOntwikkelingVan = useSelector((state: StateType) => {
     return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : moment().subtract(30, 'days').toDate();
@@ -45,12 +54,15 @@ function FilterItemDatumVanTot({
     return state.filter && state.filter.ontwikkelingaggregatie ? state.filter.ontwikkelingaggregatie : 'day';
   });
 
-  // Use default dates if provided, otherwise fall back to Redux state
-  const initialStartDate = defaultStartDate || filterOntwikkelingVan;
-  const initialEndDate = defaultEndDate || filterOntwikkelingTot;
+  const initialDates = getInitialDatesFromUrl(
+    defaultStartDate,
+    defaultEndDate,
+    filterOntwikkelingVan,
+    filterOntwikkelingTot
+  );
 
-  const [startDate, setStartDate] = useState(initialStartDate);
-  const [endDate, setEndDate] = useState(initialEndDate);
+  const [startDate, setStartDate] = useState(initialDates.startDate);
+  const [endDate, setEndDate] = useState(initialDates.endDate);
   const [isOpen, setIsOpen] = useState(false);
 
   const toDateKey = (date) => format(date, 'yyyy-MM-dd');
@@ -133,9 +145,10 @@ function FilterItemDatumVanTot({
       payload: { van: van.toISOString(), tot: tot.toISOString() }
     })
     
-    // Update URL parameters
-    setQueryParam('start_date', moment(van).format('YYYY-MM-DD'));
-    setQueryParam('end_date', moment(tot).format('YYYY-MM-DD'));
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set('start_date', moment(van).format('YYYY-MM-DD'));
+    nextSearchParams.set('end_date', moment(tot).format('YYYY-MM-DD'));
+    setSearchParams(nextSearchParams, { replace: true });
     
     if(aggregatie!==false) {
       dispatch({
@@ -147,36 +160,56 @@ function FilterItemDatumVanTot({
 
   // Initialize from URL parameters on mount, or use defaults if no URL params
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
     const startDateParam = searchParams.get('start_date');
     const endDateParam = searchParams.get('end_date');
     
     if (startDateParam && endDateParam) {
-      const start = moment(startDateParam, 'YYYY-MM-DD');
-      const end = moment(endDateParam, 'YYYY-MM-DD');
+      const startDateObj = parseUrlDate(startDateParam);
+      const endDateObj = parseUrlDate(endDateParam);
       
-      if (start.isValid() && end.isValid()) {
-        const startDateObj = start.toDate();
-        const endDateObj = end.toDate();
-        
-        // Only update if URL params differ from current Redux state
+      if (startDateObj && endDateObj) {
+        setStartDate(startDateObj);
+        setEndDate(endDateObj);
+
         const currentStart = moment(filterOntwikkelingVan).format('YYYY-MM-DD');
         const currentEnd = moment(filterOntwikkelingTot).format('YYYY-MM-DD');
         
         if (startDateParam !== currentStart || endDateParam !== currentEnd) {
-          setStartDate(startDateObj);
-          setEndDate(endDateObj);
           updateFilter(startDateObj, endDateObj);
         }
       }
     } else if (defaultStartDate && defaultEndDate) {
-      // No URL params, but defaults are provided - always use them to ensure consistency
-      // This ensures that when visiting the page without URL params, defaults are always set
       setStartDate(defaultStartDate);
       setEndDate(defaultEndDate);
       updateFilter(defaultStartDate, defaultEndDate);
     }
   }, []); // Only run on mount
+
+  // Keep picker in sync when URL dates change externally (e.g. back/forward
+  // navigation, or another component updating the URL).
+  // Important: do NOT depend on startDate/endDate here, otherwise picking the
+  // first day of a custom range (which leaves endDate=null) would re-trigger
+  // this effect and revert the picker before the user can pick the end date.
+  useEffect(() => {
+    const startDateParam = searchParams.get('start_date');
+    const endDateParam = searchParams.get('end_date');
+    if (!startDateParam || !endDateParam) {
+      return;
+    }
+
+    const startDateObj = parseUrlDate(startDateParam);
+    const endDateObj = parseUrlDate(endDateParam);
+    if (!startDateObj || !endDateObj) {
+      return;
+    }
+
+    setStartDate((prev) =>
+      prev && toDateKey(prev) === startDateParam ? prev : startDateObj
+    );
+    setEndDate((prev) =>
+      prev && toDateKey(prev) === endDateParam ? prev : endDateObj
+    );
+  }, [searchParams]);
 
   const onChange = (dates) => {
     const [start, end] = dates;

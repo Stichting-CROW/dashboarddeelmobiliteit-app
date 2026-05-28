@@ -302,6 +302,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
           onEditLimits={() => handleEditLimits(permit)}
           overviewKpiOperators={rawKpiOperators}
           overviewKpiDescriptions={performanceIndicatorDescriptions}
+          overviewKpiLoading={loading}
         />
     )});
   };

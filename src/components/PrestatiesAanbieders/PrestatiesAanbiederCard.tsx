@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
@@ -32,6 +32,8 @@ interface PrestatiesAanbiederCardProps {
     /** Preloaded KPI rows from operator overview fetch (avoids per-card API calls). */
     overviewKpiOperators?: MunicipalityModalityOperator[];
     overviewKpiDescriptions?: PerformanceIndicatorDescription[];
+    /** True while the parent overview KPI fetch is still in progress. */
+    overviewKpiLoading?: boolean;
     /**
      * Operator overview: override the title shown beside the colored dot.
      * When set, this replaces the provider name (e.g. with a municipality name).
@@ -106,6 +108,7 @@ export default function PrestatiesAanbiederCard({
   kpiFetchScope = 'municipality',
   overviewKpiOperators,
   overviewKpiDescriptions,
+  overviewKpiLoading = false,
   titleOverride,
 }: PrestatiesAanbiederCardProps) {
     const [kpis, setKpis] = useState<PerformanceIndicatorKPI[]>([]);
@@ -117,7 +120,7 @@ export default function PrestatiesAanbiederCard({
     const hasLoadedOnce = useRef(false);
     const location = useLocation();
     const navigate = useNavigate();
-    const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
+    const [searchParams] = useSearchParams();
 
     const providerSystemId = permit.operator?.system_id || permit.permit_limit.system_id;
     const realLabel = label;
@@ -163,48 +166,14 @@ export default function PrestatiesAanbiederCard({
       });
     }, [kpis, performanceIndicatorDescriptions]);
 
-    // Watch for URL changes (triggered by Filterbar using window.history.replaceState)
-    useEffect(() => {
-      // Update from React Router location first
-      setUrlSearch(location.search);
-      
-      const checkUrlChange = () => {
-        const currentSearch = window.location.search;
-        setUrlSearch(prevSearch => {
-          if (currentSearch !== prevSearch) {
-            return currentSearch;
-          }
-          return prevSearch;
-        });
-      };
-
-      // Check periodically for URL changes (since replaceState doesn't trigger popstate)
-      const interval = setInterval(checkUrlChange, 200);
-      
-      // Also listen to popstate for back/forward navigation
-      window.addEventListener('popstate', checkUrlChange);
-
-      return () => {
-        clearInterval(interval);
-        window.removeEventListener('popstate', checkUrlChange);
-      };
-    }, [location.search]);
-
-    // Get dates from URL params
-    const { startDate, endDate } = useMemo(() => {
-      const searchParams = new URLSearchParams(urlSearch);
-      const startDateParam = searchParams.get('start_date');
-      const endDateParam = searchParams.get('end_date');
-      
-      return { 
-        startDate: startDateParam || undefined, 
-        endDate: endDateParam || undefined 
-      };
-    }, [urlSearch]);
+    // Get dates from URL params (same source as usePermitData)
+    const { startDate, endDate } = useMemo(() => ({
+      startDate: searchParams.get('start_date') || undefined,
+      endDate: searchParams.get('end_date') || undefined,
+    }), [searchParams]);
 
     // Card is "active" when details panel is shown for this permit (URL params match)
     const isActive = useMemo(() => {
-      const searchParams = new URLSearchParams(urlSearch);
       const urlGmCode = searchParams.get('gm_code');
       const urlOperator = searchParams.get('operator') || searchParams.get('system_id');
       const urlFormFactor = searchParams.get('form_factor');
@@ -220,7 +189,7 @@ export default function PrestatiesAanbiederCard({
         return baseMatch && urlPropulsion === propulsionType;
       }
       return baseMatch && !urlPropulsion;
-    }, [urlSearch, permit]);
+    }, [searchParams, permit, propulsionType]);
 
     const detailsUrl = useMemo(() => {
       const params = new URLSearchParams();
@@ -231,14 +200,11 @@ export default function PrestatiesAanbiederCard({
       if (startDate) params.set('start_date', startDate);
       if (endDate) params.set('end_date', endDate);
 
-      // Preserve the view mode (?weergave=) when navigating to a card's details,
-      // so admins stay in their currently selected view.
-      const currentParams = new URLSearchParams(urlSearch);
-      const weergave = currentParams.get(PRESTATIES_VIEW_URL_PARAM);
+      const weergave = searchParams.get(PRESTATIES_VIEW_URL_PARAM);
       if (weergave) params.set(PRESTATIES_VIEW_URL_PARAM, weergave);
 
       return `/stats/prestaties-aanbieders?${params.toString()}`;
-    }, [permit, propulsionType, startDate, endDate, urlSearch]);
+    }, [permit, propulsionType, startDate, endDate, searchParams]);
 
     useEffect(() => {
       const operator = scopedSystemId || permit.operator?.system_id || permit.permit_limit.system_id;
@@ -248,10 +214,13 @@ export default function PrestatiesAanbiederCard({
       if (!operator || !formFactor) return;
       if (kpiFetchScope === 'municipality' && !municipality) return;
 
-      if (overviewKpiOperators) {
-        const descriptions = overviewKpiDescriptions ?? [];
+      if (overviewKpiOperators !== undefined) {
+        if (overviewKpiLoading) {
+          return;
+        }
+
         applyKpiDataToCard(
-          descriptions,
+          overviewKpiDescriptions ?? [],
           overviewKpiOperators,
           operator,
           formFactor,
@@ -309,6 +278,7 @@ export default function PrestatiesAanbiederCard({
       kpiFetchScope,
       overviewKpiOperators,
       overviewKpiDescriptions,
+      overviewKpiLoading,
       aclOperators,
     ]);
 

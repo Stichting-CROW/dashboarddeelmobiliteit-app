@@ -3,7 +3,7 @@ import PerformanceIndicatorBar from "./PerformanceIndicatorBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import moment from "moment";
 import type { PerformanceIndicatorKPI, PerformanceIndicatorDescription } from "../../api/permitLimits";
 
@@ -46,38 +46,15 @@ const PerformanceIndicatorTooltip = ({ description }: PerformanceIndicatorToolti
   );
 };
 
+const toDateKey = (date: string): string => moment(date).format('YYYY-MM-DD');
+
 const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: PerformanceIndicatorProps) => {
-  const location = useLocation();
-  const [urlSearch, setUrlSearch] = useState<string>(window.location.search);
+  const [searchParams] = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(280);
-  
-  // Watch for URL changes (triggered by Filterbar using window.history.replaceState)
-  useEffect(() => {
-    // Update from React Router location first
-    setUrlSearch(location.search);
-    
-    const checkUrlChange = () => {
-      const currentSearch = window.location.search;
-      setUrlSearch(prevSearch => {
-        if (currentSearch !== prevSearch) {
-          return currentSearch;
-        }
-        return prevSearch;
-      });
-    };
 
-    // Check periodically for URL changes (since replaceState doesn't trigger popstate)
-    const interval = setInterval(checkUrlChange, 200);
-    
-    // Also listen to popstate for back/forward navigation
-    window.addEventListener('popstate', checkUrlChange);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('popstate', checkUrlChange);
-    };
-  }, [location.search]);
+  const startDateParam = searchParams.get('start_date');
+  const endDateParam = searchParams.get('end_date');
 
   // Measure container width for accurate block sizing
   useEffect(() => {
@@ -101,72 +78,51 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
       resizeObserver.disconnect();
     };
   }, []);
-  
-  // Get dates from URL params
-  const { startDate, endDate } = useMemo(() => {
-    const searchParams = new URLSearchParams(urlSearch);
-    const startDateParam = searchParams.get('start_date');
-    const endDateParam = searchParams.get('end_date');
-    
-    // Parse dates and normalize to start of day for accurate comparison
-    const start = startDateParam && moment(startDateParam).isValid() 
-      ? moment(startDateParam).startOf('day').toDate() 
-      : null;
-    const end = endDateParam && moment(endDateParam).isValid() 
-      ? moment(endDateParam).startOf('day').toDate() 
-      : null;
-    
-    return { startDate: start, endDate: end };
-  }, [urlSearch]);
-  
-  // Filter values based on URL params (or show all if no dates provided)
-  const filteredValues = useMemo(() => {
-    if (!startDate || !endDate) {
-      return kpi.values;
-    }
-    
-    return kpi.values.filter(v => {
-      // Normalize the value date to start of day for comparison
-      const date = moment(v.date).startOf('day').toDate();
-      return date >= startDate && date <= endDate;
-    });
-  }, [kpi.values, startDate, endDate]);
 
-  // Calculate period in days
+  // KPI data is already scoped to the selected period by the API; use values as-is.
+  const displayValues = kpi.values;
+
+  // Calculate period in days from URL params or from the values returned by the API
   const periodDays = useMemo(() => {
-    if (!startDate || !endDate) {
-      // If no dates provided, calculate from filtered values
-      if (filteredValues.length === 0) return 0;
-      const dates = filteredValues.map(v => moment(v.date));
-      const minDate = moment.min(dates);
-      const maxDate = moment.max(dates);
-      return maxDate.diff(minDate, 'days') + 1;
+    if (
+      startDateParam &&
+      endDateParam &&
+      moment(startDateParam, 'YYYY-MM-DD', true).isValid() &&
+      moment(endDateParam, 'YYYY-MM-DD', true).isValid()
+    ) {
+      return moment(endDateParam, 'YYYY-MM-DD').diff(moment(startDateParam, 'YYYY-MM-DD'), 'days') + 1;
     }
-    return moment(endDate).diff(moment(startDate), 'days') + 1;
-  }, [startDate, endDate, filteredValues]);
+
+    if (displayValues.length === 0) return 0;
+
+    const dateKeys = displayValues.map((value) => toDateKey(value.date)).sort();
+    const minDate = moment(dateKeys[0], 'YYYY-MM-DD');
+    const maxDate = moment(dateKeys[dateKeys.length - 1], 'YYYY-MM-DD');
+    return maxDate.diff(minDate, 'days') + 1;
+  }, [startDateParam, endDateParam, displayValues]);
 
   // Calculate block size dynamically to fit within container
   // Max size: w-4 h-4 (16px), but should shrink if more days
   // Gap between blocks: 4px (gap-1)
   const blockSize = useMemo(() => {
-    if (filteredValues.length === 0) return 16;
+    if (displayValues.length === 0) return 16;
     const gapSize = 4; // gap-1 = 4px
-    const totalGaps = (filteredValues.length - 1) * gapSize;
-    const maxBlockSize = Math.floor((containerWidth - totalGaps) / filteredValues.length);
+    const totalGaps = (displayValues.length - 1) * gapSize;
+    const maxBlockSize = Math.floor((containerWidth - totalGaps) / displayValues.length);
     return Math.min(16, Math.max(4, maxBlockSize)); // Max 16px (w-4 h-4), min 4px for visibility
-  }, [filteredValues.length, containerWidth]);
+  }, [displayValues.length, containerWidth]);
 
   // Calculate average
-  const avgValue = filteredValues.length > 0
-    ? (filteredValues.reduce((sum, v) => sum + v.measured, 0) / filteredValues.length).toFixed(1)
+  const avgValue = displayValues.length > 0
+    ? (displayValues.reduce((sum, v) => sum + v.measured, 0) / displayValues.length).toFixed(1)
     : 0;
 
   // Calculate threshold display value
   const thresholdDisplay = useMemo(() => {
-    if (filteredValues.length === 0) return '-';
+    if (displayValues.length === 0) return '-';
     
     // Get all threshold values (filter out undefined/null)
-    const thresholds = filteredValues
+    const thresholds = displayValues
       .map(v => v.threshold)
       .filter((t): t is number => t !== undefined && t !== null);
     
@@ -182,7 +138,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
     } else {
       return 'div.';
     }
-  }, [filteredValues]);
+  }, [displayValues]);
 
   // Find title based on kpi_key
   const description = performanceIndicatorDescriptions.find(desc => desc.kpi_key === kpi.kpi_key);
@@ -203,7 +159,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
         </header>
         {shouldShowBlocks && (
           <div className="performance-indicator-blocks flex items-center">
-            {filteredValues.map((value, index) => (
+            {displayValues.map((value, index) => (
               <PerformanceIndicatorBlock
                 key={`${value.date}-${index}`}
                 date={value.date}
@@ -212,14 +168,14 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
                 complies={value.complies}
                 size={blockSize}
                 isFirst={index === 0}
-                isLast={index === filteredValues.length - 1}
+                isLast={index === displayValues.length - 1}
               />
             ))}
           </div>
         )}
         {shouldShowBar && (
           <div className="performance-indicator-bar-wrapper flex items-center">
-            <PerformanceIndicatorBar values={filteredValues} />
+            <PerformanceIndicatorBar values={displayValues} />
           </div>
         )}
       </section>

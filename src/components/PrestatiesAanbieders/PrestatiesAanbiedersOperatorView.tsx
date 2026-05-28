@@ -137,6 +137,7 @@ const PrestatiesAanbiedersOperatorView = ({ activeoperator }: PrestatiesAanbiede
           kpiFetchScope="operator"
           overviewKpiOperators={rawKpiOperators}
           overviewKpiDescriptions={performanceIndicatorDescriptions}
+          overviewKpiLoading={loading}
           titleOverride={municipalityName}
         />
       );
