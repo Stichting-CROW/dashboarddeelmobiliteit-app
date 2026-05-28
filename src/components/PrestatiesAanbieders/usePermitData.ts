@@ -87,6 +87,18 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
   const reloadPermits = useCallback(async () => {
     if (!token || !filterValue) return;
 
+    // Wait until the date range is known. Otherwise the API falls back to a
+    // 90-day default range, which races against the follow-up fetch that runs
+    // once `FilteritemDatumVanTot` writes the 7-day default into the URL. If
+    // the 90-day response arrives last, it overwrites the 7-day result and the
+    // page renders 90+ indicator blocks instead of 7.
+    if (!startDate || !endDate) {
+      setPermits([]);
+      setRawKpiOperators([]);
+      setPerformanceIndicatorDescriptions([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 

@@ -79,8 +79,25 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
     };
   }, []);
 
-  // KPI data is already scoped to the selected period by the API; use values as-is.
-  const displayValues = kpi.values;
+  // Clamp the values to the URL date range. A stale or cached response can
+  // contain dates outside the currently-selected period (e.g. when a default
+  // 90-day fetch resolves after a 7-day fetch). Rendering those extra dates
+  // produces dozens of indicator blocks for a 7-day period.
+  const displayValues = useMemo(() => {
+    if (
+      !startDateParam ||
+      !endDateParam ||
+      !moment(startDateParam, 'YYYY-MM-DD', true).isValid() ||
+      !moment(endDateParam, 'YYYY-MM-DD', true).isValid()
+    ) {
+      return kpi.values;
+    }
+
+    return kpi.values.filter((value) => {
+      const key = toDateKey(value.date);
+      return key >= startDateParam && key <= endDateParam;
+    });
+  }, [kpi.values, startDateParam, endDateParam]);
 
   // Calculate period in days from URL params or from the values returned by the API
   const periodDays = useMemo(() => {

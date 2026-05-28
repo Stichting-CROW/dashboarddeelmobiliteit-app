@@ -162,6 +162,14 @@ function FilterbarPermits({
       return;
     }
 
+    // Don't fetch combinations before the date range has been populated in the
+    // URL. Otherwise the underlying API falls back to its 90-day default and
+    // a late response can clobber the fetch made with the real (7-day) dates.
+    if (!startDate || !endDate) {
+      setAvailableCombinations([]);
+      return;
+    }
+
     const fetchCombinations = async () => {
       setLoadingCombinations(true);
       try {

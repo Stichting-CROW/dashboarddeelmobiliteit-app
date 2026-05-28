@@ -235,6 +235,11 @@ export default function PrestatiesAanbiederCard({
 
       const fetchPerformanceIndicators = async () => {
         if (!token || !permit.permit_limit) return;
+        // Avoid firing a request with the API's 90-day default range while the
+        // 7-day URL params are still being written by FilteritemDatumVanTot.
+        // The late-arriving default response would otherwise overwrite the
+        // current period's data (see also usePermitData).
+        if (!startDate || !endDate) return;
 
         setLoading(true);
         try {
