@@ -19,7 +19,15 @@ const md5 = require('md5');
 
 // Get persistentState from localStorage
 const theState = localStorage.getItem('CROWDD_reduxState')
-let persistedState = theState ? JSON.parse(theState) : {};
+let persistedState = {};
+if (theState) {
+  try {
+    persistedState = JSON.parse(theState);
+  } catch (e) {
+    console.warn('Invalid persisted Redux state in localStorage, starting fresh:', e);
+    localStorage.removeItem('CROWDD_reduxState');
+  }
+}
 
 // Validate and clean persisted state to prevent reload loops
 const validatePersistedState = (state) => {

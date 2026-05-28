@@ -15,6 +15,7 @@ import {StateType} from '../../types/StateType';
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle} from './MapUtils/map';
+import {createSafeGeolocateControl} from './MapUtils/mapControls';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -114,6 +115,7 @@ const MapComponent = (props): JSX.Element => {
   const [activeLayers, setActiveLayers] = useState([]);
   const [didApplyMapStyle, setDidApplyMapStyle] = useState(false);
   let map = useRef(null);
+  const mapControlsRef = useRef<maplibregl.IControl[]>([]);
 
   // Initialize hooks after map is declared
   const { getAvailableLayers } = useBackgroundLayer(map.current);
@@ -139,21 +141,21 @@ const MapComponent = (props): JSX.Element => {
   }, [location]);
 
   const applyMapSettings = (theMap) => {
-    // Hide compass control
-    theMap.addControl(new maplibregl.NavigationControl({
+    const navigationControl = new maplibregl.NavigationControl({
       showCompass: false
       // showZoom: false
-    }), 'bottom-right');
+    });
+    theMap.addControl(navigationControl, 'bottom-right');
+    mapControlsRef.current.push(navigationControl);
 
-    // Add 'current location' button
-    theMap.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true
-        },
-        trackUserLocation: true
-      }), 'bottom-right'
-    );
+    const geolocateControl = createSafeGeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: true
+    });
+    theMap.addControl(geolocateControl, 'bottom-right');
+    mapControlsRef.current.push(geolocateControl);
 
     // Disable rotating
     theMap.dragRotate.disable();
@@ -277,6 +279,14 @@ const MapComponent = (props): JSX.Element => {
         window['ddMap'] = null;
       }
       map.current = null;
+      mapControlsRef.current.forEach((control) => {
+        try {
+          toRemove.removeControl(control);
+        } catch (e) {
+          // Control may already have been removed with the map.
+        }
+      });
+      mapControlsRef.current = [];
       queueMicrotask(() => {
         try {
           toRemove.remove();
