@@ -27,7 +27,7 @@
   position: fixed;
   width: 100vw;
   z-index: 0;
-  background-color: #fff;
+  background-color: #f6f5f4;
   height: calc(100% - 60px);
 }
 @media(min-width: 640px) {
