@@ -20,6 +20,39 @@ export interface LineChartProps {
   unit?: string;
 }
 
+const TARGET_Y_TICK_COUNT = 5;
+
+/** Picks a human-friendly step (1, 2, 5 × 10^n) for axis ticks. */
+function niceAxisStep(range: number): number {
+  if (!isFinite(range) || range <= 0) {
+    return 1;
+  }
+  const exponent = Math.floor(Math.log10(range));
+  const fraction = range / 10 ** exponent;
+  let niceFraction: number;
+  if (fraction < 1.5) {
+    niceFraction = 1;
+  } else if (fraction < 3) {
+    niceFraction = 2;
+  } else if (fraction < 7) {
+    niceFraction = 5;
+  } else {
+    niceFraction = 10;
+  }
+  return niceFraction * 10 ** exponent;
+}
+
+/** Rounds axis max up and returns step/tick count for labels like 0, 200, 400, … */
+function computeNiceYAxisScale(maxValue: number): { max: number; step: number; tickAmount: number } {
+  if (!isFinite(maxValue) || maxValue <= 0) {
+    return { max: 10, step: 2, tickAmount: TARGET_Y_TICK_COUNT };
+  }
+  const step = niceAxisStep(maxValue / (TARGET_Y_TICK_COUNT - 1));
+  const niceMax = Math.ceil(maxValue / step) * step;
+  const tickAmount = Math.max(1, Math.round(niceMax / step));
+  return { max: niceMax, step, tickAmount };
+}
+
 const LineChart: React.FC<LineChartProps> = ({
   title,
   subtitle,
@@ -137,16 +170,18 @@ const LineChart: React.FC<LineChartProps> = ({
     : null;
   // Add ~15% headroom above the highest value, minimum 5 units (ensures space above highest line)
   const headroom = Math.max(maxDataValue * 0.15, 5);
-  const defaultYAxisMax = maxDataValue + headroom;
+  const rawYAxisMax = maxDataValue + headroom;
   const percentageStep = height <= 250 ? 10 : 5;
   const percentageYAxisMax = Math.max(
     percentageStep * 2,
     Math.ceil(maxDataValue / percentageStep) * percentageStep
   );
-  const yAxisMax = isPercentageUnit ? percentageYAxisMax : defaultYAxisMax;
+  const niceNumericScale = computeNiceYAxisScale(rawYAxisMax);
+  const yAxisMax = isPercentageUnit ? percentageYAxisMax : niceNumericScale.max;
+  const yAxisStepSize = isPercentageUnit ? percentageStep : niceNumericScale.step;
   const yAxisTickAmount = isPercentageUnit
     ? Math.max(1, Math.round(yAxisMax / percentageStep))
-    : undefined;
+    : niceNumericScale.tickAmount;
 
   // Always rotate at 325 degrees for all periods
   const rotationAngle = 325;
@@ -224,6 +259,8 @@ const LineChart: React.FC<LineChartProps> = ({
       max: yAxisMax,
       min: 0,
       tickAmount: yAxisTickAmount,
+      stepSize: yAxisStepSize,
+      forceNiceScale: true,
       labels: {
         formatter: (value: number) => {
           try {
