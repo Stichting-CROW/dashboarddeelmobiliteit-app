@@ -322,9 +322,15 @@ const MapComponent = (props): JSX.Element => {
     const lng = queryParams.get("lng");
 
     // If zoom and lat/lng are in URL -> navigate to that location
+    let zoomTimeoutId: ReturnType<typeof setTimeout> | undefined;
     if(zoom && lat && lng) {
       console.log('ACTION: setZoom and setCenter (MapComponent - if zoom and lat/lng are in URL)');
-      setTimeout(() => {
+      zoomTimeoutId = setTimeout(() => {
+        // Guard against the component having unmounted (map.current is reset
+        // to null in the cleanup of the init-map effect). Without this guard
+        // navigating away from a map route within 1s throws
+        // "Cannot read properties of null (reading 'setZoom')".
+        if (!map.current) return;
         map.current.setZoom(zoom);
         map.current.setCenter([lng, lat]);
       }, 1000);
@@ -337,6 +343,12 @@ const MapComponent = (props): JSX.Element => {
         payload: gm_code
       })
     }
+
+    return () => {
+      if (zoomTimeoutId !== undefined) {
+        clearTimeout(zoomTimeoutId);
+      }
+    };
   }, [
     didMapLoad
   ])
