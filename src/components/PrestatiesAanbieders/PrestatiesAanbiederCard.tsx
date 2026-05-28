@@ -73,6 +73,7 @@ const applyKpiDataToCard = (
   operator: string,
   formFactor: string,
   propulsionType: string | undefined,
+  municipality: string | undefined,
   setPerformanceIndicatorDescriptions: (d: PerformanceIndicatorDescription[]) => void,
   setKpis: (k: PerformanceIndicatorKPI[]) => void
 ) => {
@@ -81,7 +82,7 @@ const applyKpiDataToCard = (
   }
   const match =
     operators.length > 0
-      ? findOperatorMatch(operators, operator, formFactor, propulsionType)
+      ? findOperatorMatch(operators, operator, formFactor, propulsionType, municipality)
       : undefined;
   const backendKpis = match?.kpis ?? [];
   const allKpis: PerformanceIndicatorKPI[] =
@@ -255,6 +256,7 @@ export default function PrestatiesAanbiederCard({
           operator,
           formFactor,
           propulsionType,
+          municipality,
           setPerformanceIndicatorDescriptions,
           setKpis
         );
@@ -283,6 +285,7 @@ export default function PrestatiesAanbiederCard({
               operator,
               formFactor,
               propulsionType,
+              municipality,
               setPerformanceIndicatorDescriptions,
               setKpis
             );

@@ -81,6 +81,10 @@ export interface GeometryOperatorModalityLimit {
 export const toGeometryRef = (municipality: string): string =>
     municipality.startsWith('cbs:') ? municipality : `cbs:${municipality}`;
 
+/** Strip cbs: prefix so GM codes can be compared regardless of format. */
+export const normalizeGeometryRef = (ref: string): string =>
+    ref.replace(/^cbs:/i, '');
+
 // Helper: get 'niet actief' value for each field (used by usePermitActions for add flow)
 export const PERMIT_LIMITS_NIET_ACTIEF = {
     minimum_vehicles: 0,
@@ -718,20 +722,38 @@ export interface OperatorPerformanceIndicatorsResponse {
 }
 
 /**
- * Find operator data matching operator, form_factor and optionally propulsion_type.
+ * Find operator data matching operator, form_factor and optionally propulsion_type
+ * and municipality (geometry_ref).
  */
 export function findOperatorMatch(
     operators: MunicipalityModalityOperator[],
     operator: string,
     formFactor: string,
-    propulsionType?: string
+    propulsionType?: string,
+    geometryRef?: string
 ): MunicipalityModalityOperator | undefined {
-    const matches = operators.filter(
-        item => item.operator === operator && item.form_factor === formFactor
-    );
+    const normalizedGeometryRef = geometryRef
+        ? normalizeGeometryRef(geometryRef)
+        : undefined;
+
+    const matches = operators.filter((item) => {
+        if (item.operator !== operator || item.form_factor !== formFactor) {
+            return false;
+        }
+        if (normalizedGeometryRef !== undefined) {
+            const itemRef = item.geometry_ref
+                ? normalizeGeometryRef(item.geometry_ref)
+                : '';
+            if (itemRef !== normalizedGeometryRef) {
+                return false;
+            }
+        }
+        return true;
+    });
+
     if (matches.length === 0) return undefined;
     if (propulsionType) {
-        const match = matches.find(m => m.propulsion_type === propulsionType);
+        const match = matches.find((m) => m.propulsion_type === propulsionType);
         return match ?? matches[0];
     }
     return matches[0];

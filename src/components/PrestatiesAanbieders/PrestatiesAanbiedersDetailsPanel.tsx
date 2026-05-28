@@ -211,7 +211,13 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     const performanceIndicators = kpiData?.performance_indicator_description || [];
     const operators = kpiData?.municipality_modality_operators || [];
     const operatorData = operatorCode && formFactorCode
-      ? findOperatorMatch(operators, operatorCode, formFactorCode, propulsionTypeCode || undefined)
+      ? findOperatorMatch(
+          operators,
+          operatorCode,
+          formFactorCode,
+          propulsionTypeCode || undefined,
+          municipalityCode || undefined
+        )
       : operators[0];
     const kpiValues = operatorData?.kpis || [];
 
