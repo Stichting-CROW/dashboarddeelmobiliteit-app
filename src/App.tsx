@@ -8,7 +8,7 @@ import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { AnimatePresence, motion } from 'framer-motion';
-import { getAcl } from './api/acl';
+import { getAcl, getMenuAcl } from './api/acl';
 
 import { StateType } from './types/StateType';
 
@@ -395,9 +395,15 @@ function App() {
           return;
         }
 
-        const theAcl = await getAcl(token);
-        if(! theAcl) return;
-  
+        const userAcl = await getAcl(token);
+        if (!userAcl) return;
+
+        const menuAcl = await getMenuAcl(token);
+        const theAcl = {
+          ...userAcl,
+          ...(menuAcl && !Array.isArray(menuAcl) ? menuAcl : {}),
+        };
+
         dispatch(setAclInRedux(theAcl));
         setAcl(theAcl);
         

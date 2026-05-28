@@ -2,8 +2,46 @@ export const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
+/** Organisation type from /menu/acl or /user/acl (not organisation records). */
+export const getAclOrganisationType = (acl) => {
+  if (!acl) return null;
+  return acl.organisation_type ?? acl.type_of_organisation ?? null;
+};
+
+/**
+ * Operator account: organisation_type OPERATOR, or a single operator in menu ACL
+ * (see prestatiesAanbiedersViewMode.isOperatorPrestatiesView).
+ */
+export const isOperatorAccount = (acl) => {
+  if (!acl) return false;
+
+  if (getAclOrganisationType(acl) === 'OPERATOR') {
+    return true;
+  }
+
+  const operators = acl.operators;
+  if (
+    Array.isArray(operators)
+    && operators.length === 1
+    && operators[0]?.system_id
+    && !acl.is_admin
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const canEditHubs = (acl) => {
   if (!acl) return false;
+
+  // OPERATOR organisations are never allowed to edit zones,
+  // even if they happen to have the MICROHUB_EDIT privilege.
+  // Editing is restricted to MUNICIPALITY, OTHER_GOVERNMENT and ADMIN
+  // (see EditUser.tsx -> org_types_allowed_to_edit_zones).
+  if (isOperatorAccount(acl)) {
+    return false;
+  }
 
   const allowedRoles = ['MICROHUB_EDIT'];
 

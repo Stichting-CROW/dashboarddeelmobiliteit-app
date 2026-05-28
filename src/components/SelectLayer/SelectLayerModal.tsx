@@ -5,6 +5,7 @@ import { useDataLayer } from '../Map/MapUtils/useDataLayer';
 import { setMapStyle } from '../../actions/layers';
 import { selectActiveDataLayers, isParkLayerActive, isRentalsLayerActive } from '../../helpers/layerSelectors';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
+import { isOperatorAccount } from '../../helpers/authentication';
 
 import {
   DISPLAYMODE_PARK,
@@ -58,7 +59,7 @@ const SelectLayerModal = () => {
   });
 
   const isOperatorUser = isLoggedIn && (
-    acl?.type_of_organisation === 'OPERATOR' || isOperatorPrestatiesView(aclOperators)
+    isOperatorAccount(acl) || isOperatorPrestatiesView(aclOperators)
   );
 
   const zonesVisible = useSelector((state: StateType) => {

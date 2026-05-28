@@ -95,6 +95,12 @@ function FilterbarPolicyHubs({
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
   const is_stats_or_manage_mode = useSelector((state: StateType) => state.policy_hubs.is_stats_or_manage_mode || 'stats');
 
+  useEffect(() => {
+    if (!canEditHubs(acl) && is_stats_or_manage_mode === 'manage') {
+      dispatch(setIsStatsOrManageMode('stats'));
+    }
+  }, [acl, is_stats_or_manage_mode, dispatch]);
+
   // Get all available hub phases
   const policyHubPhases = get_phases();
 
@@ -174,12 +180,12 @@ function FilterbarPolicyHubs({
           <Button onClick={() => {
             dispatch(setIsStatsOrManageMode('stats'));
           }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}
-          classes="flex-2 rounded-r-none"
+          classes={canEditHubs(acl) ? 'flex-2 rounded-r-none' : 'flex-1'}
           style={{marginRight: 0}}
           >
             📊 Hubstatistieken
           </Button>
-          <Button onClick={() => {
+          {canEditHubs(acl) && <Button onClick={() => {
              dispatch(setIsStatsOrManageMode('manage'));
           }} theme={is_stats_or_manage_mode === 'manage' ? "primary" : "white"}
           classes="flex-1 ml-0 rounded-l-none"
@@ -188,7 +194,7 @@ function FilterbarPolicyHubs({
           }}
           >
             📏 Hubbeheer
-          </Button>
+          </Button>}
         </div>}
 
         {filterGebied && <div className="py-2 flex justify-between" style={{

@@ -45,7 +45,7 @@ export const getMenuAcl = async (token) => {
     json = await response.json();
     return json;
   } catch(e) {
-    console.error('Error getting ACL');
-    return [];
+    console.error('Error getting menu ACL');
+    return null;
   }
 }

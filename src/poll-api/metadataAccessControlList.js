@@ -1,4 +1,5 @@
 import { fetchOperators, getCachedOperators } from '../api/operators';
+import { setAclInRedux } from '../actions/authentication';
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
@@ -111,6 +112,18 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             // items -> {"name": "Cykl","system_id": "cykl"}
             // console.log("dispatch gebieden ", metadata.municipalities);
             store_accesscontrollist.dispatch({ type: 'SET_ACL_OPERATORS', payload: metadata.operators || [] });
+            const existingAcl = store_accesscontrollist.getState().authentication?.user_data?.acl;
+            if (existingAcl && metadata && !Array.isArray(metadata)) {
+              store_accesscontrollist.dispatch(setAclInRedux({
+                ...existingAcl,
+                organisation_type: metadata.organisation_type,
+                operators: metadata.operators,
+                municipalities: metadata.municipalities,
+                filter_municipality: metadata.filter_municipality,
+                filter_operator: metadata.filter_operator,
+                is_contact_person_municipality: metadata.is_contact_person_municipality,
+              }));
+            }
             store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
             if(metadata.municipalities.length===1) {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});
