@@ -102,13 +102,30 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
 
   const hasOperatorsParam = () => filterparams.some((p) => p.startsWith('operators='));
 
-  const appendOperatorsFromAcl = () => {
+  // system_ids from the public NL-wide /operators API (state.metadata.aanbieders).
+  const getPublicOperatorSystemIds = () => {
+    return (metadata?.aanbieders || [])
+      .map((operator) => operator.system_id || operator.value)
+      .filter(Boolean);
+  };
+
+  // Operator-type accounts (single operator in /menu/acl) must always be
+  // scoped to their own operator. For municipality / admin accounts we want
+  // the request to reflect the full NL-wide /operators list so newly added
+  // operators (e.g. 'voi') are included even when /menu/acl lags behind.
+  // The backend enforces data ACL based on the auth token + zone_ids.
+  const appendOperatorsScope = () => {
     if (hasOperatorsParam()) {
       return;
     }
-    const systemIds = getAclOperatorSystemIds(metadata);
-    if (systemIds.length > 0) {
-      filterparams.push('operators=' + systemIds.join(','));
+    const aclSystemIds = getAclOperatorSystemIds(metadata);
+    if (aclSystemIds.length === 1) {
+      filterparams.push('operators=' + aclSystemIds.join(','));
+      return;
+    }
+    const publicSystemIds = getPublicOperatorSystemIds();
+    if (publicSystemIds.length > 0) {
+      filterparams.push('operators=' + publicSystemIds.join(','));
     }
   };
 
@@ -122,20 +139,16 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
 
       filterparams.push("operators=" + selectedaanbieders);
     } else {
-      appendOperatorsFromAcl();
-      if (!hasOperatorsParam() && metadata.aanbieders.length === 1) {
-        filterparams.push("operators=" + metadata.aanbieders[0].system_id);
-      }
+      appendOperatorsScope();
     }
   } else {
     // filtering is done client side
   }
 
-  // Operator accounts: ACL lists allowed operators (public aanbieders list is NL-wide).
-  appendOperatorsFromAcl();
-  if (!hasOperatorsParam() && metadata.aanbieders.length === 1) {
-    filterparams.push("operators=" + metadata.aanbieders[0].system_id);
-  }
+  // For operator-type accounts the request must always be scoped to their own
+  // operator, even when filtering is done client-side. Other accounts get the
+  // full public operators list (see appendOperatorsScope).
+  appendOperatorsScope();
 
   // Add vehicle type filter
   // form_factors=[cargo_bicycle,moped,bicycle,car,other]
