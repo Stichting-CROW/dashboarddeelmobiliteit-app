@@ -1,6 +1,7 @@
 import { getMapStyles } from './map.js';
 import { sources } from '../sources.js';
 import { layers } from '../layers/index.js';
+import { whenMapStyleReady } from './mapGuards';
 
 // Debug flag to control console.log messages
 const DEBUG = false;
@@ -328,14 +329,9 @@ export const setBackgroundLayer = (map, layerName, onSuccess = null, onError = n
   // Check if map style is loaded
   if (!map.isStyleLoaded()) {
     if (DEBUG) console.log('Map style not loaded, waiting for style to load...');
-    const checkStyleLoaded = () => {
-      if (map && map.isStyleLoaded()) {
-        setBackgroundLayer(map, layerName, onSuccess, onError);
-      } else {
-        setTimeout(checkStyleLoaded, 100);
-      }
-    };
-    checkStyleLoaded();
+    whenMapStyleReady(map, () => {
+      setBackgroundLayer(map, layerName, onSuccess, onError);
+    });
     return;
   }
 

@@ -1,4 +1,5 @@
 import { getProviderColorForProvider } from "../../../helpers/providers";
+import { isMapStyleUsable } from './mapGuards';
 
 type HexagonType = any;
 
@@ -42,19 +43,23 @@ const removeServiceAreaSources = (map: any) => {
 }
 
 const removeServiceAreasFromMap = (map: any) => {
-    if(! map) return;
+    if (!isMapStyleUsable(map)) return;
 
-    let layer, key;
-    
-    key = 'service_areas-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'service_areas-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    removeServiceAreaSources(map);
+    try {
+      let layer, key;
+
+      key = 'service_areas-layer-fill';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = 'service_areas-layer-border';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      removeServiceAreaSources(map);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
 async function renderPolygons_fill(map, operator: string, geojson) {

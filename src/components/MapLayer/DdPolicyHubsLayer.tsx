@@ -171,14 +171,15 @@ const DdPolicyHubsLayer = ({
 
   }
 
-  // onComponentUnLoad
+  // Cleanup hub layers on unmount. Must run synchronously: MapComponent
+  // destroys the map in a microtask after child cleanups; a delayed cleanup
+  // would call getLayer on an already-removed map instance.
   useEffect(() => {
     return () => {
-      setTimeout(() => {
-        removeHubsFromMap(map);
-      }, 250)//TODO: Map is unloaded lots of times
+      if (TO_fetch_delay) clearTimeout(TO_fetch_delay);
+      removeHubsFromMap(map);
     };
-  }, []);
+  }, [map]);
 
   // Function that flys to a hub based on parameter given
   const flyToHub = async (e) => {
@@ -431,6 +432,7 @@ const DdPolicyHubsLayer = ({
 
     // Select the polygon, so it is editable
     setTimeout(() => {
+      if (!map) return;
       selectDrawPolygon(draw, hubs_in_drawing_mode[0]);
     }, 25);
   }
@@ -474,14 +476,17 @@ const DdPolicyHubsLayer = ({
     window.addEventListener('click', handleOutsideClick);
 
     return () => {
-      map.off('touchend', layerName, clickHandler);
-      map.off('click', layerName, clickHandler);
-      map.off('contextmenu', layerName, clickHandler);
-        
-      // Remove handlers for draw layer
-      drawLayerNames.forEach(drawLayerName => {
-        map.off('contextmenu', drawLayerName, clickHandler);
-      });        
+      try {
+        map.off('touchend', layerName, clickHandler);
+        map.off('click', layerName, clickHandler);
+        map.off('contextmenu', layerName, clickHandler);
+
+        drawLayerNames.forEach(drawLayerName => {
+          map.off('contextmenu', drawLayerName, clickHandler);
+        });
+      } catch {
+        // Map may already be torn down during route navigation.
+      }
       window.removeEventListener('click', handleOutsideClick);
     }
   }, [
@@ -494,6 +499,8 @@ const DdPolicyHubsLayer = ({
   // If is_drawing_enabled changes: Do things
   useEffect(() => {
     if(! map) return;
+
+    const drawTimeouts: ReturnType<typeof setTimeout>[] = [];
 
     // If drawing isn't enabled: Remove draw tools
     if(! is_drawing_enabled) {
@@ -514,24 +521,30 @@ const DdPolicyHubsLayer = ({
       dispatch(setShowEditForm(true));
 
       // Enable drawing polygons
-      setTimeout(() => {
+      drawTimeouts.push(setTimeout(() => {
+        if (!map) return;
         enableDrawingPolygon(Draw);
-      }, 25);
+      }, 25));
       // Select the polygon after it's created
       if(drawedArea && drawedArea.features && drawedArea.features[0]) {
-        setTimeout(() => {
+        drawTimeouts.push(setTimeout(() => {
+          if (!map) return;
           selectDrawPolygon(Draw, drawedArea.features[0].id);
-        }, 25);
+        }, 25));
       }
     }
 
     // Auto select polygon if not in multi polygon adding mode
     else if(is_drawing_enabled && ! isDrawingMultiPolygonActive) {
-      setTimeout(() => {
+      drawTimeouts.push(setTimeout(() => {
+        if (!map) return;
         selectDrawPolygon(Draw, is_drawing_enabled);
-      }, 25);
+      }, 25));
     }
 
+    return () => {
+      drawTimeouts.forEach(clearTimeout);
+    };
   }, [
     map,
     is_drawing_enabled,
@@ -549,11 +562,13 @@ const DdPolicyHubsLayer = ({
 
     // Cleanup function to remove event handlers when component unmounts or effect re-runs
     return () => {
-      if (map) {
-        // Remove event handlers initiated in initEventHandlers
+      if (!map) return;
+      try {
         map.off('draw.create', changeAreaHandler);
         map.off('draw.update', changeAreaHandler);
         map.off('draw.delete', changeAreaHandler);
+      } catch {
+        // Map may already be torn down during route navigation.
       }
     };
   }, [

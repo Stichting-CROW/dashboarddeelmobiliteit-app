@@ -96,6 +96,8 @@ function ZonePreviewMap({ className = '' }: ZonePreviewMapProps) {
 
     mapRef.current = map;
 
+    let attribTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
     map.on('load', () => {
       map.addSource('zone-preview', {
         type: 'geojson',
@@ -134,7 +136,8 @@ function ZonePreviewMap({ className = '' }: ZonePreviewMapProps) {
 
       // Hide Mapbox label by default; user can click info icon to reveal it.
       // Defer so we run after MapLibre's sourcedata-triggered _updateCompact.
-      setTimeout(() => {
+      attribTimeoutId = setTimeout(() => {
+        if (mapRef.current !== map) return;
         map.getContainer().querySelectorAll('.maplibregl-ctrl-attrib').forEach((el) => {
           el.classList.remove('maplibregl-compact-show', 'mapboxgl-compact-show');
         });
@@ -142,6 +145,9 @@ function ZonePreviewMap({ className = '' }: ZonePreviewMapProps) {
     });
 
     return () => {
+      if (attribTimeoutId !== undefined) {
+        clearTimeout(attribTimeoutId);
+      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;

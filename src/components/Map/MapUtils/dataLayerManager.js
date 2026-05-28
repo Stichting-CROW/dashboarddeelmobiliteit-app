@@ -1,6 +1,7 @@
 import { getMapStyles } from './map.js';
 import { sources } from '../sources.js';
 import { layers } from '../layers/index.js';
+import { whenMapStyleReady } from './mapGuards';
 
 // Debug flag to control console.log messages
 const DEBUG = false;
@@ -235,14 +236,9 @@ export const setDataLayer = (map, layerName, displayMode, onSuccess = null, onEr
   // Check if map style is loaded
   if (!map.isStyleLoaded()) {
     if (DEBUG) console.log('Map style not loaded, waiting for style to load...');
-    const checkStyleLoaded = () => {
-      if (map && map.isStyleLoaded()) {
-        setDataLayer(map, layerName, displayMode, onSuccess, onError);
-      } else {
-        setTimeout(checkStyleLoaded, 100);
-      }
-    };
-    checkStyleLoaded();
+    whenMapStyleReady(map, () => {
+      setDataLayer(map, layerName, displayMode, onSuccess, onError);
+    });
     return;
   }
 
@@ -299,14 +295,9 @@ export const unsetDataLayer = (map, layerName, displayMode, onSuccess = null, on
   // Check if map style is loaded
   if (!map.isStyleLoaded()) {
     if (DEBUG) console.log('Map style not loaded, waiting for style to load...');
-    const checkStyleLoaded = () => {
-      if (map && map.isStyleLoaded()) {
-        unsetDataLayer(map, layerName, displayMode, onSuccess, onError);
-      } else {
-        setTimeout(checkStyleLoaded, 100);
-      }
-    };
-    checkStyleLoaded();
+    whenMapStyleReady(map, () => {
+      unsetDataLayer(map, layerName, displayMode, onSuccess, onError);
+    });
     return;
   }
 
@@ -400,14 +391,9 @@ export const setSingleDataLayer = (map, layerName, displayMode, onSuccess = null
   // Check if map style is loaded
   if (!map.isStyleLoaded()) {
     if (DEBUG) console.log('Map style not loaded, waiting for style to load...');
-    const checkStyleLoaded = () => {
-      if (map && map.isStyleLoaded()) {
-        setSingleDataLayer(map, layerName, displayMode, onSuccess, onError);
-      } else {
-        setTimeout(checkStyleLoaded, 100);
-      }
-    };
-    checkStyleLoaded();
+    whenMapStyleReady(map, () => {
+      setSingleDataLayer(map, layerName, displayMode, onSuccess, onError);
+    });
     return;
   }
 

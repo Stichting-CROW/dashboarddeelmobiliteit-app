@@ -1,6 +1,7 @@
 import moment from 'moment';
 import maplibregl from 'maplibre-gl';
-import center from '@turf/center'
+import center from '@turf/center';
+import { isMapStyleUsable } from './mapGuards';
 
 import {
   abortableFetch,
@@ -176,34 +177,35 @@ const removeH3Sources = (map: any) => {
 }
 
 const removeH3Grid = (map: any) => {
-  // Early return if map is null or undefined
-  if (!map) return;
-  
-  let layer, key;
-  let source;
-  
-  key = 'h3-hexes-layer-fill';
-  layer = map.getLayer(`${key}`);
-  if(layer) map.removeLayer(`${key}`);
-  
-  key = 'h3-hexes-layer-border';
-  layer = map.getLayer(`${key}`);
-  if(layer) map.removeLayer(`${key}`);
+  if (!isMapStyleUsable(map)) return;
 
-  key = 'h3-hexes';
-  layer = map.getLayer(`${key}-layer`);
-  source = map.getSource(key);
-  if(layer) map.removeLayer(`${key}-layer`);
+  try {
+    let layer, key;
 
-  key = 'h3-hex-areas';
-  layer = map.getLayer(`${key}-layer`);
-  if(layer) map.removeLayer(`${key}-layer`);
+    key = 'h3-hexes-layer-fill';
+    layer = map.getLayer(`${key}`);
+    if (layer) map.removeLayer(`${key}`);
 
-  key = 'h3-hexes-percentageValues';
-  layer = map.getLayer(`${key}-layer`);
-  if(layer) map.removeLayer(`${key}-layer`);
+    key = 'h3-hexes-layer-border';
+    layer = map.getLayer(`${key}`);
+    if (layer) map.removeLayer(`${key}`);
 
-  removeH3Sources(map);
+    key = 'h3-hexes';
+    layer = map.getLayer(`${key}-layer`);
+    if (layer) map.removeLayer(`${key}-layer`);
+
+    key = 'h3-hex-areas';
+    layer = map.getLayer(`${key}-layer`);
+    if (layer) map.removeLayer(`${key}-layer`);
+
+    key = 'h3-hexes-percentageValues';
+    layer = map.getLayer(`${key}-layer`);
+    if (layer) map.removeLayer(`${key}-layer`);
+
+    removeH3Sources(map);
+  } catch {
+    // Map may already be torn down during route navigation.
+  }
 }
 
 const getAggregatedStats = (geojson: any) => {

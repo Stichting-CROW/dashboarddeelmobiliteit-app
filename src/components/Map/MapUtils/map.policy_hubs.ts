@@ -3,6 +3,7 @@ import {
   polygonFillStyle
 } from './map.policy_hubs.styles'
 import center from '@turf/center';
+import { isMapStyleUsable } from './mapGuards';
 
 const max_zoom_for_hub_logo = 16;
 
@@ -17,34 +18,40 @@ const removeHubSources = (map: any) => {
 }
 
 const removeHubsFromMap = (map: any) => {
-    if(! map) return;
+    if (!isMapStyleUsable(map)) return;
 
-    let layer, key;
-    
-    key = 'policy_hubs-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'policy_hubs-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    key = 'policy_hubs-hub-logo';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
+    try {
+      let layer, key;
 
-    // Remove event listeners
-    map.off('click', key, clickHubLogo);
+      key = 'policy_hubs-layer-fill';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
 
-    removeHubSources(map);
+      key = 'policy_hubs-layer-border';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = 'policy_hubs-hub-logo';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      // Remove event listeners
+      map.off('click', key, clickHubLogo);
+
+      removeHubSources(map);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
 const clickHubLogo = (e) => {
-  const zoom = window['ddMap'].getZoom();
+  const map = window['ddMap'];
+  if (!isMapStyleUsable(map)) return;
 
-  window['ddMap'].easeTo({
+  const zoom = map.getZoom();
+  map.easeTo({
     center: e.lngLat,
-    zoom: zoom+2
+    zoom: zoom + 2
   });
 }
 

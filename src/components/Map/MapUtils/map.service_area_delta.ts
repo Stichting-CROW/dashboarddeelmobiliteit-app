@@ -1,3 +1,4 @@
+import { isMapStyleUsable } from './mapGuards';
 
 const removeSources = (map: any) => {
     if(! map) return;
@@ -10,20 +11,23 @@ const removeSources = (map: any) => {
 }
 
 const removeServiceAreaDeltaFromMap = (map: any) => {
-    if(! map) return;
+    if (!isMapStyleUsable(map)) return;
 
-    let layer, key;
-    let source;
-    
-    key = 'service_area_delta-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'service_area_delta-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    removeSources(map);
+    try {
+      let layer, key;
+
+      key = 'service_area_delta-layer-fill';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = 'service_area_delta-layer-border';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      removeSources(map);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
 type LegendItemType = 'added' | 'unchanged' | 'removed';

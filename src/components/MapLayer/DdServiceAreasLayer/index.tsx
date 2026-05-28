@@ -242,14 +242,17 @@ const DdServiceAreasLayer = ({
   // Update filters when activeTypes change (without recreating layers)
   useEffect(() => {
     if (!serviceAreaDelta || !map) return;
-    
-    // Check if layers exist
-    const fillLayer = map.getLayer('service_area_delta-layer-fill');
-    const borderLayer = map.getLayer('service_area_delta-layer-border');
-    
-    if (fillLayer && borderLayer) {
-      // Layers exist, just update filters
-      updateLayerFilters(map, activeTypes);
+
+    try {
+      if (!map.isStyleLoaded()) return;
+      const fillLayer = map.getLayer('service_area_delta-layer-fill');
+      const borderLayer = map.getLayer('service_area_delta-layer-border');
+
+      if (fillLayer && borderLayer) {
+        updateLayerFilters(map, activeTypes);
+      }
+    } catch {
+      // Map may already be torn down during route navigation.
     }
   }, [activeTypes, serviceAreaDelta, map]);
 

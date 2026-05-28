@@ -59,12 +59,12 @@ const DdH3HexagonLayer = ({
     return null;
   });
 
-  // On component unload: Remove H3 grid
+  // Cleanup H3 grid on unmount (synchronous; see MapComponent map teardown).
   useEffect(() => {
     return () => {
       removeH3Grid(map);
     };
-  }, []);
+  }, [map]);
 
   // If HB view: Show H3 grid, if not: Remove H3 grid
   useEffect(() => {
@@ -139,7 +139,11 @@ const DdH3HexagonLayer = ({
     map.on('click', 'h3-hexes-layer-fill', didClick);
 
     return () => {
-      map.off('click', 'h3-hexes-layer-fill', didClick);
+      try {
+        map.off('click', 'h3-hexes-layer-fill', didClick);
+      } catch {
+        // Map may already be torn down during route navigation.
+      }
     }
   }, [
     map,
