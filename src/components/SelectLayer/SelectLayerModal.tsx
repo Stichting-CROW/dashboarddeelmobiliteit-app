@@ -4,6 +4,7 @@ import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 import { useDataLayer } from '../Map/MapUtils/useDataLayer';
 import { setMapStyle } from '../../actions/layers';
 import { selectActiveDataLayers, isParkLayerActive, isRentalsLayerActive } from '../../helpers/layerSelectors';
+import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
 
 import {
   DISPLAYMODE_PARK,
@@ -47,6 +48,18 @@ const SelectLayerModal = () => {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
+
+  const acl = useSelector((state: StateType) => {
+    return state.authentication?.user_data?.acl;
+  });
+
+  const aclOperators = useSelector((state: StateType) => {
+    return state.metadata?.aclOperators ?? [];
+  });
+
+  const isOperatorUser = isLoggedIn && (
+    acl?.type_of_organisation === 'OPERATOR' || isOperatorPrestatiesView(aclOperators)
+  );
 
   const zonesVisible = useSelector((state: StateType) => {
     return state.layers ? state.layers.zones_visible : false;
@@ -168,13 +181,13 @@ const SelectLayerModal = () => {
         </div>: null }
 
       {/* Old: dispatch({ type: 'LAYER_SET_VIEW_RENTALS', payload: DISPLAYMODE_VERHUURDATA_HB })  */}
-      { (displayMode===DISPLAYMODE_RENTALS) ?
+      { displayMode === DISPLAYMODE_RENTALS && !isOperatorUser ?
         <div data-type="od" className={`layer${!checkRentalsLayerActive(DISPLAYMODE_VERHUURDATA_HB) ? ' layer-inactive':''}`}
           onClick={() => { setSingleDataLayer(DISPLAYMODE_VERHUURDATA_HB, displayMode) }}>
           <span className="layer-title">
             HB
           </span>
-        </div>: null }
+        </div> : null }
 
       {displayMode===DISPLAYMODE_ZONES_PUBLIC && false && <>
         <div
