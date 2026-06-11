@@ -285,26 +285,23 @@ function Filterbar({
         </div>
       )}
 
-      {/* <div
-        className="absolute text-xs text-purple-800"
+      <div
+        className="filter-bar-version mt-auto pt-6 pb-6 tsext-right"
         style={{
-          left: '102px',
-          fontSize: '0.75rem',
-          top: '16px',
-          width: '210px'
+          color: '#B2B2B2',
+          fontSize: '10px',
         }}
       >
-        versie{' '}
+        Versie{' '}
         <a
           href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/RELEASES.md#dashboard-deelmobiliteit-app-releases"
           target="_blank"
           rel="external noreferrer"
           className="underline"
         >
-          2026-02-11
+          2026-06-11
         </a>
-        <br />
-      </div> */}
+      </div>
     </>
   );
 }
