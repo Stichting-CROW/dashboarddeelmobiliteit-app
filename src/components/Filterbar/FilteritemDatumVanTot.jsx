@@ -37,6 +37,7 @@ function FilterItemDatumVanTot({
   presetButtons,
   defaultStartDate,
   defaultEndDate,
+  defaultPresetView = undefined,
   showPresetOptionsByDefault = false,
 }) {
   const dispatch = useDispatch();
@@ -177,6 +178,15 @@ function FilterItemDatumVanTot({
         if (startDateParam !== currentStart || endDateParam !== currentEnd) {
           updateFilter(startDateObj, endDateObj);
         }
+      }
+    } else if (defaultPresetView) {
+      const presetConfig = getPresetDateConfig(defaultPresetView);
+      if (presetConfig) {
+        const { start, end, agg } = presetConfig;
+        setAggregationLevel(agg);
+        setStartDate(start);
+        setEndDate(end);
+        updateFilter(start, end, agg);
       }
     } else if (defaultStartDate && defaultEndDate) {
       setStartDate(defaultStartDate);

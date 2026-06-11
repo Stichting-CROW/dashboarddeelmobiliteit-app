@@ -39,11 +39,15 @@ function FilterbarStatistiek() {
     if (filterGebied) {
       searchParams.set('gm_code', filterGebied);
     }
-    if (filterOntwikkelingVan) {
-      searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
-    }
-    if (filterOntwikkelingTot) {
-      searchParams.set('end_date', format(filterOntwikkelingTot, 'yyyy-MM-dd'));
+    // Prestaties aanbieders applies its own default period (last 7 days, excluding today).
+    const isPrestatiesAanbiedersPath = path === '/stats/prestaties-aanbieders';
+    if (!isPrestatiesAanbiedersPath) {
+      if (filterOntwikkelingVan) {
+        searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
+      }
+      if (filterOntwikkelingTot) {
+        searchParams.set('end_date', format(filterOntwikkelingTot, 'yyyy-MM-dd'));
+      }
     }
     const queryString = searchParams.toString();
     navigate(queryString ? `${path}?${queryString}` : path);

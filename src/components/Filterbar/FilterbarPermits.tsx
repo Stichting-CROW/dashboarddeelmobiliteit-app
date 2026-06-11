@@ -325,13 +325,14 @@ function FilterbarPermits({
       <FilterbarStatistiek />
 
       <Fieldset title="Periode">
-        <FilteritemDatumVanTot 
+        <FilteritemDatumVanTot
           presetButtons={[
             { key: 'fdvt-po1', view: 'laatste7dagen_yesterday', label: 'Laatste 7 dagen' },
             { key: 'fdvt-po2', view: 'laatste14dagen_yesterday', label: 'Laatste 14 dagen' },
             { key: 'fdvt-po3', view: 'laatste30dagen_yesterday', label: 'Laatste 30 dagen' },
             { key: 'fdvt-po4', view: 'laatste90dagen_yesterday', label: 'Laatste 90 dagen' },
           ]}
+          defaultPresetView="laatste7dagen_yesterday"
           defaultStartDate={new Date(addDays(new Date(), -7).toDateString())}
           defaultEndDate={new Date(addDays(new Date(), -1).toDateString())}
           showPresetOptionsByDefault={isPrestatiesAanbieders}
