@@ -1,5 +1,5 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
-import {isLoggedIn} from '../helpers/authentication.js';
+import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
 
 // const getFilters = async (token, gm_code) => {
 //   let options = { headers : { "authorization": "Bearer " + token }}
@@ -61,11 +61,21 @@ export const updateZones = async (store_zones) => {
 
     // If no gebied is selected:
     if(state.filter.gebied==="") {
-      // Get all zones of all municipalities this user has access to
-      const municipality_codes = state.metadata.gebieden.map(x => x.gm_code);
-      const municipality_codes_as_string = municipality_codes.join(',');
-      // Create URL for getting all zones for all municipality codes
-      url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+      // Admins have access to every municipality in NL. Passing that whole list
+      // as `municipalities=GM..,GM..` produces a query string so long the proxy
+      // rejects it with a 502 Bad Gateway. The /zones endpoint has no "all"
+      // mode (it requires zone_ids or municipalities), so use the parameterless
+      // /public/municipalities endpoint, which returns every municipality zone
+      // NL-wide in a single lightweight request.
+      if(isAdmin(state)) {
+        url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+      } else {
+        // Get all zones of all municipalities this user has access to
+        const municipality_codes = state.metadata.gebieden.map(x => x.gm_code);
+        const municipality_codes_as_string = municipality_codes.join(',');
+        // Create URL for getting all zones for all municipality codes
+        url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+      }
 
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
@@ -91,7 +101,8 @@ export const updateZones = async (store_zones) => {
 
       response.json()
         .then((metadata) => {
-          store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones});
+          // /zones returns { zones: [...] }; /public/municipalities returns { municipalities: [...] }
+          store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones || metadata.municipalities || []});
           store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
         })
       }).catch(ex=>{
