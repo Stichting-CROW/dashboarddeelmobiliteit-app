@@ -2,9 +2,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import createSvgPlaceholder from '../../helpers/create-svg-placeholder';
+import moment from 'moment';
 import type {
   PermitLimitRecord,
   PerformanceIndicatorKPI,
+  PerformanceIndicatorValue,
   PerformanceIndicatorDescription,
   MunicipalityModalityOperator,
 } from '../../api/permitLimits';
@@ -69,6 +71,62 @@ const DetailsLink = ({ detailsUrl, isCardHovered, isHidden = false }: DetailsLin
   </Link>
 );
 
+const toDateKey = (date: string): string => moment(date).format('YYYY-MM-DD');
+
+const collectReferenceDates = (
+  backendKpis: PerformanceIndicatorKPI[],
+  startDate?: string,
+  endDate?: string
+): string[] => {
+  const fromKpis = new Set<string>();
+  backendKpis.forEach((kpi) => {
+    (kpi.values || []).forEach((value) => {
+      if (value.date) {
+        fromKpis.add(toDateKey(value.date));
+      }
+    });
+  });
+
+  if (fromKpis.size > 0) {
+    return Array.from(fromKpis).sort();
+  }
+
+  if (
+    startDate &&
+    endDate &&
+    moment(startDate, 'YYYY-MM-DD', true).isValid() &&
+    moment(endDate, 'YYYY-MM-DD', true).isValid()
+  ) {
+    const dates: string[] = [];
+    const cursor = moment(startDate, 'YYYY-MM-DD');
+    const end = moment(endDate, 'YYYY-MM-DD');
+    while (cursor.isSameOrBefore(end, 'day')) {
+      dates.push(cursor.format('YYYY-MM-DD'));
+      cursor.add(1, 'day');
+    }
+    return dates;
+  }
+
+  return [];
+};
+
+const buildPlaceholderValues = (dates: string[]): PerformanceIndicatorValue[] =>
+  dates.map((date) => ({ date, measured: 0 }));
+
+const withPlaceholderValues = (
+  kpi: PerformanceIndicatorKPI,
+  referenceDates: string[]
+): PerformanceIndicatorKPI => {
+  if (referenceDates.length === 0 || (kpi.values?.length ?? 0) > 0) {
+    return kpi;
+  }
+
+  return {
+    ...kpi,
+    values: buildPlaceholderValues(referenceDates),
+  };
+};
+
 const applyKpiDataToCard = (
   descriptions: PerformanceIndicatorDescription[],
   operators: MunicipalityModalityOperator[],
@@ -76,6 +134,8 @@ const applyKpiDataToCard = (
   formFactor: string,
   propulsionType: string | undefined,
   municipality: string | undefined,
+  startDate: string | undefined,
+  endDate: string | undefined,
   setPerformanceIndicatorDescriptions: (d: PerformanceIndicatorDescription[]) => void,
   setKpis: (k: PerformanceIndicatorKPI[]) => void
 ) => {
@@ -87,11 +147,14 @@ const applyKpiDataToCard = (
       ? findOperatorMatch(operators, operator, formFactor, propulsionType, municipality)
       : undefined;
   const backendKpis = match?.kpis ?? [];
+  const referenceDates = collectReferenceDates(backendKpis, startDate, endDate);
   const allKpis: PerformanceIndicatorKPI[] =
     descriptions.length > 0
       ? descriptions.map((desc) => {
           const found = backendKpis.find((k) => k.kpi_key === desc.kpi_key);
-          return found ?? { kpi_key: desc.kpi_key, granularity: '', values: [] };
+          const kpi =
+            found ?? { kpi_key: desc.kpi_key, granularity: '', values: [] };
+          return withPlaceholderValues(kpi, referenceDates);
         })
       : backendKpis;
   setKpis(allKpis);
@@ -228,6 +291,8 @@ export default function PrestatiesAanbiederCard({
           formFactor,
           propulsionType,
           municipality,
+          startDate,
+          endDate,
           setPerformanceIndicatorDescriptions,
           setKpis
         );
@@ -262,6 +327,8 @@ export default function PrestatiesAanbiederCard({
               formFactor,
               propulsionType,
               municipality,
+              startDate,
+              endDate,
               setPerformanceIndicatorDescriptions,
               setKpis
             );
