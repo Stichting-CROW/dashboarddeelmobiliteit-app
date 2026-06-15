@@ -17,6 +17,7 @@ import { getDisplayOperatorName, getDisplayProviderColor, applyDemoValueFactor }
 import { getVehicleIconUrl } from '../../helpers/vehicleTypes';
 import ProviderLabel from './ProviderLabel';
 import {
+  buildScopedKpiOverviewParams,
   isOperatorPrestatiesView,
   resolveOperatorSystemId,
 } from '../../helpers/prestatiesAanbiedersViewMode';
@@ -34,6 +35,9 @@ const LOADING_INDICATOR_DELAY_MS = 200;
 function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFullscreen = false }: PrestatiesAanbiedersDetailsPanelProps) {
   const gebieden = useSelector((state: StateType) => state.metadata.gebieden);
   const aclOperators = useSelector((state: StateType) => state.metadata.aclOperators ?? []);
+  const metadataLoaded = useSelector((state: StateType) =>
+    Boolean(state.metadata?.metadata_loaded)
+  );
   const voertuigtypes = useSelector((state: StateType) => state.metadata.vehicle_types);
   const token = useSelector((state: StateType) =>
     (state.authentication.user_data && state.authentication.user_data.token) || null
@@ -105,34 +109,26 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
   }, []);
 
   useEffect(() => {
-    if (!token || !formFactorCode || !operatorCode) return;
+    if (!metadataLoaded || !token || !formFactorCode || !operatorCode) return;
     if (!isOperatorScope && !municipalityCode) return;
 
     const fetchKpiData = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Intentionally omit `form_factor` and (in municipality scope) `system_id`
-        // from the request. The chart renderer filters the response client-side
-        // via `findOperatorMatch`, and dropping the filters lets this fetch share
-        // a URL (and the in-flight dedup cache) with the overview fetch in
-        // usePermitData, avoiding a redundant scoped request.
-        const params = isOperatorScope
-          ? {
-              start_date: moment(startDate).format('YYYY-MM-DD'),
-              end_date: moment(endDate).format('YYYY-MM-DD'),
-              system_id: operatorCode,
-              scope: 'operator' as const,
-              aclOperators,
-              ...(municipalityCode ? { municipality: municipalityCode } : {}),
-            }
-          : {
-              start_date: moment(startDate).format('YYYY-MM-DD'),
-              end_date: moment(endDate).format('YYYY-MM-DD'),
-              municipality: municipalityCode!,
-              scope: 'municipality' as const,
-              aclOperators,
-            };
+        // Intentionally omit `form_factor` from the request. The chart renderer
+        // filters the response client-side via `findOperatorMatch`, and dropping
+        // the filter lets this fetch share a URL (and the in-flight dedup cache)
+        // with the overview fetch in usePermitData when scopes align.
+        const params = buildScopedKpiOverviewParams(aclOperators, {
+          operatorSystemId: operatorCode,
+          municipality: municipalityCode,
+          start_date: moment(startDate).format('YYYY-MM-DD'),
+          end_date: moment(endDate).format('YYYY-MM-DD'),
+        });
+        if (!params) {
+          throw new Error('KPI overview request missing required query params');
+        }
         const data = await getKpiOverviewOperators(token, params);
         setKpiData(data);
       } catch (err: any) {
@@ -144,7 +140,17 @@ function PrestatiesAanbiedersDetailsPanel({ onClose, onToggleFullscreen, isFulls
     };
 
     fetchKpiData();
-  }, [token, municipalityCode, formFactorCode, operatorCode, startDate, endDate, isOperatorScope, aclOperators]);
+  }, [
+    metadataLoaded,
+    token,
+    municipalityCode,
+    formFactorCode,
+    operatorCode,
+    startDate,
+    endDate,
+    isOperatorScope,
+    aclOperators,
+  ]);
 
   const municipality = municipalityCode
     ? gebieden.find((g: any) => g.gm_code === municipalityCode)

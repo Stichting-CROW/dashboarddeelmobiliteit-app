@@ -193,8 +193,10 @@ export default function PrestatiesAanbiederCard({
 
     const detailsUrl = useMemo(() => {
       const params = new URLSearchParams();
+      const operatorId = permit.operator?.system_id || permit.permit_limit.system_id;
       params.set('gm_code', permit.municipality?.gmcode || permit.permit_limit.municipality);
-      params.set('operator', permit.operator?.system_id || permit.permit_limit.system_id);
+      params.set('operator', operatorId);
+      params.set('system_id', operatorId);
       params.set('form_factor', permit.vehicle_type?.id || permit.permit_limit.modality);
       if (propulsionType) params.set('propulsion_type', propulsionType);
       if (startDate) params.set('start_date', startDate);

@@ -180,7 +180,8 @@ function FilterbarPermits({
             token,
             filterGebied,
             startDate,
-            endDate
+            endDate,
+            aclOperators
           );
         } else {
           const operatorResult = await getPermitLimitOverviewForOperator(

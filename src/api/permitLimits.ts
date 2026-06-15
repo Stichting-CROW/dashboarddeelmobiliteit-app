@@ -135,9 +135,8 @@ export const buildKpiOverviewSearchParams = (
             return null;
         }
         params.set('system_id', query.system_id);
-        if (query.municipality) {
-            params.set('municipality', query.municipality);
-        }
+        // Do not pass municipality in operator scope: operator accounts are
+        // authorized via system_id only; municipality is filtered client-side.
     } else {
         if (!query.municipality) {
             return null;
@@ -416,12 +415,14 @@ export const getPermitLimitOverviewForMunicipality = async (
     token: string,
     municipality: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    aclOperators?: Array<{ system_id?: string; value?: string }>
 ) => {
     const result = await fetchKpiOverviewPermitRecords(token, {
         municipality,
         start_date: startDate,
         end_date: endDate,
+        aclOperators,
     });
     return result?.records ?? null;
 };

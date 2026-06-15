@@ -42,6 +42,10 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     (state.metadata && state.metadata.aclOperators) ? state.metadata.aclOperators : []
   );
 
+  const metadataLoaded = useSelector((state: StateType) =>
+    Boolean(state.metadata?.metadata_loaded)
+  );
+
   useEffect(() => {
     fetchOperators().then((operators) => {
       if (operators) {
@@ -85,7 +89,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
   }, [viewType, token, gebieden]);
 
   const reloadPermits = useCallback(async () => {
-    if (!token || !filterValue) return;
+    if (!metadataLoaded || !token || !filterValue) return;
 
     // Wait until the date range is known. Otherwise the API falls back to a
     // 90-day default range, which races against the follow-up fetch that runs
@@ -159,7 +163,7 @@ export const usePermitData = (viewType: PermitViewType, filterValue: string) => 
     } finally {
       setLoading(false);
     }
-  }, [token, filterValue, viewType, startDate, endDate, municipalityNames, aclOperators]);
+  }, [metadataLoaded, token, filterValue, viewType, startDate, endDate, municipalityNames, aclOperators]);
 
   useEffect(() => {
     reloadPermits();

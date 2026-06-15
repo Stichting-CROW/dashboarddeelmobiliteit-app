@@ -110,3 +110,57 @@ export const resolveKpiOverviewSystemId = (
   }
   return undefined;
 };
+
+export interface ScopedKpiOverviewParams {
+  start_date: string;
+  end_date: string;
+  scope: 'municipality' | 'operator';
+  municipality?: string;
+  system_id?: string;
+  aclOperators: AanbiederOption[];
+}
+
+/**
+ * Build kpi_overview_operators query params for a scoped view.
+ *
+ * Operator accounts must pass system_id (from URL or ACL). Municipality is
+ * filtered client-side via findOperatorMatch — do not send it to the API in
+ * operator scope (the backend rejects operator requests that combine both).
+ */
+export const buildScopedKpiOverviewParams = (
+  aclOperators: AanbiederOption[],
+  options: {
+    operatorSystemId?: string | null;
+    municipality?: string | null;
+    start_date: string;
+    end_date: string;
+  }
+): ScopedKpiOverviewParams | null => {
+  const resolvedSystemId = resolveKpiOverviewSystemId(
+    aclOperators,
+    options.operatorSystemId ?? undefined
+  );
+  const municipality = options.municipality ?? undefined;
+
+  if (resolvedSystemId) {
+    return {
+      start_date: options.start_date,
+      end_date: options.end_date,
+      system_id: resolvedSystemId,
+      scope: 'operator',
+      aclOperators,
+    };
+  }
+
+  if (!municipality) {
+    return null;
+  }
+
+  return {
+    start_date: options.start_date,
+    end_date: options.end_date,
+    municipality,
+    scope: 'municipality',
+    aclOperators,
+  };
+};
