@@ -25,6 +25,23 @@ We aggregeren de data op diverse manieren, bijvoorbeeld op zo'n manier dat je sn
 
 Op de pagina [dashboarddeelmobiliteit-datakwaliteit](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit?tab=readme-ov-file#dashboard-deelmobiliteit-data-quality) staat een lijst met de aanbieders die nu ondersteund worden, met de datafeed die zij aanbieden.
 
+## Hoe verwerkt het Data Exchange Platform de data?
+
+Data die ontvangen wordt:
+
+- Geparkeerde voertuigen (onverhuurd, in de publieke ruimte) - elke 30 seconden
+- Servicegebieden - elk uur
+
+Zo wordt de data verwerkt:
+
+- Aanbod
+  - Actueel aanbod toont alle geparkeerde voertuigen die we via de datafeeds ontvangen
+  - Historisch Aanbod toont "parkeerperiode's": moment dat een geparkeerd voertuig in de datafeed verschijnt t/m moment dat een geparkeerd voertuig niet meer aanwezig is in de datafeed
+- Verhuringen
+  - Verhuringen toont afgeleide verhuurperiode's: moment dat een geparkeerd voeruit uit de datafeed verdwijnt t/m moment dat hetzelfde voertuig weer terug aanwezig is in de datafeed
+- Servicegebieden
+  - Servicegebieden toont 1 op 1 de door de aanbieder aangeleverde servicegebieden
+
 ## Welke datastandaarden worden ondersteund?
 
 Hoewel het Data Exchange Platform verschillende datastandaarden ondersteunt, geven we er de voorkeur aan dat aanbieders hun voertuigdata aanleveren conform MDS. Dit geeft ook de aanbieders de meeste zekerheid dat de koppeling in de toekomst goed functioneert. Zie de details in deze [specificatie](https://docs.dashboarddeelmobiliteit.nl/data_feeds/for_monitoring/).
