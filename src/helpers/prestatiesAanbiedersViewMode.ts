@@ -123,9 +123,22 @@ export interface ScopedKpiOverviewParams {
 /**
  * Build kpi_overview_operators query params for a scoped view.
  *
- * Operator accounts must pass system_id (from URL or ACL). Municipality is
- * filtered client-side via findOperatorMatch — do not send it to the API in
- * operator scope (the backend rejects operator requests that combine both).
+ * Scope selection is driven by the *account type*, not by whether a system_id
+ * happens to be present in the URL:
+ *
+ * - Operator accounts use operator scope (system_id only). The backend
+ *   authorizes them via their own system_id and rejects requests that combine
+ *   system_id with municipality.
+ * - Municipality (and admin) accounts use municipality scope. The backend
+ *   forbids municipality accounts from issuing operator-scoped (system_id-only)
+ *   requests — doing so returns 403. The selected operator is filtered
+ *   client-side via findOperatorMatch, so system_id is intentionally omitted
+ *   here (which also lets this fetch share the in-flight cache with the
+ *   municipality overview fetch).
+ *
+ * As a fallback, when no municipality is available we still use operator scope
+ * if a system_id is resolvable (e.g. admin operator view without a gebied),
+ * preserving the previous behavior for accounts that are allowed to do so.
  */
 export const buildScopedKpiOverviewParams = (
   aclOperators: AanbiederOption[],
@@ -141,7 +154,33 @@ export const buildScopedKpiOverviewParams = (
     options.operatorSystemId ?? undefined
   );
   const municipality = options.municipality ?? undefined;
+  const isOperatorAccount = isOperatorPrestatiesView(aclOperators);
 
+  // Operator accounts are authorized via system_id only; never send municipality.
+  if (isOperatorAccount && resolvedSystemId) {
+    return {
+      start_date: options.start_date,
+      end_date: options.end_date,
+      system_id: resolvedSystemId,
+      scope: 'operator',
+      aclOperators,
+    };
+  }
+
+  // Municipality (and admin) accounts must query by municipality and filter the
+  // operator client-side. Sending system_id without municipality is rejected
+  // with 403 for municipality accounts.
+  if (municipality) {
+    return {
+      start_date: options.start_date,
+      end_date: options.end_date,
+      municipality,
+      scope: 'municipality',
+      aclOperators,
+    };
+  }
+
+  // No municipality context: fall back to operator scope when allowed.
   if (resolvedSystemId) {
     return {
       start_date: options.start_date,
@@ -152,15 +191,5 @@ export const buildScopedKpiOverviewParams = (
     };
   }
 
-  if (!municipality) {
-    return null;
-  }
-
-  return {
-    start_date: options.start_date,
-    end_date: options.end_date,
-    municipality,
-    scope: 'municipality',
-    aclOperators,
-  };
+  return null;
 };
