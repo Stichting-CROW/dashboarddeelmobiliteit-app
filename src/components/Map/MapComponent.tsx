@@ -242,13 +242,15 @@ const MapComponent = (props): JSX.Element => {
 
         // Add cross image to use for retirement hubs
         map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
-          if(err) throw err;
+          // The map may have been unmounted (e.g. page switch) while this
+          // request was in flight, in which case map.current is null.
+          if(err || !map.current || map.current.hasImage('pattern')) return;
           map.current.addImage('pattern', image);
         });
 
         // Add 'Mijksenaar' hub logo for Beleidshubs, if zoomed out
         map.current.loadImage('https://dashboarddeelmobiliteit.nl/components/MapComponent/hub-icon-mijksenaar.png', (err, image) => {
-          if(err) throw err;
+          if(err || !map.current || map.current.hasImage('hub-icon-mijksenaar')) return;
           map.current.addImage('hub-icon-mijksenaar', image);
         });
       });
