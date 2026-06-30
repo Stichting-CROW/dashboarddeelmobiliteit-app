@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
 import moment from 'moment';
@@ -19,6 +20,9 @@ import {
   getUserList,
   getUserListForOrganisation
 } from '../../api/users';
+import {
+  getOrganisationList
+} from '../../api/organisations';
 
 // Import components
 import Button from '../Button/Button';
@@ -99,6 +103,8 @@ const UserList = ({
 }) => {
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [organisationOptionList, setOrganisationOptionList] = useState([]);
+  const [selectedOrganisation, setSelectedOrganisation] = useState(null);
 
   const navigate = useNavigate();
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -107,6 +113,27 @@ const UserList = ({
   useEffect(() => {
     fetchUserList();
   }, [acl]);
+
+  // Fetch the list of organisations (super-admin only) to populate the filter
+  useEffect(() => {
+    if(! acl || acl.is_admin !== true) return;
+    fetchOrganisationList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [acl]);
+
+  const fetchOrganisationList = async () => {
+    const organisations = await getOrganisationList(token);
+    if(! organisations || ! organisations.forEach) return;
+    const optionsList = [];
+    organisations.forEach(x => {
+      optionsList.push({
+        value: x.organisation_id,
+        label: x.name
+      });
+    });
+    optionsList.sort((a, b) => a.label.localeCompare(b.label));
+    setOrganisationOptionList(optionsList);
+  }
 
   const fetchUserList = async () => {
     let users;
@@ -150,6 +177,11 @@ const UserList = ({
   }
 
   const filteredUsers = users.filter(x => {
+    // Filter by selected organisation (if any)
+    if(selectedOrganisation && selectedOrganisation.value && x.organisation_id !== selectedOrganisation.value) {
+      return false;
+    }
+    // Filter by free text search
     return x.user_id.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1
             || x.organisation_name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1;
   });
@@ -196,7 +228,24 @@ const UserList = ({
 
   return (
     <div className="" style={{maxWidth: '800px'}}>
-      <PageTitle>Gebruikers</PageTitle>
+      <div className="flex justify-between flex-wrap items-center">
+        <PageTitle style={{marginTop: 0}}>Gebruikers</PageTitle>
+        {isAdmin() && organisationOptionList.length > 1 &&
+          <div>
+            <Select
+              className="my-2 w-80"
+              isMulti={false}
+              isClearable={true}
+              options={organisationOptionList}
+              value={selectedOrganisation}
+              placeholder="Filter op organisatie"
+              onChange={(choice: any) => {
+                setSelectedOrganisation(choice || null);
+              }}
+            />
+          </div>
+        }
+      </div>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe gebruiker</Button>
         <Button theme='primary' classes='download' onClick={() => downloadCsv(
