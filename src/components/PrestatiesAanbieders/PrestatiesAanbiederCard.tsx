@@ -11,6 +11,7 @@ import type {
   MunicipalityModalityOperator,
 } from '../../api/permitLimits';
 import { getOperatorPerformanceIndicators, findOperatorMatch } from '../../api/permitLimits';
+import { notifyError } from '../../helpers/notify';
 import type { KpiOverviewQueryScope } from '../../api/permitLimits';
 import { PRESTATIES_VIEW_URL_PARAM } from '../../helpers/prestatiesAanbiedersViewMode';
 import PerformanceIndicator from './PerformanceIndicator';
@@ -437,7 +438,7 @@ export default function PrestatiesAanbiederCard({
                     if (permit.propulsion_type) {
                       onEditLimits();
                     } else {
-                      alert('Geen propulsion_type – bewerken niet mogelijk.');
+                      notifyError('Geen propulsion_type – bewerken niet mogelijk.');
                     }
                   }}
                 >

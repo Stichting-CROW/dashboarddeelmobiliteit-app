@@ -16,6 +16,7 @@ import center from '@turf/center'
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
 import {getAcl} from '../../api/acl';
+import { notifyError } from '../../helpers/notify';
 
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import {renderZoneTag} from '../Tag/Tag';
@@ -524,7 +525,7 @@ function FilterbarZones({
       // Error handling
       if(! updatedZone || ! updatedZone.zone_id) {
         console.error(updatedZone);
-        alert('Er ging iets fout bij het opslaan van de zone.')
+        notifyError('Er ging iets fout bij het opslaan van de zone.')
         return;
       }
       // Set updated zone in states

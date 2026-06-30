@@ -7,7 +7,6 @@ import {
 import moment from 'moment';
 import { store } from './AppProvider.js';
 import { useSelector, useDispatch } from 'react-redux';
-import { AnimatePresence, motion } from 'framer-motion';
 import { getAcl, getMenuAcl } from './api/acl';
 
 import { StateType } from './types/StateType';
@@ -58,7 +57,8 @@ import {
 } from './poll-api/pollVerhuringenData.js';
 
 import {
-  showNotification,
+  notifyInfo,
+  notifyError,
 } from './helpers/notify';
 import { pathRequiresBackgroundMap } from './helpers/routes';
 
@@ -87,87 +87,17 @@ declare global {
   }
 }
 
-interface NotificationProps {
-  doShowNotification: string | false;
-  setDoShowNotification: React.Dispatch<React.SetStateAction<string | false>>;
-  isFilterBarOpen: boolean;
-}
-
 interface Acl {
   privileges?: string[];
   is_admin?: boolean;
   [key: string]: unknown;
 }
 
-const Notification: React.FC<NotificationProps> = ({
-  doShowNotification,
-  setDoShowNotification,
-  isFilterBarOpen,
-}) => {
-  return (
-    <AnimatePresence>
-      {doShowNotification && (
-        <motion.div
-          key="notification"
-          initial={{ opacity: 0.5 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed top-5 z-20 left-5 right-5"
-        >
-          <motion.div
-            drag
-            dragConstraints={{
-              top: -10,
-              left: -50,
-              right: 50,
-              bottom: 10,
-            }}
-            className="relative bg-white/60 backdrop-blur-xl w-max-w-md rounded-lg mx-auto p-6 shadow hover:opacity-75"
-            style={{
-              width: window.innerWidth > 640 ? '322px' : '100%',
-              left: isFilterBarOpen && window.innerWidth > 640 ? '162px' : 0,
-              cursor: 'pointer',
-            }}
-            onClick={() => setDoShowNotification(false)}
-          >
-            <h1 className="text-lg text-slate-700 font-medium text-center">
-              {doShowNotification}
-            </h1>
-            <div className="flex justify-between items-center">
-              <a
-                href="#"
-                className="hidden text-slate-500 hover:text-slate-700 text-sm inline-flex space-x-1 items-center"
-              >
-                <span>Go to Dashboard</span>
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  ></path>
-                </svg>
-              </a>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
 function App() {
   // Our state variables
   const [pathName, setPathName] = useState<string>(document.location.pathname);
   const [uriParams, setUriParams] = useState<string>(document.location.search);
   const [delayTimeout, setDelayTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
-  const [doShowNotification, setDoShowNotification] = useState<string | false>('');
   const [isOrganisationAdmin, setIsOrganisationAdmin] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [acl, setAcl] = useState<Acl>({});
@@ -179,11 +109,6 @@ function App() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
 
   const DELAY_TIMEOUT_IN_MS = 250;
-
-  const exportState = useSelector((state: StateType) => {
-    return { filter: state.filter, layers: state.layers, ui: state.ui };
-  });
-  const isFilterBarOpen = Boolean(exportState && exportState.ui && exportState.ui.FILTERBAR);
 
   // Store window location in a local variable
   const location = useLocation();
@@ -322,10 +247,11 @@ function App() {
     document.title = newTitle;
   }, [location.pathname]);
   
-  // Init notify bar logic
+  // Init notify bar logic. Routes through the shared Radix toast so all
+  // app notifications use a single, consistent system.
   useEffect(() => {
     window.notify = (msg: string) => {
-      showNotification(msg, setDoShowNotification);
+      notifyInfo(msg);
     };
 
     return () => {
@@ -347,7 +273,7 @@ function App() {
           return;
         } catch(ex) {
           console.warn("unable to decode application state")
-          alert("Ongeldige link ingegeven");
+          notifyError("Ongeldige link ingegeven");
         }
         // continue
       }
@@ -623,8 +549,6 @@ function App() {
 
   return (
     <div className={`app ${(isFilterBarVisible || isLayersMobileVisible) ? 'overflow-y-hidden' : ''}`}>
-
-      <Notification doShowNotification={doShowNotification} setDoShowNotification={setDoShowNotification} isFilterBarOpen={isFilterBarOpen} />
 
       <LoadingIndicator  />
 

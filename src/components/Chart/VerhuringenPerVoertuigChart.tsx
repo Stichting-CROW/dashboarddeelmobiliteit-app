@@ -36,6 +36,7 @@ import {
 } from '../../helpers/stats/index';
 
 import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx';
+import ChartSkeleton from './ChartSkeleton';
 import './CustomizedTooltip.css';
 
 interface VerhuringenPerVoertuigChartProps {
@@ -144,6 +145,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
 
   const [vehiclesData, setVehiclesData] = useState<Record<string, unknown> | null>(null);
   const [rentalsData, setRentalsData] = useState<Record<string, unknown> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // See BeschikbareVoertuigenChart for the rationale behind the
   // metadata sub-reference deps. The actual API calls are deduplicated in the
@@ -154,6 +156,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     if (!metadata?.zones || metadata.zones.length <= 0) {
       setVehiclesData(null);
       setRentalsData(null);
+      setIsLoading(false);
       return;
     }
     // If a plaats is selected but metadata.zones still belongs to a previous
@@ -161,18 +164,24 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     if (filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
       setVehiclesData(null);
       setRentalsData(null);
+      setIsLoading(false);
       return;
     }
 
     async function fetchData() {
-      const [aggregatedVehicleData, aggregatedRentalsData] = await Promise.all([
-        getAggregatedVehicleData(token, filter, zones, metadata),
-        getAggregatedRentalsData(token, filter, zones, metadata)
-      ]);
+      try {
+        const [aggregatedVehicleData, aggregatedRentalsData] = await Promise.all([
+          getAggregatedVehicleData(token, filter, zones, metadata),
+          getAggregatedRentalsData(token, filter, zones, metadata)
+        ]);
 
-      if (aggregatedVehicleData) setVehiclesData(aggregatedVehicleData);
-      if (aggregatedRentalsData) setRentalsData(aggregatedRentalsData);
+        if (aggregatedVehicleData) setVehiclesData(aggregatedVehicleData);
+        if (aggregatedRentalsData) setRentalsData(aggregatedRentalsData);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    setIsLoading(true);
     fetchData();
   }, [
     filter.ontwikkelingvan,
@@ -326,9 +335,13 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
         </div>
       </div>
       <div className="relative" style={{width: '100%', height: '400px'}}>
-        <ResponsiveContainer>
-          {renderChart()}
-        </ResponsiveContainer>
+        {isLoading && (!chartData || chartData.length === 0) ? (
+          <ChartSkeleton height="100%" />
+        ) : (
+          <ResponsiveContainer>
+            {renderChart()}
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

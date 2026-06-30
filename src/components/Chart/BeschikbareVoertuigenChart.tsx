@@ -44,6 +44,7 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from './CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import ChartSkeleton from './ChartSkeleton';
 
 const TOTAAL_KEY = 'Totaal';
 
@@ -75,6 +76,7 @@ function BeschikbareVoertuigenChart({
 
   // Define state variables
   const [vehiclesData, setVehiclesData] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   // On updated filter: re-fetch data
   //
@@ -88,6 +90,7 @@ function BeschikbareVoertuigenChart({
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
       setVehiclesData([]);
+      setIsLoading(false);
       return;
     }
     // If a plaats is selected but metadata.zones still belongs to a previous
@@ -96,27 +99,33 @@ function BeschikbareVoertuigenChart({
     // API returns NL-wide data.
     if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
       setVehiclesData([]);
+      setIsLoading(false);
       return;
     }
 
     async function fetchData() {
-      // Get aggregated vehicle data
-      const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
-      if(! aggregatedVehicleData) return;
+      try {
+        // Get aggregated vehicle data
+        const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
+        if(! aggregatedVehicleData) return;
 
-      // Set state
-      setVehiclesData(aggregatedVehicleData);
+        // Set state
+        setVehiclesData(aggregatedVehicleData);
 
-      // Sum amount of vehicles per operator, used in FilteritemAanbieders component
-      let operators;
-      if(aggregatedVehicleData && aggregatedVehicleData.available_vehicles_aggregated_stats) {
-        operators = getOperatorStatsForChart(aggregatedVehicleData.available_vehicles_aggregated_stats.values, metadata.aanbieders);
+        // Sum amount of vehicles per operator, used in FilteritemAanbieders component
+        let operators;
+        if(aggregatedVehicleData && aggregatedVehicleData.available_vehicles_aggregated_stats) {
+          operators = getOperatorStatsForChart(aggregatedVehicleData.available_vehicles_aggregated_stats.values, metadata.aanbieders);
+        }
+        else {
+          operators = getOperatorStatsForChart(aggregatedVehicleData.availability_stats.values, metadata.aanbieders);
+        }
+        dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
+      } finally {
+        setIsLoading(false);
       }
-      else {
-        operators = getOperatorStatsForChart(aggregatedVehicleData.availability_stats.values, metadata.aanbieders);
-      }
-      dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
     }
+    setIsLoading(true);
     fetchData();
   }, [
     filter.ontwikkelingvan,
@@ -281,9 +290,13 @@ function BeschikbareVoertuigenChart({
       </div>
 
       <div className="relative" style={{ width: '100%', height: config?.height || '400px' }}>
-        <ResponsiveContainer>
-          {renderChart()}
-        </ResponsiveContainer>
+        {isLoading && (!chartData || chartData.length === 0) ? (
+          <ChartSkeleton height="100%" />
+        ) : (
+          <ResponsiveContainer>
+            {renderChart()}
+          </ResponsiveContainer>
+        )}
       </div>
 
     </div>

@@ -44,10 +44,6 @@
   }
 }
 
-.bg-theme-blue {
-  background-color: #15AEEF
-}
-
 .agg-button-container {
   display: flex;
   flex-direction: row;

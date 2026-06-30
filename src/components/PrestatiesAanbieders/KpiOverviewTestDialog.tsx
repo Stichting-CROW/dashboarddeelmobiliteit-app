@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Info } from 'lucide-react';
 import Modal from '../Modal/Modal.jsx';
+import { notifyError } from '../../helpers/notify';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import {
   getPermitLimitOverviewForMunicipality,
@@ -301,7 +302,7 @@ const KpiLimitsTabContent: React.FC<{
       await onRefreshLimitData();
     } catch (err) {
       console.error('KPI column toggle error:', err);
-      alert(err instanceof Error ? err.message : 'Fout bij wijzigen');
+      notifyError(err instanceof Error ? err.message : 'Fout bij wijzigen');
     } finally {
       setLoadingColumnKey(null);
     }
@@ -343,12 +344,12 @@ const KpiLimitsTabContent: React.FC<{
           }
         }
       } else {
-        alert('Geen KPI keys beschikbaar. Roep eerst de API aan.');
+        notifyError('Geen KPI keys beschikbaar. Roep eerst de API aan.');
       }
       await onRefreshLimitData();
     } catch (err) {
       console.error('On/off column error:', err);
-      alert(err instanceof Error ? err.message : 'Fout bij wijzigen');
+      notifyError(err instanceof Error ? err.message : 'Fout bij wijzigen');
     } finally {
       setLoadingColumnKey(null);
     }
@@ -380,7 +381,7 @@ const KpiLimitsTabContent: React.FC<{
       await onRefreshLimitData();
     } catch (err) {
       console.error('KPI cell toggle error:', err);
-      alert(err instanceof Error ? err.message : 'Fout bij wijzigen');
+      notifyError(err instanceof Error ? err.message : 'Fout bij wijzigen');
     } finally {
       setLoadingCellKey(null);
     }
@@ -388,7 +389,7 @@ const KpiLimitsTabContent: React.FC<{
 
   const handleOn = async (entry: LimitHistoryEntry) => {
     if (!token || kpiKeys.length === 0) {
-      if (kpiKeys.length === 0) alert('Geen KPI keys beschikbaar. Roep eerst de API aan.');
+      if (kpiKeys.length === 0) notifyError('Geen KPI keys beschikbaar. Roep eerst de API aan.');
       return;
     }
     const key = limitKey(entry.operator, entry.geometry_ref, entry.form_factor, entry.propulsion_type);
@@ -414,7 +415,7 @@ const KpiLimitsTabContent: React.FC<{
       await onRefreshLimitData();
     } catch (err) {
       console.error('Add limits error:', err);
-      alert(err instanceof Error ? err.message : 'Fout bij toevoegen');
+      notifyError(err instanceof Error ? err.message : 'Fout bij toevoegen');
     } finally {
       setLoadingRowKey(null);
     }
@@ -433,7 +434,7 @@ const KpiLimitsTabContent: React.FC<{
       await onRefreshLimitData();
     } catch (err) {
       console.error('Delete limits error:', err);
-      alert(err instanceof Error ? err.message : 'Fout bij verwijderen');
+      notifyError(err instanceof Error ? err.message : 'Fout bij verwijderen');
     } finally {
       setLoadingRowKey(null);
     }

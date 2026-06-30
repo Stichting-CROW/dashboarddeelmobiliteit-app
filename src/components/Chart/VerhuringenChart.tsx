@@ -45,6 +45,7 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import ChartSkeleton from './ChartSkeleton';
 
 const TOTAAL_KEY = 'Totaal';
 
@@ -65,6 +66,7 @@ function VerhuringenChart(props) {
   });
 
   const [rentalsData, setRentalsData] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   // See BeschikbareVoertuigenChart for the rationale behind the
   // metadata sub-reference deps (avoids duplicate refetches when metadata
@@ -73,32 +75,39 @@ function VerhuringenChart(props) {
     // Do not reload chart until you have 'zones'
     if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
       setRentalsData([]);
+      setIsLoading(false);
       return;
     }
     // If a plaats is selected but metadata.zones still belongs to a previous
     // plaats, skip the fetch (see BeschikbareVoertuigenChart for rationale).
     if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
       setRentalsData([]);
+      setIsLoading(false);
       return;
     }
     async function fetchData() {
-      // Get aggregated vehicle data
-      const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
-      if(! aggregatedData) return;
+      try {
+        // Get aggregated vehicle data
+        const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
+        if(! aggregatedData) return;
 
-      // Set state
-      setRentalsData(aggregatedData);
+        // Set state
+        setRentalsData(aggregatedData);
 
-      // Sum amount of vehicles per operator, used in FilteritemAanbieders component
-      let operators;
-      if(aggregatedData && aggregatedData.rentals_aggregated_stats) {
-        operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
+        // Sum amount of vehicles per operator, used in FilteritemAanbieders component
+        let operators;
+        if(aggregatedData && aggregatedData.rentals_aggregated_stats) {
+          operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
+        }
+        else {
+          operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
+        }
+        dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
+      } finally {
+        setIsLoading(false);
       }
-      else {
-        operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
-      }
-      dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
     }
+    setIsLoading(true);
     fetchData();
   }, [
     filter.ontwikkelingvan,
@@ -259,9 +268,13 @@ function VerhuringenChart(props) {
       </div>
 
       <div className="relative" style={{ width: '100%', height: '400px' }}>
-        <ResponsiveContainer>
-          {renderChart()}
-        </ResponsiveContainer>
+        {isLoading && (!chartData || chartData.length === 0) ? (
+          <ChartSkeleton height="100%" />
+        ) : (
+          <ResponsiveContainer>
+            {renderChart()}
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   )

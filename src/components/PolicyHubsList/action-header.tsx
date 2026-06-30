@@ -2,7 +2,7 @@ import { useToast } from "../ui/use-toast"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "../../types/StateType"
-import { notify } from '../../helpers/notify';
+import { notify, notifyInfo } from '../../helpers/notify';
 
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { getGeoIdForZoneIds, readable_phase } from "../../helpers/policy-hubs/common"
@@ -57,7 +57,7 @@ const ActionHeader = ({
 
     const deleteHandler = async () => {
         if(! window.confirm('Weet je zeker dat je deze hub(s) wilt verwijderen?')) {
-            alert('Verwijderen geannuleerd');
+            notifyInfo('Verwijderen geannuleerd');
             return;
         }
 

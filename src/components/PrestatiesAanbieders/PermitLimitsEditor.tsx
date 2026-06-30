@@ -6,6 +6,7 @@ import type {
   PerformanceIndicatorDescription,
 } from '../../api/permitLimits';
 import { toDateOnly, formatBound } from './permitLimitsUtils';
+import { notifyError } from '../../helpers/notify';
 
 interface PermitLimitsEditorProps {
   token: string;
@@ -197,7 +198,7 @@ const PermitLimitsEditor: React.FC<PermitLimitsEditorProps> = ({
 
   const handleOk = () => {
     if (!propulsion_type) {
-      alert('Geen propulsion_type – bewerken niet mogelijk.');
+      notifyError('Geen propulsion_type – bewerken niet mogelijk.');
       return;
     }
     onSave(getNewData());

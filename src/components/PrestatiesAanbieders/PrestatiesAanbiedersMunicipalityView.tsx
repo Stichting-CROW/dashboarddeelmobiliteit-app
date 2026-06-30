@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import '../../styles/permits.css';
 import PrestatiesAanbiederCard from './PrestatiesAanbiederCard';
+import { notifyError } from '../../helpers/notify';
 import SelectProviderDialog from './SelectProviderDialog';
 import SelectVehicleTypeDialog from './SelectVehicleTypeDialog';
 import PermitCardCollection, { type RowData } from './PermitCardCollection';
@@ -79,7 +80,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
   useEffect(() => {
     if (editDialogPermit && token) {
       if (!editDialogPermit.propulsion_type) {
-        alert('Geen propulsion_type – bewerken niet mogelijk.');
+        notifyError('Geen propulsion_type – bewerken niet mogelijk.');
         handleCloseEditDialog();
         return;
       }

@@ -17,6 +17,7 @@ import { getProvider } from '../../helpers/providers';
 import { isDemoMode } from '../../config/demo';
 import { getDemoOperatorName } from '../../helpers/demoMode';
 import Modal from '../Modal/Modal.jsx';
+import { notifyError } from '../../helpers/notify';
 import type {
   GeometryOperatorModalityLimit,
   PerformanceIndicatorDescription,
@@ -212,7 +213,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     if (!token || !record.geometry_operator_modality_limit_id) return;
     const allowChange = mode === 'admin';
     if (!allowChange && record.effective_date < moment().format('YYYY-MM-DD')) {
-      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      notifyError('Alleen toekomstige datums kunnen worden gewijzigd.');
       return;
     }
     try {
@@ -220,7 +221,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       if (prevToUpdate) {
         const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, allowChange);
         if (!updated) {
-          alert('Fout bij bijwerken vorige record');
+          notifyError('Fout bij bijwerken vorige record');
           return;
         }
       }
@@ -229,11 +230,11 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
         setAddNewInitialKpiValues(null);
         onRecordUpdated();
       } else {
-        alert('Fout bij verwijderen');
+        notifyError('Fout bij verwijderen');
       }
     } catch (error) {
       console.error('Error deleting record:', error);
-      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+      notifyError(error instanceof Error ? error.message : 'Fout bij verwijderen');
     }
   }, [token, limitHistory, mode, onRecordUpdated]);
 
@@ -338,7 +339,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       onRecordUpdated();
     } catch (error) {
       console.error('Test reset error:', error);
-      alert('Fout bij reset');
+      notifyError('Fout bij reset');
     } finally {
       setTestActionLoading(null);
     }
@@ -363,7 +364,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     if (!token || !historyData || !propulsion_type) return;
     const found = findRecordContainingDate(historyData, date);
     if (!found?.record.geometry_operator_modality_limit_id) {
-      alert(`Geen record voor datum ${date}`);
+      notifyError(`Geen record voor datum ${date}`);
       return;
     }
     const id = found.record.geometry_operator_modality_limit_id;
@@ -373,7 +374,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       if (prevToUpdate) {
         const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, true); // test tab: always allow
         if (!updated) {
-          alert('Fout bij bijwerken vorige record');
+          notifyError('Fout bij bijwerken vorige record');
           return;
         }
       }
@@ -390,11 +391,11 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
         setHistoryData(fresh ? fresh.sort((a, b) => a.effective_date.localeCompare(b.effective_date)) : []);
         onRecordUpdated();
       } else {
-        alert('Fout bij verwijderen');
+        notifyError('Fout bij verwijderen');
       }
     } catch (error) {
       console.error('Error deleting record:', error);
-      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+      notifyError(error instanceof Error ? error.message : 'Fout bij verwijderen');
     } finally {
       setTestActionLoading(null);
     }
@@ -402,7 +403,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
 
   const handleTestInsert = useCallback(async (date: string) => {
     if (!token || !kpiListForTest?.length) {
-      alert('KPI list niet beschikbaar.');
+      notifyError('KPI list niet beschikbaar.');
       return;
     }
     setTestActionLoading(`insert-${date}`);
@@ -433,7 +434,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       onRecordUpdated();
     } catch (error) {
       console.error('Test insert error:', error);
-      alert('Fout bij insert');
+      notifyError('Fout bij insert');
     } finally {
       setTestActionLoading(null);
     }
@@ -441,7 +442,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
 
   const handleTestRandom = useCallback(async (date: string) => {
     if (!token || !kpiListForTest?.length) {
-      alert('KPI list niet beschikbaar.');
+      notifyError('KPI list niet beschikbaar.');
       return;
     }
     setTestActionLoading(`random-${date}`);
@@ -486,7 +487,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
       onRecordUpdated();
     } catch (error) {
       console.error('Test random error:', error);
-      alert('Fout bij random');
+      notifyError('Fout bij random');
     } finally {
       setTestActionLoading(null);
     }
@@ -496,7 +497,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
     if (!token) return;
     const allowChange = mode === 'admin';
     if (!allowChange && data.effective_date < moment().format('YYYY-MM-DD')) {
-      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      notifyError('Alleen toekomstige datums kunnen worden gewijzigd.');
       return;
     }
     try {
@@ -506,7 +507,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
           setAddNewInitialKpiValues(null);
           onRecordUpdated();
         } else {
-          alert('Fout bij opslaan');
+          notifyError('Fout bij opslaan');
         }
       } else {
         const ctx: OperationContext = {
@@ -521,12 +522,12 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
           setAddNewInitialKpiValues(null);
           onRecordUpdated();
         } else {
-          alert('Fout bij opslaan');
+          notifyError('Fout bij opslaan');
         }
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Fout bij opslaan';
-      alert(msg);
+      notifyError(msg);
     }
   };
 

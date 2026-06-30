@@ -5,6 +5,7 @@ import { updateGeometryOperatorModalityLimit, addGeometryOperatorModalityLimit, 
 import { planDeleteRecord, getPreviousRecordForDate } from './permitLimitsOperations';
 import type { HistoryTableRow } from './permitLimitsUtils';
 import { getAllKpis, toDateOnly, formatBound } from './permitLimitsUtils';
+import { notifyError } from '../../helpers/notify';
 
 type SortColumn = 'date' | 'kpi' | 'value';
 type SortDirection = 'asc' | 'desc' | null;
@@ -166,7 +167,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
 
   const handleSaveClick = async (row: HistoryTableRow) => {
     if (!limitHistory || !token) {
-      alert('Fout: Kan record niet bijwerken');
+      notifyError('Fout: Kan record niet bijwerken');
       return;
     }
 
@@ -177,17 +178,17 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
     );
 
     if (!fullRecord || !fullRecord.geometry_operator_modality_limit_id) {
-      alert('Fout: Record niet gevonden');
+      notifyError('Fout: Record niet gevonden');
       return;
     }
 
     if (mode !== 'admin' && moment(fullRecord.effective_date).isBefore(moment(), 'day')) {
-      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      notifyError('Alleen toekomstige datums kunnen worden gewijzigd.');
       return;
     }
 
     if (typeof editingValue === 'number' && editingValue < 0) {
-      alert('Fout: Ongeldige waarde');
+      notifyError('Fout: Ongeldige waarde');
       return;
     }
 
@@ -223,11 +224,11 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
         setEditingValue('');
         onRecordUpdated();
       } else {
-        alert('Fout bij bijwerken van record');
+        notifyError('Fout bij bijwerken van record');
       }
     } catch (error) {
       console.error('Error updating record:', error);
-      alert(error instanceof Error ? error.message : 'Fout bij bijwerken van record');
+      notifyError(error instanceof Error ? error.message : 'Fout bij bijwerken van record');
     } finally {
       setIsSaving(false);
     }
@@ -240,7 +241,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
 
   const handleDeleteClick = async (row: HistoryTableRow) => {
     if (!limitHistory || !token) {
-      alert('Fout: Kan record niet verwijderen');
+      notifyError('Fout: Kan record niet verwijderen');
       return;
     }
 
@@ -251,12 +252,12 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
     );
 
     if (!fullRecord || !fullRecord.geometry_operator_modality_limit_id) {
-      alert('Fout: Record niet gevonden');
+      notifyError('Fout: Record niet gevonden');
       return;
     }
 
     if (mode !== 'admin' && moment(fullRecord.effective_date).isBefore(moment(), 'day')) {
-      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      notifyError('Alleen toekomstige datums kunnen worden gewijzigd.');
       return;
     }
 
@@ -282,7 +283,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
         if (result) {
           onRecordUpdated();
         } else {
-          alert('Fout bij bijwerken van record');
+          notifyError('Fout bij bijwerken van record');
         }
       } else {
         // Last value: delete the full geometry_operator_modality_limit record
@@ -290,7 +291,7 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
         if (prevToUpdate) {
           const updated = await updateGeometryOperatorModalityLimit(token, prevToUpdate, mode === 'admin');
           if (!updated) {
-            alert('Fout bij bijwerken vorige record');
+            notifyError('Fout bij bijwerken vorige record');
             return;
           }
         }
@@ -299,12 +300,12 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
         if (ok) {
           onRecordUpdated();
         } else {
-          alert('Fout bij verwijderen');
+          notifyError('Fout bij verwijderen');
         }
       }
     } catch (error) {
       console.error('Error deleting record:', error);
-      alert(error instanceof Error ? error.message : 'Fout bij verwijderen');
+      notifyError(error instanceof Error ? error.message : 'Fout bij verwijderen');
     } finally {
       setDeletingId(null);
     }
@@ -364,33 +365,33 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
 
   const handleSaveAddNewRow = async () => {
     if (!token) {
-      alert('Fout: Kan record niet toevoegen');
+      notifyError('Fout: Kan record niet toevoegen');
       return;
     }
 
     if (!propulsion_type) {
-      alert('Geen propulsion_type – bewerken niet mogelijk.');
+      notifyError('Geen propulsion_type – bewerken niet mogelijk.');
       return;
     }
 
     if (!newRowKpiKey) {
-      alert('Fout: Selecteer een KPI');
+      notifyError('Fout: Selecteer een KPI');
       return;
     }
 
     if (newRowValue !== '' && (typeof newRowValue !== 'number' || newRowValue < 0)) {
-      alert('Fout: Voer een geldige waarde in (of leeg voor uitschakelen)');
+      notifyError('Fout: Voer een geldige waarde in (of leeg voor uitschakelen)');
       return;
     }
 
     if (mode !== 'admin' && newRowDate < moment().format('YYYY-MM-DD')) {
-      alert('Alleen toekomstige datums kunnen worden gewijzigd.');
+      notifyError('Alleen toekomstige datums kunnen worden gewijzigd.');
       return;
     }
 
     const kpi = availableKpis.find((k) => k.kpiKey === newRowKpiKey);
     if (!kpi) {
-      alert('Fout: Ongeldige KPI');
+      notifyError('Fout: Ongeldige KPI');
       return;
     }
 
@@ -466,11 +467,11 @@ const PermitLimitsTable: React.FC<PermitLimitsTableProps> = ({
         setNewRowValue('');
         onRecordUpdated();
       } else {
-        alert('Fout bij toevoegen van record');
+        notifyError('Fout bij toevoegen van record');
       }
     } catch (error) {
       console.error('Error adding record:', error);
-      alert(error instanceof Error ? error.message : 'Fout bij toevoegen van record');
+      notifyError(error instanceof Error ? error.message : 'Fout bij toevoegen van record');
     } finally {
       setIsAdding(false);
     }
