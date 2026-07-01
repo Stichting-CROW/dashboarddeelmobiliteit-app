@@ -28,7 +28,7 @@ const DEMO_OPERATOR_NAMES_POOL = [
   'FietsDeel BV',
   'ScootShare',
   'Stedelijk Vervoer',
-  'Mobiliteitshub',
+  'Fenyx',
   'FietsNet Holland',
   'StadsDeel',
   'Mobiel Nederland',
