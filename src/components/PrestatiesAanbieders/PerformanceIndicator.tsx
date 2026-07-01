@@ -186,6 +186,7 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
                 size={blockSize}
                 isFirst={index === 0}
                 isLast={index === displayValues.length - 1}
+                kpiKey={kpi.kpi_key}
               />
             ))}
           </div>

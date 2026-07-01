@@ -1,5 +1,6 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useState } from "react";
+import { applyDemoValueFactor } from "../../helpers/demoMode";
 
 interface PerformanceIndicatorBlockProps {
   date: string;
@@ -9,6 +10,7 @@ interface PerformanceIndicatorBlockProps {
   size?: number; // Size in pixels (default: 16px for w-4 h-4)
   isFirst?: boolean; // Whether this is the first block in the row
   isLast?: boolean; // Whether this is the last block in the row
+  kpiKey?: string; // Used to derive a consistent demo value factor in demo mode
 }
 
 const getDutchDayAbbreviation = (dateString: string): string => {
@@ -34,10 +36,15 @@ const formatDutchDate = (dateString: string): string => {
   });
 };
 
-const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16, isFirst = false, isLast = false }: PerformanceIndicatorBlockProps) => {
+const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16, isFirst = false, isLast = false, kpiKey = '' }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
   const dayAbbreviation = getDutchDayAbbreviation(date);
   const formattedDate = formatDutchDate(date);
+
+  // In demo mode, show a fictional measured value so real numbers are never
+  // exposed. The factor is consistent per KPI (same as the detail panel chart).
+  // The block color still reflects the real `complies` result from the backend.
+  const displayMeasured = Math.round(applyDemoValueFactor(measured, kpiKey));
 
   const getBackgroundColor = (): string => {
     if (complies === true) return '#48E248';
@@ -79,8 +86,8 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
         >
           <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
             __html: threshold !== undefined 
-              ? `<b>${measured}</b> / ${threshold}<br />${dayAbbreviation}. ${formattedDate}`
-              : `<b>${measured}</b><br />${dayAbbreviation}. ${formattedDate}`
+              ? `<b>${displayMeasured}</b> / ${threshold}<br />${dayAbbreviation}. ${formattedDate}`
+              : `<b>${displayMeasured}</b><br />${dayAbbreviation}. ${formattedDate}`
           }} />
         </TooltipContent>
       </Tooltip>

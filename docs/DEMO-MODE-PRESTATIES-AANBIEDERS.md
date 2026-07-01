@@ -37,11 +37,13 @@ When DEMO mode is enabled, the following changes apply on the Prestaties aanbied
 
 - **Consistency**: Each operator keeps the same demo color across navigation and reloads.
 
-### 3. Chart Values
+### 3. Chart & Indicator Values
 
-- **Measured values** in the detail panel LineCharts are multiplied by factors such as `× 1.4`, `÷ 1.4`, `× 1.2`, `÷ 1.2`, etc.
+- **Measured values** are multiplied by factors such as `× 1.4`, `÷ 1.4`, `× 1.2`, `÷ 1.2`, etc. This applies to:
+  - the detail panel LineCharts, and
+  - the daily indicator block tooltips (e.g. the `200` in `200 / 275`), so real numbers are never exposed.
 - Each KPI metric has its own factor, kept consistent across sessions.
-- **KPI values (thresholds and compliance)** are not changed; pass/fail logic stays the same.
+- **KPI thresholds and compliance** are not changed; the pass/fail logic and the green/red/white block colors stay the same.
 
 ## Persistence
 
@@ -71,6 +73,7 @@ Then reload the page.
 
 - `PrestatiesAanbiedersDetailsPanel` – operator name, color, chart values
 - `PrestatiesAanbiederCard` – operator name and color
+- `PerformanceIndicatorBlock` – factored measured value in the daily block tooltip
 - `FilterbarPermits` – operator names and colors in the aanbieders filter
 - `SelectProviderDialog` – operator names
 - `PrestatiesAanbiedersMunicipalityView` – provider names in the edit dialog table
