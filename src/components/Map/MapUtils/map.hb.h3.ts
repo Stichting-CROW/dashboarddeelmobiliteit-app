@@ -151,6 +151,14 @@ const renderH3Grid = async (
   // Get hexes for map
   const hexesForUser = await getHexesForUser(map, token, filter);
 
+  // Bail out if the od-api didn't return the accessible hexes (e.g. the
+  // request errored for this account). Clear the grid instead of crashing
+  // on undefined, so the rest of the map stays usable.
+  if(! hexesForUser) {
+    removeH3Grid(map);
+    return;
+  }
+
   // Get OD data
   let hbData;
   const hbDataResponse = await fetchHbData(token, filter, metadata);
