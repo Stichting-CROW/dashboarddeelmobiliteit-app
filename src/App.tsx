@@ -110,6 +110,13 @@ function App() {
 
   const DELAY_TIMEOUT_IN_MS = 250;
 
+  // The park/rentals data effects debounce their API poll to coalesce rapid
+  // filter changes. The very first poll doesn't need that: fire it immediately
+  // so the (large) vehicles request starts as early as possible. Follow-up
+  // effect runs during app boot no longer abort it (see poll-api/pollParkingData).
+  const didInitParkingPoll = useRef(false);
+  const didInitRentalsPoll = useRef(false);
+
   // Store window location in a local variable
   const location = useLocation();
   useEffect(() => {
@@ -519,9 +526,11 @@ function App() {
 
     if(delayTimeout) clearTimeout(delayTimeout);
 
+    const delay = didInitParkingPoll.current ? DELAY_TIMEOUT_IN_MS : 0;
+    didInitParkingPoll.current = true;
     setDelayTimeout(setTimeout(() => {
       initUpdateParkingData(store);
-    }, DELAY_TIMEOUT_IN_MS))
+    }, delay))
   }, [
     isLoggedIn,
     metadata.zones_loaded,
@@ -539,9 +548,11 @@ function App() {
 
     if(delayTimeout) clearTimeout(delayTimeout);
 
+    const delay = didInitRentalsPoll.current ? DELAY_TIMEOUT_IN_MS : 0;
+    didInitRentalsPoll.current = true;
     setDelayTimeout(setTimeout(() => {
       initUpdateVerhuringenData(store);
-    }, DELAY_TIMEOUT_IN_MS))
+    }, delay))
   }, [
     isLoggedIn,// If we change from guest to logged in we want to update rentals
     metadata.zones_loaded,// We only do an API call if zones are loaded

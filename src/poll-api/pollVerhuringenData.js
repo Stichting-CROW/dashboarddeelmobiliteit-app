@@ -8,13 +8,16 @@ import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
 import {shouldFetchVehicles} from './pollTools.js';
 
 import { DISPLAYMODE_RENTALS } from '../reducers/layers.js';
-const md5 = require('md5');
 
 var store_verhuringendata = undefined;
 var timerid_verhuringendata = undefined;
 
 // Variable that will prevent simultaneous loading of fetch requests
 let theFetch = null;
+
+// URL of the request currently in flight, so an identical request can reuse
+// it instead of aborting and starting over (see doApiCall)
+let theFetchUrl = null;
 
 // Variable to keep track of vehicles response
 // Only do a new fetch() if needed
@@ -46,7 +49,7 @@ const processRentalsResult = (state, type, rentals) => {
     let feature = {
      "type":"Feature",
      "properties":{
-        "id": md5(v.location.latitude+v.location.longitude),
+        "id": v.location.latitude+","+v.location.longitude,
         "system_id": v.system_id,
         "form_factor": v.form_factor || null,
         "arrival_time": v.arrival_time,
@@ -117,35 +120,59 @@ const doApiCall = (
     };
   }
   
+  // If a request for this exact URL is already in flight, let it finish
+  // instead of aborting and re-issuing it: the response is processed with the
+  // then-current store state, so the result is the same either way.
+  if(theFetch && theFetchUrl === url) {
+    return;
+  }
+
   store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: true});
-  
+
   // Abort previous fetch
   if(theFetch) {
     theFetch.abort()
   }
   // Now do a new fetch
-  theFetch = abortableFetch(url, options);
-  theFetch.ready.then(function(response) {
-    // Set theFetch to null, so next request is not aborted
-    theFetch = null;
+  const thisFetch = abortableFetch(url, options);
+  theFetch = thisFetch;
+  theFetchUrl = url;
 
-    store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
+  // Only clear the in-flight tracking if it still points at this request
+  // (a newer request may have replaced it in the meantime)
+  const clearFetchTracking = () => {
+    if(theFetch === thisFetch) {
+      theFetch = null;
+      theFetchUrl = null;
+    }
+  };
 
+  thisFetch.ready.then(function(response) {
     if(!response.ok) {
+      clearFetchTracking();
+      store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
       console.error("unable to fetch: %o", response);
       return false
     }
 
     response.json().then(function(data) {
       const rentals = isLoggedIn ? data : [];
-      callback(state, type, rentals);
+      // Process with the *current* store state (not the state at request
+      // time), so client-side filters that changed while the request was in
+      // flight are applied to the result.
+      callback(store_verhuringendata.getState(), type, rentals);
     }).catch(ex=>{
       console.error("unable to decode JSON");
     }).finally(()=>{
+      clearFetchTracking();
       store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
     })
-    
+
   }).catch(ex=>{
+    // If this request was aborted because a newer one replaced it, leave the
+    // loading state to the newer request
+    if(theFetch !== thisFetch) return;
+    clearFetchTracking();
     store_verhuringendata.dispatch({type: 'SHOW_LOADING', payload: false});
     console.error("fetch error - unable to fetch JSON from %s", url);
   });
@@ -186,12 +213,14 @@ const updateVerhuringenData = ()  => {
       existingFilter = state.filter;
 
       const theType = state.filter.herkomstbestemming === 'bestemming' ? 'destinations' : 'origins';
-      if(doFetchRentals || ! activeRentals) {
+      if(doFetchRentals || (! activeRentals && ! theFetch)) {
         doApiCall(state, theType, processRentalsResult);
-      } else {
+      } else if(activeRentals) {
         // Regenerate geoJson without querying API
-        processRentalsResult(state, theType, activeRentals); 
+        processRentalsResult(state, theType, activeRentals);
       }
+      // else: no rentals yet but a fetch is in flight; its callback processes
+      // the response with the store state at completion time
 
     }
   } catch(ex) {

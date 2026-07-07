@@ -58,6 +58,20 @@ const validatePersistedState = (state) => {
 
 persistedState = validatePersistedState(persistedState);
 
+// Reset a stale persisted 'datum' filter to now *before* the store is created.
+// App.tsx used to do this in an effect ~500ms after load, but by then the
+// initial vehicles fetch is already in flight and the datum change would abort
+// it and fetch everything again (doubling the load time for returning
+// visitors). Shared links (?view=...) keep their persisted datum.
+if (persistedState.filter && persistedState.filter.datum) {
+  const isSharedLink = new URLSearchParams(window.location.search).get('view');
+  const datumAgeMs = Date.now() - new Date(persistedState.filter.datum).getTime();
+  const isMoreThan10MinutesAgo = isNaN(datumAgeMs) || datumAgeMs > 10 * 60 * 1000;
+  if (!isSharedLink && isMoreThan10MinutesAgo) {
+    persistedState.filter.datum = new Date().toISOString();
+  }
+}
+
 window.process = { ...window.process }
 
 export const store = createStore(
