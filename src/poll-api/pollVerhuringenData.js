@@ -106,7 +106,8 @@ const doApiCall = (
   let options = {};
   if (canfetchdata) {
     let filterparams = createFilterparameters(DISPLAYMODE_RENTALS, state.filter, state.metadata, {
-      show_global: is_admin
+      show_global: is_admin,
+      is_logged_in: isLoggedIn(state)
     });
     if (filterparams.length > 0) {
       url += "?" + filterparams.join("&");

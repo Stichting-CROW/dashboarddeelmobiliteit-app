@@ -1,5 +1,6 @@
 import { fetchOperators, getCachedOperators } from '../api/operators';
 import { setAclInRedux } from '../actions/authentication';
+import { isAdmin } from '../helpers/authentication.js';
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
@@ -130,6 +131,22 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             } else if(metadata.municipalities.length === 0){
               // Reset filterGebied if user has access to 0 municipalities
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+            } else {
+              // User has access to multiple municipalities. When the persisted /
+              // initial 'Plaats' filter points at a municipality this user cannot
+              // access (e.g. a stale localStorage value or the random initial
+              // municipality after a fresh load), the filter bar already renders
+              // it as "Alle plaatsen", but the vehicle query would be scoped to
+              // zones of that inaccessible municipality and return nothing. Reset
+              // it to "" ("Alle plaatsen") so all accessible municipalities'
+              // vehicles are shown, matching what the UI displays.
+              // Admins are exempt: they can view municipalities outside their ACL
+              // list and their queries are NL-wide regardless of this value.
+              const currentGebied = store_accesscontrollist.getState().filter?.gebied;
+              const hasAccessToCurrentGebied = metadata.municipalities.some(m => m.gm_code === currentGebied);
+              if(currentGebied && !hasAccessToCurrentGebied && !isAdmin(store_accesscontrollist.getState())) {
+                store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+              }
             }
             
             // Aanbieders come from the public /operators API (see dispatchPublicAanbiedersFromApi).

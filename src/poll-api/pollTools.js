@@ -81,7 +81,16 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
       filterparams.push("zone_ids=" + zoneIds.join(','));
     }
   }
-  // If no place is set, but the user is no admin: Set all places user has access to
+  // Logged-in users with no specific place selected ("Alle plaatsen"): the
+  // backend already scopes the response to the account's allowed data via the
+  // auth token, so we intentionally add no zone_ids. This is also required for
+  // accounts with access to a large number of municipalities (e.g. NL-wide
+  // shared data): enumerating every municipality/zone would make the query
+  // string long enough that the upstream server rejects it with a 502.
+  else if (options.is_logged_in && !options.show_global) {
+    // No zone_ids: the auth token (+ operators=) scopes the data server-side.
+  }
+  // Guests with access to multiple (public) municipalities: scope to those zones
   else if (hasAccessToMultipleGebieden && !options.show_global) {
     // Get zone IDs as array
     const allowed_zone_ids = metadata.zones.filter(zone => {

@@ -1,5 +1,5 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
-import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
+import {isLoggedIn, shouldTreatMunicipalitiesAsNlWide} from '../helpers/authentication.js';
 
 // const getFilters = async (token, gm_code) => {
 //   let options = { headers : { "authorization": "Bearer " + token }}
@@ -61,13 +61,16 @@ export const updateZones = async (store_zones) => {
 
     // If no gebied is selected:
     if(state.filter.gebied==="") {
-      // Admins have access to every municipality in NL. Passing that whole list
-      // as `municipalities=GM..,GM..` produces a query string so long the proxy
-      // rejects it with a 502 Bad Gateway. The /zones endpoint has no "all"
-      // mode (it requires zone_ids or municipalities), so use the parameterless
-      // /public/municipalities endpoint, which returns every municipality zone
-      // NL-wide in a single lightweight request.
-      if(isAdmin(state)) {
+      // Admins - and non-admin organisations with access to a large number of
+      // municipalities (e.g. NL-wide shared data) - can't pass their whole
+      // municipality list as `municipalities=GM..,GM..`: the upstream server
+      // rejects such a request with a 502. When the zones request fails,
+      // zones_loaded never becomes true and the vehicle fetch stays blocked, so
+      // no vehicles show. Use the lightweight parameterless /public/municipalities
+      // endpoint instead, which returns every municipality zone NL-wide in a
+      // single request. Vehicles are scoped by the auth token regardless of the
+      // loaded zones (see createFilterparameters).
+      if(shouldTreatMunicipalitiesAsNlWide(state)) {
         url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
       } else {
         // Get all zones of all municipalities this user has access to

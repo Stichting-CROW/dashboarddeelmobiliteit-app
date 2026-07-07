@@ -18,7 +18,7 @@ export const getAggregatedStats = async (token, key, options) => {
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
-  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
+  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata, { is_logged_in: true });
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
   // Get API response (deduped: concurrent identical requests share a single network call)
@@ -41,7 +41,7 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
-  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
+  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata, { is_logged_in: true });
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
   // Get API response (deduped: concurrent identical requests share a single network call)

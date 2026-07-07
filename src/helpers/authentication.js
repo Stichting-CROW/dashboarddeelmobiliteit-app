@@ -71,6 +71,24 @@ export const isAdmin = (state) => {
   return admin;
 }
 
+// Maximum number of municipalities we still enumerate in a
+// `/zones?municipalities=GM..,GM..` (or `/zones?zone_ids=..`) query. Above this,
+// the upstream server rejects the request with a 502. Accounts with more
+// accessible municipalities than this are treated NL-wide (like admins) for zone
+// loading and zone-boundary display; their vehicles are scoped by the auth token
+// regardless (see createFilterparameters). Kept well below any realistic
+// province-sized list so that small/regional accounts keep their precise zones.
+export const MAX_ENUMERABLE_MUNICIPALITIES = 25;
+
+// True when we should treat this account as NL-wide for zone loading/display:
+// admins, or non-admin organisations with access to so many municipalities that
+// enumerating them in a zones query would 502.
+export const shouldTreatMunicipalitiesAsNlWide = (state) => {
+  if (isAdmin(state)) return true;
+  const gebieden = state?.metadata?.gebieden || [];
+  return gebieden.length > MAX_ENUMERABLE_MUNICIPALITIES;
+};
+
 // Validate if the current authentication state is valid
 export const isValidAuthState = (state) => {
   if (!state || !state.authentication || !state.authentication.user_data) {

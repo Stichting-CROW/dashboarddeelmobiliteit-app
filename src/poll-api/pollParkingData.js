@@ -114,7 +114,8 @@ const doApiCall = (
 
   let options = {};
   let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
-    show_global: is_admin
+    show_global: is_admin,
+    is_logged_in: isLoggedIn(state)
   });
 
   // Set query params for guests
