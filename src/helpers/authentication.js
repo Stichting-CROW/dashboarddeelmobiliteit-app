@@ -1,3 +1,5 @@
+import { isOperatorPrestatiesView } from './prestatiesAanbiedersViewMode';
+
 export const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
@@ -9,14 +11,21 @@ export const getAclOrganisationType = (acl) => {
 };
 
 /**
- * Operator account: organisation_type OPERATOR, or a single operator in menu ACL
+ * Operator account: organisation_type OPERATOR, or — only when the
+ * organisation type is unknown — a single operator in the menu ACL
  * (see prestatiesAanbiedersViewMode.isOperatorPrestatiesView).
+ *
+ * A known organisation type is authoritative: municipality and other
+ * government accounts can be scoped to a single operator too (e.g. only one
+ * provider active in their gebied), so the single-operator heuristic must not
+ * override a known non-OPERATOR type.
  */
 export const isOperatorAccount = (acl) => {
   if (!acl) return false;
 
-  if (getAclOrganisationType(acl) === 'OPERATOR') {
-    return true;
+  const organisationType = getAclOrganisationType(acl);
+  if (organisationType) {
+    return organisationType === 'OPERATOR';
   }
 
   const operators = acl.operators;
@@ -30,6 +39,19 @@ export const isOperatorAccount = (acl) => {
   }
 
   return false;
+};
+
+/**
+ * Whether the logged-in user should get the operator-restricted UI
+ * (e.g. no HB matrix layer). Falls back to the single-operator heuristic on
+ * `aclOperators` only when the ACL doesn't expose an organisation type.
+ */
+export const isOperatorUser = (acl, aclOperators = []) => {
+  const organisationType = getAclOrganisationType(acl);
+  if (organisationType) {
+    return organisationType === 'OPERATOR';
+  }
+  return isOperatorAccount(acl) || isOperatorPrestatiesView(aclOperators);
 };
 
 export const canEditHubs = (acl) => {
