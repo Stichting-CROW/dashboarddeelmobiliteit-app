@@ -1,4 +1,4 @@
-import {isLoggedIn, isAdmin} from '../helpers/authentication.js';
+import {isLoggedIn, shouldTreatMunicipalitiesAsNlWide} from '../helpers/authentication.js';
 
 export const getEmptyZonesGeodataPayload = () => {
   return {
@@ -86,8 +86,10 @@ export const updateZonesgeodata = (store) => {
     let zone_ids = '';
     if (!state) {
       zone_ids = '';
-    } else if (state.filter.gebied === '' && isAdmin(state)) {
-      // Don't show all zone boundaries
+    } else if (state.filter.gebied === '' && shouldTreatMunicipalitiesAsNlWide(state)) {
+      // Don't show all zone boundaries. For admins and large non-admin orgs this
+      // would enumerate every municipality zone_id into the request, which the
+      // upstream server rejects with a 502 (and NL-wide boundaries aren't useful).
     } else if (state.filter.gebied === '') {
       zone_ids = state.metadata.zones
         .filter((zone) => zone.zone_type === 'municipality')
