@@ -54,6 +54,12 @@ function EditOrganisation({
   // Get API token
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
+  // Get the list of known operators (system_id + name) from the metadata.
+  // This is the canonical source of operators, so selecting an operator always
+  // produces a valid system_id (instead of relying on other organisations'
+  // possibly-empty data_owner_of_operators arrays).
+  const aanbieders = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+
   useEffect(() => {
     buildMunicipalityOptionsValue();
     prepareDefaultSelectedMunicipalities();
@@ -63,7 +69,8 @@ function EditOrganisation({
   }, [
     token,
     municipalities,
-    organisations
+    organisations,
+    aanbieders
   ]);
 
   const prepareDefaultSelectedMunicipalities = () => {
@@ -81,13 +88,13 @@ function EditOrganisation({
   }
   
   const prepareDefaultSelectedOperators = () => {
-    if(! organisations || ! organisation || ! organisation.data_owner_of_operators) return;
+    if(! organisation || ! organisation.data_owner_of_operators) return;
     let currentUserOperators = [];
     organisation.data_owner_of_operators.forEach(system_id => {
-      let relatedOperator: any = organisations.filter(x => x.data_owner_of_operators && x.data_owner_of_operators[0] === system_id);
-      if(relatedOperator && relatedOperator.length > 0) {
-        currentUserOperators.push({ label: relatedOperator[0].name, value: system_id });
-      }
+      if(! system_id) return;
+      let relatedOperator: any = aanbieders.filter(x => x.system_id === system_id);
+      const label = (relatedOperator && relatedOperator.length > 0) ? relatedOperator[0].name : system_id;
+      currentUserOperators.push({ label, value: system_id });
     });
     setSelectedOperators(currentUserOperators);
   }
@@ -106,8 +113,9 @@ function EditOrganisation({
     // Build municipalityCodeArray
     let data_owner_of_municipalities = selectedMunicipalities.map(x => x.value);
 
-    // Build operatorArray
-    let data_owner_of_operators = selectedOperators.map(x => x.value);
+    // Build operatorArray. Filter out empty values so we never send `null`,
+    // which the API rejects ("none is not an allowed value").
+    let data_owner_of_operators = selectedOperators.map(x => x.value).filter(value => value !== null && value !== undefined);
 
     // Update
     if(organisation && organisation.organisation_id) {
@@ -152,14 +160,16 @@ function EditOrganisation({
   }
 
   const buildOperatorOptionsValue = async () => {
-    const optionsList = [];
-    const operators = organisations.filter(x => x.type_of_organisation === 'OPERATOR');
-    operators.forEach(x => {
-      optionsList.push({
-        value: x.data_owner_of_operators[0],
-        label: x.name
-      })
-    })
+    if(! aanbieders) return;
+    const optionsList = aanbieders
+      // Only operators with a valid system_id can be selected, otherwise we'd
+      // send `null` in data_owner_of_operators (which the API rejects).
+      .filter(x => x && x.system_id)
+      .map(x => ({
+        value: x.system_id,
+        label: x.name || x.system_id
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
     setOperatorOptionList(optionsList)
   }
 
