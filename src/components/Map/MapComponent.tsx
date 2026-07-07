@@ -661,8 +661,12 @@ const MapComponent = (props): JSX.Element => {
         return;
       }
 
+      // In the public map view (not logged in) we show a simplified marker:
+      // one dot in the operator color.
+      const useSimplifiedMarkers = ! isLoggedIn;
+
       if (stateLayers.displaymode === 'displaymode-rentals') {
-        const rentalMarkers = await getVehicleMarkers_rentals(operatorColor);
+        const rentalMarkers = await getVehicleMarkers_rentals(operatorColor, useSimplifiedMarkers);
         if (cancelled || !map.current) {
           return;
         }
@@ -673,8 +677,8 @@ const MapComponent = (props): JSX.Element => {
       }
 
       const [operationalMarkers, nonOperationalMarkers] = await Promise.all([
-        getVehicleMarkers(operatorColor, false),
-        getVehicleMarkers(operatorColor, true),
+        getVehicleMarkers(operatorColor, false, useSimplifiedMarkers),
+        getVehicleMarkers(operatorColor, true, useSimplifiedMarkers),
       ]);
       if (cancelled || !map.current) {
         return;
@@ -706,7 +710,8 @@ const MapComponent = (props): JSX.Element => {
   }, [
     didMapLoad,
     providers,
-    stateLayers.displaymode
+    stateLayers.displaymode,
+    isLoggedIn
   ]);
 
   const showSearchBar = () => {

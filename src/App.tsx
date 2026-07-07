@@ -386,6 +386,30 @@ function App() {
     return state.metadata;
   });
 
+  // Public map view default (not logged in): no municipality filter and
+  // only operator Voi active. Applied once, as soon as the operator list is
+  // known; after that the visitor's own filter choices are left alone.
+  useEffect(() => {
+    if (isLoggedIn) return;
+    if (filter?.public_defaults_applied) return;
+
+    const aanbieders = metadata?.aanbieders || [];
+    if (aanbieders.length === 0) return;
+
+    // Only apply if Voi is a known operator, otherwise we would exclude everything
+    if (!aanbieders.some((aanbieder) => aanbieder.system_id === 'voi')) return;
+
+    const aanbiedersexclude = aanbieders
+      .filter((aanbieder) => aanbieder.system_id !== 'voi')
+      .map((aanbieder) => aanbieder.system_id)
+      .join(',');
+
+    dispatch({
+      type: 'APPLY_PUBLIC_DEFAULT_FILTERS',
+      payload: { aanbiedersexclude }
+    });
+  }, [isLoggedIn, metadata.aanbieders, filter?.public_defaults_applied, dispatch]);
+
   // Set date to current date/time on load
   useEffect(() => {
     const setFilterDatum = newdt => {

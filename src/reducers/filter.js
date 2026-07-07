@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-// Always start with an initial municipality
+// Logged in users start with an initial municipality
 // This prevents a slow website on initial load
 const randomInitialMunicipality = () => {
   const municipalitiesWithLotsOfVehicles = [
@@ -24,9 +24,13 @@ const randomInitialMunicipality = () => {
   return randomMunicipality;
 }
 
+// The public map view (not logged in) starts without a municipality filter.
+// Once the operator list is loaded, only operator Voi is active by default
+// (see the APPLY_PUBLIC_DEFAULT_FILTERS effect in App.tsx).
 const initialState = {
   visible: true,
-  gebied: randomInitialMunicipality(),
+  gebied: "",
+  public_defaults_applied: false,
   zones: "",
   datum: (new Date()).toISOString(),
   // intervalstart: (new Date()).toISOString(),
@@ -454,14 +458,29 @@ export default function filter(state = initialState, action) {
       };
     }
     case 'LOGIN':
+    // RESET_FILTER is only dispatched right after a successful login
+    case 'RESET_FILTER': {
+      // Logged in users start with a random municipality selected,
+      // to prevent a slow website on initial load
+      return {
+        ...initialState,
+        gebied: randomInitialMunicipality()
+      };
+    }
     case 'LOGOUT': {
-      // console.log('login/logout - reset filter')
+      // console.log('logout - reset filter to public defaults')
       return initialState;
     }
-    case 'RESET_FILTER': {
-      // console.log('reset filter')
-      
-      return initialState;
+    case 'APPLY_PUBLIC_DEFAULT_FILTERS': {
+      // One-time default for the public map view: no municipality filter
+      // and only the given operators active (all others excluded)
+      return {
+        ...state,
+        gebied: "",
+        zones: "",
+        aanbiedersexclude: action.payload.aanbiedersexclude,
+        public_defaults_applied: true
+      };
     }
     case 'IMPORT_STATE': {
       // console.log('import filter', action.payload.filter)

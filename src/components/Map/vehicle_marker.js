@@ -1,30 +1,30 @@
 const MARKER_SIZE = 50;
 const markerRasterCache = new Map();
 
-function markerCacheKey(operatorColor, durationIndicationColor, isNonOperational) {
-  return `${operatorColor || '#666'}|${durationIndicationColor}|${isNonOperational ? 1 : 0}`;
+function markerCacheKey(operatorColor, durationIndicationColor, isNonOperational, simplified) {
+  return `${operatorColor || '#666'}|${durationIndicationColor}|${isNonOperational ? 1 : 0}|${simplified ? 1 : 0}`;
 }
 
-async function getVehicleMarkers(operatorColor, isNonOperational = false) {
+async function getVehicleMarkers(operatorColor, isNonOperational = false, simplified = false) {
   const gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48', '#9158DE'];
   return Promise.all(
     gradients.map((durationIndicationColor) =>
-      styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational)
+      styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational, simplified)
     )
   );
 }
 
-async function getVehicleMarkers_rentals(operatorColor) {
+async function getVehicleMarkers_rentals(operatorColor, simplified = false) {
   const gradients = ['#48E248', '#44BD48', '#3B7747', '#343E47'];
   return Promise.all(
     gradients.map((distanceIndicationColor) =>
-      styleVehicleMarker(operatorColor, distanceIndicationColor, false)
+      styleVehicleMarker(operatorColor, distanceIndicationColor, false, simplified)
     )
   );
 }
 
-async function styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational = false) {
-  const cacheKey = markerCacheKey(operatorColor, durationIndicationColor, isNonOperational);
+async function styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational = false, simplified = false) {
+  const cacheKey = markerCacheKey(operatorColor, durationIndicationColor, isNonOperational, simplified);
   const cached = markerRasterCache.get(cacheKey);
   if (cached) {
     return cached;
@@ -33,7 +33,8 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor, isNonO
   const rasterPromise = rasterizeVehicleMarkerSvg(
     operatorColor,
     durationIndicationColor,
-    isNonOperational
+    isNonOperational,
+    simplified
   );
   markerRasterCache.set(cacheKey, rasterPromise);
 
@@ -45,10 +46,25 @@ async function styleVehicleMarker(operatorColor, durationIndicationColor, isNonO
   }
 }
 
-async function rasterizeVehicleMarkerSvg(operatorColor, durationIndicationColor, isNonOperational) {
+async function rasterizeVehicleMarkerSvg(operatorColor, durationIndicationColor, isNonOperational, simplified) {
   const xmlns = 'http://www.w3.org/2000/svg';
   const svgElement = document.createElementNS(xmlns, 'svg');
   const resolvedOperatorColor = operatorColor || '#666';
+
+  // Simplified marker (public map view): a single dot in the operator color,
+  // instead of the duration-colored circle with a separate operator dot.
+  if (simplified) {
+    const dot = document.createElementNS(xmlns, 'circle');
+    dot.setAttribute('cx', '12');
+    dot.setAttribute('cy', '12');
+    dot.setAttribute('r', '9.5');
+    dot.setAttribute('fill', resolvedOperatorColor);
+    dot.setAttribute('stroke', '#fff');
+    dot.setAttribute('stroke-width', '1');
+    svgElement.appendChild(dot);
+
+    return rasterizeSvgElement(svgElement);
+  }
 
   const circle1 = document.createElementNS(xmlns, 'circle');
   circle1.setAttribute('cx', '12');
@@ -113,6 +129,10 @@ async function rasterizeVehicleMarkerSvg(operatorColor, durationIndicationColor,
     svgElement.appendChild(smallCircle);
   }
 
+  return rasterizeSvgElement(svgElement);
+}
+
+async function rasterizeSvgElement(svgElement) {
   svgElement.setAttribute('viewBox', '0 0 24 24');
   svgElement.setAttribute('width', String(MARKER_SIZE));
   svgElement.setAttribute('height', String(MARKER_SIZE));
