@@ -53,6 +53,7 @@ import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 import { getProviderColorForProvider } from '../../helpers/providers';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
+import SelectionTool from '../SelectionTool/SelectionTool';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -722,6 +723,8 @@ const MapComponent = (props): JSX.Element => {
   return <>
     {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map flex-1" />
+    {/* Vehicle selection tool */}
+    <SelectionTool map={map.current} vehicles={vehicles} />
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools /> : null}
     {/* Service areas layer */}
