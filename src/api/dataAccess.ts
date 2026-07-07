@@ -50,6 +50,26 @@ export const getDataAccessReceived = async (token) => {
   return await response.json();
 }
 
+// GET /data_access/list_received?user_id=example@example.com
+// Returns the data access received by a specific user (grants to their
+// organisation + grants made directly to that user). Requires admin or
+// organisation-admin rights on the backend.
+export const getDataAccessReceivedForUser = async (token, userId) => {
+  if(! userId) return [];
+
+  const url = `${admin_api_url}/data_access/list_received?user_id=${encodeURIComponent(userId)}`;
+  const options = getHeaders(token);
+  const response = await fetch(url, options);
+
+  if(! response.ok) {
+    const error: any = new Error(`Failed to load received data access (status ${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+
+  return await response.json();
+}
+
 // GET /data_access/list_granted/413
 export const getDataAccessGranted = async (token, ownerOrganisationId) => {
   const url = `${admin_api_url}/data_access/list_granted/${ownerOrganisationId}`;
@@ -57,6 +77,48 @@ export const getDataAccessGranted = async (token, ownerOrganisationId) => {
   const response = await fetch(url, options);
 
   return await response.json();
+}
+
+interface DataOwnerOrganisation {
+  organisation_id: number;
+  name: string;
+}
+
+// Build the received-data view for a user by scanning list_granted on data-owner
+// organisations. list_received?user_id= does not return user-level grants.
+export const getDataAccessGrantedToUser = async (
+  token,
+  userId: string,
+  userOrganisationId: number,
+  ownerOrganisations: DataOwnerOrganisation[]
+) => {
+  if (!userId || !ownerOrganisations || ownerOrganisations.length === 0) return [];
+
+  const grantLists = await Promise.all(
+    ownerOrganisations.map(async (org) => {
+      try {
+        const granted = await getDataAccessGranted(token, org.organisation_id);
+        if (!Array.isArray(granted)) return [];
+        return granted
+          .filter((entry: any) => (
+            entry.granted_user_id === userId
+            || entry.granted_organisation_id === userOrganisationId
+          ))
+          .map((entry: any) => ({
+            ...entry,
+            owner_organisation_id: org.organisation_id,
+            owner_organisation_name: org.name,
+          }));
+      } catch (err) {
+        console.error('Error loading granted data access for organisation', org.organisation_id, err);
+        return [];
+      }
+    })
+  );
+
+  return grantLists
+    .flat()
+    .filter((entry: any) => entry.owner_organisation_id && entry.owner_organisation_id !== userOrganisationId);
 }
 
 // POST /data_access/grant_organisation

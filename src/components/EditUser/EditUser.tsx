@@ -24,6 +24,7 @@ import H5Title from '../H5Title/H5Title';
 import FormLabel from '../FormLabel/FormLabel';
 import Modal from '../Modal/Modal.jsx';
 import ErrorMessage from '../NotificationMessage/ErrorMessage';
+import UserDataAccess from './UserDataAccess';
 
 function fallbackCopyTextToClipboard(text) {
   var textArea = document.createElement("textarea");
@@ -95,6 +96,10 @@ function EditUser({
   const [doShowDeleteModal, setDoShowDeleteModal] = useState(false);
   const [doShowCredentialsModal, setDoShowCredentialsModal] = useState(false);
   const [doShowCanEditMicrohubs, setDoShowCanEditMicrohubs] = useState(false);
+  // While organisations are loading we don't know yet if the 'Kan zones
+  // beheren' checkbox applies. Keep its space reserved (invisible) to avoid
+  // a layout jump once it appears.
+  const [isCanEditMicrohubsDetermined, setIsCanEditMicrohubsDetermined] = useState(false);
 
   // Init navigation class, so we can easily redirect using navigate('/path')
   const navigate = useNavigate();
@@ -129,6 +134,7 @@ function EditUser({
     setDoShowCanEditMicrohubs(
       org_types_allowed_to_edit_zones.indexOf(organisation_of_logged_in_user.type_of_organisation) > -1
     );
+    setIsCanEditMicrohubsDetermined(true);
   }, [
     organisations,
     acl
@@ -273,7 +279,10 @@ function EditUser({
           </FormLabel>
         </div>
 
-        {doShowCanEditMicrohubs && <div className=" flex">
+        {(doShowCanEditMicrohubs || ! isCanEditMicrohubsDetermined) && <div
+          className=" flex"
+          style={! isCanEditMicrohubsDetermined ? {visibility: 'hidden'} : undefined}
+        >
           <input 
             type="checkbox"
             id="microhub-edit" 
@@ -331,6 +340,8 @@ function EditUser({
           </div>}
         </div>
       </form>
+
+      {(user && user.user_id) && <UserDataAccess user={user} organisations={organisations} />}
 
       {message && <ErrorMessage title="Fout" message={message} />}
 
