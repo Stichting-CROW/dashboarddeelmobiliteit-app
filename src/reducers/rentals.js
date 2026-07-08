@@ -2,7 +2,10 @@ const initialState = {
   origins: {},
   destinations: {},
   origins_operatorstats: [],
-  destinations_operatorstats: []
+  destinations_operatorstats: [],
+  // Imported CSV data ('Ruwe data import'): { fileName, rows } or null.
+  // If set, the map shows this data instead of API data
+  csv_data: null
 }
 
 export default function rentals(state = initialState, action) {
@@ -29,6 +32,16 @@ export default function rentals(state = initialState, action) {
       return Object.assign({}, state, {
         destinations: [],
         destinations_operatorstats: []
+      })
+    }
+    case 'SET_RENTALS_CSV_DATA': {
+      return Object.assign({}, state, {
+        csv_data: action.payload
+      })
+    }
+    case 'CLEAR_RENTALS_CSV_DATA': {
+      return Object.assign({}, state, {
+        csv_data: null
       })
     }
     case 'LOGIN':

@@ -25,6 +25,12 @@ let activeRentals;
 let existingFilter;
 
 const processRentalsResult = (state, type, rentals) => {
+  // Don't overwrite imported CSV data ('Ruwe data import') with API data
+  const currentState = store_verhuringendata.getState();
+  if(currentState.rentals && currentState.rentals.csv_data) {
+    return;
+  }
+
   activeRentals = rentals;
 
   let geoJson = {
@@ -85,6 +91,72 @@ const processRentalsResult = (state, type, rentals) => {
   store_verhuringendata.dispatch({
     type: `SET_RENTALS_${type.toUpperCase()}_OPERATORSTATS`,
     payload: operatorstats
+  })
+}
+
+// Render imported CSV data ('Ruwe data import') instead of API data.
+// The CSV contains park_events without trip distance, so the afstand filter
+// does not apply; aanbieders- and voertuigtype-filters are applied client-side.
+const processCsvRentalsResult = (state, csvData) => {
+  let geoJson = {
+    "type":"FeatureCollection",
+    "features":[]
+  }
+
+  let operatorstats = {}
+  state.metadata.aanbieders.forEach(o => {
+    operatorstats[o.system_id || o.value]=0;
+  });
+
+  const aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || [];
+  const voertuigtypesexclude = (state.filter.voertuigtypesexclude || '').split(",");
+
+  csvData.rows.forEach(v => {
+    let feature = {
+     "type":"Feature",
+     "properties":{
+        "id": md5(`${v.lat}${v.lon}`),
+        "system_id": v.system_id,
+        "form_factor": v.form_factor || null,
+        "arrival_time": v.start_time,
+        "departure_time": v.end_time,
+        "distance_bin": 0,
+        "distance_in_meters": null
+     },
+     "geometry":{
+        "type":"Point",
+        "coordinates": [
+           v.lon,
+           v.lat,
+           0.0
+        ]
+      }
+    }
+
+    if(operatorstats[v.system_id] === undefined) {
+      operatorstats[v.system_id] = 0;
+    }
+    operatorstats[v.system_id] += 1;
+
+    let markerVisible = aanbiedersexclude.includes(v.system_id) === false;
+    markerVisible = markerVisible && (!v.form_factor || voertuigtypesexclude.includes(v.form_factor) === false);
+    if(markerVisible) {
+      geoJson.features.push(feature);
+    }
+  })
+
+  // Fill both origins and destinations, so the imported data is visible
+  // in every rentals layer (points, clusters, heat map), regardless of
+  // the herkomst/bestemming setting
+  ['ORIGINS', 'DESTINATIONS'].forEach(type => {
+    store_verhuringendata.dispatch({
+      type: `SET_RENTALS_${type}`,
+      payload: geoJson
+    })
+    store_verhuringendata.dispatch({
+      type: `SET_RENTALS_${type}_OPERATORSTATS`,
+      payload: operatorstats
+    })
   })
 }
 
@@ -164,6 +236,17 @@ const updateVerhuringenData = ()  => {
     const state = store_verhuringendata.getState();
     if(state.layers.displaymode!==DISPLAYMODE_RENTALS) {
       // console.log(`not viewing rentals data (viewing ${state.layers.displaymode}, need ${DISPLAYMODE_RENTALS}) - skip update`);
+      return true;
+    }
+
+    // If CSV data was imported ('Ruwe data import'): render that instead of API data
+    if(state.rentals && state.rentals.csv_data) {
+      // Abort any in-flight API fetch, so it can't overwrite the imported data
+      if(theFetch) {
+        theFetch.abort();
+        theFetch = null;
+      }
+      processCsvRentalsResult(state, state.rentals.csv_data);
       return true;
     }
 

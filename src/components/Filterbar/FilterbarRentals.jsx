@@ -15,6 +15,7 @@ import {
 } from './FilteritemMarkers.jsx';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
+import FilteritemRuweDataImport from './FilteritemRuweDataImport';
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 
 import Fieldset from '../Fieldset/Fieldset';
@@ -103,6 +104,12 @@ function Filterbar({
           {/* INFO */}
         </div>
       </div>
+
+      {isrentals && (
+        <Fieldset title="Ruwe data import">
+          <FilteritemRuweDataImport />
+        </Fieldset>
+      )}
 
       { isLoggedIn && showdatum && <FilteritemDatum /> }
       
