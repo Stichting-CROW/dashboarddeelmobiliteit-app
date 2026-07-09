@@ -14,6 +14,10 @@ var timerid_parkingdata;
 // theFetch: Variabele used for managing fetch calls
 let theFetch = null;
 
+// URL of the request currently in flight, so an identical request can reuse
+// it instead of aborting and starting over (see doApiCall)
+let theFetchUrl = null;
+
 // Variable to keep track of vehicles response
 // Only do a new fetch() if needed
 let activeVehicles;
@@ -37,19 +41,32 @@ const processVehiclesResult = (state, vehicles) => {
     operatorstats[o.system_id || o.value]=0;
   });
 
-  const md5 = require('md5');
   var start_time = moment(state.filter.datum);
-  
-  vehicles.forEach(v => {
-    let in_public_space_since = isLoggedIn(state) ? v.start_time : v.in_public_space_since;
+  const start_time_ms = start_time.valueOf();
 
-    var minutes = start_time.diff(moment(in_public_space_since), 'minutes');
+  // Get list of providers to exclude
+  const aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || [];
+  // Get parkeerduur length to exclude
+  const parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
+  const showOnlyNonOperational = state.filter.non_operational_only === true;
+  const loggedIn = isLoggedIn(state);
+
+  vehicles.forEach(v => {
+    let in_public_space_since = loggedIn ? v.start_time : v.in_public_space_since;
+
+    // Plain Date math instead of constructing a moment per vehicle (~10x
+    // faster over 25k+ vehicles); fall back to moment for exotic date formats
+    let since_ms = in_public_space_since ? Date.parse(in_public_space_since) : Date.now();
+    if(isNaN(since_ms) && in_public_space_since) {
+      since_ms = moment(in_public_space_since).valueOf();
+    }
+    var minutes = Math.floor((start_time_ms - since_ms) / 60000);
     const duration_bin = convertDurationToBin(minutes);
-    
+
     let feature = {
        "type":"Feature",
        "properties":{
-          "id":md5(v.location.latitude+v.location.longitude),
+          "id":v.location.latitude+","+v.location.longitude,
           "vehicle_id":v.bike_id,
           "system_id": v.system_id || v.value,// v.value is used in the public map
           "form_factor": v.form_factor || null,
@@ -69,15 +86,8 @@ const processVehiclesResult = (state, vehicles) => {
 
     operatorstats[v.system_id || v.value]+=1;
 
-    // Get list of providers to exclude
-    let aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || []
-
-    // Get parkeerduur length to exclude
-    let parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
-    const showOnlyNonOperational = state.filter.non_operational_only === true;
-
     // Filter markers
-    let markerVisible = ! isLoggedIn(state) || !parkeerduurexclude.includes(duration_bin.toString());
+    let markerVisible = ! loggedIn || !parkeerduurexclude.includes(duration_bin.toString());
     markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
     if (showOnlyNonOperational) {
       markerVisible = markerVisible && v.is_non_operational === true;
@@ -138,6 +148,13 @@ const doApiCall = (
     }
   }
   
+  // If a request for this exact URL is already in flight, let it finish
+  // instead of aborting and re-issuing it: the response is processed with the
+  // then-current store state, so the result is the same either way.
+  if(theFetch && theFetchUrl === url) {
+    return;
+  }
+
   // Start loading
   store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: true});
 
@@ -149,12 +166,22 @@ const doApiCall = (
     theFetch.abort();
   }
   // Now do a new fetch
-  theFetch = abortableFetch(url, options);
-  theFetch.ready.then(function(response) {
-    // Set theFetch to null, so next request is not aborted
-    theFetch = null;
+  const thisFetch = abortableFetch(url, options);
+  theFetch = thisFetch;
+  theFetchUrl = url;
 
+  // Only clear the in-flight tracking if it still points at this request
+  // (a newer request may have replaced it in the meantime)
+  const clearFetchTracking = () => {
+    if(theFetch === thisFetch) {
+      theFetch = null;
+      theFetchUrl = null;
+    }
+  };
+
+  thisFetch.ready.then(function(response) {
     if(! response.ok) {
+      clearFetchTracking();
       console.error("unable to fetch: %o", response);
       return false
     }
@@ -165,14 +192,22 @@ const doApiCall = (
       } else {
         vehicles = vehicles.vehicles_in_public_space
       }
-      callback(state, vehicles);
+      // Process with the *current* store state (not the state at request
+      // time), so client-side filters that changed while the request was in
+      // flight are applied to the result.
+      callback(store_parkingdata.getState(), vehicles);
     }).catch(ex=>{
       console.error("unable to decode JSON");
     }).finally(()=>{
+      clearFetchTracking();
       // Stop loading
       store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
     })
   }).catch(ex=>{
+    // If this request was aborted because a newer one replaced it, leave the
+    // loading state to the newer request
+    if(theFetch !== thisFetch) return;
+    clearFetchTracking();
     // Stop loading
     store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
     console.error("fetch error - unable to fetch JSON from %s", url);
@@ -199,12 +234,14 @@ const updateParkingData = async () => {
     // Update active filter
     existingFilter = state.filter;
 
-    if(doFetchVehicles || ! activeVehicles) {
+    if(doFetchVehicles || (! activeVehicles && ! theFetch)) {
       doApiCall(state, processVehiclesResult);
-    } else {
+    } else if(activeVehicles) {
       // Regenerate geoJson without querying API
-      processVehiclesResult(state, activeVehicles); 
+      processVehiclesResult(state, activeVehicles);
     }
+    // else: no vehicles yet but a fetch is in flight; its callback processes
+    // the response with the store state at completion time
 
   } catch(ex) {
     console.error("Unable to update zones", ex)
