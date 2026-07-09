@@ -719,6 +719,13 @@ const MapComponent = (props): JSX.Element => {
     return viewsToShowSearchBar.indexOf(stateLayers.displaymode) > -1;
   }
 
+  const shouldShowMapTopControls = () => {
+    if (isLoggedIn) {
+      return true;
+    }
+    return showSearchBar();
+  }
+
   return <>
     {/* The map container (HTML element) */}
     <div ref={mapContainer} className="map flex-1" />
@@ -734,7 +741,7 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
     </>}
-    {isLoggedIn && showSearchBar && 
+    {shouldShowMapTopControls() &&
       <>
         <RightTop>
           <div className="flex gap-2">
