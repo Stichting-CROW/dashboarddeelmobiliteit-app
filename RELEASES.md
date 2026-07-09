@@ -1,5 +1,93 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-07-09
+
+**Prestaties aanbieders**
+
+- ✨ KPI-indicatorblokken worden nu ook getoond als er geen waarden beschikbaar zijn
+- 🐛 Opgelost: standaardperiode laadt nu de laatste 7 dagen exclusief vandaag
+- 🐛 Opgelost: in demomodus worden fictieve waarden getoond in indicator-tooltips
+- 🧹 Demoaanbieder 'Mobiliteitshub' hernoemd naar 'Fenyx'
+
+**Aanbod en verhuringen**
+
+- ✨ Snellere Aanbod- en Verhuringen-pagina: voertuigdata wordt direct bij het openen geladen en dubbele downloads zijn voorkomen
+- 🐛 Opgelost: zones werden niet geladen als er geen gemeente was geselecteerd
+
+**Kaart**
+
+- 🪄 Gastgebruikers kunnen nu ook de knoppen 'Laag selecteren' en 'Zoeken' gebruiken op de kaart
+- 🐛 Opgelost: fout bij het laden van kaatafbeeldingen bij het verlaten van een pagina
+
+**Gebruikersbeheer**
+
+- 🪄 Gebruikerslijst kan nu gefilterd worden op organisatie
+- 🪄 Per gebruiker is zichtbaar tot welke (gedeelde) data toegang bestaat
+- 🐛 Opgelost: operatorgegevens konden niet worden toegevoegd aan een operatororganisatie
+- 🐛 Opgelost: gebruikers met toegang tot meerdere plaatsen zien nu alle plaatsen tegelijk bij 'Alle plaatsen'
+
+**Gebruikersinterface**
+
+- 🪄 Versietag en link naar release notes toegevoegd in de filterbar
+- ✨ Skeleton loaders toegevoegd op statistiekpagina's voor betere laadervaring
+- ✨ Verbeterde meldingen (toasts) in de applicatie
+- 🧹 Vergelijkbare componenten samengevoegd voor eenvoudiger onderhoud
+
+**Documentatie**
+
+- ✨ Extra documentatie over hoe datafeed-data wordt verwerkt
+
+## Release 2026-05-28
+
+**Prestaties aanbieders**
+
+- 🪄 Aanbiederaccounts hebben nu toegang tot de pagina 'Prestaties aanbieders', inclusief KPI-overzicht en detailweergave
+- 🐛 Opgelost: KPI-indicatorblokken werden onjuist getoond voor aanbiederaccounts
+- 🐛 Opgelost: indicatorblokken ontbraken bij een handmatig gekozen periode
+- 🐛 Opgelost: laadindicator en race condition bij het laden van prestatiedata
+- ✨ Y-as in grafieken toont nu afgeronde, leesbare waarden
+
+**Aanbod en statistieken (aanbieders)**
+
+- 🐛 Opgelost: aanbiederaccounts zagen hun eigen voertuigen niet op de aanbodkaart
+- 🐛 Opgelost: aanbiederaccounts zagen geen verhuringen en geaggregeerde statistieken
+- 🐛 Opgelost: laag 'HB matrix' wordt niet meer getoond aan aanbiederaccounts
+
+**Aanbieders**
+
+- 🪄 Voi toegevoegd als aanbieder in het dashboard
+- ✨ Aanbiederslijst komt nu uit de API in plaats van een vaste lijst; nieuwe aanbieders verschijnen sneller na toevoeging
+
+**Statistieken en filterbar**
+
+- 🐛 Opgelost: gemeenten zagen niet alle beschikbare aanbieders in de filterbar
+- ✨ Op Beleidsinfo wordt de serie 'Totaal' niet meer getoond als er maar één serie zichtbaar is
+
+**Kaart en prestaties**
+
+- ✨ Snellere kaart: kortere laadtijd, efficiënter laden van voertuigmarkers en minder onnodige achtergrondkaart op pagina's zonder kaart
+- ✨ Minder dubbele API-verzoeken en betere opruiming van kaartbronnen bij navigatie
+- 🐛 Opgelost: fout bij navigatie van een kaartpagina naar een pagina zonder kaart
+- 🐛 Opgelost: fout als de kaart al was uitgeladen maar er nog acties werden uitgevoerd
+- 🐛 Opgelost: laadfout op de Servicegebieden-pagina door een race condition bij het starten van de kaart
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: zone-beheerknoppen worden niet meer getoond aan aanbiederaccounts zonder beheerrechten
+
+**Gebruikersinterface**
+
+- ✨ Grijze achtergrond op pagina's zonder kaart voor een rustiger beeld
+
+**Documentatie**
+
+- ✨ Documentatie wordt lokaal geladen in plaats van via de GitHub API, waardoor de docs-pagina's betrouwbaarder en sneller laden
+- ✨ Documentatie over ruwe data-download bijgewerkt (geen trips meer; geen vehicle_id meer bij park_events)
+
+**Technisch**
+
+- 🧹 Nieuwe GitHub Actions-workflow voor deployment naar GitHub Pages
+
 ## Release 2026-05-20
 
 **Aanbod**
