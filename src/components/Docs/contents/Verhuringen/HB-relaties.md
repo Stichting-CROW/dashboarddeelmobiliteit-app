@@ -43,6 +43,23 @@ Wissel in de filterbalk gemakkelijk tussen herkomsten en bestemmingen.
 
 Een gemeente kan HB-matrices zien van/naar een gebied dat zich binnen de gemeentegrenzen bevindt.
 
+## Betekenis van wat je ziet
+
+Onderstaand een voorbeeld van een weergave van het H3-grid:
+
+![HB matrices H3 grid for Rotterdam](https://files.dashboarddeelmobiliteit.nl/docs/Verhuringen/hb_matrices_h3_grid.png)
+
+De kaart is opgedeeld in hexagonen (hier: H3-grid op niveau 8). In dit voorbeeld zijn er geen filters actief: je ziet alle verhuringen, op alle dagen, op alle tijden van de dag, voor alle voertuigtypes.
+
+Er is op 1 hexagoon geklikt: het hexagoon met de blauwe rand. Dit is het gebied waarvoor je de herkomst-bestemmingsrelaties bekijkt.
+
+Met de instelling **Herkomst** / **Bestemming** in de filterbalk bepaal je wat de getallen in de omliggende hexagonen betekenen:
+
+- **Herkomst**: je ziet waar men vandaan kwam. Elk getal toont het aantal verhuringen dat in dát hexagoon startte en eindigde in het aangeklikte hexagoon. Je beantwoordt hiermee de vraag: "Waar kwamen de mensen vandaan, voordat ze naar het aangeklikte gebied reisden?"
+- **Bestemming**: je ziet waar men naartoe ging. Elk getal toont het aantal verhuringen dat in het aangeklikte hexagoon startte en eindigde in dát hexagoon. Je beantwoordt hiermee de vraag: "Waar gingen de mensen naartoe, nadat ze uit het aangeklikte gebied vertrokken?"
+
+In de screenshot is **Herkomst** geselecteerd. De getallen tonen dus per hexagoon hoeveel verhuringen daar startten met het aangeklikte hexagoon als bestemming. Je ziet dat de meeste van deze verhuringen begonnen in of vlakbij het aangeklikte hexagoon. Vanaf de randen van het gebied waren er ook verhuringen naar het aangeklikte hexagoon, maar dat waren er minder.
+
 ## Privacy
 
 Voor het beschermen van de privacy van individuele gebruikers maken we gebruik van een minimaal aantal voertuigen dat uit een zone vertrokken moet zijn voordat we deze tonen. In ons initiële ontwerp kiezen we voor minstens 4 voertuigen. Dit doen we in combinatie met een minimale te bevragen tijdsperiode van 4 uur. Op deze manier is alleen te achterhalen naar welke zone een persoon toe reist als je weet dat een specifiek persoon in die periode vertrokken is en je weet waar de 4 andere personen die in die periode vertrokken zijn naar toe zijn gereisd. Dat is geen data die op eenvoudige wijze op grote schaal te combineren valt aan externe databronnen.
