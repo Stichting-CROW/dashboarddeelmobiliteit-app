@@ -1,4 +1,4 @@
-import { isMapStyleUsable } from './mapGuards';
+import { isMapStyleUsable, whenMapStyleReady } from './mapGuards';
 
 const removeSources = (map: any) => {
     if(! map) return;
@@ -11,7 +11,11 @@ const removeSources = (map: any) => {
 }
 
 const removeServiceAreaDeltaFromMap = (map: any) => {
-    if (!isMapStyleUsable(map)) return;
+    if (!map) return;
+    if (!isMapStyleUsable(map)) {
+      whenMapStyleReady(map, () => removeServiceAreaDeltaFromMap(map));
+      return;
+    }
 
     try {
       let layer, key;

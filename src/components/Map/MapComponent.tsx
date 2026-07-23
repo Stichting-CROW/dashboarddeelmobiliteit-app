@@ -35,7 +35,12 @@ import {
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_START,
   DISPLAYMODE_OTHER,
+  DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
 } from '../../reducers/layers.js';
+import { removeHubsFromMap } from './MapUtils/map.policy_hubs';
+import { removeServiceAreasFromMap } from './MapUtils/map.service_areas';
+import { removeServiceAreaDeltaFromMap } from './MapUtils/map.service_area_delta';
 
 import './MapComponent.css';
 
@@ -475,6 +480,23 @@ const MapComponent = (props): JSX.Element => {
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)
   ])
+
+  // Defensive cleanup: when the display mode changes away from a page that owns
+  // dynamic map layers, make sure those layers are removed. Child components
+  // normally clean up themselves, but if the map style was loading during their
+  // unmount their cleanup may have been deferred. This effect acts as a safety net.
+  useEffect(() => {
+    if(! map.current) return;
+    if(! didMapLoad) return;
+
+    if (displayMode !== DISPLAYMODE_POLICY_HUBS) {
+      removeHubsFromMap(map.current);
+    }
+    if (displayMode !== DISPLAYMODE_SERVICE_AREAS) {
+      removeServiceAreasFromMap(map.current);
+      removeServiceAreaDeltaFromMap(map.current);
+    }
+  }, [displayMode, didMapLoad]);
 
   // Set vehicles sources
   useEffect(() => {

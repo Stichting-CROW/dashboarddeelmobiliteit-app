@@ -1,5 +1,6 @@
 import { toast, useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { whenMapStyleReady } from '../Map/MapUtils/mapGuards';
 import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
@@ -62,6 +63,10 @@ const DdPolicyHubsLayer = ({
   
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
+  const drawRef = useRef(draw);
+  useEffect(() => {
+    drawRef.current = draw;
+  }, [draw]);
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
   const [isDrawingMultiPolygonActive, setIsDrawingMultiPolygonActive] = useState<boolean>(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -171,13 +176,25 @@ const DdPolicyHubsLayer = ({
 
   }
 
-  // Cleanup hub layers on unmount. Must run synchronously: MapComponent
-  // destroys the map in a microtask after child cleanups; a delayed cleanup
-  // would call getLayer on an already-removed map instance.
+  // Cleanup hub layers on unmount. If the map style is still loading, defer
+  // removal until it is ready; the remover helpers guard against calls on an
+  // already-removed map instance.
   useEffect(() => {
     return () => {
       if (TO_fetch_delay) clearTimeout(TO_fetch_delay);
-      removeHubsFromMap(map);
+      if (map) {
+        whenMapStyleReady(map, () => removeHubsFromMap(map));
+        // Clean up any active drawing state so it does not leak onto other pages.
+        if (drawRef.current) {
+          removeDrawedPolygons(drawRef.current);
+          try {
+            map.removeControl(drawRef.current);
+          } catch {
+            // Control may already have been removed.
+          }
+        }
+      }
+      closeOverlapSelectionPopup();
     };
   }, [map]);
 

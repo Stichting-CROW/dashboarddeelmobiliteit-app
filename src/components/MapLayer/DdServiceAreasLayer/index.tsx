@@ -25,6 +25,7 @@ import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
+import { whenMapStyleReady } from '../../Map/MapUtils/mapGuards';
 
 import { Legend, LegendItemType } from './Legend';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
@@ -128,12 +129,15 @@ const DdServiceAreasLayer = ({
     visible_operators
   ]);
 
-  // Cleanup on component unmount
+  // Cleanup on component unmount. Defer removal if the map style is still
+  // loading so layers/sources are reliably cleared once the map is ready.
   useEffect(() => {
     return () => {
       if (map) {
-        removeServiceAreasFromMap(map);
-        removeServiceAreaDeltaFromMap(map);
+        whenMapStyleReady(map, () => {
+          removeServiceAreasFromMap(map);
+          removeServiceAreaDeltaFromMap(map);
+        });
       }
     };
   }, [map]);

@@ -1,5 +1,5 @@
 import { getProviderColorForProvider } from "../../../helpers/providers";
-import { isMapStyleUsable } from './mapGuards';
+import { isMapStyleUsable, whenMapStyleReady } from './mapGuards';
 
 type HexagonType = any;
 
@@ -43,7 +43,11 @@ const removeServiceAreaSources = (map: any) => {
 }
 
 const removeServiceAreasFromMap = (map: any) => {
-    if (!isMapStyleUsable(map)) return;
+    if (!map) return;
+    if (!isMapStyleUsable(map)) {
+      whenMapStyleReady(map, () => removeServiceAreasFromMap(map));
+      return;
+    }
 
     try {
       let layer, key;

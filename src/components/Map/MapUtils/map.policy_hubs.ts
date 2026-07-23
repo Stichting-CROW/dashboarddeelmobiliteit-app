@@ -3,7 +3,7 @@ import {
   polygonFillStyle
 } from './map.policy_hubs.styles'
 import center from '@turf/center';
-import { isMapStyleUsable } from './mapGuards';
+import { isMapStyleUsable, whenMapStyleReady } from './mapGuards';
 
 const max_zoom_for_hub_logo = 16;
 
@@ -18,7 +18,11 @@ const removeHubSources = (map: any) => {
 }
 
 const removeHubsFromMap = (map: any) => {
-    if (!isMapStyleUsable(map)) return;
+    if (!map) return;
+    if (!isMapStyleUsable(map)) {
+      whenMapStyleReady(map, () => removeHubsFromMap(map));
+      return;
+    }
 
     try {
       let layer, key;
