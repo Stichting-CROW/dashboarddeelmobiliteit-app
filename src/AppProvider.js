@@ -11,6 +11,7 @@ import moment from 'moment';
 import thunk from 'redux-thunk';
 
 import appReducer from './reducers';
+import { sanitizeActiveDataLayers } from './reducers/layers';
 import App from './App';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -57,6 +58,14 @@ const validatePersistedState = (state) => {
 };
 
 persistedState = validatePersistedState(persistedState);
+
+// The data-layer UI uses radio-button behaviour (one layer per display mode).
+// Older persisted states may contain multiple active layers; sanitize them.
+if (persistedState.layers && persistedState.layers.active_data_layers) {
+  persistedState.layers.active_data_layers = sanitizeActiveDataLayers(
+    persistedState.layers.active_data_layers
+  );
+}
 
 // Reset a stale persisted 'datum' filter to now *before* the store is created.
 // App.tsx used to do this in an effect ~500ms after load, but by then the

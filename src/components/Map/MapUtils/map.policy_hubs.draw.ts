@@ -1,6 +1,32 @@
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
+// Track the active draw control at module level so we can always clean it up,
+// even if React state/refs get out of sync during mount/unmount cycles.
+let activeDrawControl: any = null;
+
+const DRAW_SOURCE_IDS = ['mapbox-gl-draw-cold', 'mapbox-gl-draw-hot'];
+
+const removeDrawSources = (map) => {
+  if (!map) return;
+  DRAW_SOURCE_IDS.forEach(sourceId => {
+    try {
+      if (map.getSource(sourceId)) {
+        map.removeSource(sourceId);
+      }
+    } catch {
+      // Source may already be removed or map may be destroyed.
+    }
+  });
+};
+
 const initMapboxDraw = (map) => {
+    // Clean up any previous control first to avoid duplicate sources.
+    if (activeDrawControl) {
+      removeDrawControl(map, activeDrawControl);
+    }
+    // Defensive cleanup of draw sources in case the control reference was lost.
+    removeDrawSources(map);
+
     const draw = new MapboxDraw({
         displayControlsDefault: false,
         // Select which mapbox-gl-draw control buttons to add to the map.
@@ -13,6 +39,7 @@ const initMapboxDraw = (map) => {
         defaultMode: 'simple_select'
     });
     map.addControl(draw);
+    activeDrawControl = draw;
 
     return draw;
 }
@@ -67,6 +94,9 @@ const removeDrawControl = (map, draw) => {
       map.removeControl(draw);
     } catch {
       // Control may already have been removed or map may be destroyed.
+    }
+    if (activeDrawControl === draw) {
+      activeDrawControl = null;
     }
 }
 

@@ -25,7 +25,7 @@ import {
 const SelectLayerModal = () => {
   const dispatch = useDispatch();
   const { setLayer } = useBackgroundLayer(window['ddMap']);
-  const { setSingleLayer: setDataLayer, getAvailableLayers } = useDataLayer(window['ddMap']);
+  const { setSingleLayer: setDataLayer, getAvailableLayers } = useDataLayer();
 
   const displayMode = useSelector((state: StateType) => {
     return state.layers ? state.layers.displaymode : DISPLAYMODE_PARK;

@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import maplibregl from 'maplibre-gl';
 import { 
   setDataLayer, 
   unsetDataLayer, 
@@ -12,21 +11,29 @@ import {
 import { setDataLayer as setDataLayerAction, setSingleDataLayer as setSingleDataLayerAction, unsetDataLayer as unsetDataLayerAction, toggleDataLayer as toggleDataLayerAction } from '../../../actions/layers';
 
 /**
- * React hook for managing data layers
+ * React hook for managing data layers.
  * 
- * @param map - The map instance
+ * The map layer visibility is handled by MapComponent based on the Redux state.
+ * This hook only validates layer names and dispatches the corresponding actions.
+ * 
+ * The `map` parameter is kept for backward compatibility but is no longer used.
  * @returns Data layer management functions
  */
-export const useDataLayer = (map: maplibregl.Map | null) => {
+export const useDataLayer = (map?: unknown) => {
   const dispatch = useDispatch();
+
+  const handleSuccess = (callback, layerName, action) => {
+    if (action) dispatch(action);
+    if (callback) callback(layerName);
+  };
+
+  const handleError = (callback, error) => {
+    console.error('Failed to set data layer:', error);
+    if (callback) callback(error);
+  };
 
   /**
    * Set a data layer (show it)
-   * 
-   * @param layerName - Name of the data layer to set
-   * @param displayMode - Current display mode
-   * @param onSuccess - Optional success callback
-   * @param onError - Optional error callback
    */
   const setLayer = useCallback((
     layerName: string, 
@@ -34,42 +41,17 @@ export const useDataLayer = (map: maplibregl.Map | null) => {
     onSuccess: ((layerName: string) => void) | null = null, 
     onError: ((error: string) => void) | null = null
   ) => {
-    if (!map) {
-      const error = 'Map instance is required';
-      console.error(error);
-      if (onError) onError(error);
-      return;
-    }
-
     setDataLayer(
-      map,
+      null,
       layerName,
       displayMode,
-      (layerName: string) => {
-        // Update Redux state with new data layer action
-        dispatch(setDataLayerAction(displayMode, layerName));
-        
-        // Call custom success callback if provided
-        if (onSuccess) {
-          onSuccess(layerName);
-        }
-      },
-      (error: string) => {
-        console.error('Failed to set data layer:', error);
-        if (onError) {
-          onError(error);
-        }
-      }
+      (layerName: string) => handleSuccess(onSuccess, layerName, setDataLayerAction(displayMode, layerName)),
+      (error: string) => handleError(onError, error)
     );
-  }, [map, dispatch]);
+  }, [dispatch]);
 
   /**
    * Unset a data layer (hide it)
-   * 
-   * @param layerName - Name of the data layer to unset
-   * @param displayMode - Current display mode
-   * @param onSuccess - Optional success callback
-   * @param onError - Optional error callback
    */
   const unsetLayer = useCallback((
     layerName: string, 
@@ -77,43 +59,17 @@ export const useDataLayer = (map: maplibregl.Map | null) => {
     onSuccess: ((layerName: string) => void) | null = null, 
     onError: ((error: string) => void) | null = null
   ) => {
-    if (!map) {
-      const error = 'Map instance is required';
-      console.error(error);
-      if (onError) onError(error);
-      return;
-    }
-
     unsetDataLayer(
-      map,
+      null,
       layerName,
       displayMode,
-      (layerName: string) => {
-        // Update Redux state with new data layer action
-        dispatch(unsetDataLayerAction(displayMode, layerName));
-        
-        // Call custom success callback if provided
-        if (onSuccess) {
-          onSuccess(layerName);
-        }
-      },
-      (error: string) => {
-        console.error('Failed to unset data layer:', error);
-        if (onError) {
-          onError(error);
-        }
-      }
+      (layerName: string) => handleSuccess(onSuccess, layerName, unsetDataLayerAction(displayMode, layerName)),
+      (error: string) => handleError(onError, error)
     );
-  }, [map]);
+  }, [dispatch]);
 
   /**
    * Toggle a data layer (show if hidden, hide if shown)
-   * 
-   * @param layerName - Name of the data layer to toggle
-   * @param displayMode - Current display mode
-   * @param isVisible - Current visibility state
-   * @param onSuccess - Optional success callback
-   * @param onError - Optional error callback
    */
   const toggleLayer = useCallback((
     layerName: string, 
@@ -122,35 +78,15 @@ export const useDataLayer = (map: maplibregl.Map | null) => {
     onSuccess: ((layerName: string) => void) | null = null, 
     onError: ((error: string) => void) | null = null
   ) => {
-    if (!map) {
-      const error = 'Map instance is required';
-      console.error(error);
-      if (onError) onError(error);
-      return;
-    }
-
     toggleDataLayer(
-      map,
+      null,
       layerName,
       displayMode,
       isVisible,
-      (layerName: string) => {
-        // Update Redux state with new data layer action
-        dispatch(toggleDataLayerAction(displayMode, layerName, isVisible));
-        
-        // Call custom success callback if provided
-        if (onSuccess) {
-          onSuccess(layerName);
-        }
-      },
-      (error: string) => {
-        console.error('Failed to toggle data layer:', error);
-        if (onError) {
-          onError(error);
-        }
-      }
+      (layerName: string) => handleSuccess(onSuccess, layerName, toggleDataLayerAction(displayMode, layerName, isVisible)),
+      (error: string) => handleError(onError, error)
     );
-  }, [map, dispatch]);
+  }, [dispatch]);
 
   /**
    * Get available data layers for a display mode
@@ -161,11 +97,6 @@ export const useDataLayer = (map: maplibregl.Map | null) => {
 
   /**
    * Set a single data layer (radio button behavior)
-   * 
-   * @param layerName - Name of the data layer to set
-   * @param displayMode - Current display mode
-   * @param onSuccess - Optional success callback
-   * @param onError - Optional error callback
    */
   const setSingleLayer = useCallback((
     layerName: string, 
@@ -173,41 +104,22 @@ export const useDataLayer = (map: maplibregl.Map | null) => {
     onSuccess: ((layerName: string) => void) | null = null, 
     onError: ((error: string) => void) | null = null
   ) => {
-    if (!map) {
-      const error = 'Map instance is required';
-      console.error(error);
-      if (onError) onError(error);
-      return;
-    }
-
     setSingleDataLayer(
-      map,
+      null,
       layerName,
       displayMode,
-      (layerName: string) => {
-        // Update Redux state with new single data layer action
-        dispatch(setSingleDataLayerAction(displayMode, layerName));
-        
-        // Call custom success callback if provided
-        if (onSuccess) {
-          onSuccess(layerName);
-        }
-      },
-      (error: string) => {
-        console.error('Failed to set single data layer:', error);
-        if (onError) {
-          onError(error);
-        }
-      }
+      (layerName: string) => handleSuccess(onSuccess, layerName, setSingleDataLayerAction(displayMode, layerName)),
+      (error: string) => handleError(onError, error)
     );
-  }, [map, dispatch]);
+  }, [dispatch]);
 
   /**
-   * Get currently active data layers for a display mode
+   * Get currently active data layers for a display mode.
+   * @deprecated Read active_data_layers from Redux instead.
    */
   const getCurrentLayers = useCallback((displayMode: string) => {
-    return getCurrentDataLayers(map, displayMode);
-  }, [map]);
+    return getCurrentDataLayers(null, displayMode);
+  }, []);
 
   return {
     setLayer,

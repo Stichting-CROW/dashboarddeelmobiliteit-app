@@ -3,6 +3,7 @@ import {
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN
 } from '../reducers/layers.js';
+import { sanitizeActiveDataLayers } from '../reducers/layers.js';
 
 /**
  * Default active data layers configuration
@@ -18,7 +19,8 @@ export const DEFAULT_ACTIVE_DATA_LAYERS = {
  * @returns The active data layers object or default configuration
  */
 export const selectActiveDataLayers = (state: StateType) => {
-  return state.layers?.active_data_layers || DEFAULT_ACTIVE_DATA_LAYERS;
+  const raw = state.layers?.active_data_layers || DEFAULT_ACTIVE_DATA_LAYERS;
+  return sanitizeActiveDataLayers(raw);
 };
 
 /**

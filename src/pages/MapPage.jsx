@@ -40,6 +40,13 @@ function Map({mapContainer}) {
 
   const activeDataLayers = useSelector(selectActiveDataLayers);
 
+  if (process.env.NODE_ENV === 'development') {
+    const parkLayers = activeDataLayers['displaymode-park'];
+    if (parkLayers?.length > 1 || parkLayers?.length === 0) {
+      console.warn('MapPage: displayMode', displayMode, 'park layers', parkLayers);
+    }
+  }
+
   // For backward compatibility, keep the old selectors
   const viewPark = useSelector((state: StateType) => {
     return state.layers ? state.layers.view_park : DISPLAYMODE_PARKEERDATA_VOERTUIGEN;

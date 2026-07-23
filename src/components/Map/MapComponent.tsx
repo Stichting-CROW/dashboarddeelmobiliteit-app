@@ -16,6 +16,7 @@ import {StateType} from '../../types/StateType';
 import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle} from './MapUtils/map';
 import {createSafeGeolocateControl} from './MapUtils/mapControls';
+import { whenMapStyleReady } from './MapUtils/mapGuards';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -469,13 +470,27 @@ const MapComponent = (props): JSX.Element => {
   // Set active layers (now handled by MapPage based on active_data_layers)
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
+    if(! map.current) return;
 
     // Do not activate background layers
     // Get background layers from components/Map/MapUtils/backgroundLayerManager.js
     const backgroundLayers = getAvailableLayers();
     const layersToActivate = props.layers.filter(layer => !Object.values(backgroundLayers).some(backgroundLayer => backgroundLayer.layerId === layer));
 
-    activateLayers(map.current, layers, layersToActivate);
+    let cancelled = false;
+
+    const run = () => {
+      if (cancelled || !map.current) return;
+      activateLayers(map.current, layers, layersToActivate);
+    };
+
+    if (!map.current.isStyleLoaded()) {
+      whenMapStyleReady(map.current, run);
+      return () => { cancelled = true; };
+    }
+
+    run();
+    return () => { cancelled = true; };
   }, [
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)

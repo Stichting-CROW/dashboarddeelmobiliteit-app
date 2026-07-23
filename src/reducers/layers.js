@@ -39,15 +39,75 @@ const initialState = {
 
 const md5 = require('md5');
 
+const VALID_DATA_LAYERS = {
+  'displaymode-park': [
+    DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+    DISPLAYMODE_PARKEERDATA_CLUSTERS,
+    DISPLAYMODE_PARKEERDATA_HEATMAP
+  ],
+  'displaymode-rentals': [
+    DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+    DISPLAYMODE_VERHUURDATA_CLUSTERS,
+    DISPLAYMODE_VERHUURDATA_HEATMAP,
+    DISPLAYMODE_VERHUURDATA_HB
+  ]
+};
+
+/**
+ * Ensure a display mode has at most one active data layer.
+ * If multiple layers are active, keep only the first valid one and fall back
+ * to the default when none of the active layers is valid.
+ */
+export const sanitizeActiveDataLayers = (activeDataLayers) => {
+  if (!activeDataLayers || typeof activeDataLayers !== 'object') {
+    return initialState.active_data_layers;
+  }
+
+  const validDisplayModes = Object.keys(initialState.active_data_layers);
+  const sanitized = {};
+  let didNormalize = false;
+
+  validDisplayModes.forEach(displayMode => {
+    const validLayers = VALID_DATA_LAYERS[displayMode] || [];
+    const currentLayers = activeDataLayers[displayMode];
+
+    if (!Array.isArray(currentLayers) || currentLayers.length === 0) {
+      sanitized[displayMode] = [initialState.active_data_layers[displayMode][0]];
+      return;
+    }
+
+    // Keep only the first valid active layer
+    const firstValid = currentLayers.find(layer => validLayers.includes(layer));
+    const normalized = firstValid
+      ? [firstValid]
+      : [initialState.active_data_layers[displayMode][0]];
+    sanitized[displayMode] = normalized;
+
+    if (currentLayers.length > 1 || !currentLayers.includes(normalized[0])) {
+      didNormalize = true;
+    }
+  });
+
+  if (didNormalize && process.env.NODE_ENV === 'development') {
+    console.warn('Normalized active_data_layers to single-layer mode:', activeDataLayers, '->', sanitized);
+  }
+
+  return sanitized;
+};
+
 export default function filter(state = initialState, action) {
   switch(action.type) {
     case 'LAYER_SET_DISPLAYMODE': {
       if(state.displaymode===action.payload) { return state }
       
-      // console.log('reducer layer set view_park %s', action.payload)
+      // Data-layer UI uses radio-button behaviour; clean up any corrupted
+      // multi-layer state when switching display modes.
+      const sanitizedActiveDataLayers = sanitizeActiveDataLayers(state.active_data_layers);
+      
       return {
           ...state,
-          displaymode: action.payload
+          displaymode: action.payload,
+          active_data_layers: sanitizedActiveDataLayers
       };
     }
     case 'LAYER_SET_VIEW_PARK': {
@@ -71,17 +131,17 @@ export default function filter(state = initialState, action) {
     // New data layer management cases
     case 'LAYER_SET_DATA_LAYER': {
       const { displayMode, layerName } = action.payload;
-      const currentLayers = state.active_data_layers[displayMode] || [];
+      const validLayers = VALID_DATA_LAYERS[displayMode] || [];
       
-      if (currentLayers.includes(layerName)) {
-        return state; // Layer already active
+      if (!validLayers.includes(layerName)) {
+        return state;
       }
       
       return {
         ...state,
         active_data_layers: {
           ...state.active_data_layers,
-          [displayMode]: [...currentLayers, layerName]
+          [displayMode]: [layerName] // Only this layer is active
         }
       };
     }
@@ -103,55 +163,64 @@ export default function filter(state = initialState, action) {
     }
     case 'LAYER_TOGGLE_DATA_LAYER': {
       const { displayMode, layerName, isVisible } = action.payload;
-      const currentLayers = state.active_data_layers[displayMode] || [];
+      const validLayers = VALID_DATA_LAYERS[displayMode] || [];
+      const defaultLayer = initialState.active_data_layers[displayMode]?.[0];
+      
+      if (!validLayers.includes(layerName) || !defaultLayer) {
+        return state;
+      }
       
       if (isVisible) {
-        // Hide layer
-        if (!currentLayers.includes(layerName)) {
-          return state; // Layer not active
-        }
-        
+        // Hiding the active layer: fall back to the default so the map
+        // always has a valid data layer for this display mode.
         return {
           ...state,
           active_data_layers: {
             ...state.active_data_layers,
-            [displayMode]: currentLayers.filter(layer => layer !== layerName)
+            [displayMode]: [defaultLayer]
           }
         };
       } else {
-        // Show layer
-        if (currentLayers.includes(layerName)) {
-          return state; // Layer already active
-        }
-        
+        // Showing a layer: make it the only active one.
         return {
           ...state,
           active_data_layers: {
             ...state.active_data_layers,
-            [displayMode]: [...currentLayers, layerName]
+            [displayMode]: [layerName]
           }
         };
       }
     }
     case 'LAYER_SET_ACTIVE_DATA_LAYERS': {
       const { displayMode, layerNames } = action.payload;
+      const validLayers = VALID_DATA_LAYERS[displayMode] || [];
+      const firstValid = Array.isArray(layerNames)
+        ? layerNames.find(layer => validLayers.includes(layer))
+        : null;
       
       return {
         ...state,
         active_data_layers: {
           ...state.active_data_layers,
-          [displayMode]: layerNames
+          [displayMode]: [firstValid || initialState.active_data_layers[displayMode][0]]
         }
       };
     }
     case 'LAYER_SET_SINGLE_DATA_LAYER': {
       const { displayMode, layerName } = action.payload;
-      
+      const validLayers = VALID_DATA_LAYERS[displayMode] || [];
+      const defaultLayer = initialState.active_data_layers[displayMode]?.[0];
+      if (!defaultLayer) return state; // Unknown display mode
+
+      const safeLayerName = validLayers.includes(layerName)
+        ? layerName
+        : defaultLayer;
+
       return {
         ...state,
         active_data_layers: {
           ...state.active_data_layers,
-          [displayMode]: [layerName] // Only this layer is active
+          [displayMode]: [safeLayerName] // Only this layer is active
         }
       };
     }
@@ -205,9 +274,11 @@ export default function filter(state = initialState, action) {
       }
     }
     case 'IMPORT_STATE': {
+      const importedLayers = action.payload.layers || {};
       return {
         ...state,
-        ...action.payload.layers
+        ...importedLayers,
+        active_data_layers: sanitizeActiveDataLayers(importedLayers.active_data_layers)
       }
     }
     case 'LOGIN':
