@@ -707,6 +707,7 @@ export interface PerformanceIndicatorDescription {
     title: string;
     description: string;
     bound_description: string;
+    precision?: number;
 }
 
 export interface MunicipalityModalityOperator {

@@ -18,6 +18,8 @@ export interface LineChartProps {
   colors?: string[];
   /** When 'percentage', appends '%' to tooltip and y-axis values */
   unit?: string;
+  /** Number of decimal places to show for values (defaults to 0) */
+  precision?: number;
 }
 
 const TARGET_Y_TICK_COUNT = 5;
@@ -60,7 +62,8 @@ const LineChart: React.FC<LineChartProps> = ({
   xAxisCategories,
   height = 300,
   colors = ['#ef4444', '#3b82f6'],
-  unit
+  unit,
+  precision
 }) => {
   // Validate inputs
   if (!series || series.length === 0 || !xAxisCategories || xAxisCategories.length === 0) {
@@ -165,8 +168,18 @@ const LineChart: React.FC<LineChartProps> = ({
   );
   const normalizedUnit = unit?.trim().toLowerCase();
   const isPercentageUnit = normalizedUnit === '%' || normalizedUnit === 'percentage';
+  const valuePrecision = typeof precision === 'number' && precision >= 0 ? precision : 0;
+
+  const formatValue = (value: number): string => {
+    if (!isFinite(value)) {
+      return isPercentageUnit ? '0%' : '0';
+    }
+    const str = value.toFixed(valuePrecision).replace('.', ',');
+    return isPercentageUnit ? `${str}%` : str;
+  };
+
   const formattedPrimaryLineAverage = primaryLineAverage !== null
-    ? `${Math.round(primaryLineAverage)}${isPercentageUnit ? '%' : ''}`
+    ? formatValue(primaryLineAverage)
     : null;
   // Add ~15% headroom above the highest value, minimum 5 units (ensures space above highest line)
   const headroom = Math.max(maxDataValue * 0.15, 5);
@@ -264,11 +277,7 @@ const LineChart: React.FC<LineChartProps> = ({
       labels: {
         formatter: (value: number) => {
           try {
-            if (!isFinite(value)) {
-              return isPercentageUnit ? '0%' : '0';
-            }
-            const str = Math.round(value).toString();
-            return isPercentageUnit ? `${str}%` : str;
+            return formatValue(value);
           } catch (error) {
             return isPercentageUnit ? '0%' : '0';
           }
@@ -320,8 +329,7 @@ const LineChart: React.FC<LineChartProps> = ({
       y: {
         formatter: (value: number) => {
           if (value == null || !isFinite(value)) return '-';
-          const str = Math.round(value).toString();
-          return isPercentageUnit ? `${str}%` : str;
+          return formatValue(value);
         }
       }
     },
