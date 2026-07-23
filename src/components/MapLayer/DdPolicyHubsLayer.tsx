@@ -32,7 +32,8 @@ import {
   initEventHandlers,
   enableDrawingPolygon,
   selectDrawPolygon,
-  removeDrawedPolygons
+  removeDrawedPolygons,
+  removeDrawControl
 } from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
@@ -186,12 +187,8 @@ const DdPolicyHubsLayer = ({
         whenMapStyleReady(map, () => removeHubsFromMap(map));
         // Clean up any active drawing state so it does not leak onto other pages.
         if (drawRef.current) {
-          removeDrawedPolygons(drawRef.current);
-          try {
-            map.removeControl(drawRef.current);
-          } catch {
-            // Control may already have been removed.
-          }
+          removeDrawControl(map, drawRef.current);
+          drawRef.current = undefined;
         }
       }
       closeOverlapSelectionPopup();
@@ -519,15 +516,20 @@ const DdPolicyHubsLayer = ({
 
     const drawTimeouts: ReturnType<typeof setTimeout>[] = [];
 
-    // If drawing isn't enabled: Remove draw tools
+    // If drawing isn't enabled: Remove draw tools and control
     if(! is_drawing_enabled) {
-      removeDrawedPolygons(draw);
+      if (draw) {
+        removeDrawControl(map, draw);
+        drawRef.current = undefined;
+        setDraw(undefined);
+      }
       return;
     }
     // Initialize draw
     let Draw = draw;
     if(! draw) {
       Draw = initMapboxDraw(map)
+      drawRef.current = Draw;
       setDraw(Draw);
     };
 

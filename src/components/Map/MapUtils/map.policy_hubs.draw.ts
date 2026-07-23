@@ -51,9 +51,22 @@ const selectDrawPolygon = (draw, id) => {
 
 const removeDrawedPolygons = (draw) => {
     // Remove all drawed zones from the map
-    if(draw) {
+    if(! draw) return;
+    try {
       draw.deleteAll();
       draw.changeMode('simple_select');
+    } catch {
+      // Draw control may already have been removed from the map.
+    }
+}
+
+const removeDrawControl = (map, draw) => {
+    if(! map || ! draw) return;
+    try {
+      removeDrawedPolygons(draw);
+      map.removeControl(draw);
+    } catch {
+      // Control may already have been removed or map may be destroyed.
     }
 }
 
@@ -62,5 +75,6 @@ export {
     initEventHandlers,
     enableDrawingPolygon,
     selectDrawPolygon,
-    removeDrawedPolygons
+    removeDrawedPolygons,
+    removeDrawControl
 }
