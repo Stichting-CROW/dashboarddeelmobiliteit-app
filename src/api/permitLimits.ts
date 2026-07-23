@@ -259,6 +259,7 @@ export const transformKpiOverviewToPermitRecords = (
             vehicle_type: {
                 id: item.form_factor,
                 name: item.form_factor,
+
                 icon: '',
             },
             permit_limit: permitLimit,
@@ -381,7 +382,16 @@ export const fetchKpiOverviewPermitRecords = async (
         }
 
         const scopeLabel = params.municipality || params.system_id || 'unknown';
-        const kpiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        let kpiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        // temporary workaround to filter out lime bicycles with human propulsion type, until the frontend is fixed by Bart
+        kpiData.municipality_modality_operators = kpiData.municipality_modality_operators.filter(
+            record =>
+                !(
+                record.operator === "lime" &&
+                record.form_factor === "bicycle" &&
+                record.propulsion_type === "human"
+                )
+        );
         if (!kpiData) {
             return null;
         }
@@ -791,7 +801,16 @@ export const getOperatorPerformanceIndicators = async (
         }
 
         const scopeLabel = systemId || request.municipality || 'unknown';
-        const apiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        let apiData = await fetchKpiOverviewRaw(token, searchParams, scopeLabel);
+        // temporary workaround to filter out lime bicycles with human propulsion type, until the frontend is fixed by Bart
+        apiData.municipality_modality_operators = apiData.municipality_modality_operators.filter(
+            record =>
+                !(
+                record.operator === "lime" &&
+                record.form_factor === "bicycle" &&
+                record.propulsion_type === "human"
+                )
+        );
         if (!apiData) {
             return null;
         }
