@@ -74,7 +74,7 @@ function Profile() {
         mb-2
         inline-block
       ">
-        Snel overzicht van belangrijkste functies
+        Visueel overzicht belangrijkste functies
       </Link><br />
 
       &raquo; <Link to="/rondleiding" className="

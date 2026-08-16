@@ -18,7 +18,7 @@ function DemoHeatmapMap() {
       ...data,
       features: data.features.map((feature) => ({
         ...feature,
-        properties: { ...feature.properties, mag: 5 }
+        properties: { ...feature.properties, mag: 10 }
       }))
     };
   }, []);
@@ -30,7 +30,20 @@ function DemoHeatmapMap() {
       map.addLayer({
         ...heatmapLayer,
         id: 'demo-vehicles-heatmap',
-        source: 'demo-vehicles'
+        source: 'demo-vehicles',
+        paint: {
+          ...heatmapLayer.paint,
+          // The production intensity is tuned for thousands of vehicles in a
+          // city; this demo only holds a neighbourhood worth of them.
+          'heatmap-intensity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10, 0.6,
+            13, 1.4,
+            16, 2
+          ]
+        }
       } as unknown as maplibregl.HeatmapLayerSpecification);
     },
     [geojson]
@@ -55,7 +68,7 @@ function DemoHeatmapMap() {
         </div>
       }
     >
-      <DemoMap onMapLoad={onMapLoad} zoom={13.6} />
+      <DemoMap onMapLoad={onMapLoad} zoom={13.6} fitTo={geojson} maxFitZoom={14} />
     </DemoWidgetCard>
   );
 }

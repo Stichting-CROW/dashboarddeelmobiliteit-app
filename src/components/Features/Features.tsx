@@ -5,6 +5,12 @@ import DemoVehiclesMap from './demo/DemoVehiclesMap';
 import DemoDefectVehiclesMap from './demo/DemoDefectVehiclesMap';
 import DemoHeatmapMap from './demo/DemoHeatmapMap';
 import DemoOntwikkelingChart from './demo/DemoOntwikkelingChart';
+import DemoRentalOriginsMap from './demo/DemoRentalOriginsMap';
+import DemoHbMatrixMap from './demo/DemoHbMatrixMap';
+import DemoVerhuringenChart from './demo/DemoVerhuringenChart';
+import DemoServiceAreaMap from './demo/DemoServiceAreaMap';
+import DemoHubsMap from './demo/DemoHubsMap';
+import DemoPrestatiesOverview from './demo/DemoPrestatiesOverview';
 
 const introMarkdown = `
 Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen. Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid ontwikkelen, evalueren en bijsturen. [meer info](/over)
@@ -69,11 +75,18 @@ const WidgetGrid = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
+/** Single widget that uses the full width of the page. */
+const WidgetRow = ({ children }: { children: ReactNode }) => (
+  <div className="my-4">
+    {children}
+  </div>
+);
+
 const Features = () => {
   return (
     <div>
       <h1 className="text-4xl font-bold">
-        Dashboard Deelmobiliteit in het kort
+        Dashboard Deelmobiliteit functies
       </h1>
 
       <div className="mx-auto pb-8">
@@ -91,12 +104,28 @@ const Features = () => {
         </WidgetGrid>
 
         <Markdown>{verhuringenMarkdown}</Markdown>
+        <WidgetGrid>
+          <DemoRentalOriginsMap />
+          <DemoHbMatrixMap />
+        </WidgetGrid>
+        <WidgetRow>
+          <DemoVerhuringenChart />
+        </WidgetRow>
 
         <Markdown>{servicegebiedenMarkdown}</Markdown>
+        <WidgetRow>
+          <DemoServiceAreaMap />
+        </WidgetRow>
 
         <Markdown>{zonesMarkdown}</Markdown>
+        <WidgetRow>
+          <DemoHubsMap />
+        </WidgetRow>
 
         <Markdown>{prestatiesMarkdown}</Markdown>
+        <WidgetRow>
+          <DemoPrestatiesOverview />
+        </WidgetRow>
 
         <Markdown>{outroMarkdown}</Markdown>
       </div>

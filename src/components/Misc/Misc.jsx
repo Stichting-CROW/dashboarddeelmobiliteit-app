@@ -17,7 +17,7 @@ export default function Misc({children, contentWidth = '600px'}) {
 
   const loggedInPillMenuItems = [
     {
-      title: 'Profiel',
+      title: 'Start',
       link: '/profile',
     },
     {

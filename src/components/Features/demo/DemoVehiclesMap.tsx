@@ -112,7 +112,7 @@ function DemoVehiclesMap({
       description={description}
       footer={footer !== undefined ? footer : <DurationLegend />}
     >
-      <DemoMap onMapLoad={onMapLoad} zoom={zoom} />
+      <DemoMap onMapLoad={onMapLoad} zoom={zoom} fitTo={geojson} maxFitZoom={15} />
     </DemoWidgetCard>
   );
 }

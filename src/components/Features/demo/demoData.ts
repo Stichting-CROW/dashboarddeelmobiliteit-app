@@ -33,9 +33,13 @@ export interface DemoVehicleProperties {
   system_id: string;
   operator_name: string;
   form_factor: string;
-  duration_bin: number;
-  duration_label: string;
-  is_non_operational: boolean;
+  /** Parked vehicles (Aanbod) */
+  duration_bin?: number;
+  duration_label?: string;
+  is_non_operational?: boolean;
+  /** Rental departure locations (Verhuringen) */
+  distance_bin?: number;
+  distance_label?: string;
 }
 
 export type DemoVehiclesGeoJson = {
@@ -136,6 +140,73 @@ export function getDemoDefectVehiclesGeoJson(): DemoVehiclesGeoJson {
   };
 }
 
+/** Afstand bins as used by the Verhuringen map legend. */
+export const distanceBins = [
+  { bin: 0, color: '#48E248', label: '1km' },
+  { bin: 1, color: '#44BD48', label: '2km' },
+  { bin: 2, color: '#3B7747', label: '5km' },
+  { bin: 3, color: '#343E47', label: '> 5km' }
+] as const;
+
+const distanceBinWeights = [0.42, 0.27, 0.21, 0.1];
+
+function pickWeighted(random: () => number, weights: number[]): number {
+  const value = random();
+  let cumulative = 0;
+  for (let index = 0; index < weights.length; index++) {
+    cumulative += weights[index];
+    if (value <= cumulative) return index;
+  }
+  return weights.length - 1;
+}
+
+/** Departure locations are spread wider than parked vehicles: whole city centre. */
+const rentalClusters: { center: [number, number]; count: number; spread: number }[] = [
+  { center: [4.4695, 51.9235], count: 40, spread: 0.0030 }, // Weena / Centraal
+  { center: [4.4738, 51.9198], count: 30, spread: 0.0026 }, // Lijnbaan
+  { center: [4.4790, 51.9245], count: 22, spread: 0.0030 }, // Hofplein
+  { center: [4.4880, 51.9160], count: 20, spread: 0.0040 }, // Oude Haven
+  { center: [4.4600, 51.9130], count: 18, spread: 0.0040 }, // Museumpark
+  { center: [4.4530, 51.9290], count: 16, spread: 0.0044 }, // Delfshaven kant
+  { center: [4.4940, 51.9290], count: 14, spread: 0.0044 } // Kralingen kant
+];
+
+/**
+ * Departure locations of rentals ("Herkomst"), with the distance bin the
+ * Verhuringen map uses to color its markers.
+ */
+export function getDemoRentalOriginsGeoJson(): DemoVehiclesGeoJson {
+  const random = createRandom(778211);
+  const features: DemoVehiclesGeoJson['features'] = [];
+
+  rentalClusters.forEach((cluster, clusterIndex) => {
+    for (let i = 0; i < cluster.count; i++) {
+      const operator = demoOperators[Math.floor(random() * demoOperators.length)];
+      const distanceBin = pickWeighted(random, distanceBinWeights);
+      const lng = cluster.center[0] + (random() - 0.5) * cluster.spread * 2;
+      const lat = cluster.center[1] + (random() - 0.5) * cluster.spread;
+
+      features.push({
+        type: 'Feature',
+        properties: {
+          vehicle_id: `demo-rental-${clusterIndex}-${i}`,
+          system_id: operator.system_id,
+          operator_name: operator.name,
+          form_factor: formFactors[Math.floor(random() * formFactors.length)],
+          distance_bin: distanceBin,
+          distance_label: distanceBins[distanceBin].label
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [Number(lng.toFixed(6)), Number(lat.toFixed(6))]
+        }
+      });
+    }
+  });
+
+  return { type: 'FeatureCollection', features };
+}
+
 export interface DemoChartRow {
   time: string;
   [operatorKey: string]: string | number;
@@ -174,6 +245,55 @@ export function getDemoOntwikkelingData(): DemoChartRow[] {
         profile[hour] + (profile[nextHour] - profile[hour]) * withinHour;
       const noise = (random() - 0.5) * 1.4;
       row[operator.system_id] = Math.max(0, Math.round(interpolated + noise));
+    });
+
+    row['Totaal'] = demoOperators.reduce(
+      (sum, operator) => sum + (Number(row[operator.system_id]) || 0),
+      0
+    );
+
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+const dutchWeekdays = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+const dutchMonths = [
+  'jan', 'feb', 'mrt', 'apr', 'mei', 'jun',
+  'jul', 'aug', 'sep', 'okt', 'nov', 'dec'
+];
+
+/**
+ * Number of rentals per day over four weeks, per operator. Weekends are busier
+ * than weekdays and there is a slow upward trend, as in a spring month.
+ * Dates are formatted here instead of with moment, because the Dutch locale is
+ * only registered on the map pages.
+ */
+export function getDemoVerhuringenData(): DemoChartRow[] {
+  const random = createRandom(4451209);
+  const rows: DemoChartRow[] = [];
+  const startDate = new Date(Date.UTC(2026, 5, 1));
+
+  // Rentals per day per operator, on an average weekday.
+  const weekdayBase = [180, 120, 70];
+
+  for (let day = 0; day < 28; day++) {
+    const date = new Date(startDate.getTime() + day * 24 * 60 * 60 * 1000);
+    const dayOfWeek = date.getUTCDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+    const row: DemoChartRow = {
+      time: `${dutchWeekdays[dayOfWeek]} ${date.getUTCDate()} ${dutchMonths[date.getUTCMonth()]}`
+    };
+
+    demoOperators.forEach((operator, index) => {
+      const trend = 1 + day * 0.008;
+      const weekendFactor = isWeekend ? 1.35 : 1;
+      const noise = 0.88 + random() * 0.24;
+      row[operator.system_id] = Math.round(
+        weekdayBase[index] * trend * weekendFactor * noise
+      );
     });
 
     row['Totaal'] = demoOperators.reduce(

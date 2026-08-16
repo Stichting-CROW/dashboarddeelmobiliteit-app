@@ -1,6 +1,9 @@
 import maplibregl from 'maplibre-gl';
 
-import { getVehicleMarkers } from '../../Map/vehicle_marker.js';
+import {
+  getVehicleMarkers,
+  getVehicleMarkers_rentals
+} from '../../Map/vehicle_marker.js';
 import { demoOperators } from './demoData';
 
 const MARKER_SIZE = 50;
@@ -43,6 +46,34 @@ export async function addDemoVehicleImages(map: maplibregl.Map): Promise<boolean
   }
 }
 
+/**
+ * Registers the rentals marker sprites: the ring color indicates the distance
+ * travelled instead of the parking duration.
+ */
+export async function addDemoRentalImages(map: maplibregl.Map): Promise<boolean> {
+  try {
+    const results = await Promise.all(
+      demoOperators.map(async (operator) => ({
+        operator,
+        markers: await getVehicleMarkers_rentals(operator.color)
+      }))
+    );
+
+    results.forEach(({ operator, markers }) => {
+      markers.forEach((data: Uint8Array, bin: number) => {
+        const id = `${operator.system_id}-r:${bin}`;
+        if (map.hasImage(id)) return;
+        map.addImage(id, { width: MARKER_SIZE, height: MARKER_SIZE, data });
+      });
+    });
+
+    return true;
+  } catch (error) {
+    console.warn('Could not add demo rental markers to the features page map', error);
+    return false;
+  }
+}
+
 /** Same icon-image expression as the production vehicles-point layer. */
 export const demoVehicleIconLayout = {
   'icon-image': [
@@ -51,6 +82,21 @@ export const demoVehicleIconLayout = {
     ['case', ['==', ['get', 'is_non_operational'], true], '-p-n:', '-p:'],
     ['get', 'duration_bin']
   ],
+  'icon-size': [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    11,
+    0.25,
+    16,
+    0.7
+  ],
+  'icon-allow-overlap': true
+};
+
+/** Same icon-image expression as the production rentals-origins-point layer. */
+export const demoRentalIconLayout = {
+  'icon-image': ['concat', ['get', 'system_id'], '-r:', ['get', 'distance_bin']],
   'icon-size': [
     'interpolate',
     ['linear'],

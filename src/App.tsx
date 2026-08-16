@@ -178,7 +178,7 @@ function App() {
         return `Inloggen - ${baseTitle}`;
       }
       if (pathname === '/profile') {
-        return `Profiel - ${baseTitle}`;
+        return `Start - ${baseTitle}`;
       }
       if (pathname === '/profile/api') {
         return `API-sleutels - ${baseTitle}`;

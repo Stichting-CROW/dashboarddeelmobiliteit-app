@@ -25,7 +25,7 @@ When DEMO mode is enabled, the following changes apply on the Prestaties aanbied
   - FietsDeel BV
   - ScootShare
   - Stedelijk Vervoer
-  - Mobiliteitshub
+  - Fenyx
   - FietsNet Holland
   - And more…
 

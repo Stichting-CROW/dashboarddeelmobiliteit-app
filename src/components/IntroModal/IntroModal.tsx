@@ -71,7 +71,7 @@ const IntroModal = ({ pathName }: IntroModalProps) => {
 
   const handleMeerInfo = () => {
     dismiss();
-    navigate('/over');
+    navigate('/features');
   };
 
   const handleOpenbareKaart = () => {
