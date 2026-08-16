@@ -15,7 +15,7 @@ export default function Misc({children, contentWidth = '600px'}) {
     return state.authentication.user_data ? true : false;
   });
 
-  const pillMenuItems = [
+  const loggedInPillMenuItems = [
     {
       title: 'Profiel',
       link: '/profile',
@@ -23,7 +23,6 @@ export default function Misc({children, contentWidth = '600px'}) {
     {
       title: 'Documentatie',
       link: '/docs',
-      public: true
     },
     {
       title: 'Exporteer',
@@ -32,12 +31,10 @@ export default function Misc({children, contentWidth = '600px'}) {
     {
       title: 'Datafeeds',
       link: '/active_feeds',
-      public: true
     },
     // {
     //   title: 'Voertuigplafonds',
     //   link: '/permits',
-    //   public: false
     // },
     {
       title: 'API keys',
@@ -45,11 +42,28 @@ export default function Misc({children, contentWidth = '600px'}) {
     }
   ];
 
-  // Only show pill items user has access to
-  const allowedPillMenuItems = pillMenuItems.filter(x => {
-    if(isLoggedIn) return true;
-    return x.public === true;
-  });
+  const guestPillMenuItems = [
+    {
+      title: 'Functies',
+      link: '/features',
+    },
+    {
+      title: 'Over',
+      link: '/over',
+    },
+    {
+      title: 'Documentatie',
+      link: '/docs',
+    },
+    {
+      title: 'Datafeeds',
+      link: '/active_feeds',
+    },
+  ];
+
+  const allowedPillMenuItems = isLoggedIn
+    ? loggedInPillMenuItems
+    : guestPillMenuItems;
 
   return (
     <div className="

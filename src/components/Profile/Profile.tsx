@@ -64,7 +64,17 @@ function Profile() {
         mb-2
         inline-block
       ">
-        Meer info
+        Over het Dashboard Deelmobiliteit
+      </Link><br />
+
+      &raquo; <Link to="/features" className="
+        text-gray-400
+        underline
+        block
+        mb-2
+        inline-block
+      ">
+        Snel overzicht van belangrijkste functies
       </Link><br />
 
       &raquo; <Link to="/rondleiding" className="
@@ -74,7 +84,7 @@ function Profile() {
         mb-2
         inline-block
       ">
-        Rondleiding
+        Rondleiding via slides (2022)
       </Link>
 
       <div className="flex">
