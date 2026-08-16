@@ -79,9 +79,6 @@ const Tour = () => {
                     <div><a href="https://github.com/Stichting-CROW/" target="_blank" rel="noreferrer">
                       GitHub
                     </a></div>
-                    <div><a href="https://gitlab.com/bikedashboard" target="_blank" rel="noreferrer">
-                      GitLab
-                    </a></div>
                     <div><a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues" target="_blank" rel="noreferrer">
                       Bugs & Suggesties
                     </a></div>
