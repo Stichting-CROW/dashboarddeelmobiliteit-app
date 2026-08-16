@@ -8,7 +8,7 @@ import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 
-export default function Misc({children}) {
+export default function Misc({children, contentWidth = '600px'}) {
   const navigate = useNavigate();
 
   const isLoggedIn = useSelector((state: StateType) => {
@@ -74,7 +74,7 @@ export default function Misc({children}) {
         <div className="
           mt-8
         " style={{
-          width: '600px',
+          width: contentWidth,
           maxWidth: '100%'
         }}>
           {children}

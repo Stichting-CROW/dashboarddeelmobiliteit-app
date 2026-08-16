@@ -24,6 +24,7 @@ import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
+import Features from './components/Features/Features';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
@@ -151,6 +152,9 @@ function App() {
       }
       if (pathname === '/over') {
         return `Over - ${baseTitle}`;
+      }
+      if (pathname === '/features') {
+        return `In het kort - ${baseTitle}`;
       }
       if (pathname === '/faq') {
         return `Veelgestelde vragen - ${baseTitle}`;
@@ -725,6 +729,13 @@ function App() {
                 </Misc>
               </Overlay>
             } />
+            <Route path="/features" element={
+              <Overlay>
+                <Misc contentWidth="900px">
+                  <Features />
+                </Misc>
+              </Overlay>
+            } />
             <Route path="/export" element={
               <Overlay>
                 <Misc>
@@ -818,6 +829,13 @@ function App() {
           <Overlay>
             <Misc>
               <About />
+            </Misc>
+          </Overlay>
+        } />
+        <Route path="/features" element={
+          <Overlay>
+            <Misc contentWidth="900px">
+              <Features />
             </Misc>
           </Overlay>
         } />

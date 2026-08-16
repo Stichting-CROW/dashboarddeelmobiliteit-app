@@ -58,7 +58,7 @@ Met de instelling **Herkomst** / **Bestemming** in de filterbalk bepaal je wat d
 - **Herkomst**: je ziet waar men vandaan kwam. Elk getal toont het aantal verhuringen dat in dát hexagoon startte en eindigde in het aangeklikte hexagoon. Je beantwoordt hiermee de vraag: "Waar kwamen de mensen vandaan, voordat ze naar het aangeklikte gebied reisden?"
 - **Bestemming**: je ziet waar men naartoe ging. Elk getal toont het aantal verhuringen dat in het aangeklikte hexagoon startte en eindigde in dát hexagoon. Je beantwoordt hiermee de vraag: "Waar gingen de mensen naartoe, nadat ze uit het aangeklikte gebied vertrokken?"
 
-In de screenshot is **Herkomst** geselecteerd. De getallen tonen dus per hexagoon hoeveel verhuringen daar startten met het aangeklikte hexagoon als bestemming. Je ziet dat de meeste van deze verhuringen begonnen in of vlakbij het aangeklikte hexagoon. Vanaf de randen van het gebied waren er ook verhuringen naar het aangeklikte hexagoon, maar dat waren er minder.
+In het screenshot is **Herkomst** geselecteerd. De getallen tonen dus per hexagoon hoeveel verhuringen daar startten met het aangeklikte hexagoon als bestemming. Je ziet dat de meeste van deze verhuringen begonnen in of vlakbij het aangeklikte hexagoon. Vanaf de randen van het gebied waren er ook verhuringen naar het aangeklikte hexagoon, maar dat waren er minder.
 
 ## Privacy
 
