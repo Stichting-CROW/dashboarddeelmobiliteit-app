@@ -35,6 +35,7 @@ import ActiveFeeds from './components/ActiveFeeds/ActiveFeeds';
 import MailTemplateList from './components/MailTemplateList/MailTemplateList';
 import MapPage from './pages/MapPage.jsx';
 import Menu from './components/Menu';
+import IntroModal from './components/IntroModal/IntroModal';
 import FloatingMobileMenu from './components/Menu/FloatingMobileMenu.jsx';
 import {SelectLayerMobile} from './components/SelectLayer/SelectLayerMobile.jsx';
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator.jsx';
@@ -884,6 +885,7 @@ function App() {
       {pathRequiresBackgroundMap(pathName) && <MapPage mapContainer={mapContainer} />}
 
       <Menu acl={acl} pathName={pathName} />
+      <IntroModal pathName={pathName} />
 
      </div>
      <Toaster />     

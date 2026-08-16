@@ -36,9 +36,11 @@ const Modal = ({
   const handleHide = () => blurThen(hideModalHandler);
   const button2Loading = button2Options && button2Options.isLoading === true;
   const button2Disabled = button2Loading || (button2Options && button2Options.disabled === true);
+  const showFooter = Boolean(button1Title || button2Title);
   const modalContent = (
     <div className={`
           fixed top-0 left-0 w-full h-full outline-none overflow-x-hidden overflow-y-auto
+          py-4 sm:py-12
         `}
         id="exampleModalCenteredScrollable"
         tabIndex="-1"
@@ -48,7 +50,6 @@ const Modal = ({
         style={{
           'display': isVisible ? 'block' : 'none',
           zIndex: (config && config.zIndex != null) ? config.zIndex : 9999,
-          padding: '50px 0'
         }}
         role="dialog"
       >
@@ -58,7 +59,6 @@ const Modal = ({
             'display': isVisible ? 'block' : 'none',
             backgroundColor: 'rgba(0,0,0,0.3)',
             zIndex: -1,
-            padding: '50px 0'
           }}
           onClick={handleHide}
         >
@@ -66,7 +66,7 @@ const Modal = ({
         
         <div className="
           modal-dialog relative w-auto pointer-events-auto
-          max-w-full
+          max-w-full px-2 sm:px-0
         " style={{
           height: '90%',
           ...(config && config.minWidth ? { minWidth: config.minWidth } : {})
@@ -107,7 +107,7 @@ const Modal = ({
             `}>
               {children}
             </div>}
-            <div
+            {showFooter && <div
               className="flex flex-shrink-0 flex-wrap items-center justify-end gap-2 p-4 border-t border-gray-200 rounded-b-md">
               {button1Title && <Button
                 type="button"
@@ -123,7 +123,7 @@ const Modal = ({
                 >
                 {button2Title}
               </Button>}
-            </div>
+            </div>}
           </div>
         </div>
       </div>
