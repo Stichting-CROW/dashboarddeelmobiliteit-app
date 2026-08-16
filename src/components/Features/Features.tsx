@@ -61,7 +61,9 @@ const prestatiesMarkdown = `
 `;
 
 const outroMarkdown = `
-Wil je meer informatie? Bekijk dan de [gebruikersdocumentatie](/docs) en [technische documentatie](https://docs.dashboarddeelmobiliteit.nl/).
+Ben je geinteresseerd geworden en ben je werkzaam bij een aanbieder of overheid? Lees dan bij [Over](/over) hoe je toegang krijgt.
+
+Wil je meer informatie? Bekijk dan de [gebruikersdocumentatie](/docs) en <a href="https://docs.dashboarddeelmobiliteit.nl/" target="_blank">technische documentatie</a>.
 `;
 
 const Markdown = ({ children }: { children: string }) => (

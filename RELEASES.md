@@ -1,5 +1,29 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-08-16
+
+**Functies en onboarding**
+
+- 🪄 Nieuwe pagina 'Functies' met visuals van de belangrijkste dashboardonderdelen
+- 🪄 Link naar de Functies-pagina toegevoegd in het menu en op de profielpagina
+- 🪄 Introductie-modal voor niet-ingelogde bezoekers bij een eerste bezoek aan het Aanbod-scherm
+
+**Prestaties aanbieders**
+
+- ✨ Grafieken tonen KPI-waarden nu met de juiste precisie (decimalen waar nodig)
+- 🐛 Opgelost: Lime-fietsen met handmatige aandrijving werden onterecht meegenomen in prestatieoverzichten
+
+**Kaart en zones**
+
+- 🐛 Opgelost: vastlopen bij wisselen van Zones naar Aanbod met cluster-, heatmap- en voertuiglagen tegelijk actief
+- 🐛 Opgelost: tekenmenu bleef actief na wisselen van tabblad en terugkeren naar tekenen
+
+**Documentatie en overig**
+
+- ✨ Documentatie over de knoppen 'Herkomst' en 'Bestemming' bij de HB-matrix uitgebreid
+- 🧹 Verouderde GitLab-link verwijderd van de tourpagina
+- 🧹 Node.js bijgewerkt naar versie 24
+
 ## Release 2026-07-09
 
 **Prestaties aanbieders**
