@@ -3,7 +3,7 @@ import {
   polygonFillStyle
 } from './map.policy_hubs.styles'
 import center from '@turf/center';
-import { isMapStyleUsable, whenMapStyleReady } from './mapGuards';
+import { canMutateMapLayers, isMapStyleUsable, whenMapLayersMutable } from './mapGuards';
 
 const max_zoom_for_hub_logo = 16;
 
@@ -19,8 +19,8 @@ const removeHubSources = (map: any) => {
 
 const removeHubsFromMap = (map: any) => {
     if (!map) return;
-    if (!isMapStyleUsable(map)) {
-      whenMapStyleReady(map, () => removeHubsFromMap(map));
+    if (!canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => removeHubsFromMap(map));
       return;
     }
 
@@ -61,7 +61,10 @@ const clickHubLogo = (e) => {
 
 async function renderPolygons_fill(map, geojson) {
     if(! map) return;
-    if(! map.isStyleLoaded()) return;
+    if(! canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => renderPolygons_fill(map, geojson));
+      return;
+    }
     
     const sourceId = 'policy_hubs';
     let layerId = `${sourceId}-layer-fill`

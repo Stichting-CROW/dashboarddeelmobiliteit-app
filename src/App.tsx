@@ -440,21 +440,27 @@ function App() {
     return () => clearTimeout(timer);
   }, [isLoggedIn]);
   
+  // Only the beleidszones page loads a different set of zones, so reloading on
+  // every single path change is wasteful: it briefly resets `zones_loaded`,
+  // which retriggers the zone geodata fetch (and used to reset the map viewport).
+  const isBeleidszonesPath = Boolean(pathName?.includes('/stats/beleidszones'));
+  const beleidszonesFilterZones = isBeleidszonesPath ? filter.zones : null;
+
   useEffect(() => {
     if(process && process.env.DEBUG) console.log('useEffect zones', filter.gebied)
     if(! metadata.metadata_loaded) return;
 
-    if (pathName?.includes('/stats/beleidszones')) {
+    if (isBeleidszonesPath) {
       updateBeleidszonesZones(store);
     } else {
       updateZones(store);
     }
   }, [
-    pathName,
+    isBeleidszonesPath,
     isLoggedIn,
     metadata.metadata_loaded,
     filter.gebied,
-    ...(pathName?.includes('/stats/beleidszones') ? [filter.zones] : []),
+    beleidszonesFilterZones,
   ]);
 
   /**

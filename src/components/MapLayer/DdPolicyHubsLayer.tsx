@@ -1,6 +1,6 @@
 import { toast, useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { whenMapStyleReady } from '../Map/MapUtils/mapGuards';
+import { whenMapLayersMutable } from '../Map/MapUtils/mapGuards';
 import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
@@ -184,7 +184,7 @@ const DdPolicyHubsLayer = ({
     return () => {
       if (TO_fetch_delay) clearTimeout(TO_fetch_delay);
       if (map) {
-        whenMapStyleReady(map, () => removeHubsFromMap(map));
+        whenMapLayersMutable(map, () => removeHubsFromMap(map));
         // Clean up any active drawing state so it does not leak onto other pages.
         if (drawRef.current) {
           removeDrawControl(map, drawRef.current);

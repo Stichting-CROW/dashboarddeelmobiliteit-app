@@ -1,4 +1,4 @@
-import { isMapStyleUsable, whenMapStyleReady } from './mapGuards';
+import { canMutateMapLayers, whenMapLayersMutable } from './mapGuards';
 
 const removeSources = (map: any) => {
     if(! map) return;
@@ -12,8 +12,8 @@ const removeSources = (map: any) => {
 
 const removeServiceAreaDeltaFromMap = (map: any) => {
     if (!map) return;
-    if (!isMapStyleUsable(map)) {
-      whenMapStyleReady(map, () => removeServiceAreaDeltaFromMap(map));
+    if (!canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => removeServiceAreaDeltaFromMap(map));
       return;
     }
 

@@ -13,7 +13,38 @@ export const getEmptyZonesGeodataPayload = () => {
 /** Cache for MDS public/zones responses by municipality code. Avoids refetch when only filter.zones changes. */
 const mdsZonesCache = new Map();
 
-const buildGeodataFromMdsZones = (zones, selectedZoneIds, store, state) => {
+/**
+ * Area selection (`gebied|zones`) the map was last zoomed to. Zone geodata gets
+ * rebuilt for several reasons (login, zone reload, switching data source), but the
+ * map may only be re-fitted when the user actually picked another place or zone.
+ * Otherwise a refresh of the same selection would throw away the current viewport.
+ */
+let lastZoomedSelection = null;
+
+const getSelectionKey = (state) => `${state.filter.gebied}|${state.filter.zones}`;
+
+/** True when the URL pins an explicit viewport, which must win over the area extent. */
+const hasViewportInUrl = () => {
+  if (typeof window === 'undefined') return false;
+  const queryParams = new URLSearchParams(window.location.search);
+  return Boolean(queryParams.get('lat') && queryParams.get('lng') && queryParams.get('zoom'));
+};
+
+/**
+ * Decides whether this geodata update should also move the map, and records the
+ * selection so subsequent updates for the same selection leave the viewport alone.
+ */
+const claimZoomForSelection = (state) => {
+  const selectionKey = getSelectionKey(state);
+  const isFirstUpdate = lastZoomedSelection === null;
+  const shouldZoom = selectionKey !== lastZoomedSelection && !(isFirstUpdate && hasViewportInUrl());
+
+  lastZoomedSelection = selectionKey;
+
+  return shouldZoom;
+};
+
+const buildGeodataFromMdsZones = (zones, selectedZoneIds, store, state, shouldZoom) => {
   const st = require('geojson-bounds');
   const geojson = { type: 'FeatureCollection', features: [] };
   let fullextent = undefined;
@@ -42,10 +73,12 @@ const buildGeodataFromMdsZones = (zones, selectedZoneIds, store, state) => {
 
   const payload = { data: geojson, filter: state.filter.zones, bounds: fullextent };
   store.dispatch({ type: 'SET_ZONES_GEODATA', payload });
-  store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent });
+  if (shouldZoom) {
+    store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent });
+  }
 };
 
-const buildGeodataFromDashboardZones = (metadata, store, state) => {
+const buildGeodataFromDashboardZones = (metadata, store, state, shouldZoom) => {
   const st = require('geojson-bounds');
   const geojson = { type: 'FeatureCollection', features: [] };
   let fullextent = undefined;
@@ -70,7 +103,9 @@ const buildGeodataFromDashboardZones = (metadata, store, state) => {
 
   const payload = { data: geojson, filter: state.filter.zones, bounds: fullextent };
   store.dispatch({ type: 'SET_ZONES_GEODATA', payload });
-  store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent });
+  if (shouldZoom) {
+    store.dispatch({ type: 'LAYER_SET_ZONES_EXTENT', payload: fullextent });
+  }
 };
 
 export const updateZonesgeodata = (store) => {
@@ -82,6 +117,8 @@ export const updateZonesgeodata = (store) => {
 
     const pathName = typeof window !== 'undefined' ? window.location?.pathname ?? '' : '';
     const useMds = pathName.includes('/stats/beleidszones');
+
+    const shouldZoom = claimZoomForSelection(state);
 
     let zone_ids = '';
     if (!state) {
@@ -125,7 +162,7 @@ export const updateZonesgeodata = (store) => {
         const selectedZoneIds = state.filter.zones
           ? state.filter.zones.split(',').map((id) => id.trim()).filter(Boolean)
           : null;
-        buildGeodataFromMdsZones(cachedZones, selectedZoneIds, store, state);
+        buildGeodataFromMdsZones(cachedZones, selectedZoneIds, store, state, shouldZoom);
         return;
       }
 
@@ -147,7 +184,7 @@ export const updateZonesgeodata = (store) => {
           const selectedZoneIds = state.filter.zones
             ? state.filter.zones.split(',').map((id) => id.trim()).filter(Boolean)
             : null;
-          buildGeodataFromMdsZones(zones, selectedZoneIds, store, state);
+          buildGeodataFromMdsZones(zones, selectedZoneIds, store, state, shouldZoom);
         })
         .catch((ex) => console.error('unable to fetch MDS zone geodata', ex))
         .finally(() => store.dispatch({ type: 'SHOW_LOADING', payload: false }));
@@ -175,7 +212,7 @@ export const updateZonesgeodata = (store) => {
       })
       .then((metadata) => {
         if (!metadata?.zones) return;
-        buildGeodataFromDashboardZones(metadata, store, state);
+        buildGeodataFromDashboardZones(metadata, store, state, shouldZoom);
       })
       .catch((ex) => console.error('unable to fetch zone geodata', ex))
       .finally(() => store.dispatch({ type: 'SHOW_LOADING', payload: false }));

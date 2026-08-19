@@ -25,7 +25,7 @@ import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
-import { whenMapStyleReady } from '../../Map/MapUtils/mapGuards';
+import { whenMapLayersMutable } from '../../Map/MapUtils/mapGuards';
 
 import { Legend, LegendItemType } from './Legend';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
@@ -91,16 +91,18 @@ const DdServiceAreasLayer = ({
     // together via Promise.all and the polygons only rendered once both
     // finished.
     setIsLoading(true);
+    let isStale = false;
     let serviceAreasDone = false;
     let historyDone = false;
     const maybeFinishLoading = () => {
-      if (serviceAreasDone && historyDone) {
+      if (serviceAreasDone && historyDone && !isStale) {
         setIsLoading(false);
       }
     };
 
     loadServiceAreas(filter.gebied, visible_operators)
       .then((service_areas) => {
+        if (isStale) return;
         setServiceAreas(service_areas);
       })
       .catch((error) => {
@@ -113,6 +115,7 @@ const DdServiceAreasLayer = ({
 
     loadServiceAreasHistory(filter.gebied, visible_operators)
       .then((service_area_history) => {
+        if (isStale) return;
         setServiceAreasHistory(service_area_history);
       })
       .catch((error) => {
@@ -123,6 +126,11 @@ const DdServiceAreasLayer = ({
         maybeFinishLoading();
       });
 
+    // Switching municipality again while these are in flight must not let the
+    // superseded response overwrite the newer one.
+    return () => {
+      isStale = true;
+    };
   }, [
     map,
     filter?.gebied,
@@ -134,7 +142,7 @@ const DdServiceAreasLayer = ({
   useEffect(() => {
     return () => {
       if (map) {
-        whenMapStyleReady(map, () => {
+        whenMapLayersMutable(map, () => {
           removeServiceAreasFromMap(map);
           removeServiceAreaDeltaFromMap(map);
         });
