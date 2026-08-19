@@ -52,6 +52,9 @@ import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
+import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
+import { selectDataLayerOrder } from '../../helpers/layerSelectors';
+import { DISPLAYMODE_POLICY_HUBS } from '../../reducers/layers.js';
 import Button from '../Button/Button';
 
 let TO_fetch_delay;
@@ -88,6 +91,7 @@ const DdPolicyHubsLayer = ({
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
 
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
@@ -320,6 +324,9 @@ const DdPolicyHubsLayer = ({
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
+
+    // Re-apply the user-defined z-order now that the hub layers exist again
+    applyDataLayerOrderWhenReady(map, dataLayerOrder[DISPLAYMODE_POLICY_HUBS], DISPLAYMODE_POLICY_HUBS);
   }, [
     policyHubs,
     policyHubs?.length,

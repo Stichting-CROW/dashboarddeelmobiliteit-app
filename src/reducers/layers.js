@@ -24,15 +24,72 @@ export const DATASOURCE_VERHUUR = 'rentals';
 
 export const DATA_LAYER_ORDER_GROUP = 'data-group';
 export const DATA_LAYER_ORDER_CBS = 'cbs-zones';
+export const DATA_LAYER_ORDER_SERVICE_AREAS = 'servicegebieden';
+export const DATA_LAYER_ORDER_HUBS = 'hubs';
+export const DATA_LAYER_ORDER_VERBODSGEBIEDEN = 'verbodsgebieden';
 
 export const VALID_DATA_LAYER_ORDER_IDS = [
   DATA_LAYER_ORDER_GROUP,
-  DATA_LAYER_ORDER_CBS
+  DATA_LAYER_ORDER_CBS,
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN
+];
+
+// Overlay layers (Andere datalaag) that can be toggled per display mode
+export const VALID_OVERLAY_LAYER_IDS = [
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN
+];
+
+export const VALID_OVERLAY_PHASES = [
+  'concept',
+  'committed_concept',
+  'published',
+  'active'
 ];
 
 export const DEFAULT_DATA_LAYER_ORDER = {
-  'displaymode-park': [DATA_LAYER_ORDER_GROUP, DATA_LAYER_ORDER_CBS],
-  'displaymode-rentals': [DATA_LAYER_ORDER_GROUP, DATA_LAYER_ORDER_CBS]
+  'displaymode-park': [
+    DATA_LAYER_ORDER_GROUP,
+    DATA_LAYER_ORDER_CBS,
+    DATA_LAYER_ORDER_SERVICE_AREAS,
+    DATA_LAYER_ORDER_HUBS,
+    DATA_LAYER_ORDER_VERBODSGEBIEDEN
+  ],
+  'displaymode-rentals': [
+    DATA_LAYER_ORDER_GROUP,
+    DATA_LAYER_ORDER_CBS,
+    DATA_LAYER_ORDER_SERVICE_AREAS,
+    DATA_LAYER_ORDER_HUBS,
+    DATA_LAYER_ORDER_VERBODSGEBIEDEN
+  ],
+  'displaymode-service-areas': [
+    DATA_LAYER_ORDER_SERVICE_AREAS,
+    DATA_LAYER_ORDER_HUBS,
+    DATA_LAYER_ORDER_VERBODSGEBIEDEN,
+    DATA_LAYER_ORDER_CBS
+  ],
+  'displaymode-policy-hubs': [
+    DATA_LAYER_ORDER_HUBS,
+    DATA_LAYER_ORDER_VERBODSGEBIEDEN,
+    DATA_LAYER_ORDER_SERVICE_AREAS,
+    DATA_LAYER_ORDER_CBS
+  ]
+};
+
+export const DEFAULT_OVERLAY_LAYERS = {
+  enabled: {
+    'displaymode-park': [],
+    'displaymode-rentals': [],
+    'displaymode-service-areas': [DATA_LAYER_ORDER_SERVICE_AREAS],
+    'displaymode-policy-hubs': []
+  },
+  phases: {
+    [DATA_LAYER_ORDER_HUBS]: 'active',
+    [DATA_LAYER_ORDER_VERBODSGEBIEDEN]: 'active'
+  }
 };
 
 const initialState = {
@@ -51,7 +108,18 @@ const initialState = {
   // Top-first list order; controls map z-order for Andere datalaag items
   data_layer_order: {
     'displaymode-park': [...DEFAULT_DATA_LAYER_ORDER['displaymode-park']],
-    'displaymode-rentals': [...DEFAULT_DATA_LAYER_ORDER['displaymode-rentals']]
+    'displaymode-rentals': [...DEFAULT_DATA_LAYER_ORDER['displaymode-rentals']],
+    'displaymode-service-areas': [...DEFAULT_DATA_LAYER_ORDER['displaymode-service-areas']],
+    'displaymode-policy-hubs': [...DEFAULT_DATA_LAYER_ORDER['displaymode-policy-hubs']]
+  },
+  // Toggleable overlay layers (servicegebieden/hubs/verbodsgebieden) per display mode
+  overlay_layers: {
+    enabled: {
+      ...DEFAULT_OVERLAY_LAYERS.enabled
+    },
+    phases: {
+      ...DEFAULT_OVERLAY_LAYERS.phases
+    }
   }
 }
 
@@ -119,10 +187,11 @@ export const sanitizeActiveDataLayers = (activeDataLayers) => {
  */
 export const sanitizeDataLayerOrder = (dataLayerOrder) => {
   if (!dataLayerOrder || typeof dataLayerOrder !== 'object') {
-    return {
-      'displaymode-park': [...DEFAULT_DATA_LAYER_ORDER['displaymode-park']],
-      'displaymode-rentals': [...DEFAULT_DATA_LAYER_ORDER['displaymode-rentals']]
-    };
+    const defaults = {};
+    Object.keys(DEFAULT_DATA_LAYER_ORDER).forEach((displayMode) => {
+      defaults[displayMode] = [...DEFAULT_DATA_LAYER_ORDER[displayMode]];
+    });
+    return defaults;
   }
 
   const sanitized = {};
@@ -134,13 +203,42 @@ export const sanitizeDataLayerOrder = (dataLayerOrder) => {
       return;
     }
 
-    const valid = current.filter((id) => VALID_DATA_LAYER_ORDER_IDS.includes(id));
+    // Only keep ids that are valid for this display mode
+    const valid = current.filter((id) => defaults.includes(id));
     defaults.forEach((id) => {
       if (!valid.includes(id)) {
         valid.push(id);
       }
     });
     sanitized[displayMode] = valid;
+  });
+
+  return sanitized;
+};
+
+/**
+ * Ensure the overlay layers state (enabled + phases) is complete and valid.
+ */
+export const sanitizeOverlayLayers = (overlayLayers) => {
+  const sanitized = {
+    enabled: {},
+    phases: {}
+  };
+
+  Object.keys(DEFAULT_OVERLAY_LAYERS.enabled).forEach((displayMode) => {
+    const current = overlayLayers?.enabled?.[displayMode];
+    if (!Array.isArray(current)) {
+      sanitized.enabled[displayMode] = [...DEFAULT_OVERLAY_LAYERS.enabled[displayMode]];
+      return;
+    }
+    sanitized.enabled[displayMode] = current.filter((id) => VALID_OVERLAY_LAYER_IDS.includes(id));
+  });
+
+  Object.keys(DEFAULT_OVERLAY_LAYERS.phases).forEach((layerId) => {
+    const current = overlayLayers?.phases?.[layerId];
+    sanitized.phases[layerId] = VALID_OVERLAY_PHASES.includes(current)
+      ? current
+      : DEFAULT_OVERLAY_LAYERS.phases[layerId];
   });
 
   return sanitized;
@@ -291,6 +389,46 @@ export default function filter(state = initialState, action) {
         data_layer_order: sanitized
       };
     }
+    case 'LAYER_TOGGLE_OVERLAY_LAYER': {
+      const { displayMode, layerId } = action.payload || {};
+      if (!VALID_OVERLAY_LAYER_IDS.includes(layerId)) return state;
+
+      const overlayLayers = sanitizeOverlayLayers(state.overlay_layers);
+      const current = overlayLayers.enabled[displayMode];
+      if (!Array.isArray(current)) return state;
+
+      const enabled = current.includes(layerId)
+        ? current.filter((id) => id !== layerId)
+        : [...current, layerId];
+
+      return {
+        ...state,
+        overlay_layers: {
+          ...overlayLayers,
+          enabled: {
+            ...overlayLayers.enabled,
+            [displayMode]: enabled
+          }
+        }
+      };
+    }
+    case 'LAYER_SET_OVERLAY_PHASE': {
+      const { layerId, phase } = action.payload || {};
+      const overlayLayers = sanitizeOverlayLayers(state.overlay_layers);
+      if (!(layerId in overlayLayers.phases)) return state;
+      if (!VALID_OVERLAY_PHASES.includes(phase)) return state;
+
+      return {
+        ...state,
+        overlay_layers: {
+          ...overlayLayers,
+          phases: {
+            ...overlayLayers.phases,
+            [layerId]: phase
+          }
+        }
+      };
+    }
     case 'LAYER_TOGGLE_ZONES_VISIBLE': {
       // console.log('reducer layer set zones visible %s', !state.zones_visible)
       return {
@@ -346,7 +484,8 @@ export default function filter(state = initialState, action) {
         ...state,
         ...importedLayers,
         active_data_layers: sanitizeActiveDataLayers(importedLayers.active_data_layers),
-        data_layer_order: sanitizeDataLayerOrder(importedLayers.data_layer_order)
+        data_layer_order: sanitizeDataLayerOrder(importedLayers.data_layer_order),
+        overlay_layers: sanitizeOverlayLayers(importedLayers.overlay_layers)
       }
     }
     case 'LOGIN':

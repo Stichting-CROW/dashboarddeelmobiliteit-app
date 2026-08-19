@@ -1,8 +1,12 @@
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_POLICY_HUBS,
   DATA_LAYER_ORDER_GROUP,
   DATA_LAYER_ORDER_CBS,
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN,
   DEFAULT_DATA_LAYER_ORDER,
   sanitizeDataLayerOrder
 } from '../../../reducers/layers.js';
@@ -39,6 +43,32 @@ const RENTALS_GROUP_MAP_LAYER_IDS = [
   'h3-hexes-percentageValues-layer'
 ];
 
+const SERVICE_AREAS_MAP_LAYER_IDS = [
+  'service_areas-layer-fill',
+  'service_areas-layer-border',
+  'service_area_delta-layer-fill',
+  'service_area_delta-layer-border'
+];
+
+// On /map/beleidshubs hubs + verbodsgebieden share one source/layer set
+const POLICY_HUBS_NATIVE_MAP_LAYER_IDS = [
+  'policy_hubs-layer-fill',
+  'policy_hubs-layer-border',
+  'policy_hubs-hub-logo'
+];
+
+const HUBS_OVERLAY_MAP_LAYER_IDS = [
+  'overlay-hubs-layer-fill',
+  'overlay-hubs-layer-border',
+  'overlay-hubs-hub-logo'
+];
+
+const VERBODSGEBIEDEN_OVERLAY_MAP_LAYER_IDS = [
+  'overlay-verbodsgebieden-layer-fill',
+  'overlay-verbodsgebieden-layer-border',
+  'overlay-verbodsgebieden-hub-logo'
+];
+
 interface MapLike {
   getLayer?: (id: string) => unknown;
   moveLayer?: (id: string) => void;
@@ -55,6 +85,19 @@ const getMapLayerIdsForListItem = (listId: string, displayMode: string): string[
     if (displayMode === DISPLAYMODE_RENTALS) {
       return RENTALS_GROUP_MAP_LAYER_IDS;
     }
+  }
+  if (listId === DATA_LAYER_ORDER_SERVICE_AREAS) {
+    return SERVICE_AREAS_MAP_LAYER_IDS;
+  }
+  if (listId === DATA_LAYER_ORDER_HUBS) {
+    return displayMode === DISPLAYMODE_POLICY_HUBS
+      ? POLICY_HUBS_NATIVE_MAP_LAYER_IDS
+      : HUBS_OVERLAY_MAP_LAYER_IDS;
+  }
+  if (listId === DATA_LAYER_ORDER_VERBODSGEBIEDEN) {
+    return displayMode === DISPLAYMODE_POLICY_HUBS
+      ? POLICY_HUBS_NATIVE_MAP_LAYER_IDS
+      : VERBODSGEBIEDEN_OVERLAY_MAP_LAYER_IDS;
   }
   return [];
 };
@@ -83,7 +126,7 @@ export const applyDataLayerOrder = (
   displayMode: string
 ): void => {
   if (!map || !canMutateMapLayers(map)) return;
-  if (displayMode !== DISPLAYMODE_PARK && displayMode !== DISPLAYMODE_RENTALS) {
+  if (!DEFAULT_DATA_LAYER_ORDER[displayMode]) {
     return;
   }
 

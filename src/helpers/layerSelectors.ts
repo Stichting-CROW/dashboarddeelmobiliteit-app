@@ -4,7 +4,8 @@ import {
   DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
   DEFAULT_DATA_LAYER_ORDER,
   sanitizeActiveDataLayers,
-  sanitizeDataLayerOrder
+  sanitizeDataLayerOrder,
+  sanitizeOverlayLayers
 } from '../reducers/layers.js';
 
 /**
@@ -59,4 +60,23 @@ export const isRentalsLayerActive = (activeDataLayers: any, layerName: string): 
 export const selectDataLayerOrder = (state: StateType) => {
   const raw = state.layers?.data_layer_order || DEFAULT_DATA_LAYER_ORDER;
   return sanitizeDataLayerOrder(raw);
-}; 
+};
+
+/**
+ * Selector for the toggleable overlay layers (servicegebieden/hubs/verbodsgebieden).
+ */
+export const selectOverlayLayers = (state: StateType) => {
+  return sanitizeOverlayLayers(state.layers?.overlay_layers);
+};
+
+/**
+ * Check if an overlay layer is enabled for a display mode.
+ */
+export const isOverlayLayerEnabled = (
+  overlayLayers: { enabled: { [displayMode: string]: string[] } },
+  displayMode: string,
+  layerId: string
+): boolean => {
+  const enabled = overlayLayers?.enabled?.[displayMode];
+  return Array.isArray(enabled) && enabled.includes(layerId);
+};

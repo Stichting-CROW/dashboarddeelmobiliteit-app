@@ -8,7 +8,9 @@ import DataLayerList from './DataLayerList';
 
 import {
   DISPLAYMODE_PARK,
-  DISPLAYMODE_RENTALS
+  DISPLAYMODE_RENTALS,
+  DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS
 } from '../../reducers/layers.js';
 
 const SelectLayerModal = () => {
@@ -76,7 +78,10 @@ const SelectLayerModal = () => {
         </span>
       </div>
 
-      {(displayMode === DISPLAYMODE_PARK || displayMode === DISPLAYMODE_RENTALS) && <>
+      {(displayMode === DISPLAYMODE_PARK
+        || displayMode === DISPLAYMODE_RENTALS
+        || displayMode === DISPLAYMODE_SERVICE_AREAS
+        || displayMode === DISPLAYMODE_POLICY_HUBS) && <>
         <h2>Andere datalaag</h2>
         <DataLayerList
           displayMode={displayMode}

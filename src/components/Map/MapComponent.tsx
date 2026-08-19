@@ -39,6 +39,9 @@ import {
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN,
 } from '../../reducers/layers.js';
 import { removeHubsFromMap } from './MapUtils/map.policy_hubs';
 import { removeServiceAreasFromMap } from './MapUtils/map.service_areas';
@@ -55,12 +58,18 @@ import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
+import DdServiceAreasOverlay from '../MapLayer/DdServiceAreasOverlay';
+import DdPolicyHubsOverlay from '../MapLayer/DdPolicyHubsOverlay';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 import { getProviderColorForProvider } from '../../helpers/providers';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
-import { selectDataLayerOrder } from '../../helpers/layerSelectors';
+import {
+  selectDataLayerOrder,
+  selectOverlayLayers,
+  isOverlayLayerEnabled
+} from '../../helpers/layerSelectors';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -82,6 +91,7 @@ const MapComponent = (props): JSX.Element => {
   });
 
   const dataLayerOrder = useSelector(selectDataLayerOrder);
+  const overlayLayers = useSelector(selectOverlayLayers);
 
   // Connect to redux store
   const dispatch = useDispatch()
@@ -527,13 +537,22 @@ const MapComponent = (props): JSX.Element => {
     if(! didMapLoad) return;
 
     if (displayMode !== DISPLAYMODE_POLICY_HUBS) {
+      // Only remove the native policy hubs source; overlay sources are
+      // managed by DdPolicyHubsOverlay itself.
       removeHubsFromMap(map.current);
     }
-    if (displayMode !== DISPLAYMODE_SERVICE_AREAS) {
+    // The service_areas source is shared by the native layer and the overlay,
+    // so keep it if the servicegebieden overlay is enabled for this page.
+    const serviceAreasOverlayEnabled = isOverlayLayerEnabled(
+      overlayLayers,
+      displayMode,
+      DATA_LAYER_ORDER_SERVICE_AREAS
+    );
+    if (displayMode !== DISPLAYMODE_SERVICE_AREAS && !serviceAreasOverlayEnabled) {
       removeServiceAreasFromMap(map.current);
       removeServiceAreaDeltaFromMap(map.current);
     }
-  }, [displayMode, didMapLoad]);
+  }, [displayMode, didMapLoad, overlayLayers]);
 
   // Set vehicles sources
   useEffect(() => {
@@ -800,6 +819,14 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
     </>}
+    {/* Overlay layers (Andere datalaag) on non-native pages */}
+    {stateLayers.displaymode !== DISPLAYMODE_SERVICE_AREAS
+      && isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_SERVICE_AREAS)
+      && <DdServiceAreasOverlay map={map.current} />}
+    {stateLayers.displaymode !== DISPLAYMODE_POLICY_HUBS
+      && (isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_HUBS)
+        || isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_VERBODSGEBIEDEN))
+      && <DdPolicyHubsOverlay map={map.current} />}
     {shouldShowMapTopControls() &&
       <>
         <RightTop>

@@ -19,16 +19,22 @@ import { CSS } from '@dnd-kit/utilities';
 import { Check, GripVertical } from 'lucide-react';
 
 import { useDataLayer } from '../Map/MapUtils/useDataLayer';
-import { setDataLayerOrder } from '../../actions/layers';
+import { setDataLayerOrder, toggleOverlayLayer, setOverlayPhase } from '../../actions/layers';
+import { toggleVisibleLayer } from '../../actions/policy-hubs';
+import { get_phases } from '../../helpers/policy-hubs/get-phases';
 import {
   selectActiveDataLayers,
   selectDataLayerOrder,
+  selectOverlayLayers,
+  isOverlayLayerEnabled,
   isParkLayerActive,
   isRentalsLayerActive
 } from '../../helpers/layerSelectors';
+import { StateType } from '../../types/StateType';
 import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
+  DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
@@ -38,6 +44,10 @@ import {
   DISPLAYMODE_VERHUURDATA_HB,
   DATA_LAYER_ORDER_GROUP,
   DATA_LAYER_ORDER_CBS,
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN,
+  VALID_OVERLAY_PHASES,
   DEFAULT_DATA_LAYER_ORDER
 } from '../../reducers/layers.js';
 
@@ -73,6 +83,23 @@ const PARK_OPTIONS: VisualizationOption[] = [
     label: 'Aanbod als heat map'
   }
 ];
+
+const OVERLAY_LABELS: { [id: string]: string } = {
+  [DATA_LAYER_ORDER_SERVICE_AREAS]: 'Servicegebieden',
+  [DATA_LAYER_ORDER_HUBS]: 'Hubs',
+  [DATA_LAYER_ORDER_VERBODSGEBIEDEN]: 'Verbodsgebieden'
+};
+
+// Map overlay list ids to the prefix used in policy_hubs.visible_layers
+const POLICY_HUBS_LAYER_PREFIX: { [id: string]: string } = {
+  [DATA_LAYER_ORDER_HUBS]: 'hub',
+  [DATA_LAYER_ORDER_VERBODSGEBIEDEN]: 'verbodsgebied'
+};
+
+const PHASE_OPTIONS = VALID_OVERLAY_PHASES.map((phase: string) => ({
+  value: phase,
+  label: get_phases()[phase]?.title || phase
+}));
 
 const RENTALS_OPTIONS: VisualizationOption[] = [
   {
@@ -143,6 +170,17 @@ const DataLayerList = ({
   const { setSingleLayer } = useDataLayer();
   const activeDataLayers = useSelector(selectActiveDataLayers);
   const dataLayerOrder = useSelector(selectDataLayerOrder);
+  const overlayLayers = useSelector(selectOverlayLayers);
+
+  const isPolicyHubsPage = displayMode === DISPLAYMODE_POLICY_HUBS;
+
+  // Policy hubs state, used for the Hubs/Verbodsgebieden rows on /map/beleidshubs
+  const policyHubsActivePhase = useSelector((state: StateType) => {
+    return (state.policy_hubs && state.policy_hubs.active_phase) || 'active';
+  });
+  const policyHubsVisibleLayers = useSelector((state: StateType) => {
+    return state.policy_hubs ? (state.policy_hubs.visible_layers || []) : [];
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -168,6 +206,16 @@ const DataLayerList = ({
   const isItemChecked = (id: string) => {
     if (id === DATA_LAYER_ORDER_GROUP) return true;
     if (id === DATA_LAYER_ORDER_CBS) return zonesVisible;
+    if (id === DATA_LAYER_ORDER_SERVICE_AREAS) {
+      return isOverlayLayerEnabled(overlayLayers, displayMode, id);
+    }
+    if (id === DATA_LAYER_ORDER_HUBS || id === DATA_LAYER_ORDER_VERBODSGEBIEDEN) {
+      // On the beleidshubs page these rows reflect the policy hubs visible layers
+      if (isPolicyHubsPage) {
+        return policyHubsVisibleLayers.includes(`${POLICY_HUBS_LAYER_PREFIX[id]}-${policyHubsActivePhase}`);
+      }
+      return isOverlayLayerEnabled(overlayLayers, displayMode, id);
+    }
     return false;
   };
 
@@ -175,7 +223,15 @@ const DataLayerList = ({
     const checked = storedOrder.filter(isItemChecked);
     const unchecked = storedOrder.filter((id: string) => !isItemChecked(id));
     return [...checked, ...unchecked];
-  }, [storedOrder, zonesVisible]);
+  }, [
+    storedOrder,
+    zonesVisible,
+    overlayLayers,
+    displayMode,
+    isPolicyHubsPage,
+    policyHubsVisibleLayers,
+    policyHubsActivePhase
+  ]);
 
   const visualizationOptions = useMemo(() => {
     if (displayMode === DISPLAYMODE_PARK) {
@@ -200,15 +256,38 @@ const DataLayerList = ({
     setSingleLayer(layerName, displayMode);
   };
 
+  const moveItemToTop = (id: string) => {
+    dispatch(setDataLayerOrder(displayMode, [
+      id,
+      ...storedOrder.filter((x: string) => x !== id)
+    ]));
+  };
+
   const handleCbsToggle = () => {
     const willBeVisible = !zonesVisible;
     dispatch({ type: 'LAYER_TOGGLE_ZONES_VISIBLE', payload: null });
     if (willBeVisible) {
-      dispatch(setDataLayerOrder(displayMode, [
-        DATA_LAYER_ORDER_CBS,
-        ...storedOrder.filter((id: string) => id !== DATA_LAYER_ORDER_CBS)
-      ]));
+      moveItemToTop(DATA_LAYER_ORDER_CBS);
     }
+  };
+
+  const handleOverlayToggle = (id: string) => {
+    const willBeVisible = !isItemChecked(id);
+
+    if (isPolicyHubsPage && POLICY_HUBS_LAYER_PREFIX[id]) {
+      // On the beleidshubs page, toggle the corresponding policy hubs visible layer
+      dispatch(toggleVisibleLayer(`${POLICY_HUBS_LAYER_PREFIX[id]}-${policyHubsActivePhase}`));
+    } else {
+      dispatch(toggleOverlayLayer(displayMode, id));
+    }
+
+    if (willBeVisible) {
+      moveItemToTop(id);
+    }
+  };
+
+  const handleOverlayPhaseChange = (id: string, phase: string) => {
+    dispatch(setOverlayPhase(id, phase));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -270,12 +349,59 @@ const DataLayerList = ({
     </button>
   );
 
+  const renderOverlayRow = (id: string) => {
+    const checked = isItemChecked(id);
+    const showPhaseSelect = !isPolicyHubsPage
+      && (id === DATA_LAYER_ORDER_HUBS || id === DATA_LAYER_ORDER_VERBODSGEBIEDEN);
+
+    return (
+      <div
+        className={`DataLayerList-checkRow${checked ? ' is-active' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-pressed={checked}
+        onClick={() => handleOverlayToggle(id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleOverlayToggle(id);
+          }
+        }}
+      >
+        <span className={`DataLayerList-checkbox${checked ? ' is-checked' : ''}`}>
+          {checked && <Check size={12} strokeWidth={3} />}
+        </span>
+        <span className="DataLayerList-checkLabel">{OVERLAY_LABELS[id]}</span>
+        {showPhaseSelect && (
+          <select
+            className="DataLayerList-phaseSelect"
+            value={overlayLayers.phases[id]}
+            aria-label={`Fase voor ${OVERLAY_LABELS[id]}`}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onChange={(e) => handleOverlayPhaseChange(id, e.target.value)}
+          >
+            {PHASE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  };
+
   const renderItem = (id: string) => {
     const checked = isItemChecked(id);
+    const isOverlayRow = id === DATA_LAYER_ORDER_SERVICE_AREAS
+      || id === DATA_LAYER_ORDER_HUBS
+      || id === DATA_LAYER_ORDER_VERBODSGEBIEDEN;
     return (
       <SortableRow key={id} id={id} disabled={!checked}>
         {id === DATA_LAYER_ORDER_GROUP && renderGroupCard()}
         {id === DATA_LAYER_ORDER_CBS && renderCbsRow()}
+        {isOverlayRow && renderOverlayRow(id)}
       </SortableRow>
     );
   };
