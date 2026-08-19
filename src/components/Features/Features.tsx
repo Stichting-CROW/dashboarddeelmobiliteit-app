@@ -13,22 +13,22 @@ import DemoHubsMap from './demo/DemoHubsMap';
 import DemoPrestatiesOverview from './demo/DemoPrestatiesOverview';
 
 const introMarkdown = `
-Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen. Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid ontwikkelen, evalueren en bijsturen. [meer info](/over)
+Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen. Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid ontwikkelen, evalueren en bijsturen. &raquo; [Over het Dashboard Deelmobiliteit](/over)
 `;
 
 const aanbodMarkdown = `
-## Aanbod
+## <a href="/map/park" target="_blank">Aanbod</a>
 
 - Actueel en historisch aanbod
 - Voertuigweergave en heatmap
 - Waar staan defecte voertuigen?
 - Hoe lang staan voertuigen onverhuurd stil?
-- Trends door tijd
+- <a href="/stats/beleidsinfo" target="_blank">Trends door tijd</a>
 - Filter op voertuigtype en aanbieder
 `;
 
 const verhuringenMarkdown = `
-## Verhuringen
+## <a href="/map/rentals" target="_blank">Verhuringen</a>
 
 - Actuele en historische verhuringen (vertrek en aankomst)
 - Hoe ver reden de voertuigen?
@@ -37,14 +37,14 @@ const verhuringenMarkdown = `
 `;
 
 const servicegebiedenMarkdown = `
-## Servicegebieden
+## <a href="/map/servicegebieden" target="_blank">Servicegebieden</a>
 
 - In welke servicegebieden is een aanbieder actief?
 - Actuele weergave en servicegebieden die vroeger werden gehanteerd
 `;
 
 const zonesMarkdown = `
-## Zones
+## <a href="/map/beleidshubs" target="_blank">Zones</a>
 
 - Gemeenten tekenen hubs en verbodsgebieden in voor optimalisatie in de stad
 - Waar staan de hubs- en verbodsgebieden?
@@ -54,7 +54,7 @@ const zonesMarkdown = `
 `;
 
 const prestatiesMarkdown = `
-## Statistiek: Prestaties aanbieders
+## <a href="/stats/prestaties-aanbieders" target="_blank">Statistiek: Prestaties aanbieders</a>
 
 - Een handig overzicht in de prestaties van aanbieders
 - Statistieken door tijd
