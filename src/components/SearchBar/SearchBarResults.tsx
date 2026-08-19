@@ -1,8 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import SearchBarResult from '../SearchBar/SearchBarResult';
-import {StateType} from '../../types/StateType';
-import { fetch_hubs } from "../../helpers/policy-hubs/fetch-hubs"
 
 function SearchBarResults({
   results
@@ -17,9 +14,10 @@ function SearchBarResults({
     <div>
       {results.map((x: any) => {
         return <SearchBarResult
-          key={x.title}
+          key={x.key ?? x.title}
           title={x.title}
           subTitle={x.subTitle}
+          tag={x.tag}
           onClick={x.onClick}
         />
       })}
