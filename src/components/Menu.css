@@ -117,12 +117,29 @@
   border-right: solid 1px #000;
 }
 
-.Menu-desktop-submenu {
-  display: none;
+.Menu-desktop-submenu-zone {
   position: fixed;
   top: 0;
   left: 0;
   transform: translate(-50%, -100%);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Menu-desktop-submenu-bridge {
+  width: 228px;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.Menu-desktop-submenu {
+  display: none;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
   width: 228px;
   background: #ffffff 0% 0% no-repeat padding-box;
   box-shadow: 0 3px 6px #00000029;
@@ -137,22 +154,9 @@
 }
 
 @media (max-width: 639px) {
-  .Menu-desktop-submenu {
+  .Menu-desktop-submenu-zone {
     display: none !important;
   }
-}
-
-/*
- * Invisible hover bridge: the 16px offset leaves a dead zone between the bar
- * and the panel. Without this, :hover drops before the cursor reaches links.
- */
-.Menu-desktop-submenu::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 24px;
 }
 
 .Menu-desktop-submenu-item {

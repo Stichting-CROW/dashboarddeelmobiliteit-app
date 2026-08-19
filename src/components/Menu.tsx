@@ -23,8 +23,13 @@ function MenuItem(props) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const submenuZoneRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const pointerRef = useRef({ x: 0, y: 0 });
   const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
+
+  const SUBMENU_GAP_PX = 16;
+  const SUBMENU_BRIDGE_OVERLAP_PX = 4;
 
   const hasDesktopSubmenu = Boolean(props.path && props.subMenuItems && props.subMenuItems.length > 0);
 
@@ -40,8 +45,26 @@ function MenuItem(props) {
     const rect = wrapperRef.current.getBoundingClientRect();
     setSubmenuPosition({
       left: rect.left + (rect.width / 2),
-      top: rect.top - 16,
+      top: rect.top + SUBMENU_BRIDGE_OVERLAP_PX,
     });
+  };
+
+  const isPointerOverSubmenuArea = (clientX: number, clientY: number) => {
+    const hovered = document.elementFromPoint(clientX, clientY);
+    if (!hovered) return false;
+    return Boolean(
+      wrapperRef.current?.contains(hovered) ||
+      submenuZoneRef.current?.contains(hovered)
+    );
+  };
+
+  const scheduleSubmenuClose = () => {
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      const { x, y } = pointerRef.current;
+      if (isPointerOverSubmenuArea(x, y)) return;
+      setSubmenuOpen(false);
+    }, 120);
   };
 
   const openSubmenu = () => {
@@ -52,23 +75,29 @@ function MenuItem(props) {
   };
 
   const closeSubmenuSoon = () => {
-    clearCloseTimer();
-    closeTimerRef.current = window.setTimeout(() => {
-      setSubmenuOpen(false);
-    }, 120);
+    scheduleSubmenuClose();
   };
 
   useEffect(() => {
     if (!submenuOpen) return undefined;
 
+    const handlePointerMove = (event: PointerEvent) => {
+      pointerRef.current = { x: event.clientX, y: event.clientY };
+      if (isPointerOverSubmenuArea(event.clientX, event.clientY)) {
+        clearCloseTimer();
+      }
+    };
+
     const handleViewportChange = () => {
       updateSubmenuPosition();
     };
 
+    document.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('resize', handleViewportChange);
     window.addEventListener('scroll', handleViewportChange, true);
 
     return () => {
+      document.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('resize', handleViewportChange);
       window.removeEventListener('scroll', handleViewportChange, true);
     };
@@ -144,34 +173,47 @@ function MenuItem(props) {
             )}
           </Link>
 
-          {props.subMenuItems && props.subMenuItems.length > 0 && createPortal(
+          {submenuOpen && props.subMenuItems && props.subMenuItems.length > 0 && createPortal(
             <div
-              className={`Menu-desktop-submenu text-left${submenuOpen ? ' is-open' : ''}`}
-              role="menu"
-              aria-label={`${props.text} submenu`}
+              ref={submenuZoneRef}
+              className="Menu-desktop-submenu-zone"
               onMouseEnter={openSubmenu}
               onMouseLeave={closeSubmenuSoon}
-              style={{ left: `${submenuPosition.left}px`, top: `${submenuPosition.top}px` }}
+              style={{
+                left: `${submenuPosition.left}px`,
+                top: `${submenuPosition.top}px`,
+              }}
             >
-              {props.subMenuItems.map((item, index) => {
-                const subItemActive = isSubmenuItemPathActive(pathName, item.path);
-                return (
-                  <React.Fragment key={item.path}>
-                    <Link
-                      className={`Menu-desktop-submenu-item${subItemActive ? ' is-active' : ''}`}
-                      to={item.path}
-                      role="menuitem"
-                      aria-current={subItemActive ? 'page' : undefined}
-                      onClick={props.onClick}
-                    >
-                      {item.text}
-                    </Link>
-                    {index < props.subMenuItems.length - 1 && (
-                      <div className="Menu-desktop-submenu-divider" aria-hidden="true" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+              <div
+                className="Menu-desktop-submenu text-left is-open"
+                role="menu"
+                aria-label={`${props.text} submenu`}
+              >
+                {props.subMenuItems.map((item, index) => {
+                  const subItemActive = isSubmenuItemPathActive(pathName, item.path);
+                  return (
+                    <React.Fragment key={item.path}>
+                      <Link
+                        className={`Menu-desktop-submenu-item${subItemActive ? ' is-active' : ''}`}
+                        to={item.path}
+                        role="menuitem"
+                        aria-current={subItemActive ? 'page' : undefined}
+                        onClick={props.onClick}
+                      >
+                        {item.text}
+                      </Link>
+                      {index < props.subMenuItems.length - 1 && (
+                        <div className="Menu-desktop-submenu-divider" aria-hidden="true" />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              <div
+                className="Menu-desktop-submenu-bridge"
+                style={{ height: `${SUBMENU_GAP_PX + SUBMENU_BRIDGE_OVERLAP_PX}px` }}
+                aria-hidden="true"
+              />
             </div>,
             document.body
           )}
