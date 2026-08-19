@@ -6,6 +6,9 @@
   "dependencies": {
     "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^3.3.4",
     "@mapbox/mapbox-gl-draw": "1.4.3",
     "@mapbox/mapbox-gl-draw-static-mode": "1.0.1",

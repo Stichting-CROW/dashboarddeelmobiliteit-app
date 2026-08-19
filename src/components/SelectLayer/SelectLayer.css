@@ -79,3 +79,143 @@
 .layer-inactive .layer-title {
   font-weight: normal;
 }
+
+.DataLayerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 280px;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.DataLayerList-zHint {
+  margin: 0;
+  font: normal normal normal 12px/16px Inter, sans-serif;
+  color: #6b7280;
+}
+
+.DataLayerList-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.DataLayerList-item.is-dragging {
+  cursor: grabbing;
+}
+
+.DataLayerList-item.is-disabled {
+  opacity: 0.55;
+}
+
+.DataLayerList-item.is-disabled .DataLayerList-handle {
+  visibility: hidden;
+}
+
+.DataLayerList-handle {
+  flex-shrink: 0;
+  width: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: grab;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10px;
+  touch-action: none;
+}
+
+.DataLayerList-handle:disabled {
+  cursor: default;
+}
+
+.DataLayerList-handle:active {
+  cursor: grabbing;
+}
+
+.DataLayerList-itemBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.DataLayerList-group {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.DataLayerList-groupHint {
+  font: normal normal 600 11px/14px Inter, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 8px 12px 4px;
+}
+
+.DataLayerList-radios {
+  display: flex;
+  flex-direction: column;
+}
+
+.DataLayerList-radio,
+.DataLayerList-checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font: normal normal normal 13px/18px Inter, sans-serif;
+  color: #333333;
+}
+
+.DataLayerList-radio:hover,
+.DataLayerList-checkRow:hover {
+  background: #f3f4f6;
+}
+
+.DataLayerList-radio.is-active,
+.DataLayerList-checkRow.is-active {
+  font-weight: 600;
+}
+
+.DataLayerList-radioMark,
+.DataLayerList-checkbox {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #343E47;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #fff;
+}
+
+.DataLayerList-radioMark {
+  border-radius: 50%;
+}
+
+.DataLayerList-checkbox {
+  border-radius: 3px;
+}
+
+.DataLayerList-radioMark.is-checked,
+.DataLayerList-checkbox.is-checked {
+  background: #343E47;
+  border-color: #343E47;
+}
+
+.DataLayerList-checkRow {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  min-height: 40px;
+}

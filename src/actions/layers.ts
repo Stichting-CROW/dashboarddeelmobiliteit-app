@@ -1,4 +1,4 @@
-import { LAYER_SET_MAP_STYLE } from "./actionTypes";
+import { LAYER_SET_MAP_STYLE, LAYER_SET_DATA_LAYER_ORDER } from "./actionTypes";
 
 export const setMapStyle = (name: string) => ({
   type: LAYER_SET_MAP_STYLE,
@@ -29,4 +29,9 @@ export const toggleDataLayer = (displayMode: string, layerName: string, isVisibl
 export const setActiveDataLayers = (displayMode: string, layerNames: string[]) => ({
   type: 'LAYER_SET_ACTIVE_DATA_LAYERS',
   payload: { displayMode, layerNames }
+})
+
+export const setDataLayerOrder = (displayMode: string, order: string[]) => ({
+  type: LAYER_SET_DATA_LAYER_ORDER,
+  payload: { displayMode, order }
 })

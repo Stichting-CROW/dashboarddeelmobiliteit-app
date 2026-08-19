@@ -17,6 +17,7 @@ import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle} from './MapUtils/map';
 import {createSafeGeolocateControl} from './MapUtils/mapControls';
 import { whenMapStyleReady } from './MapUtils/mapGuards';
+import { applyDataLayerOrderWhenReady } from './MapUtils/dataLayerOrder';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -59,6 +60,7 @@ import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 import { getProviderColorForProvider } from '../../helpers/providers';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
+import { selectDataLayerOrder } from '../../helpers/layerSelectors';
 
 // Set language for momentJS
 moment.locale('nl');
@@ -78,6 +80,8 @@ const MapComponent = (props): JSX.Element => {
   const mapStyle = useSelector((state: StateType) => {
     return state.layers ? state.layers.map_style : null;
   });
+
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
 
   // Connect to redux store
   const dispatch = useDispatch()
@@ -494,6 +498,24 @@ const MapComponent = (props): JSX.Element => {
   }, [
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)
+  ])
+
+  // Re-apply user-defined z-order after layers are (re)activated or the style changes.
+  useEffect(() => {
+    if (!didInitSourcesAndLayers) return;
+    if (!map.current) return;
+
+    applyDataLayerOrderWhenReady(
+      map.current,
+      dataLayerOrder[displayMode],
+      displayMode
+    );
+  }, [
+    didInitSourcesAndLayers,
+    displayMode,
+    JSON.stringify(dataLayerOrder),
+    JSON.stringify(props.layers),
+    mapStyle
   ])
 
   // Defensive cleanup: when the display mode changes away from a page that owns

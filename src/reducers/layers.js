@@ -22,6 +22,19 @@ export const DISPLAYMODE_DASHBOARD = 'vergunningseisen';
 export const DATASOURCE_VOERTUIGEN = 'vehicles';
 export const DATASOURCE_VERHUUR = 'rentals';
 
+export const DATA_LAYER_ORDER_GROUP = 'data-group';
+export const DATA_LAYER_ORDER_CBS = 'cbs-zones';
+
+export const VALID_DATA_LAYER_ORDER_IDS = [
+  DATA_LAYER_ORDER_GROUP,
+  DATA_LAYER_ORDER_CBS
+];
+
+export const DEFAULT_DATA_LAYER_ORDER = {
+  'displaymode-park': [DATA_LAYER_ORDER_GROUP, DATA_LAYER_ORDER_CBS],
+  'displaymode-rentals': [DATA_LAYER_ORDER_GROUP, DATA_LAYER_ORDER_CBS]
+};
+
 const initialState = {
   zones_visible: false,
   displaymode: DISPLAYMODE_PARK,
@@ -34,6 +47,11 @@ const initialState = {
   active_data_layers: {
     'displaymode-park': [DISPLAYMODE_PARKEERDATA_VOERTUIGEN],
     'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_VOERTUIGEN]
+  },
+  // Top-first list order; controls map z-order for Andere datalaag items
+  data_layer_order: {
+    'displaymode-park': [...DEFAULT_DATA_LAYER_ORDER['displaymode-park']],
+    'displaymode-rentals': [...DEFAULT_DATA_LAYER_ORDER['displaymode-rentals']]
   }
 }
 
@@ -91,6 +109,39 @@ export const sanitizeActiveDataLayers = (activeDataLayers) => {
   if (didNormalize && process.env.NODE_ENV === 'development') {
     console.warn('Normalized active_data_layers to single-layer mode:', activeDataLayers, '->', sanitized);
   }
+
+  return sanitized;
+};
+
+/**
+ * Ensure each display mode has a complete, valid data-layer order.
+ * Unknown ids are dropped; missing ids are appended from the default.
+ */
+export const sanitizeDataLayerOrder = (dataLayerOrder) => {
+  if (!dataLayerOrder || typeof dataLayerOrder !== 'object') {
+    return {
+      'displaymode-park': [...DEFAULT_DATA_LAYER_ORDER['displaymode-park']],
+      'displaymode-rentals': [...DEFAULT_DATA_LAYER_ORDER['displaymode-rentals']]
+    };
+  }
+
+  const sanitized = {};
+  Object.keys(DEFAULT_DATA_LAYER_ORDER).forEach((displayMode) => {
+    const defaults = DEFAULT_DATA_LAYER_ORDER[displayMode];
+    const current = dataLayerOrder[displayMode];
+    if (!Array.isArray(current)) {
+      sanitized[displayMode] = [...defaults];
+      return;
+    }
+
+    const valid = current.filter((id) => VALID_DATA_LAYER_ORDER_IDS.includes(id));
+    defaults.forEach((id) => {
+      if (!valid.includes(id)) {
+        valid.push(id);
+      }
+    });
+    sanitized[displayMode] = valid;
+  });
 
   return sanitized;
 };
@@ -224,6 +275,22 @@ export default function filter(state = initialState, action) {
         }
       };
     }
+    case 'LAYER_SET_DATA_LAYER_ORDER': {
+      const { displayMode, order } = action.payload || {};
+      if (!DEFAULT_DATA_LAYER_ORDER[displayMode] || !Array.isArray(order)) {
+        return state;
+      }
+
+      const sanitized = sanitizeDataLayerOrder({
+        ...state.data_layer_order,
+        [displayMode]: order
+      });
+
+      return {
+        ...state,
+        data_layer_order: sanitized
+      };
+    }
     case 'LAYER_TOGGLE_ZONES_VISIBLE': {
       // console.log('reducer layer set zones visible %s', !state.zones_visible)
       return {
@@ -278,7 +345,8 @@ export default function filter(state = initialState, action) {
       return {
         ...state,
         ...importedLayers,
-        active_data_layers: sanitizeActiveDataLayers(importedLayers.active_data_layers)
+        active_data_layers: sanitizeActiveDataLayers(importedLayers.active_data_layers),
+        data_layer_order: sanitizeDataLayerOrder(importedLayers.data_layer_order)
       }
     }
     case 'LOGIN':

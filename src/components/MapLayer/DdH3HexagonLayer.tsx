@@ -15,7 +15,7 @@ import {
 } from '../../reducers/layers.js';
 
 import {StateType} from '../../types/StateType';
-import { selectActiveDataLayers, isRentalsLayerActive } from '../../helpers/layerSelectors';
+import { selectActiveDataLayers, isRentalsLayerActive, selectDataLayerOrder } from '../../helpers/layerSelectors';
 
 import {
   removeH3Grid
@@ -26,6 +26,7 @@ import {
 import {
   renderH3Grid
 } from '../Map/MapUtils/map.hb.h3';
+import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
 
 const DdH3HexagonLayer = ({
   map
@@ -39,6 +40,7 @@ const DdH3HexagonLayer = ({
   };
 
   const displayMode = useSelector((state: StateType) => state.layers ? state.layers.displaymode : DISPLAYMODE_PARK);
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
   const isrentals=displayMode===DISPLAYMODE_RENTALS;
   const viewRentals = useSelector((state: StateType) => state.layers ? state.layers.view_rentals : null);
   // const is_hb_view=(isrentals && viewRentals==='verhuurdata-hb');
@@ -77,16 +79,31 @@ const DdH3HexagonLayer = ({
       return;
     }
     // If HB map is active: render hexagons
-    if(filter.h3niveau === 'wijk') {
-      renderGeometriesGrid(map, token, filter, metadata);
-    } else {
-      renderH3Grid(map, token, filter, metadata);
-    }
+    let cancelled = false;
+    const applyOrder = () => {
+      if (cancelled) return;
+      applyDataLayerOrderWhenReady(
+        map,
+        dataLayerOrder[DISPLAYMODE_RENTALS],
+        DISPLAYMODE_RENTALS
+      );
+    };
+
+    const renderPromise = filter.h3niveau === 'wijk'
+      ? renderGeometriesGrid(map, token, filter, metadata)
+      : renderH3Grid(map, token, filter, metadata);
+
+    Promise.resolve(renderPromise).then(applyOrder);
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     map,
     is_hb_view,
     metadata?.aclOperators,
     stateLayers.displaymode,
+    JSON.stringify(dataLayerOrder),
     filter.gebied,
     filter.h3niveau,
     filter.h3hexes7,

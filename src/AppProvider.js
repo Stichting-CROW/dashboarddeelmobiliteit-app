@@ -11,7 +11,7 @@ import moment from 'moment';
 import thunk from 'redux-thunk';
 
 import appReducer from './reducers';
-import { sanitizeActiveDataLayers } from './reducers/layers';
+import { sanitizeActiveDataLayers, sanitizeDataLayerOrder } from './reducers/layers';
 import App from './App';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -64,6 +64,12 @@ persistedState = validatePersistedState(persistedState);
 if (persistedState.layers && persistedState.layers.active_data_layers) {
   persistedState.layers.active_data_layers = sanitizeActiveDataLayers(
     persistedState.layers.active_data_layers
+  );
+}
+
+if (persistedState.layers) {
+  persistedState.layers.data_layer_order = sanitizeDataLayerOrder(
+    persistedState.layers.data_layer_order
   );
 }
 
