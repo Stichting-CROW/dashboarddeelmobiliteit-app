@@ -36,6 +36,7 @@ const Feed = ({data}) => {
 
 const ActiveFeeds = () => {
   const [datafeeds, setDatafeeds] = useState([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     // Variable to keep track of interval variable
@@ -55,10 +56,11 @@ const ActiveFeeds = () => {
     const result = await fetch_datafeeds();
     const sorted = sort_datafeeds(result);
     setDatafeeds(sorted);
+    setHasLoaded(true);
   }
 
   const fetch_datafeeds = async () => {
-    const response = await fetch('https://api.dashboarddeelmobiliteit.nl/dashboard-api/public/active_feeds');
+    const response = await fetch(`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/active_feeds`);
     if(! response) throw Error('Active feeds could not be fetched from API');
 
     const json = await response.json();
@@ -66,6 +68,7 @@ const ActiveFeeds = () => {
   }
 
   const sort_datafeeds = (feeds) => {
+    if (!feeds || !Array.isArray(feeds)) return [];
     let sorted_by_operator = feeds.sort((a, b) => a.system_id < b.system_id ? 1 : -1);
     let sorted_by_up = sorted_by_operator.sort((a, b) => a.up === false ? 1 : -1);
     return sorted_by_up;
@@ -80,7 +83,11 @@ const ActiveFeeds = () => {
         Actieve datafeeds
       </h1>
       <div className="my-5">
-        {datafeeds.map((x) => <Feed key={x.feed_id} data={x} />)}
+        {hasLoaded && datafeeds.length === 0 ? (
+          <p>Er zijn nog geen datafeeds van aanbieders geconfigureerd.</p>
+        ) : (
+          datafeeds.map((x) => <Feed key={x.feed_id} data={x} />)
+        )}
       </div>
 
     </div>

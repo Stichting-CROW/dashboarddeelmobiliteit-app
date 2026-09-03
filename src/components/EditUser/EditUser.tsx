@@ -90,8 +90,7 @@ function EditUser({
   const [isCoreGroup, setIsCoreGroup] = useState(user && user.privileges && user.privileges.indexOf('CORE_GROUP') > -1);
   const [canEditMicrohubs, setCanEditMicrohubs] = useState(user && user.privileges && user.privileges.indexOf('MICROHUB_EDIT') > -1);
   const [canDownloadRawData, setCanDownloadRawData] = useState(user && user.privileges && user.privileges.indexOf('DOWNLOAD_RAW_DATA') > -1);
-  const [sendEmail, setSendEmail] = useState(false)
-  const [credentials, setCredentials] = useState({username: '', password: ''})
+  const [welcomeEmail, setWelcomeEmail] = useState({emailText: '', emailSent: false, username: ''})
 
   const [doShowDeleteModal, setDoShowDeleteModal] = useState(false);
   const [doShowCredentialsModal, setDoShowCredentialsModal] = useState(false);
@@ -195,12 +194,14 @@ function EditUser({
         setMessage(error);
         return;
       }
-      // If no errors:
-      setDoShowCredentialsModal(true);
-      setCredentials({
-        username: createdUser.user_account.user_id,
-        password: createdUser.generated_password
+      // If no errors: FusionAuth sends the Setup Password email (configured
+      // separately from the Forgot Password template used by password reset).
+      setWelcomeEmail({
+        emailText: createdUser.email_text || '',
+        emailSent: createdUser.email_sent !== false,
+        username: createdUser.user_account.user_id
       })
+      setDoShowCredentialsModal(true);
     }
   }
   
@@ -308,20 +309,6 @@ function EditUser({
           </FormLabel>
         </div>
 
-        {/*
-        <div className="mb-2 flex">
-          <input 
-            type="checkbox"
-            id="send-welcome-email" 
-            value={sendEmail ? 'true' : 'false'}
-            onChange={(event) => setSendEmail(event.target.value ? true : false)}
-          />
-          <FormLabel htmlFor="send-welcome-email" classes="py-3 px-2">
-            Stuur welkomstmail
-          </FormLabel>
-        </div>
-        */}
-      
         <div className="flex justify-between" style={{marginLeft: '-0.5rem'}}>
           <Button classes={'w-40 save'} type="submit" theme="primary">
             Opslaan
@@ -376,7 +363,7 @@ function EditUser({
 
       <Modal
         isVisible={doShowCredentialsModal}
-        title="Gebruiker toegevoegd"
+        title="Nieuwe gebruiker aangemaakt"
         button2Title={"Sluiten"}
         button2Handler={async (e) => {
           // Hide modal
@@ -390,37 +377,35 @@ function EditUser({
           onSaveHandler();
         }}
       >
-        <p className="mb-4">
-          <small style={{color: '#f00', fontStyle: 'italic'}}>
-            Kopieer de tekst hieronder en plak dit in een email aan: {credentials.username} <span title="Kopieer e-mailadres naar klembord" onClick={() => copyTextToClipboard(credentials.username)} className="cursor-pointer">📋</span>
-          </small>
-        </p>
-        <p>
-          Welkom bij het Dashboard Deelmobiliteit! Mocht je vragen of feedback hebben, neem dan vooral contact op met info@dashboarddeelmobiliteit.nl
-        </p>
-        <p className="mb-4">
-          Hierbij stuur ik je inloggegevens voor <a href="https://dashboarddeelmobiliteit.nl/login" target="_blank">https://dashboarddeelmobiliteit.nl/login</a>
-        </p>
-        <p className="mb-4">
-          <b>Gebruikersnaam:</b><br />
-          {credentials.username}
-        </p>
-        <p className="mb-4">
-          <b>Wachtwoord:</b><br />
-          {credentials.password}
-        </p>
-        <br />
-        <p className="mb-4">
-          Handige links:
-        </p>
-        <ul className="mb-4">
-          <li><a href="https://www.fietsberaad.nl/Kennisbank/Afspraken-over-data-en-financiering-van-dashboard" target="_blank">Afspraken over openbaarheid</a></li>
-          <li><a href="https://dashboarddeelmobiliteit.nl/rondleiding">Korte rondleiding door het dashboard</a></li>
-          <li><a href="https://dashboarddeelmobiliteit.nl/faq">Veelgestelde vragen</a></li>
-        </ul>
-        <p className="mb-4">
-          Bij vragen, opmerkingen of feedback horen we graag van je!
-        </p>
+        {welcomeEmail.emailSent
+          ? <p className="mb-4">
+              De gebruiker heeft een e-mail ontvangen met een link om een
+              wachtwoord in te stellen.
+            </p>
+          : <p className="mb-4">
+              <small style={{color: '#f00', fontStyle: 'italic'}}>
+                Let op: de e-mail om een wachtwoord in te stellen kon niet
+                automatisch verstuurd worden. Vraag de gebruiker om via
+                &quot;Wachtwoord vergeten?&quot; op de inlogpagina een link aan te
+                vragen ({welcomeEmail.username}).
+              </small>
+            </p>
+        }
+        {welcomeEmail.emailText ? (
+          <div className="mb-4 relative">
+            <span
+              title="Kopieer e-mailtekst naar klembord"
+              onClick={() => copyTextToClipboard(welcomeEmail.emailText)}
+              className="cursor-pointer absolute right-2 top-2"
+            >📋</span>
+            <p
+              className="p-3 pr-8 rounded-lg text-sm"
+              style={{backgroundColor: '#f5f5f5', whiteSpace: 'pre-wrap'}}
+            >
+              {welcomeEmail.emailText}
+            </p>
+          </div>
+        ) : null}
       </Modal>
 
     </div>

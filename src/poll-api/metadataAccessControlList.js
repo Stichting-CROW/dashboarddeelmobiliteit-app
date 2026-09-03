@@ -149,10 +149,10 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             // items -> {"name": "Cykl","system_id": "cykl"}
             // console.log("dispatch gebieden ", metadata.municipalities);
             store_accesscontrollist.dispatch({ type: 'SET_ACL_OPERATORS', payload: metadata.operators || [] });
-            const existingAcl = store_accesscontrollist.getState().authentication?.user_data?.acl;
-            if (existingAcl && metadata && !Array.isArray(metadata)) {
+            const userData = store_accesscontrollist.getState().authentication?.user_data;
+            if (userData && metadata && !Array.isArray(metadata)) {
               store_accesscontrollist.dispatch(setAclInRedux({
-                ...existingAcl,
+                ...(userData.acl || {}),
                 organisation_type: metadata.organisation_type,
                 operators: metadata.operators,
                 municipalities: metadata.municipalities,
@@ -190,8 +190,8 @@ export const initAccessControlList = (store_accesscontrollist)  => {
               // Admins are exempt: they can view municipalities outside their ACL
               // list and their queries are NL-wide regardless of this value.
               const currentGebied = store_accesscontrollist.getState().filter?.gebied;
-              const hasAccessToCurrentGebied = metadata.municipalities.some(m => m.gm_code === currentGebied);
-              if(currentGebied && !hasAccessToCurrentGebied && !isAdmin(store_accesscontrollist.getState())) {
+              const hasAccessToCurrentGebied = municipalities.some(m => m.gm_code === currentGebied);
+              if(currentGebied && !hasAccessToCurrentGebied && !treatAsNlWide) {
                 store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
               }
             }

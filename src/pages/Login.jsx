@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import LogoCrow from '../components/LogoCrow.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 import LogoDashboardDeelmobiliteit from '../components/Logo/LogoDashboardDeelmobiliteit';
+import { sendForgotPasswordEmail } from '../api/auth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -64,33 +65,14 @@ const Login = () => {
     });
   };
   
-  const recover = e => {
+  const recover = async e => {
     e.preventDefault();
 
     // Clear error message
     setErrorMessage(null);
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + "/api/user/forgot-password"
-    var data = {
-      loginId: emailaddress,
-    };
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => res.json())
-      .then(response => {
-        console.log(response);
-        setSuccessMessage('Als je e-mailadres bij ons bekend is, heb je nu e-mail ontvangen. Hiermee kun je je wachtwoord opnieuw instellen.');
-        return true;
-      }).catch(error => {
-        console.log(error)
-        setSuccessMessage('Als je e-mailadres bij ons bekend is, heb je nu e-mail ontvangen. Hiermee kun je je wachtwoord opnieuw instellen.');
-        return false;
-      });
+    await sendForgotPasswordEmail(emailaddress);
+    setSuccessMessage('Als je e-mailadres bij ons bekend is, heb je nu e-mail ontvangen. Hiermee kun je je wachtwoord opnieuw instellen.');
   };
 
   const renderLogin = () => {
@@ -260,7 +242,7 @@ const Login = () => {
         <LogoDashboardDeelmobiliteit />
 
         <h2 className="mt-4 mb-4 text-4xl font-bold">
-          Dashboard Deelmobiliteit
+          Inloggen
         </h2>
 
         {recoverPassword ? renderRecoverPassword() : renderLogin()}

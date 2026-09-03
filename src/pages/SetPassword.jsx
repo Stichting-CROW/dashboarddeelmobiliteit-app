@@ -1,47 +1,55 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useDispatch } from 'react-redux';
 
-import LogoCrow from '../components/LogoCrow.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 import LogoDashboardDeelmobiliteit from '../components/Logo/LogoDashboardDeelmobiliteit';
+import { setUser } from '../actions/authentication';
+import {
+  changePassword,
+  loginWithOneTimePassword
+} from '../api/auth';
+import { notifyInfo } from '../helpers/notify';
 
 const SetPassword = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { changePasswordCode } = useParams();
 
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    // Clear error message
     setErrorMessage(null);
+    setIsSubmitting(true);
 
-    const url = (process ? process.env.REACT_APP_FUSIONAUTH_URL : '') + `/api/user/change-password/${changePasswordCode}`
-    var data = {
-      password: password,
-    };
+    const changeResult = await changePassword(changePasswordCode, password);
+    if (!changeResult) {
+      setErrorMessage('Er ging iets fout bij het instellen van je nieuwe wachtwoord. Mogelijk was de link verlopen. In dat geval: klik hieronder op Annuleer en vraag een nieuwe wachtwoordlink aan.');
+      setIsSubmitting(false);
+      return;
+    }
 
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
+    if (changeResult.oneTimePassword) {
+      const loginResponse = await loginWithOneTimePassword(
+        changeResult.oneTimePassword
+      );
+      if (loginResponse) {
+        dispatch({ type: 'LOGIN', payload: null });
+        dispatch({ type: 'RESET_FILTER', payload: null });
+        dispatch(setUser(loginResponse));
+        notifyInfo('Succesvol ingelogd 👌');
+        navigate('/map/park');
+        return;
       }
-    })
-    .then(res => {
-      if(res.ok === true) {
-        window.notify('Je nieuwe wachtwoord is ingesteld. Log nu in met je nieuwe wachtwoord')
-        document.location = '/login'
-        return true;
-      } else {
-        setErrorMessage('Er ging iets fout bij het instellen van je nieuwe wachtwoord. Mogelijk was de link verlopen. In dat geval: klik hieronder op Annuleer en vraag een nieuwe wachtwoordlink aan.');
-        return false;
-      }
-    })
-  }
+    }
+
+    // Password was set, but auto-login was not possible — fall back to login.
+    notifyInfo('Je nieuwe wachtwoord is ingesteld. Log nu in met je nieuwe wachtwoord.');
+    navigate('/login');
+  };
 
   return (
     <div className="
@@ -63,7 +71,7 @@ const SetPassword = () => {
         <LogoDashboardDeelmobiliteit />
 
         <h2 className="mt-4 mb-4 text-4xl font-bold">
-          Dashboard Deelmobiliteit
+          Stel je wachtwoord in
         </h2>
 
         <p className="mb-4">
@@ -74,7 +82,7 @@ const SetPassword = () => {
           Vul hieronder je nieuwe wachtwoord in:
         </p>
 
-        <form className="mt-8 mb-4">
+        <form className="mt-8 mb-4" onSubmit={handleSubmit}>
           <label className="mt-4 block" htmlFor="password">Wachtwoord</label>
           <input
             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
@@ -82,6 +90,7 @@ const SetPassword = () => {
             placeholder="Wachtwoord"
             name="password"
             required
+            disabled={isSubmitting}
             onChange={e => setPassword(e.target.value)}
           />
         
@@ -90,12 +99,20 @@ const SetPassword = () => {
           </div>}
 
           <div className="flex items-baseline mt-4">
-              <button className="px-6 py-2 mr-4 mt-4 text-white bg-theme-blue rounded-lg" onClick={handleSubmit}>
+              <button
+                type="submit"
+                className="px-6 py-2 mr-4 mt-4 text-white bg-theme-blue rounded-lg"
+                disabled={isSubmitting}
+              >
                 Wachtwoord opslaan
               </button>
-              <button className="px-6 py-2 mt-4 text-white bg-gray-300 rounded-lg hover:bg-gray-400" onClick={() => {
-                navigate('/')
-              }}>
+              <button
+                type="button"
+                className="px-6 py-2 mt-4 text-white bg-gray-300 rounded-lg hover:bg-gray-400"
+                onClick={() => {
+                  navigate('/')
+                }}
+              >
                 Annuleer
               </button>
           </div>
