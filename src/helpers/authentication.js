@@ -55,20 +55,20 @@ export const canEditHubs = (acl) => {
   return true;
 }
 
-// Checks if user is admin
+// NL-wide data access: ACL super-admin, ADMIN organisation, or FusionAuth admin role.
 export const isAdmin = (state) => {
-  if(! state) return;
-  if(! state.authentication) return;
-  if(! state.authentication.user_data?.user?.registrations) return;
+  if (!state || !state.authentication) return false;
 
-  let admin = false;
-  state.authentication.user_data.user.registrations.forEach(x => {
-    if(x.roles.includes('admin')) {
-      admin = true;
-    }
-  });
+  const acl = state.authentication.user_data?.acl;
+  if (acl?.is_admin === true) return true;
+  if (getAclOrganisationType(acl) === 'ADMIN') return true;
 
-  return admin;
+  const registrations = state.authentication.user_data?.user?.registrations;
+  if (!Array.isArray(registrations)) return false;
+
+  return registrations.some((registration) => (
+    Array.isArray(registration.roles) && registration.roles.includes('admin')
+  ));
 }
 
 // Maximum number of municipalities we still enumerate in a
@@ -80,13 +80,23 @@ export const isAdmin = (state) => {
 // province-sized list so that small/regional accounts keep their precise zones.
 export const MAX_ENUMERABLE_MUNICIPALITIES = 25;
 
+export const getEnumerableMunicipalityCodes = (gebieden) => {
+  if (!Array.isArray(gebieden)) return [];
+  return gebieden
+    .map((gebied) => gebied && gebied.gm_code)
+    .filter(Boolean);
+};
+
 // True when we should treat this account as NL-wide for zone loading/display:
-// admins, or non-admin organisations with access to so many municipalities that
-// enumerating them in a zones query would 502.
+// admins, ADMIN organisations (ACL municipality list is typically empty), or
+// non-admin organisations with access to so many municipalities that enumerating
+// them in a zones query would 502. An empty `municipalities=` query is rejected
+// by the API, so an empty ACL list is treated NL-wide as well.
 export const shouldTreatMunicipalitiesAsNlWide = (state) => {
   if (isAdmin(state)) return true;
-  const gebieden = state?.metadata?.gebieden || [];
-  return gebieden.length > MAX_ENUMERABLE_MUNICIPALITIES;
+  const municipalityCodes = getEnumerableMunicipalityCodes(state?.metadata?.gebieden);
+  if (municipalityCodes.length === 0) return true;
+  return municipalityCodes.length > MAX_ENUMERABLE_MUNICIPALITIES;
 };
 
 // Validate if the current authentication state is valid

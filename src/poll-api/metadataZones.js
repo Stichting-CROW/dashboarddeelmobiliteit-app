@@ -1,5 +1,9 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
-import {isLoggedIn, shouldTreatMunicipalitiesAsNlWide} from '../helpers/authentication.js';
+import {
+  getEnumerableMunicipalityCodes,
+  isLoggedIn,
+  shouldTreatMunicipalitiesAsNlWide
+} from '../helpers/authentication.js';
 
 // const getFilters = async (token, gm_code) => {
 //   let options = { headers : { "authorization": "Bearer " + token }}
@@ -74,10 +78,16 @@ export const updateZones = async (store_zones) => {
         url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
       } else {
         // Get all zones of all municipalities this user has access to
-        const municipality_codes = state.metadata.gebieden.map(x => x.gm_code);
-        const municipality_codes_as_string = municipality_codes.join(',');
-        // Create URL for getting all zones for all municipality codes
-        url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+        const municipality_codes_as_string = getEnumerableMunicipalityCodes(
+          state.metadata.gebieden
+        ).join(',');
+        // /zones rejects an empty municipalities= query. Fall back to the
+        // NL-wide public list rather than calling the API with no codes.
+        if (!municipality_codes_as_string) {
+          url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+        } else {
+          url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+        }
       }
 
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});

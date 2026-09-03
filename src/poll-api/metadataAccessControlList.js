@@ -38,6 +38,39 @@ const dispatchCachedAanbieders = (store_accesscontrollist) => {
   return false;
 };
 
+const toGebiedOptions = (municipalities) => {
+  return (municipalities || [])
+    .map((municipality) => ({
+      gm_code: municipality.gm_code || municipality.municipality,
+      name: municipality.name,
+    }))
+    .filter((municipality) => municipality.gm_code);
+};
+
+const loadPublicGebiedenForNlWideAccount = (store_accesscontrollist) => {
+  const url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`public/municipalities ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((publicData) => {
+      const gebieden = toGebiedOptions(publicData.municipalities);
+      if (gebieden.length > 0) {
+        store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: gebieden });
+      }
+    })
+    .catch((ex) => {
+      console.error('Unable to load public municipalities for NL-wide account', ex);
+      store_accesscontrollist.dispatch({
+        type: 'SET_GEBIEDEN',
+        payload: cPublicGebieden.filter((gebied) => gebied.gm_code),
+      });
+    });
+};
+
 // Resolve the public operators list from the API. If the network fails and
 // nothing is cached, we leave aanbieders as-is so the app keeps working with
 // whatever is already in state.
@@ -113,10 +146,10 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             // items -> {"name": "Cykl","system_id": "cykl"}
             // console.log("dispatch gebieden ", metadata.municipalities);
             store_accesscontrollist.dispatch({ type: 'SET_ACL_OPERATORS', payload: metadata.operators || [] });
-            const existingAcl = store_accesscontrollist.getState().authentication?.user_data?.acl;
-            if (existingAcl && metadata && !Array.isArray(metadata)) {
+            const userData = store_accesscontrollist.getState().authentication?.user_data;
+            if (userData && metadata && !Array.isArray(metadata)) {
               store_accesscontrollist.dispatch(setAclInRedux({
-                ...existingAcl,
+                ...(userData.acl || {}),
                 organisation_type: metadata.organisation_type,
                 operators: metadata.operators,
                 municipalities: metadata.municipalities,
@@ -125,12 +158,23 @@ export const initAccessControlList = (store_accesscontrollist)  => {
                 is_contact_person_municipality: metadata.is_contact_person_municipality,
               }));
             }
-            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
-            if(metadata.municipalities.length===1) {
-              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});
-            } else if(metadata.municipalities.length === 0){
-              // Reset filterGebied if user has access to 0 municipalities
-              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+            const municipalities = metadata.municipalities || [];
+            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: municipalities});
+            // ADMIN organisations typically have an empty ACL municipality list
+            // (they see all data). Do not treat that as "no access".
+            const organisationType = metadata.organisation_type
+              || metadata.type_of_organisation;
+            const treatAsNlWide = organisationType === 'ADMIN'
+              || metadata.is_admin === true
+              || isAdmin(store_accesscontrollist.getState());
+            if(municipalities.length===1) {
+              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: municipalities[0].gm_code});
+            } else if(municipalities.length === 0){
+              if (!treatAsNlWide) {
+                store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+              } else {
+                loadPublicGebiedenForNlWideAccount(store_accesscontrollist);
+              }
             } else {
               // User has access to multiple municipalities. When the persisted /
               // initial 'Plaats' filter points at a municipality this user cannot
@@ -143,8 +187,8 @@ export const initAccessControlList = (store_accesscontrollist)  => {
               // Admins are exempt: they can view municipalities outside their ACL
               // list and their queries are NL-wide regardless of this value.
               const currentGebied = store_accesscontrollist.getState().filter?.gebied;
-              const hasAccessToCurrentGebied = metadata.municipalities.some(m => m.gm_code === currentGebied);
-              if(currentGebied && !hasAccessToCurrentGebied && !isAdmin(store_accesscontrollist.getState())) {
+              const hasAccessToCurrentGebied = municipalities.some(m => m.gm_code === currentGebied);
+              if(currentGebied && !hasAccessToCurrentGebied && !treatAsNlWide) {
                 store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
               }
             }
