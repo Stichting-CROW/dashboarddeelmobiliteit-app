@@ -33,6 +33,10 @@
   max-width: 306px !important;
 }
 
+.maplibregl-popup.dd-overlap-popup {
+  max-width: 360px !important;
+}
+
 .mapboxgl-popup-content,
 .maplibregl-popup-content {
   box-shadow: none;
@@ -66,6 +70,58 @@
 .Map-popup-body tr[data-dd-vehicle-row="true"]:hover,
 .Map-popup-body tr[data-dd-hub-row="true"]:hover {
   background-color: rgba(15, 28, 63, 0.08);
+}
+
+.Map-popup-body .dd-vehicle-overlap-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.Map-popup-body .dd-vehicle-overlap-table th,
+.Map-popup-body .dd-vehicle-overlap-table td {
+  padding: 4px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.Map-popup-body .dd-vehicle-overlap-table th {
+  font-weight: 600;
+  padding: 0 4px 6px 4px;
+  text-align: left;
+}
+
+.Map-popup-body .dd-vehicle-since-col,
+.Map-popup-body .dd-vehicle-since-cell {
+  width: 5rem;
+}
+
+.Map-popup-body .dd-vehicle-overlap-table td.dd-vehicle-id-cell {
+  min-width: 0;
+  padding-right: 10px;
+  overflow-wrap: anywhere;
+}
+
+.Map-popup-body .dd-vehicle-id {
+  display: block;
+  min-width: 0;
+}
+
+.Map-popup-body .dd-vehicle-since {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.Map-popup-body .dd-vehicle-since img {
+  flex-shrink: 0;
+}
+
+.Map-popup-body .dd-vehicle-since-datetime {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
 /* CONTROLS */

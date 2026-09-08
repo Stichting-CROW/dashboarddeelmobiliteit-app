@@ -118,8 +118,14 @@ export const initPopupLogic = (
       };
 
       const formatSinceDateTime = (props) => {
-        if(! props || ! props.in_public_space_since) return '-';
-        return moment(props.in_public_space_since).locale('nl').format('DD/MM HH:mm');
+        if(! props || ! props.in_public_space_since) {
+          return { date: '-', time: '' };
+        }
+        const since = moment(props.in_public_space_since).locale('nl');
+        return {
+          date: since.format('DD/MM'),
+          time: since.format('HH:mm')
+        };
       };
 
       const buildVehicleBodyHtml = (theVehicleProperties, theProviderColor) => {
@@ -157,9 +163,12 @@ export const initPopupLogic = (
           const vehicleTypeIconHtml = getVehicleTypeHeaderImgHtml(
             props.form_factor,
             undefined,
-            'height:18px; width:auto; margin-right: 6px;'
+            'height:18px; width:auto;'
           );
           const sinceDateTime = formatSinceDateTime(props);
+          const sinceTimeHtml = sinceDateTime.time
+            ? `<span>${escapeHtml(sinceDateTime.time)}</span>`
+            : '';
 
           return `
             <tr
@@ -168,24 +177,33 @@ export const initPopupLogic = (
               class="dd-vehicle-overlap-row"
               style="cursor: pointer;"
             >
-              <td style="padding: 4px">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="white-space: nowrap;">${escapeHtml(vehicleId)}</span>
+              <td class="dd-vehicle-id-cell">
+                <span class="dd-vehicle-id" title="${escapeHtml(vehicleId)}">${escapeHtml(vehicleId)}</span>
+              </td>
+              <td class="dd-vehicle-since-cell">
+                <div class="dd-vehicle-since">
                   ${vehicleTypeIconHtml}
+                  <span class="dd-vehicle-since-datetime">
+                    <span>${escapeHtml(sinceDateTime.date)}</span>
+                    ${sinceTimeHtml}
+                  </span>
                 </div>
               </td>
-              <td style="padding: 4px;">${escapeHtml(sinceDateTime)}</td>
             </tr>
           `;
         }).join('');
 
         return `
           <div class="Map-popup-body">
-            <table style="width: 100%; border-collapse: collapse;">
+            <table class="dd-vehicle-overlap-table">
+              <colgroup>
+                <col>
+                <col class="dd-vehicle-since-col">
+              </colgroup>
               <thead>
                 <tr>
-                  <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px;">voertuig-id</th>
-                  <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px;">sinds</th>
+                  <th>voertuig-id</th>
+                  <th>sinds</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,7 +226,9 @@ export const initPopupLogic = (
         isVehicleMarkerLayer && primaryFeatureIsVehicle && features.length > 1
       );
 
-      popup = new maplibregl.Popup()
+      popup = new maplibregl.Popup({
+        maxWidth: shouldShowOverlappingVehiclesTable ? '360px' : '306px'
+      })
         .setLngLat(coordinates)
         .setHTML(`
           ${buildProviderLabelHtml(headerLabel, providerColor, providerLabelOptions)}
@@ -223,6 +243,7 @@ export const initPopupLogic = (
       if(shouldShowOverlappingVehiclesTable) {
         const popupEl = popup && popup.getElement && popup.getElement();
         if(popupEl) {
+          popupEl.classList.add('dd-overlap-popup');
           popupEl.addEventListener('click', (evt) => {
             const tr = evt.target && evt.target.closest
               ? evt.target.closest('tr[data-dd-vehicle-row="true"]')
@@ -237,6 +258,8 @@ export const initPopupLogic = (
 
             evt.preventDefault();
             evt.stopPropagation();
+
+            popupEl.classList.remove('dd-overlap-popup');
 
             const clickedVehicleProperties = clickedFeature.properties || {};
             const clickedProviderColor = getProviderColor(
