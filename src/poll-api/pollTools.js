@@ -8,6 +8,26 @@ import {
 
 export const vehiclesAbortController = new AbortController();
 
+/**
+ * zone_id of the country-level "Nederland" zone. Used to scope per-zone
+ * aggregated stats to a single non-overlapping zone for NL-wide accounts.
+ */
+export const NL_COUNTRY_ZONE_ID = 51233;
+
+/**
+ * Unique zone_ids of the 'municipality' zones in `zones`. When
+ * `municipalityCodes` is given, only zones of those gm_codes are returned.
+ */
+export const getMunicipalityZoneIds = (zones, municipalityCodes) => {
+  const zoneIds = (zones || [])
+    .filter((zone) => (
+      zone.zone_type === 'municipality'
+      && (!municipalityCodes || municipalityCodes.indexOf(zone.municipality) > -1)
+    ))
+    .map((zone) => zone.zone_id);
+  return [...new Set(zoneIds)];
+};
+
 /** system_ids from /menu/acl (operator accounts have a restricted list). */
 export const getAclOperatorSystemIds = (metadata) => {
   const aclOperators = metadata?.aclOperators || [];
@@ -81,26 +101,45 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
       filterparams.push("zone_ids=" + zoneIds.join(','));
     }
   }
-  // Logged-in users with no specific place selected ("Alle plaatsen"): the
-  // backend already scopes the response to the account's allowed data via the
-  // auth token, so we intentionally add no zone_ids. This is also required for
-  // accounts with access to a large number of municipalities (e.g. NL-wide
-  // shared data): enumerating every municipality/zone would make the query
-  // string long enough that the upstream server rejects it with a 502.
+  // Logged-in users with no specific place selected ("Alle plaatsen"), for
+  // per-zone aggregated endpoints (aggregated_stats/*, stats_v2/*). These
+  // endpoints sum the stats of every zone matched, and without zone_ids the
+  // backend matches all overlapping layers (country + municipality + stadsdeel
+  // + wijk), so every count comes out 4x too high. Always send an explicit,
+  // non-overlapping zone set here:
+  // - Admin / NL-wide accounts (metadata.is_admin, set from the ACL): the
+  //   single country zone. Enumerating every municipality would make the query
+  //   string long enough that the upstream server rejects it with a 502; if the
+  //   country zone yields nothing, getAggregatedStats falls back to batched
+  //   municipality requests.
+  // - Other accounts: the 'municipality' zones of the gebieden they may access.
+  //   Long lists are split into batches by getAggregatedStats.
+  else if (options.is_logged_in && options.is_aggregated_stats && !options.show_global) {
+    if (metadata.is_admin === true) {
+      filterparams.push(`zone_ids=${NL_COUNTRY_ZONE_ID}`);
+    } else {
+      const zoneIds = getMunicipalityZoneIds(metadata.zones, municipalityCodesAsArray);
+      // Zones may not have loaded yet; callers wait for metadata.zones before
+      // fetching, so this only guards against an empty `zone_ids=` param.
+      if (zoneIds.length > 0) {
+        filterparams.push(`zone_ids=${zoneIds.join(',')}`);
+      }
+    }
+  }
+  // Logged-in users with no specific place selected ("Alle plaatsen"), for
+  // point endpoints (park_events, trips): the backend already scopes the
+  // response to the account's allowed data via the auth token, so we
+  // intentionally add no zone_ids. This is also required for accounts with
+  // access to a large number of municipalities (e.g. NL-wide shared data):
+  // enumerating every municipality/zone would make the query string long
+  // enough that the upstream server rejects it with a 502.
   else if (options.is_logged_in && !options.show_global) {
     // No zone_ids: the auth token (+ operators=) scopes the data server-side.
   }
   // Guests with access to multiple (public) municipalities: scope to those zones
   else if (hasAccessToMultipleGebieden && !options.show_global) {
-    // Get zone IDs as array
-    const allowed_zone_ids = metadata.zones.filter(zone => {
-      return municipalityCodesAsArray.indexOf(zone.municipality) > -1 && zone.zone_type === 'municipality';
-    });
-    // Get zone IDs as array
-    const zone_ids_as_array = allowed_zone_ids.map(zone => {
-      return zone.zone_id;
-    });
-    filterparams.push(`zone_ids=${zone_ids_as_array.join(',')}`);
+    const zoneIds = getMunicipalityZoneIds(metadata.zones, municipalityCodesAsArray);
+    filterparams.push(`zone_ids=${zoneIds.join(',')}`);
   }
   // If no place is set: Get NL data (NL 'zone')
   // Only providers and admins are allowed to see this info
@@ -173,7 +212,7 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   // Add date (start and/or end)
   if (isParkingData) {
     let ts = new Date().toISOString().replace(/.\d+Z$/g, "Z"); // use current time without decimals
-    if (filter.datum !== "") {
+    if (filter.datum) {
       ts = new Date(filter.datum).toISOString().replace(/.\d+Z$/g, "Z");
     }
     filterparams.push("timestamp=" + ts)

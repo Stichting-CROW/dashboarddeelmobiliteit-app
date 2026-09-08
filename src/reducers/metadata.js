@@ -8,6 +8,10 @@ const initialState = {
   gebieden: [],
   zones: [],
   vehicle_types: [],
+  // NL-wide account (admin / ADMIN organisation), resolved from the ACL. Kept in
+  // metadata so request builders that only receive `metadata` (e.g.
+  // createFilterparameters) can scope requests without the full state.
+  is_admin: false,
   metadata_loaded: false,
   zones_loaded: false
 }
@@ -108,6 +112,16 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           vehicle_types: action.payload,
+      };
+    }
+
+    case 'SET_METADATA_IS_ADMIN': {
+      const is_admin = action.payload === true;
+      if (state.is_admin === is_admin) { return state; }
+
+      return {
+        ...state,
+        is_admin,
       };
     }
 
