@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useLocation, Navigate } from 'react-router-dom';
 import DashboardPrestatiesAanbieders from './DashboardPrestatiesAanbieders';
 import DashboardBeleidszones from './DashboardBeleidszones';
+import DashboardBeleidsinfoBeta from './DashboardBeleidsinfoBeta';
 import StatsPage from '../StatsPage';
 
 interface DashboardPageProps {}
@@ -12,6 +13,11 @@ function DashboardPage(props: DashboardPageProps) {
 
   if (dashboard === 'beleidsinfo') {
     return <StatsPage />;
+  }
+
+  /* Mockup of the proposed new beleidsinfo charts (fictional data) */
+  if (dashboard === 'beleidsinfo-beta') {
+    return <DashboardBeleidsinfoBeta />;
   }
 
   if (dashboard === 'prestaties-aanbieders') {

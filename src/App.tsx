@@ -150,6 +150,9 @@ function App() {
       if (pathname === '/stats/beleidsinfo') {
         return `Ontwikkeling - ${baseTitle}`;
       }
+      if (pathname === '/stats/beleidsinfo-beta') {
+        return `Beleidsinfo (beta) - ${baseTitle}`;
+      }
       if (pathname === '/over') {
         return `Over - ${baseTitle}`;
       }
@@ -297,7 +300,7 @@ function App() {
       payload=DISPLAYMODE_PARK;
     } else if(pathName.includes("/start")) {
       payload=DISPLAYMODE_START;
-    } else if(pathName === "/stats/beleidsinfo") {
+    } else if(pathName === "/stats/beleidsinfo" || pathName === "/stats/beleidsinfo-beta") {
       payload=DISPLAYMODE_OTHER;
     } else if(pathName === "/stats/beleidszones") {
       payload=DISPLAYMODE_OTHER;
@@ -850,8 +853,7 @@ function App() {
             <Login />
           </Overlay>
           {renderFilterbarElements()}
-        </>} />
-        <Route path="/rondleiding" element={
+        </>} />        <Route path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
           </ContentPage>
