@@ -48,18 +48,33 @@ import ChartSkeleton from './ChartSkeleton';
 import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
 import {useAggregatedChartData} from './useAggregatedChartData';
 import {useLegendToggle} from './useLegendToggle';
-import {CHART_SYNC_ID, TOTAAL_STROKE, TOTAAL_DASH} from './chartConstants';
+import {
+  CHART_SYNC_ID,
+  TOTAAL_KEY,
+  TOTAAL_STROKE,
+  TOTAAL_DASH,
+  PREVIOUS_TOTAAL_KEY,
+  PREVIOUS_TOTAAL_STROKE,
+  PREVIOUS_TOTAAL_DASH
+} from './chartConstants';
+import {mergePreviousPeriodTotals} from './previousPeriod';
+import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
-const TOTAAL_KEY = 'Totaal';
+/** Fetches the same data for the previous period of equal length */
+const getPreviousPeriodVehicleData = (token, filter, zones, metadata) =>
+  getAggregatedVehicleData(token, getPreviousPeriodFilter(filter), zones, metadata);
 
 function BeschikbareVoertuigenChart({
   filter,
   config,
-  title
+  title,
+  compareWithPreviousPeriod = false
 }: {
   filter: any,
   config: any,
-  title?: string
+  title?: string,
+  /** Show the total of the previous period as a ghost line */
+  compareWithPreviousPeriod?: boolean
 }) {
   const dispatch = useDispatch()
 
@@ -98,11 +113,21 @@ function BeschikbareVoertuigenChart({
     }
   );
 
+  // Optional: the previous period, only fetched when comparing
+  const {data: previousVehiclesData} = useAggregatedChartData<any>(
+    getPreviousPeriodVehicleData,
+    undefined,
+    {enabled: compareWithPreviousPeriod}
+  );
+
   // Clickable legend: hide/show individual providers
   const legend = useLegendToggle();
 
   // Populate chart data
   let chartData = getAggregatedChartData(vehiclesData || [], filter, zones, aanbieders);
+  const previousChartData = compareWithPreviousPeriod && previousVehiclesData
+    ? getAggregatedChartData(previousVehiclesData, getPreviousPeriodFilter(filter), zones, aanbieders)
+    : null;
 
   const getChartDataWithNiceDates = (data) => {
     if (!data?.length) return [];
@@ -120,7 +145,10 @@ function BeschikbareVoertuigenChart({
       return row;
     });
   };
-  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const chartDataWithNiceDatesRaw = mergePreviousPeriodTotals(
+    getChartDataWithNiceDates(chartData),
+    previousChartData
+  );
   const valueKeys = chartDataWithNiceDatesRaw?.[0]
     ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
     : [];
@@ -143,14 +171,15 @@ function BeschikbareVoertuigenChart({
 
   const getSeriesKeys = () => {
     const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
-    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name');
+    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY);
     const totaalIndex = providerKeys.indexOf(TOTAAL_KEY);
     const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
-    return { providersOnly, hasTotaal: totaalIndex >= 0 };
+    const hasPrevious = allKeys.indexOf(PREVIOUS_TOTAAL_KEY) >= 0;
+    return { providersOnly, hasTotaal: totaalIndex >= 0, hasPrevious };
   };
 
   const renderLineSeries = () => {
-    const { providersOnly, hasTotaal } = getSeriesKeys();
+    const { providersOnly, hasTotaal, hasPrevious } = getSeriesKeys();
     const series: React.ReactNode[] = [];
     providersOnly.forEach(x => {
       series.push(
@@ -186,6 +215,26 @@ function BeschikbareVoertuigenChart({
           isAnimationActive={false}
           connectNulls
           hide={legend.isHidden(TOTAAL_KEY)}
+        />
+      );
+    }
+    // Ghost line of the previous period, last so it is last in the legend too
+    if (hasPrevious) {
+      series.push(
+        <Line
+          key={PREVIOUS_TOTAAL_KEY}
+          type="monotone"
+          dataKey={PREVIOUS_TOTAAL_KEY}
+          name={PREVIOUS_TOTAAL_KEY}
+          stroke={PREVIOUS_TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={PREVIOUS_TOTAAL_DASH}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(PREVIOUS_TOTAAL_KEY)}
         />
       );
     }

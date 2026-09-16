@@ -49,11 +49,30 @@ import ChartSkeleton from './ChartSkeleton';
 import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
 import {useAggregatedChartData} from './useAggregatedChartData';
 import {useLegendToggle} from './useLegendToggle';
-import {CHART_SYNC_ID, TOTAAL_STROKE, TOTAAL_DASH} from './chartConstants';
+import {
+  CHART_SYNC_ID,
+  TOTAAL_KEY,
+  TOTAAL_STROKE,
+  TOTAAL_DASH,
+  PREVIOUS_TOTAAL_KEY,
+  PREVIOUS_TOTAAL_STROKE,
+  PREVIOUS_TOTAAL_DASH
+} from './chartConstants';
+import {mergePreviousPeriodTotals} from './previousPeriod';
+import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
-const TOTAAL_KEY = 'Totaal';
+/** Fetches the same data for the previous period of equal length */
+const getPreviousPeriodRentalsData = (token, filter, zones, metadata) =>
+  getAggregatedRentalsData(token, getPreviousPeriodFilter(filter), zones, metadata);
 
-function VerhuringenChart(props) {
+interface VerhuringenChartProps {
+  title?: string;
+  /** Show the total of the previous period as a ghost line */
+  compareWithPreviousPeriod?: boolean;
+}
+
+function VerhuringenChart(props: VerhuringenChartProps) {
+  const {compareWithPreviousPeriod = false} = props;
   const dispatch = useDispatch()
 
   const filter = useSelector((state: StateType) => state.filter)
@@ -91,11 +110,21 @@ function VerhuringenChart(props) {
     }
   );
 
+  // Optional: the previous period, only fetched when comparing
+  const {data: previousRentalsData} = useAggregatedChartData<any>(
+    getPreviousPeriodRentalsData,
+    undefined,
+    {enabled: compareWithPreviousPeriod}
+  );
+
   // Clickable legend: hide/show individual providers
   const legend = useLegendToggle();
 
   // Populate chart data
   const chartData = getAggregatedRentalsChartData(rentalsData || [], filter, zones, aanbieders);
+  const previousChartData = compareWithPreviousPeriod && previousRentalsData
+    ? getAggregatedRentalsChartData(previousRentalsData, getPreviousPeriodFilter(filter), zones, aanbieders)
+    : null;
 
   const getChartDataWithNiceDates = (data) => {
     if (!data?.length) return [];
@@ -113,7 +142,10 @@ function VerhuringenChart(props) {
       return row;
     });
   };
-  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const chartDataWithNiceDatesRaw = mergePreviousPeriodTotals(
+    getChartDataWithNiceDates(chartData),
+    previousChartData
+  );
   const valueKeys = chartDataWithNiceDatesRaw?.[0]
     ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
     : [];
@@ -136,14 +168,15 @@ function VerhuringenChart(props) {
 
   const getSeriesKeys = () => {
     const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
-    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name');
+    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY);
     const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
     const hasTotaal = providerKeys.indexOf(TOTAAL_KEY) >= 0;
-    return { providersOnly, hasTotaal };
+    const hasPrevious = allKeys.indexOf(PREVIOUS_TOTAAL_KEY) >= 0;
+    return { providersOnly, hasTotaal, hasPrevious };
   };
 
   const renderLineSeries = () => {
-    const { providersOnly, hasTotaal } = getSeriesKeys();
+    const { providersOnly, hasTotaal, hasPrevious } = getSeriesKeys();
     const series: React.ReactNode[] = [];
     providersOnly.forEach(x => {
       series.push(
@@ -179,6 +212,26 @@ function VerhuringenChart(props) {
           isAnimationActive={false}
           connectNulls
           hide={legend.isHidden(TOTAAL_KEY)}
+        />
+      );
+    }
+    // Ghost line of the previous period, last so it is last in the legend too
+    if (hasPrevious) {
+      series.push(
+        <Line
+          key={PREVIOUS_TOTAAL_KEY}
+          type="monotone"
+          dataKey={PREVIOUS_TOTAAL_KEY}
+          name={PREVIOUS_TOTAAL_KEY}
+          stroke={PREVIOUS_TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={PREVIOUS_TOTAAL_DASH}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(PREVIOUS_TOTAAL_KEY)}
         />
       );
     }

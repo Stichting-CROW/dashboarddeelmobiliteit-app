@@ -4,6 +4,7 @@ import moment from 'moment';
 import PageTitle from '../common/PageTitle';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import {AggregationLevel, AggregationLevelOption} from '../../helpers/stats/index';
+import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
 interface StatsPageHeaderProps {
   /** Selected plaats or zone name(s) */
@@ -16,6 +17,9 @@ interface StatsPageHeaderProps {
   aggregationLevels: AggregationLevelOption[];
   activeAggregationLevel: AggregationLevel | string;
   onChangeAggregationLevel: (level: AggregationLevel) => void;
+  /** Whether the charts show the previous period as a ghost line */
+  compareWithPreviousPeriod: boolean;
+  onChangeCompareWithPreviousPeriod: (compare: boolean) => void;
 }
 
 /**
@@ -39,11 +43,17 @@ function StatsPageHeader({
   zoneCount,
   aggregationLevels,
   activeAggregationLevel,
-  onChangeAggregationLevel
+  onChangeAggregationLevel,
+  compareWithPreviousPeriod,
+  onChangeCompareWithPreviousPeriod
 }: StatsPageHeaderProps) {
   // Inclusive number of days in the selected period
   const days = moment(endDate).startOf('day').diff(moment(startDate).startOf('day'), 'days') + 1;
   const activeOption = aggregationLevels.find(x => x.name === activeAggregationLevel);
+
+  // The previous period of equal length, shown in the compare toggle
+  const previousPeriod = getPreviousPeriodFilter({ontwikkelingvan: startDate, ontwikkelingtot: endDate});
+  const previousPeriodLabel = formatPeriodLabel(previousPeriod.ontwikkelingvan, previousPeriod.ontwikkelingtot);
 
   const subtitleParts = [
     formatPeriodLabel(startDate, endDate),
@@ -95,6 +105,39 @@ function StatsPageHeader({
           <InfoTooltip className="inline-block">
             Toon de data in intervallen van {aggregationLevels.map(x => x.title).join(' / ')}.
             Je bekijkt nu {activeOption?.title}-niveau.
+          </InfoTooltip>
+
+          <span className="mx-1 h-5 w-px bg-gray-200" aria-hidden="true" />
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={compareWithPreviousPeriod}
+            onClick={() => onChangeCompareWithPreviousPeriod(!compareWithPreviousPeriod)}
+            className="StatsPageHeader-compare inline-flex items-center gap-2 text-xs text-gray-600 select-none"
+          >
+            <span
+              className={
+                'relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors ' +
+                (compareWithPreviousPeriod ? 'bg-theme-blue' : 'bg-gray-300')
+              }
+            >
+              <span
+                className={
+                  'inline-block h-3 w-3 rounded-full bg-white shadow transition-transform ' +
+                  (compareWithPreviousPeriod ? 'translate-x-3.5' : 'translate-x-0.5')
+                }
+              />
+            </span>
+            <span>
+              Vergelijk met vorige periode
+              <span className="ml-1 text-gray-400">({previousPeriodLabel})</span>
+            </span>
+          </button>
+          <InfoTooltip className="inline-block">
+            Toont in de grafieken het totaal van de vorige periode van gelijke lengte
+            ({previousPeriodLabel}) als grijze stippellijn, uitgelijnd op dezelfde dag
+            van de periode.
           </InfoTooltip>
         </div>
       )}

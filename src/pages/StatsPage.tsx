@@ -1,10 +1,11 @@
-import React, {useEffect, useMemo} from 'react'; // , {useEffect, useState }
+import React, {useCallback, useEffect, useMemo} from 'react'; // , {useEffect, useState }
 import './StatsPage.css'
 
 import {
   useDispatch,
   useSelector
 } from 'react-redux';
+import {useSearchParams} from 'react-router-dom';
 
 import moment from 'moment';
 
@@ -39,6 +40,17 @@ function StatsPage(props) {
   });
 
   const gebieden = useSelector((state: StateType) => state.metadata?.gebieden)
+
+  // "Vergelijk met vorige periode" lives in the URL (?compare=1) so a shared
+  // link shows the same view
+  const [searchParams, setSearchParams] = useSearchParams();
+  const compareWithPreviousPeriod = searchParams.get('compare') === '1';
+  const setCompareWithPreviousPeriod = useCallback((compare: boolean) => {
+    const next = new URLSearchParams(searchParams);
+    if(compare) next.set('compare', '1');
+    else next.delete('compare');
+    setSearchParams(next, {replace: true});
+  }, [searchParams, setSearchParams]);
 
   const setAggregationLevel = (newlevel) => {
     dispatch({
@@ -147,6 +159,8 @@ function StatsPage(props) {
         aggregationLevels={aggregationButtonsToRender}
         activeAggregationLevel={filter.ontwikkelingaggregatie}
         onChangeAggregationLevel={setAggregationLevel}
+        compareWithPreviousPeriod={compareWithPreviousPeriod}
+        onChangeCompareWithPreviousPeriod={setCompareWithPreviousPeriod}
       />
 
       {/* Only mount the charts once the aggregation level is valid for this
@@ -162,9 +176,11 @@ function StatsPage(props) {
               showLegend: true
             }}
             title="Beschikbare voertuigen"
+            compareWithPreviousPeriod={compareWithPreviousPeriod}
           />
           <VerhuringenChart
             title="Verhuringen"
+            compareWithPreviousPeriod={compareWithPreviousPeriod}
           />
           <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
         </div>

@@ -8,3 +8,11 @@ export const CHART_SYNC_ID = 'beleidsinfo';
 /** Styling of the summed "Totaal" series, dashed so it stands apart from provider colors */
 export const TOTAAL_STROKE = '#1a1a1a';
 export const TOTAAL_DASH = '6 4';
+
+/** Data key of the summed series */
+export const TOTAAL_KEY = 'Totaal';
+
+/** "Ghost" line showing the total of the previous period of equal length */
+export const PREVIOUS_TOTAAL_KEY = 'Totaal vorige periode';
+export const PREVIOUS_TOTAAL_STROKE = '#9CA3AF';
+export const PREVIOUS_TOTAAL_DASH = '2 4';

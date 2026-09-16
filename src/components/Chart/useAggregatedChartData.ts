@@ -49,6 +49,11 @@ export interface UseAggregatedChartDataOptions {
    * the UI does not trigger a needless refetch.
    */
   ignoreAggregationLevel?: boolean;
+  /**
+   * When false, nothing is fetched and `data` is null. Used for optional
+   * datasets such as the previous-period comparison. Defaults to true.
+   */
+  enabled?: boolean;
 }
 
 export function useAggregatedChartData<T>(
@@ -80,9 +85,11 @@ export function useAggregatedChartData<T>(
 
   const refetch = useCallback(() => setRefetchCounter((c) => c + 1), []);
 
+  const enabled = options.enabled !== false;
+
   useEffect(() => {
-    // Do not load until we have zones
-    if (!metadata?.zones || metadata.zones.length <= 0) {
+    // Do not load until we have zones, or when this dataset is switched off
+    if (!enabled || !metadata?.zones || metadata.zones.length <= 0) {
       requestIdRef.current += 1;
       setData(null);
       setIsFetching(false);
@@ -139,7 +146,8 @@ export function useAggregatedChartData<T>(
     metadata?.gebieden,
     metadata?.vehicle_types,
     token,
-    refetchCounter
+    refetchCounter,
+    enabled
   ]);
 
   return {
