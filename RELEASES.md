@@ -1,5 +1,27 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-09-16
+
+**Statistiek: Beleidsinfo**
+
+- 🪄 Kerncijfers bovenaan de pagina: gemiddeld beschikbare voertuigen per dag, totaal aantal verhuringen, verhuringen per voertuig per dag en aantal actieve aanbieders, elk met het verschil ten opzichte van de vorige periode van gelijke lengte
+- 🪄 Nieuwe schakelaar 'Vergelijk met vorige periode': toont het totaal van de vorige periode als grijze stippellijn in de grafieken 'Beschikbare voertuigen' en 'Verhuringen'. De instelling staat in de URL, zodat je de vergelijking kunt delen
+- 🪄 Weekenden zijn in de grafieken gemarkeerd met een lichte achtergrond (bij dag-, uur- en kwartierintervallen)
+- ✨ Nieuwe paginakop met de geselecteerde plaats of zones, de periode, het aantal dagen en een duidelijke keuze voor het tijdsinterval (dag / week / maand)
+- ✨ Grafieken tonen nu een duidelijke melding als er geen data is voor de selectie, en een foutmelding met 'Opnieuw proberen' als het laden mislukt
+- ✨ Beweeg je over een grafiek, dan lichten alle grafieken op hetzelfde moment op; klik op een aanbieder in de legenda om die lijn te verbergen of te tonen
+- ✨ Getallen worden in Nederlandse notatie weergegeven (bijv. 23.986 en 1,13); de 'Totaal'-lijn is gestreept zodat deze beter te onderscheiden is van aanbieders
+- 🐛 Opgelost: bij het openen van de pagina werd soms een ongeldig tijdsinterval opgevraagd, waardoor grafieken eerst leeg bleven en daarna opnieuw laadden
+- 🐛 Opgelost: bij snel wisselen van selectie kon een oudere dataset de nieuwe grafiekdata overschrijven
+- 🐛 Opgelost: CSV-bestandsnamen bevatten de periode niet correct; ze heten nu bijv. `2026-08-17_to_2026-09-16_verhuringen.csv`
+
+**Statistiek: Hubs en verbodsgebieden**
+
+- 🪄 Analysegebieden (monitoringzones) zijn nu beschikbaar in de zonefilter, naast hubs en verbodsgebieden; per zone is het type zichtbaar
+- 🪄 Link 'Toon op kaart' bij een geselecteerde zone opent de zone direct op de kaart
+- 🐛 Opgelost: onjuiste datum bij 'Actief vanaf' (toonde de wijzigingsdatum)
+- 🐛 Opgelost: eindeloze doorverwijzing bij het openen van zonestatistieken via een link
+
 ## Release 2026-09-07
 
 **Kaart**
