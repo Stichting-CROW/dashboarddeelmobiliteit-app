@@ -38,11 +38,24 @@ const Section = ({
   </div>
 }
 
+const HubName = ({ name }: { name?: string }) => (
+  <div className="font-inter" style={{minWidth: '180px'}}>
+    <div className="text-lg font-bold">
+      {name}
+    </div>
+  </div>
+);
+
 const HubStats = ({
   hubData
 }): ReactElement => {
-  if(! hubData) return <div />;
-  if(! hubData.stop) return <div />;
+  if(! hubData || !hubData.zone_id) return <div />;
+
+  // Monitoring / no-parking zones have no hub occupancy (stop) data.
+  // Still show the zone name; vehicle stats come from HubStatsWidget below.
+  if(! hubData.stop || hubData.geography_type === 'monitoring') {
+    return <HubName name={hubData.name} />;
+  }
 
   const stop = hubData.stop;
 
@@ -107,13 +120,7 @@ const HubStats = ({
     return calculateGradient(parked, capacity);
   }
 
-  if(! stop) return <>
-    <div className="font-inter" style={{minWidth: '180px'}}>
-      <div className="text-lg font-bold">
-        ${hubData.name}
-      </div>
-    </div>
-    </>
+  if(! stop) return <HubName name={hubData.name} />;
   if(! stop.realtime_data) return <div>
     Er zijn nog geen realtime statistieken beschikbaar voor deze zone.
   </div>;// Realtime data not yet loaded

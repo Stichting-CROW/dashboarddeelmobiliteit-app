@@ -968,6 +968,14 @@ const DdPolicyHubsLayer = ({
     return selected_hub.geography_type === 'stop';
   }
 
+  const didSelectMonitoringZone = () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length !== 1) return false;
+    const selected_hub = getSelectedHub();
+    if(! selected_hub) return false;
+
+    return selected_hub.geography_type === 'monitoring';
+  }
+
   const didSelectNoParkingZone = () => {
     if(! policyHubs || ! policyHubs[0]) return false;
     if(! selected_policy_hubs || selected_policy_hubs.length !== 1) return false;
@@ -1028,7 +1036,7 @@ const DdPolicyHubsLayer = ({
       </ActionModule>}
     </>}
 
-    {(is_stats_or_manage_mode === 'stats' && didSelectOneHub() && didSelectHubHub()) && <>
+    {(is_stats_or_manage_mode === 'stats' && didSelectOneHub() && (didSelectHubHub() || didSelectMonitoringZone())) && <>
       <ActionModule>
         <PolicyHubsStats
           fetchHubs={fetchHubs}

@@ -4,13 +4,52 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import FilterbarExtended from './FilterbarExtended.jsx';
 import useFilterbarExtended from '../../customHooks/useFilterbarExtended';
+import { readable_geotype } from '../../helpers/policy-hubs/common';
+import { themes } from '../../themes';
 import './css/FilteritemZones.css';
 
 import {StateType} from '../../types/StateType';
 
+const ALL_GEOGRAPHY_TYPES = ['monitoring', 'stop', 'no_parking'];
+
+const GEOGRAPHY_TYPE_FILTERS = [
+  {
+    name: 'monitoring',
+    title: 'Analyse',
+    color: themes.zone.monitoring.primaryColor,
+  },
+  {
+    name: 'stop',
+    title: 'Hubs',
+    color: themes.zone.stop.primaryColor,
+  },
+  {
+    name: 'no_parking',
+    title: 'Verbodsgebieden',
+    color: themes.zone.no_parking.primaryColor,
+  },
+];
+
+function renderZoneTypeMarker(geography_type) {
+  if (!geography_type) return null;
+  const label = readable_geotype(geography_type);
+  if (!label) return null;
+  const color = themes.zone[geography_type]?.primaryColor;
+  return (
+    <span className="filter-zones-type">
+      <span
+        className="filter-zones-type-dot"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
+  );
+}
+
 function FilteritemZones({
   zonesToShow,
-  beleidszonesRedirect = false
+  beleidszonesRedirect = false,
+  showGeographyTypeFilter = false
 }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -41,6 +80,9 @@ function FilteritemZones({
   );
 
   let [filterSearch, setFilterSearch] = useState("");
+  const [activeGeographyTypes, setActiveGeographyTypes] = useState(
+    [...ALL_GEOGRAPHY_TYPES]
+  );
 
   // Reset the search field whenever the panel is closed so that reopening it
   // always starts from a clean state.
@@ -48,8 +90,26 @@ function FilteritemZones({
   useEffect(() => {
     if (!isPanelOpen) {
       setFilterSearch("");
+      setActiveGeographyTypes([...ALL_GEOGRAPHY_TYPES]);
     }
   }, [isPanelOpen]);
+
+  // Clicking a type while all types are active narrows down to just that
+  // type. Further clicks add/remove types; deselecting the last active type
+  // resets to all available types.
+  const toggleGeographyType = (type, availableTypes) => {
+    setActiveGeographyTypes((prev) => {
+      const allActive = availableTypes.every((t) => prev.includes(t));
+      if (allActive) {
+        return [type];
+      }
+      if (prev.includes(type)) {
+        const next = prev.filter((t) => t !== type);
+        return next.length === 0 ? [...availableTypes] : next;
+      }
+      return [...prev, type];
+    });
+  };
 
   const getBeleidszonesPath = () => {
     const searchParams = new URLSearchParams();
@@ -180,12 +240,18 @@ function FilteritemZones({
                 form-item-selected
                 form-item
                 cursor-pointer
-              " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>{a.name}</div>)
+              " onClick={e=>{ e.stopPropagation(); removeFromFilterZones(a.zone_id)}}>
+                {a.name}
+                {renderZoneTypeMarker(a.geography_type)}
+              </div>)
             } else {
               return (<div key={'item-'+a.zone_id} className="
                 form-item
                 cursor-pointer
-              " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>{a.name}</div>)
+              " onClick={e=>{ e.stopPropagation(); addToFilterZones(a.zone_id)}}>
+                {a.name}
+                {renderZoneTypeMarker(a.geography_type)}
+              </div>)
             }
           })
         }
@@ -195,8 +261,23 @@ function FilteritemZones({
   }
 
   const renderSelectZones = (zones) => {
+    // Only offer type filters for types that actually occur in the list
+    const availableGeographyTypes = ALL_GEOGRAPHY_TYPES.filter((type) =>
+      zones.some((zone) => zone.geography_type === type)
+    );
+    const geographyTypeFilters = GEOGRAPHY_TYPE_FILTERS.filter((x) =>
+      availableGeographyTypes.includes(x.name)
+    );
+    const doShowGeographyTypeFilter =
+      showGeographyTypeFilter && geographyTypeFilters.length > 1;
+
     const filteredZones = zones.filter(zone=>{
-      return filterSearch===''|| zone.name.toLowerCase().includes(filterSearch.toLowerCase())
+      const matchesSearch = filterSearch===''||
+        zone.name.toLowerCase().includes(filterSearch.toLowerCase());
+      if (!matchesSearch) return false;
+      if (!doShowGeographyTypeFilter) return true;
+      if (!zone.geography_type) return true;
+      return activeGeographyTypes.includes(zone.geography_type);
     })
     
     return (
@@ -223,6 +304,31 @@ function FilteritemZones({
             </div>
             <div>&nbsp;</div>
           </div>
+            {doShowGeographyTypeFilter && (
+              <div className="filter-zones-geotype-filter">
+                {geographyTypeFilters.map((x) => {
+                  const isActive = activeGeographyTypes.includes(x.name);
+                  return (
+                    <div
+                      key={x.name}
+                      className={`filter-zones-geotype-option${
+                        isActive ? ' is-active' : ''
+                      }`}
+                      style={{
+                        backgroundColor: isActive ? x.color : '',
+                        flex: x.name === 'no_parking' ? 2 : 1,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleGeographyType(x.name, availableGeographyTypes);
+                      }}
+                    >
+                      {x.title}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           <div className="filter-form-values">
             { zone_groups_filtered.map(group=>{
                 return renderSelectZonesGroup(group, filteredZones);
@@ -293,7 +399,8 @@ function FilteritemZones({
         {filteredZones.map(zone => {
           return (
             <div className="filter-zones-zoneitem" key={zone.zone_id}>
-              { zone.name}
+              {zone.name}
+              {renderZoneTypeMarker(zone.geography_type)}
               <div className="filter-zones-img-zoneitem-cancel" onClick={e=>{ e.stopPropagation(); removeFromFilterZones(zone.zone_id)}}>×</div>
             </div>
           )

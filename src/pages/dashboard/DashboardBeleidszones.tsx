@@ -9,6 +9,7 @@ import {
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
+import { readable_geotype } from '../../helpers/policy-hubs/common';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -51,6 +52,7 @@ interface MdsZone {
   modified_at?: string;
   retire_date?: string;
   name?: string;
+  geography_type?: string;
 }
 
 function DashboardBeleidszones() {
@@ -252,6 +254,9 @@ function DashboardBeleidszones() {
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
+        {hasExactlyOneZone && selectedZone?.geography_type && (
+          <span>{readable_geotype(selectedZone.geography_type)}</span>
+        )}
         {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
             {isArchived

@@ -123,7 +123,10 @@ function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
 
       {filterGebied && (
         <Fieldset title="Zones">
-          <FilteritemZones zonesToShow={['custom']} />
+          <FilteritemZones
+            zonesToShow={['custom']}
+            showGeographyTypeFilter={true}
+          />
         </Fieldset>
       )}
 
