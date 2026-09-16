@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 
 import { StateType } from '../../types/StateType';
@@ -9,6 +10,11 @@ import {
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
+import {
+  readable_geotype,
+  readable_phase,
+  mapZonePhaseToPolicyHubsPhase
+} from '../../helpers/policy-hubs/common';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -51,6 +57,8 @@ interface MdsZone {
   modified_at?: string;
   retire_date?: string;
   name?: string;
+  geography_type?: string;
+  phase?: string;
 }
 
 function DashboardBeleidszones() {
@@ -179,9 +187,14 @@ function DashboardBeleidszones() {
   const isViewingPreviousVersion = Boolean(
     hasExactlyOneZone && selectedZone && currentZone
   );
+  // Do not fall back to modified_at: concept analysegebieden have no
+  // effective/published date, and using modified_at would show a false
+  // "Zone actief vanaf" timestamp.
   const effectiveDate =
-    selectedZone?.effective_date || selectedZone?.published_date || selectedZone?.modified_at;
-  const hasValidEffectiveDate = effectiveDate && moment(effectiveDate).isValid();
+    selectedZone?.effective_date || selectedZone?.published_date;
+  const hasValidEffectiveDate = Boolean(
+    effectiveDate && moment(effectiveDate).isValid()
+  );
   const retireDate = selectedZone?.retire_date;
   const isArchived =
     retireDate &&
@@ -198,6 +211,27 @@ function DashboardBeleidszones() {
       dispatch({ type: 'SET_FILTER_ZONES', payload: String(currentZone.zone_id) });
     }
   };
+
+  const beleidshubsMapUrl = useMemo(() => {
+    if (!hasExactlyOneZone) return '';
+    const params = new URLSearchParams();
+    if (filter.gebied) params.set('gm_code', filter.gebied);
+    params.append('selected', String(selectedZoneIds[0]));
+    params.set(
+      'phase',
+      mapZonePhaseToPolicyHubsPhase(
+        selectedZone?.geography_type,
+        selectedZone?.phase
+      )
+    );
+    return `/map/beleidshubs?${params.toString()}`;
+  }, [
+    hasExactlyOneZone,
+    filter.gebied,
+    selectedZoneIds,
+    selectedZone?.geography_type,
+    selectedZone?.phase
+  ]);
 
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
@@ -252,6 +286,12 @@ function DashboardBeleidszones() {
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
+        {hasExactlyOneZone && selectedZone?.geography_type && (
+          <span>{readable_geotype(selectedZone.geography_type)}</span>
+        )}
+        {hasExactlyOneZone && selectedZone?.phase === 'concept' && (
+          <span>{readable_phase(selectedZone.phase)}</span>
+        )}
         {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
             {isArchived
@@ -276,6 +316,14 @@ function DashboardBeleidszones() {
           >
             Huidige versie
           </button>
+        )}
+        {hasExactlyOneZone && beleidshubsMapUrl && (
+          <Link
+            to={beleidshubsMapUrl}
+            className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Toon op kaart
+          </Link>
         )}
       </div>
 

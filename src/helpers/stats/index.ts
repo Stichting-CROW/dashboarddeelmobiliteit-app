@@ -43,6 +43,10 @@ const didSelectAtLeastOneCustomZone = (filter, zones) => {
     const foundZone = getZoneById(zones, Math.abs(filter.zones.split(',')[0]));
     if(foundZone && foundZone.zone_type === 'custom') {
       userDidSelectCustomZone = true;
+    } else if(!foundZone || !foundZone.zone_id) {
+      // Zone id is set but not in metadata.zones (e.g. a concept analysegebied).
+      // Still request zone-specific stats via stats_v2.
+      userDidSelectCustomZone = true;
     }
   }
   return userDidSelectCustomZone;

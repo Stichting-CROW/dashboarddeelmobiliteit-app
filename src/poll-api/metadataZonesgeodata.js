@@ -1,4 +1,8 @@
 import {isLoggedIn, shouldTreatMunicipalitiesAsNlWide} from '../helpers/authentication.js';
+import {
+  BELEIDSZONES_MDS_PHASES_PARAM_WITH_ARCHIVED,
+  isBeleidszoneWithStats,
+} from '../api/beleidszones';
 
 export const getEmptyZonesGeodataPayload = () => {
   return {
@@ -51,7 +55,7 @@ const buildGeodataFromMdsZones = (zones, selectedZoneIds, store, state, shouldZo
 
   const zonesToUse = selectedZoneIds && selectedZoneIds.length > 0
     ? zones.filter((z) => selectedZoneIds.includes(String(z.zone_id)))
-    : zones;
+    : zones.filter(isBeleidszoneWithStats);
 
   zonesToUse.forEach((zonedata) => {
     const geom = zonedata.area?.geometry;
@@ -168,7 +172,7 @@ export const updateZonesgeodata = (store) => {
 
       store.dispatch({ type: 'SHOW_LOADING', payload: true });
 
-      const url = `${process.env.REACT_APP_MDS_URL}/public/zones?municipality=${encodeURIComponent(gmCode)}&geography_types=no_parking&geography_types=stop&geography_types=monitoring&phases=active&phases=retirement_concept&phases=committed_retirement_concept&phases=published_retirement&phases=archived`;
+      const url = `${process.env.REACT_APP_MDS_URL}/public/zones?municipality=${encodeURIComponent(gmCode)}&geography_types=no_parking&geography_types=stop&geography_types=monitoring&${BELEIDSZONES_MDS_PHASES_PARAM_WITH_ARCHIVED}`;
 
       fetch(url)
         .then((response) => {

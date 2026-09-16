@@ -37,6 +37,33 @@ export const readable_phase = (name: string) => {
   return name;
 }
 
+const POLICY_HUBS_MAP_PHASES = [
+  'concept',
+  'committed_concept',
+  'published',
+  'active',
+  'archived',
+] as const;
+
+/**
+ * Map a zone's MDS phase to the phase tab on /map/beleidshubs.
+ * Analysegebieden stay in concept; retirement variants map to their parent tab.
+ */
+export const mapZonePhaseToPolicyHubsPhase = (
+  geographyType?: string,
+  phase?: string
+): string => {
+  if (geographyType === 'monitoring') return 'concept';
+  if (phase === 'retirement_concept') return 'concept';
+  if (phase === 'committed_retirement_concept') return 'committed_concept';
+  if (phase === 'published_retirement') return 'published';
+  if (phase === 'active_retirement') return 'active';
+  if (phase && (POLICY_HUBS_MAP_PHASES as readonly string[]).includes(phase)) {
+    return phase;
+  }
+  return 'active';
+}
+
 export const defaultStopProperties = {
   location: {},
   is_virtual: true,
