@@ -3,6 +3,7 @@ import moment from 'moment';
 
 import PageTitle from '../common/PageTitle';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import AggregationLevelControl from './AggregationLevelControl';
 import {AggregationLevel, AggregationLevelOption} from '../../helpers/stats/index';
 import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
@@ -49,7 +50,6 @@ function StatsPageHeader({
 }: StatsPageHeaderProps) {
   // Inclusive number of days in the selected period
   const days = moment(endDate).startOf('day').diff(moment(startDate).startOf('day'), 'days') + 1;
-  const activeOption = aggregationLevels.find(x => x.name === activeAggregationLevel);
 
   // The previous period of equal length, shown in the compare toggle
   const previousPeriod = getPreviousPeriodFilter({ontwikkelingvan: startDate, ontwikkelingtot: endDate});
@@ -77,35 +77,11 @@ function StatsPageHeader({
 
       {aggregationLevels.length > 0 && (
         <div className="StatsPageHeader-controls flex items-center gap-2 mt-3">
-          <div
-            className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5"
-            role="group"
-            aria-label="Tijdsinterval"
-          >
-            {aggregationLevels.map(x => {
-              const isActive = x.name === activeAggregationLevel;
-              return (
-                <button
-                  key={x.name}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => onChangeAggregationLevel(x.name)}
-                  className={
-                    'px-3 py-1 text-xs font-medium rounded-md transition-colors select-none ' +
-                    (isActive
-                      ? 'bg-theme-blue text-white cursor-default'
-                      : 'text-gray-600 hover:bg-gray-100')
-                  }
-                >
-                  {x.title}
-                </button>
-              );
-            })}
-          </div>
-          <InfoTooltip className="inline-block">
-            Toon de data in intervallen van {aggregationLevels.map(x => x.title).join(' / ')}.
-            Je bekijkt nu {activeOption?.title}-niveau.
-          </InfoTooltip>
+          <AggregationLevelControl
+            levels={aggregationLevels}
+            activeLevel={activeAggregationLevel}
+            onChange={onChangeAggregationLevel}
+          />
 
           <span className="mx-1 h-5 w-px bg-gray-200" aria-hidden="true" />
 

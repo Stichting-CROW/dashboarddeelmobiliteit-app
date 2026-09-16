@@ -6,7 +6,8 @@ import moment from 'moment';
 import { StateType } from '../../types/StateType';
 import {
   doShowDetailledAggregatedData,
-  didSelectAtLeastOneCustomZone
+  didSelectAtLeastOneCustomZone,
+  AggregationLevelOption
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
@@ -20,8 +21,8 @@ import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
 import VerhuringenPerVoertuigChart from '../../components/Chart/VerhuringenPerVoertuigChart';
 import TimeGridVehicleAvailability from '../../components/TimeGrid/TimeGrid_VehicleAvailability';
-import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
 import PageTitle from '../../components/common/PageTitle';
+import AggregationLevelControl from '../../components/Stats/AggregationLevelControl';
 import ZonePreviewMap from '../../components/ZonePreviewMap/ZonePreviewMap';
 
 import '../../pages/StatsPage.css';
@@ -134,7 +135,7 @@ function DashboardBeleidszones() {
   );
 
   const getAggregationButtonsToRender = () => {
-    const ret: Array<{ name: string; title: string }> = [];
+    const ret: AggregationLevelOption[] = [];
     if (doShowDetailledAggregatedData(filter, zones)) {
       const doShow5m = daysInSelectedPeriod <= 1;
       const doShow15m = daysInSelectedPeriod <= 2;
@@ -235,19 +236,6 @@ function DashboardBeleidszones() {
 
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
-  const renderAggregationButton = (name: string, title: string) => (
-    <div
-      key={`agg-level-${name}`}
-      className={
-        'agg-button ' +
-        (filter.ontwikkelingaggregatie === name ? ' agg-button-active' : '')
-      }
-      onClick={() => setAggregationLevel(name)}
-    >
-      {title}
-    </div>
-  );
-
   if (!hasSelectedBeleidszone) {
     return (
       <div className="DashboardBeleidszones StatsPage pt-12 pb-24">
@@ -266,23 +254,6 @@ function DashboardBeleidszones() {
 
   return (
     <div className="DashboardBeleidszones StatsPage pt-4 pb-24">
-      <div className="agg-button-container mb-8">
-        {aggregationButtonsToRender.map((x) =>
-          renderAggregationButton(x.name, x.title)
-        )}
-        {aggregationButtonsToRender.length > 0 && (
-          <InfoTooltip className="mx-2 inline-block">
-            Toon de data in intervallen van{' '}
-            {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je
-            bekijkt nu{' '}
-            {aggregationButtonsToRender
-              .filter((x) => filter.ontwikkelingaggregatie === x.name)
-              .pop()?.title}
-            -niveau.
-          </InfoTooltip>
-        )}
-      </div>
-
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
@@ -326,6 +297,17 @@ function DashboardBeleidszones() {
           </Link>
         )}
       </div>
+
+      {/* Interval control, same design and position as on the Beleidsinfo page */}
+      {aggregationButtonsToRender.length > 0 && (
+        <div className="flex items-center gap-2 my-4" style={{marginLeft: '58px'}}>
+          <AggregationLevelControl
+            levels={aggregationButtonsToRender}
+            activeLevel={filter.ontwikkelingaggregatie}
+            onChange={setAggregationLevel}
+          />
+        </div>
+      )}
 
       <div style={{marginLeft: '58px'}}>
         <ZonePreviewMap className="my-4" />
