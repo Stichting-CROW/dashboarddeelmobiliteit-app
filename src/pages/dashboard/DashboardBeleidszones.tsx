@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 
 import { StateType } from '../../types/StateType';
@@ -9,7 +10,11 @@ import {
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
-import { readable_geotype, readable_phase } from '../../helpers/policy-hubs/common';
+import {
+  readable_geotype,
+  readable_phase,
+  mapZonePhaseToPolicyHubsPhase
+} from '../../helpers/policy-hubs/common';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -207,6 +212,27 @@ function DashboardBeleidszones() {
     }
   };
 
+  const beleidshubsMapUrl = useMemo(() => {
+    if (!hasExactlyOneZone) return '';
+    const params = new URLSearchParams();
+    if (filter.gebied) params.set('gm_code', filter.gebied);
+    params.append('selected', String(selectedZoneIds[0]));
+    params.set(
+      'phase',
+      mapZonePhaseToPolicyHubsPhase(
+        selectedZone?.geography_type,
+        selectedZone?.phase
+      )
+    );
+    return `/map/beleidshubs?${params.toString()}`;
+  }, [
+    hasExactlyOneZone,
+    filter.gebied,
+    selectedZoneIds,
+    selectedZone?.geography_type,
+    selectedZone?.phase
+  ]);
+
   const aggregationButtonsToRender = getAggregationButtonsToRender();
 
   const renderAggregationButton = (name: string, title: string) => (
@@ -290,6 +316,14 @@ function DashboardBeleidszones() {
           >
             Huidige versie
           </button>
+        )}
+        {hasExactlyOneZone && beleidshubsMapUrl && (
+          <Link
+            to={beleidshubsMapUrl}
+            className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Toon op kaart
+          </Link>
         )}
       </div>
 

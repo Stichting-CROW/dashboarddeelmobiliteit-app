@@ -88,6 +88,14 @@ const DdPolicyHubsLayer = ({
   });
   const [affectedModalities, setAffectedModalities] = useState<string[]>([]);
   const overlapSelectionPopupRef = useRef<any>(null);
+  const didSyncSelectedFromUrl = useRef(false);
+  const didZoomToSelectedFromUrl = useRef(false);
+  const selectedFromUrlRef = useRef(
+    new URLSearchParams(window.location.search).getAll('selected')
+  );
+  const phaseFromUrlRef = useRef(
+    new URLSearchParams(window.location.search).get('phase')
+  );
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
@@ -145,12 +153,19 @@ const DdPolicyHubsLayer = ({
 
   const uniqueComponentId = Math.random()*9000000;
 
-  // On component load: reset 'selected_policy_hubs'
+  // On component load: apply `selected` from the URL (overrides persisted Redux)
   useEffect(() => {
-    dispatch(setShowEditForm(false));
-    dispatch(setSelectedPolicyHubs([]));
     dispatch(setIsDrawingEnabled(false));
     dispatch(setShowList(false));
+
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (selectedFromUrl.length > 0) {
+      dispatch(setSelectedPolicyHubs(selectedFromUrl.map((x) => Number(x))));
+      dispatch(setShowEditForm(true));
+    } else {
+      dispatch(setShowEditForm(false));
+      dispatch(setSelectedPolicyHubs([]));
+    }
 
     return () => {
       clearTimeout(TO_fetch_delay);
@@ -246,29 +261,65 @@ const DdPolicyHubsLayer = ({
     if(visible) {
       dispatch(setVisibleLayers(visible));
     }
-    const selected = queryParams.getAll('selected');
+    const selected = selectedFromUrlRef.current;
     if(selected && selected.length > 0) {
-      const selectedIds = selected.map(x => Number(x));
-      setTimeout(() => {
-        dispatch(setSelectedPolicyHubs(selectedIds));
-      }, 1500);
       dispatch(setShowEditForm(true));
     }
-    const phase = queryParams.get('phase');
+    const phase = phaseFromUrlRef.current;
     if(phase) {
       dispatch(setActivePhase(phase));
     }
   }, [])
 
-  // Set default state
+  // Set default phase unless the URL already requested one
   useEffect(() => {
+    if(phaseFromUrlRef.current) return;
     if(! active_phase) {
       dispatch(setActivePhase(acl ? 'concept' : 'active'))
     }
   }, [])
 
+  // When hubs load, zoom once to the zone from the URL
+  useEffect(() => {
+    if (didZoomToSelectedFromUrl.current) return;
+    if (!map) return;
+
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (!selectedFromUrl.length) return;
+    if (!Array.isArray(policyHubs) || policyHubs.length === 0) return;
+
+    const selectedIds = selectedFromUrl.map((x) => Number(x));
+    const hub = policyHubs.find((x) => selectedIds.indexOf(x.zone_id) > -1);
+    if (!hub?.area) return;
+
+    didZoomToSelectedFromUrl.current = true;
+
+    try {
+      const extent = st.extent(hub.area);
+      map.fitBounds(extent, {
+        padding: {
+          top: 25,
+          bottom: 25,
+          left: window.innerWidth > 800 ? 350 : 25,
+          right: window.innerWidth > 800 ? 520 : 25
+        },
+        maxZoom: 16,
+        duration: 1000
+      });
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
+  }, [map, policyHubs])
+
   // If selected_policy_hubs changes -> update URL
   useEffect(() => {
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (!didSyncSelectedFromUrl.current && selectedFromUrl.length > 0) {
+      const urlIds = selectedFromUrl.map((x) => Number(x)).join(',');
+      const reduxIds = (selected_policy_hubs || []).join(',');
+      if (urlIds !== reduxIds) return;
+      didSyncSelectedFromUrl.current = true;
+    }
     update_url({
       selected: selected_policy_hubs
     });
@@ -401,12 +452,23 @@ const DdPolicyHubsLayer = ({
     let filteredHubs = hubs.filter((x) => {
       const isInPhase = isHubInPhase(x, active_phase, visible_layers);
       const isInVisibleLayers = isHubInVisibleLayers(x);
+      const isSelected = selected_policy_hubs
+        && selected_policy_hubs.indexOf(x.zone_id) > -1;
 
-      return isInPhase || isInVisibleLayers;
+      return isInPhase || isInVisibleLayers || isSelected;
     });
 
     // Remove all zones that have a zone ID of any of the prev_geography_ids
     const uniqueHubs = deDuplicateHubs(filteredHubs);
+
+    // Keep deep-linked / selected hubs visible even if a newer version replaced them
+    if (selected_policy_hubs?.length) {
+      selected_policy_hubs.forEach((id) => {
+        if (uniqueHubs.some((h) => h.zone_id === id)) return;
+        const hub = hubs.find((h) => h.zone_id === id);
+        if (hub) uniqueHubs.push(hub);
+      });
+    }
     
     return uniqueHubs;
   }

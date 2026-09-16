@@ -658,8 +658,16 @@ const MapComponent = (props): JSX.Element => {
       return;
     }
 
-    // Do not zoom to place if zone geography is in URL
+    // Do not zoom to place if a specific zone is in the URL
     const hasZoneInUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      // Policy hubs page: `selected` means we will zoom to that hub instead
+      if (
+        window.location.pathname.indexOf('/map/beleidshubs') > -1
+        && params.getAll('selected').length > 0
+      ) {
+        return true;
+      }
       // Check if we are on the zones page
       if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return false;
       // Get geographyId from URL
