@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React from 'react';
 
 import { getOperatorStatsForChart, transformZerosToNullForChart } from './chartTools.js';
 
@@ -46,13 +46,14 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisT
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import ChartSkeleton from './ChartSkeleton';
+import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
+import {useAggregatedChartData} from './useAggregatedChartData';
 
 const TOTAAL_KEY = 'Totaal';
 
 function VerhuringenChart(props) {
   const dispatch = useDispatch()
 
-  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector((state: StateType) => state.filter)
   const metadata = useSelector((state: StateType) => state.metadata)
 
@@ -65,69 +66,31 @@ function VerhuringenChart(props) {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
-  const [rentalsData, setRentalsData] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  // See BeschikbareVoertuigenChart for the rationale behind the
-  // metadata sub-reference deps (avoids duplicate refetches when metadata
-  // gets a new top-level reference but the relevant slices did not change).
-  useEffect(() => {
-    // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
-      setRentalsData([]);
-      setIsLoading(false);
-      return;
-    }
-    // If a plaats is selected but metadata.zones still belongs to a previous
-    // plaats, skip the fetch (see BeschikbareVoertuigenChart for rationale).
-    if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
-      setRentalsData([]);
-      setIsLoading(false);
-      return;
-    }
-    async function fetchData() {
-      try {
-        // Get aggregated vehicle data
-        const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
-        if(! aggregatedData) return;
-
-        // Set state
-        setRentalsData(aggregatedData);
-
-        // Sum amount of vehicles per operator, used in FilteritemAanbieders component
-        let operators;
-        if(aggregatedData && aggregatedData.rentals_aggregated_stats) {
-          operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
-        }
-        else {
-          operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
-        }
-        dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
-      } finally {
-        setIsLoading(false);
+  // Load the aggregated rentals data for the current filter. The hook handles
+  // waiting for zones, stale responses, and loading/error state.
+  const {
+    data: rentalsData,
+    isLoading,
+    isRefreshing,
+    error,
+    refetch
+  } = useAggregatedChartData<any>(
+    getAggregatedRentalsData,
+    (aggregatedData) => {
+      // Sum amount of rentals per operator, used in FilteritemAanbieders component
+      let operators;
+      if(aggregatedData.rentals_aggregated_stats) {
+        operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
       }
+      else {
+        operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
+      }
+      dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
     }
-    setIsLoading(true);
-    fetchData();
-  }, [
-    filter.ontwikkelingvan,
-    filter.ontwikkelingtot,
-    filter.ontwikkelingaggregatie,
-    filter.ontwikkelingaggregatie_function,
-    filter.gebied,
-    filter.zones,
-    filter.aanbiedersexclude,
-    metadata.aanbieders,
-    metadata.aclOperators,
-    metadata.zones,
-    metadata.gebieden,
-    metadata.vehicle_types,
-    token,
-    dispatch
-  ]);
-  
+  );
+
   // Populate chart data
-  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones, aanbieders);
+  const chartData = getAggregatedRentalsChartData(rentalsData || [], filter, zones, aanbieders);
 
   const getChartDataWithNiceDates = (data) => {
     if (!data?.length) return [];
@@ -268,12 +231,19 @@ function VerhuringenChart(props) {
       </div>
 
       <div className="relative" style={{ width: '100%', height: '400px' }}>
-        {isLoading && (!chartData || chartData.length === 0) ? (
+        {isLoading ? (
           <ChartSkeleton height="100%" />
+        ) : error ? (
+          <ChartErrorState onRetry={refetch} />
+        ) : !chartData || chartData.length === 0 ? (
+          <ChartEmptyState />
         ) : (
-          <ResponsiveContainer>
-            {renderChart()}
-          </ResponsiveContainer>
+          <>
+            {isRefreshing && <ChartRefreshingOverlay />}
+            <ResponsiveContainer>
+              {renderChart()}
+            </ResponsiveContainer>
+          </>
         )}
       </div>
     </div>
