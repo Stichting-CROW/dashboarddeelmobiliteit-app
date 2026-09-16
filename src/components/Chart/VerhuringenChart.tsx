@@ -48,6 +48,8 @@ import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import ChartSkeleton from './ChartSkeleton';
 import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
 import {useAggregatedChartData} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {CHART_SYNC_ID, TOTAAL_STROKE, TOTAAL_DASH} from './chartConstants';
 
 const TOTAAL_KEY = 'Totaal';
 
@@ -88,6 +90,9 @@ function VerhuringenChart(props) {
       dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
     }
   );
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
 
   // Populate chart data
   const chartData = getAggregatedRentalsChartData(rentalsData || [], filter, zones, aanbieders);
@@ -154,6 +159,7 @@ function VerhuringenChart(props) {
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(x)}
         />
       );
     });
@@ -164,13 +170,15 @@ function VerhuringenChart(props) {
           type="monotone"
           dataKey={TOTAAL_KEY}
           name={TOTAAL_KEY}
-          stroke="#1a1a1a"
-          strokeWidth={3}
+          stroke={TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={TOTAAL_DASH}
           strokeLinejoin="round"
           strokeLinecap="round"
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(TOTAAL_KEY)}
         />
       );
     }
@@ -180,6 +188,7 @@ function VerhuringenChart(props) {
   const renderChart = () => (
     <LineChart
       data={chartDataWithNiceDates}
+      syncId={CHART_SYNC_ID}
       margin={{
         top: 10,
         right: 30,
@@ -191,7 +200,7 @@ function VerhuringenChart(props) {
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
-      <Legend />
+      <Legend {...legend.legendProps} />
       {renderLineSeries()}
     </LineChart>
   );

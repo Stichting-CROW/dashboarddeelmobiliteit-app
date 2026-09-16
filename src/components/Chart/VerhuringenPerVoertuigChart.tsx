@@ -39,6 +39,9 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx
 import ChartSkeleton from './ChartSkeleton';
 import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
 import {useAggregatedChartData, ChartDataFetcher} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {CHART_SYNC_ID} from './chartConstants';
+import {formatNumber} from './chartFormatting';
 import './CustomizedTooltip.css';
 
 interface VerhuringenPerVoertuigChartProps {
@@ -127,8 +130,8 @@ const RatioTooltip = ({
   contentStyle?: React.CSSProperties;
 }) => {
   if (active && payload && payload.length) {
-    const displayValue = (v: number | null | undefined) =>
-      v == null ? '0' : Number.isInteger(v) ? v.toString() : v.toFixed(1);
+    // Ratios always get two decimals so values line up in the list
+    const displayValue = (v: number | null | undefined) => formatNumber(v ?? 0, 2);
     const rootStyle = {color: tooltipTextColor, background: '#FFFFFF', ...contentStyle};
 
     return (
@@ -169,6 +172,9 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
   );
   const vehiclesData = data?.vehicles ?? null;
   const rentalsData = data?.rentals ?? null;
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
 
   const vehiclesChartData = getAggregatedChartData(
     vehiclesData as Parameters<typeof getAggregatedChartData>[0],
@@ -213,13 +219,14 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
       return (
         <AreaChart
           data={chartDataWithNiceDates}
+          syncId={CHART_SYNC_ID}
           margin={{top: 10, right: 30, left: 0, bottom: 0}}
         >
           <CartesianGrid strokeDasharray="3 0" vertical={false} />
           <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
           <YAxis tick={<CustomizedYAxisTick />} />
           <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
-          <Legend />
+          <Legend {...legend.legendProps} />
           {providerNames.map((x) => {
             const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
             return (
@@ -235,6 +242,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
                 fill="transparent"
                 isAnimationActive={false}
                 connectNulls
+                hide={legend.isHidden(x)}
               />
             );
           })}
@@ -245,13 +253,14 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     return (
       <LineChart
         data={chartDataWithNiceDates}
+        syncId={CHART_SYNC_ID}
         margin={{top: 10, right: 30, left: 0, bottom: 0}}
       >
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
         <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
-        <Legend />
+        <Legend {...legend.legendProps} />
         {providerNames.map((x) => {
           const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
             return (
@@ -267,6 +276,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
               dot={false}
               isAnimationActive={false}
               connectNulls
+              hide={legend.isHidden(x)}
             />
           );
         })}

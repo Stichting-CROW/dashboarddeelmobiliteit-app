@@ -47,6 +47,8 @@ import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import ChartSkeleton from './ChartSkeleton';
 import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
 import {useAggregatedChartData} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {CHART_SYNC_ID, TOTAAL_STROKE, TOTAAL_DASH} from './chartConstants';
 
 const TOTAAL_KEY = 'Totaal';
 
@@ -95,6 +97,9 @@ function BeschikbareVoertuigenChart({
       dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
     }
   );
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
 
   // Populate chart data
   let chartData = getAggregatedChartData(vehiclesData || [], filter, zones, aanbieders);
@@ -161,6 +166,7 @@ function BeschikbareVoertuigenChart({
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(x)}
         />
       );
     });
@@ -171,13 +177,15 @@ function BeschikbareVoertuigenChart({
           type="monotone"
           dataKey={TOTAAL_KEY}
           name={TOTAAL_KEY}
-          stroke="#1a1a1a"
-          strokeWidth={3}
+          stroke={TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={TOTAAL_DASH}
           strokeLinejoin="round"
           strokeLinecap="round"
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(TOTAAL_KEY)}
         />
       );
     }
@@ -187,6 +195,7 @@ function BeschikbareVoertuigenChart({
   const renderChart = () => (
     <LineChart
       data={chartDataWithNiceDates}
+      syncId={CHART_SYNC_ID}
       margin={{
         top: 10,
         right: 30,
@@ -198,7 +207,7 @@ function BeschikbareVoertuigenChart({
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
-      {config?.sumTotal !== true && <Legend />}
+      {config?.sumTotal !== true && <Legend {...legend.legendProps} />}
       {renderLineSeries()}
     </LineChart>
   );
