@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import './css/FilterbarPermits.css';
 import './css/FilteritemGebieden.css';
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, useStore } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { addDays } from 'date-fns';
 
@@ -20,8 +20,17 @@ interface FilterbarBeleidszonesProps {
   hideLogo: boolean;
 }
 
+/** `gm_code` / `zones` values as last seen in the URL by the sync effect. */
+interface SyncSnapshot {
+  urlGebied: string;
+  urlZones: string;
+}
+
+const BELEIDSZONES_PATH = '/stats/beleidszones';
+
 function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
   const dispatch = useDispatch();
+  const store = useStore<StateType>();
   const location = useLocation();
   const navigate = useNavigate();
   const gebieden = useSelector((state: StateType) => {
@@ -37,54 +46,91 @@ function FilterbarBeleidszones({ hideLogo }: FilterbarBeleidszonesProps) {
   );
 
   const hidePlaats = gebieden.length <= 1;
-  const hasSkippedInitialSync = useRef(false);
 
-  // Sync active zones (and plaats) to URL when user selects in Filterbar
+  // URL values as last seen by the sync effect. Lets us detect whether the URL
+  // changed since the previous run (and therefore is the source of truth).
+  const lastSyncedRef = useRef<SyncSnapshot | null>(null);
+
+  /**
+   * Keep `gm_code` / `zones` in the URL and Redux in sync.
+   *
+   * This is intentionally a single effect. Two separate effects (URL -> Redux
+   * on `location.search`, Redux -> URL on `filterZones`) could fire in the
+   * same commit with different values and keep overwriting each other, which
+   * caused an endless redirect loop between the URL zone and the Redux zone.
+   *
+   * Rules:
+   * - If the URL params changed (navigation, back/forward): URL wins. A param
+   *   that is absent from the URL has no opinion, so Redux is written to the
+   *   URL for it instead.
+   * - Otherwise (user picked in the filterbar): the URL follows Redux.
+   *
+   * Redux values are read from the store rather than from the closure so a
+   * re-run with a stale closure (e.g. StrictMode) never pushes an outdated
+   * value back to the URL. `filterGebied` / `filterZones` are only deps so
+   * that Redux changes trigger this effect.
+   */
   useEffect(() => {
-    if (location.pathname !== '/stats/beleidszones') return;
-
-    const currentParams = new URLSearchParams(location.search);
-    if (
-      !hasSkippedInitialSync.current &&
-      (currentParams.has('zones') || currentParams.has('gm_code'))
-    ) {
-      hasSkippedInitialSync.current = true;
-      return;
-    }
+    if (location.pathname !== BELEIDSZONES_PATH) return;
 
     const params = new URLSearchParams(location.search);
-    if (filterGebied) {
-      params.set('gm_code', filterGebied);
+    const urlGebied = params.get('gm_code') ?? '';
+    const urlZones = (params.get('zones') ?? '').trim();
+
+    const liveFilter = store.getState().filter;
+    const reduxGebied = liveFilter?.gebied ? String(liveFilter.gebied) : '';
+    const reduxZones = liveFilter?.zones ? String(liveFilter.zones).trim() : '';
+
+    const prev = lastSyncedRef.current;
+    const urlChanged =
+      !prev || prev.urlGebied !== urlGebied || prev.urlZones !== urlZones;
+
+    // What Redux will hold after this effect; the URL is derived from this.
+    let nextGebied = reduxGebied;
+    let nextZones = reduxZones;
+
+    if (urlChanged) {
+      if (urlGebied && urlGebied !== reduxGebied) {
+        dispatch({ type: 'SET_FILTER_GEBIED', payload: urlGebied });
+        nextGebied = urlGebied;
+        // The reducer clears the zones when the gebied changes.
+        nextZones = '';
+      }
+      if (urlZones && urlZones !== nextZones) {
+        dispatch({ type: 'SET_FILTER_ZONES', payload: urlZones });
+        nextZones = urlZones;
+      }
+    }
+
+    if (nextGebied) {
+      params.set('gm_code', nextGebied);
     } else {
       params.delete('gm_code');
     }
-    if (filterZones && String(filterZones).trim()) {
-      params.set('zones', String(filterZones).trim());
+    if (nextZones) {
+      params.set('zones', nextZones);
     } else {
       params.delete('zones');
     }
+
+    lastSyncedRef.current = { urlGebied: nextGebied, urlZones: nextZones };
+
     const newSearch = params.toString();
     const currentSearch = location.search ? location.search.slice(1) : '';
     if (newSearch !== currentSearch) {
-      navigate(`/stats/beleidszones${newSearch ? `?${newSearch}` : ''}`, {
+      navigate(`${BELEIDSZONES_PATH}${newSearch ? `?${newSearch}` : ''}`, {
         replace: true
       });
     }
-  }, [filterGebied, filterZones]);
-
-  // Initialize filter from URL params when navigating to beleidszones with preselected hub/date
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const urlGmCode = params.get('gm_code');
-    const urlZones = params.get('zones');
-
-    if (urlGmCode && urlGmCode !== filterGebied) {
-      dispatch({ type: 'SET_FILTER_GEBIED', payload: urlGmCode });
-    }
-    if (urlZones) {
-      dispatch({ type: 'SET_FILTER_ZONES', payload: urlZones });
-    }
-  }, [location.search]); // Only run when URL search changes (e.g. initial nav or back)
+  }, [
+    location.pathname,
+    location.search,
+    filterGebied,
+    filterZones,
+    store,
+    dispatch,
+    navigate
+  ]);
 
   return (
     <div className="filter-bar-inner">
