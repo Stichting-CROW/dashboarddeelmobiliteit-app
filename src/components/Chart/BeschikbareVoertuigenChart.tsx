@@ -264,10 +264,10 @@ function BeschikbareVoertuigenChart({
           {chartData && chartData.length > 0 && <div className="flex justify-center flex-col ml-2">
             <button onClick={() => {
               const preparedData = prepareDataForCsv(chartData);
-              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}_beschikbare_voertuigen`;
               downloadCsv(preparedData, filename);
             }} className="opacity-50 cursor-pointer">
-              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30" alt="Download to CSV" title="Download to CSV" />
             </button>
           </div>}
 

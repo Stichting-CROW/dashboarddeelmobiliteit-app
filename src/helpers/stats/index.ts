@@ -63,6 +63,56 @@ const doShowDetailledAggregatedData = (filter, zones) => {
          && userDidSelectCustomZone;
 }
 
+export type AggregationLevel = '5m' | '15m' | 'hour' | 'day' | 'week' | 'month';
+
+export interface AggregationLevelOption {
+  name: AggregationLevel;
+  title: string;
+}
+
+const getDaysInSelectedPeriod = (filter) =>
+  moment(filter.ontwikkelingtot).diff(moment(filter.ontwikkelingvan), 'days');
+
+/**
+ * Returns the aggregation levels that are valid for the current filter
+ * (selected period length and whether detailed zone data is available).
+ * The coarse `aggregated_stats` API only supports day/week/month; the
+ * detailed `stats_v2` API also supports 5m/15m/hour for short periods.
+ */
+export const getAllowedAggregationLevels = (filter, zones): AggregationLevelOption[] => {
+  const days = getDaysInSelectedPeriod(filter);
+  const levels: AggregationLevelOption[] = [];
+
+  if(doShowDetailledAggregatedData(filter, zones)) {
+    if(days <= 1) levels.push({name: '5m', title: '5 min'});
+    if(days <= 2) levels.push({name: '15m', title: 'kwartier'});
+    if(days <= 10) levels.push({name: 'hour', title: 'uur'});
+  }
+  levels.push({name: 'day', title: 'dag'});
+  if(days >= 6) levels.push({name: 'week', title: 'week'});
+  if(days >= 27) levels.push({name: 'month', title: 'maand'});
+
+  return levels;
+}
+
+/**
+ * Returns the current aggregation level if it is allowed for the current
+ * filter, otherwise a sensible fallback. Used to make sure charts never
+ * request data with an aggregation level the API rejects.
+ */
+export const getValidAggregationLevel = (filter, zones): AggregationLevel => {
+  const allowed = getAllowedAggregationLevels(filter, zones).map(x => x.name);
+  const current = filter.ontwikkelingaggregatie as AggregationLevel;
+  if(allowed.includes(current)) return current;
+
+  if(doShowDetailledAggregatedData(filter, zones)) {
+    const days = getDaysInSelectedPeriod(filter);
+    if(days <= 2) return '15m';
+    if(days <= 5) return 'hour';
+  }
+  return 'day';
+}
+
 const prepareAggregatedStatsData = (key, data, aggregationLevel, aanbiedersexclude='') => {
   // Validate data object
   if(! data || ! data[`${key}_aggregated_stats`] || ! data[`${key}_aggregated_stats`].values) {

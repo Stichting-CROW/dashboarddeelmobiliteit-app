@@ -14,7 +14,8 @@ const getFetchOptions = (token) => {
 
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
-  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}`;
+  if(options.aggregationTime) url += `&aggregation_time=${options.aggregationTime}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
