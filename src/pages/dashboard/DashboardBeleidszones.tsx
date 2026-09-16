@@ -9,7 +9,7 @@ import {
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
-import { readable_geotype } from '../../helpers/policy-hubs/common';
+import { readable_geotype, readable_phase } from '../../helpers/policy-hubs/common';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
@@ -53,6 +53,7 @@ interface MdsZone {
   retire_date?: string;
   name?: string;
   geography_type?: string;
+  phase?: string;
 }
 
 function DashboardBeleidszones() {
@@ -181,9 +182,14 @@ function DashboardBeleidszones() {
   const isViewingPreviousVersion = Boolean(
     hasExactlyOneZone && selectedZone && currentZone
   );
+  // Do not fall back to modified_at: concept analysegebieden have no
+  // effective/published date, and using modified_at would show a false
+  // "Zone actief vanaf" timestamp.
   const effectiveDate =
-    selectedZone?.effective_date || selectedZone?.published_date || selectedZone?.modified_at;
-  const hasValidEffectiveDate = effectiveDate && moment(effectiveDate).isValid();
+    selectedZone?.effective_date || selectedZone?.published_date;
+  const hasValidEffectiveDate = Boolean(
+    effectiveDate && moment(effectiveDate).isValid()
+  );
   const retireDate = selectedZone?.retire_date;
   const isArchived =
     retireDate &&
@@ -256,6 +262,9 @@ function DashboardBeleidszones() {
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
         {hasExactlyOneZone && selectedZone?.geography_type && (
           <span>{readable_geotype(selectedZone.geography_type)}</span>
+        )}
+        {hasExactlyOneZone && selectedZone?.phase === 'concept' && (
+          <span>{readable_phase(selectedZone.phase)}</span>
         )}
         {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
