@@ -58,6 +58,7 @@ import {
   PREVIOUS_TOTAAL_DASH
 } from './chartConstants';
 import {mergePreviousPeriodTotals} from './previousPeriod';
+import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
 import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
 /** Fetches the same data for the previous period of equal length */
@@ -153,6 +154,9 @@ function BeschikbareVoertuigenChart({
     ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
     : [];
   const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+
+  // Weekend bands, based on the original timestamps (before date formatting)
+  const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
 
   const setAggregationFunction = (value) => {
     dispatch({
@@ -252,6 +256,7 @@ function BeschikbareVoertuigenChart({
         bottom: 0,
       }}
     >
+      {renderWeekendShading(weekendRanges)}
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />

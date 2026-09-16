@@ -16,3 +16,7 @@ export const TOTAAL_KEY = 'Totaal';
 export const PREVIOUS_TOTAAL_KEY = 'Totaal vorige periode';
 export const PREVIOUS_TOTAAL_STROKE = '#9CA3AF';
 export const PREVIOUS_TOTAAL_DASH = '2 4';
+
+/** Background band marking weekends on day-level (and finer) x-axes */
+export const WEEKEND_FILL = '#0F172A';
+export const WEEKEND_FILL_OPACITY = 0.045;

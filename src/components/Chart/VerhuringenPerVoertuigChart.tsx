@@ -42,6 +42,7 @@ import {useAggregatedChartData, ChartDataFetcher} from './useAggregatedChartData
 import {useLegendToggle} from './useLegendToggle';
 import {CHART_SYNC_ID} from './chartConstants';
 import {formatNumber} from './chartFormatting';
+import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
 import './CustomizedTooltip.css';
 
 interface VerhuringenPerVoertuigChartProps {
@@ -204,6 +205,9 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
     : [];
   const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
 
+  // Weekend bands, based on the original timestamps (before date formatting)
+  const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
+
   const numberOfPointsOnXAxis = chartData?.length ?? 0;
   const providerNames = getUniqueProviderNames(chartDataWithNiceDates).filter(
     (x) => x !== 'time' && x !== 'name'
@@ -222,6 +226,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
           syncId={CHART_SYNC_ID}
           margin={{top: 10, right: 30, left: 0, bottom: 0}}
         >
+          {renderWeekendShading(weekendRanges)}
           <CartesianGrid strokeDasharray="3 0" vertical={false} />
           <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
           <YAxis tick={<CustomizedYAxisTick />} />
@@ -256,6 +261,7 @@ function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: Verhu
         syncId={CHART_SYNC_ID}
         margin={{top: 10, right: 30, left: 0, bottom: 0}}
       >
+        {renderWeekendShading(weekendRanges)}
         <CartesianGrid strokeDasharray="3 0" vertical={false} />
         <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
         <YAxis tick={<CustomizedYAxisTick />} />
