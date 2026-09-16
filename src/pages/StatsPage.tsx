@@ -22,8 +22,7 @@ import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuige
 import VerhuringenPerVoertuigChart from '../components/Chart/VerhuringenPerVoertuigChart';
 import FormInput from '../components/FormInput/FormInput';
 import TimeGridVehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
-import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
-import PageTitle from '../components/common/PageTitle';
+import StatsPageHeader from '../components/Stats/StatsPageHeader';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -115,18 +114,6 @@ function StatsPage(props) {
     )
   }
 
-  const renderAggregationButton = (name, title) => {
-    return (
-      <div
-        key={`agg-level-${name}`}
-        className={"agg-button " + (filter.ontwikkelingaggregatie===name ? " agg-button-active":"")}
-        onClick={() => { setAggregationLevel(name) }}
-      >
-        {title}
-      </div>
-    )
-  }
-
   const getPageTitle = useMemo(() => {
     if(filterZones) {
       const zoneIds = filterZones.split(',').map(id => parseInt(id));
@@ -142,25 +129,24 @@ function StatsPage(props) {
   }, [filterZones, filter.gebied, zones, gebieden]);
 
   const aggregationButtonsToRender = getAllowedAggregationLevels(filter, zones);
+  const selectedZoneCount = filterZones ? filterZones.split(',').filter(Boolean).length : 0;
 
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   return (
     <div className="StatsPage pt-4 pb-24">
 
-      <div className={"agg-button-container mb-8"}>
-
-        {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))} 
-
-        {aggregationButtonsToRender && aggregationButtonsToRender.length > 0 && (<InfoTooltip className="mx-2 inline-block">
-          Toon de data in intervallen van {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je bekijkt nu {aggregationButtonsToRender.filter(x => filter.ontwikkelingaggregatie == x.name).pop()?.title}-niveau.
-        </InfoTooltip>)}
-      </div>
-
-      {/* Show a title for the chart, that is the area currently selected (gebied or zones) */}
-      <PageTitle className="my-2">
-        {getPageTitle}
-      </PageTitle>
+      {/* Title is the area currently selected (gebied or zones), with the
+          period as subtitle and the aggregation level control on the right */}
+      <StatsPageHeader
+        title={getPageTitle}
+        startDate={filter.ontwikkelingvan}
+        endDate={filter.ontwikkelingtot}
+        zoneCount={selectedZoneCount}
+        aggregationLevels={aggregationButtonsToRender}
+        activeAggregationLevel={filter.ontwikkelingaggregatie}
+        onChangeAggregationLevel={setAggregationLevel}
+      />
 
       {/* Only mount the charts once the aggregation level is valid for this
           selection, so they never fetch with a level the API rejects */}
