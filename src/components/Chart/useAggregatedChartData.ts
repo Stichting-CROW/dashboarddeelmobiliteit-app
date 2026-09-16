@@ -42,9 +42,19 @@ export interface AggregatedChartDataState<T> {
  * @param onData Optional side effect that runs once per successful fetch
  *   (e.g. dispatching operator totals to the store).
  */
+export interface UseAggregatedChartDataOptions {
+  /**
+   * Set when the fetcher always requests a fixed aggregation level (e.g. the
+   * KPI row, which works on day-level data), so switching the interval in
+   * the UI does not trigger a needless refetch.
+   */
+  ignoreAggregationLevel?: boolean;
+}
+
 export function useAggregatedChartData<T>(
   fetcher: ChartDataFetcher<T>,
-  onData?: (data: T) => void
+  onData?: (data: T) => void,
+  options: UseAggregatedChartDataOptions = {}
 ): AggregatedChartDataState<T> {
   const token = useSelector((state: StateType) =>
     state.authentication?.user_data?.token ? state.authentication.user_data.token : null
@@ -118,7 +128,7 @@ export function useAggregatedChartData<T>(
   }, [
     filter.ontwikkelingvan,
     filter.ontwikkelingtot,
-    filter.ontwikkelingaggregatie,
+    options.ignoreAggregationLevel ? null : filter.ontwikkelingaggregatie,
     filter.ontwikkelingaggregatie_function,
     filter.gebied,
     filter.zones,

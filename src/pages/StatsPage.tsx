@@ -23,6 +23,7 @@ import VerhuringenPerVoertuigChart from '../components/Chart/VerhuringenPerVoert
 import FormInput from '../components/FormInput/FormInput';
 import TimeGridVehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
 import StatsPageHeader from '../components/Stats/StatsPageHeader';
+import StatsKpiRow from '../components/Stats/StatsKpiRow';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -151,6 +152,9 @@ function StatsPage(props) {
       {/* Only mount the charts once the aggregation level is valid for this
           selection, so they never fetch with a level the API rejects */}
       {isAggregationLevelValid && (<>
+        {/* Headline numbers for the period, compared with the previous period */}
+        <StatsKpiRow />
+
         <div className="StatsPage-chart-grid">
           <BeschikbareVoertuigenChart
             filter={filter}
