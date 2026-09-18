@@ -2,6 +2,23 @@
   display: none;
 }
 
+.Docs table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.Docs table th,
+.Docs table td {
+  border: 1px solid #d1d5db;
+  padding: 0.5em 0.75em;
+}
+
+.Docs table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
 .Docs table td,
 .Docs table th {
   vertical-align: top;
