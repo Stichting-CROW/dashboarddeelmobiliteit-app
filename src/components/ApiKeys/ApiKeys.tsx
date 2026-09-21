@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select'
 import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from 'react-router';
@@ -8,6 +8,7 @@ import {
   // useDispatch,
   useSelector
 } from 'react-redux';
+import { Check, Copy } from 'lucide-react';
 
 // import {OrganisationType} from '../../types/OrganisationType';
 import {StateType} from '../../types/StateType';
@@ -20,20 +21,70 @@ import {
   deleteApiKey
 } from '../../api/apiKeys';
 import {getAcl} from '../../api/acl';
+import { copyTextToClipboard } from '../../helpers/clipboard';
 
 // Import components
 import Button from '../Button/Button';
 import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
+const API_KEY_REVEAL_DURATION_MS = 10000;
+const MASKED_API_KEY = '••••••••••••••••••••••••';
+
 const TableRow = ({
   apiKey,
   onRevokeHandler
-}, {
+}: {
   apiKey: any,
   onRevokeHandler: Function
 }) => {
   const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [didCopy, setDidCopy] = useState(false);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const revealKey = () => {
+    setIsKeyVisible(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsKeyVisible(false);
+      hideTimeoutRef.current = null;
+    }, API_KEY_REVEAL_DURATION_MS);
+  };
+
+  const hideKey = () => {
+    setIsKeyVisible(false);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const copyKey = () => {
+    copyTextToClipboard(apiKey.key);
+    setDidCopy(true);
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    copyTimeoutRef.current = setTimeout(() => {
+      setDidCopy(false);
+      copyTimeoutRef.current = null;
+    }, 2000);
+  };
 
   return (
       <div
@@ -41,8 +92,33 @@ const TableRow = ({
         className={`TableRow no-hover`}
       >
         <div className="flex">
-          <div className="col-apiKey text-sm flex-1">
-            {apiKey.key}
+          <div className="col-apiKey text-sm flex-1 flex items-center flex-wrap gap-2">
+            <code
+              className="font-mono break-all"
+              style={{ userSelect: isKeyVisible ? 'text' : 'none' }}
+            >
+              {isKeyVisible ? apiKey.key : MASKED_API_KEY}
+            </code>
+            <button
+              type="button"
+              className="underline text-gray-600 hover:text-gray-900 bg-transparent p-0"
+              onClick={isKeyVisible ? hideKey : revealKey}
+            >
+              {isKeyVisible ? 'Verberg' : 'Toon'}
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center bg-transparent p-0 text-gray-600 hover:text-gray-900"
+              style={{ height: '20px', width: '20px' }}
+              title={didCopy ? 'Gekopieerd' : 'Kopieer API key'}
+              aria-label={didCopy ? 'Gekopieerd' : 'Kopieer API key'}
+              onClick={copyKey}
+            >
+              {didCopy ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+            {didCopy ? (
+              <span className="text-xs text-gray-500">Gekopieerd</span>
+            ) : null}
           </div>
           <div className="col-actions text-sm flex justify-end">
             <button className='delete-icon' style={{height: '100%'}} onClick={() => setShowRevokeModal(true)} />
