@@ -63,6 +63,8 @@ const loggedInSections: SidebarMenuSection[] = [
     title: 'Help',
     items: [
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
+      { title: 'Functies', link: '/features', icon: Sparkles },
+      { title: 'Over', link: '/over', icon: Info },
     ],
   },
 ];
