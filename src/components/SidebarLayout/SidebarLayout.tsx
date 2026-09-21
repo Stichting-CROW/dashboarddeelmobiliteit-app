@@ -67,6 +67,16 @@ const loggedInSections: SidebarMenuSection[] = [
   },
 ];
 
+/**
+ * Path prefixes of the pages in the logged-in left menu. The bottom settings
+ * icon stays active on any of these pages, including nested routes such as a
+ * documentation article or an admin detail page.
+ */
+export const sidebarMenuPathPrefixes = [
+  ...loggedInSections.flatMap((section) => section.items.map((item) => item.link)),
+  '/admin',
+];
+
 const guestSections: SidebarMenuSection[] = [
   {
     title: 'Menu',
