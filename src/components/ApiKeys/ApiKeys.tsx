@@ -25,7 +25,6 @@ import { copyTextToClipboard } from '../../helpers/clipboard';
 
 // Import components
 import Button from '../Button/Button';
-import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 const API_KEY_REVEAL_DURATION_MS = 10000;
@@ -202,11 +201,6 @@ const ApiKeys = ({
 
   return (
     <div className="ApiKeys" style={{maxWidth: '800px'}}>
-      <div className="flex justify-between flex-wrap">
-        <PageTitle style={{marginTop: 0}}>
-          API keys
-        </PageTitle>
-      </div>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 pt-4 pb-4 rounded relative" role="alert">
           <strong className="font-bold">

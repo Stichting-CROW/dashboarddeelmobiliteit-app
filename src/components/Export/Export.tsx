@@ -120,14 +120,7 @@ function Export() {
 
   return (
     <div className="Export">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Exporteer data
-      </h1>
-
-      <div className="my-5">
+      <div className="mb-5">
 
         <Section title="Download standaardrapportage">
           <div className="lg:w-72">

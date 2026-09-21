@@ -295,7 +295,7 @@ function MenuItem(props) {
 }
 
 function Menu({
-  pathName, acl
+  pathName
 }) {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -361,13 +361,6 @@ function Menu({
           // { text: 'Open data', path: '/docs' },
         ]}
       />
-
-      {(acl && (acl.is_admin || (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1))) && <MenuItem
-        pathName={pathName}
-        path={'/admin'}
-        text={''}
-        icon={'/images/components/Menu/admin.svg'}
-      />}
 
       <MenuItem
         pathName={pathName}
