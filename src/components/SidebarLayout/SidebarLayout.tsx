@@ -13,6 +13,7 @@ import {
   Share2,
   Building2,
   Receipt,
+  Mail,
   LucideIcon
 } from 'lucide-react';
 
@@ -110,6 +111,7 @@ const getAdminSection = (acl: any): SidebarMenuSection | null => {
   if (isAdmin) {
     items.push({ title: 'Organisaties', link: '/admin/organisations', icon: Building2 });
     items.push({ title: 'Jaarbijdrage', link: '/admin/yearly-costs', icon: Receipt });
+    items.push({ title: 'E-mail gebruikers', link: '/admin/email', icon: Mail });
   }
 
   return { title: 'Beheer', items };

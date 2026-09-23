@@ -45,6 +45,7 @@ import UserList from './components/UserList/UserList';
 import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
+import EmailUsers from './components/EmailUsers/EmailUsers';
 import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -226,6 +227,9 @@ function App() {
         }
         if (pathname === '/admin/yearly-costs') {
           return `Jaarlijkse kosten - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/email') {
+          return `E-mail gebruikers - Beheer - ${baseTitle}`;
         }
         if (pathname === '/admin/mail-templates') {
           return `E-mail templates - Beheer - ${baseTitle}`;
@@ -653,6 +657,13 @@ function App() {
                     </SidebarLayout>
                   </Overlay>
                 } />
+                {isAdmin && <Route path="/admin/email" element={
+                  <Overlay>
+                    <SidebarLayout title="E-mail gebruikers" contentWidth="100%">
+                      <EmailUsers acl={acl} />
+                    </SidebarLayout>
+                  </Overlay>
+                } />}
                 <Route path="/admin/mail-templates" element={
                   <Overlay>
                     <SidebarLayout title="Mail-templates" contentWidth="100%">
@@ -730,16 +741,16 @@ function App() {
             } />
             <Route path="/over" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Over het Dashboard Deelmobiliteit">
                   <About />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/features" element={
               <Overlay>
-                <Misc contentWidth="900px">
+                <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
                   <Features />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/export" element={
@@ -833,16 +844,16 @@ function App() {
 
         <Route path="/over" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Over het Dashboard Deelmobiliteit">
               <About />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/features" element={
           <Overlay>
-            <Misc contentWidth="900px">
+            <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
               <Features />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/stats/beleidsinfo" element={<>
