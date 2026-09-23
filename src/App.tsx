@@ -730,7 +730,7 @@ function App() {
             } />
             <Route path="/over" element={
               <Overlay>
-                <SidebarLayout title="Over het Dashboard Deelmobiliteit">
+                <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
                   <About />
                 </SidebarLayout>
               </Overlay>
@@ -765,21 +765,21 @@ function App() {
             } />
             <Route path="/docs" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category/:doc" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
@@ -833,7 +833,7 @@ function App() {
 
         <Route path="/over" element={
           <Overlay>
-            <SidebarLayout title="Over het Dashboard Deelmobiliteit">
+            <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
               <About />
             </SidebarLayout>
           </Overlay>
@@ -868,21 +868,21 @@ function App() {
         } />
         <Route path="/docs" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category/:doc" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>

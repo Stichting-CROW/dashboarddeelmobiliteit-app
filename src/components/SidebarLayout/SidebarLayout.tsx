@@ -55,8 +55,8 @@ const loggedInSections: SidebarMenuSection[] = [
   {
     title: 'Help',
     items: [
-      { title: 'Functies', link: '/features', icon: Sparkles },
       { title: 'Over', link: '/over', icon: Info },
+      { title: 'Functies', link: '/features', icon: Sparkles },
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
     ],
   },
