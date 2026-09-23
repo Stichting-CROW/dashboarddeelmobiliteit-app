@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Select from 'react-select';
@@ -39,6 +39,50 @@ interface Notice {
 }
 
 const PREVIEW_DEBOUNCE_MS = 500;
+const DRAFT_STORAGE_KEY = 'dashboarddeelmobiliteit.mailingDraft';
+
+interface MailingDraft {
+  subject: string;
+  bodyMarkdown: string;
+  organisationId: number | null;
+  coreGroupOnly: boolean;
+  microhubEditOnly: boolean;
+}
+
+const readMailingDraft = (): MailingDraft | null => {
+  try {
+    const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      subject: typeof parsed.subject === 'string' ? parsed.subject : '',
+      bodyMarkdown: typeof parsed.bodyMarkdown === 'string' ? parsed.bodyMarkdown : '',
+      organisationId: typeof parsed.organisationId === 'number' ? parsed.organisationId : null,
+      coreGroupOnly: parsed.coreGroupOnly === true,
+      microhubEditOnly: parsed.microhubEditOnly === true
+    };
+  } catch (e) {
+    console.error('Could not read mailing draft', e);
+    return null;
+  }
+};
+
+const writeMailingDraft = (draft: MailingDraft) => {
+  try {
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  } catch (e) {
+    console.error('Could not save mailing draft', e);
+  }
+};
+
+const clearMailingDraft = () => {
+  try {
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+  } catch (e) {
+    console.error('Could not discard mailing draft', e);
+  }
+};
 
 const DEFAULT_BODY = `# Beste gebruiker,
 
@@ -84,11 +128,20 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
     state.authentication.user_data && state.authentication.user_data.token
   ) || null);
 
+  const initialDraftRef = useRef<MailingDraft | null>(readMailingDraft());
+  const editedRef = useRef<boolean>(false);
+
   // Filters
   const [organisationOptions, setOrganisationOptions] = useState<OrganisationOption[]>([]);
-  const [selectedOrganisation, setSelectedOrganisation] = useState<OrganisationOption | null>(null);
-  const [coreGroupOnly, setCoreGroupOnly] = useState<boolean>(false);
-  const [microhubEditOnly, setMicrohubEditOnly] = useState<boolean>(false);
+  const [organisationId, setOrganisationId] = useState<number | null>(
+    initialDraftRef.current ? initialDraftRef.current.organisationId : null
+  );
+  const [coreGroupOnly, setCoreGroupOnly] = useState<boolean>(
+    initialDraftRef.current ? initialDraftRef.current.coreGroupOnly : false
+  );
+  const [microhubEditOnly, setMicrohubEditOnly] = useState<boolean>(
+    initialDraftRef.current ? initialDraftRef.current.microhubEditOnly : false
+  );
 
   // Recipients
   const [recipients, setRecipients] = useState<string[]>([]);
@@ -96,10 +149,16 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
   const [isLoadingRecipients, setIsLoadingRecipients] = useState<boolean>(false);
 
   // Content
-  const [subject, setSubject] = useState<string>('');
-  const [bodyMarkdown, setBodyMarkdown] = useState<string>('');
-  const [hasLoadedLast, setHasLoadedLast] = useState<boolean>(false);
+  const [subject, setSubject] = useState<string>(
+    initialDraftRef.current ? initialDraftRef.current.subject : ''
+  );
+  const [bodyMarkdown, setBodyMarkdown] = useState<string>(
+    initialDraftRef.current ? initialDraftRef.current.bodyMarkdown : ''
+  );
+  const [hasLoadedLast, setHasLoadedLast] = useState<boolean>(Boolean(initialDraftRef.current));
+  const [hasDraft, setHasDraft] = useState<boolean>(Boolean(initialDraftRef.current));
   const [lastInfo, setLastInfo] = useState<string | null>(null);
+  const [doShowLoadLastModal, setDoShowLoadLastModal] = useState<boolean>(false);
 
   // Preview
   const [previewHtml, setPreviewHtml] = useState<string>('');
@@ -113,11 +172,27 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [sendResult, setSendResult] = useState<MailingResult | null>(null);
 
+  const selectedOrganisation = useMemo(
+    () => organisationOptions.find((option) => option.value === organisationId) || null,
+    [organisationOptions, organisationId]
+  );
+
   const filters: MailingFilters = useMemo(() => ({
-    organisation_id: selectedOrganisation ? selectedOrganisation.value : null,
+    organisation_id: organisationId,
     core_group_only: coreGroupOnly,
     microhub_edit_only: microhubEditOnly
-  }), [selectedOrganisation, coreGroupOnly, microhubEditOnly]);
+  }), [organisationId, coreGroupOnly, microhubEditOnly]);
+
+  const draftRef = useRef<MailingDraft | null>(initialDraftRef.current);
+  if (hasLoadedLast || editedRef.current) {
+    draftRef.current = {
+      subject,
+      bodyMarkdown,
+      organisationId,
+      coreGroupOnly,
+      microhubEditOnly
+    };
+  }
 
   // A signature of everything that influences what is sent. The bulk send
   // button is only enabled when a test mail was sent for this exact signature.
@@ -155,31 +230,56 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
     })();
   }, [token]);
 
-  // Prefill subject and body with the last sent mailing
+  // Restore an unsaved draft, otherwise prefill with the last sent mailing.
   useEffect(() => {
     if (!token) return;
+    let cancelled = false;
+    const draft = initialDraftRef.current;
     (async () => {
       try {
         const last = await getLastMailing(token);
+        if (cancelled) return;
         if (last && last.subject) {
-          setSubject(last.subject);
-          setBodyMarkdown(last.body_markdown || '');
           const when = last.sent_at ? new Date(last.sent_at).toLocaleString('nl-NL') : '';
           setLastInfo(
             `Laatst ${last.is_test ? 'als test verstuurd' : `verstuurd naar ${last.recipient_count} gebruikers`}` +
             `${when ? ` op ${when}` : ''} door ${last.sent_by}.`
           );
-        } else {
+          if (!draft && !editedRef.current) {
+            setSubject(last.subject);
+            setBodyMarkdown(last.body_markdown || '');
+          }
+        } else if (!draft && !editedRef.current) {
           setBodyMarkdown(DEFAULT_BODY);
         }
       } catch (e) {
         console.error('Error loading last mailing', e);
-        setBodyMarkdown(DEFAULT_BODY);
+        if (!cancelled && !draft && !editedRef.current) setBodyMarkdown(DEFAULT_BODY);
       } finally {
-        setHasLoadedLast(true);
+        if (!cancelled) setHasLoadedLast(true);
       }
     })();
+
+    return () => { cancelled = true; };
   }, [token]);
+
+  // Keep an edited draft in localStorage so leaving the page does not discard it.
+  useEffect(() => {
+    if (!editedRef.current || !draftRef.current) return;
+    writeMailingDraft(draftRef.current);
+    setHasDraft(true);
+  }, [subject, bodyMarkdown, organisationId, coreGroupOnly, microhubEditOnly]);
+
+  useEffect(() => {
+    const persistDraft = () => {
+      if (editedRef.current && draftRef.current) writeMailingDraft(draftRef.current);
+    };
+    window.addEventListener('beforeunload', persistDraft);
+    return () => {
+      window.removeEventListener('beforeunload', persistDraft);
+      persistDraft();
+    };
+  }, []);
 
   // Fetch recipients whenever the filters change
   useEffect(() => {
@@ -224,6 +324,34 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
       clearTimeout(timer);
     };
   }, [token, subject, bodyMarkdown, hasLoadedLast]);
+
+  const handleLoadLastSent = async () => {
+    setDoShowLoadLastModal(false);
+    // Stop the draft from being written back when the form updates.
+    editedRef.current = false;
+    clearMailingDraft();
+    initialDraftRef.current = null;
+    setHasDraft(false);
+    try {
+      const last = await getLastMailing(token);
+      if (last && last.subject) {
+        setSubject(last.subject);
+        setBodyMarkdown(last.body_markdown || '');
+        const when = last.sent_at ? new Date(last.sent_at).toLocaleString('nl-NL') : '';
+        setLastInfo(
+          `Laatst ${last.is_test ? 'als test verstuurd' : `verstuurd naar ${last.recipient_count} gebruikers`}` +
+          `${when ? ` op ${when}` : ''} door ${last.sent_by}.`
+        );
+      } else {
+        setSubject('');
+        setBodyMarkdown(DEFAULT_BODY);
+        setLastInfo(null);
+      }
+    } catch (e) {
+      console.error('Error loading last mailing', e);
+      setNotice({ type: 'error', text: 'De laatst verzonden e-mail kon niet geladen worden.' });
+    }
+  };
 
   const buildRequest = useCallback((): MailingRequest => ({
     subject: subject.trim(),
@@ -311,7 +439,10 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
               value={selectedOrganisation}
               placeholder="Alle organisaties"
               noOptionsMessage={() => 'Geen organisaties gevonden'}
-              onChange={(choice: any) => setSelectedOrganisation(choice || null)}
+              onChange={(choice: any) => {
+                editedRef.current = true;
+                setOrganisationId(choice ? choice.value : null);
+              }}
             />
 
             <div className="flex items-center">
@@ -320,7 +451,10 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
                 id="coreGroupOnly"
                 checked={coreGroupOnly}
                 disabled={isSending}
-                onChange={(e) => setCoreGroupOnly(e.target.checked)}
+                onChange={(e) => {
+                  editedRef.current = true;
+                  setCoreGroupOnly(e.target.checked);
+                }}
               />
               <FormLabel htmlFor="coreGroupOnly" classes="py-2 px-2">
                 Alleen contactpersonen (onderdeel van het kernteam)
@@ -332,7 +466,10 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
                 id="microhubEditOnly"
                 checked={microhubEditOnly}
                 disabled={isSending}
-                onChange={(e) => setMicrohubEditOnly(e.target.checked)}
+                onChange={(e) => {
+                  editedRef.current = true;
+                  setMicrohubEditOnly(e.target.checked);
+                }}
               />
               <FormLabel htmlFor="microhubEditOnly" classes="py-2 px-2">
                 Alleen gebruikers met rechten om zones/hubs te beheren
@@ -365,7 +502,10 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
               value={subject}
               disabled={isSending}
               placeholder="Bijvoorbeeld: Nieuwe functies in het Dashboard Deelmobiliteit"
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => {
+                editedRef.current = true;
+                setSubject(e.target.value);
+              }}
             />
 
             <FormLabel htmlFor="mailingBody" classes="mt-2 mb-2 font-bold">
@@ -378,13 +518,27 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
               value={bodyMarkdown}
               disabled={isSending}
               placeholder="Schrijf je bericht in Markdown..."
-              onChange={(e) => setBodyMarkdown(e.target.value)}
+              onChange={(e) => {
+                editedRef.current = true;
+                setBodyMarkdown(e.target.value);
+              }}
             />
             <p className="text-xs text-gray-500 mb-2">
               Gebruik <code># Kop</code>, <code>## Tussenkop</code>, <code>**vet**</code>, <code>*cursief*</code>,
               <code>- lijst</code> en <code>[tekst](https://...)</code> voor links.
+              Je tekst en ontvangers blijven bewaard als je deze pagina verlaat.
               {lastInfo && <> {lastInfo}</>}
             </p>
+            {hasDraft && (
+              <button
+                type="button"
+                className="mb-2 text-sm underline"
+                style={{ color: '#15AEEF' }}
+                onClick={() => setDoShowLoadLastModal(true)}
+              >
+                Laad laatst verzonden mail
+              </button>
+            )}
           </section>
 
           <section className="mb-8">
@@ -452,6 +606,20 @@ const EmailUsers = ({ acl }: EmailUsersProps) => {
           />
         </div>
       </div>
+
+      <Modal
+        isVisible={doShowLoadLastModal}
+        title="Laatst verzonden e-mail laden"
+        button1Title="Annuleren"
+        button1Handler={() => setDoShowLoadLastModal(false)}
+        button2Title="Doorgaan"
+        button2Handler={handleLoadLastSent}
+        hideModalHandler={() => setDoShowLoadLastModal(false)}
+      >
+        <p>
+          Als je de laatst verzonden e-mail inlaadt, verdwijnt de door jou reeds getypte mailtekst. Wil je doorgaan?
+        </p>
+      </Modal>
 
       <Modal
         isVisible={doShowConfirmModal}
