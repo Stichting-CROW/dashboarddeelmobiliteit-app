@@ -1,0 +1,62 @@
+/*
+ * The Overlay reserves bottom space (pb-16) for the bottom menu bar. For this
+ * layout the sidebar should run to the bottom edge, so drop that padding and
+ * add the spacing to the content area instead (see .SidebarLayout main).
+ */
+.Overlay:has(.SidebarLayout) {
+  padding-bottom: 0;
+}
+
+.SidebarLayout {
+  /* Darkened brand purple (brand identity purple is #9158DE) */
+  --sidebar-bg: #2B55A0;
+}
+
+.SidebarLayout-sidebar {
+  background-color: var(--sidebar-bg);
+}
+
+/* Reset the generic .Overlay list/link/heading styles for this layout */
+.Overlay .SidebarLayout-sidebar ul,
+.SidebarLayout-sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.Overlay .SidebarLayout-sidebar a,
+.SidebarLayout-sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 2px;
+  border-radius: 0.375rem;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.Overlay .SidebarLayout-sidebar a:hover,
+.SidebarLayout-sidebar a:hover {
+  background-color: rgba(255, 255, 255, 0.10);
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.Overlay .SidebarLayout-sidebar a.active,
+.SidebarLayout-sidebar a.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+}
+
+.Overlay .SidebarLayout-header h1,
+.SidebarLayout-header h1 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+}

@@ -8,17 +8,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
 import { InfoCircledIcon } from "@radix-ui/react-icons"
 
+import { sidebarMenuPathPrefixes } from './SidebarLayout/SidebarLayout';
+
 function isSubmenuItemPathActive(pathName: string, itemPath: string): boolean {
   if (pathName === itemPath) return true;
   if (itemPath === '/docs') return pathName.startsWith('/docs/');
   return pathName.startsWith(`${itemPath}/`);
 }
 
+function pathMatchesPrefix(pathName: string, prefix: string): boolean {
+  return pathName === prefix || pathName.startsWith(`${prefix}/`);
+}
+
 function MenuItem(props) {
   const pathName = props.pathName;
-  const isActive = props.pathPrefix
-    ? pathName.startsWith(props.pathPrefix)
-    : pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
+  const isActive = props.activePathPrefixes
+    ? props.activePathPrefixes.some((prefix: string) => pathMatchesPrefix(pathName, prefix))
+    : props.pathPrefix
+      ? pathName.startsWith(props.pathPrefix)
+      : pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [submenuOpen, setSubmenuOpen] = useState(false);
@@ -295,7 +303,7 @@ function MenuItem(props) {
 }
 
 function Menu({
-  pathName, acl
+  pathName
 }) {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -362,18 +370,12 @@ function Menu({
         ]}
       />
 
-      {(acl && (acl.is_admin || (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1))) && <MenuItem
-        pathName={pathName}
-        path={'/admin'}
-        text={''}
-        icon={'/images/components/Menu/admin.svg'}
-      />}
-
       <MenuItem
         pathName={pathName}
         path={'/profile'}
         text={''}
         icon={'/images/components/Menu/settings.svg'}
+        activePathPrefixes={sidebarMenuPathPrefixes}
       />
     </>
   }

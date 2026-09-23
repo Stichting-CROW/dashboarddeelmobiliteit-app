@@ -29,7 +29,6 @@ import {
 import Button from '../Button/Button';
 import GrantUser from './GrantUser';
 import GrantOrganisation from './GrantOrganisation';
-import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 const TableRow = ({
@@ -215,9 +214,6 @@ const SharedDataOverview = ({
   return (
     <div className="SharedDataOverview" style={{maxWidth: '800px'}}>
       <div className="flex justify-between flex-wrap">
-        <PageTitle style={{marginTop: 0}}>
-          Data delen
-        </PageTitle>
         {acl && acl.is_admin &&
           <div>
             <Select
