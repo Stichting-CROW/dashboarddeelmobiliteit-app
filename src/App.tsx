@@ -730,16 +730,16 @@ function App() {
             } />
             <Route path="/over" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Over het Dashboard Deelmobiliteit">
                   <About />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/features" element={
               <Overlay>
-                <Misc contentWidth="900px">
+                <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
                   <Features />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/export" element={
@@ -833,16 +833,16 @@ function App() {
 
         <Route path="/over" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Over het Dashboard Deelmobiliteit">
               <About />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/features" element={
           <Overlay>
-            <Misc contentWidth="900px">
+            <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
               <Features />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/stats/beleidsinfo" element={<>
