@@ -1,0 +1,21 @@
+.center-top {
+  position: absolute;
+  top: 14px;
+  /* Make left position relative to the center of the map */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: margin 0.6s;
+  transition-timing-function: ease-in;
+  /* Above the map, below modals/popovers */
+  z-index: 20;
+  /* Leave room for the right-top controls (search + layers) */
+  max-width: calc(100% - 140px);
+}
+
+.filter-open .center-top {
+  transition: margin 0.4s;
+  transition-timing-function: ease-out;
+  /* Make left position relative to the filterbar */
+  margin-left: calc(324px/2);
+  max-width: calc(100% - 324px - 140px);
+}
