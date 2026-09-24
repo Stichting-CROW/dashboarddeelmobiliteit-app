@@ -1,0 +1,30 @@
+.EmailUsers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .EmailUsers-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.EmailUsers-form {
+  max-width: 800px;
+}
+
+.EmailUsers-preview {
+  position: sticky;
+  top: 1rem;
+}
+
+.EmailUsers-preview-frame {
+  height: 720px;
+  max-height: calc(100vh - 12rem);
+}
+
+.EmailUsers-recipients {
+  background-color: #f9fafb;
+}
