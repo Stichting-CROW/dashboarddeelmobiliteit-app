@@ -150,6 +150,10 @@ const renderH3Grid = async (
 
   // Get hexes for map
   const hexesForUser = await getHexesForUser(map, token, filter);
+  if (!Array.isArray(hexesForUser)) {
+    removeH3Grid(map);
+    return;
+  }
 
   // Get OD data
   let hbData;

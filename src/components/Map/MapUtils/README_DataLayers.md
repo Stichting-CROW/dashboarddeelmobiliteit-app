@@ -108,7 +108,7 @@ The new system uses a new Redux state structure:
   // ... existing state
   active_data_layers: {
     'displaymode-park': ['parkeerdata-voertuigen', 'parkeerdata-clusters'],
-    'displaymode-rentals': ['verhuurdata-voertuigen']
+    'displaymode-rentals': ['verhuurdata-hb']
   }
 }
 ```
