@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   KeyRound,
@@ -57,7 +57,7 @@ const loggedInSections: SidebarMenuSection[] = [
     title: 'Help',
     items: [
       { title: 'Over', link: '/over', icon: Info },
-      { title: 'Functies', link: '/features', icon: Sparkles },
+      { title: 'Functionaliteiten', link: '/functionaliteiten', icon: Sparkles },
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
     ],
   },
@@ -84,7 +84,7 @@ const guestSections: SidebarMenuSection[] = [
   {
     title: 'Menu',
     items: [
-      { title: 'Functies', link: '/features', icon: Sparkles },
+      { title: 'Functionaliteiten', link: '/functionaliteiten', icon: Sparkles },
       { title: 'Over', link: '/over', icon: Info },
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
       { title: 'Datafeeds', link: '/active_feeds', icon: Rss },
@@ -145,7 +145,9 @@ export default function SidebarLayout({
       {/* Sidebar */}
       <aside className="SidebarLayout-sidebar md:w-56 md:flex-shrink-0 text-white">
         <div className="px-5 pt-6 pb-2">
-          <LogoDashboardDeelmobiliteit color="#FFFFFF" />
+          <Link to="/" className="SidebarLayout-logo">
+            <LogoDashboardDeelmobiliteit color="#FFFFFF" />
+          </Link>
         </div>
 
         <nav className="px-3 pb-3 md:pb-6 flex md:block overflow-x-auto" aria-label="Hoofdmenu">

@@ -67,7 +67,7 @@ function Profile() {
         Over het Dashboard Deelmobiliteit
       </Link><br />
 
-      &raquo; <Link to="/features" className="
+      &raquo; <Link to="/functionaliteiten" className="
         text-gray-400
         underline
         block

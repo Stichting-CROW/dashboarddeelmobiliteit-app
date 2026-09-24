@@ -154,7 +154,7 @@ function App() {
       if (pathname === '/over') {
         return `Over - ${baseTitle}`;
       }
-      if (pathname === '/features') {
+      if (pathname === '/functionaliteiten') {
         return `In het kort - ${baseTitle}`;
       }
       if (pathname === '/faq') {
@@ -746,9 +746,9 @@ function App() {
                 </SidebarLayout>
               </Overlay>
             } />
-            <Route path="/features" element={
+            <Route path="/functionaliteiten" element={
               <Overlay>
-                <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
+                <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
                   <Features />
                 </SidebarLayout>
               </Overlay>
@@ -849,9 +849,9 @@ function App() {
             </SidebarLayout>
           </Overlay>
         } />
-        <Route path="/features" element={
+        <Route path="/functionaliteiten" element={
           <Overlay>
-            <SidebarLayout title="Dashboard Deelmobiliteit functies" contentWidth="900px">
+            <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
               <Features />
             </SidebarLayout>
           </Overlay>
