@@ -45,7 +45,6 @@ import UserList from './components/UserList/UserList';
 import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
-import EmailUsers from './components/EmailUsers/EmailUsers';
 import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -227,9 +226,6 @@ function App() {
         }
         if (pathname === '/admin/yearly-costs') {
           return `Jaarlijkse kosten - Beheer - ${baseTitle}`;
-        }
-        if (pathname === '/admin/email') {
-          return `E-mail gebruikers - Beheer - ${baseTitle}`;
         }
         if (pathname === '/admin/mail-templates') {
           return `E-mail templates - Beheer - ${baseTitle}`;
@@ -657,13 +653,6 @@ function App() {
                     </SidebarLayout>
                   </Overlay>
                 } />
-                {isAdmin && <Route path="/admin/email" element={
-                  <Overlay>
-                    <SidebarLayout title="E-mail gebruikers" contentWidth="100%">
-                      <EmailUsers acl={acl} />
-                    </SidebarLayout>
-                  </Overlay>
-                } />}
                 <Route path="/admin/mail-templates" element={
                   <Overlay>
                     <SidebarLayout title="Mail-templates" contentWidth="100%">
@@ -741,7 +730,7 @@ function App() {
             } />
             <Route path="/over" element={
               <Overlay>
-                <SidebarLayout title="Over het Dashboard Deelmobiliteit">
+                <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
                   <About />
                 </SidebarLayout>
               </Overlay>
@@ -776,21 +765,21 @@ function App() {
             } />
             <Route path="/docs" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category/:doc" element={
               <Overlay>
-                <SidebarLayout title="Documentatie">
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
                 </SidebarLayout>
               </Overlay>
@@ -844,7 +833,7 @@ function App() {
 
         <Route path="/over" element={
           <Overlay>
-            <SidebarLayout title="Over het Dashboard Deelmobiliteit">
+            <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
               <About />
             </SidebarLayout>
           </Overlay>
@@ -879,21 +868,21 @@ function App() {
         } />
         <Route path="/docs" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category/:doc" element={
           <Overlay>
-            <SidebarLayout title="Documentatie">
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
             </SidebarLayout>
           </Overlay>

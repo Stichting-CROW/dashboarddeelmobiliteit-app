@@ -54,18 +54,18 @@ const loggedInSections: SidebarMenuSection[] = [
     ],
   },
   {
-    title: 'Data',
+    title: 'Help',
     items: [
-      { title: 'Exporteer', link: '/export', icon: Download },
-      { title: 'Datafeeds', link: '/active_feeds', icon: Rss },
+      { title: 'Over', link: '/over', icon: Info },
+      { title: 'Functies', link: '/features', icon: Sparkles },
+      { title: 'Documentatie', link: '/docs', icon: BookOpen },
     ],
   },
   {
-    title: 'Help',
+    title: 'Data',
     items: [
-      { title: 'Documentatie', link: '/docs', icon: BookOpen },
-      { title: 'Functies', link: '/features', icon: Sparkles },
-      { title: 'Over', link: '/over', icon: Info },
+      { title: 'Exporteer', link: '/export', icon: Download },
+      { title: 'Datafeeds status', link: '/active_feeds', icon: Rss },
     ],
   },
 ];
