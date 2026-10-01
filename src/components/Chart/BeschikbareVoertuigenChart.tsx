@@ -18,6 +18,8 @@ import {
   Legend,
   YAxis,
   CartesianGrid,
+  ReferenceArea,
+  ReferenceLine,
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
@@ -55,7 +57,11 @@ import {
   TOTAAL_DASH,
   PREVIOUS_TOTAAL_KEY,
   PREVIOUS_TOTAAL_STROKE,
-  PREVIOUS_TOTAAL_DASH
+  PREVIOUS_TOTAAL_DASH,
+  CAPACITY_KEY,
+  CAPACITY_STROKE,
+  CAPACITY_DASH,
+  CAPACITY_FILL_OPACITY
 } from './chartConstants';
 import {mergePreviousPeriodTotals} from './previousPeriod';
 import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
@@ -69,13 +75,16 @@ function BeschikbareVoertuigenChart({
   filter,
   config,
   title,
-  compareWithPreviousPeriod = false
+  compareWithPreviousPeriod = false,
+  capacity
 }: {
   filter: any,
   config: any,
   title?: string,
   /** Show the total of the previous period as a ghost line */
-  compareWithPreviousPeriod?: boolean
+  compareWithPreviousPeriod?: boolean,
+  /** Maximum capacity of the selected hub, shown as a horizontal line */
+  capacity?: number
 }) {
   const dispatch = useDispatch()
 
@@ -153,7 +162,10 @@ function BeschikbareVoertuigenChart({
   const valueKeys = chartDataWithNiceDatesRaw?.[0]
     ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
     : [];
-  const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+  const chartDataWithoutCapacity = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+  const chartDataWithNiceDates = capacity
+    ? chartDataWithoutCapacity.map((row) => ({ ...row, [CAPACITY_KEY]: capacity }))
+    : chartDataWithoutCapacity;
 
   // Weekend bands, based on the original timestamps (before date formatting)
   const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
@@ -175,7 +187,9 @@ function BeschikbareVoertuigenChart({
 
   const getSeriesKeys = () => {
     const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
-    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY);
+    const providerKeys = allKeys.filter(k =>
+      k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY && k !== CAPACITY_KEY
+    );
     const totaalIndex = providerKeys.indexOf(TOTAAL_KEY);
     const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
     const hasPrevious = allKeys.indexOf(PREVIOUS_TOTAAL_KEY) >= 0;
@@ -242,8 +256,27 @@ function BeschikbareVoertuigenChart({
         />
       );
     }
+    if (capacity) {
+      series.push(
+        <Line
+          key={CAPACITY_KEY}
+          type="linear"
+          dataKey={CAPACITY_KEY}
+          name={CAPACITY_KEY}
+          stroke={CAPACITY_STROKE}
+          strokeWidth={2}
+          strokeDasharray={CAPACITY_DASH}
+          dot={false}
+          activeDot={false}
+          isAnimationActive={false}
+          hide={legend.isHidden(CAPACITY_KEY)}
+        />
+      );
+    }
     return series;
   };
+
+  const showCapacity = Boolean(capacity) && !legend.isHidden(CAPACITY_KEY);
 
   const renderChart = () => (
     <LineChart
@@ -259,7 +292,32 @@ function BeschikbareVoertuigenChart({
       {renderWeekendShading(weekendRanges)}
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
-      <YAxis tick={<CustomizedYAxisTick />} />
+      <YAxis
+        tick={<CustomizedYAxisTick />}
+        domain={showCapacity ? [0, (dataMax: number) => Math.ceil(dataMax * 1.15)] : undefined}
+        allowDecimals={false}
+      />
+      {showCapacity && (
+        <ReferenceArea
+          y1={capacity}
+          fill={CAPACITY_STROKE}
+          fillOpacity={CAPACITY_FILL_OPACITY}
+          stroke="none"
+          ifOverflow="hidden"
+        />
+      )}
+      {showCapacity && (
+        <ReferenceLine
+          y={capacity}
+          stroke="none"
+          label={{
+            value: `huidige capaciteit: ${capacity}`,
+            position: 'insideBottomLeft',
+            fill: CAPACITY_STROKE,
+            fontSize: 12
+          }}
+        />
+      )}
       <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
       {config?.sumTotal !== true && <Legend {...legend.legendProps} />}
       {renderLineSeries()}
