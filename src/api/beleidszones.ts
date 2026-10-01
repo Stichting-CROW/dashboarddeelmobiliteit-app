@@ -53,6 +53,9 @@ export interface Beleidszone {
   geography_type?: string;
   municipality?: string;
   phase?: string;
+  stop?: {
+    capacity?: Record<string, number | string>;
+  } | null;
   [key: string]: unknown;
 }
 
@@ -70,8 +73,24 @@ export interface BeleidszoneForFilter {
   municipality?: string;
   geography_type?: 'stop' | 'no_parking' | 'monitoring';
   phase?: string;
+  /** Maximum capacity of a hub (combined, or summed over modalities) */
+  capacity?: number;
   [key: string]: unknown;
 }
+
+/**
+ * Returns the maximum capacity of a hub: the combined capacity if set,
+ * otherwise the sum of the capacities per modality.
+ * Returns undefined if no (positive) capacity is set.
+ */
+export const getZoneCapacity = (z: Beleidszone): number | undefined => {
+  const capacity = z.stop?.capacity;
+  if (!capacity) return undefined;
+  const total = capacity.combined != null
+    ? Number(capacity.combined)
+    : Object.values(capacity).reduce<number>((sum, v) => sum + (Number(v) || 0), 0);
+  return Number.isFinite(total) && total > 0 ? total : undefined;
+};
 
 function zoneDisplayName(z: Beleidszone, baseName: string): string {
   const now = moment();
@@ -103,6 +122,7 @@ function mapZone(z: Beleidszone, gmCode: string): BeleidszoneForFilter {
     municipality: z.municipality ?? gmCode,
     geography_type: z.geography_type as BeleidszoneForFilter['geography_type'],
     phase: z.phase,
+    capacity: getZoneCapacity(z),
   };
 }
 

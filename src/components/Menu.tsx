@@ -392,7 +392,7 @@ function Menu({
         pathName={pathName}
         text={'Zones'}
         path={'/map/beleidshubs'}
-        icon={'https://i.imgur.com/GrF8KBA.png'}
+        icon={'/images/components/Menu/zones.svg'}
       />
       <MenuItem
         pathName={pathName}

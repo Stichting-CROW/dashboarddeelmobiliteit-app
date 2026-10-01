@@ -60,6 +60,7 @@ interface MdsZone {
   name?: string;
   geography_type?: string;
   phase?: string;
+  capacity?: number;
 }
 
 function DashboardBeleidszones() {
@@ -318,6 +319,7 @@ function DashboardBeleidszones() {
           filter={filter}
           config={{ showLegend: true }}
           title="Beschikbare voertuigen"
+          capacity={hasExactlyOneZone ? selectedZone?.capacity : undefined}
         />
         <VerhuringenChart title="Verhuringen" />
         <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
