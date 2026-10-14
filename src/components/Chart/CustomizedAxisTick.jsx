@@ -1,4 +1,5 @@
 import {PureComponent } from 'react';
+import {formatCompactNumber} from './chartFormatting';
 
 class CustomizedXAxisTick extends PureComponent {
   render() {
@@ -21,7 +22,7 @@ class CustomizedYAxisTick extends PureComponent {
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={-4} y={0} dy={3} textAnchor="end" fill="#666" transform="rotate(0)" fontSize="0.8em">
-          {payload.value}
+          {formatCompactNumber(payload.value)}
         </text>
       </g>
     );

@@ -4,4 +4,7 @@
   border-radius: 5px;
   opacity: 1;
   padding: 12.5px;
+  color: #333333;
 }
+
+/* Tooltip list items use inline color (operator color) for each line */

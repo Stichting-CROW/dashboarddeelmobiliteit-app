@@ -11,7 +11,15 @@ import moment from 'moment';
 import thunk from 'redux-thunk';
 
 import appReducer from './reducers';
-import App from './App.jsx';
+import {
+  sanitizeActiveDataLayers,
+  sanitizeDataLayerOrder,
+  sanitizeOverlayLayers,
+  DISPLAYMODE_VERHUURDATA_HB,
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_RENTALS
+} from './reducers/layers';
+import App from './App';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -19,7 +27,15 @@ const md5 = require('md5');
 
 // Get persistentState from localStorage
 const theState = localStorage.getItem('CROWDD_reduxState')
-let persistedState = theState ? JSON.parse(theState) : {};
+let persistedState = {};
+if (theState) {
+  try {
+    persistedState = JSON.parse(theState);
+  } catch (e) {
+    console.warn('Invalid persisted Redux state in localStorage, starting fresh:', e);
+    localStorage.removeItem('CROWDD_reduxState');
+  }
+}
 
 // Validate and clean persisted state to prevent reload loops
 const validatePersistedState = (state) => {
@@ -49,6 +65,59 @@ const validatePersistedState = (state) => {
 };
 
 persistedState = validatePersistedState(persistedState);
+
+// HB is the standard rentals view. Apply that once to sessions that still
+// have the previous default (individual rental vehicles), then leave later
+// choices alone.
+const RENTALS_DEFAULT_MIGRATION_KEY = 'CROWDD_rentals_default_hb_v1';
+if (!localStorage.getItem(RENTALS_DEFAULT_MIGRATION_KEY)) {
+  const layers = persistedState.layers;
+  if (layers) {
+    if (layers.view_rentals === DISPLAYMODE_VERHUURDATA_VOERTUIGEN) {
+      layers.view_rentals = DISPLAYMODE_VERHUURDATA_HB;
+    }
+    const rentalsLayers = layers.active_data_layers?.[DISPLAYMODE_RENTALS];
+    if (
+      Array.isArray(rentalsLayers)
+      && rentalsLayers.length === 1
+      && rentalsLayers[0] === DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+    ) {
+      layers.active_data_layers[DISPLAYMODE_RENTALS] = [DISPLAYMODE_VERHUURDATA_HB];
+    }
+  }
+  localStorage.setItem(RENTALS_DEFAULT_MIGRATION_KEY, '1');
+}
+
+// The data-layer UI uses radio-button behaviour (one layer per display mode).
+// Older persisted states may contain multiple active layers; sanitize them.
+if (persistedState.layers && persistedState.layers.active_data_layers) {
+  persistedState.layers.active_data_layers = sanitizeActiveDataLayers(
+    persistedState.layers.active_data_layers
+  );
+}
+
+if (persistedState.layers) {
+  persistedState.layers.data_layer_order = sanitizeDataLayerOrder(
+    persistedState.layers.data_layer_order
+  );
+  persistedState.layers.overlay_layers = sanitizeOverlayLayers(
+    persistedState.layers.overlay_layers
+  );
+}
+
+// Reset a stale persisted 'datum' filter to now *before* the store is created.
+// App.tsx used to do this in an effect ~500ms after load, but by then the
+// initial vehicles fetch is already in flight and the datum change would abort
+// it and fetch everything again (doubling the load time for returning
+// visitors). Shared links (?view=...) keep their persisted datum.
+if (persistedState.filter && persistedState.filter.datum) {
+  const isSharedLink = new URLSearchParams(window.location.search).get('view');
+  const datumAgeMs = Date.now() - new Date(persistedState.filter.datum).getTime();
+  const isMoreThan10MinutesAgo = isNaN(datumAgeMs) || datumAgeMs > 10 * 60 * 1000;
+  if (!isSharedLink && isMoreThan10MinutesAgo) {
+    persistedState.filter.datum = new Date().toISOString();
+  }
+}
 
 window.process = { ...window.process }
 

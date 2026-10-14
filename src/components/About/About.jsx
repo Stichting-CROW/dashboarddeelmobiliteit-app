@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {marked} from 'marked'
 import { useNavigate } from "react-router-dom";
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 const About = () => {
@@ -11,12 +11,6 @@ const About = () => {
   return (
     <div className="
     ">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Over het Dashboard Deelmobiliteit
-      </h1>
       <div className="mx-auto pb-8">
         <div
           dangerouslySetInnerHTML={{ __html: marked.parse(`

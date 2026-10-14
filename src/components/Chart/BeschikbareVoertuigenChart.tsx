@@ -1,6 +1,6 @@
-import React, {useEffect, useState } from 'react';
+import React from 'react';
 
-import { getOperatorStatsForChart } from './chartTools.js';
+import { getOperatorStatsForChart, transformZerosToNullForChart } from './chartTools.js';
 
 import {StateType} from '../../types/StateType.js';
 
@@ -12,23 +12,21 @@ import {
 import moment from 'moment';
 
 import {
-  AreaChart,
-  // LineChart,
-  Area,
-  BarChart,
-  Bar,
-  // Line,
+  LineChart,
+  Line,
   XAxis,
   Legend,
   YAxis,
   CartesianGrid,
+  ReferenceArea,
+  ReferenceLine,
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
 
-import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats.js';
 import {
   getProviderColor,
+  getPrettyProviderName,
   getUniqueProviderNames
 } from '../../helpers/providers.js';
 import {
@@ -48,20 +46,47 @@ import {
 import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx';
 import {CustomizedTooltip} from './CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import ChartSkeleton from './ChartSkeleton';
+import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
+import {useAggregatedChartData} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {
+  CHART_SYNC_ID,
+  TOTAAL_KEY,
+  TOTAAL_STROKE,
+  TOTAAL_DASH,
+  PREVIOUS_TOTAAL_KEY,
+  PREVIOUS_TOTAAL_STROKE,
+  PREVIOUS_TOTAAL_DASH,
+  CAPACITY_KEY,
+  CAPACITY_STROKE,
+  CAPACITY_DASH,
+  CAPACITY_FILL_OPACITY
+} from './chartConstants';
+import {mergePreviousPeriodTotals} from './previousPeriod';
+import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
+import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
+
+/** Fetches the same data for the previous period of equal length */
+const getPreviousPeriodVehicleData = (token, filter, zones, metadata) =>
+  getAggregatedVehicleData(token, getPreviousPeriodFilter(filter), zones, metadata);
 
 function BeschikbareVoertuigenChart({
   filter,
   config,
-  title
+  title,
+  compareWithPreviousPeriod = false,
+  capacity
 }: {
   filter: any,
   config: any,
-  title?: string
+  title?: string,
+  /** Show the total of the previous period as a ghost line */
+  compareWithPreviousPeriod?: boolean,
+  /** Maximum capacity of the selected hub, shown as a horizontal line */
+  capacity?: number
 }) {
   const dispatch = useDispatch()
-  
-  // Get authentication token
-  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // Get metadata
   const metadata = useSelector((state: StateType) => state.metadata)
@@ -75,25 +100,20 @@ function BeschikbareVoertuigenChart({
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
-  // Define state variables
-  const [vehiclesData, setVehiclesData] = useState([])
-
-  // On updated filter: re-fetch data
-  useEffect(() => {
-    // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) return;
-
-    async function fetchData() {
-      // Get aggregated vehicle data
-      const aggregatedVehicleData = await getAggregatedVehicleData(token, filter, zones, metadata);
-      if(! aggregatedVehicleData) return;
-
-      // Set state
-      setVehiclesData(aggregatedVehicleData);
-
+  // Load the aggregated vehicle data for the current filter. The hook handles
+  // waiting for zones, stale responses, and loading/error state.
+  const {
+    data: vehiclesData,
+    isLoading,
+    isRefreshing,
+    error,
+    refetch
+  } = useAggregatedChartData<any>(
+    getAggregatedVehicleData,
+    (aggregatedVehicleData) => {
       // Sum amount of vehicles per operator, used in FilteritemAanbieders component
       let operators;
-      if(aggregatedVehicleData && aggregatedVehicleData.available_vehicles_aggregated_stats) {
+      if(aggregatedVehicleData.available_vehicles_aggregated_stats) {
         operators = getOperatorStatsForChart(aggregatedVehicleData.available_vehicles_aggregated_stats.values, metadata.aanbieders);
       }
       else {
@@ -101,29 +121,54 @@ function BeschikbareVoertuigenChart({
       }
       dispatch({type: 'SET_OPERATORSTATS_BESCHIKBAREVOERTUIGENCHART', payload: operators });
     }
-    fetchData();
-  }, [
-    filter.ontwikkelingvan,
-    filter.ontwikkelingtot,
-    filter.ontwikkelingaggregatie,
-    filter.ontwikkelingaggregatie_function,
-    filter.zones,
-    metadata,
-    token,
-    dispatch
-  ]);
-  
+  );
+
+  // Optional: the previous period, only fetched when comparing
+  const {data: previousVehiclesData} = useAggregatedChartData<any>(
+    getPreviousPeriodVehicleData,
+    undefined,
+    {enabled: compareWithPreviousPeriod}
+  );
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
+
   // Populate chart data
-  let chartData = getAggregatedChartData(vehiclesData, filter, zones, aanbieders);
+  let chartData = getAggregatedChartData(vehiclesData || [], filter, zones, aanbieders);
+  const previousChartData = compareWithPreviousPeriod && previousVehiclesData
+    ? getAggregatedChartData(previousVehiclesData, getPreviousPeriodFilter(filter), zones, aanbieders)
+    : null;
 
   const getChartDataWithNiceDates = (data) => {
+    if (!data?.length) return [];
     const aggregationLevel = filter.ontwikkelingaggregatie;
     const dateFormat = getDateFormat(aggregationLevel);
+    const providerKeys = Object.keys(data[0]).filter(k => k !== 'time' && k !== 'name');
+    const showTotaal = providerKeys.length > 1;
     return data.map(x => {
-      return {...x, ...{ time: moment(x.time ? x.time : x.name).format(dateFormat) }}
-    })
-  }
-  const chartDataWithNiceDates = getChartDataWithNiceDates(chartData)
+      const timeFormatted = moment(x.time ? x.time : x.name).format(dateFormat);
+      const row = { ...x, time: timeFormatted };
+      if (showTotaal) {
+        const totaal = providerKeys.reduce((sum, k) => sum + (Number(x[k]) || 0), 0);
+        row[TOTAAL_KEY] = totaal;
+      }
+      return row;
+    });
+  };
+  const chartDataWithNiceDatesRaw = mergePreviousPeriodTotals(
+    getChartDataWithNiceDates(chartData),
+    previousChartData
+  );
+  const valueKeys = chartDataWithNiceDatesRaw?.[0]
+    ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
+    : [];
+  const chartDataWithoutCapacity = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+  const chartDataWithNiceDates = capacity
+    ? chartDataWithoutCapacity.map((row) => ({ ...row, [CAPACITY_KEY]: capacity }))
+    : chartDataWithoutCapacity;
+
+  // Weekend bands, based on the original timestamps (before date formatting)
+  const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
 
   const setAggregationFunction = (value) => {
     dispatch({
@@ -140,49 +185,103 @@ function BeschikbareVoertuigenChart({
     )
   }
 
-  const numberOfPointsOnXAxis = chartData ? Object.keys(chartData).length : 0;
+  const getSeriesKeys = () => {
+    const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
+    const providerKeys = allKeys.filter(k =>
+      k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY && k !== CAPACITY_KEY
+    );
+    const totaalIndex = providerKeys.indexOf(TOTAAL_KEY);
+    const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
+    const hasPrevious = allKeys.indexOf(PREVIOUS_TOTAAL_KEY) >= 0;
+    return { providersOnly, hasTotaal: totaalIndex >= 0, hasPrevious };
+  };
 
-  // Function that renders the chart
-  const renderChart = () => {
-
-    // Render area line chart 
-    if(numberOfPointsOnXAxis > 24 && filter.ontwikkelingaggregatie !== '15m' && filter.ontwikkelingaggregatie !== '5m' && filter.ontwikkelingaggregatie !== 'hour') {
-      return <AreaChart
-        data={chartDataWithNiceDates}
-        margin={{
-          top: 10,
-          right: 30,
-          left: 0,
-          bottom: 0,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 0" vertical={false} />
-        <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
-        <YAxis tick={<CustomizedYAxisTick />} />
-        <Tooltip content={<CustomizedTooltip />} />
-        {config && config.sumTotal === true ? '' : <Legend />}
-        {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
-          const providerColor = getProviderColor(metadata.aanbieders, x)
-          if(x === 'time') return;
-          return (
-            <Area
-              key={x}
-              stackId="1"
-              type="monotone"
-              dataKey={x}
-              stroke="#fff"
-              strokeWidth={2}
-              fill={providerColor}
-              isAnimationActive={false}
-            />
-          )
-        })}
-      </AreaChart>
+  const renderLineSeries = () => {
+    const { providersOnly, hasTotaal, hasPrevious } = getSeriesKeys();
+    const series: React.ReactNode[] = [];
+    providersOnly.forEach(x => {
+      series.push(
+        <Line
+          key={x}
+          type="monotone"
+          dataKey={x}
+          name={getPrettyProviderName(x)}
+          stroke={getProviderColor(metadata.aanbieders, x)}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(x)}
+        />
+      );
+    });
+    if (hasTotaal && providersOnly.length > 1) {
+      series.push(
+        <Line
+          key={TOTAAL_KEY}
+          type="monotone"
+          dataKey={TOTAAL_KEY}
+          name={TOTAAL_KEY}
+          stroke={TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={TOTAAL_DASH}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(TOTAAL_KEY)}
+        />
+      );
     }
+    // Ghost line of the previous period, last so it is last in the legend too
+    if (hasPrevious) {
+      series.push(
+        <Line
+          key={PREVIOUS_TOTAAL_KEY}
+          type="monotone"
+          dataKey={PREVIOUS_TOTAAL_KEY}
+          name={PREVIOUS_TOTAAL_KEY}
+          stroke={PREVIOUS_TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={PREVIOUS_TOTAAL_DASH}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(PREVIOUS_TOTAAL_KEY)}
+        />
+      );
+    }
+    if (capacity) {
+      series.push(
+        <Line
+          key={CAPACITY_KEY}
+          type="linear"
+          dataKey={CAPACITY_KEY}
+          name={CAPACITY_KEY}
+          stroke={CAPACITY_STROKE}
+          strokeWidth={2}
+          strokeDasharray={CAPACITY_DASH}
+          dot={false}
+          activeDot={false}
+          isAnimationActive={false}
+          hide={legend.isHidden(CAPACITY_KEY)}
+        />
+      );
+    }
+    return series;
+  };
 
-    // Or render bar chart
-    return <BarChart
+  const showCapacity = Boolean(capacity) && !legend.isHidden(CAPACITY_KEY);
+
+  const renderChart = () => (
+    <LineChart
       data={chartDataWithNiceDates}
+      syncId={CHART_SYNC_ID}
       margin={{
         top: 10,
         right: 30,
@@ -190,28 +289,40 @@ function BeschikbareVoertuigenChart({
         bottom: 0,
       }}
     >
+      {renderWeekendShading(weekendRanges)}
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
-      <YAxis tick={<CustomizedYAxisTick />} />
-      <Tooltip content={<CustomizedTooltip />} />
-      {config && config.sumTotal === true ? '' : <Legend />}
-      {getUniqueProviderNames(chartDataWithNiceDates).map(x => {
-        const providerColor = getProviderColor(metadata.aanbieders, x)
-        if(x === 'time') return;
-        return (
-          <Bar
-            key={x}
-            stackId="1"
-            type="monotone"
-            dataKey={x}
-            stroke={providerColor}
-            fill={providerColor}
-            isAnimationActive={false}
-          />
-        )
-      })}
-    </BarChart>
-  }
+      <YAxis
+        tick={<CustomizedYAxisTick />}
+        domain={showCapacity ? [0, (dataMax: number) => Math.ceil(dataMax * 1.15)] : undefined}
+        allowDecimals={false}
+      />
+      {showCapacity && (
+        <ReferenceArea
+          y1={capacity}
+          fill={CAPACITY_STROKE}
+          fillOpacity={CAPACITY_FILL_OPACITY}
+          stroke="none"
+          ifOverflow="hidden"
+        />
+      )}
+      {showCapacity && (
+        <ReferenceLine
+          y={capacity}
+          stroke="none"
+          label={{
+            value: `huidige capaciteit: ${capacity}`,
+            position: 'insideBottomLeft',
+            fill: CAPACITY_STROKE,
+            fontSize: 12
+          }}
+        />
+      )}
+      <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
+      {config?.sumTotal !== true && <Legend {...legend.legendProps} />}
+      {renderLineSeries()}
+    </LineChart>
+  );
 
   return (
     <div className="relative">
@@ -226,10 +337,10 @@ function BeschikbareVoertuigenChart({
           {chartData && chartData.length > 0 && <div className="flex justify-center flex-col ml-2">
             <button onClick={() => {
               const preparedData = prepareDataForCsv(chartData);
-              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}_beschikbare_voertuigen`;
               downloadCsv(preparedData, filename);
             }} className="opacity-50 cursor-pointer">
-              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30" alt="Download to CSV" title="Download to CSV" />
             </button>
           </div>}
 
@@ -252,9 +363,20 @@ function BeschikbareVoertuigenChart({
       </div>
 
       <div className="relative" style={{ width: '100%', height: config?.height || '400px' }}>
-        <ResponsiveContainer>
-          {renderChart()}
-        </ResponsiveContainer>
+        {isLoading ? (
+          <ChartSkeleton height="100%" />
+        ) : error ? (
+          <ChartErrorState onRetry={refetch} />
+        ) : !chartData || chartData.length === 0 ? (
+          <ChartEmptyState />
+        ) : (
+          <>
+            {isRefreshing && <ChartRefreshingOverlay />}
+            <ResponsiveContainer>
+              {renderChart()}
+            </ResponsiveContainer>
+          </>
+        )}
       </div>
 
     </div>

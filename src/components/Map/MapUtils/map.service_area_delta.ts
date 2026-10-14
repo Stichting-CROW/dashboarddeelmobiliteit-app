@@ -1,3 +1,4 @@
+import { canMutateMapLayers, whenMapLayersMutable } from './mapGuards';
 
 const removeSources = (map: any) => {
     if(! map) return;
@@ -10,23 +11,32 @@ const removeSources = (map: any) => {
 }
 
 const removeServiceAreaDeltaFromMap = (map: any) => {
-    if(! map) return;
+    if (!map) return;
+    if (!canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => removeServiceAreaDeltaFromMap(map));
+      return;
+    }
 
-    let layer, key;
-    let source;
-    
-    key = 'service_area_delta-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'service_area_delta-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    removeSources(map);
+    try {
+      let layer, key;
+
+      key = 'service_area_delta-layer-fill';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = 'service_area_delta-layer-border';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      removeSources(map);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
-async function renderPolygons_fill(map, geojson) {
+type LegendItemType = 'added' | 'unchanged' | 'removed';
+
+async function renderPolygons_fill(map, geojson, activeTypes?: Set<LegendItemType>) {
   if(! map) return;
   if(! geojson) return;
 
@@ -60,12 +70,29 @@ async function renderPolygons_fill(map, geojson) {
     source.setData(geojson);
   }
   
+  // Set filter based on active types
+  if (activeTypes && activeTypes.size > 0) {
+    // Build filter expression using 'any' with multiple '==' conditions
+    const activeTypesArray = Array.from(activeTypes);
+    if (activeTypesArray.length === 1) {
+      // Single condition
+      map.setFilter(layerId, ['==', ['get', 'type'], activeTypesArray[0]]);
+    } else {
+      // Multiple conditions using 'any'
+      const conditions = activeTypesArray.map(type => ['==', ['get', 'type'], type]);
+      map.setFilter(layerId, ['any', ...conditions]);
+    }
+  } else {
+    // If no active types, hide all
+    map.setFilter(layerId, ['literal', false]);
+  }
+  
   // Set fill color
   map.setPaintProperty(
     layerId,
     'fill-color',
     ['match', ['get', 'type'],
-      'unchanged', '#666',
+      'unchanged', '#c06427',
       'removed', '#f00',
       'added', '#0f0',
       '#8f3af8'
@@ -78,25 +105,41 @@ async function renderPolygons_fill(map, geojson) {
   // Add line layer for wider outline/borders, on top of fill layer
   // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
   layerId = `${sourceId}-layer-border`;
-  map.addLayer({
-    id: layerId,
-    source: sourceId,
-    type: 'line',
-    paint: {
-      'line-color': [
-        "case",
-        ["==", ["get", "selected"], 1], '#15aeef',
-        ["boolean", ["feature-state", "hover"], false], '#666',
-        '#DDD'
-      ],
-      'line-width': [
-        "case",
-        ["==", ["get", "selected"], 1], 5,
-        ["boolean", ["feature-state", "hover"], false], 2,
-        1
-      ]
+  const borderLayer = map.getLayer(layerId);
+  if (!borderLayer) {
+    map.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'line',
+      paint: {
+        'line-color': [
+          "case",
+          ["==", ["get", "selected"], 1], '#15aeef',
+          ["boolean", ["feature-state", "hover"], false], '#666',
+          '#DDD'
+        ],
+        'line-width': [
+          "case",
+          ["==", ["get", "selected"], 1], 5,
+          ["boolean", ["feature-state", "hover"], false], 2,
+          1
+        ]
+      }
+    });
+  }
+  
+  // Apply same filter to border layer (always update filter, even if layer already exists)
+  if (activeTypes && activeTypes.size > 0) {
+    const activeTypesArray = Array.from(activeTypes);
+    if (activeTypesArray.length === 1) {
+      map.setFilter(layerId, ['==', ['get', 'type'], activeTypesArray[0]]);
+    } else {
+      const conditions = activeTypesArray.map(type => ['==', ['get', 'type'], type]);
+      map.setFilter(layerId, ['any', ...conditions]);
     }
-  });
+  } else {
+    map.setFilter(layerId, ['literal', false]);
+  }
 }
 
 const createFeatureCollection = (data) => {
@@ -125,9 +168,40 @@ const createFeatureCollection = (data) => {
   return geojson;
 }
 
+const updateLayerFilters = (map: any, activeTypes?: Set<LegendItemType>) => {
+  if (!map) return;
+  
+  const sourceId = 'service_area_delta';
+  const fillLayerId = `${sourceId}-layer-fill`;
+  const borderLayerId = `${sourceId}-layer-border`;
+  
+  const fillLayer = map.getLayer(fillLayerId);
+  const borderLayer = map.getLayer(borderLayerId);
+  
+  if (!fillLayer || !borderLayer) return;
+  
+  const buildFilter = (types: Set<LegendItemType>) => {
+    if (!types || types.size === 0) {
+      return ['literal', false];
+    }
+    const activeTypesArray = Array.from(types);
+    if (activeTypesArray.length === 1) {
+      return ['==', ['get', 'type'], activeTypesArray[0]];
+    } else {
+      const conditions = activeTypesArray.map(type => ['==', ['get', 'type'], type]);
+      return ['any', ...conditions];
+    }
+  };
+  
+  const filter = buildFilter(activeTypes);
+  map.setFilter(fillLayerId, filter);
+  map.setFilter(borderLayerId, filter);
+};
+
 const renderServiceAreaDelta = async (
   map: any,
   serviceAreaVersionData: any,
+  activeTypes?: Set<LegendItemType>
 ) => {
   // Create feature collection based on geometriesForUser & hbDataResponse
   const featureCollection = createFeatureCollection(serviceAreaVersionData);
@@ -136,10 +210,11 @@ const renderServiceAreaDelta = async (
   removeServiceAreaDeltaFromMap(map);
 
   // Render hexes
-  renderPolygons_fill(map, featureCollection);
+  renderPolygons_fill(map, featureCollection, activeTypes);
 }
 
 export {
     renderServiceAreaDelta,
-    removeServiceAreaDeltaFromMap
+    removeServiceAreaDeltaFromMap,
+    updateLayerFilters
 }

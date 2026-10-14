@@ -1,5 +1,9 @@
 import { getEmptyZonesGeodataPayload } from './metadataZonesgeodata';
-import {isLoggedIn} from '../helpers/authentication.js';
+import {
+  getEnumerableMunicipalityCodes,
+  isLoggedIn,
+  shouldTreatMunicipalitiesAsNlWide
+} from '../helpers/authentication.js';
 
 // const getFilters = async (token, gm_code) => {
 //   let options = { headers : { "authorization": "Bearer " + token }}
@@ -61,11 +65,30 @@ export const updateZones = async (store_zones) => {
 
     // If no gebied is selected:
     if(state.filter.gebied==="") {
-      // Get all zones of all municipalities this user has access to
-      const municipality_codes = state.metadata.gebieden.map(x => x.gm_code);
-      const municipality_codes_as_string = municipality_codes.join(',');
-      // Create URL for getting all zones for all municipality codes
-      url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+      // Admins - and non-admin organisations with access to a large number of
+      // municipalities (e.g. NL-wide shared data) - can't pass their whole
+      // municipality list as `municipalities=GM..,GM..`: the upstream server
+      // rejects such a request with a 502. When the zones request fails,
+      // zones_loaded never becomes true and the vehicle fetch stays blocked, so
+      // no vehicles show. Use the lightweight parameterless /public/municipalities
+      // endpoint instead, which returns every municipality zone NL-wide in a
+      // single request. Vehicles are scoped by the auth token regardless of the
+      // loaded zones (see createFilterparameters).
+      if(shouldTreatMunicipalitiesAsNlWide(state)) {
+        url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+      } else {
+        // Get all zones of all municipalities this user has access to
+        const municipality_codes_as_string = getEnumerableMunicipalityCodes(
+          state.metadata.gebieden
+        ).join(',');
+        // /zones rejects an empty municipalities= query. Fall back to the
+        // NL-wide public list rather than calling the API with no codes.
+        if (!municipality_codes_as_string) {
+          url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+        } else {
+          url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/zones?municipalities=${municipality_codes_as_string}`;
+        }
+      }
 
       store_zones.dispatch({ type: 'SET_ZONES', payload: []});
       store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: false});
@@ -91,7 +114,8 @@ export const updateZones = async (store_zones) => {
 
       response.json()
         .then((metadata) => {
-          store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones});
+          // /zones returns { zones: [...] }; /public/municipalities returns { municipalities: [...] }
+          store_zones.dispatch({ type: 'SET_ZONES', payload: metadata.zones || metadata.municipalities || []});
           store_zones.dispatch({ type: 'SET_ZONES_LOADED', payload: true});
         })
       }).catch(ex=>{

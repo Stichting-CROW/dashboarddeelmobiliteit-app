@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from "react-router-dom";
 import {StateType} from '../types/StateType';
 
@@ -7,14 +8,227 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
 import { InfoCircledIcon } from "@radix-ui/react-icons"
 
+import { sidebarMenuPathPrefixes } from './SidebarLayout/SidebarLayout';
+
+function isSubmenuItemPathActive(pathName: string, itemPath: string): boolean {
+  if (pathName === itemPath) return true;
+  if (itemPath === '/docs') return pathName.startsWith('/docs/');
+  return pathName.startsWith(`${itemPath}/`);
+}
+
+function pathMatchesPrefix(pathName: string, prefix: string): boolean {
+  return pathName === prefix || pathName.startsWith(`${prefix}/`);
+}
+
 function MenuItem(props) {
   const pathName = props.pathName;
-  const isActive = pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
+  const isActive = props.activePathPrefixes
+    ? props.activePathPrefixes.some((prefix: string) => pathMatchesPrefix(pathName, prefix))
+    : props.pathPrefix
+      ? pathName.startsWith(props.pathPrefix)
+      : pathName === props.path || pathName === props.href || (pathName === '/' && props.path === '/map/park');
   const icon = (isActive ? props.icon.replace('.svg', '-active.svg') : props.icon);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const submenuZoneRef = useRef<HTMLDivElement | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const pointerRef = useRef({ x: 0, y: 0 });
+  const [submenuPosition, setSubmenuPosition] = useState({ left: 0, top: 0 });
+
+  const SUBMENU_GAP_PX = 16;
+  const SUBMENU_BRIDGE_OVERLAP_PX = 4;
+
+  const hasDesktopSubmenu = Boolean(props.path && props.subMenuItems && props.subMenuItems.length > 0);
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const updateSubmenuPosition = () => {
+    if (!wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    setSubmenuPosition({
+      left: rect.left + (rect.width / 2),
+      top: rect.top + SUBMENU_BRIDGE_OVERLAP_PX,
+    });
+  };
+
+  const isPointerOverSubmenuArea = (clientX: number, clientY: number) => {
+    const hovered = document.elementFromPoint(clientX, clientY);
+    if (!hovered) return false;
+    return Boolean(
+      wrapperRef.current?.contains(hovered) ||
+      submenuZoneRef.current?.contains(hovered)
+    );
+  };
+
+  const scheduleSubmenuClose = () => {
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      const { x, y } = pointerRef.current;
+      if (isPointerOverSubmenuArea(x, y)) return;
+      setSubmenuOpen(false);
+    }, 120);
+  };
+
+  const openSubmenu = () => {
+    if (!hasDesktopSubmenu || window.innerWidth < 640) return;
+    clearCloseTimer();
+    updateSubmenuPosition();
+    setSubmenuOpen(true);
+  };
+
+  const closeSubmenuSoon = () => {
+    scheduleSubmenuClose();
+  };
+
+  useEffect(() => {
+    if (!submenuOpen) return undefined;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      pointerRef.current = { x: event.clientX, y: event.clientY };
+      if (isPointerOverSubmenuArea(event.clientX, event.clientY)) {
+        clearCloseTimer();
+      }
+    };
+
+    const handleViewportChange = () => {
+      updateSubmenuPosition();
+    };
+
+    document.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [submenuOpen]);
+
+  useEffect(() => {
+    return () => {
+      clearCloseTimer();
+    };
+  }, []);
 
   return (
     <>
-      {props.path && <Link className={`
+      {props.path && props.subMenuItems && props.subMenuItems.length > 0 && (
+        <div
+          ref={wrapperRef}
+          className="Menu-item-wrapper has-submenu"
+          onMouseEnter={openSubmenu}
+          onMouseLeave={closeSubmenuSoon}
+        >
+          <Link className={`
+              text-menu
+              text-center
+              ${isActive ? 'is-active' : ''}
+            `}
+            to={props.path}
+            onClick={props.onClick}
+            title={props.title}
+            >
+            {icon ? <img alt={props.text} src={icon} /> : ''}
+            {props.text && (
+              isActive && props.text === 'Zones' ? (
+                <>
+                  {props.text}
+                  <TooltipProvider delayDuration={500}>
+                    <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+                      <TooltipTrigger
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTooltipOpen(!tooltipOpen);
+                        }}
+                      >
+                        <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+                          <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="top"
+                        align="center"
+                        className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+                      >
+                        <p className="text-sm leading-tight">
+                          <a 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            href="https://dashboarddeelmobiliteit.nl/docs/Beleidszones" 
+                            className="no-underline text-theme-blue" 
+                            style={{color: '#15AEEF'}}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Lees de documentatie
+                          </a>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              ) : (
+                <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
+                  {props.text}
+                </span>
+              )
+            )}
+          </Link>
+
+          {submenuOpen && props.subMenuItems && props.subMenuItems.length > 0 && createPortal(
+            <div
+              ref={submenuZoneRef}
+              className="Menu-desktop-submenu-zone"
+              onMouseEnter={openSubmenu}
+              onMouseLeave={closeSubmenuSoon}
+              style={{
+                left: `${submenuPosition.left}px`,
+                top: `${submenuPosition.top}px`,
+              }}
+            >
+              <div
+                className="Menu-desktop-submenu text-left is-open"
+                role="menu"
+                aria-label={`${props.text} submenu`}
+              >
+                {props.subMenuItems.map((item, index) => {
+                  const subItemActive = isSubmenuItemPathActive(pathName, item.path);
+                  return (
+                    <React.Fragment key={item.path}>
+                      <Link
+                        className={`Menu-desktop-submenu-item${subItemActive ? ' is-active' : ''}`}
+                        to={item.path}
+                        role="menuitem"
+                        aria-current={subItemActive ? 'page' : undefined}
+                        onClick={props.onClick}
+                      >
+                        {item.text}
+                      </Link>
+                      {index < props.subMenuItems.length - 1 && (
+                        <div className="Menu-desktop-submenu-divider" aria-hidden="true" />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              <div
+                className="Menu-desktop-submenu-bridge"
+                style={{ height: `${SUBMENU_GAP_PX + SUBMENU_BRIDGE_OVERLAP_PX}px` }}
+                aria-hidden="true"
+              />
+            </div>,
+            document.body
+          )}
+        </div>
+      )}
+
+      {props.path && (!props.subMenuItems || props.subMenuItems.length === 0) && <Link className={`
           text-menu
           text-center
           ${isActive ? 'is-active' : ''}
@@ -29,8 +243,13 @@ function MenuItem(props) {
             <>
               {props.text}
               <TooltipProvider delayDuration={500}>
-                <Tooltip>
-                  <TooltipTrigger>
+                <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+                  <TooltipTrigger
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTooltipOpen(!tooltipOpen);
+                    }}
+                  >
                     <span className={`${(isActive || !icon) ? 'inline-block' : 'hidden'} sm:inline-block ml-1`}>
                       <InfoCircledIcon className="inline-block ml-1 h-4 w-4" />
                     </span>
@@ -84,7 +303,7 @@ function MenuItem(props) {
 }
 
 function Menu({
-  pathName, acl
+  pathName
 }) {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
@@ -139,23 +358,24 @@ function Menu({
 
       <MenuItem
         pathName={pathName}
-        text={'Ontwikkeling'}
-        path={'/stats/overview'}
+        text={'Statistiek'}
+        path={'/stats/beleidsinfo'}
+        pathPrefix={'/stats'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
+        subMenuItems={[
+          { text: 'Beleidsinfo', path: '/stats/beleidsinfo' },
+          { text: 'Hubs en verbodsgebieden', path: '/stats/beleidszones' },
+          { text: 'Prestaties aanbieders', path: '/stats/prestaties-aanbieders' },
+          // { text: 'Open data', path: '/docs' },
+        ]}
       />
-
-      {(acl && (acl.is_admin || (acl.privileges && acl.privileges.indexOf('ORGANISATION_ADMIN') > -1))) && <MenuItem
-        pathName={pathName}
-        path={'/admin'}
-        text={''}
-        icon={'/images/components/Menu/admin.svg'}
-      />}
 
       <MenuItem
         pathName={pathName}
         path={'/profile'}
         text={''}
         icon={'/images/components/Menu/settings.svg'}
+        activePathPrefixes={sidebarMenuPathPrefixes}
       />
     </>
   }
@@ -172,7 +392,7 @@ function Menu({
         pathName={pathName}
         text={'Zones'}
         path={'/map/beleidshubs'}
-        icon={'https://i.imgur.com/GrF8KBA.png'}
+        icon={'/images/components/Menu/zones.svg'}
       />
       <MenuItem
         pathName={pathName}
@@ -207,10 +427,12 @@ function Menu({
         sm:px-4
         sm:shadow-lg
         sm:m-4
-        sm:mb-1
-        sm:rounded-3xl
+        sm:mb-0
+        sm:rounded-tl-3xl
+        sm:rounded-tr-3xl
       ">
         <div className="
+          Menu-scroll
           whitespace-nowrap
           text-center
         ">

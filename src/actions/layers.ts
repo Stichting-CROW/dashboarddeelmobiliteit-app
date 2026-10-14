@@ -1,4 +1,9 @@
-import { LAYER_SET_MAP_STYLE } from "./actionTypes";
+import {
+  LAYER_SET_MAP_STYLE,
+  LAYER_SET_DATA_LAYER_ORDER,
+  LAYER_TOGGLE_OVERLAY_LAYER,
+  LAYER_SET_OVERLAY_PHASE
+} from "./actionTypes";
 
 export const setMapStyle = (name: string) => ({
   type: LAYER_SET_MAP_STYLE,
@@ -29,4 +34,20 @@ export const toggleDataLayer = (displayMode: string, layerName: string, isVisibl
 export const setActiveDataLayers = (displayMode: string, layerNames: string[]) => ({
   type: 'LAYER_SET_ACTIVE_DATA_LAYERS',
   payload: { displayMode, layerNames }
+})
+
+export const setDataLayerOrder = (displayMode: string, order: string[]) => ({
+  type: LAYER_SET_DATA_LAYER_ORDER,
+  payload: { displayMode, order }
+})
+
+// Overlay layer actions (servicegebieden / hubs / verbodsgebieden)
+export const toggleOverlayLayer = (displayMode: string, layerId: string) => ({
+  type: LAYER_TOGGLE_OVERLAY_LAYER,
+  payload: { displayMode, layerId }
+})
+
+export const setOverlayPhase = (layerId: string, phase: string) => ({
+  type: LAYER_SET_OVERLAY_PHASE,
+  payload: { layerId, phase }
 })

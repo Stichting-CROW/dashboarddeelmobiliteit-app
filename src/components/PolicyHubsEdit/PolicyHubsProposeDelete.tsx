@@ -45,6 +45,7 @@ const PolicyHubsProposeDelete = ({
 
   const [geographyIds, setGeographyIds] = useState([]);
   const [errors, setErrors] = useState<any>({});
+  const [tooltipOpen, setTooltipOpen] = useState<Record<string, boolean>>({});
 
   let publish_on_relative = localStorage.getItem("last_publish_on_relative_used") || "1week";
   let effective_on_relative = localStorage.getItem("last_effective_on_relative_used") || "1week";
@@ -93,6 +94,8 @@ const PolicyHubsProposeDelete = ({
   }, [formData]);
 
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
+
+  const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
 
   // If selected policy hubs changes: Load data of hub
   useEffect(() => {
@@ -217,14 +220,23 @@ const PolicyHubsProposeDelete = ({
       </div>
 
       <div className="mb-8">
-        Je staat op het punt om <b>{selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`}</b> te gaan verwijderen. Stel nu de gewenste publicatie- en verwijderdatum in.
+        Je staat op het punt om <b>{active_phase === 'active' || active_phase === 'definitief actief'
+          ? (selected_policy_hubs.length === 1 ? '1 definitieve zone' : `${selected_policy_hubs.length} definitieve zones`)
+          : active_phase === 'published' || active_phase === 'definitief gepubliceerd'
+            ? (selected_policy_hubs.length === 1 ? '1 gepubliceerde zone' : `${selected_policy_hubs.length} gepubliceerde zones`)
+            : (selected_policy_hubs.length === 1 ? '1 concept' : `${selected_policy_hubs.length} concepten`)}</b> te gaan verwijderen. Stel nu de gewenste publicatie- en verwijderdatum in.
       </div>
       <div>
         <FormLabel classes="mt-2 mb-2 font-bold">
           Wanneer publiceren?
           <TooltipProvider delayDuration={500}>
-            <Tooltip>
-              <TooltipTrigger>
+            <Tooltip open={tooltipOpen.publish} onOpenChange={(open) => setTooltipOpen({ ...tooltipOpen, publish: open })}>
+              <TooltipTrigger
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTooltipOpen({ ...tooltipOpen, publish: !tooltipOpen.publish });
+                }}
+              >
                 <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
               </TooltipTrigger>
               <TooltipContent 
@@ -274,7 +286,7 @@ const PolicyHubsProposeDelete = ({
             onClick={() => {
               setFormData({
                 ...formData,
-                ["publish_on_relative"]: x.name 
+                publish_on_relative: x.name 
               });
             }}
           >
@@ -302,8 +314,13 @@ const PolicyHubsProposeDelete = ({
         <FormLabel classes="mt-8 mb-2 font-bold">
           Verwijderen na publicatie
           <TooltipProvider delayDuration={500}>
-            <Tooltip>
-              <TooltipTrigger>
+            <Tooltip open={tooltipOpen.effective} onOpenChange={(open) => setTooltipOpen({ ...tooltipOpen, effective: open })}>
+              <TooltipTrigger
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTooltipOpen({ ...tooltipOpen, effective: !tooltipOpen.effective });
+                }}
+              >
                 <InfoCircledIcon className="inline-block ml-1 h-4 w-4 hover:text-[#15AEEF]" />
               </TooltipTrigger>
               <TooltipContent 
@@ -353,7 +370,7 @@ const PolicyHubsProposeDelete = ({
             onClick={() => {
               setFormData({
                 ...formData,
-                ["effective_on_relative"]: x.name 
+                effective_on_relative: x.name 
               });
             }}
           >

@@ -1,7 +1,11 @@
+import { normalizeFilterbarExtended } from '../helpers/filterbarExtendedState';
+import { FILTERBAR_EXTENDED_CLOSED } from '../types/FilterbarExtendedState';
+
 const initialState = {
   FILTERBAR: window.innerWidth > 800 ? true : false,
   SELECTLAYER: true,
-  SHOWLOADING: false
+  SHOWLOADING: false,
+  FILTERBAR_EXTENDED: FILTERBAR_EXTENDED_CLOSED,
 }
 
 export default function ui(state = initialState, action) {
@@ -12,12 +16,24 @@ export default function ui(state = initialState, action) {
         [action.payload.name]: action.payload.visibility
       };
     }
-    case 'IMPORT_STATE': {
-      console.log('import ui')
-      
+    case 'SET_FILTERBAR_EXTENDED': {
       return {
         ...state,
-        ...action.payload.ui
+        FILTERBAR_EXTENDED: normalizeFilterbarExtended(action.payload),
+      };
+    }
+    case 'IMPORT_STATE': {
+      console.log('import ui')
+      const importedUi = { ...action.payload.ui };
+      if ('FILTERBAR_EXTENDED' in importedUi) {
+        importedUi.FILTERBAR_EXTENDED = normalizeFilterbarExtended(
+          importedUi.FILTERBAR_EXTENDED
+        );
+      }
+
+      return {
+        ...state,
+        ...importedUi
       }
     }
     case 'SHOW_LOADING': {

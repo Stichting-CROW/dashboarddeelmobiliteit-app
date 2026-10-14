@@ -16,6 +16,10 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Brand color. Centralized here so `text-theme-blue`, `bg-theme-blue`
+        // and `border-theme-blue` are generated as Tailwind utilities instead
+        // of being hardcoded in scattered CSS files.
+        "theme-blue": "#15AEEF",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

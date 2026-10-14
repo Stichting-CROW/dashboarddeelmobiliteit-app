@@ -1,0 +1,137 @@
+.StatsPage h1,
+.StatsPage h2 {
+  margin-left: 58px;
+}
+
+.DashboardPrestatiesAanbiedersDetails a {
+  text-decoration: none;
+  color: #009fe3;
+}
+.DashboardPrestatiesAanbiedersDetails a:hover {
+  text-decoration: underline;
+}
+
+/* Split layout: overview on left, details panel on right */
+.DashboardPrestatiesAanbieders--split {
+  display: flex;
+  flex-direction: row;
+  /* gap: 1rem; */
+  align-items: flex-start;
+}
+
+.DashboardPrestatiesAanbieders__overview {
+  flex: 1 1 45%;
+  min-width: 521px;
+  @apply h-full overflow-auto pb-20;
+  padding-top: 3rem;
+}
+.DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__overview {
+  flex: 0;
+}
+  
+
+.DashboardPrestatiesAanbieders__details {
+  flex: 0 1 55%;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background-color: #F6F5F4;
+}
+
+/* When details panel is shown: stack permit cards vertically, 1 per row */
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card {
+  width: 100%;
+  flex: 0 0 auto;
+  will-change: padding-right, border-top-right-radius, border-bottom-right-radius;
+  transition:
+    padding-right 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-top-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-bottom-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: calc(100% - 1px);
+  width: 0;
+  background-color: #F6F5F4;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  pointer-events: none;
+  transition:
+    width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-top-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-bottom-right-radius 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card {
+    transition: none;
+  }
+
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card::after {
+    transition: none;
+  }
+}
+
+/* Active card: extend background to the right to connect with details panel */
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-right: 1rem;
+}
+
+.DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active::after {
+  width: 1rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+@media (min-width: 640px) {
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active {
+
+  }
+
+  .DashboardPrestatiesAanbieders--split .permits-collection-cards-content .permits-card.permits-card--active::after {
+    width: 3rem;
+    margin-right: -3rem;
+  }
+}
+
+/* Remove left border on details when connected to active card */
+.DashboardPrestatiesAanbieders--split .DashboardPrestatiesAanbieders__details {
+  border-left: none;
+  padding: 4rem 3rem;
+}
+
+/* Fullscreen: details take full width, overview hidden */
+.DashboardPrestatiesAanbieders--fullscreen .DashboardPrestatiesAanbieders__details {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.DashboardPrestatiesAanbieders.DashboardPrestatiesAanbieders--split.DashboardPrestatiesAanbieders--fullscreen {
+  position: relative;
+}
+
+.DashboardPrestatiesAanbieders.DashboardPrestatiesAanbieders--split.DashboardPrestatiesAanbieders--fullscreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3rem;
+  height: 100%;
+  margin-left: -3rem;
+  background-color: #F6F5F4;
+  pointer-events: none;
+}

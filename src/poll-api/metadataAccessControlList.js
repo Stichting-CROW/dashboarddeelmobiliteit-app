@@ -1,33 +1,12 @@
-const cPublicAanbieders = [
-  { value:"cykl", system_id:"cykl", name:"Cykl" },
-  { value:"donkey", system_id:"donkey", name:"Donkey" },
-  { value:"htm", system_id:"htm", name:"HTM" },
-  { value:"gosharing", system_id:"gosharing", name:"GO Sharing" },
-  // { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels" },
-  { value:"check", system_id:"check", name:"CHECK" },
-  { value:"felyx_mds", system_id:"felyx", name:"Felyx" },
-  { value:"deelfietsnederland", system_id:"deelfietsnederland", name:"Deelfiets" },
-  { value:"keobike", system_id:"keobike", name:"Keobike" },
-  { value:"lime", system_id:"lime", name:"Lime" },
-  { value:"baqme", system_id:"baqme", name:"BAQME" },
-  { value:"cargoroo", system_id:"cargoroo", name:"Cargoroo" },
-  { value:"uwdeelfiets", system_id:"uwdeelfiets", name:"uwdeelfiets" },
-  { value:"hely", system_id:"hely", name:"Hely" },
-  { value:"tier", system_id:"tier", name:"TIER" },
-  { value:"bird", system_id:"bird", name:"Bird" },
-  { value:"bolt", system_id:"bolt", name:"Bolt" },
-  { value:"bondi", system_id:"bondi", name:"Bondi" },
-  { value:"dott", system_id:"dott", name:"Dott" },
-  { value:"moveyou", system_id:"moveyou", name:"MoveYou" },
-  { value:"mywheels", system_id:"mywheels", name:"MyWheels (pilot)" },
-  { value:"greenwheels", system_id:"greenwheels", name:"Greenwheels (pilot)" },
-];
+import { fetchOperators, getCachedOperators } from '../api/operators';
+import { setAclInRedux } from '../actions/authentication';
+import { isAdmin } from '../helpers/authentication.js';
 
 const isDutchDashboardDeelmobiliteit = true;// document.location.host.indexOf('dashboarddeelmobiliteit.nl') > -1;
 
 const cPublicGebieden = isDutchDashboardDeelmobiliteit
   ? [
-    { gm_code:"", name:"Alle plaatsen" }, { gm_code:"GM0518", name:"'s-Gravenhage" }, { gm_code:"GM0796", name:"'s-Hertogenbosch" }, { gm_code:"GM0613", name:"Albrandswaard" }, { gm_code:"GM0141", name:"Almelo" }, { gm_code:"GM0034", name:"Almere" }, { gm_code:"GM0484", name:"Alphen aan den Rijn" }, { gm_code:"GM0307", name:"Amersfoort" }, { gm_code:"GM0362", name:"Amstelveen" }, { gm_code:"GM0363", name:"Amsterdam" }, { gm_code:"GM0200", name:"Apeldoorn" }, { gm_code:"GM0202", name:"Arnhem" }, { gm_code:"GM0106", name:"Assen" }, { gm_code:"GM0489", name:"Barendrecht" }, { gm_code:"GM0203", name:"Barneveld" }, { gm_code:"GM0373", name:"Bergen (NH" }, { gm_code:"GM0753", name:"Best" }, { gm_code:"GM0375", name:"Beverwijk" }, { gm_code:"GM0377", name:"Bloemendaal" }, { gm_code:"GM0758", name:"Breda" }, { gm_code:"GM0312", name:"Bunnik" }, { gm_code:"GM0313", name:"Bunschoten" }, { gm_code:"GM0502", name:"Capelle aan den IJssel" }, { gm_code:"GM0310", name:"De Bilt" }, { gm_code:"GM0736", name:"De Ronde Venen" }, { gm_code:"GM0503", name:"Delft" }, { gm_code:"GM0150", name:"Deventer" }, { gm_code:"GM0384", name:"Diemen" }, { gm_code:"GM0505", name:"Dordrecht" }, { gm_code:"GM0512", name:"Gorinchem" }, { gm_code:"GM0228", name:"Ede" }, { gm_code:"GM0772", name:"Eindhoven" }, { gm_code:"GM0153", name:"Enschede" }, { gm_code:"GM0232", name:"Epe" }, { gm_code:"GM1771", name:"Geldrop-Mierlo" }, { gm_code:"GM1942", name:"Gooise Meren" }, { gm_code:"GM0014", name:"Groningen" }, { gm_code:"GM0392", name:"Haarlem" }, { gm_code:"GM0394", name:"Haarlemmermeer" }, { gm_code:"GM0243", name:"Harderwijk" }, { gm_code:"GM0246", name:"Heerde" }, { gm_code:"GM0794", name:"Helmond" }, { gm_code:"GM0164", name:"Hengelo" }, { gm_code:"GM0798", name:"Hilvarenbeek" }, { gm_code:"GM0402", name:"Hilversum" }, { gm_code:"GM0353", name:"IJsselstein" }, { gm_code:"GM0166", name:"Kampen" }, { gm_code:"GM0542", name:"Krimpen aan den IJssel" }, { gm_code:"GM1621", name:"Lansingerland" }, { gm_code:"GM0080", name:"Leeuwarden" }, { gm_code:"GM1916", name:"Leidschendam-Voorburg" }, { gm_code:"GM0327", name:"Leusden" }, { gm_code:"GM0809", name:"Loon op Zand" }, { gm_code:"GM0556", name:"Maassluis" }, { gm_code:"GM1842", name:"Midden-Delfland" }, { gm_code:"GM1952", name:"Midden-Groningen" }, { gm_code:"GM0356", name:"Nieuwegein" }, { gm_code:"GM0267", name:"Nijkerk" }, { gm_code:"GM0268", name:"Nijmegen" }, { gm_code:"GM1930", name:"Nissewaard" }, { gm_code:"GM0820", name:"Nuenen, Gerwen en Nederwetten" }, { gm_code:"GM0302", name:"Nunspeet" }, { gm_code:"GM0826", name:"Oosterhout" }, { gm_code:"GM0431", name:"Oostzaan" }, { gm_code:"GM1926", name:"Pijnacker-Nootdorp" }, { gm_code:"GM0273", name:"Putten" }, { gm_code:"GM0597", name:"Ridderkerk" }, { gm_code:"GM0603", name:"Rijswijk" }, { gm_code:"GM1674", name:"Roosendaal" }, { gm_code:"GM0599", name:"Rotterdam" }, { gm_code:"GM0606", name:"Schiedam" }, { gm_code:"GM0848", name:"Son en Breugel" }, { gm_code:"GM0855", name:"Tilburg" }, { gm_code:"GM1730", name:"Tynaarlo" }, { gm_code:"GM0344", name:"Utrecht" }, { gm_code:"GM1581", name:"Utrechtse Heuvelrug" }, { gm_code:"GM0861", name:"Veldhoven" }, { gm_code:"GM0622", name:"Vlaardingen" }, { gm_code:"GM0865", name:"Vught" }, { gm_code:"GM0866", name:"Waalre" }, { gm_code:"GM0867", name:"Waalwijk" }, { gm_code:"GM0289", name:"Wageningen" }, { gm_code:"GM0629", name:"Wassenaar" }, { gm_code:"GM1960", name:"West Betuwe" }, { gm_code:"GM1783", name:"Westland" }, { gm_code:"GM0637", name:"Zoetermeer" }, { gm_code:"GM0642", name:"Zwijndrecht" }, { gm_code:"GM0193", name:"Zwolle" }
+    { gm_code:"", name:"Alle plaatsen" }, { gm_code:"GM0518", name:"'s-Gravenhage" }, { gm_code:"GM0796", name:"'s-Hertogenbosch" }, { gm_code:"GM0613", name:"Albrandswaard" }, { gm_code:"GM0141", name:"Almelo" }, { gm_code:"GM0034", name:"Almere" }, { gm_code:"GM0484", name:"Alphen aan den Rijn" }, { gm_code:"GM0307", name:"Amersfoort" }, { gm_code:"GM0362", name:"Amstelveen" }, { gm_code:"GM0363", name:"Amsterdam" }, { gm_code:"GM0200", name:"Apeldoorn" }, { gm_code:"GM0202", name:"Arnhem" }, { gm_code:"GM0106", name:"Assen" }, { gm_code:"GM0489", name:"Barendrecht" }, { gm_code:"GM0203", name:"Barneveld" }, { gm_code:"GM0373", name:"Bergen (NH)" }, { gm_code:"GM0753", name:"Best" }, { gm_code:"GM0375", name:"Beverwijk" }, { gm_code:"GM0377", name:"Bloemendaal" }, { gm_code:"GM0758", name:"Breda" }, { gm_code:"GM0312", name:"Bunnik" }, { gm_code:"GM0313", name:"Bunschoten" }, { gm_code:"GM0502", name:"Capelle aan den IJssel" }, { gm_code:"GM0310", name:"De Bilt" }, { gm_code:"GM0736", name:"De Ronde Venen" }, { gm_code:"GM0503", name:"Delft" }, { gm_code:"GM0150", name:"Deventer" }, { gm_code:"GM0384", name:"Diemen" }, { gm_code:"GM0505", name:"Dordrecht" }, { gm_code:"GM0512", name:"Gorinchem" }, { gm_code:"GM0228", name:"Ede" }, { gm_code:"GM0772", name:"Eindhoven" }, { gm_code:"GM0153", name:"Enschede" }, { gm_code:"GM0232", name:"Epe" }, { gm_code:"GM1771", name:"Geldrop-Mierlo" }, { gm_code:"GM1942", name:"Gooise Meren" }, { gm_code:"GM0014", name:"Groningen" }, { gm_code:"GM0392", name:"Haarlem" }, { gm_code:"GM0394", name:"Haarlemmermeer" }, { gm_code:"GM0243", name:"Harderwijk" }, { gm_code:"GM0246", name:"Heerde" }, { gm_code:"GM0794", name:"Helmond" }, { gm_code:"GM0164", name:"Hengelo" }, { gm_code:"GM0798", name:"Hilvarenbeek" }, { gm_code:"GM0402", name:"Hilversum" }, { gm_code:"GM0353", name:"IJsselstein" }, { gm_code:"GM0166", name:"Kampen" }, { gm_code:"GM0542", name:"Krimpen aan den IJssel" }, { gm_code:"GM1621", name:"Lansingerland" }, { gm_code:"GM0080", name:"Leeuwarden" }, { gm_code:"GM1916", name:"Leidschendam-Voorburg" }, { gm_code:"GM0327", name:"Leusden" }, { gm_code:"GM0809", name:"Loon op Zand" }, { gm_code:"GM0556", name:"Maassluis" }, { gm_code:"12025", name:"Mechelen" }, { gm_code:"GM1842", name:"Midden-Delfland" }, { gm_code:"GM1952", name:"Midden-Groningen" }, { gm_code:"GM0356", name:"Nieuwegein" }, { gm_code:"GM0267", name:"Nijkerk" }, { gm_code:"GM0268", name:"Nijmegen" }, { gm_code:"GM1930", name:"Nissewaard" }, { gm_code:"GM0820", name:"Nuenen, Gerwen en Nederwetten" }, { gm_code:"GM0302", name:"Nunspeet" }, { gm_code:"GM0826", name:"Oosterhout" }, { gm_code:"GM0431", name:"Oostzaan" }, { gm_code:"GM1926", name:"Pijnacker-Nootdorp" }, { gm_code:"GM0273", name:"Putten" }, { gm_code:"GM0597", name:"Ridderkerk" }, { gm_code:"GM0603", name:"Rijswijk" }, { gm_code:"GM1674", name:"Roosendaal" }, { gm_code:"GM0599", name:"Rotterdam" }, { gm_code:"GM0606", name:"Schiedam" }, { gm_code:"GM0848", name:"Son en Breugel" }, { gm_code:"GM0855", name:"Tilburg" }, { gm_code:"GM1730", name:"Tynaarlo" }, { gm_code:"GM0344", name:"Utrecht" }, { gm_code:"GM1581", name:"Utrechtse Heuvelrug" }, { gm_code:"GM0861", name:"Veldhoven" }, { gm_code:"GM0622", name:"Vlaardingen" }, { gm_code:"GM0865", name:"Vught" }, { gm_code:"GM0866", name:"Waalre" }, { gm_code:"GM0867", name:"Waalwijk" }, { gm_code:"GM0289", name:"Wageningen" }, { gm_code:"GM0629", name:"Wassenaar" }, { gm_code:"GM1960", name:"West Betuwe" }, { gm_code:"GM1783", name:"Westland" }, { gm_code:"GM0637", name:"Zoetermeer" }, { gm_code:"GM0642", name:"Zwijndrecht" }, { gm_code:"GM0193", name:"Zwolle" }
   ]
   : [
     { gm_code:"cnis5:44021", name:"Gent" },
@@ -48,6 +27,70 @@ const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
+// Synchronously dispatch operators from the in-memory/localStorage cache when
+// available, so the filter bar paints immediately on (subsequent) loads.
+const dispatchCachedAanbieders = (store_accesscontrollist) => {
+  const cached = getCachedOperators();
+  if (cached && cached.length > 0) {
+    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cached });
+    return true;
+  }
+  return false;
+};
+
+const toGebiedOptions = (municipalities) => {
+  return (municipalities || [])
+    .map((municipality) => ({
+      gm_code: municipality.gm_code || municipality.municipality,
+      name: municipality.name,
+    }))
+    .filter((municipality) => municipality.gm_code);
+};
+
+// Guests and NL-wide accounts use the live public municipalities list so new
+// places (e.g. Weert) appear without a frontend deploy. The hardcoded
+// cPublicGebieden list is only a last-resort fallback when the API fails.
+const loadPublicGebieden = (store_accesscontrollist) => {
+  const url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`public/municipalities ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((publicData) => {
+      const gebieden = toGebiedOptions(publicData.municipalities);
+      if (gebieden.length > 0) {
+        store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: gebieden });
+      }
+    })
+    .catch((ex) => {
+      console.error('Unable to load public municipalities', ex);
+      store_accesscontrollist.dispatch({
+        type: 'SET_GEBIEDEN',
+        payload: cPublicGebieden.filter((gebied) => gebied.gm_code),
+      });
+    });
+};
+
+// Resolve the public operators list from the API. If the network fails and
+// nothing is cached, we leave aanbieders as-is so the app keeps working with
+// whatever is already in state.
+const dispatchPublicAanbiedersFromApi = (store_accesscontrollist) => {
+  // Always refresh from the network on app init so a stale localStorage entry
+  // (or a prior in-memory cache) cannot block the full operators list.
+  return fetchOperators({ refresh: true })
+    .then((operators) => {
+      if (operators && operators.length > 0) {
+        store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: operators });
+      }
+    })
+    .catch((ex) => {
+      console.error('Unable to fetch operators', ex);
+    });
+};
+
 export const initAccessControlList = (store_accesscontrollist)  => {
   try {
     if(undefined===store_accesscontrollist) {
@@ -58,11 +101,13 @@ export const initAccessControlList = (store_accesscontrollist)  => {
     const state = store_accesscontrollist.getState();
     if(!isLoggedIn(state)) {
       // console.log("initialize ACL Data (not logged in)")
-      // items -> {"name": "Cykl","system_id": "cykl"}
-      store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-      
-      // items -> {"name": "Cykl","system_id": "cykl"}
-      store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+
+      loadPublicGebieden(store_accesscontrollist);
+
+      // Render whatever we already have cached for instant paint, then refresh
+      // from the operators API in the background.
+      dispatchCachedAanbieders(store_accesscontrollist);
+      dispatchPublicAanbiedersFromApi(store_accesscontrollist);
 
       let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented
       store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: types});
@@ -74,7 +119,12 @@ export const initAccessControlList = (store_accesscontrollist)  => {
       let options = { headers : { "authorization": "Bearer " + state.authentication.user_data.token }}
       
       store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: true});
-      
+
+      // Instant paint from cache, then always refresh from the public operators
+      // API (same source as anonymous users). ACL only scopes municipalities.
+      dispatchCachedAanbieders(store_accesscontrollist);
+      dispatchPublicAanbiedersFromApi(store_accesscontrollist);
+
       fetch(url, options).then((response) => {
         if(!response.ok) {
           console.error("unable to fetch: %o", response);
@@ -84,9 +134,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             console.warn("Authentication failed, clearing user data");
             store_accesscontrollist.dispatch({ type: 'CLEAR_USER' });
             
-            // Fall back to public data
-            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+            // Fall back to public data (operators come from the API).
+            loadPublicGebieden(store_accesscontrollist);
+            dispatchPublicAanbiedersFromApi(store_accesscontrollist);
             store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
             store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
           }
@@ -98,20 +148,55 @@ export const initAccessControlList = (store_accesscontrollist)  => {
           .then((metadata) => {
             // items -> {"name": "Cykl","system_id": "cykl"}
             // console.log("dispatch gebieden ", metadata.municipalities);
-            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: metadata.municipalities});
-            if(metadata.municipalities.length===1) {
-              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: metadata.municipalities[0].gm_code});
-            } else if(metadata.municipalities.length === 0){
-              // Reset filterGebied if user has access to 0 municipalities
-              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+            store_accesscontrollist.dispatch({ type: 'SET_ACL_OPERATORS', payload: metadata.operators || [] });
+            const userData = store_accesscontrollist.getState().authentication?.user_data;
+            if (userData && metadata && !Array.isArray(metadata)) {
+              store_accesscontrollist.dispatch(setAclInRedux({
+                ...(userData.acl || {}),
+                organisation_type: metadata.organisation_type,
+                operators: metadata.operators,
+                municipalities: metadata.municipalities,
+                filter_municipality: metadata.filter_municipality,
+                filter_operator: metadata.filter_operator,
+                is_contact_person_municipality: metadata.is_contact_person_municipality,
+              }));
+            }
+            const municipalities = metadata.municipalities || [];
+            store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: municipalities});
+            // ADMIN organisations typically have an empty ACL municipality list
+            // (they see all data). Do not treat that as "no access".
+            const organisationType = metadata.organisation_type
+              || metadata.type_of_organisation;
+            const treatAsNlWide = organisationType === 'ADMIN'
+              || metadata.is_admin === true
+              || isAdmin(store_accesscontrollist.getState());
+            if(municipalities.length===1) {
+              store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: municipalities[0].gm_code});
+            } else if(municipalities.length === 0){
+              if (!treatAsNlWide) {
+                store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+              } else {
+                loadPublicGebieden(store_accesscontrollist);
+              }
+            } else {
+              // User has access to multiple municipalities. When the persisted /
+              // initial 'Plaats' filter points at a municipality this user cannot
+              // access (e.g. a stale localStorage value or the random initial
+              // municipality after a fresh load), the filter bar already renders
+              // it as "Alle plaatsen", but the vehicle query would be scoped to
+              // zones of that inaccessible municipality and return nothing. Reset
+              // it to "" ("Alle plaatsen") so all accessible municipalities'
+              // vehicles are shown, matching what the UI displays.
+              // Admins are exempt: they can view municipalities outside their ACL
+              // list and their queries are NL-wide regardless of this value.
+              const currentGebied = store_accesscontrollist.getState().filter?.gebied;
+              const hasAccessToCurrentGebied = municipalities.some(m => m.gm_code === currentGebied);
+              if(currentGebied && !hasAccessToCurrentGebied && !treatAsNlWide) {
+                store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: ""});
+              }
             }
             
-            // If not admin, filter out certain operators
-            // if(!state.authentication.user_data.acl || !state.authentication.user_data.acl.is_admin) {
-            //   const hideOperators = ['mywheels', 'greenwheels'];
-            //   metadata.operators = metadata.operators.filter(op => hideOperators.indexOf(op.system_id) <= -1);
-            // }
-            store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: metadata.operators});
+            // Aanbieders come from the public /operators API (see dispatchPublicAanbiedersFromApi).
 
             // items -> {"id": 1, "name": "asdfasdfadfa" }
             let types = cPublicVoertuigTypes; // TODO: get from ACL once implemented
@@ -121,10 +206,11 @@ export const initAccessControlList = (store_accesscontrollist)  => {
           })
         }).catch(ex=>{
           console.error("unable to decode JSON", ex);
-          
-          // Handle network errors by falling back to public data
-          store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-          store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+
+          // Handle network errors by falling back to public data (operators
+          // come from the public operators API).
+          loadPublicGebieden(store_accesscontrollist);
+          dispatchPublicAanbiedersFromApi(store_accesscontrollist);
           store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
           store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
         }).finally(()=>{
@@ -136,9 +222,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
     // console.error("Unable to update ACL", ex)
     store_accesscontrollist.dispatch({type: 'SHOW_LOADING', payload: false});
     
-    // Handle any other errors by falling back to public data
-    store_accesscontrollist.dispatch({ type: 'SET_GEBIEDEN', payload: cPublicGebieden});
-    store_accesscontrollist.dispatch({ type: 'SET_AANBIEDERS', payload: cPublicAanbieders});
+    // Handle any other errors by falling back to public data.
+    loadPublicGebieden(store_accesscontrollist);
+    dispatchPublicAanbiedersFromApi(store_accesscontrollist);
     store_accesscontrollist.dispatch({ type: 'SET_VEHICLE_TYPES', payload: cPublicVoertuigTypes});
     store_accesscontrollist.dispatch({ type: 'SET_METADATA_LOADED', payload: true});
     

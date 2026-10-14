@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 
-import Logo from '../Logo.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Button from '../Button/Button';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
@@ -95,6 +95,12 @@ function FilterbarPolicyHubs({
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
   const is_stats_or_manage_mode = useSelector((state: StateType) => state.policy_hubs.is_stats_or_manage_mode || 'stats');
 
+  useEffect(() => {
+    if (!canEditHubs(acl) && is_stats_or_manage_mode === 'manage') {
+      dispatch(setIsStatsOrManageMode('stats'));
+    }
+  }, [acl, is_stats_or_manage_mode, dispatch]);
+
   // Get all available hub phases
   const policyHubPhases = get_phases();
 
@@ -157,29 +163,29 @@ function FilterbarPolicyHubs({
 
   return (
     <>
-      <div className="filter-bar-inner py-2">
+      <div className="filter-bar-inner">
 
         <div style={{
-          paddingBottom: '24px'
+          paddingBottom: '48px'
         }}>
           {! hideLogo && <Link to="/">
-            <Logo />
+            <LogoDashboardDeelmobiliteit />
           </Link>}
         </div>
 
-        {filterGebied && canEditHubs(acl) && <div className="py-2 flex justify-between" style={{
+        {filterGebied && <div className="py-2 flex justify-between" style={{
           visibility: filterGebied ? 'visible' : 'hidden',
           marginLeft: '-0.5rem'
         }}>
           <Button onClick={() => {
             dispatch(setIsStatsOrManageMode('stats'));
           }} theme={is_stats_or_manage_mode === 'stats' ? "primary" : "white"}
-          classes="flex-2 rounded-r-none"
+          classes={canEditHubs(acl) ? 'flex-2 rounded-r-none' : 'flex-1'}
           style={{marginRight: 0}}
           >
             📊 Hubstatistieken
           </Button>
-          <Button onClick={() => {
+          {canEditHubs(acl) && <Button onClick={() => {
              dispatch(setIsStatsOrManageMode('manage'));
           }} theme={is_stats_or_manage_mode === 'manage' ? "primary" : "white"}
           classes="flex-1 ml-0 rounded-l-none"
@@ -188,7 +194,7 @@ function FilterbarPolicyHubs({
           }}
           >
             📏 Hubbeheer
-          </Button>
+          </Button>}
         </div>}
 
         {filterGebied && <div className="py-2 flex justify-between" style={{

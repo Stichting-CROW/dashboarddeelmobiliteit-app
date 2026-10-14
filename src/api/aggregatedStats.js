@@ -1,6 +1,7 @@
 import { createFilterparameters } from '../poll-api/pollTools.js';
 import { DISPLAYMODE_OTHER } from '../reducers/layers.js';
 import saveAs from 'file-saver';
+import { dedupedFetch } from './dedupedFetch';
 
 const getFetchOptions = (token) => {
   return {
@@ -13,16 +14,17 @@ const getFetchOptions = (token) => {
 
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
-  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
+  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}`;
+  if(options.aggregationTime) url += `&aggregation_time=${options.aggregationTime}`;
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
-  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
+  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata, { is_logged_in: true });
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
-  // Get API response  
+  // Get API response (deduped: concurrent identical requests share a single network call)
   const fetchOptions = getFetchOptions(token)
-  const response = await fetch(url, fetchOptions);
+  const response = await dedupedFetch(url, fetchOptions);
   const responseJson = await response.json();
 
   // Return
@@ -40,12 +42,12 @@ export const getAggregatedStats_timescaleDB = async (token, key, options) => {
 
   // Set filter params if needed
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
-  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata);
+  let filterParams = createFilterparameters(DISPLAYMODE_OTHER, options.filter, options.metadata, { is_logged_in: true });
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
-  // Get API response  
+  // Get API response (deduped: concurrent identical requests share a single network call)
   const fetchOptions = getFetchOptions(token)
-  const response = await fetch(url, fetchOptions);
+  const response = await dedupedFetch(url, fetchOptions);
   const responseJson = await response.json();
 
   // Return

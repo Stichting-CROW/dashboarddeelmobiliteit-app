@@ -15,6 +15,10 @@ import {StateType} from '../../types/StateType';
 // https://github.com/mapbox/mapbox-gl-js/issues/1722#issuecomment-460500411
 import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle} from './MapUtils/map';
+import {createSafeGeolocateControl} from './MapUtils/mapControls';
+import MapAttribution from './MapControls/MapAttribution';
+import { whenMapStyleReady } from './MapUtils/mapGuards';
+import { applyDataLayerOrderWhenReady } from './MapUtils/dataLayerOrder';
 import {initPopupLogic} from './MapUtils/popups.js';
 import {initClusters} from './MapUtils/clusters.js';
 import {
@@ -34,7 +38,15 @@ import {
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_START,
   DISPLAYMODE_OTHER,
+  DISPLAYMODE_SERVICE_AREAS,
+  DISPLAYMODE_POLICY_HUBS,
+  DATA_LAYER_ORDER_SERVICE_AREAS,
+  DATA_LAYER_ORDER_HUBS,
+  DATA_LAYER_ORDER_VERBODSGEBIEDEN,
 } from '../../reducers/layers.js';
+import { removeHubsFromMap } from './MapUtils/map.policy_hubs';
+import { removeServiceAreasFromMap } from './MapUtils/map.service_areas';
+import { removeServiceAreaDeltaFromMap } from './MapUtils/map.service_area_delta';
 
 import './MapComponent.css';
 
@@ -47,12 +59,21 @@ import DdServiceAreasLayer from '../MapLayer/DdServiceAreasLayer';
 import DdPolicyHubsLayer from '../MapLayer/DdPolicyHubsLayer';
 import DdParkEventsLayer from '../MapLayer/DdParkEventsLayer';
 import DdRentalsLayer from '../MapLayer/DdRentalsLayer';
+import DdServiceAreasOverlay from '../MapLayer/DdServiceAreasOverlay';
+import DdPolicyHubsOverlay from '../MapLayer/DdPolicyHubsOverlay';
 import { WidthIcon } from '@radix-ui/react-icons';
 import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
-import { getAvailableBackgroundLayers } from './MapUtils/backgroundLayerManager';
+import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
+import { getProviderColorForProvider } from '../../helpers/providers';
+import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
+import {
+  selectDataLayerOrder,
+  selectOverlayLayers,
+  isOverlayLayerEnabled
+} from '../../helpers/layerSelectors';
 
 // Set language for momentJS
-moment.updateLocale('nl', moment.locale);
+moment.locale('nl');
 
 const MapComponent = (props): JSX.Element => {
   const [pathName, setPathName] = useState(document.location.pathname);
@@ -70,6 +91,9 @@ const MapComponent = (props): JSX.Element => {
     return state.layers ? state.layers.map_style : null;
   });
 
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
+  const overlayLayers = useSelector(selectOverlayLayers);
+
   // Connect to redux store
   const dispatch = useDispatch()
 
@@ -80,6 +104,12 @@ const MapComponent = (props): JSX.Element => {
   const stateLayers = useSelector((state: StateType) => state.layers || null);
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
   const providers = useSelector((state: StateType) => (state.metadata && state.metadata.aanbieders) ? state.metadata.aanbieders : []);
+  const aclOperators = useSelector((state: StateType) =>
+    state.metadata?.aclOperators ? state.metadata.aclOperators : []
+  );
+  const gebieden = useSelector((state: StateType) =>
+    state.metadata?.gebieden ? state.metadata.gebieden : []
+  );
   const extent/* map boundaries */ = useSelector((state: StateType) => state.layers ? state.layers.extent : null);
   const [counter, setCounter] = useState(0);
   const zones_geodata = useSelector((state: StateType) => {
@@ -106,6 +136,7 @@ const MapComponent = (props): JSX.Element => {
   const [activeLayers, setActiveLayers] = useState([]);
   const [didApplyMapStyle, setDidApplyMapStyle] = useState(false);
   let map = useRef(null);
+  const mapControlsRef = useRef<maplibregl.IControl[]>([]);
 
   // Initialize hooks after map is declared
   const { getAvailableLayers } = useBackgroundLayer(map.current);
@@ -124,6 +155,10 @@ const MapComponent = (props): JSX.Element => {
     return null;
   });
 
+  const filterbarOpen = useSelector((state: StateType) => {
+    return state.ui && state.ui.FILTERBAR || false;
+  });
+
   // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
@@ -131,21 +166,21 @@ const MapComponent = (props): JSX.Element => {
   }, [location]);
 
   const applyMapSettings = (theMap) => {
-    // Hide compass control
-    theMap.addControl(new maplibregl.NavigationControl({
+    const navigationControl = new maplibregl.NavigationControl({
       showCompass: false
       // showZoom: false
-    }), 'bottom-right');
+    });
+    theMap.addControl(navigationControl, 'bottom-right');
+    mapControlsRef.current.push(navigationControl);
 
-    // Add 'current location' button
-    theMap.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true
-        },
-        trackUserLocation: true
-      }), 'bottom-right'
-    );
+    const geolocateControl = createSafeGeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: true
+    });
+    theMap.addControl(geolocateControl, 'bottom-right');
+    mapControlsRef.current.push(geolocateControl);
 
     // Disable rotating
     theMap.dragRotate.disable();
@@ -192,7 +227,9 @@ const MapComponent = (props): JSX.Element => {
         center: [lng, lat],
         zoom: zoom,
         maxZoom: 21,
-        attributionControl: false// Hide info icon
+        // Attribution is rendered by <MapAttribution /> in the bottom-right control stack
+        attributionControl: false,
+        maplibreLogo: false
       });
 
       // Apply settings like disabling rotating the map
@@ -232,13 +269,15 @@ const MapComponent = (props): JSX.Element => {
 
         // Add cross image to use for retirement hubs
         map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
-          if(err) throw err;
+          // The map may have been unmounted (e.g. page switch) while this
+          // request was in flight, in which case map.current is null.
+          if(err || !map.current || map.current.hasImage('pattern')) return;
           map.current.addImage('pattern', image);
         });
 
         // Add 'Mijksenaar' hub logo for Beleidshubs, if zoomed out
         map.current.loadImage('https://dashboarddeelmobiliteit.nl/components/MapComponent/hub-icon-mijksenaar.png', (err, image) => {
-          if(err) throw err;
+          if(err || !map.current || map.current.hasImage('hub-icon-mijksenaar')) return;
           map.current.addImage('hub-icon-mijksenaar', image);
         });
       });
@@ -248,6 +287,45 @@ const MapComponent = (props): JSX.Element => {
       map.current.touchZoomRotate.disableRotation();
     }
     initMap();
+
+    // Cleanup on unmount: when the user navigates to a non-map route, MapPage
+    // (and thus MapComponent) unmounts. Properly destroy the MapLibre instance
+    // so its WebGL context, DOM nodes, event listeners and tile requests are
+    // released. Without this we leak a full MapLibre map per visit.
+    //
+    // IMPORTANT: in a deleted React subtree, parent effect cleanups run
+    // BEFORE the children's cleanups. Several child layers (e.g.
+    // DdServiceAreasLayer, DdPolicyHubsLayer) call `map.getLayer` /
+    // `map.removeLayer` in their own cleanup. After `map.remove()` the
+    // MapLibre instance's internal style is destroyed and those calls throw
+    // ("Cannot read properties of undefined (reading 'getLayer')"). We
+    // therefore defer the actual `.remove()` to a microtask so child
+    // cleanups run against a still-alive map.
+    return () => {
+      const toRemove = map.current;
+      if (!toRemove) return;
+      if (window['ddMap'] === toRemove) {
+        window['ddMap'] = null;
+      }
+      map.current = null;
+      mapControlsRef.current.forEach((control) => {
+        try {
+          toRemove.removeControl(control);
+        } catch (e) {
+          // Control may already have been removed with the map.
+        }
+      });
+      mapControlsRef.current = [];
+      queueMicrotask(() => {
+        try {
+          toRemove.remove();
+        } catch (e) {
+          // Ignore: MapLibre sometimes throws during teardown if a request
+          // was already aborted; the goal is to not leak, not to be perfectly
+          // clean.
+        }
+      });
+    };
   }, [
     lng,
     lat,
@@ -273,9 +351,15 @@ const MapComponent = (props): JSX.Element => {
     const lng = queryParams.get("lng");
 
     // If zoom and lat/lng are in URL -> navigate to that location
+    let zoomTimeoutId: ReturnType<typeof setTimeout> | undefined;
     if(zoom && lat && lng) {
       console.log('ACTION: setZoom and setCenter (MapComponent - if zoom and lat/lng are in URL)');
-      setTimeout(() => {
+      zoomTimeoutId = setTimeout(() => {
+        // Guard against the component having unmounted (map.current is reset
+        // to null in the cleanup of the init-map effect). Without this guard
+        // navigating away from a map route within 1s throws
+        // "Cannot read properties of null (reading 'setZoom')".
+        if (!map.current) return;
         map.current.setZoom(zoom);
         map.current.setCenter([lng, lat]);
       }, 1000);
@@ -288,6 +372,12 @@ const MapComponent = (props): JSX.Element => {
         payload: gm_code
       })
     }
+
+    return () => {
+      if (zoomTimeoutId !== undefined) {
+        clearTimeout(zoomTimeoutId);
+      }
+    };
   }, [
     didMapLoad
   ])
@@ -363,28 +453,118 @@ const MapComponent = (props): JSX.Element => {
     setDidApplyMapStyle(false);
   }, [mapStyle]);
 
+  // Update street visibility when zooming/moving on satellite (fade streets at neighbourhood level)
+  const mapStyleRef = useRef(mapStyle);
+  mapStyleRef.current = mapStyle;
+  useEffect(() => {
+    if (!didMapLoad || !map.current) return;
+    const updateStreets = () => {
+      if (map.current?.isStyleLoaded() && mapStyleRef.current) {
+        updateStreetVisibilityForSatellite(map.current, mapStyleRef.current);
+      }
+    };
+    // Throttle zoom handler with rAF so we update during zoom (smooth fade) without flooding
+    let zoomRafId = null;
+    const zoomHandler = () => {
+      if (zoomRafId == null) {
+        zoomRafId = requestAnimationFrame(() => {
+          updateStreets();
+          zoomRafId = null;
+        });
+      }
+    };
+    map.current.on('zoom', zoomHandler);
+    map.current.on('zoomend', updateStreets);
+    map.current.on('moveend', updateStreets);
+    updateStreets(); // Run on mount
+    return () => {
+      if (zoomRafId != null) cancelAnimationFrame(zoomRafId);
+      map.current?.off('zoom', zoomHandler);
+      map.current?.off('zoomend', updateStreets);
+      map.current?.off('moveend', updateStreets);
+    };
+  }, [didMapLoad]);
+
   // Data layer management is now handled by MapPage based on active_data_layers
   // The layers are passed via props.layers and activated by the existing activateLayers logic
 
   // Set active layers (now handled by MapPage based on active_data_layers)
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
+    if(! map.current) return;
 
     // Do not activate background layers
     // Get background layers from components/Map/MapUtils/backgroundLayerManager.js
     const backgroundLayers = getAvailableLayers();
     const layersToActivate = props.layers.filter(layer => !Object.values(backgroundLayers).some(backgroundLayer => backgroundLayer.layerId === layer));
 
-    activateLayers(map.current, layers, layersToActivate);
+    let cancelled = false;
+
+    const run = () => {
+      if (cancelled || !map.current) return;
+      activateLayers(map.current, layers, layersToActivate);
+    };
+
+    if (!map.current.isStyleLoaded()) {
+      whenMapStyleReady(map.current, run);
+      return () => { cancelled = true; };
+    }
+
+    run();
+    return () => { cancelled = true; };
   }, [
     didInitSourcesAndLayers,
     JSON.stringify(props.layers)
   ])
 
+  // Re-apply user-defined z-order after layers are (re)activated or the style changes.
+  useEffect(() => {
+    if (!didInitSourcesAndLayers) return;
+    if (!map.current) return;
+
+    applyDataLayerOrderWhenReady(
+      map.current,
+      dataLayerOrder[displayMode],
+      displayMode
+    );
+  }, [
+    didInitSourcesAndLayers,
+    displayMode,
+    JSON.stringify(dataLayerOrder),
+    JSON.stringify(props.layers),
+    mapStyle
+  ])
+
+  // Defensive cleanup: when the display mode changes away from a page that owns
+  // dynamic map layers, make sure those layers are removed. Child components
+  // normally clean up themselves, but if the map style was loading during their
+  // unmount their cleanup may have been deferred. This effect acts as a safety net.
+  useEffect(() => {
+    if(! map.current) return;
+    if(! didMapLoad) return;
+
+    if (displayMode !== DISPLAYMODE_POLICY_HUBS) {
+      // Only remove the native policy hubs source; overlay sources are
+      // managed by DdPolicyHubsOverlay itself.
+      removeHubsFromMap(map.current);
+    }
+    // The service_areas source is shared by the native layer and the overlay,
+    // so keep it if the servicegebieden overlay is enabled for this page.
+    const serviceAreasOverlayEnabled = isOverlayLayerEnabled(
+      overlayLayers,
+      displayMode,
+      DATA_LAYER_ORDER_SERVICE_AREAS
+    );
+    if (displayMode !== DISPLAYMODE_SERVICE_AREAS && !serviceAreasOverlayEnabled) {
+      removeServiceAreasFromMap(map.current);
+      removeServiceAreaDeltaFromMap(map.current);
+    }
+  }, [displayMode, didMapLoad, overlayLayers]);
+
   // Set vehicles sources
   useEffect(() => {
     if(! didInitSourcesAndLayers) return;
-    if(! vehicles.data || !vehicles.data.features || vehicles.data.features.length <= 0) return;
+    if(! vehicles.data || !vehicles.data.features) return;
     if(! map.current) return;
     if(! map.current.U) return;
 
@@ -478,8 +658,16 @@ const MapComponent = (props): JSX.Element => {
       return;
     }
 
-    // Do not zoom to place if zone geography is in URL
+    // Do not zoom to place if a specific zone is in the URL
     const hasZoneInUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      // Policy hubs page: `selected` means we will zoom to that hub instead
+      if (
+        window.location.pathname.indexOf('/map/beleidshubs') > -1
+        && params.getAll('selected').length > 0
+      ) {
+        return true;
+      }
       // Check if we are on the zones page
       if(window.location.pathname.indexOf('/map/zones/') <= -1 && window.location.pathname.indexOf('/admin/zones/') <= -1) return false;
       // Get geographyId from URL
@@ -513,11 +701,23 @@ const MapComponent = (props): JSX.Element => {
       return true;
     }
 
-    initPopupLogic(map.current, providers, canSeeVehicleId(), filter.datum)
+    const hidePopupProviderTitle =
+      location.pathname === '/stats/prestaties-aanbieders' &&
+      isOperatorPrestatiesView(aclOperators);
+
+    initPopupLogic(
+      map.current,
+      providers,
+      canSeeVehicleId(),
+      filter.datum,
+      hidePopupProviderTitle
+    );
   }, [
     didInitSourcesAndLayers,
     providers,
-    filter.datum
+    aclOperators,
+    filter.datum,
+    location.pathname,
   ])
 
   // Init clusters click handler
@@ -529,29 +729,75 @@ const MapComponent = (props): JSX.Element => {
     didInitSourcesAndLayers
   ])
 
-  // Add provider images/icons
+  // Add provider images/icons (batched to avoid blocking the main thread)
   useEffect(() => {
+    if (!didMapLoad || !map.current) {
+      return;
+    }
+
+    let cancelled = false;
+    const PROVIDER_IMAGE_BATCH_SIZE = 4;
+
     const addProviderImage = async(aanbieder) => {
-      let baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p')
-      if (map.current.hasImage(baselabel + ':0')) {
-        // console.log("provider image for %s already exists", baselabel);
+      if (cancelled || !map.current) {
         return;
       }
-      var value;
-      if(stateLayers.displaymode === 'displaymode-rentals') {
-        value = await getVehicleMarkers_rentals(aanbieder.color);
-      } else {
-        value = await getVehicleMarkers(aanbieder.color);
+
+      const operatorColor = aanbieder.color || getProviderColorForProvider(aanbieder.system_id);
+      const baselabel = aanbieder.system_id + (stateLayers.displaymode === 'displaymode-rentals' ? '-r' : '-p');
+      const hasOperationalImages = map.current.hasImage(baselabel + ':0');
+      const hasNonOperationalImages = map.current.hasImage(baselabel + '-n:0');
+      if (
+        (stateLayers.displaymode === 'displaymode-rentals' && hasOperationalImages) ||
+        (stateLayers.displaymode !== 'displaymode-rentals' && hasOperationalImages && hasNonOperationalImages)
+      ) {
+        return;
       }
-      value.forEach((img, idx) => {
+
+      if (stateLayers.displaymode === 'displaymode-rentals') {
+        const rentalMarkers = await getVehicleMarkers_rentals(operatorColor);
+        if (cancelled || !map.current) {
+          return;
+        }
+        rentalMarkers.forEach((img, idx) => {
+          map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
+        });
+        return;
+      }
+
+      const [operationalMarkers, nonOperationalMarkers] = await Promise.all([
+        getVehicleMarkers(operatorColor, false),
+        getVehicleMarkers(operatorColor, true),
+      ]);
+      if (cancelled || !map.current) {
+        return;
+      }
+
+      operationalMarkers.forEach((img, idx) => {
         map.current.addImage(baselabel + `:` + idx, { width: 50, height: 50, data: img});
       });
-      // console.log('Added provider images for:', aanbieder.system_id);
+      nonOperationalMarkers.forEach((img, idx) => {
+        map.current.addImage(baselabel + `-n:` + idx, { width: 50, height: 50, data: img});
+      });
     };
-    providers.forEach(aanbieder => {
-      addProviderImage(aanbieder);
-    });
+
+    const loadProviderImages = async() => {
+      for (let i = 0; i < providers.length; i += PROVIDER_IMAGE_BATCH_SIZE) {
+        if (cancelled) {
+          return;
+        }
+        const batch = providers.slice(i, i + PROVIDER_IMAGE_BATCH_SIZE);
+        await Promise.all(batch.map((aanbieder) => addProviderImage(aanbieder)));
+      }
+    };
+
+    loadProviderImages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    didMapLoad,
     providers,
     stateLayers.displaymode
   ]);
@@ -566,11 +812,20 @@ const MapComponent = (props): JSX.Element => {
     return viewsToShowSearchBar.indexOf(stateLayers.displaymode) > -1;
   }
 
+  const shouldShowMapTopControls = () => {
+    if (isLoggedIn) {
+      return true;
+    }
+    return showSearchBar();
+  }
+
   return <>
     {/* The map container (HTML element) */}
-    <div ref={mapContainer} className="map flex-1" />
+    <div ref={mapContainer} className={`map flex-1 ${filterbarOpen ? 'filter-open' : ''}`} />
     {/* Isochrone layer */}
-    {isLoggedIn ? <IsochroneTools /> : null}
+    {isLoggedIn ? <IsochroneTools map={map.current} /> : null}
+    {/* Attribution (bottom-right control stack) */}
+    <MapAttribution map={map.current} />
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
     
@@ -581,7 +836,15 @@ const MapComponent = (props): JSX.Element => {
     {stateLayers.displaymode === 'displaymode-policy-hubs' && <>
       <DdPolicyHubsLayer map={map.current} />
     </>}
-    {isLoggedIn && showSearchBar && 
+    {/* Overlay layers (Andere datalaag) on non-native pages */}
+    {stateLayers.displaymode !== DISPLAYMODE_SERVICE_AREAS
+      && isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_SERVICE_AREAS)
+      && <DdServiceAreasOverlay map={map.current} />}
+    {stateLayers.displaymode !== DISPLAYMODE_POLICY_HUBS
+      && (isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_HUBS)
+        || isOverlayLayerEnabled(overlayLayers, stateLayers.displaymode, DATA_LAYER_ORDER_VERBODSGEBIEDEN))
+      && <DdPolicyHubsOverlay map={map.current} />}
+    {shouldShowMapTopControls() &&
       <>
         <RightTop>
           <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom'
 import EventsTimeline from '../../EventsTimeline/EventsTimeline';
@@ -14,7 +14,8 @@ import {
 
 import {
   renderServiceAreaDelta,
-  removeServiceAreaDeltaFromMap
+  removeServiceAreaDeltaFromMap,
+  updateLayerFilters
 } from '../../Map/MapUtils/map.service_area_delta';
 
 import {StateType} from '../../../types/StateType.js';
@@ -24,8 +25,15 @@ import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
 import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
 import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
+import { whenMapLayersMutable } from '../../Map/MapUtils/mapGuards';
+import { selectOverlayLayers, isOverlayLayerEnabled, selectDataLayerOrder } from '../../../helpers/layerSelectors';
+import { applyDataLayerOrderWhenReady } from '../../Map/MapUtils/dataLayerOrder';
+import {
+  DISPLAYMODE_SERVICE_AREAS,
+  DATA_LAYER_ORDER_SERVICE_AREAS
+} from '../../../reducers/layers.js';
 
-import { Legend } from './Legend';
+import { Legend, LegendItemType } from './Legend';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 
 const DdServiceAreasLayer = ({
@@ -37,6 +45,10 @@ const DdServiceAreasLayer = ({
   const [serviceAreas, setServiceAreas] = useState([]);
   const [serviceAreasHistory, setServiceAreasHistory] = useState([]);
   const [serviceAreaDelta, setServiceAreaDelta] = useState<ServiceAreaDelta | null>(null);
+  const [activeTypes, setActiveTypes] = useState<Set<LegendItemType>>(
+    new Set(['added', 'unchanged', 'removed'] as LegendItemType[])
+  );
+  const [isLoading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const dispatch = useDispatch()
@@ -45,6 +57,15 @@ const DdServiceAreasLayer = ({
   const visible_operators = useSelector((state: StateType) => state.service_areas ? state.service_areas.visible_operators : null);
   const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
+  const overlayLayers = useSelector(selectOverlayLayers);
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
+
+  // The 'Servicegebieden' checkbox in the layer list can hide this layer
+  const isServiceAreasLayerEnabled = isOverlayLayerEnabled(
+    overlayLayers,
+    DISPLAYMODE_SERVICE_AREAS,
+    DATA_LAYER_ORDER_SERVICE_AREAS
+  );
 
   // On component load: Set background layer to 'base layer' only on initial load
   useEffect(() => {
@@ -64,38 +85,85 @@ const DdServiceAreasLayer = ({
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
-    // Remove 
-    searchParams.delete('version');
-    setSearchParams(searchParams);
+    if (!map || !filter?.gebied || !visible_operators || visible_operators.length === 0) return;
+
+    // Remove version from search params
+    if (searchParams.get('version')) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('version');
+      setSearchParams(newParams);
+    }
 
     // Remove old service areas and deltas
     removeServiceAreasFromMap(map);
     removeServiceAreaDeltaFromMap(map);
 
-    // Load new service areas
-    (async () => {
-      const service_areas = await loadServiceAreas(filter.gebied, visible_operators);
-      setServiceAreas(service_areas);
-    })();
+    // Fire both fetches in parallel but update state independently so the
+    // current service area polygons paint as soon as `loadServiceAreas`
+    // resolves, instead of waiting for the (much heavier and slower)
+    // history endpoint to also come back. This is the main reason the map
+    // used to feel "stuck" on cold load - both calls were awaited
+    // together via Promise.all and the polygons only rendered once both
+    // finished.
+    setIsLoading(true);
+    let isStale = false;
+    let serviceAreasDone = false;
+    let historyDone = false;
+    const maybeFinishLoading = () => {
+      if (serviceAreasDone && historyDone && !isStale) {
+        setIsLoading(false);
+      }
+    };
 
-    (async () => {
-      const service_area_history = await loadServiceAreasHistory(filter.gebied, visible_operators);
-      setServiceAreasHistory(service_area_history);
-    })();
+    loadServiceAreas(filter.gebied, visible_operators)
+      .then((service_areas) => {
+        if (isStale) return;
+        setServiceAreas(service_areas);
+      })
+      .catch((error) => {
+        console.error('Error loading service areas:', error);
+      })
+      .finally(() => {
+        serviceAreasDone = true;
+        maybeFinishLoading();
+      });
 
+    loadServiceAreasHistory(filter.gebied, visible_operators)
+      .then((service_area_history) => {
+        if (isStale) return;
+        setServiceAreasHistory(service_area_history);
+      })
+      .catch((error) => {
+        console.error('Error loading service areas history:', error);
+      })
+      .finally(() => {
+        historyDone = true;
+        maybeFinishLoading();
+      });
+
+    // Switching municipality again while these are in flight must not let the
+    // superseded response overwrite the newer one.
+    return () => {
+      isStale = true;
+    };
   }, [
-    filter.gebied,
+    map,
+    filter?.gebied,
     visible_operators
   ]);
 
-  // onComponentUnLoad
+  // Cleanup on component unmount. Defer removal if the map style is still
+  // loading so layers/sources are reliably cleared once the map is ready.
   useEffect(() => {
     return () => {
-      removeServiceAreasFromMap(map);
-      removeServiceAreaDeltaFromMap(map);
+      if (map) {
+        whenMapLayersMutable(map, () => {
+          removeServiceAreasFromMap(map);
+          removeServiceAreaDeltaFromMap(map);
+        });
+      }
     };
-  }, [
-  ]);
+  }, [map]);
 
   // On component load: Set background layer to 'base layer' only if not already set
   useEffect(() => {
@@ -117,99 +185,188 @@ const DdServiceAreasLayer = ({
     // Removed stateLayers.map_style from dependencies to prevent reverting when user changes background layer
   ]);
 
-  // Load 'delta' if version_id or visible_operators changes
-  useEffect(() => {
-    if(! searchParams.get('version')) return;
+  // Memoize version string to avoid unnecessary re-renders
+  const versionParam = useMemo(() => searchParams.get('version'), [searchParams]);
 
-    (async () => {
-      const response = await loadServiceAreaDeltas(visible_operators, searchParams);
-      setServiceAreaDelta(response);
-    })();
+  // Load 'delta' if version_id changes
+  useEffect(() => {
+    if (!versionParam || !map || !visible_operators || visible_operators.length === 0) {
+      setServiceAreaDelta(null);
+      return;
+    }
+
+    setIsLoading(true);
+    loadServiceAreaDeltas(visible_operators, searchParams)
+      .then((response) => {
+        setServiceAreaDelta(response);
+      })
+      .catch((error) => {
+        console.error('Error loading service area delta:', error);
+        setServiceAreaDelta(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
 
   }, [
-    searchParams.get('version'),
+    versionParam,
+    map,
+    visible_operators,
+    searchParams
   ]);
+
+  // Memoize the service area for the current municipality to avoid unnecessary filtering
+  const serviceAreaForMunicipality = useMemo(() => {
+    if (!serviceAreas || serviceAreas.length === 0 || !filter?.gebied) return null;
+    return serviceAreas.find(x => x.municipality === filter.gebied) || null;
+  }, [serviceAreas, filter?.gebied]);
 
   // Do things if 'serviceAreas' change
   useEffect(() => {
-    // Return if no service areas were found
-    if(! serviceAreas || ! serviceAreas[0]) return;
-    
-    // Get the service area of the selected municipality
-    const serviceAreasForMunicipality = serviceAreas.filter(x => x.municipality === filter.gebied).pop();
+    if (!map) return;
 
-    // Return if no service areas were found for this municipality
-    if(! serviceAreasForMunicipality) {
-      console.log('no service areas for municipality');
+    // If the Servicegebieden layer is unchecked in the layer list: hide it
+    if (!isServiceAreasLayerEnabled) {
+      removeServiceAreasFromMap(map);
+      removeServiceAreaDeltaFromMap(map);
       return;
     }
 
-    renderServiceAreas(map, visible_operators[0], serviceAreasForMunicipality.geometries);
+    // Return if no service areas were found or map is not ready
+    if (!serviceAreaForMunicipality || !visible_operators || visible_operators.length === 0) {
+      return;
+    }
 
-    // onComponentUnLoad
+    // Only render if we're not showing a delta (delta takes precedence)
+    if (!versionParam) {
+      renderServiceAreas(map, visible_operators[0], serviceAreaForMunicipality.geometries);
+
+      // Re-apply the user-defined z-order now that the layers exist again
+      applyDataLayerOrderWhenReady(map, dataLayerOrder[DISPLAYMODE_SERVICE_AREAS], DISPLAYMODE_SERVICE_AREAS);
+    }
+
+    // Cleanup function - only remove if component unmounts
     return () => {
-
+      // Only cleanup if map still exists and we're not transitioning to delta view
+      if (map && !versionParam) {
+        removeServiceAreasFromMap(map);
+      }
     };
   }, [
-    serviceAreas
+    map,
+    serviceAreaForMunicipality,
+    visible_operators,
+    versionParam,
+    isServiceAreasLayerEnabled
   ]);
 
-  // Do things if 'serviceAreaDelta' change
+  // Do things if 'serviceAreaDelta' changes
   useEffect(() => {
-    // Return if no service areas were found
-    if (!serviceAreaDelta) return;
+    // Return if no service area delta or map is not ready
+    if (!map || !serviceAreaDelta) {
+      return;
+    }
 
-    // Remove old service area delta
+    // If the Servicegebieden layer is unchecked in the layer list: hide it
+    if (!isServiceAreasLayerEnabled) {
+      removeServiceAreaDeltaFromMap(map);
+      return;
+    }
+
+    // Remove old service areas when showing delta
     removeServiceAreasFromMap(map);
 
-    // Render service area delta
-    renderServiceAreaDelta(map, serviceAreaDelta);
+    // Render service area delta with active types filter
+    renderServiceAreaDelta(map, serviceAreaDelta, activeTypes);
 
-    // onComponentUnLoad
+    // Cleanup on unmount
     return () => {
+      removeServiceAreaDeltaFromMap(map);
     };
-  }, [serviceAreaDelta]);
+  }, [map, serviceAreaDelta, activeTypes, isServiceAreasLayerEnabled]);
 
-  const clickPreviousVersion = () => {
+  // Update filters when activeTypes change (without recreating layers)
+  useEffect(() => {
+    if (!serviceAreaDelta || !map) return;
+
+    try {
+      if (!map.isStyleLoaded()) return;
+      const fillLayer = map.getLayer('service_area_delta-layer-fill');
+      const borderLayer = map.getLayer('service_area_delta-layer-border');
+
+      if (fillLayer && borderLayer) {
+        updateLayerFilters(map, activeTypes);
+      }
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
+  }, [activeTypes, serviceAreaDelta, map]);
+
+  // Memoize version navigation helpers to avoid recalculating on every render
+  const versionNavigation = useMemo(() => {
+    const currentVersion = versionParam;
+    const currentIndex = currentVersion 
+      ? serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === currentVersion)
+      : -1;
+
+    return {
+      currentIndex,
+      hasPrevious: currentIndex > 0,
+      hasNext: currentIndex >= 0 && currentIndex < serviceAreasHistory.length - 1,
+      isAtLatest: currentIndex === -1 || currentIndex === serviceAreasHistory.length - 1
+    };
+  }, [versionParam, serviceAreasHistory]);
+
+  const clickPreviousVersion = useCallback(() => {
     if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
     
-    // Find current version index
-    const currentVersion = searchParams.get('version');
-    const currentIndex = serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === currentVersion);
+    const { currentIndex } = versionNavigation;
     
-    // If no version selected or at start, use one to latest version
+    // If no version selected or at start, use second to latest version
     if (currentIndex === -1 || currentIndex === 0) {
-      setSearchParams({ version: serviceAreasHistory[serviceAreasHistory.length - 2]?.service_area_version_id.toString() });
+      const secondToLast = serviceAreasHistory[serviceAreasHistory.length - 2];
+      if (secondToLast) {
+        setSearchParams({ version: secondToLast.service_area_version_id.toString() });
+      }
       return;
     }
     
     // Go to previous version
-    setSearchParams({ version: serviceAreasHistory[currentIndex - 1]?.service_area_version_id.toString() });
-  }
+    const previous = serviceAreasHistory[currentIndex - 1];
+    if (previous) {
+      setSearchParams({ version: previous.service_area_version_id.toString() });
+    }
+  }, [serviceAreasHistory, versionNavigation, setSearchParams]);
 
-  const clickNextVersion = () => {
+  const clickNextVersion = useCallback(() => {
     if (!serviceAreasHistory || serviceAreasHistory.length === 0) return;
     
-    // Find current version index
-    const currentVersion = searchParams.get('version');
-    const currentIndex = serviceAreasHistory.findIndex(x => x?.service_area_version_id.toString() === currentVersion);
+    const { currentIndex, isAtLatest } = versionNavigation;
     
-    // If no historic version found, use latest version
-    if (currentIndex === -1 || currentIndex === serviceAreasHistory.length - 1) {
-      // Get version of latest service area
-      const latestServiceArea = serviceAreas.pop();
-      // If no latest service area, return
-      if(! latestServiceArea) return;
-      setSearchParams({ version: latestServiceArea?.service_area_version_id.toString() });
+    // If at latest or no version selected, go to latest
+    if (isAtLatest) {
+      // Find latest service area version
+      const latestServiceArea = serviceAreas.length > 0 ? serviceAreas[serviceAreas.length - 1] : null;
+      if (latestServiceArea?.service_area_version_id) {
+        setSearchParams({ version: latestServiceArea.service_area_version_id.toString() });
+      }
       return;
     }
     
-    // Go to previous version
-    setSearchParams({ version: serviceAreasHistory[currentIndex + 1]?.service_area_version_id.toString() });
-  }
+    // Go to next version
+    const next = serviceAreasHistory[currentIndex + 1];
+    if (next) {
+      setSearchParams({ version: next.service_area_version_id.toString() });
+    }
+  }, [serviceAreas, serviceAreasHistory, versionNavigation, setSearchParams]);
 
-  const doesHavePreviousVersion = () => !searchParams.get('version') || (serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) > 0);
-  const doesHaveNextVersion = () => serviceAreasHistory && serviceAreasHistory.length > 0 && searchParams.get('version') && serviceAreasHistory.findIndex(x => x.service_area_version_id.toString() === searchParams.get('version')) < serviceAreasHistory.length - 1;
+  const doesHavePreviousVersion = useCallback(() => {
+    return versionNavigation.hasPrevious;
+  }, [versionNavigation]);
+
+  const doesHaveNextVersion = useCallback(() => {
+    return versionNavigation.hasNext || versionNavigation.isAtLatest;
+  }, [versionNavigation]);
 
   return <>
     {/* LeftTop InfoCard */}
@@ -241,10 +398,10 @@ const DdServiceAreasLayer = ({
     </div>}
 
     {/* CenterBottom InfoCard */}
-    {searchParams.get('version') && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
+    {versionParam && <div className={`${isFilterbarOpen ? 'filter-open' : ''}`}>
       <CenterBottom>
         <InfoCard>
-          <Legend />
+          <Legend onActiveTypesChange={setActiveTypes} />
         </InfoCard>
       </CenterBottom>
     </div>}

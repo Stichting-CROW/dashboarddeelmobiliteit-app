@@ -2,7 +2,7 @@ import { useToast } from "../ui/use-toast"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { StateType } from "../../types/StateType"
-import { notify } from '../../helpers/notify';
+import { notify, notifyInfo } from '../../helpers/notify';
 
 import { deleteHubs } from '../../helpers/policy-hubs/delete-hubs';
 import { getGeoIdForZoneIds, readable_phase } from "../../helpers/policy-hubs/common"
@@ -57,7 +57,7 @@ const ActionHeader = ({
 
     const deleteHandler = async () => {
         if(! window.confirm('Weet je zeker dat je deze hub(s) wilt verwijderen?')) {
-            alert('Verwijderen geannuleerd');
+            notifyInfo('Verwijderen geannuleerd');
             return;
         }
 
@@ -173,8 +173,26 @@ const ActionHeader = ({
       return are_the_same;
     }
 
+    // Function that checks if all selected hubs are in a deletable phase
+    const canDeleteSelectedHubs = () => {
+      if (!policyHubs || policyHubs.length === 0) return false;
+      if (!selected_policy_hubs || selected_policy_hubs.length === 0) return false;
+
+      const allowedPhases = [
+        'concept',
+        'committed_concept',
+        'committed_retirement_concept'
+      ];
+
+      return selected_policy_hubs.every((hubId) => {
+        const hubData = policyHubs.find(x => x.zone_id === hubId);
+        if (!hubData) return false;
+        return allowedPhases.indexOf(hubData.phase) > -1;
+      });
+    }
+
     return <>
-        <div className="flex justify-between sticky left-0" style={{minHeight: '55px'}}>
+        <div className="flex justify-between" style={{minHeight: '55px'}}>
             {canEditHubs(acl) && <div className="flex justify-start">
                 {<Button theme="white" onClick={commitHandler} disabled={! canCommit()}>
                     Stel vast
@@ -182,7 +200,7 @@ const ActionHeader = ({
                 {<Button theme="white" onClick={editHandler} disabled={! haveSameGeoType(selected_policy_hubs)}>
                     Bewerk
                 </Button>}
-                {active_phase === 'concept' && (selected_policy_hubs && selected_policy_hubs.length >= 1) && <Button theme="white" onClick={deleteHandler}>
+                {canDeleteSelectedHubs() && <Button theme="white" onClick={deleteHandler}>
                     Verwijder
                 </Button>}
             </div>}
@@ -208,6 +226,7 @@ const ActionHeader = ({
         <Modal
             isVisible={doShowExportModal}
             title="Exporteer zones"
+            config={{ zIndex: 10000 }}
             button1Title={false}
             button1Handler={(e) => {
                 setDoShowExportModal(false);

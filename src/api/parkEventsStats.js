@@ -23,7 +23,7 @@ export const getParkEventsStats = async (token, options) => {
   // Return cached data
   if(! doFetchVehicles) return activeEventStats;
 
-  let filterParams = createFilterparameters(DISPLAYMODE_PARK, options.filter, options.metadata);
+  let filterParams = createFilterparameters(DISPLAYMODE_PARK, options.filter, options.metadata, { is_logged_in: true });
   if(filterParams.length>0) url += "&" + filterParams.join("&");
 
   let fetchOptions = {

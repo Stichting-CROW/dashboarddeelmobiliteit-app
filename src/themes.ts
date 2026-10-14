@@ -1,4 +1,9 @@
 
+// Brand color, single source of truth. Mirrors the `theme-blue` color defined
+// in tailwind.config.js for use in inline styles / JS where Tailwind utility
+// classes are not available.
+export const THEME_BLUE = '#15AEEF';
+
 export const themes = {
   white: {
     backgroundColor: '#fff',
@@ -6,12 +11,12 @@ export const themes = {
     color: '#343E47'
   },
   primary: {
-    backgroundColor: '#15AEEF', 
+    backgroundColor: THEME_BLUE, 
     color: 'white',
-    borderColor: '#15AEEF',     
+    borderColor: THEME_BLUE,     
   },
   blue: {
-    backgroundColor: '#15AEEF',
+    backgroundColor: THEME_BLUE,
     borderColor: '#ccc',
     color: '#fff'
   },
@@ -30,9 +35,14 @@ export const themes = {
     backgroundColor: '#00ff008c',
     borderColor: '#CCCCCC',
   },
+  gray: {
+    backgroundColor: '#d1d5db',
+    borderColor: '#d1d5db',
+    color: '#fff'
+  },
   zone: {
     monitoring: {
-      primaryColor: '#15AEEF',
+      primaryColor: THEME_BLUE,
     },
     stop: {
       primaryColor: '#FD862E'

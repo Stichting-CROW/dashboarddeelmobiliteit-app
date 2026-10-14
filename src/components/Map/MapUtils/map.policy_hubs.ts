@@ -3,56 +3,67 @@ import {
   polygonFillStyle
 } from './map.policy_hubs.styles'
 import center from '@turf/center';
+import { canMutateMapLayers, isMapStyleUsable, whenMapLayersMutable } from './mapGuards';
 
 const max_zoom_for_hub_logo = 16;
 
-const removeHubSources = (map: any) => {
+const removeHubSources = (map: any, sourceKey: string = 'policy_hubs') => {
     if(! map) return;
 
-    let key, source;
-    
-    key = 'policy_hubs';
-    source = map.getSource(key);
-    if(source) map.removeSource(key);
+    const source = map.getSource(sourceKey);
+    if(source) map.removeSource(sourceKey);
 }
 
-const removeHubsFromMap = (map: any) => {
-    if(! map) return;
+const removeHubsFromMap = (map: any, sourceKey: string = 'policy_hubs') => {
+    if (!map) return;
+    if (!canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => removeHubsFromMap(map, sourceKey));
+      return;
+    }
 
-    let layer, key;
-    
-    key = 'policy_hubs-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'policy_hubs-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    key = 'policy_hubs-hub-logo';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
+    try {
+      let layer, key;
 
-    // Remove event listeners
-    map.off('click', key, clickHubLogo);
+      key = `${sourceKey}-layer-fill`;
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
 
-    removeHubSources(map);
+      key = `${sourceKey}-layer-border`;
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = `${sourceKey}-hub-logo`;
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      // Remove event listeners
+      map.off('click', key, clickHubLogo);
+
+      removeHubSources(map, sourceKey);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
 const clickHubLogo = (e) => {
-  const zoom = window['ddMap'].getZoom();
+  const map = window['ddMap'];
+  if (!isMapStyleUsable(map)) return;
 
-  window['ddMap'].easeTo({
+  const zoom = map.getZoom();
+  map.easeTo({
     center: e.lngLat,
-    zoom: zoom+2
+    zoom: zoom + 2
   });
 }
 
-async function renderPolygons_fill(map, geojson) {
+async function renderPolygons_fill(map, geojson, sourceKey: string = 'policy_hubs') {
     if(! map) return;
-    if(! map.isStyleLoaded()) return;
+    if(! canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => renderPolygons_fill(map, geojson, sourceKey));
+      return;
+    }
     
-    const sourceId = 'policy_hubs';
+    const sourceId = sourceKey;
     let layerId = `${sourceId}-layer-fill`
       , source = map.getSource(sourceId);
     const layer = map.getLayer(layerId)
@@ -220,7 +231,8 @@ const renderHubs = async (
   map: any,
   hubs: any,
   selected_policy_hubs: any,
-  hubs_in_drawing_mode: any
+  hubs_in_drawing_mode: any,
+  sourceKey: string = 'policy_hubs'
 ) => {
   if(! map) return;
 
@@ -232,10 +244,10 @@ const renderHubs = async (
   );
 
   // Remove old polygons first
-  removeHubsFromMap(map);
+  removeHubsFromMap(map, sourceKey);
 
   // Render polygons
-  renderPolygons_fill(map, featureCollection);
+  renderPolygons_fill(map, featureCollection, sourceKey);
 }
 
 export {

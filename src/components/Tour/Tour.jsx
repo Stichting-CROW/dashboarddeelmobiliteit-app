@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import { useNavigate } from "react-router-dom";
 import { Fade } from 'react-slideshow-image';
 
-import Logo from '../Logo.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 import './react-slideshow-image.css';
@@ -60,7 +60,7 @@ const Tour = () => {
       />
       <div className="mx-auto py-8 w-full justify-between flex-col flex">
 
-        <Logo />
+        <LogoDashboardDeelmobiliteit />
 
         <div className="slide-container flex-1">
           <Fade ref={slideRef} {...sliderProperties}>
@@ -78,9 +78,6 @@ const Tour = () => {
                     </a></div>
                     <div><a href="https://github.com/Stichting-CROW/" target="_blank" rel="noreferrer">
                       GitHub
-                    </a></div>
-                    <div><a href="https://gitlab.com/bikedashboard" target="_blank" rel="noreferrer">
-                      GitLab
                     </a></div>
                     <div><a href="https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/issues" target="_blank" rel="noreferrer">
                       Bugs & Suggesties

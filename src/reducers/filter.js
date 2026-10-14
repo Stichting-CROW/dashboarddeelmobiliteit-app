@@ -33,6 +33,7 @@ const initialState = {
   intervalduur: 60 * 60 * 1000,
   aanbiedersexclude: "",
   parkeerduurexclude: "",
+  non_operational_only: false,
   voertuigtypesexclude: "",
   afstandexclude: "",
   herkomstbestemming: "herkomstbestemming",
@@ -101,6 +102,12 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           herkomstbestemming: action.payload
+      };
+    }
+    case 'SET_FILTER_NON_OPERATIONAL_ONLY': {
+      return {
+        ...state,
+        non_operational_only: action.payload === true
       };
     }
     case 'SET_FILTER_H3NIVEAU': {
@@ -228,6 +235,15 @@ export default function filter(state = initialState, action) {
       return {
           ...state,
           zones: ''
+      };
+    }
+    case 'SET_FILTER_ZONES': {
+      const zonesValue = Array.isArray(action.payload)
+        ? action.payload.join(',')
+        : (action.payload || '');
+      return {
+        ...state,
+        zones: zonesValue
       };
     }
     case 'ADD_TO_FILTER_MARKERS_EXCLUDE': {

@@ -1,4 +1,24 @@
 .StatsPage h1,
-.StatsPage h2 {
+.StatsPage h2,
+.StatsPage .StatsPageHeader-subtitle,
+.StatsPage .StatsPageHeader-controls {
   margin-left: 58px;
+}
+
+/* Page header: title, period subtitle, aggregation control */
+.StatsPage .StatsPageHeader h1 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.StatsPage .StatsPageHeader-subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+/* Chart grid: 2 columns when each chart can be at least 800px, otherwise stacked */
+.StatsPage-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(800px, 100%), 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
 }

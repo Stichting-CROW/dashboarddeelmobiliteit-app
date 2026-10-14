@@ -26,7 +26,7 @@ import moment from 'moment';
 
 import { ServiceAreaDelta } from '../../types/ServiceAreaDelta';
 
-import Logo from '../Logo.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Fieldset from '../Fieldset/Fieldset';
 import { Checkbox } from "../ui/checkbox"
 
@@ -45,28 +45,36 @@ const ServiceAreaHistory = ({
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    // Load new service areas
+    if (!filter?.gebied || !visible_operators || visible_operators.length === 0) {
+      setServiceAreas([]);
+      setServiceAreasHistory([]);
+      return;
+    }
+
     (async () => {
       const service_areas = await loadServiceAreas(filter.gebied, visible_operators);
       setServiceAreas(service_areas);
     })();
 
     (async () => {
-      // Get service area history
       const service_area_history = await loadServiceAreasHistory(filter.gebied, visible_operators);
-      // Sort by valid_from descending
-      service_area_history.sort((a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime());
-      // Set in state
+      service_area_history.sort(
+        (a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime()
+      );
       setServiceAreasHistory(service_area_history);
     })();
   }, [
-    filter.gebied,
+    filter?.gebied,
     visible_operators
   ]);
 
   // Load 'delta' if version_id or visible_operators changes
   useEffect(() => {
-    if(! searchParams.get('version')) return;
+    if (!searchParams.get('version')) {
+      setServiceAreaDelta(null);
+      return;
+    }
+    if (!visible_operators || visible_operators.length === 0) return;
 
     (async () => {
       const response = await loadServiceAreaDeltas(visible_operators, searchParams);
@@ -74,6 +82,7 @@ const ServiceAreaHistory = ({
     })();
   }, [
     searchParams,
+    visible_operators,
   ]);
 
   // Do things if 'serviceAreaDelta' change
@@ -126,19 +135,36 @@ function FilterbarServiceAreas({
   const [availableOperators, setAvailableOperators] = useState([]);
 
   useEffect(() => {
+    if (!municipality) {
+      setAvailableOperators([]);
+      return;
+    }
+
     getAvailableOperators(municipality).then((operators) => {
-      if(! operators) return;
+      if (!operators) return;
       setAvailableOperators(operators.operators_with_service_area || []);
     });
   }, [municipality]);
 
+  // Auto-select first operator if none is selected or if selected operators are not available
+  useEffect(() => {
+    if (availableOperators.length > 0) {
+      const hasValidSelection = visible_operators && visible_operators.length > 0 && 
+        visible_operators.some(op => availableOperators.includes(op));
+      
+      if (!hasValidSelection) {
+        dispatch(showServiceAreaForOperator(availableOperators[0]));
+      }
+    }
+  }, [availableOperators, visible_operators, dispatch]);
+
   return (
-    <div className="filter-bar-inner py-2">
+    <div className="filter-bar-inner">
 
       <div style={{
-        paddingBottom: '24px'
+        paddingBottom: '48px'
       }}>
-        {! hideLogo && <Link to="/"><Logo /></Link>}
+        {! hideLogo && <Link to="/"><LogoDashboardDeelmobiliteit /></Link>}
       </div>
       
       <Fieldset title="Plaats">
@@ -164,13 +190,14 @@ function FilterbarServiceAreas({
         >
           <Checkbox
             id={`aanbieder-${x}`}
-            checked={visible_operators.includes(x)}
+            checked={visible_operators?.includes(x) ?? false}
             color={getProviderColorForProvider(x)}
           />
           <label
             htmlFor={`aanbieder-${x}`}
             className="
               text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70
+              cursor-pointer
             "
           >
             {getPrettyProviderName(x)}

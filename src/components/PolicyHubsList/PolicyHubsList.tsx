@@ -27,6 +27,7 @@ function populateTableData(policyHubs) {
       internal_id: hub.internal_id,
       name: hub.name,
       type: readable_geotype(hub.geography_type),
+      phase: readable_phase(hub.phase),
       created_by: hub.created_by,
       created_at: moment(hub.created_at).format('YYYY-MM-DD HH:mm'),
       last_modified_by: hub.last_modified_by,
@@ -63,6 +64,7 @@ const PolicyHubsList = () => {
 
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
+
 
   const uniqueComponentId = Math.random()*9000000;
 
@@ -109,7 +111,12 @@ const PolicyHubsList = () => {
   // Populate table data if policyHubs change
   useEffect(() => {
     if(! active_phase) return;
-    if(! policyHubs || policyHubs.length === 0) return;
+    if(! policyHubs || policyHubs.length === 0) {
+      // If no hubs are available (e.g. after deleting the last one),
+      // make sure the table is cleared instead of showing stale data.
+      setTableData([]);
+      return;
+    }
 
     // Only keep hubs in active phase
     const filteredHubs = filterVisible(
@@ -170,18 +177,26 @@ const PolicyHubsList = () => {
 
   return (
     <>
-      <ActionHeader
-        policyHubs={policyHubs}
-        fetchHubs={fetchHubs}
-      />
-      <div data-name="body" className="mx-auto p-4" style={{
-        width: 'fit-content'
+      <div className="sticky top-0 z-10 bg-white shadow-sm pb-4" style={{
+        marginTop: '-1rem',
+        marginLeft: '-0.5rem',
+        marginRight: '-0.5rem',
+        top: '-1rem',
+        paddingBottom: 0,
+        width: 'calc(100% + 1.5rem)'
+      }}>
+        <ActionHeader
+          policyHubs={policyHubs}
+          fetchHubs={fetchHubs}
+        />
+      </div>
+      <div data-name="body" className="mx-auto" style={{
+        width: 'fit-content',
+        marginLeft: '-1rem',
+        marginRight: '-1rem',
       }}>
         <DataTable key="data-table" columns={filterColumnsForGuest(columns)} data={tableData} />
       </div>
-      <div className="text-gray-200 px-2" onClick={() => {
-        fetchHubs();
-      }}>.</div>
     </>
   );
 }

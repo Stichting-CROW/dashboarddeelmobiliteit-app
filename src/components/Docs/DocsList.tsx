@@ -1,17 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import {marked} from 'marked'
 import { useEffect, useState } from "react";
-
-type Folder = {
-  name: string,
-  path: string
-}
-
-type Doc = {
-  name: string,
-  path: string,
-  download_url: string
-}
+import { DocItem } from "./types";
 
 const getFilename = (path) => {
   if(! path) return;
@@ -28,7 +17,7 @@ const getFolderName = (path) => path.split('/')[path.split('/').length-1];
 function DocsList({
   docs
 }: {
-  docs: Array<Doc>
+  docs: Array<DocItem>
 }) {
   const location = useLocation();
 
@@ -69,7 +58,7 @@ function DocsList({
       {getFolderName(location.pathname)?.replaceAll('_', ' ')}
     </h2>
 
-    {folderDocs?.map((x: Doc) => (
+    {folderDocs?.map((x: DocItem) => (
       <h3 className="
         mt-4 mb-4
         text-xl font-bold

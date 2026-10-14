@@ -609,17 +609,20 @@ const fetchPublicZones = async (filterGebied) => {
 
 // Color between green and red
 const perc2color = (perc) => {
-  var perc = 100 - perc;
-  var r, g, b = 0;
-  if(perc < 50) {
+  const invertedPerc = 100 - perc;
+  let r;
+  let g;
+  const b = 0;
+
+  if (invertedPerc < 50) {
     r = 255;
-    g = Math.round(5.1 * perc);
-  }
-  else {
+    g = Math.round(5.1 * invertedPerc);
+  } else {
     g = 255;
-    r = Math.round(510 - 5.10 * perc);
+    r = Math.round(510 - 5.1 * invertedPerc);
   }
-  var h = r * 0x10000 + g * 0x100 + b * 0x1;
+
+  const h = r * 0x10000 + g * 0x100 + b * 0x1;
   return '#' + ('000000' + h.toString(16)).slice(-6);
 }
 
@@ -728,21 +731,35 @@ const navigateToGeography = (geographyId, allZones) => {
     const extent = st.extent(foundZone.area)
     // Delay it a little bit, so it comes after the
     // 'zoom in to extent' on filterGebied change/load
-    setTimeout(x => {
-      console.log('ACTION: fitBounds (zones.js - navigateToGeography)');
-      window['ddMap'].fitBounds(extent, {
-        padding: {
-          top: 25,
-          bottom: 25,
-          left: window.innerWidth > 800 ? 350 : 25,
-          right: 25
-        },
-        duration: 1.4*1000 // in ms
-      });
-      // Open popup for this polygon automatically
-      setTimeout(() => {
-        openPopup(window['ddMap'], foundZone);
-      }, 1500);
+    setTimeout(() => {
+      const map = window['ddMap'];
+      if (!map) return;
+      try {
+        if (!map.isStyleLoaded()) return;
+        console.log('ACTION: fitBounds (zones.js - navigateToGeography)');
+        map.fitBounds(extent, {
+          padding: {
+            top: 25,
+            bottom: 25,
+            left: window.innerWidth > 800 ? 350 : 25,
+            right: 25
+          },
+          duration: 1.4 * 1000 // in ms
+        });
+        // Open popup for this polygon automatically
+        setTimeout(() => {
+          const mapForPopup = window['ddMap'];
+          if (!mapForPopup) return;
+          try {
+            if (!mapForPopup.isStyleLoaded()) return;
+            openPopup(mapForPopup, foundZone);
+          } catch {
+            // Map may already be torn down during route navigation.
+          }
+        }, 1500);
+      } catch {
+        // Map may already be torn down during route navigation.
+      }
     }, 100);
   }
 

@@ -4,6 +4,7 @@ const md5 = require('md5');
 
 const initialState = {
   aanbieders: [],
+  aclOperators: [],
   gebieden: [],
   zones: [],
   vehicle_types: [],
@@ -34,12 +35,19 @@ export default function filter(state = initialState, action) {
     case 'SET_AANBIEDERS': {
       let current = state.aanbieders ? state.aanbieders: [];
 
-      // add colors (will be supplied by the API later)
+      // Resolve color per provider with this priority:
+      //   1. Hardcoded brand color from `getProviderColors()` (visual consistency
+      //      for known providers).
+      //   2. `color` returned by the operators API (covers new providers we
+      //      have not yet added to the local map).
+      //   3. Generated HSLA fallback so every provider always has a color.
       const colors = generateHslaColors(action.payload.length)
       const providerColors = getProviderColors();
       const aanbieders = action.payload.map((aanbieder,idx)=>{
-        const color = providerColors[aanbieder.system_id] ? providerColors[aanbieder.system_id] : colors[idx];
-        return Object.assign(aanbieder, {color: color});
+        const localColor = providerColors[aanbieder.system_id];
+        const apiColor = aanbieder && aanbieder.color ? aanbieder.color : null;
+        const color = localColor || apiColor || colors[idx];
+        return Object.assign({}, aanbieder, {color: color});
       })
       
       if(md5(JSON.stringify(current))===md5(JSON.stringify(aanbieders))) { return state; }
@@ -48,6 +56,19 @@ export default function filter(state = initialState, action) {
         ...state,
         aanbieders
       }
+    }
+    case 'SET_ACL_OPERATORS': {
+      const aclOperators = action.payload || [];
+      const current = state.aclOperators || [];
+
+      if (md5(JSON.stringify(current)) === md5(JSON.stringify(aclOperators))) {
+        return state;
+      }
+
+      return {
+        ...state,
+        aclOperators,
+      };
     }
     case 'SET_GEBIEDEN': {
       let current = state.gebieden ? state.gebieden: [];

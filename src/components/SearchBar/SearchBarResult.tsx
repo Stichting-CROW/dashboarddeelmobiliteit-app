@@ -3,10 +3,12 @@ import React from 'react';
 function SearchBarResult({
   title,
   subTitle,
+  tag,
   onClick
 }: {
   title: string,
   subTitle?: string,
+  tag?: string,
   onClick?: Function
 }) {
   const compact = true;
@@ -52,6 +54,9 @@ function SearchBarResult({
         <div className="">
           <div className="h-6 overflow-hidden sm:h-auto">
             <b className="text-base">{title}</b>
+            {tag && (
+              <span className="ml-2 text-xs text-gray-500">{tag}</span>
+            )}
           </div>
           <div className="text-sm text-gray-500 h-5 overflow-hidden" title={subTitle}>
             {subTitle}

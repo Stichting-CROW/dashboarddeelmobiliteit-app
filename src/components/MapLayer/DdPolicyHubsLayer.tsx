@@ -1,9 +1,11 @@
 import { toast, useToast } from "../ui/use-toast"
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { whenMapLayersMutable } from '../Map/MapUtils/mapGuards';
 import { useDispatch, useSelector } from 'react-redux';
+import maplibregl from 'maplibre-gl';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
-import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
+import { deDuplicateHubs, isHubInPhase, readable_phase } from '../../helpers/policy-hubs/common';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { notify } from '../../helpers/notify';
 
@@ -15,6 +17,7 @@ import {
   setShowEditForm,
   setShowList,
   setShowProposeDeleteForm,
+  setIsStatsOrManageMode,
 } from '../../actions/policy-hubs'
 
 import { getGeoIdForZoneIds, sortZonesInPreferedOrder } from '../../helpers/policy-hubs/common';
@@ -29,7 +32,8 @@ import {
   initEventHandlers,
   enableDrawingPolygon,
   selectDrawPolygon,
-  removeDrawedPolygons
+  removeDrawedPolygons,
+  removeDrawControl
 } from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
@@ -48,6 +52,10 @@ import { ContextMenu } from "./ContextMenu";
 import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
+import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
+import { selectDataLayerOrder } from '../../helpers/layerSelectors';
+import { DISPLAYMODE_POLICY_HUBS } from '../../reducers/layers.js';
+import Button from '../Button/Button';
 
 let TO_fetch_delay;
 
@@ -59,6 +67,10 @@ const DdPolicyHubsLayer = ({
   
   const [policyHubs, setPolicyHubs] = useState([]);
   const [draw, setDraw] = useState<any>();
+  const drawRef = useRef(draw);
+  useEffect(() => {
+    drawRef.current = draw;
+  }, [draw]);
   const [drawedArea, setDrawedArea] = useState<DrawedAreaType | undefined>();
   const [isDrawingMultiPolygonActive, setIsDrawingMultiPolygonActive] = useState<boolean>(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -75,9 +87,19 @@ const DdPolicyHubsLayer = ({
     onDeletePolygonFromMultiPolygon: undefined
   });
   const [affectedModalities, setAffectedModalities] = useState<string[]>([]);
+  const overlapSelectionPopupRef = useRef<any>(null);
+  const didSyncSelectedFromUrl = useRef(false);
+  const didZoomToSelectedFromUrl = useRef(false);
+  const selectedFromUrlRef = useRef(
+    new URLSearchParams(window.location.search).getAll('selected')
+  );
+  const phaseFromUrlRef = useRef(
+    new URLSearchParams(window.location.search).get('phase')
+  );
 
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
+  const dataLayerOrder = useSelector(selectDataLayerOrder);
 
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
@@ -131,12 +153,19 @@ const DdPolicyHubsLayer = ({
 
   const uniqueComponentId = Math.random()*9000000;
 
-  // On component load: reset 'selected_policy_hubs'
+  // On component load: apply `selected` from the URL (overrides persisted Redux)
   useEffect(() => {
-    dispatch(setShowEditForm(false));
-    dispatch(setSelectedPolicyHubs([]));
     dispatch(setIsDrawingEnabled(false));
     dispatch(setShowList(false));
+
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (selectedFromUrl.length > 0) {
+      dispatch(setSelectedPolicyHubs(selectedFromUrl.map((x) => Number(x))));
+      dispatch(setShowEditForm(true));
+    } else {
+      dispatch(setShowEditForm(false));
+      dispatch(setSelectedPolicyHubs([]));
+    }
 
     return () => {
       clearTimeout(TO_fetch_delay);
@@ -167,14 +196,23 @@ const DdPolicyHubsLayer = ({
 
   }
 
-  // onComponentUnLoad
+  // Cleanup hub layers on unmount. If the map style is still loading, defer
+  // removal until it is ready; the remover helpers guard against calls on an
+  // already-removed map instance.
   useEffect(() => {
     return () => {
-      setTimeout(() => {
-        removeHubsFromMap(map);
-      }, 250)//TODO: Map is unloaded lots of times
+      if (TO_fetch_delay) clearTimeout(TO_fetch_delay);
+      if (map) {
+        whenMapLayersMutable(map, () => removeHubsFromMap(map));
+        // Clean up any active drawing state so it does not leak onto other pages.
+        if (drawRef.current) {
+          removeDrawControl(map, drawRef.current);
+          drawRef.current = undefined;
+        }
+      }
+      closeOverlapSelectionPopup();
     };
-  }, []);
+  }, [map]);
 
   // Function that flys to a hub based on parameter given
   const flyToHub = async (e) => {
@@ -223,29 +261,65 @@ const DdPolicyHubsLayer = ({
     if(visible) {
       dispatch(setVisibleLayers(visible));
     }
-    const selected = queryParams.getAll('selected');
+    const selected = selectedFromUrlRef.current;
     if(selected && selected.length > 0) {
-      const selectedIds = selected.map(x => Number(x));
-      setTimeout(() => {
-        dispatch(setSelectedPolicyHubs(selectedIds));
-      }, 1500);
       dispatch(setShowEditForm(true));
     }
-    const phase = queryParams.get('phase');
+    const phase = phaseFromUrlRef.current;
     if(phase) {
       dispatch(setActivePhase(phase));
     }
   }, [])
 
-  // Set default state
+  // Set default phase unless the URL already requested one
   useEffect(() => {
+    if(phaseFromUrlRef.current) return;
     if(! active_phase) {
       dispatch(setActivePhase(acl ? 'concept' : 'active'))
     }
   }, [])
 
+  // When hubs load, zoom once to the zone from the URL
+  useEffect(() => {
+    if (didZoomToSelectedFromUrl.current) return;
+    if (!map) return;
+
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (!selectedFromUrl.length) return;
+    if (!Array.isArray(policyHubs) || policyHubs.length === 0) return;
+
+    const selectedIds = selectedFromUrl.map((x) => Number(x));
+    const hub = policyHubs.find((x) => selectedIds.indexOf(x.zone_id) > -1);
+    if (!hub?.area) return;
+
+    didZoomToSelectedFromUrl.current = true;
+
+    try {
+      const extent = st.extent(hub.area);
+      map.fitBounds(extent, {
+        padding: {
+          top: 25,
+          bottom: 25,
+          left: window.innerWidth > 800 ? 350 : 25,
+          right: window.innerWidth > 800 ? 520 : 25
+        },
+        maxZoom: 16,
+        duration: 1000
+      });
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
+  }, [map, policyHubs])
+
   // If selected_policy_hubs changes -> update URL
   useEffect(() => {
+    const selectedFromUrl = selectedFromUrlRef.current;
+    if (!didSyncSelectedFromUrl.current && selectedFromUrl.length > 0) {
+      const urlIds = selectedFromUrl.map((x) => Number(x)).join(',');
+      const reduxIds = (selected_policy_hubs || []).join(',');
+      if (urlIds !== reduxIds) return;
+      didSyncSelectedFromUrl.current = true;
+    }
     update_url({
       selected: selected_policy_hubs
     });
@@ -278,6 +352,16 @@ const DdPolicyHubsLayer = ({
     hub_refetch_counter,
   ]);
 
+  // Always refetch hubs when the global hub_refetch_counter changes,
+  // regardless of visible layers, so map stays in sync with actions
+  // like deletions triggered from other components (e.g. the table).
+  useEffect(() => {
+    if(! filter.gebied) return;
+    fetchHubs();
+  }, [
+    hub_refetch_counter,
+  ]);
+
   // Render hubs if 'policyHubs' or 'selected_policy_hubs' or 'hubs_in_drawing_mode' change
   useEffect(() => {
     // Return
@@ -291,6 +375,9 @@ const DdPolicyHubsLayer = ({
       selected_policy_hubs,
       hubs_in_drawing_mode
     );
+
+    // Re-apply the user-defined z-order now that the hub layers exist again
+    applyDataLayerOrderWhenReady(map, dataLayerOrder[DISPLAYMODE_POLICY_HUBS], DISPLAYMODE_POLICY_HUBS);
   }, [
     policyHubs,
     policyHubs?.length,
@@ -365,12 +452,23 @@ const DdPolicyHubsLayer = ({
     let filteredHubs = hubs.filter((x) => {
       const isInPhase = isHubInPhase(x, active_phase, visible_layers);
       const isInVisibleLayers = isHubInVisibleLayers(x);
+      const isSelected = selected_policy_hubs
+        && selected_policy_hubs.indexOf(x.zone_id) > -1;
 
-      return isInPhase || isInVisibleLayers;
+      return isInPhase || isInVisibleLayers || isSelected;
     });
 
     // Remove all zones that have a zone ID of any of the prev_geography_ids
     const uniqueHubs = deDuplicateHubs(filteredHubs);
+
+    // Keep deep-linked / selected hubs visible even if a newer version replaced them
+    if (selected_policy_hubs?.length) {
+      selected_policy_hubs.forEach((id) => {
+        if (uniqueHubs.some((h) => h.zone_id === id)) return;
+        const hub = hubs.find((h) => h.zone_id === id);
+        if (hub) uniqueHubs.push(hub);
+      });
+    }
     
     return uniqueHubs;
   }
@@ -417,6 +515,7 @@ const DdPolicyHubsLayer = ({
 
     // Select the polygon, so it is editable
     setTimeout(() => {
+      if (!map) return;
       selectDrawPolygon(draw, hubs_in_drawing_mode[0]);
     }, 25);
   }
@@ -460,14 +559,17 @@ const DdPolicyHubsLayer = ({
     window.addEventListener('click', handleOutsideClick);
 
     return () => {
-      map.off('touchend', layerName, clickHandler);
-      map.off('click', layerName, clickHandler);
-      map.off('contextmenu', layerName, clickHandler);
-        
-      // Remove handlers for draw layer
-      drawLayerNames.forEach(drawLayerName => {
-        map.off('contextmenu', drawLayerName, clickHandler);
-      });        
+      try {
+        map.off('touchend', layerName, clickHandler);
+        map.off('click', layerName, clickHandler);
+        map.off('contextmenu', layerName, clickHandler);
+
+        drawLayerNames.forEach(drawLayerName => {
+          map.off('contextmenu', drawLayerName, clickHandler);
+        });
+      } catch {
+        // Map may already be torn down during route navigation.
+      }
       window.removeEventListener('click', handleOutsideClick);
     }
   }, [
@@ -481,15 +583,22 @@ const DdPolicyHubsLayer = ({
   useEffect(() => {
     if(! map) return;
 
-    // If drawing isn't enabled: Remove draw tools
+    const drawTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+    // If drawing isn't enabled: Remove draw tools and control
     if(! is_drawing_enabled) {
-      removeDrawedPolygons(draw);
+      if (draw) {
+        removeDrawControl(map, draw);
+        drawRef.current = undefined;
+        setDraw(undefined);
+      }
       return;
     }
     // Initialize draw
     let Draw = draw;
     if(! draw) {
       Draw = initMapboxDraw(map)
+      drawRef.current = Draw;
       setDraw(Draw);
     };
 
@@ -500,24 +609,30 @@ const DdPolicyHubsLayer = ({
       dispatch(setShowEditForm(true));
 
       // Enable drawing polygons
-      setTimeout(() => {
+      drawTimeouts.push(setTimeout(() => {
+        if (!map) return;
         enableDrawingPolygon(Draw);
-      }, 25);
+      }, 25));
       // Select the polygon after it's created
       if(drawedArea && drawedArea.features && drawedArea.features[0]) {
-        setTimeout(() => {
+        drawTimeouts.push(setTimeout(() => {
+          if (!map) return;
           selectDrawPolygon(Draw, drawedArea.features[0].id);
-        }, 25);
+        }, 25));
       }
     }
 
     // Auto select polygon if not in multi polygon adding mode
     else if(is_drawing_enabled && ! isDrawingMultiPolygonActive) {
-      setTimeout(() => {
+      drawTimeouts.push(setTimeout(() => {
+        if (!map) return;
         selectDrawPolygon(Draw, is_drawing_enabled);
-      }, 25);
+      }, 25));
     }
 
+    return () => {
+      drawTimeouts.forEach(clearTimeout);
+    };
   }, [
     map,
     is_drawing_enabled,
@@ -535,11 +650,13 @@ const DdPolicyHubsLayer = ({
 
     // Cleanup function to remove event handlers when component unmounts or effect re-runs
     return () => {
-      if (map) {
-        // Remove event handlers initiated in initEventHandlers
+      if (!map) return;
+      try {
         map.off('draw.create', changeAreaHandler);
         map.off('draw.update', changeAreaHandler);
         map.off('draw.delete', changeAreaHandler);
+      } catch {
+        // Map may already be torn down during route navigation.
       }
     };
   }, [
@@ -681,16 +798,138 @@ const DdPolicyHubsLayer = ({
     })();
   }
 
+  const closeOverlapSelectionPopup = () => {
+    if(! overlapSelectionPopupRef.current) return;
+    overlapSelectionPopupRef.current.remove();
+    overlapSelectionPopupRef.current = null;
+  }
+
+  const escapeHtml = (value: any) => {
+    const str = String(value ?? '');
+    return str.replace(/[&<>"']/g, (c) => {
+      switch(c) {
+        case '&':
+          return '&amp;';
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case '"':
+          return '&quot;';
+        case '\'':
+          return '&#039;';
+        default:
+          return c;
+      }
+    });
+  }
+
+  const buildOverlappingHubsTableHtml = (features) => {
+    const getReadableGeographyType = (geographyType: string) => {
+      if(geographyType === 'stop') return 'hub';
+      if(geographyType === 'no_parking') return 'verbodszone';
+      if(geographyType === 'monitoring') return 'analysezone';
+      return geographyType || '-';
+    }
+
+    const rowsHtml = features.map((feature, idx) => {
+      const props = feature?.properties || {};
+      const geographyTypeLabel = getReadableGeographyType(props.geography_type);
+      const phaseLabel = props.phase ? readable_phase(props.phase) : '-';
+      return `
+        <tr
+          data-dd-hub-row="true"
+          data-zone-id="${escapeHtml(props.id)}"
+          class="dd-vehicle-overlap-row"
+          style="cursor: pointer;"
+        >
+          <td style="padding: 4px; vertical-align: top;">${idx + 1}.</td>
+          <td style="padding: 4px; vertical-align: top;">${escapeHtml(props.name || '-')}</td>
+          <td style="padding: 4px; vertical-align: top;">${escapeHtml(`${geographyTypeLabel} (${phaseLabel})`)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <h1 class="mb-2">
+        <span
+          class="rounded-full inline-block w-4 h-4"
+          style="background-color: #0B3D20;position: relative;top: 2px"
+        ></span>
+        <span class="Map-popup-title ml-1" style="color: #0B3D20;">
+          Selecteer een zone
+        </span>
+      </h1>
+      <div class="Map-popup-body">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px; vertical-align: top;">#</th>
+              <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px; vertical-align: top;">naam</th>
+              <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px; vertical-align: top;">type/fase</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  const showOverlappingHubsSelectionPopup = (e, features) => {
+    if(! map) return;
+    closeOverlapSelectionPopup();
+
+    overlapSelectionPopupRef.current = new maplibregl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(buildOverlappingHubsTableHtml(features))
+      .addTo(map);
+
+    const popupEl = overlapSelectionPopupRef.current?.getElement?.();
+    if(! popupEl) return;
+
+    popupEl.addEventListener('click', (evt) => {
+      const tr = evt.target && evt.target.closest
+        ? evt.target.closest('tr[data-dd-hub-row="true"]')
+        : null;
+      if(! tr) return;
+
+      evt.preventDefault();
+      evt.stopPropagation();
+
+      const zoneId = tr.getAttribute('data-zone-id');
+      if(! zoneId) return;
+      const normalizedZoneId = Number.isNaN(Number(zoneId)) ? zoneId : Number(zoneId);
+
+      dispatch(setSelectedPolicyHubs([normalizedZoneId]));
+      dispatch(setShowEditForm(true));
+      dispatch(setShowProposeDeleteForm(false));
+      closeOverlapSelectionPopup();
+    });
+  }
+
   const clickHandler = (e) => {
     if(! map) return;
+
+    const features = e.features || [];
+    if(! features[0]) return;
 
     const isMultiPolygon = e.features[0].geometry.type === 'MultiPolygon';
     const isMultiPolygonWithMoreThanOnePolygon = isMultiPolygon && e.features[0].geometry.coordinates.length > 1;
     const isInConceptPhase = active_phase === 'concept';
+    const isRightClick = e.originalEvent?.button === 2;
+
+    if(isRightClick && features.length > 1) {
+      e.preventDefault();
+      setContextMenu(prev => ({ ...prev, visible: false }));
+      showOverlappingHubsSelectionPopup(e, features);
+      return;
+    }
 
     // Handle right click for context menu (delete polygon from multi polygon)
     if (
-      e.originalEvent.button === 2
+      isRightClick
       && canEditHubs(acl)
       && isInConceptPhase
       && (
@@ -716,6 +955,7 @@ const DdPolicyHubsLayer = ({
     if(! e.features || ! e.features[0]) {
       return;
     }
+    closeOverlapSelectionPopup();
 
     // Get coordinates and props
     const coordinates = e.lngLat;
@@ -742,6 +982,12 @@ const DdPolicyHubsLayer = ({
     dispatch(setShowEditForm(true));
     dispatch(setShowProposeDeleteForm(false));
   }
+
+  useEffect(() => {
+    return () => {
+      closeOverlapSelectionPopup();
+    }
+  }, []);
 
   const getSelectedHub = () => {
     if(! selected_policy_hubs || selected_policy_hubs.length <= 0) {
@@ -782,6 +1028,23 @@ const DdPolicyHubsLayer = ({
     
     // Return if zone is a hub
     return selected_hub.geography_type === 'stop';
+  }
+
+  const didSelectMonitoringZone = () => {
+    if(! selected_policy_hubs || selected_policy_hubs.length !== 1) return false;
+    const selected_hub = getSelectedHub();
+    if(! selected_hub) return false;
+
+    return selected_hub.geography_type === 'monitoring';
+  }
+
+  const didSelectNoParkingZone = () => {
+    if(! policyHubs || ! policyHubs[0]) return false;
+    if(! selected_policy_hubs || selected_policy_hubs.length !== 1) return false;
+    const selected_hub = policyHubs.find(x => selected_policy_hubs && x.zone_id === selected_policy_hubs[0]);
+    if(! selected_hub) return false;
+
+    return selected_hub.geography_type === 'no_parking';
   }
 
   return <>
@@ -835,7 +1098,7 @@ const DdPolicyHubsLayer = ({
       </ActionModule>}
     </>}
 
-    {(is_stats_or_manage_mode === 'stats' && didSelectOneHub() && didSelectHubHub()) && <>
+    {(is_stats_or_manage_mode === 'stats' && didSelectOneHub() && (didSelectHubHub() || didSelectMonitoringZone())) && <>
       <ActionModule>
         <PolicyHubsStats
           fetchHubs={fetchHubs}
@@ -849,6 +1112,47 @@ const DdPolicyHubsLayer = ({
             setDrawedArea(undefined);
           }}
         />
+      </ActionModule>
+    </>}
+
+    {(is_stats_or_manage_mode === 'stats' && didSelectNoParkingZone()) && <>
+      <ActionModule>
+        <div>
+          <div className="mb-2 font-bold">
+            Verbodszone details
+          </div>
+          <div className="p-4 bg-white rounded-lg border border-gray-300">
+            <div className="text-lg font-bold">
+              {getSelectedHub()?.name}
+            </div>
+          </div>
+          <div className="flex w-full justify-between mt-2">
+            <Button
+              theme="white"
+              style={{marginLeft: 0}}
+              onClick={() => {
+                dispatch(setIsDrawingEnabled(false));
+                dispatch(setHubsInDrawingMode([]));
+                dispatch(setShowEditForm(false));
+                dispatch(setSelectedPolicyHubs([]));
+                setDrawedArea(undefined);
+              }}
+            >
+              Sluiten
+            </Button>
+            <Button
+              theme="white"
+              style={{marginLeft: 0}}
+              onClick={() => {
+                dispatch(setShowEditForm(true));
+                dispatch(setShowProposeDeleteForm(false));
+                dispatch(setIsStatsOrManageMode('manage'));
+              }}
+            >
+              Bewerk
+            </Button>
+          </div>
+        </div>
       </ActionModule>
     </>}
 

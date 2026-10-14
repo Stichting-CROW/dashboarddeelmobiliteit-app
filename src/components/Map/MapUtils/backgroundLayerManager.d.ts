@@ -16,4 +16,5 @@ export declare function setBackgroundLayer(
   onSuccess?: (layerName: string) => void, 
   onError?: (error: string) => void
 ): void;
+export declare function updateStreetVisibilityForSatellite(map: any, mapStyle: string): void;
 export declare function getCurrentBackgroundLayer(map: any): string; 

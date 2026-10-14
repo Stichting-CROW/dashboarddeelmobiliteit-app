@@ -29,11 +29,11 @@
 } 
 
 .permits-vehicle-type-header-img {
-    @apply w-12 h-12 object-contain mb-2;
+    @apply h-6 object-contain;
 }
 
 .permits-vehicle-type-header-text {
-    @apply text-sm font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden;
+    @apply font-normal text-[18px] leading-[21px] font-[Inter] text-[#343E47];
 }
 
 .permits-add-button {
@@ -79,15 +79,30 @@
 
 /* Card styles */
 .permits-card {
-  @apply bg-gray-50 rounded-lg shadow-md p-4 w-48 h-auto relative border border-gray-400;
+  @apply min-w-96 rounded-lg p-4 h-auto w-fit relative flex flex-col;
+  background-color: #F6F5F4;
+  border: 1px solid #F6F5F4;
+  border-radius: 10px;
+}
+
+.permits-card:not(.permits-card--active) {
+  cursor: pointer;
+}
+
+.permits-card:hover:not(.permits-card--active):not(:has([data-name='indicator-container']:hover)) {
+  border: 1px solid #CCCCCC;
+}
+
+.permits-card [data-name='indicator-container'] {
+  cursor: default;
 }
 
 .permits-card-edit-button {
-  @apply absolute top-1 right-1 p-1 bg-transparent hover:bg-gray-100 rounded-full;
+  @apply p-1 bg-transparent hover:bg-gray-100 rounded-full;
 }
 
 .permits-card-content {
-  @apply flex flex-col items-center mb-3;
+  @apply flex flex-col mb-3;
 }
 
 .permits-card-logo {
@@ -103,7 +118,21 @@
 }
 
 .permits-card-label {
-  @apply text-xs font-semibold text-center whitespace-nowrap text-ellipsis overflow-hidden;
+  @apply text-xl leading-6 font-semibold font-sans whitespace-nowrap text-ellipsis overflow-hidden;
+  color: #343e47;
+}
+
+.permits-card-details-button {
+  transition: all 0.2s ease-in-out;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.permits-card-details-button:hover {
+  background-color: #9ca3af !important;
+  border-color: #9ca3af !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
 /* Collection styles */
@@ -111,49 +140,77 @@
   @apply mb-8 w-full;
 }
 
-.permits-collection-row-content {
+/* .permits-collection-row-content {
   @apply flex items-center gap-6 w-full min-w-0;
-}
+} */
 
 .permits-collection-header {
-  @apply bg-transparent p-0 w-24 min-w-24 h-auto flex flex-col justify-center flex-shrink-0;
+  @apply bg-transparent p-0 min-w-24 h-auto flex flex-col justify-center flex-shrink-0;
 }
 
 .permits-collection-header-content {
-  @apply flex flex-col items-center;
+  @apply block;
+  
 }
 
 .permits-collection-cards {
-  @apply flex-1 overflow-x-auto;
+  @apply w-full;
 }
 
 .permits-collection-cards-content {
-  @apply flex gap-6 min-w-max px-4 pb-4;
+  @apply flex flex-wrap gap-6 w-full pb-4;
 }
 
 /* Form styles */
+.permits-form-grid {
+  display: grid;
+  grid-template-columns: auto minmax(140px, auto) 1fr;
+  gap: 0.75rem 0.5rem;
+  align-items: center;
+}
+
 .permits-form-row {
-  @apply flex flex-row items-center gap-3;
+  display: contents;
 }
 
 .permits-form-label {
-  @apply w-56 text-sm text-gray-700;
+  @apply text-sm text-gray-700;
+}
+
+.permits-form-input-wrap {
+  @apply flex items-center gap-1;
+}
+
+.permits-form-input-wrap-with-pill {
+  justify-content: flex-start;
 }
 
 .permits-form-input {
-  @apply border rounded px-2 py-1 w-32;
+  @apply border rounded px-2 py-1 w-20;
+}
+
+.permits-form-input[type="date"] {
+  min-width: 8.5rem;
+}
+
+.permits-form-unit {
+  @apply text-sm text-gray-500 w-6 shrink-0;
 }
 
 .permits-form-checkbox-label {
-  @apply flex items-center gap-1 ml-2 text-xs text-gray-600;
+  @apply flex items-center gap-1 text-xs text-gray-600;
 }
 
 .permits-form-message {
-  @apply ml-2 text-xs text-gray-400;
+  @apply text-xs text-gray-400;
 }
 
 .permits-form-actions {
-  @apply flex justify-end gap-2 mt-4;
+  @apply flex justify-between items-center gap-2 mt-4;
+}
+
+.permits-form-delete-button {
+  @apply px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm font-medium;
 }
 
 .permits-form-cancel-button {
@@ -177,6 +234,10 @@
 
 .permits-table-header {
   @apply bg-gray-100;
+}
+
+.permits-table-scrollable .permits-table-header th {
+  @apply sticky top-0 z-10 bg-gray-100;
 }
 
 .permits-table-header-cell {
@@ -207,5 +268,27 @@
 
 .permits-table-delete-button {
   @apply inline-block align-middle p-1 hover:bg-gray-200 rounded;
+}
+
+.permits-table-edit-icon {
+  background: center center url('../images/UserList/noun-edit-684936.svg');
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
+  min-width: 20px;
+  display: inline-block;
+}
+
+.permits-table-delete-icon {
+  background: center center url('../images/UserList/delete-object.svg');
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  min-width: 20px;
+}
+
+.permits-table-delete-icon.loading {
+  background-image: none;
 }
 

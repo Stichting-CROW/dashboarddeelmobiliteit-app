@@ -1,5 +1,430 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-09-16
+
+**Statistiek: Beleidsinfo**
+
+- 🪄 Kerncijfers bovenaan de pagina: gemiddeld beschikbare voertuigen per dag, totaal aantal verhuringen, verhuringen per voertuig per dag en aantal actieve aanbieders, elk met het verschil ten opzichte van de vorige periode van gelijke lengte
+- 🪄 Nieuwe schakelaar 'Vergelijk met vorige periode': toont het totaal van de vorige periode als grijze stippellijn in de grafieken 'Beschikbare voertuigen' en 'Verhuringen'. De instelling staat in de URL, zodat je de vergelijking kunt delen
+- 🪄 Weekenden zijn in de grafieken gemarkeerd met een lichte achtergrond (bij dag-, uur- en kwartierintervallen)
+- ✨ Nieuwe paginakop met de geselecteerde plaats of zones, de periode, het aantal dagen en een duidelijke keuze voor het tijdsinterval (dag / week / maand)
+- ✨ Grafieken tonen nu een duidelijke melding als er geen data is voor de selectie, en een foutmelding met 'Opnieuw proberen' als het laden mislukt
+- ✨ Beweeg je over een grafiek, dan lichten alle grafieken op hetzelfde moment op; klik op een aanbieder in de legenda om die lijn te verbergen of te tonen
+- ✨ Getallen worden in Nederlandse notatie weergegeven (bijv. 23.986 en 1,13); de 'Totaal'-lijn is gestreept zodat deze beter te onderscheiden is van aanbieders
+- 🐛 Opgelost: bij het openen van de pagina werd soms een ongeldig tijdsinterval opgevraagd, waardoor grafieken eerst leeg bleven en daarna opnieuw laadden
+- 🐛 Opgelost: bij snel wisselen van selectie kon een oudere dataset de nieuwe grafiekdata overschrijven
+- 🐛 Opgelost: CSV-bestandsnamen bevatten de periode niet correct; ze heten nu bijv. `2026-08-17_to_2026-09-16_verhuringen.csv`
+
+**Statistiek: Hubs en verbodsgebieden**
+
+- 🪄 Analysegebieden (monitoringzones) zijn nu beschikbaar in de zonefilter, naast hubs en verbodsgebieden; per zone is het type zichtbaar
+- 🪄 Link 'Toon op kaart' bij een geselecteerde zone opent de zone direct op de kaart
+- 🐛 Opgelost: onjuiste datum bij 'Actief vanaf' (toonde de wijzigingsdatum)
+- 🐛 Opgelost: eindeloze doorverwijzing bij het openen van zonestatistieken via een link
+
+## Release 2026-09-07
+
+**Kaart**
+
+- 🪄 Lagenselectie vernieuwd: datalagen kies je nu via een aanvinkbare lijst, en je kunt de volgorde van lagen verslepen
+- 🪄 Lagen 'Servicegebieden', 'Hubs' en 'Verbodsgebieden' zijn nu op elke kaartpagina in- en uit te schakelen
+- 🪄 Via het zoekicoon kun je op elke kaartpagina zoeken naar hubs en verbodsgebieden
+- ✨ Bij wisselen van pagina blijft de kaartpositie en het zoomniveau behouden
+- ✨ Bronvermelding van OpenStreetMap, Mapbox en PDOK toegevoegd op de kaart
+- 🐛 Opgelost: fout bij het laden van zones voor accounts zonder gemeentelijst
+
+**Prestaties aanbieders**
+
+- 🪄 Grafieken op de detailpagina kun je downloaden als CSV, per grafiek of alle KPI's tegelijk
+
+**Gebruikersbeheer**
+
+- ✨ Nieuwe gebruikers ontvangen automatisch een e-mail om hun wachtwoord in te stellen
+
+**Gebruikersinterface**
+
+- ✨ Functies-pagina bevat nu links naar de belangrijkste dashboardpagina's
+- 🐛 Opgelost: submenu in het hoofdmenu sloot onbedoeld bij het bewegen van de muis naar het submenu
+
+**Aanbod**
+
+- 🐛 Opgelost: gastgebruikers zagen een andere (verouderde) gemeentelijst dan ingelogde gebruikers
+
+**Datafeeds**
+
+- 🐛 Opgelost: de pagina 'Actieve datafeeds' gaf een fout als er geen feeds geconfigureerd waren
+
+## Release 2026-08-16
+
+**Functies en onboarding**
+
+- 🪄 Nieuwe pagina 'Functies' met visuals van de belangrijkste dashboardonderdelen
+- 🪄 Link naar de Functies-pagina toegevoegd in het menu en op de profielpagina
+- 🪄 Introductie-modal voor niet-ingelogde bezoekers bij een eerste bezoek aan het Aanbod-scherm
+
+**Prestaties aanbieders**
+
+- ✨ Grafieken tonen KPI-waarden nu met de juiste precisie (decimalen waar nodig)
+- 🐛 Opgelost: Lime-fietsen met handmatige aandrijving werden onterecht meegenomen in prestatieoverzichten
+
+**Kaart en zones**
+
+- 🐛 Opgelost: vastlopen bij wisselen van Zones naar Aanbod met cluster-, heatmap- en voertuiglagen tegelijk actief
+- 🐛 Opgelost: tekenmenu bleef actief na wisselen van tabblad en terugkeren naar tekenen
+
+**Documentatie en overig**
+
+- ✨ Documentatie over de knoppen 'Herkomst' en 'Bestemming' bij de HB-matrix uitgebreid
+- 🧹 Verouderde GitLab-link verwijderd van de tourpagina
+- 🧹 Node.js bijgewerkt naar versie 24
+
+## Release 2026-07-09
+
+**Prestaties aanbieders**
+
+- ✨ KPI-indicatorblokken worden nu ook getoond als er geen waarden beschikbaar zijn
+- 🐛 Opgelost: standaardperiode laadt nu de laatste 7 dagen exclusief vandaag
+- 🐛 Opgelost: in demomodus worden fictieve waarden getoond in indicator-tooltips
+- 🧹 Demoaanbieder 'Mobiliteitshub' hernoemd naar 'Fenyx'
+
+**Aanbod en verhuringen**
+
+- ✨ Snellere Aanbod- en Verhuringen-pagina: voertuigdata wordt direct bij het openen geladen en dubbele downloads zijn voorkomen
+- 🐛 Opgelost: zones werden niet geladen als er geen gemeente was geselecteerd
+
+**Kaart**
+
+- 🪄 Gastgebruikers kunnen nu ook de knoppen 'Laag selecteren' en 'Zoeken' gebruiken op de kaart
+- 🐛 Opgelost: fout bij het laden van kaatafbeeldingen bij het verlaten van een pagina
+
+**Gebruikersbeheer**
+
+- 🪄 Gebruikerslijst kan nu gefilterd worden op organisatie
+- 🪄 Per gebruiker is zichtbaar tot welke (gedeelde) data toegang bestaat
+- 🐛 Opgelost: operatorgegevens konden niet worden toegevoegd aan een operatororganisatie
+- 🐛 Opgelost: gebruikers met toegang tot meerdere plaatsen zien nu alle plaatsen tegelijk bij 'Alle plaatsen'
+
+**Gebruikersinterface**
+
+- 🪄 Versietag en link naar release notes toegevoegd in de filterbar
+- ✨ Skeleton loaders toegevoegd op statistiekpagina's voor betere laadervaring
+- ✨ Verbeterde meldingen (toasts) in de applicatie
+- 🧹 Vergelijkbare componenten samengevoegd voor eenvoudiger onderhoud
+
+**Documentatie**
+
+- ✨ Extra documentatie over hoe datafeed-data wordt verwerkt
+
+## Release 2026-05-28
+
+**Prestaties aanbieders**
+
+- 🪄 Aanbiederaccounts hebben nu toegang tot de pagina 'Prestaties aanbieders', inclusief KPI-overzicht en detailweergave
+- 🐛 Opgelost: KPI-indicatorblokken werden onjuist getoond voor aanbiederaccounts
+- 🐛 Opgelost: indicatorblokken ontbraken bij een handmatig gekozen periode
+- 🐛 Opgelost: laadindicator en race condition bij het laden van prestatiedata
+- ✨ Y-as in grafieken toont nu afgeronde, leesbare waarden
+
+**Aanbod en statistieken (aanbieders)**
+
+- 🐛 Opgelost: aanbiederaccounts zagen hun eigen voertuigen niet op de aanbodkaart
+- 🐛 Opgelost: aanbiederaccounts zagen geen verhuringen en geaggregeerde statistieken
+- 🐛 Opgelost: laag 'HB matrix' wordt niet meer getoond aan aanbiederaccounts
+
+**Aanbieders**
+
+- 🪄 Voi toegevoegd als aanbieder in het dashboard
+- ✨ Aanbiederslijst komt nu uit de API in plaats van een vaste lijst; nieuwe aanbieders verschijnen sneller na toevoeging
+
+**Statistieken en filterbar**
+
+- 🐛 Opgelost: gemeenten zagen niet alle beschikbare aanbieders in de filterbar
+- ✨ Op Beleidsinfo wordt de serie 'Totaal' niet meer getoond als er maar één serie zichtbaar is
+
+**Kaart en prestaties**
+
+- ✨ Snellere kaart: kortere laadtijd, efficiënter laden van voertuigmarkers en minder onnodige achtergrondkaart op pagina's zonder kaart
+- ✨ Minder dubbele API-verzoeken en betere opruiming van kaartbronnen bij navigatie
+- 🐛 Opgelost: fout bij navigatie van een kaartpagina naar een pagina zonder kaart
+- 🐛 Opgelost: fout als de kaart al was uitgeladen maar er nog acties werden uitgevoerd
+- 🐛 Opgelost: laadfout op de Servicegebieden-pagina door een race condition bij het starten van de kaart
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: zone-beheerknoppen worden niet meer getoond aan aanbiederaccounts zonder beheerrechten
+
+**Gebruikersinterface**
+
+- ✨ Grijze achtergrond op pagina's zonder kaart voor een rustiger beeld
+
+**Documentatie**
+
+- ✨ Documentatie wordt lokaal geladen in plaats van via de GitHub API, waardoor de docs-pagina's betrouwbaarder en sneller laden
+- ✨ Documentatie over ruwe data-download bijgewerkt (geen trips meer; geen vehicle_id meer bij park_events)
+
+**Technisch**
+
+- 🧹 Nieuwe GitHub Actions-workflow voor deployment naar GitHub Pages
+
+## Release 2026-05-20
+
+**Aanbod**
+
+- 🪄 Defecte (niet-operationele) voertuigen zijn nu zichtbaar op de kaart, met een apart filter om ze te tonen of te verbergen
+
+**Prestaties aanbieders**
+
+- 🪄 Nieuwe KPI-pagina voor aanbieders met overzicht van prestaties per gemeente
+- 🪄 Admins kunnen schakelen tussen gemeente- en aanbiederweergave
+- ✨ In gemeenteweergave worden gemeentenamen getoond op aanbiederkaarten en in grafieken
+- ✨ 'Prestaties aanbieders' staat nu als laatste item in het Statistiek-submenu
+
+**Statistieken en Filterbar**
+
+- 🪄 Beleidszones-knoppen zijn uit de filterbar op Beleidsinfo verwijderd
+- 🪄 Filterbar sluit met Escape-toets
+- 🪄 Zoekstatus in de uitgebreide filterbar wordt gereset bij sluiten
+- 🐛 Opgelost: na wisselen van plaats werden soms nog Nederland-brede waarden getoond in grafieken
+- 🐛 Opgelost: filterbar sloot onbedoeld bij klikken op de scrollbar of buiten de filterbar
+- ✨ Verbeterde toegankelijkheid: aria-label op sluitknop van de filterbar
+
+**Zones/Beleidszones**
+
+- 🪄 Rechtermuisklik op overlappende zones opent een contextmenu voor eenvoudigere zone-selectie
+- 🪄 In hub-statistiekenmodus verschijnt bij klik op een verbodsgebied informatie over dat gebied
+- 🐛 Opgelost: bij verwijderen van een zone wordt nu de juiste fase getoond in het bevestigingsscherm
+
+**Gebruikersinterface**
+
+- 🐛 Opgelost: horizontaal scrollen in het desktopmenu werkt weer
+
+**Documentatie**
+
+- ✨ Nieuw API-overzicht met links naar alle beschikbare API's
+- ✨ Documentatie toegevoegd voor defecte voertuigen op de kaart
+- ✨ API-links in documentatie openen in een nieuw tabblad
+
+## Release 2026-03-31
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: gebruikers met bewerkrechten voor hubs kunnen hubs weer bewerken
+
+## Release 2026-03-25
+
+**Statistieken en Navigatie**
+
+- 🪄 Hoofdmenu uitgebreid met een submenu onder 'Statistiek' voor snellere navigatie binnen statistiekpagina's
+
+**Prestaties aanbieders en Grafieken**
+
+- 🪄 Lijngrafieken tonen nu ook de gemiddelde waarde voor extra context bij trendanalyse
+- 🪄 In de filterbar scrolt de pagina nu vloeiend naar het geselecteerde aanbieder/voertuigtype-blok
+- ✨ Weergave van lijngrafieken aangescherpt voor rustiger en beter leesbaar lijnverloop
+- ✨ Kleine visuele verbeteringen doorgevoerd op aanbiederkaarten voor een consistenter geheel
+- ✨ Selectie-icoon in de filterbar aangepast naar een radio-button stijl voor duidelijkere keuzeweergave
+
+**Aanbod**
+
+- 🪄 Bij overlappende voertuigen op de kaart verschijnt nu bij klikken een lijst met voertuigen, zodat selectie eenvoudiger is
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: superadmins kunnen zones weer bewerken
+- 🐛 Opgelost: knoppen voor bewerken en statistieken bij zones blijven betrouwbaar zichtbaar
+
+## Release 2026-03-24
+
+**Prestaties aanbieders**
+
+- 🪄 KPI-beheer verbeterd: grenswaarden bewerken werkt nu betrouwbaarder
+- 🪄 KPI-volgorde op aanbiederkaarten is nu vast en consistent
+- 🪄 Tooltip bij prestatie-indicatoren wordt niet meer getoond als er geen KPI-waarde beschikbaar is
+- 🪄 Vergunningseisen sluiten nu beter aan op het juiste voertuigtype per aanbieder
+- ✨ Detailweergave van prestaties heeft een verbeterd fullscreen-ontwerp en vloeiendere overgangen
+- ✨ Hover-states verbeterd voor aanbiederkaarten en de 'details'-link
+- ✨ Tooltips in indicatorbalken verschijnen met een korte vertraging voor rustiger interactie
+
+**Statistieken en Filterbar**
+
+- 🪄 Link naar 'Prestaties aanbieders' is weer beschikbaar in de statistiekfilter
+- 🪄 Datum-presets worden op relevante pagina's standaard getoond
+- 🪄 Actieve datum-preset wordt nu visueel gemarkeerd
+- ✨ Datum-van-tot component vernieuwd met duidelijkere invoervelden, icoon en compactere datumweergave
+- ✨ Preset-knoppen hebben een vernieuwd ontwerp en blijven binnen de beschikbare ruimte
+
+**Grafieken**
+
+- ✨ Breedtes van dashboardgrafieken gelijkgetrokken voor een consistenter overzicht
+- ✨ Y-asverdeling in lijngrafieken verbeterd voor beter leesbare waarden
+- ✨ Lijnweergave afgestemd voor betere balans tussen scherpte en leesbaarheid
+
+**Zones/Beleidszones**
+
+- 🪄 Alleen gebruikers van gemeentelijke organisaties kunnen nog hubs bewerken
+- 🐛 Opgelost: bij navigatie worden geselecteerde gearchiveerde zones nu correct opgeschoond
+
+**Aanbieders**
+
+- 🪄 Bolt toegevoegd als aanbieder, inclusief website, naam en herkenbare kleur
+
+**Documentatie**
+
+- ✨ Nieuwe documentatie voor het dashboard 'Prestaties aanbieders'
+- ✨ Link naar datakwaliteit toegevoegd in documentatie voor ruwe data-download
+- ✨ Nieuwe interne richtlijnen toegevoegd voor consistente overgangen in de interface
+
+**Technisch**
+
+- 🐛 Opgelost: serverwaarschuwingen en -fouten in de console verminderd
+- 🐛 Opgelost: toevoegen van een nieuwe grenswaarde werkt nu ook goed als er nog geen invoer voor die datum bestaat
+- 🧹 Technische stabiliteitsverbetering doorgevoerd om fouten met te veel open bestanden te voorkomen
+
+## Release 2026-02-25
+
+**Zones/Beleidszones**
+
+- 🪄 Nieuw statistiekendashboard voor beleidszones met overzicht van hubs en verbodsgebieden
+- 🪄 Kaartpreview toegevoegd op de Beleidszones-pagina, met nieuwe API's
+- 🪄 Geselecteerde zones worden nu opgeslagen in de URL, zodat je de weergave kunt delen
+- 🪄 Zone-data wordt gecachet voor snellere laadtijden
+- 🪄 Gearchiveerde zones tonen nu de vervaldatum wanneer ze worden getoond
+- 🪄 Link vanuit de hub-statistiekwidget naar de statistiekendetailpagina
+- ✨ Automatisch verbergen van straatlaag bij inzoomen op satellietkaart
+- ✨ Mapbox-label standaard verborgen op kaartpreview
+- 🐛 Opgelost: Gearchiveerde hubs worden niet meer getoond in de filterbar
+- 🧹 Refactor: PolicyHubsStats-code opgeschoond
+
+**Statistieken en Beleidsinfo**
+
+- 🪄 Grafieken gebruiken nu niet-gestapelde lijnen voor betere leesbaarheid
+- 🪄 Lijnen in grafieken worden verbonden bij ontbrekende waarden
+- ✨ Opvulkleur verwijderd bij lijn grafieken voor strakker ontwerp
+- ✨ Link naar 'Prestaties aanbieders' tijdelijk verborgen in de filterbar
+
+**Kaart**
+
+- 🐛 Opgelost: 'Data'-titel wordt niet meer getoond in lagenselectie als er geen datalagen beschikbaar zijn
+
+## Release 2026-02-18
+
+**Statistieken en Beleidsinfo**
+
+- 🪄 Nieuwe grafiek 'Verhuringen per voertuig' op de statistiekenpagina
+- 🪄 Grafiek 'Aanbod' heeft nu een legenda en verbeterde aanbiedernamen
+- 🪄 In de filterbar kun je nu schakelen tussen verschillende statistiekpagina's (Beleidsinfo, Aanbod, Verhuringen)
+- ✨ Route wijziging: `/stats/overview` is hernoemd naar `/stats/beleidsinfo`
+
+**Prestaties aanbieders**
+
+- 🪄 Gebruik een balk in plaats van blokken wanneer de geselecteerde periode langer is dan 7 dagen
+- 🪄 Toon gemiddelde waarde in grafieken op de detailpagina
+- 🪄 Grafieken ondersteunen nu percentage als eenheid (met %-teken)
+- 🪄 Demo-modus toegevoegd met geanonymiseerde namen en kleuren
+- 🪄 Toon meerdere aandrijvingstypes (combustie) per aanbieder
+- 🪄 Alleen één kaart per combinatie aanbieder/voertuigtype
+- 🪄 Vergunningseisen-dialoog herschreven met nieuwe API en verbeterd beheer van records
+- 🪄 Mogelijkheid om KPI-configuratie te verwijderen in de grenswaarde-tabel
+- 🪄 Grenswaarde (min/max) wordt nu voor het invoerveld getoond
+- 🪄 Ophalen van geometrie operator-modaliteitslimieten voor gemeente met fallback-logica
+- ✨ Verbeterde volgorde van compliance-indicatoren: rood (niet-compliant) eerst, dan groen, dan grijs
+- ✨ Detailpagina ondersteunt fullscreen-weergave en gesplitste layout
+- ✨ Verbeterd ontwerp van de 'Grenswaarde toevoegen'-sectie
+- ✨ Actieve geselecteerde aanbieder/voertuigtype wordt nu duidelijk getoond
+- ✨ Filterbar: optie 'Prestaties aanbieders' tijdelijk verborgen
+
+**Grafieken**
+
+- ✨ LineChart: soepelere lijn, blauwe kleur en altijd 15% ruimte aan de bovenkant
+- 🐛 Opgelost: Y-as toont geen decimale getallen meer bij hele getallen
+
+**Modals en dialogen**
+
+- 🪄 Modals worden nu boven alle app-elementen geladen
+- 🐛 Opgelost: 'Exporteer'-modal werd getoond onder de Lijst-modal (PolicyHubsList)
+- 🐛 Opgelost: Button-actie in modal gaf een fout
+
+**Gebruikersinterface**
+
+- ✨ Nieuw Dashboard Deelmobiliteit-logo in plaats van CROW-logo
+- ✨ Vernieuwd menu-ontwerp
+- ✨ Verbeterde stijlen voor voertuigtype-kopteksten en prestatie-indicatorblokken
+- 🧹 Filterbar geconverteerd van JSX naar TypeScript
+
+## Release 2026-02-05
+
+**Prestaties aanbieders**
+
+- 🪄 Selecteer aanbieder en voertuigtype op de detailpagina voor gefilterde weergave van prestaties
+- 🪄 Standaard toon laatste 7 dagen in de filterbar (was voorheen 60 dagen)
+- 🪄 Verbeterde navigatie tussen pagina's: query parameters worden behouden bij navigatie
+- 🪄 Periode wordt nu automatisch ingesteld op basis van URL query parameters (start_date/end_date)
+- 🪄 Preset-knoppen voor datumselectie kunnen nu handmatig worden ingesteld
+- 🪄 Alleen grafieken worden geladen die beschikbaar zijn in de API-resultaten
+- 🐛 Opgelost: Voorkomt knipperen van divs tijdens het laden van data
+- 🐛 Opgelost: Geen aparte indicatorblokken meer voor verschillende aandrijvingstypes (propulsion_types)
+- 🧹 Gebruik gemeenschappelijke Overlay-component in plaats van aangepaste implementatie
+
+## Release 2026-01-29
+
+**Prestaties aanbieders**
+
+- 🪄 Nieuwe pagina 'Prestaties aanbieders' (voorheen 'Vergunningseisen') voor het monitoren van prestaties van aanbieders
+- 🪄 Nieuwe detailpagina met grafieken voor gedetailleerde analyse van prestaties per aanbieder
+- 🪄 Toon prestatie-indicatoren (KPI's) per aanbieder met visuele indicatorblokken
+- 🪄 Toon drempelwaarden (threshold) in KPI-blok tooltips
+- 🪄 Toon drempelwaarden in grafieken op de detailpagina
+- 🪄 Toon indicatorblok voor elke datum in de geselecteerde periode
+- 🪄 Toon dagnaam bij hover over indicatorblokken
+- 🪄 Filterbar uitgebreid met Dashboard- en Plaatsselectie voor 'Prestaties aanbieders'
+- 🪄 Route aangepast: `vergunningseisen` → `prestaties-aanbieders`
+
+**Gebruikersinterface**
+
+- 🪄 Tooltips zijn nu klikbaar: klik op het tooltip-icoon om de tooltip te openen
+- 🪄 Elke pagina heeft nu een specifieke paginatitel in de browser (metatags)
+- 🪄 Nieuwe gemeenschappelijke PageTitle-component gebruikt op meerdere pagina's voor consistentie
+- 🪄 FilterbarExtended sluit automatisch wanneer je buiten de filterbar klikt
+- 🪄 MenuSecondary hernoemd naar FloatingMobileMenu voor duidelijkere naamgeving
+
+**Kaart**
+
+- 🐛 Opgelost: Browser console errors in MapComponent zijn verholpen
+
+**Diverse**
+
+- 🧹 Code cleanup in `src/helpers/stats/rental-data.ts`
+- 🧹 App.jsx geconverteerd naar App.tsx (TypeScript)
+- 🧹 DISPLAYMODE_PERMITS vervangen door DISPLAYMODE_DASHBOARD
+
+## Release 2026-01-05
+
+**Aanbod**
+
+- 🐛 De kaart update niet als je filterde en er geen voertuigen werden gevonden met de gebruikte filters. Hierdoor kon het zijn dat je bijvoorbeeld op voertuigtype 'fiets' filterde, maar de voertuigen op de kaart niet verdwenen omdat er 0 voertuigen met voertuigtype 'fiets' waren gevonden. Dit is opgelost: ook als er een lege dataset terugkomt na toepassen van filters, wordt de kaartdata geupdate.
+
+## Release 2025-12-15
+
+**Zones**
+
+- 🐛 Na verwijderen van een zone: update de tabellijst en kaart, zodat de verwijderde zone direct na verwijderen van de lijst en kaartweergave weg is
+- 🐛 Toon de 'verwijder'-knop alleen (boven de tabel) als verwijderen van de geselecteerde zones mogelijk is. De bug was dat de verwijder-knop getoond werd als zones geselecteerd waren waarbij het verwijderen al ingepland was
+
+## Release 2025-11-28
+
+**Servicegebieden**
+
+- De Servicegebieden-kaart laadt sneller
+- Verbeterde legenda:
+  - Nu 1 laagkleur voor 'Onveranderd'
+  - Klik op de legenda-items om lagen te verbergen/tonen
+- Bij het laden van een gemeente wordt automatisch tenminste 1 beschikbare aanbieder aangevinkt (de eerste in de lijst)
+
+## Release 2025-11-27
+
+- 🐛 Fix: De x-as van [Ontwikkeling](https://dashboarddeelmobiliteit.nl/stats/beleidsinfo)-grafieken was onjuist bij selectie van maatwerkzones<br />
+Dat er geen x-as-waardes werden getoond kwam doordat er sinds kort [[1]](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-api/commit/2e18f28425be233d30d819229966d7b8632753fd) [[2]](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-api/commit/476d3d4b1a15d64293d21d856b2b0bb7e6d01b18) een deel van de API's sinds kort tijdzones teruggeven.
+
 ## Release 2025-08-06
 
 Beleidszones:

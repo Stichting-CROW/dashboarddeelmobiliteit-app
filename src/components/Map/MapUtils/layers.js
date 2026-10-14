@@ -1,4 +1,25 @@
 import {layers} from '../layers';
+import { whenMapStyleReady } from './mapGuards';
+
+const setLayerVisibility = (map, layerId, visibility) => {
+  if (!map || !map.getLayer) return;
+  if (!map.getLayer(layerId)) return;
+
+  try {
+    map.setLayoutProperty(layerId, 'visibility', visibility);
+  } catch (e) {
+    // Fallback to map.U helper if direct call failed.
+    try {
+      if (visibility === 'visible') {
+        map.U.show(layerId);
+      } else {
+        map.U.hide(layerId);
+      }
+    } catch {
+      // Layer may be in an invalid state.
+    }
+  }
+};
 
 export const addLayers = (map) => {
   // Separate background layers from data layers
@@ -21,12 +42,20 @@ export const addLayers = (map) => {
 
   // Add data layers after (they should be on top)
   dataLayers.forEach(({ key, config }) => {
-    map.U.addLayer(config);
+    // Start data layers hidden so they don't flash before activateLayers runs.
+    const configWithHiddenLayout = {
+      ...config,
+      layout: {
+        ...config.layout,
+        visibility: 'none'
+      }
+    };
+    map.U.addLayer(configWithHiddenLayout);
   });
 }
 
 export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
-  if(! layersToShow) {
+  if(! layersToShow || ! map) {
     return;
   }
 
@@ -36,29 +65,42 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
     layersToShow.forEach(l => {
       const data = allLayers[l];
       // Only activate layer if it's not a background layer
-      if(! data['is-background-layer']) {
-        map.U.show(l);
+      if(data && !data['is-background-layer']) {
+        setLayerVisibility(map, l, 'visible');
       }
     });
 
-    // Hide all other layersToShow (but not background layers)
-    Object.keys(allLayers).forEach((key, idx) => {
+    // Hide all other layers (but not background layers)
+    Object.keys(allLayers).forEach((key) => {
       const data = allLayers[key];
       // Don't hide background layers - they're managed by setBackgroundLayer
-      if(layersToShow.indexOf(key) <= -1 && !data['is-background-layer']) {
-        map.U.hide(key);
+      if(layersToShow.indexOf(key) <= -1 && data && !data['is-background-layer']) {
+        setLayerVisibility(map, key, 'none');
       }
     });
   }
 
-  // If not loaded: try again in x seconds
-  // if(! map.isStyleLoaded() && ! isRetry) {
-  //   setTimeout(() => {
-  //     activateLayers(map, allLayers, layersToShow, true);
-  //   }, 250);
+  if (!map.isStyleLoaded() && !isRetry) {
+    // Retry once the style is ready. This prevents the race where the
+    // transition from Zones to Aanbod runs before MapLibre has finished
+    // processing the style and layers can't be hidden yet.
+    if (process.env.NODE_ENV === 'development') {
+      console.log('activateLayers: map style not ready, deferring', layersToShow);
+    }
+    whenMapStyleReady(map, () => {
+      activateLayers(map, allLayers, layersToShow, true);
+    });
+    return;
+  }
 
-  //   return;
-  // }
+  if (process.env.NODE_ENV === 'development') {
+    const parkIds = ['vehicles-point', 'vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
+    const activeParkIds = layersToShow.filter(id => parkIds.includes(id));
+    const hiddenParkIds = Object.keys(allLayers).filter(id => parkIds.includes(id) && layersToShow.indexOf(id) <= -1);
+    if (activeParkIds.length > 0 || hiddenParkIds.length > 0) {
+      console.log('activateLayers: layersToShow', layersToShow, 'show', activeParkIds, 'hide', hiddenParkIds);
+    }
+  }
 
   doAction();
 

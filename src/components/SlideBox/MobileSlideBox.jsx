@@ -1,14 +1,10 @@
-import {
-  // useDispatch,
-  // useSelector
-} from 'react-redux';
-
 import './MobileSlideBox.css';
 import { IconButtonClose } from '../IconButtons.jsx';
 
 function MobileSlideBox(props) {
   return (
-    <div className={`
+    <div
+      className={`
       MobileSlideBox w-full sm:hidden fixed left-0
       ${props.isVisible ? 'is-visible' : ''}
       ${props.classes}

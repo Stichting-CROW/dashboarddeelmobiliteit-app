@@ -1,0 +1,343 @@
+import React from 'react';
+
+import {StateType} from '../../types/StateType';
+
+import {useSelector} from 'react-redux';
+
+import moment from 'moment';
+
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  XAxis,
+  Legend,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+
+import { transformZerosToNullForChart } from './chartTools.js';
+import {
+  getProviderColor,
+  getPrettyProviderName,
+  getUniqueProviderNames
+} from '../../helpers/providers.js';
+import {
+  getAggregatedVehicleData,
+  getAggregatedChartData,
+  getAggregatedRentalsData,
+  getAggregatedRentalsChartData,
+  getDateFormat,
+  prepareDataForCsv,
+  downloadCsv
+} from '../../helpers/stats/index';
+
+import {CustomizedXAxisTick, CustomizedYAxisTick} from './CustomizedAxisTick.jsx';
+import ChartSkeleton from './ChartSkeleton';
+import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
+import {useAggregatedChartData, ChartDataFetcher} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {CHART_SYNC_ID} from './chartConstants';
+import {formatNumber} from './chartFormatting';
+import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
+import './CustomizedTooltip.css';
+
+interface VerhuringenPerVoertuigChartProps {
+  title?: string;
+}
+
+function mergeRentalsPerVehicle(
+  vehiclesChartData: Record<string, unknown>[],
+  rentalsChartData: Record<string, unknown>[]
+): Record<string, unknown>[] {
+  if (!vehiclesChartData?.length || !rentalsChartData?.length) return [];
+
+  return vehiclesChartData.map((vehicleRow, index) => {
+    const rentalsRow = rentalsChartData[index];
+    if (!rentalsRow) return vehicleRow;
+
+    const timeKey = vehicleRow.time ? 'time' : 'name';
+    const timeValue = vehicleRow.time || vehicleRow.name;
+
+    const merged: Record<string, unknown> = {[timeKey]: timeValue, time: timeValue};
+
+    const providerKeys = new Set([
+      ...Object.keys(vehicleRow).filter((k) => k !== 'time' && k !== 'name'),
+      ...Object.keys(rentalsRow).filter((k) => k !== 'time' && k !== 'name')
+    ]);
+
+    providerKeys.forEach((provider) => {
+      const vehicles = Number(vehicleRow[provider]) || 0;
+      const rentals = Number(rentalsRow[provider]) || 0;
+      merged[provider] = vehicles > 0 ? Math.round((rentals / vehicles) * 100) / 100 : 0;
+    });
+
+    return merged;
+  });
+}
+
+interface RatioChartData {
+  vehicles: Record<string, unknown>;
+  rentals: Record<string, unknown>;
+}
+
+/**
+ * Fetches both datasets the ratio needs. Returns undefined when either is
+ * missing, so the chart shows its empty state instead of a partial ratio.
+ */
+const fetchRatioChartData: ChartDataFetcher<RatioChartData> = async (token, filter, zones, metadata) => {
+  const [vehicles, rentals] = await Promise.all([
+    getAggregatedVehicleData(token, filter, zones, metadata),
+    getAggregatedRentalsData(token, filter, zones, metadata)
+  ]);
+  if (!vehicles || !rentals) return undefined;
+  return {vehicles, rentals};
+};
+
+const tooltipTextColor = '#333333';
+
+const isLightColor = (c: string | undefined): boolean => {
+  if (!c || typeof c !== 'string') return true;
+  const s = c.replace(/\s/g, '').toLowerCase();
+  if (s === 'white' || s === '#fff' || s === '#ffffff' || s.startsWith('rgb(255,255,255')) return true;
+  if (s.startsWith('#')) {
+    const hex = s.slice(1);
+    if (hex.length <= 4) return parseInt(hex, 16) > 0xff0;
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6) || 'ff', 16);
+    return (r + g + b) / 3 > 240;
+  }
+  return false;
+};
+
+const getLineColor = (x: {name?: string; value?: number; fill?: string; stroke?: string; color?: string}) => {
+  const c = x.color || (x.fill && x.fill !== 'transparent' ? x.fill : x.stroke) || tooltipTextColor;
+  return isLightColor(c) ? tooltipTextColor : c;
+};
+
+const RatioTooltip = ({
+  active,
+  payload,
+  label,
+  contentStyle = {}
+}: {
+  active?: boolean;
+  payload?: Array<{name: string; value: number; fill?: string; stroke?: string; color?: string}>;
+  label?: string;
+  contentStyle?: React.CSSProperties;
+}) => {
+  if (active && payload && payload.length) {
+    // Ratios always get two decimals so values line up in the list
+    const displayValue = (v: number | null | undefined) => formatNumber(v ?? 0, 2);
+    const rootStyle = {color: tooltipTextColor, background: '#FFFFFF', ...contentStyle};
+
+    return (
+      <div className="CustomizedTooltip" style={rootStyle}>
+        <div className="my-0" style={{color: tooltipTextColor}}>
+          <b>{label}</b>
+        </div>
+        <ul className="my-0 py-0">
+          {payload.map((x, i) => (
+            <li key={'c-' + i} className="CustomizedTooltip-item" style={{color: getLineColor(x)}}>
+              {x.name}: {displayValue(x.value)}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return null;
+};
+
+function VerhuringenPerVoertuigChart({title = 'Verhuringen per voertuig'}: VerhuringenPerVoertuigChartProps) {
+
+  const filter = useSelector((state: StateType) => state.filter);
+  const metadata = useSelector((state: StateType) => state.metadata);
+  const aanbieders = useSelector((state: StateType) =>
+    state.metadata?.aanbieders ? state.metadata.aanbieders : []
+  );
+  const zones = useSelector((state: StateType) =>
+    state.metadata?.zones ? state.metadata.zones : []
+  );
+
+  // Load vehicle and rental data together. The actual API calls are
+  // deduplicated in the shared dedupedFetch helper, so even though this
+  // component requests the same endpoints as BeschikbareVoertuigenChart and
+  // VerhuringenChart, only one HTTP request is sent for each.
+  const {data, isLoading, isRefreshing, error, refetch} = useAggregatedChartData<RatioChartData>(
+    fetchRatioChartData
+  );
+  const vehiclesData = data?.vehicles ?? null;
+  const rentalsData = data?.rentals ?? null;
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
+
+  const vehiclesChartData = getAggregatedChartData(
+    vehiclesData as Parameters<typeof getAggregatedChartData>[0],
+    filter,
+    zones,
+    aanbieders
+  );
+  const rentalsChartData = getAggregatedRentalsChartData(
+    rentalsData as Parameters<typeof getAggregatedRentalsChartData>[0],
+    filter,
+    zones,
+    aanbieders
+  );
+
+  const chartData = mergeRentalsPerVehicle(vehiclesChartData, rentalsChartData);
+
+  const getChartDataWithNiceDates = (data: Record<string, unknown>[]) => {
+    const dateFormat = getDateFormat(filter.ontwikkelingaggregatie);
+    return data.map((x) => ({
+      ...x,
+      time: moment((x.time ?? x.name) as string).format(dateFormat)
+    }));
+  };
+  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const valueKeys = chartDataWithNiceDatesRaw?.[0]
+    ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
+    : [];
+  const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+
+  // Weekend bands, based on the original timestamps (before date formatting)
+  const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
+
+  const numberOfPointsOnXAxis = chartData?.length ?? 0;
+  const providerNames = getUniqueProviderNames(chartDataWithNiceDates).filter(
+    (x) => x !== 'time' && x !== 'name'
+  );
+
+  const renderChart = () => {
+    if (
+      numberOfPointsOnXAxis > 24 &&
+      filter.ontwikkelingaggregatie !== '15m' &&
+      filter.ontwikkelingaggregatie !== '5m' &&
+      filter.ontwikkelingaggregatie !== 'hour'
+    ) {
+      return (
+        <AreaChart
+          data={chartDataWithNiceDates}
+          syncId={CHART_SYNC_ID}
+          margin={{top: 10, right: 30, left: 0, bottom: 0}}
+        >
+          {renderWeekendShading(weekendRanges)}
+          <CartesianGrid strokeDasharray="3 0" vertical={false} />
+          <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
+          <YAxis tick={<CustomizedYAxisTick />} />
+          <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
+          <Legend {...legend.legendProps} />
+          {providerNames.map((x) => {
+            const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
+            return (
+              <Area
+                key={x}
+                type="monotone"
+                dataKey={x}
+                name={getPrettyProviderName(x)}
+                stroke={providerColor}
+                strokeWidth={2.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                fill="transparent"
+                isAnimationActive={false}
+                connectNulls
+                hide={legend.isHidden(x)}
+              />
+            );
+          })}
+        </AreaChart>
+      );
+    }
+
+    return (
+      <LineChart
+        data={chartDataWithNiceDates}
+        syncId={CHART_SYNC_ID}
+        margin={{top: 10, right: 30, left: 0, bottom: 0}}
+      >
+        {renderWeekendShading(weekendRanges)}
+        <CartesianGrid strokeDasharray="3 0" vertical={false} />
+        <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
+        <YAxis tick={<CustomizedYAxisTick />} />
+        <Tooltip content={<RatioTooltip />} contentStyle={{color: '#333333', background: '#FFFFFF'}} />
+        <Legend {...legend.legendProps} />
+        {providerNames.map((x) => {
+          const providerColor = getProviderColor(metadata?.aanbieders ?? [], x);
+            return (
+            <Line
+              key={x}
+              type="monotone"
+              dataKey={x}
+              name={getPrettyProviderName(x)}
+              stroke={providerColor}
+              strokeWidth={2.5}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              dot={false}
+              isAnimationActive={false}
+              connectNulls
+              hide={legend.isHidden(x)}
+            />
+          );
+        })}
+      </LineChart>
+    );
+  };
+
+  return (
+    <div className="relative">
+      <div className="flex justify-between my-2">
+        <div className="flex flex-start">
+          {title && (
+            <h2 className="text-4xl my-2">
+              {title}
+            </h2>
+          )}
+          {chartData && chartData.length > 0 && (
+            <div className="flex justify-center flex-col ml-2">
+              <button
+                onClick={() => {
+                  const preparedData = prepareDataForCsv(chartData);
+                  const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}_verhuringen_per_voertuig`;
+                  downloadCsv(preparedData, filename);
+                }}
+                className="opacity-50 cursor-pointer"
+              >
+                <img
+                  src="/components/StatsPage/icon-download-to-csv.svg"
+                  width="30"
+                  alt="Download to CSV"
+                  title="Download to CSV"
+                />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="relative" style={{width: '100%', height: '400px'}}>
+        {isLoading ? (
+          <ChartSkeleton height="100%" />
+        ) : error ? (
+          <ChartErrorState onRetry={refetch} />
+        ) : !chartData || chartData.length === 0 ? (
+          <ChartEmptyState />
+        ) : (
+          <>
+            {isRefreshing && <ChartRefreshingOverlay />}
+            <ResponsiveContainer>
+              {renderChart()}
+            </ResponsiveContainer>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default VerhuringenPerVoertuigChart;

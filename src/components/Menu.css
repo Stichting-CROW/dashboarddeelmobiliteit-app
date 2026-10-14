@@ -12,7 +12,12 @@
 }
 
 .Menu-inner {
+  overflow: visible;
+}
+
+.Menu-scroll {
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 @media (min-width: 640px) {
@@ -38,6 +43,12 @@
     display: inline-block;
     max-width: 100%;
     width: auto;
+    overflow: visible;
+  }
+
+  .Menu-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   @media (max-width: 964px) {
@@ -95,6 +106,83 @@
 }
 .text-menu:last-child::after {
   border-right: none;
+}
+
+.Menu-item-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.Menu-item-wrapper.has-submenu .text-menu::after {
+  border-right: solid 1px #000;
+}
+
+.Menu-desktop-submenu-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -100%);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Menu-desktop-submenu-bridge {
+  width: 228px;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.Menu-desktop-submenu {
+  display: none;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  width: 228px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0 3px 6px #00000029;
+  border-radius: 20px;
+  opacity: 1;
+  padding: 16px 20px;
+  z-index: 120;
+}
+
+.Menu-desktop-submenu.is-open {
+  display: block;
+}
+
+@media (max-width: 639px) {
+  .Menu-desktop-submenu-zone {
+    display: none !important;
+  }
+}
+
+.Menu-desktop-submenu-item {
+  display: block;
+  font: normal normal normal 14px/17px Inter;
+  letter-spacing: 0;
+  color: #343e47;
+  text-decoration: none;
+  margin: 0;
+  line-height: 1.25rem;
+}
+
+.Menu-desktop-submenu-item:hover {
+  color: #15aeef;
+}
+
+.Menu-desktop-submenu-item.is-active {
+  color: #15aeef;
+}
+
+.Menu-desktop-submenu-divider {
+  width: 30px;
+  height: 0;
+  border: 1px solid #707070;
+  opacity: 1;
+  margin: 10px 0;
 }
 
 .Menu-subMenu {

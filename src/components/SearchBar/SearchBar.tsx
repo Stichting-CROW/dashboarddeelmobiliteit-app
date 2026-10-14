@@ -1,19 +1,25 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { readable_geotype } from "../../helpers/policy-hubs/common"
+import { readable_geotype, readable_phase } from "../../helpers/policy-hubs/common"
 import center from '@turf/center'
+import st from 'geojson-bounds';
 import maplibregl from 'maplibre-gl';
 
 import SearchBarResults from './SearchBarResults';
 import SearchBarInput from './SearchBarInput';
 
 import {StateType} from '../../types/StateType';
+import { HubType } from '../../types/HubType';
 
 import {
   setSearchBarQuery,
 } from '../../actions/search';
 
 import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
+import {
+  filterHubsForSearch,
+  getSearchableZoneLayers,
+} from '../../helpers/policy-hubs/search-hubs';
 
 import './SearchBar.css';
 
@@ -36,13 +42,14 @@ function SearchBar({map}: {map: any}) {
   const uniqueComponentId = Math.random()*9000000;
 
   // State vars
-  const [policyHubs, setPolicyHubs] = useState([]);
-  const [filteredPolicyHubs, setFilteredPolicyHubs] = useState([]);
+  const [policyHubs, setPolicyHubs] = useState<HubType[]>([]);
+  const [filteredPolicyHubs, setFilteredPolicyHubs] = useState<HubType[]>([]);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [marker, setMarker] = useState<maplibregl.Marker | null>(null);
+  const [selectedResultLabel, setSelectedResultLabel] = useState<string | null>(null);
+  const markerRef = useRef<maplibregl.Marker | null>(null);
 
   // Selectors
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -50,10 +57,23 @@ function SearchBar({map}: {map: any}) {
   const active_phase = useSelector((state: StateType) => state.policy_hubs ? state.policy_hubs.active_phase : '');
   const filter = useSelector((state: StateType) => state.filter || null);
   const visible_layers = useSelector((state: StateType) => state.policy_hubs.visible_layers || []);
-  const isFilterbarOpen = useSelector((state: StateType) => state.ui && state.ui.FILTERBAR || false);
+  const displaymode = useSelector((state: StateType) => state.layers?.displaymode || '');
+  const isPolicyHubsPage = displaymode === 'displaymode-policy-hubs';
 
   // Add AbortController ref
   const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  const removeMarker = () => {
+    if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
+  };
+
+  const clearSelectedResult = () => {
+    removeMarker();
+    setSelectedResultLabel(null);
+  };
 
   // On component load
   useEffect(() => {
@@ -61,20 +81,33 @@ function SearchBar({map}: {map: any}) {
   }, [
     filter.gebied,
     active_phase,
-    visible_layers
+    visible_layers,
+    token,
+    displaymode
   ]);
+
+  useEffect(() => {
+    return () => {
+      removeMarker();
+    };
+  }, []);
+
+  useEffect(() => {
+    clearSelectedResult();
+  }, [displaymode]);
 
   // Fetch hubs
   const fetchHubs = async () => {
-    // Add a small delay to prevent multiple fetches
     try {
       const res: any = await fetch_hubs({
         token: token,
         municipality: filter.gebied,
-        phase: active_phase,
-        visible_layers: visible_layers
+        phase: isPolicyHubsPage ? active_phase : '',
+        visible_layers: isPolicyHubsPage
+          ? visible_layers
+          : getSearchableZoneLayers(!!token)
       }, uniqueComponentId);
-      setPolicyHubs(res);
+      setPolicyHubs(res || []);
     }
     catch(err) {
       console.error(err);
@@ -122,24 +155,33 @@ function SearchBar({map}: {map: any}) {
     }
   };
 
+  const filterPolicyHubsByQuery = (searchValue: string): HubType[] => {
+    if (isPolicyHubsPage) {
+      const uniquePolicyHubs = policyHubs.filter((x, index, self) =>
+        index === self.findIndex((t) => t.name === x.name)
+      );
+      return uniquePolicyHubs.filter(x =>
+        x.name?.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    }
+
+    return filterHubsForSearch(policyHubs, searchValue);
+  };
+
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value;
     dispatch(setSearchBarQuery(searchValue));
 
-    // Only keep one of each policy hub (x.name should be unique)
-    // TODO: Remove retired hubs out of the policyHubs list
-    const uniquePolicyHubs = policyHubs.filter((x, index, self) =>
-      index === self.findIndex((t) => t.name === x.name)
-    );
-    // Filter policy hubs regardless of search length
-    setFilteredPolicyHubs(
-      uniquePolicyHubs.filter(x => x.name.toLowerCase().includes(searchValue.toLowerCase()))
-    );
+    if (selectedResultLabel !== null && searchValue !== selectedResultLabel) {
+      clearSelectedResult();
+    }
+
+    setFilteredPolicyHubs(filterPolicyHubsByQuery(searchValue));
 
     if (searchValue.length < 3) {
       setSearchResults([]);
-      if (marker) {
-        marker.remove();
+      if (selectedResultLabel === null) {
+        removeMarker();
       }
       return;
     }
@@ -189,22 +231,49 @@ function SearchBar({map}: {map: any}) {
       setIsLoading(false);
     }
   };
+
+  const onZoneSelect = (hub: HubType) => {
+    if (!map || !hub.area || !hub.name) return;
+
+    const [lng, lat] = center(hub.area).geometry.coordinates;
+    removeMarker();
+
+    markerRef.current = new maplibregl.Marker()
+      .setLngLat([lng, lat])
+      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<div>${hub.name}</div>`))
+      .addTo(map);
+
+    map.fitBounds(st.extent(hub.area), {
+      padding: 80,
+      maxZoom: 17,
+      duration: 1000
+    });
+
+    dispatch(setSearchBarQuery(hub.name));
+    setSelectedResultLabel(hub.name);
+    setIsFocused(false);
+  };
   
   const results = filteredPolicyHubs.map((x) => {
     return {
+      key: x.zone_id,
       title: x.name,
-      subTitle: readable_geotype(x.geography_type),
+      subTitle: readable_geotype(x.geography_type || ''),
+      tag: x.phase === 'active' ? undefined : readable_phase(x.phase || ''),
       onClick: () => {
-        flyTo(x.area, x.zone_id);
-        dispatch(setSearchBarQuery(''));
+        if (isPolicyHubsPage) {
+          flyTo(x.area, x.zone_id);
+          dispatch(setSearchBarQuery(''));
+          return;
+        }
+
+        onZoneSelect(x);
       }
     }
   });
 
-  const onAddressSelect = (location: { lat: number; lng: number }, options: FlyToOptions) => {
-    if (marker) {
-      marker.remove();
-    }
+  const onAddressSelect = (location: { lat: number; lng: number }, options: FlyToOptions, label: string) => {
+    removeMarker();
 
     const newMarker = new maplibregl.Marker()
       .setLngLat([location.lng, location.lat])
@@ -212,14 +281,12 @@ function SearchBar({map}: {map: any}) {
     
     // Add popup to marker
     const popup = new maplibregl.Popup({ offset: 25 })
-      .setHTML(`<div>${searchResults.find(r => 
-        r.location?.lat === location.lat && 
-        r.location?.lng === location.lng
-      )?.text || 'Locatie'}</div>`);
+      .setHTML(`<div>${label || 'Locatie'}</div>`);
 
     newMarker.setPopup(popup);
     
-    setMarker(newMarker);
+    markerRef.current = newMarker;
+    setSelectedResultLabel(label);
 
     map.flyTo({
       center: [location.lng, location.lat],
@@ -328,11 +395,11 @@ function SearchBar({map}: {map: any}) {
                   key={index}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    if (result.type === 'address' && result.location && onAddressSelect) {
+                    if (result.type === 'address' && result.location) {
                       onAddressSelect(result.location, {
                         zoom: 17,
                         duration: 1000
-                      });
+                      }, result.text);
                     }
                   }}
                 >

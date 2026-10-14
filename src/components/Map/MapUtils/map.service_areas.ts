@@ -1,4 +1,5 @@
 import { getProviderColorForProvider } from "../../../helpers/providers";
+import { canMutateMapLayers, whenMapLayersMutable } from './mapGuards';
 
 type HexagonType = any;
 
@@ -42,19 +43,27 @@ const removeServiceAreaSources = (map: any) => {
 }
 
 const removeServiceAreasFromMap = (map: any) => {
-    if(! map) return;
+    if (!map) return;
+    if (!canMutateMapLayers(map)) {
+      whenMapLayersMutable(map, () => removeServiceAreasFromMap(map));
+      return;
+    }
 
-    let layer, key;
-    
-    key = 'service_areas-layer-fill';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-    
-    key = 'service_areas-layer-border';
-    layer = map.getLayer(`${key}`);
-    if(layer) map.removeLayer(`${key}`);
-  
-    removeServiceAreaSources(map);
+    try {
+      let layer, key;
+
+      key = 'service_areas-layer-fill';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      key = 'service_areas-layer-border';
+      layer = map.getLayer(`${key}`);
+      if (layer) map.removeLayer(`${key}`);
+
+      removeServiceAreaSources(map);
+    } catch {
+      // Map may already be torn down during route navigation.
+    }
 }
 
 async function renderPolygons_fill(map, operator: string, geojson) {
@@ -98,6 +107,7 @@ async function renderPolygons_fill(map, operator: string, geojson) {
     // Add line layer for wider outline/borders, on top of fill layer
     // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
     layerId = `${sourceId}-layer-border`;
+    if (map.getLayer(layerId)) return;
     map.addLayer({
       id: layerId,
       source: sourceId,
@@ -124,7 +134,12 @@ const renderServiceAreas = async (
   operator: string,
   geojson: any,
 ) => {
-  let features = [];
+  if (!map) return;
+  if (!canMutateMapLayers(map)) {
+    whenMapLayersMutable(map, () => renderServiceAreas(map, operator, geojson));
+    return;
+  }
+
 //   // Create feature collection based on geometriesForUser & hbDataResponse
   const featureCollection = geojson;
 

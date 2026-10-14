@@ -1,11 +1,15 @@
 import React from 'react';
 
-export function IconButtonClose(props) {
+export function IconButtonClose({ onClick, style, ariaLabel = 'Sluiten' }) {
   return (
-    <div className="text-2xl font-bold cursor-pointer" onClick={props.onClick}
-      style={props.style}
-      >×</div>
-  )
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={onClick}
+      style={style}
+      className="text-2xl font-bold leading-none bg-transparent border-0 p-0 cursor-pointer rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >×</button>
+  );
 }
 
 export function IconButtonFilter(props) {

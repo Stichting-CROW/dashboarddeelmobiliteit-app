@@ -42,6 +42,7 @@ export const getPrettyProviderName = (system_id) => {
     'felyx': 'Felyx',
     'felyx_mds': 'Felyx MDS (test)',
     'flickbike': 'FlickBike',
+    'bolt': 'Bolt',
     'gosharing': 'GO Sharing',
     'greenwheels': 'Greenwheels (pilot)',
     'hely': 'Hely',
@@ -52,7 +53,8 @@ export const getPrettyProviderName = (system_id) => {
     'lime': 'Lime',
     'tier': 'TIER',
     'dott': 'Dott',
-    'uwdeelfiets': 'Uw Deelfiets'
+    'uwdeelfiets': 'Uw Deelfiets',
+    'voi': 'Voi'
   }
   return providerPrettyNames[system_id]
     ? providerPrettyNames[system_id]
@@ -63,6 +65,7 @@ export const getProviderWebsiteUrl = (system_id) => {
   const providerWebsiteUrls = {
     'baqme': 'https://www.baqme.com/',
     'bird': 'https://www.bird.co/',
+    'bolt': 'https://bolt.eu/',
     'bondi': 'https://www.bondi.city/',
     'cykl': 'https://www.cykl.nl/',
     'check': 'https://ridecheck.app/',
@@ -84,6 +87,7 @@ export const getProviderWebsiteUrl = (system_id) => {
     'tier': 'https://www.tier.app/',
     'dott': 'https://ridedott.com/',
     'uwdeelfiets': 'https://www.uwdeelfiets.nl/',
+    'voi': 'https://voi.com/nl',
   }
   return providerWebsiteUrls[system_id]
     ? providerWebsiteUrls[system_id]
@@ -100,6 +104,11 @@ export const getProvider = (system_id) => {
     'bird': {
       name: 'Bird',
       website: 'https://www.bird.co/',
+      logo: '',
+    },
+    'bolt': {
+      name: 'Bolt',
+      website: 'https://bolt.eu/',
       logo: '',
     },
     'bondi': {
@@ -202,6 +211,11 @@ export const getProvider = (system_id) => {
       website: 'https://www.uwdeelfiets.nl/',
       logo: 'https://raw.githubusercontent.com/Stichting-CROW/dashboarddeelmobiliteit-datakwaliteit/main/logos/uwdeelfiets.png',
     },
+    'voi': {
+      name: 'Voi',
+      website: 'https://voi.com/nl',
+      logo: 'https://voi.com/logos/voi-coral.svg',
+    },
   }
   return providerData[system_id]
     ? providerData[system_id]
@@ -219,6 +233,7 @@ export const getProviderColors = () => {
     'jump': '#fd3e48',
     'gosharing': '#77b136',
     'greenwheels': '#32ab52',
+    'bolt': '#34d283',
     'check': '#8f3af8',
     'check_mdsv2': '#8f3af8',
     'felyx': '#064627',
@@ -231,6 +246,7 @@ export const getProviderColors = () => {
     'hely': '#fd645c',
     'tier': '#0d123f',
     'dott': '#00a8e9',
+    'voi': '#f26961',
   }
 }
 

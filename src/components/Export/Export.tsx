@@ -10,11 +10,11 @@ import {StateType} from '../../types/StateType';
 
 import {downloadReport, downloadRawData} from '../../api/aggregatedStats';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import { IconButtonClose } from '../IconButtons.jsx';
 import DateFromTo from '../DateFromTo/DateFromTo.jsx';
 import FormSelect from '../FormSelect/FormSelect.jsx';
-import Button from '../Form/Button.jsx';
+import Button from '../Button/Button';
 import PillMenu from '../PillMenu/PillMenu';
 import Section from '../Section/Section';
 import ExportParkeertelling from './ExportParkeertelling';
@@ -102,8 +102,8 @@ function Export() {
   const handleDownloadRawDataClick = async () => {
     setSuccesfullRawDataRequest(false);
     let result = await downloadRawData(token, {
-      startDate: moment(startDate).format('YYYY-MM-DD'),
-      endDate: moment(endDate).format('YYYY-MM-DD 23:59:59')
+      startDate: moment(startDate).format('YYYY-MM-DD') + 'T00:00:00Z',
+      endDate: moment(endDate).format('YYYY-MM-DD') + 'T23:59:59Z'
     });
     if ("email" in result) {
       setSuccesfullRawDataRequest(true);
@@ -120,14 +120,7 @@ function Export() {
 
   return (
     <div className="Export">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Exporteer data
-      </h1>
-
-      <div className="my-5">
+      <div className="mb-5">
 
         <Section title="Download standaardrapportage">
           <div className="lg:w-72">
@@ -152,7 +145,7 @@ function Export() {
               }
             })}
           />
-          <Button classes="" color="blue" onClick={() => handleDownloadReportClick()}>
+          <Button classes="" theme="blue" onClick={() => handleDownloadReportClick()}>
             Download rapportage
           </Button>
         </Section>
@@ -181,7 +174,7 @@ function Export() {
             />
           </div>
 
-          <Button classes="" color="blue" onClick={() => handleDownloadRawDataClick()}>
+          <Button classes="" theme="blue" onClick={() => handleDownloadRawDataClick()}>
             Vraag ruwe data export aan (.csv)
           </Button>
 

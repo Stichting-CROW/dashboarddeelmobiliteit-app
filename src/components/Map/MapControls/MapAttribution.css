@@ -1,0 +1,47 @@
+.MapAttribution {
+  position: relative;
+}
+
+.MapAttribution-button {
+  background: url('../images/controls-attribution.svg') center center no-repeat;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.MapAttribution-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.MapAttribution-panel {
+  position: absolute;
+  right: calc(100% + 8px);
+  bottom: 0;
+  width: max-content;
+  max-width: calc(100vw - 70px);
+  /* Match the height of the icon button next to it */
+  min-height: 43px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+  background: #ffffff;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 5px;
+  /* Size comes from the `text-sm` utility on the element */
+  font-family: Inter, sans-serif;
+  font-weight: normal;
+  color: #333333;
+  text-align: right;
+}
+
+.MapAttribution-panel a {
+  color: #333333;
+  text-decoration: underline;
+}
+
+.MapAttribution-panel a:hover {
+  color: #15aeef;
+}

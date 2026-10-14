@@ -3,26 +3,26 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import {StateType} from '../../types/StateType';
 
-import Logo from '../Logo.jsx';
+import LogoCrow from '../LogoCrow.jsx';
 import PillMenu from '../PillMenu/PillMenu';
 import { IconButtonClose } from '../IconButtons.jsx';
+import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 
-export default function Misc({children}) {
+export default function Misc({children, contentWidth = '600px'}) {
   const navigate = useNavigate();
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
 
-  const pillMenuItems = [
+  const loggedInPillMenuItems = [
     {
-      title: 'Profiel',
+      title: 'Start',
       link: '/profile',
     },
     {
       title: 'Documentatie',
       link: '/docs',
-      public: true
     },
     {
       title: 'Exporteer',
@@ -31,12 +31,10 @@ export default function Misc({children}) {
     {
       title: 'Datafeeds',
       link: '/active_feeds',
-      public: true
     },
     // {
     //   title: 'Voertuigplafonds',
     //   link: '/permits',
-    //   public: false
     // },
     {
       title: 'API keys',
@@ -44,11 +42,28 @@ export default function Misc({children}) {
     }
   ];
 
-  // Only show pill items user has access to
-  const allowedPillMenuItems = pillMenuItems.filter(x => {
-    if(isLoggedIn) return true;
-    return x.public === true;
-  });
+  const guestPillMenuItems = [
+    {
+      title: 'Functies',
+      link: '/functionaliteiten',
+    },
+    {
+      title: 'Over',
+      link: '/over',
+    },
+    {
+      title: 'Documentatie',
+      link: '/docs',
+    },
+    {
+      title: 'Datafeeds',
+      link: '/active_feeds',
+    },
+  ];
+
+  const allowedPillMenuItems = isLoggedIn
+    ? loggedInPillMenuItems
+    : guestPillMenuItems;
 
   return (
     <div className="
@@ -64,7 +79,7 @@ export default function Misc({children}) {
           style={{position: 'absolute', right: '30px', top: '18px'}}
         />
 
-        <Logo title="" />
+        <LogoDashboardDeelmobiliteit />
 
         <div className="mt-8">
           <PillMenu items={allowedPillMenuItems} />
@@ -73,7 +88,7 @@ export default function Misc({children}) {
         <div className="
           mt-8
         " style={{
-          width: '600px',
+          width: contentWidth,
           maxWidth: '100%'
         }}>
           {children}

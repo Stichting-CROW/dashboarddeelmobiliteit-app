@@ -2,38 +2,102 @@ export const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
 
+/** Organisation type from /menu/acl or /user/acl (not organisation records). */
+export const getAclOrganisationType = (acl) => {
+  if (!acl) return null;
+  return acl.organisation_type ?? acl.type_of_organisation ?? null;
+};
+
+/**
+ * Operator account: organisation_type OPERATOR, or a single operator in menu ACL
+ * (see prestatiesAanbiedersViewMode.isOperatorPrestatiesView).
+ */
+export const isOperatorAccount = (acl) => {
+  if (!acl) return false;
+
+  if (getAclOrganisationType(acl) === 'OPERATOR') {
+    return true;
+  }
+
+  const operators = acl.operators;
+  if (
+    Array.isArray(operators)
+    && operators.length === 1
+    && operators[0]?.system_id
+    && !acl.is_admin
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const canEditHubs = (acl) => {
-  if(! acl) return false;
+  if (!acl) return false;
 
-  const allowedRoles = [
-    'MICROHUB_EDIT'
-  ];
+  // OPERATOR organisations are never allowed to edit zones,
+  // even if they happen to have the MICROHUB_EDIT privilege.
+  // Editing is restricted to MUNICIPALITY, OTHER_GOVERNMENT and ADMIN
+  // (see EditUser.tsx -> org_types_allowed_to_edit_zones).
+  if (isOperatorAccount(acl)) {
+    return false;
+  }
 
-  let canEdit = false;
-  acl.privileges?.forEach((role) => {
-    if(allowedRoles.indexOf(role) > -1) {
-      canEdit = true;
-    }
-  });
+  const allowedRoles = ['MICROHUB_EDIT'];
 
-  return canEdit;
+  const hasEditPrivilege = Array.isArray(acl.privileges)
+    && acl.privileges.some((role) => allowedRoles.indexOf(role) > -1);
+
+  if (!hasEditPrivilege) {
+    return false;
+  }
+
+  return true;
 }
 
-// Checks if user is admin
+// NL-wide data access: ACL super-admin, ADMIN organisation, or FusionAuth admin role.
 export const isAdmin = (state) => {
-  if(! state) return;
-  if(! state.authentication) return;
-  if(! state.authentication.user_data?.user?.registrations) return;
+  if (!state || !state.authentication) return false;
 
-  let admin = false;
-  state.authentication.user_data.user.registrations.forEach(x => {
-    if(x.roles.includes('admin')) {
-      admin = true;
-    }
-  });
+  const acl = state.authentication.user_data?.acl;
+  if (acl?.is_admin === true) return true;
+  if (getAclOrganisationType(acl) === 'ADMIN') return true;
 
-  return admin;
+  const registrations = state.authentication.user_data?.user?.registrations;
+  if (!Array.isArray(registrations)) return false;
+
+  return registrations.some((registration) => (
+    Array.isArray(registration.roles) && registration.roles.includes('admin')
+  ));
 }
+
+// Maximum number of municipalities we still enumerate in a
+// `/zones?municipalities=GM..,GM..` (or `/zones?zone_ids=..`) query. Above this,
+// the upstream server rejects the request with a 502. Accounts with more
+// accessible municipalities than this are treated NL-wide (like admins) for zone
+// loading and zone-boundary display; their vehicles are scoped by the auth token
+// regardless (see createFilterparameters). Kept well below any realistic
+// province-sized list so that small/regional accounts keep their precise zones.
+export const MAX_ENUMERABLE_MUNICIPALITIES = 25;
+
+export const getEnumerableMunicipalityCodes = (gebieden) => {
+  if (!Array.isArray(gebieden)) return [];
+  return gebieden
+    .map((gebied) => gebied && gebied.gm_code)
+    .filter(Boolean);
+};
+
+// True when we should treat this account as NL-wide for zone loading/display:
+// admins, ADMIN organisations (ACL municipality list is typically empty), or
+// non-admin organisations with access to so many municipalities that enumerating
+// them in a zones query would 502. An empty `municipalities=` query is rejected
+// by the API, so an empty ACL list is treated NL-wide as well.
+export const shouldTreatMunicipalitiesAsNlWide = (state) => {
+  if (isAdmin(state)) return true;
+  const municipalityCodes = getEnumerableMunicipalityCodes(state?.metadata?.gebieden);
+  if (municipalityCodes.length === 0) return true;
+  return municipalityCodes.length > MAX_ENUMERABLE_MUNICIPALITIES;
+};
 
 // Validate if the current authentication state is valid
 export const isValidAuthState = (state) => {

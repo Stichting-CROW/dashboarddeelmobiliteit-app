@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+  <g id="Attribution" fill="none" stroke="#343e47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path id="Map_outline" data-name="Map outline" d="M1,3.9,6.333,1.8l5.334,2.1L17,1.8V14.1l-5.333,2.1L6.333,14.1,1,16.2Z"/>
+    <line id="Fold_left" data-name="Fold left" y2="12.3" transform="translate(6.333 1.8)"/>
+    <line id="Fold_right" data-name="Fold right" y2="12.3" transform="translate(11.667 3.9)"/>
+  </g>
+</svg>

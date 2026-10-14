@@ -8,6 +8,24 @@ import {
 
 export const vehiclesAbortController = new AbortController();
 
+/** system_ids from /menu/acl (operator accounts have a restricted list). */
+export const getAclOperatorSystemIds = (metadata) => {
+  const aclOperators = metadata?.aclOperators || [];
+  return aclOperators
+    .map((operator) => operator.system_id)
+    .filter(Boolean);
+};
+
+/** Append `operators=` when the logged-in user is scoped to specific operators. */
+export const appendAclOperatorsToUrl = (url, metadata) => {
+  const systemIds = getAclOperatorSystemIds(metadata);
+  if (systemIds.length === 0) {
+    return url;
+  }
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}operators=${systemIds.join(',')}`;
+};
+
 export const createFilterparameters = (displayMode, filter, metadata, options) => {
   const isParkingData = displayMode === DISPLAYMODE_PARK;
   const isRentalData = displayMode === DISPLAYMODE_RENTALS;
@@ -29,22 +47,50 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   }
   // If a place is selected, get all zones for this place
   else if (filter.gebied !== "" && hasAccessToFilterGebied) {
-    // create zone filter
+    const municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
     let candidates = [];
-    let municipality = metadata.gebieden.find(gebied => gebied.gm_code === filter.gebied);
-    if (undefined !== municipality) {
+
+    // Prefer an exact name match on a non-custom zone (the municipality's own
+    // boundary). This is what existed historically and works for places that
+    // have exactly one zone with the same name as the municipality.
+    if (municipality !== undefined) {
       candidates = metadata.zones.filter(zone => {
-        return zone.municipality === municipality.gm_code && zone.name === municipality.name && zone.zone_type !== 'custom'
+        return zone.municipality === municipality.gm_code
+          && zone.name === municipality.name
+          && zone.zone_type !== 'custom';
       });
-    } else {
     }
-    if (candidates.length === 1) {
-      filterparams.push("zone_ids=" + candidates[0].zone_id);
-    } else {
-      // console.error("zero or multiple multiple zones found for a single municipality (%s)", filter.gebied, candidates);
+
+    // Fallback 1: zones explicitly typed 'municipality' for this gm_code.
+    if (candidates.length === 0) {
+      candidates = metadata.zones.filter(zone => {
+        return zone.municipality === filter.gebied && zone.zone_type === 'municipality';
+      });
+    }
+
+    // Fallback 2: any non-custom zone for this gm_code. Keeps requests scoped
+    // to the selected plaats instead of falling through to NL-wide data.
+    if (candidates.length === 0) {
+      candidates = metadata.zones.filter(zone => {
+        return zone.municipality === filter.gebied && zone.zone_type !== 'custom';
+      });
+    }
+
+    if (candidates.length >= 1) {
+      const zoneIds = [...new Set(candidates.map(zone => zone.zone_id))];
+      filterparams.push("zone_ids=" + zoneIds.join(','));
     }
   }
-  // If no place is set, but the user is no admin: Set all places user has access to
+  // Logged-in users with no specific place selected ("Alle plaatsen"): the
+  // backend already scopes the response to the account's allowed data via the
+  // auth token, so we intentionally add no zone_ids. This is also required for
+  // accounts with access to a large number of municipalities (e.g. NL-wide
+  // shared data): enumerating every municipality/zone would make the query
+  // string long enough that the upstream server rejects it with a 502.
+  else if (options.is_logged_in && !options.show_global) {
+    // No zone_ids: the auth token (+ operators=) scopes the data server-side.
+  }
+  // Guests with access to multiple (public) municipalities: scope to those zones
   else if (hasAccessToMultipleGebieden && !options.show_global) {
     // Get zone IDs as array
     const allowed_zone_ids = metadata.zones.filter(zone => {
@@ -63,6 +109,35 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // filterparams.push("zone_ids=51233");
   }
 
+  const hasOperatorsParam = () => filterparams.some((p) => p.startsWith('operators='));
+
+  // system_ids from the public NL-wide /operators API (state.metadata.aanbieders).
+  const getPublicOperatorSystemIds = () => {
+    return (metadata?.aanbieders || [])
+      .map((operator) => operator.system_id || operator.value)
+      .filter(Boolean);
+  };
+
+  // Operator-type accounts (single operator in /menu/acl) must always be
+  // scoped to their own operator. For municipality / admin accounts we want
+  // the request to reflect the full NL-wide /operators list so newly added
+  // operators (e.g. 'voi') are included even when /menu/acl lags behind.
+  // The backend enforces data ACL based on the auth token + zone_ids.
+  const appendOperatorsScope = () => {
+    if (hasOperatorsParam()) {
+      return;
+    }
+    const aclSystemIds = getAclOperatorSystemIds(metadata);
+    if (aclSystemIds.length === 1) {
+      filterparams.push('operators=' + aclSystemIds.join(','));
+      return;
+    }
+    const publicSystemIds = getPublicOperatorSystemIds();
+    if (publicSystemIds.length > 0) {
+      filterparams.push('operators=' + publicSystemIds.join(','));
+    }
+  };
+
   if (options.includeOperators === true) {
     // Add provider filter
     if (filter.aanbiedersexclude !== "" && filter.aanbiedersexclude !== undefined) {
@@ -72,17 +147,17 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
         .map(aanbieder => aanbieder.system_id).join(",");
 
       filterparams.push("operators=" + selectedaanbieders);
-    } else if (metadata.aanbieders.length === 1) {
-      filterparams.push("operators=" + metadata.aanbieders[0].system_id);
+    } else {
+      appendOperatorsScope();
     }
   } else {
     // filtering is done client side
   }
 
-  // only apply here if there is one aanbieder set
-  if (metadata.aanbieders.length === 1) {
-    filterparams.push("operators=" + metadata.aanbieders[0].system_id);
-  }
+  // For operator-type accounts the request must always be scoped to their own
+  // operator, even when filtering is done client-side. Other accounts get the
+  // full public operators list (see appendOperatorsScope).
+  appendOperatorsScope();
 
   // Add vehicle type filter
   // form_factors=[cargo_bicycle,moped,bicycle,car,other]

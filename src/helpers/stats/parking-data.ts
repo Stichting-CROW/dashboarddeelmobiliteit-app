@@ -1,5 +1,6 @@
 import moment from 'moment-timezone';
 import {getAggregatedStats, getAggregatedStats_timescaleDB} from '../../api/aggregatedStats';
+import { getBeleidszonesAvailabilityStats } from '../../api/beleidszones';
 
 import {
   prepareAggregatedStatsData,
@@ -14,6 +15,11 @@ import {
   keepActiveOperators
 } from './index';
 
+const parseZoneIdsFromFilter = (filter: { zones?: string }) => {
+  if (!filter?.zones) return [];
+  return filter.zones.split(',').map((id) => parseInt(id.trim(), 10)).filter((n) => !isNaN(n));
+};
+
 export const getAggregatedVehicleData = async (token, filter, zones, metadata) => {
   let aggregatedVehicleData;
   const options = {
@@ -22,9 +28,23 @@ export const getAggregatedVehicleData = async (token, filter, zones, metadata) =
     aggregationLevel: filter.ontwikkelingaggregatie,
     aggregationTime: filter.ontwikkelingaggregatie_tijd,
     aggregationFunction: filter.ontwikkelingaggregatie_function
-  }
-  if(doShowDetailledAggregatedData(filter, zones)) {
-    aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'available_vehicles', options);
+  };
+  if (doShowDetailledAggregatedData(filter, zones)) {
+    const zoneIds = parseZoneIdsFromFilter(filter);
+    if (zoneIds.length > 0) {
+      const van = filter.ontwikkelingvan ? new Date(filter.ontwikkelingvan) : new Date();
+      const tot = filter.ontwikkelingtot ? moment(filter.ontwikkelingtot).add(1, 'day').toDate() : new Date();
+      aggregatedVehicleData = await getBeleidszonesAvailabilityStats(token, {
+        zoneIds,
+        startTime: van.toISOString(),
+        endTime: tot.toISOString(),
+        aggregationLevel: filter.ontwikkelingaggregatie,
+        aggregationFunction: filter.ontwikkelingaggregatie_function || 'MAX',
+      });
+    }
+    if (!aggregatedVehicleData) {
+      aggregatedVehicleData = await getAggregatedStats_timescaleDB(token, 'available_vehicles', options);
+    }
   } else {
     aggregatedVehicleData = await getAggregatedStats(token, 'available_vehicles', options);
   }

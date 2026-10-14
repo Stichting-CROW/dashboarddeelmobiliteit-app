@@ -7,6 +7,8 @@ import {
 
 import {StateType} from '../../types/StateType';
 
+import MapControlsPortal from '../Map/MapControls/MapControlsPortal';
+
 import './IsochroneTools.css';
 
 const addIsochronesToMap = (theMap, featureCollection) => {
@@ -32,7 +34,11 @@ const addIsochronesForMarkers = async (theMap, locations) => {
   return;
 }
 
-const IsochroneTools = () => {
+interface IsochroneToolsProps {
+  map: maplibregl.Map | null;
+}
+
+const IsochroneTools = ({ map }: IsochroneToolsProps) => {
 
   const [isochroneMarkers, setIsochroneMarkers] = useState([]);
   const [counter, setCounter] = useState(0);
@@ -109,11 +115,12 @@ const IsochroneTools = () => {
 
   const isLoggedIn = useSelector((state: StateType) => state.authentication.user_data ? true : false);
 
+  const hasMarkers = isochroneMarkers && isochroneMarkers.length > 0;
+
   return (
     <>
-
-      <div className={`IsochroneTools ${isFilterbarOpen ? 'filter-open' : ''} fixed bg-white`}>
-        {(! isochroneMarkers || isochroneMarkers.length <= 0) && <div
+      <MapControlsPortal map={map} corner="bottom-right" order={-1}>
+        {! hasMarkers && <div
           className="IsochroneTools-ctrl-group">
             <div 
             className="IsochroneTools-ctrl IsochroneTools-ctrl-start cursor-pointer flex justify-center flex-col text-center"
@@ -124,7 +131,7 @@ const IsochroneTools = () => {
           />
         </div>}
 
-        {(isochroneMarkers && isochroneMarkers.length > 0) && <div className="IsochroneTools-ctrl-group">
+        {hasMarkers && <div className="IsochroneTools-ctrl-group">
           <div 
             className="IsochroneTools-ctrl IsochroneTools-ctrl-add cursor-pointer flex justify-center flex-col text-center"
             onClick={() => {addIsochroneMarker(window['ddMap'])}}
@@ -136,20 +143,19 @@ const IsochroneTools = () => {
             title="Stop isochronenweergave"
           />
         </div>}
+      </MapControlsPortal>
 
-        {(isochroneMarkers && isochroneMarkers.length > 0) && <div className="IsochroneTools-legend-container">
-          <div className="IsochroneTools-legend flex">
-            <div className="walker-icon" />
-            <div className="IsochroneTools-legend-parts flex-1 flex justify-center">
-              <div>1m</div>
-              <div>2m</div>
-              <div>3m</div>
-              <div>5m</div>
-            </div>
+      {hasMarkers && <div className={`IsochroneTools-legend-container ${isFilterbarOpen ? 'filter-open' : ''}`}>
+        <div className="IsochroneTools-legend flex">
+          <div className="walker-icon" />
+          <div className="IsochroneTools-legend-parts flex-1 flex justify-center">
+            <div>1m</div>
+            <div>2m</div>
+            <div>3m</div>
+            <div>5m</div>
           </div>
-        </div>}
-
-      </div>
+        </div>
+      </div>}
     </>
   )
 }

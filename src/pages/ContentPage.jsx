@@ -14,9 +14,10 @@ export default function ContentPage(props) {
       style={{
         overflowY: 'auto',
         zIndex: 5,
+        ...props.style,
       }}
     >
-      <div className="ContentPage-inner py-3 sm:py-8 pl-3 pr-3 sm:pl-12 sm:pr-12 pb-20">
+      <div className="ContentPage-inner py-3 sm:py-8 pl-3 pr-3 sm:pl-12 sm:pr-12 pb-20" style={props.innerStyle}>
         {props.children}
       </div>
     </div>

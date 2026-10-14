@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './css/FilteritemDatumVanTot.css';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from 'react-datepicker';
 import { format, addDays, addMonths } from 'date-fns';
@@ -8,8 +9,39 @@ import moment from 'moment';
 
 import {StateType} from '../../types/StateType';
 
-function FilterItemDatumVanTot() {
-  const dispatch = useDispatch()
+const parseUrlDate = (dateParam) => {
+  const parsed = moment(dateParam, 'YYYY-MM-DD', true);
+  return parsed.isValid() ? parsed.toDate() : null;
+};
+
+const getInitialDatesFromUrl = (defaultStartDate, defaultEndDate, filterOntwikkelingVan, filterOntwikkelingTot) => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const startDateParam = searchParams.get('start_date');
+  const endDateParam = searchParams.get('end_date');
+
+  if (startDateParam && endDateParam) {
+    const start = parseUrlDate(startDateParam);
+    const end = parseUrlDate(endDateParam);
+    if (start && end) {
+      return { startDate: start, endDate: end };
+    }
+  }
+
+  return {
+    startDate: defaultStartDate || filterOntwikkelingVan,
+    endDate: defaultEndDate || filterOntwikkelingTot,
+  };
+};
+
+function FilterItemDatumVanTot({
+  presetButtons,
+  defaultStartDate,
+  defaultEndDate,
+  defaultPresetView = undefined,
+  showPresetOptionsByDefault = false,
+}) {
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const filterOntwikkelingVan = useSelector((state: StateType) => {
     return state.filter && state.filter.ontwikkelingvan ? new Date(state.filter.ontwikkelingvan) : moment().subtract(30, 'days').toDate();
@@ -23,9 +55,77 @@ function FilterItemDatumVanTot() {
     return state.filter && state.filter.ontwikkelingaggregatie ? state.filter.ontwikkelingaggregatie : 'day';
   });
 
-  const [startDate, setStartDate] = useState(filterOntwikkelingVan);
-  const [endDate, setEndDate] = useState(filterOntwikkelingTot);
+  const initialDates = getInitialDatesFromUrl(
+    defaultStartDate,
+    defaultEndDate,
+    filterOntwikkelingVan,
+    filterOntwikkelingTot
+  );
+
+  const [startDate, setStartDate] = useState(initialDates.startDate);
+  const [endDate, setEndDate] = useState(initialDates.endDate);
   const [isOpen, setIsOpen] = useState(false);
+
+  const toDateKey = (date) => format(date, 'yyyy-MM-dd');
+
+  const getPresetDateConfig = (view) => {
+    const today = new Date((new Date()).toDateString());
+
+    switch(view) {
+      case 'vandaag':
+        return { start: today, end: today, agg: '15m' };
+      case 'laatste2dagen':
+        return { start: addDays(today, -1), end: today, agg: '15m' };
+      case 'laatste7dagen':
+        return { start: addDays(today, -6), end: today, agg: 'day' };
+      case 'laatste14dagen':
+        return { start: addDays(today, -13), end: today, agg: 'day' };
+      case 'laatste30dagen':
+        return { start: addDays(today, -30), end: today, agg: 'day' };
+      case 'laatste90dagen':
+        return { start: addDays(today, -90), end: today, agg: 'day' };
+      case 'laatste7dagen_yesterday':
+        return { start: addDays(today, -7), end: addDays(today, -1), agg: 'day' };
+      case 'laatste14dagen_yesterday':
+        return { start: addDays(today, -14), end: addDays(today, -1), agg: 'day' };
+      case 'laatste30dagen_yesterday':
+        return { start: addDays(today, -30), end: addDays(today, -1), agg: 'day' };
+      case 'laatste90dagen_yesterday':
+        return { start: addDays(today, -90), end: addDays(today, -1), agg: 'day' };
+      case 'laatste12maanden':
+        return { start: addDays(today, -365), end: today, agg: 'week' };
+      case 'ditjaar': {
+        const thisYear = today.getFullYear();
+        return { start: new Date(`${thisYear}/1/1`), end: today, agg: 'month' };
+      }
+      case 'vorigjaar': {
+        const previousYear = today.getFullYear() - 1;
+        return {
+          start: new Date(`${previousYear}/1/1`),
+          end: new Date(`${previousYear}/12/31`),
+          agg: 'month'
+        };
+      }
+      default:
+        return null;
+    }
+  };
+
+  const isPresetActive = (view) => {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    const presetConfig = getPresetDateConfig(view);
+    if (!presetConfig) {
+      return false;
+    }
+
+    return (
+      toDateKey(startDate) === toDateKey(presetConfig.start) &&
+      toDateKey(endDate) === toDateKey(presetConfig.end)
+    );
+  };
 
   const setAggregationLevel = (newlevel) => {
     dispatch({
@@ -46,6 +146,11 @@ function FilterItemDatumVanTot() {
       payload: { van: van.toISOString(), tot: tot.toISOString() }
     })
     
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set('start_date', moment(van).format('YYYY-MM-DD'));
+    nextSearchParams.set('end_date', moment(tot).format('YYYY-MM-DD'));
+    setSearchParams(nextSearchParams, { replace: true });
+    
     if(aggregatie!==false) {
       dispatch({
         type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -53,6 +158,69 @@ function FilterItemDatumVanTot() {
       })
     }
   }
+
+  // Initialize from URL parameters on mount, or use defaults if no URL params
+  useEffect(() => {
+    const startDateParam = searchParams.get('start_date');
+    const endDateParam = searchParams.get('end_date');
+    
+    if (startDateParam && endDateParam) {
+      const startDateObj = parseUrlDate(startDateParam);
+      const endDateObj = parseUrlDate(endDateParam);
+      
+      if (startDateObj && endDateObj) {
+        setStartDate(startDateObj);
+        setEndDate(endDateObj);
+
+        const currentStart = moment(filterOntwikkelingVan).format('YYYY-MM-DD');
+        const currentEnd = moment(filterOntwikkelingTot).format('YYYY-MM-DD');
+        
+        if (startDateParam !== currentStart || endDateParam !== currentEnd) {
+          updateFilter(startDateObj, endDateObj);
+        }
+      }
+    } else if (defaultPresetView) {
+      const presetConfig = getPresetDateConfig(defaultPresetView);
+      if (presetConfig) {
+        const { start, end, agg } = presetConfig;
+        setAggregationLevel(agg);
+        setStartDate(start);
+        setEndDate(end);
+        updateFilter(start, end, agg);
+      }
+    } else if (defaultStartDate && defaultEndDate) {
+      setStartDate(defaultStartDate);
+      setEndDate(defaultEndDate);
+      updateFilter(defaultStartDate, defaultEndDate);
+    }
+  }, []); // Only run on mount
+
+  // Keep picker in sync when URL dates change externally (e.g. back/forward
+  // navigation, or another component updating the URL).
+  // Important: do NOT depend on startDate/endDate here, otherwise picking the
+  // first day of a custom range (which leaves endDate=null) would re-trigger
+  // this effect and revert the picker before the user can pick the end date.
+  useEffect(() => {
+    const startDateParam = searchParams.get('start_date');
+    const endDateParam = searchParams.get('end_date');
+    if (!startDateParam || !endDateParam) {
+      return;
+    }
+
+    const startDateObj = parseUrlDate(startDateParam);
+    const endDateObj = parseUrlDate(endDateParam);
+    if (!startDateObj || !endDateObj) {
+      return;
+    }
+
+    setStartDate((prev) =>
+      prev && toDateKey(prev) === startDateParam ? prev : startDateObj
+    );
+    setEndDate((prev) =>
+      prev && toDateKey(prev) === endDateParam ? prev : endDateObj
+    );
+  }, [searchParams]);
+
   const onChange = (dates) => {
     const [start, end] = dates;
     setStartDate(start);
@@ -114,58 +282,11 @@ function FilterItemDatumVanTot() {
   
   
   const setView = (view) => {
-    // strip hours
-    const today = new Date((new Date()).toDateString());
-
-    let start;
-    let end;
-    let agg;
-    switch(view) {
-      case 'vandaag':
-        start = today;
-        end = today;
-        agg='15m';
-        break;
-      case 'laatste2dagen':
-        start = addDays(today,-1);
-        end = today;
-        agg='15m';
-        break;
-      case 'laatste7dagen':
-        start = addDays(today,-6);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste30dagen':
-        start = addDays(today,-30);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste90dagen':
-        start = addDays(today,-90);
-        end = today;
-        agg='day';
-        break;
-      case 'laatste12maanden':
-        start = addDays(today,-365);
-        end = today;
-        agg='week';
-        break;
-      case 'ditjaar':
-        let tyear= today.getFullYear();
-        start = new Date(tyear.toString() + '/1/1');
-        end = today;
-        agg='month';
-        break;
-      case 'vorigjaar':
-        let lyear= today.getFullYear()-1;
-        start = new Date(lyear.toString() + '/1/1');
-        end = new Date(lyear.toString() + '/12/31');
-        agg='month';
-        break;
-      default:
-        return; // do nothing
+    const presetConfig = getPresetDateConfig(view);
+    if (!presetConfig) {
+      return;
     }
+    const { start, end, agg } = presetConfig;
     
     setAggregationLevel(agg);
 
@@ -176,6 +297,21 @@ function FilterItemDatumVanTot() {
   }
 
   const renderPickerInline = () => {
+    // Default preset buttons
+    const defaultPresets = [
+      { key: 'fdvt-po1', view: 'vandaag', label: 'Vandaag' },
+      { key: 'fdvt-po2', view: 'laatste2dagen', label: 'Laatste 2 dagen' },
+      { key: 'fdvt-po3', view: 'laatste7dagen', label: 'Laatste 7 dagen' },
+      { key: 'fdvt-po4', view: 'laatste30dagen', label: 'Laatste 30 d' },
+      { key: 'fdvt-po5', view: 'laatste90dagen', label: 'Laatste 90 dagen' },
+      { key: 'fdvt-po6', view: 'laatste12maanden', label: 'Laatste 12 maanden' },
+      { key: 'fdvt-po7', view: 'ditjaar', label: 'Dit jaar' },
+      { key: 'fdvt-po8', view: 'vorigjaar', label: 'Vorig jaar' },
+    ];
+
+    // Use custom preset buttons if provided, otherwise use defaults
+    const presetsToRender = presetButtons || defaultPresets;
+
     return (
       <div className="filter-datum-van-tot-pickercontainer">
         <DatePicker
@@ -190,40 +326,87 @@ function FilterItemDatumVanTot() {
           inline
         />
         <div className="filter-datum-van-tot-picker-options">
-          <div key="fdvt-po1" className="filter-datum-van-tot-option" onClick={() => { setView('vandaag')}}>Vandaag</div>
-          <div key="fdvt-po2" className="filter-datum-van-tot-option" onClick={() => { setView('laatste2dagen')}}>Laatste 2 dagen</div>
-          <div key="fdvt-po3" className="filter-datum-van-tot-option" onClick={() => { setView('laatste7dagen')}}>Laatste 7 dagen</div>
-          <div key="fdvt-po4" className="filter-datum-van-tot-option" onClick={() => { setView('laatste30dagen')}}>Laatste 30 dagen</div>
-          <div key="fdvt-po5" className="filter-datum-van-tot-option" onClick={() => { setView('laatste90dagen')}}>Laatste 90 dagen</div>
-          <div key="fdvt-po6" className="filter-datum-van-tot-option" onClick={() => { setView('laatste12maanden')}}>Laatste 12 maanden</div>
-          <div key="fdvt-po7" className="filter-datum-van-tot-option" onClick={() => { setView('ditjaar')}}>Dit jaar</div>
-          <div key="fdvt-po8" className="filter-datum-van-tot-option" onClick={() => { setView('vorigjaar')}}>Vorig jaar </div>
+          {presetsToRender.map((preset, index) => (
+            <div
+              key={preset.key || `fdvt-po${index + 1}`}
+              className={`filter-datum-van-tot-option${isPresetActive(preset.view) ? ' active' : ''}`}
+              onClick={() => { setView(preset.view) }}
+            >
+              {preset.label}
+            </div>
+          ))}
         </div>
       </div>
     )
+  }
+
+  const renderPickerOptions = () => {
+    // Default preset buttons
+    const defaultPresets = [
+      { key: 'fdvt-po1', view: 'vandaag', label: 'Vandaag' },
+      { key: 'fdvt-po2', view: 'laatste2dagen', label: 'Laatste 2 dagen' },
+      { key: 'fdvt-po3', view: 'laatste7dagen', label: 'Laatste 7 dagen' },
+      { key: 'fdvt-po4', view: 'laatste30dagen', label: 'Laatste 30 d' },
+      { key: 'fdvt-po5', view: 'laatste90dagen', label: 'Laatste 90 dagen' },
+      { key: 'fdvt-po6', view: 'laatste12maanden', label: 'Laatste 12 maanden' },
+      { key: 'fdvt-po7', view: 'ditjaar', label: 'Dit jaar' },
+      { key: 'fdvt-po8', view: 'vorigjaar', label: 'Vorig jaar' },
+    ];
+
+    const presetsToRender = presetButtons || defaultPresets;
+
+    return (
+      <div className="filter-datum-van-tot-picker-options">
+        {presetsToRender.map((preset, index) => (
+          <div
+            key={preset.key || `fdvt-po${index + 1}`}
+            className={`filter-datum-van-tot-option${isPresetActive(preset.view) ? ' active' : ''}`}
+            onClick={() => { setView(preset.view) }}
+          >
+            {preset.label}
+          </div>
+        ))}
+      </div>
+    );
   }
     
   return (
     <div className="filter-datum-van-tot-container">
       <div className="filter-datum-van-tot-box-row">
-        <div className="flex flex-col justify-center"><div
-          className="filter-datum-caret"
-          onClick={() => {moveFilterDatum(true)}}>
-          &lsaquo;
-        </div></div>
         <div className="filter-datum-van-tot-input"
-          onClick={handleClick}
-          >
-          {startDate!==null?format(startDate, "yyyy-MM-dd"):""}
-          &nbsp;t/m&nbsp;
-          {endDate!==null?format(endDate, "yyyy-MM-dd"):""} </div>
-        <div className="flex flex-col justify-center"><div
-          className="filter-datum-caret"
-          onClick={() => {moveFilterDatum(false)}}
-          >
-          &rsaquo;
-        </div></div>
+          onClick={handleClick}>
+          <div
+            className="filter-datum-van-tot-caret"
+            onClick={(e) => {
+              e.stopPropagation();
+              moveFilterDatum(true);
+            }}>
+            &lsaquo;
+          </div>
+          <div className="flex gap-2">
+            <img
+              className="filter-datum-van-tot-img-now"
+              src="/components/FilteritemDuur/calendar-alt.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span className="filter-datum-van-tot-period">
+              {startDate!==null?format(startDate, "dd-MM-''yy"):""}
+            &nbsp;t/m&nbsp;
+              {endDate!==null?format(endDate, "dd-MM-''yy"):""}
+            </span>
+          </div>
+          <div
+            className="filter-datum-van-tot-caret"
+            onClick={(e) => {
+              e.stopPropagation();
+              moveFilterDatum(false);
+            }}>
+            &rsaquo;
+          </div>
+        </div>
       </div>
+      {showPresetOptionsByDefault && !isOpen && renderPickerOptions()}
       { isOpen && renderPickerInline() }
     </div>
   )

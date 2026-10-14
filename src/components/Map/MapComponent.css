@@ -9,7 +9,14 @@
   box-sizing: border-box;
   border-width: 2px;
   border-color: rgb(255 255 255);
-  background-color: rgb(255 255 255);
+  /*
+   * Paint the container in the same color MapLibre uses for its "land"
+   * background (see `nine3030.js`). This eliminates the flash from white
+   * to map color when MapLibre's WebGL canvas paints for the first time,
+   * making the map appear to be "ready" the moment this element mounts -
+   * even before tiles, sprite or glyphs are downloaded.
+   */
+  background-color: hsl(40, 8%, 96%);
 }
 
 .Map-popup-title {
@@ -55,6 +62,12 @@
   left: -1px;
 }
 
+/* Overlap-selection tables (MapLibre popups) */
+.Map-popup-body tr[data-dd-vehicle-row="true"]:hover,
+.Map-popup-body tr[data-dd-hub-row="true"]:hover {
+  background-color: rgba(15, 28, 63, 0.08);
+}
+
 /* CONTROLS */
 
 /* Controls wrapper */
@@ -81,4 +94,31 @@
 .maplibregl-ctrl button.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
   background-image: url('./images/controls-zoom-out.svg');
   background-size: 16px;
+}
+
+/*
+ * Single wrapper for every map icon button in the bottom right: MapLibre's own
+ * controls (zoom, geolocate) plus the React ones portalled in via
+ * `MapControlsPortal`. Stacking is done here, so individual buttons never need
+ * their own `bottom`/`right` offsets. Use `order` to place a button in the
+ * stack; MapLibre's own controls sit at order 0.
+ */
+.maplibregl-ctrl-bottom-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 110;
+}
+
+.maplibregl-ctrl-bottom-right > .maplibregl-ctrl {
+  float: none;
+  clear: none;
+  margin: 0 10px 10px 0;
+}
+
+/* The bottom Menu (z-index 100) spans the full width on mobile */
+@media (max-width: 639px) {
+  .maplibregl-ctrl-bottom-right {
+    bottom: 62px;
+  }
 }

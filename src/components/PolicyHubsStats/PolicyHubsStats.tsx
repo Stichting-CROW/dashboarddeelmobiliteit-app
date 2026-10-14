@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "../ui/use-toast"
 import {getVehicleIconUrl} from '../../helpers/vehicleTypes';
 
@@ -37,11 +38,24 @@ const Section = ({
   </div>
 }
 
+const HubName = ({ name }: { name?: string }) => (
+  <div className="font-inter" style={{minWidth: '180px'}}>
+    <div className="text-lg font-bold">
+      {name}
+    </div>
+  </div>
+);
+
 const HubStats = ({
   hubData
 }): ReactElement => {
-  if(! hubData) return <div />;
-  if(! hubData.stop) return <div />;
+  if(! hubData || !hubData.zone_id) return <div />;
+
+  // Monitoring / no-parking zones have no hub occupancy (stop) data.
+  // Still show the zone name; vehicle stats come from HubStatsWidget below.
+  if(! hubData.stop || hubData.geography_type === 'monitoring') {
+    return <HubName name={hubData.name} />;
+  }
 
   const stop = hubData.stop;
 
@@ -106,13 +120,7 @@ const HubStats = ({
     return calculateGradient(parked, capacity);
   }
 
-  if(! stop) return <>
-    <div className="font-inter" style={{minWidth: '180px'}}>
-      <div className="text-lg font-bold">
-        ${hubData.name}
-      </div>
-    </div>
-    </>
+  if(! stop) return <HubName name={hubData.name} />;
   if(! stop.realtime_data) return <div>
     Er zijn nog geen realtime statistieken beschikbaar voor deze zone.
   </div>;// Realtime data not yet loaded
@@ -270,98 +278,139 @@ const PolicyHubsStats = ({
     selected_policy_hubs: any,
     cancelHandler: Function,
 }) => {
-    const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    // Get gebied / municipality code
-    const gm_code = useSelector((state: StateType) => state.filter.gebied);
+  // Get gebied / municipality code from filter
+  const gm_code = useSelector((state: StateType) => state.filter.gebied);
 
-    const [hubData, setHubData] = useState<HubType>({
-        stop: defaultStopProperties,
-        name: '',
-        geography_type: 'stop',
-        zone_availability: 'auto',
-        municipality: gm_code,
-        description: 'Hub',
-        internal_id: '',
-        area: {},
-        phase: 'concept'
-    });
+  // Date range for HubStatsWidget (and Ontwikkeling button) - synced with what the widget displays
+  const [widgetOntwikkelingVan, setWidgetOntwikkelingVan] = useState(() =>
+    moment(moment().format('YYYY-MM-DD 00:00'))
+  );
+  const [widgetOntwikkelingTot, setWidgetOntwikkelingTot] = useState(() =>
+    moment(moment().format('YYYY-MM-DD 00:00'))
+  );
 
-    // If selected policy hubs changes: Load data of hub
-    useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
+  const [hubData, setHubData] = useState<HubType>({
+    stop: defaultStopProperties,
+    name: '',
+    geography_type: 'stop',
+    zone_availability: 'auto',
+    municipality: gm_code,
+    description: 'Hub',
+    internal_id: '',
+    area: {},
+    phase: 'concept'
+  });
 
-        // Don't do anything if we changed to the same hub
-        if(hubData.zone_id === zone_id) {
-            return;
-        }
+  // If selected policy hubs changes: Load data of hub
+  useEffect(() => {
+    if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+    const zone_id = selected_policy_hubs[0];
 
-        // If we selected an existing hub: Stop being in drawing mode 
-        if(zone_id !== 'new') {
-            // Stop being in drawing mode
-            dispatch(setHubsInDrawingMode([]));
-            dispatch(setIsDrawingEnabled(false));
-        }
-
-        // Load hub data
-        setTimeout(() => {
-           loadHubData(zone_id);
-        }, 25);
-    }, [
-        selected_policy_hubs,
-        selected_policy_hubs.length
-    ]);
-
-    // If amount of policy hubs changes: (Re)load data of hub
-    useEffect(() => {
-        if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
-        const zone_id = selected_policy_hubs[0];
-        
-        if(! zone_id) return;
-        if(zone_id === 'new') return;
-
-        // Load hub data
-        loadHubData(zone_id);
-    }, [
-        all_policy_hubs.length// If there's a new hub added
-    ]);
-
-    const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
-
-    // Find hub data in array with all policy hubs
-    const loadHubData = async (hub_id) => {
-        const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
-        if(foundHub) {
-            // Set hub data in local state
-            setHubData(foundHub);
-        }
+    // Don't do anything if we changed to the same hub
+    if(hubData.zone_id === zone_id) {
+      return;
     }
 
-    const labelClassNames = 'mb-2';
-        
-    return (
-      <div>
-        <div className={`${labelClassNames} font-bold`}>
-            Zone statistieken
-        </div>
+    // If we selected an existing hub: Stop being in drawing mode 
+    if(zone_id !== 'new') {
+      // Stop being in drawing mode
+      dispatch(setHubsInDrawingMode([]));
+      dispatch(setIsDrawingEnabled(false));
+    }
 
-        <Section>
-          <HubStats hubData={hubData} />
-        </Section>
+    // Load hub data
+    setTimeout(() => {
+      loadHubData(zone_id);
+    }, 25);
+  }, [
+    selected_policy_hubs,
+    selected_policy_hubs.length
+  ]);
 
-        <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
-          <HubStatsWidget zone_id={hubData.zone_id} />
-        </Section>
+  // If amount of policy hubs changes: (Re)load data of hub
+  useEffect(() => {
+    if(! selected_policy_hubs || ! selected_policy_hubs[0]) return;
+    const zone_id = selected_policy_hubs[0];
+    
+    if(! zone_id) return;
+    if(zone_id === 'new') return;
 
-        <div className="flex w-full justify-between">
-          <Button
-              theme="white"
-              style={{marginLeft: 0}}
-              onClick={cancelHandler}
-          >
-              Sluiten
-          </Button>
+    // Load hub data
+    loadHubData(zone_id);
+  }, [
+    all_policy_hubs.length// If there's a new hub added
+  ]);
+
+  const isNewZone = selected_policy_hubs && selected_policy_hubs[0] && selected_policy_hubs[0] === 'new';
+
+  // Find hub data in array with all policy hubs
+  const loadHubData = async (hub_id) => {
+    const foundHub = all_policy_hubs.find(x => x.zone_id === hub_id);
+    if(foundHub) {
+      // Set hub data in local state
+      setHubData(foundHub);
+    }
+  }
+
+  const labelClassNames = 'mb-2';
+      
+  return (
+    <div>
+      <div className={`${labelClassNames} font-bold`}>
+        Zone statistieken
+      </div>
+
+      <Section>
+        <HubStats hubData={hubData} />
+      </Section>
+
+      <Section classes="mt-2 pt-0 pr-0 pb-1 pl-0">
+        <HubStatsWidget
+          zone_id={hubData.zone_id}
+          ontwikkelingVan={widgetOntwikkelingVan}
+          ontwikkelingTot={widgetOntwikkelingTot}
+          onOntwikkelingChange={(van, tot) => {
+            setWidgetOntwikkelingVan(van);
+            setWidgetOntwikkelingTot(tot);
+          }}
+        />
+      </Section>
+
+      <div className="flex w-full justify-between">
+        <Button
+          theme="white"
+          style={{marginLeft: 0}}
+          onClick={cancelHandler}
+        >
+          Sluiten
+        </Button>
+        <Button
+          theme="white"
+          style={{marginLeft: 0}}
+          onClick={() => {
+            const params = new URLSearchParams();
+            if (gm_code) params.set('gm_code', gm_code);
+            if (selected_policy_hubs?.[0] !== 'new' && hubData.zone_id) {
+              params.set('zones', String(hubData.zone_id));
+            }
+            if (widgetOntwikkelingVan) {
+              params.set('start_date', widgetOntwikkelingVan.format('YYYY-MM-DD'));
+            }
+            if (widgetOntwikkelingTot) {
+              params.set('end_date', widgetOntwikkelingTot.format('YYYY-MM-DD'));
+            }
+            const query = params.toString();
+            const targetPath = `/stats/beleidszones${query ? `?${query}` : ''}`;
+            cancelHandler();
+            navigate(targetPath, { replace: false });
+          }}
+        >
+          <img src="/images/components/Menu/ontwikkeling.svg" alt="" className="inline-block w-4 h-4 mr-1.5 align-middle" />
+          Ontwikkeling
+        </Button>
       </div>
     </div>
   )

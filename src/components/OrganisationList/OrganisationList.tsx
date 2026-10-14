@@ -16,7 +16,6 @@ import {getMunicipalityList} from '../../api/municipalities';
 // Import components
 import Button from '../Button/Button';
 import EditOrganisation from '../EditOrganisation/EditOrganisation';
-import H1Title from '../H1Title/H1Title';
 import H4Title from '../H4Title/H4Title';
 
 const readablePrivilege = (privilegeKey) => {
@@ -144,7 +143,6 @@ const OrganisationList = ({
 
   return (
     <div className="OrganisationList" style={{maxWidth: '800px'}}>
-      <H1Title>Organisaties</H1Title>
       <div className='mb-8' style={{marginRight: '-0.5rem', marginLeft: '-0.5rem'}}>
         <Button theme='primary' classes='add-new' onClick={() => handleClick()}>Nieuwe organisatie</Button>
       </div>

@@ -28,13 +28,40 @@ export const readable_geotype = (name: string) => {
 export const readable_phase = (name: string) => {
   if(name === 'concept') return 'Concept';
   else if(name === 'active') return 'Actief';
-  else if(name === 'retirement_concept') return 'Concept \'te verwijderen\'';
+  else if(name === 'retirement_concept') return 'Te verwijderen concept';// Concept
   else if(name === 'committed_concept') return 'Vastgesteld concept';
-  else if(name === 'committed_retirement_concept') return 'Vastgesteld concept \'te verwijderen\'';
+  else if(name === 'committed_retirement_concept') return 'Voorgenomen te verwijderen';// Vastgesteld concept
   else if(name === 'published') return 'Definitief gepubliceerd';
-  else if(name === 'published_retirement') return 'Definitief gepubliceerd \'te verwijderen\'';
-  else if(name === 'active') return 'Definitief Actief';
+  else if(name === 'published_retirement') return 'Definitief gepland te verwijderen';// Definitief gepubliceerd
+  else if(name === 'active') return 'Definitief actief';
   return name;
+}
+
+const POLICY_HUBS_MAP_PHASES = [
+  'concept',
+  'committed_concept',
+  'published',
+  'active',
+  'archived',
+] as const;
+
+/**
+ * Map a zone's MDS phase to the phase tab on /map/beleidshubs.
+ * Analysegebieden stay in concept; retirement variants map to their parent tab.
+ */
+export const mapZonePhaseToPolicyHubsPhase = (
+  geographyType?: string,
+  phase?: string
+): string => {
+  if (geographyType === 'monitoring') return 'concept';
+  if (phase === 'retirement_concept') return 'concept';
+  if (phase === 'committed_retirement_concept') return 'committed_concept';
+  if (phase === 'published_retirement') return 'published';
+  if (phase === 'active_retirement') return 'active';
+  if (phase && (POLICY_HUBS_MAP_PHASES as readonly string[]).includes(phase)) {
+    return phase;
+  }
+  return 'active';
 }
 
 export const defaultStopProperties = {

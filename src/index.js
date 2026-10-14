@@ -1,5 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+// Bundle the maplibre-gl CSS (matching the installed maplibre-gl version)
+// instead of render-blocking on an external CDN stylesheet in index.html
+import 'maplibre-gl/dist/maplibre-gl.css';
 import AppProvider from './AppProvider';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';

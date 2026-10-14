@@ -64,7 +64,8 @@ function MetaStats(props) {
     metadata,
     metadata.zones,
     filter,
-    filter.zones
+    filter.zones,
+    metadata.aclOperators
   ]);
     
   const markers = [

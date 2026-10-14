@@ -1,8 +1,23 @@
-const API_URL: string = `${process.env.REACT_APP_MDS_URL}/public`;
+import { fetchJson } from './fetchJson';
+import { getMdsPublicUrl } from '../helpers/mdsUrl';
 
-export const getAvailableOperators = async (municipality: string) => {
-  const url = `${API_URL}/service_area/available_operators?municipalities=${municipality}`;
-  const response = await fetch(url);
-  return await response.json();
+export interface AvailableOperatorsResponse {
+  operators_with_service_area: string[];
 }
 
+export const getAvailableOperators = async (
+  municipality: string | null | undefined
+): Promise<AvailableOperatorsResponse | null> => {
+  if (!municipality) {
+    return null;
+  }
+
+  const url = `${getMdsPublicUrl()}/service_area/available_operators?municipalities=${encodeURIComponent(municipality)}`;
+
+  try {
+    return await fetchJson<AvailableOperatorsResponse>(url);
+  } catch (error) {
+    console.error('Failed to load available service area operators:', error);
+    return null;
+  }
+};

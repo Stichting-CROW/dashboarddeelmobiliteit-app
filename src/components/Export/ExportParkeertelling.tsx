@@ -12,7 +12,7 @@ import calendarIcon from '../../images/calendar.svg';
 import FormLabel from '../FormLabel/FormLabel';
 import FormTextarea from '../FormTextarea/FormTextarea';
 import FormInput from '../FormInput/FormInput';
-import Button from '../Form/Button.jsx';
+import Button from '../Button/Button';
 
 function Export() {
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
@@ -180,7 +180,7 @@ function Export() {
       </div>
 
       <div className="my-2">
-        <Button classes="" color="blue" onClick={downloadParkeertelling}>
+        <Button classes="" theme="blue" onClick={downloadParkeertelling}>
           Download parkeertelling
         </Button>
       </div>
