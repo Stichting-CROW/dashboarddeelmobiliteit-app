@@ -21,7 +21,12 @@ import { Check, GripVertical } from 'lucide-react';
 import { useDataLayer } from '../Map/MapUtils/useDataLayer';
 import { setDataLayerOrder, toggleOverlayLayer, setOverlayPhase } from '../../actions/layers';
 import { toggleVisibleLayer } from '../../actions/policy-hubs';
+import { showServiceAreaForOperator } from '../../actions/service-areas';
 import { get_phases } from '../../helpers/policy-hubs/get-phases';
+import { getPrettyProviderName } from '../../helpers/providers';
+import {
+  useAvailableServiceAreaOperators
+} from '../../helpers/service-areas/useAvailableServiceAreaOperators';
 import {
   selectActiveDataLayers,
   selectDataLayerOrder,
@@ -35,6 +40,7 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
@@ -173,6 +179,23 @@ const DataLayerList = ({
   const overlayLayers = useSelector(selectOverlayLayers);
 
   const isPolicyHubsPage = displayMode === DISPLAYMODE_POLICY_HUBS;
+  const isServiceAreasPage = displayMode === DISPLAYMODE_SERVICE_AREAS;
+
+  const municipality = useSelector((state: StateType) => state.filter?.gebied || null);
+  const serviceAreaVisibleOperators = useSelector((state: StateType) => {
+    return state.service_areas ? state.service_areas.visible_operators : null;
+  });
+  const {
+    operators: availableServiceAreaOperators,
+    isLoading: isLoadingServiceAreaOperators
+  } = useAvailableServiceAreaOperators(
+    isServiceAreasPage ? null : municipality
+  );
+  const selectedServiceAreaOperator = availableServiceAreaOperators.includes(
+    serviceAreaVisibleOperators?.[0]
+  )
+    ? serviceAreaVisibleOperators[0]
+    : (availableServiceAreaOperators[0] || '');
 
   // Policy hubs state, used for the Hubs/Verbodsgebieden rows on /map/beleidshubs
   const policyHubsActivePhase = useSelector((state: StateType) => {
@@ -290,6 +313,10 @@ const DataLayerList = ({
     dispatch(setOverlayPhase(id, phase));
   };
 
+  const handleServiceAreaOperatorChange = (operator: string) => {
+    dispatch(showServiceAreaForOperator(operator));
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -353,6 +380,9 @@ const DataLayerList = ({
     const checked = isItemChecked(id);
     const showPhaseSelect = !isPolicyHubsPage
       && (id === DATA_LAYER_ORDER_HUBS || id === DATA_LAYER_ORDER_VERBODSGEBIEDEN);
+    const showOperatorSelect = !isServiceAreasPage
+      && id === DATA_LAYER_ORDER_SERVICE_AREAS
+      && !!municipality;
 
     return (
       <div
@@ -372,6 +402,28 @@ const DataLayerList = ({
           {checked && <Check size={12} strokeWidth={3} />}
         </span>
         <span className="DataLayerList-checkLabel">{OVERLAY_LABELS[id]}</span>
+        {showOperatorSelect && (
+          <select
+            className="DataLayerList-phaseSelect"
+            value={selectedServiceAreaOperator}
+            disabled={availableServiceAreaOperators.length === 0}
+            aria-label={`Aanbieder voor ${OVERLAY_LABELS[id]}`}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onChange={(e) => handleServiceAreaOperatorChange(e.target.value)}
+          >
+            {availableServiceAreaOperators.length === 0 && (
+              <option value="">
+                {isLoadingServiceAreaOperators ? 'Laden…' : 'Geen aanbieders'}
+              </option>
+            )}
+            {availableServiceAreaOperators.map((operator) => (
+              <option key={operator} value={operator}>
+                {getPrettyProviderName(operator)}
+              </option>
+            ))}
+          </select>
+        )}
         {showPhaseSelect && (
           <select
             className="DataLayerList-phaseSelect"

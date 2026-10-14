@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   renderServiceAreas,
@@ -8,7 +8,9 @@ import {
 import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
 import { whenMapLayersMutable } from '../Map/MapUtils/mapGuards';
 import { loadServiceAreas } from '../../helpers/service-areas';
+import { useAvailableServiceAreaOperators } from '../../helpers/service-areas/useAvailableServiceAreaOperators';
 import { selectDataLayerOrder } from '../../helpers/layerSelectors';
+import { showServiceAreaForOperator } from '../../actions/service-areas';
 
 import { StateType } from '../../types/StateType';
 
@@ -20,6 +22,7 @@ import { StateType } from '../../types/StateType';
 const DdServiceAreasOverlay = ({
   map
 }): JSX.Element => {
+  const dispatch = useDispatch();
   const [serviceAreas, setServiceAreas] = useState([]);
 
   const filter = useSelector((state: StateType) => state.filter || null);
@@ -29,6 +32,18 @@ const DdServiceAreasOverlay = ({
   const mapStyle = useSelector((state: StateType) => state.layers?.map_style || null);
   const displayMode = useSelector((state: StateType) => state.layers?.displaymode || '');
   const dataLayerOrder = useSelector(selectDataLayerOrder);
+  const { operators: availableOperators } = useAvailableServiceAreaOperators(filter?.gebied);
+
+  // Select the first available operator if the current selection isn't available
+  useEffect(() => {
+    if (availableOperators.length === 0) return;
+    const hasValidSelection = visible_operators
+      && visible_operators.length > 0
+      && availableOperators.includes(visible_operators[0]);
+    if (!hasValidSelection) {
+      dispatch(showServiceAreaForOperator(availableOperators[0]));
+    }
+  }, [availableOperators, visible_operators, dispatch]);
 
   // Load service areas for the selected municipality and operators
   useEffect(() => {
