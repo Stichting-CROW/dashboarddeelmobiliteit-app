@@ -1,5 +1,11 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-10-22
+
+**Zones en documentatie**
+
+- 🐛 Opgelost: niet-werkende afbeeldingen in zonebeheer (iconen voor fiets, bakfiets, scooter en auto) en in de documentatie 'Zones beheren'; afbeeldingen staan nu in de app zelf
+
 ## Release 2026-09-16
 
 **Statistiek: Beleidsinfo**

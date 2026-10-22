@@ -760,25 +760,25 @@ const PolicyHubsEdit = ({
                     />}
                     {getCapacityType() === 'modality' && <>
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/IF05O8u.png"
+                            imageUrl="/components/PolicyHubsEdit/bike-icon.png"
                             name="vehicles-limit.bicycle"
                             value={hubData?.stop?.capacity?.bicycle || 0}
                             onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                            imageUrl="/components/PolicyHubsEdit/cargo-bike-icon.png"
                             name="vehicles-limit.cargo_bicycle"
                             value={hubData?.stop?.capacity?.cargo_bicycle || 0}
                             onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/h264sb2.png"
+                            imageUrl="/components/PolicyHubsEdit/moped-icon.png"
                             name="vehicles-limit.moped"
                             value={hubData?.stop?.capacity?.moped || 0}
                             onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                            imageUrl="/components/PolicyHubsEdit/car-icon.png"
                             name="vehicles-limit.car"
                             value={hubData?.stop?.capacity?.car || 0}
                             onChange={(e) => updateCapacityValue('car', Number(e.target.value))}
