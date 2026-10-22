@@ -982,25 +982,25 @@ function FilterbarZones({
             />}
             {limitType === 'modality' && <>
               <ModalityRow
-                imageUrl="https://i.imgur.com/IF05O8u.png"
+                imageUrl="/components/PolicyHubsEdit/bike-icon.png"
                 name="vehicles-limit.bicycle"
                 value={activeZone['vehicles-limit.bicycle']}
                 onChange={changeHandler}
               />
               <ModalityRow
-                imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                imageUrl="/components/PolicyHubsEdit/cargo-bike-icon.png"
                 name="vehicles-limit.cargo_bicycle"
                 value={activeZone['vehicles-limit.cargo_bicycle']}
                 onChange={changeHandler}
               />
               <ModalityRow
-                imageUrl="https://i.imgur.com/h264sb2.png"
+                imageUrl="/components/PolicyHubsEdit/moped-icon.png"
                 name="vehicles-limit.moped"
                 value={activeZone['vehicles-limit.moped']}
                 onChange={changeHandler}
               />
               <ModalityRow
-                imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                imageUrl="/components/PolicyHubsEdit/car-icon.png"
                 name="vehicles-limit.car"
                 value={activeZone['vehicles-limit.car']}
                 onChange={changeHandler}
