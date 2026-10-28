@@ -403,7 +403,7 @@ function Menu({
       <Link className="text-menu" to="/login">
         Log in
       </Link>
-      <Link className="text-menu" to="/docs/Over_het_Dashboard_Deelmobiliteit">
+      <Link className="text-menu" to="/functionaliteiten">
         Over
       </Link>
       <Link className="text-menu" to="/rondleiding">
