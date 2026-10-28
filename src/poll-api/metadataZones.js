@@ -73,7 +73,9 @@ export const updateZones = async (store_zones) => {
       // no vehicles show. Use the lightweight parameterless /public/municipalities
       // endpoint instead, which returns every municipality zone NL-wide in a
       // single request. Vehicles are scoped by the auth token regardless of the
-      // loaded zones (see createFilterparameters).
+      // loaded zones; aggregated stats use these municipality zones as the
+      // fallback scope for "Alle plaatsen" (see createFilterparameters and
+      // getAggregatedStats).
       if(shouldTreatMunicipalitiesAsNlWide(state)) {
         url_zones=`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/municipalities`;
       } else {

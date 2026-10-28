@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Email the team
+    url: mailto:info@dashboarddeelmobiliteit.nl
+    about: No GitHub account, or sensitive information? Send us an email.
+  - name: How we work together
+    url: https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/blob/main/CONTRIBUTING.md
+    about: Read how bugs, feature requests and Pull Requests are handled.
