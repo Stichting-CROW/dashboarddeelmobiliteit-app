@@ -1,21 +1,28 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import moment from 'moment';
 
 import { StateType } from '../../types/StateType';
 import {
   doShowDetailledAggregatedData,
-  didSelectAtLeastOneCustomZone
+  didSelectAtLeastOneCustomZone,
+  AggregationLevelOption
 } from '../../helpers/stats/index';
 import { getZoneById } from '../../components/Map/MapUtils/zones';
 import { getBeleidszonesZonesForMetadata } from '../../api/beleidszones';
+import {
+  readable_geotype,
+  readable_phase,
+  mapZonePhaseToPolicyHubsPhase
+} from '../../helpers/policy-hubs/common';
 
 import VerhuringenChart from '../../components/Chart/VerhuringenChart';
 import BeschikbareVoertuigenChart from '../../components/Chart/BeschikbareVoertuigenChart';
 import VerhuringenPerVoertuigChart from '../../components/Chart/VerhuringenPerVoertuigChart';
 import TimeGridVehicleAvailability from '../../components/TimeGrid/TimeGrid_VehicleAvailability';
-import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
 import PageTitle from '../../components/common/PageTitle';
+import AggregationLevelControl from '../../components/Stats/AggregationLevelControl';
 import ZonePreviewMap from '../../components/ZonePreviewMap/ZonePreviewMap';
 
 import '../../pages/StatsPage.css';
@@ -51,6 +58,9 @@ interface MdsZone {
   modified_at?: string;
   retire_date?: string;
   name?: string;
+  geography_type?: string;
+  phase?: string;
+  capacity?: number;
 }
 
 function DashboardBeleidszones() {
@@ -126,7 +136,7 @@ function DashboardBeleidszones() {
   );
 
   const getAggregationButtonsToRender = () => {
-    const ret: Array<{ name: string; title: string }> = [];
+    const ret: AggregationLevelOption[] = [];
     if (doShowDetailledAggregatedData(filter, zones)) {
       const doShow5m = daysInSelectedPeriod <= 1;
       const doShow15m = daysInSelectedPeriod <= 2;
@@ -179,9 +189,14 @@ function DashboardBeleidszones() {
   const isViewingPreviousVersion = Boolean(
     hasExactlyOneZone && selectedZone && currentZone
   );
+  // Do not fall back to modified_at: concept analysegebieden have no
+  // effective/published date, and using modified_at would show a false
+  // "Zone actief vanaf" timestamp.
   const effectiveDate =
-    selectedZone?.effective_date || selectedZone?.published_date || selectedZone?.modified_at;
-  const hasValidEffectiveDate = effectiveDate && moment(effectiveDate).isValid();
+    selectedZone?.effective_date || selectedZone?.published_date;
+  const hasValidEffectiveDate = Boolean(
+    effectiveDate && moment(effectiveDate).isValid()
+  );
   const retireDate = selectedZone?.retire_date;
   const isArchived =
     retireDate &&
@@ -199,20 +214,28 @@ function DashboardBeleidszones() {
     }
   };
 
-  const aggregationButtonsToRender = getAggregationButtonsToRender();
+  const beleidshubsMapUrl = useMemo(() => {
+    if (!hasExactlyOneZone) return '';
+    const params = new URLSearchParams();
+    if (filter.gebied) params.set('gm_code', filter.gebied);
+    params.append('selected', String(selectedZoneIds[0]));
+    params.set(
+      'phase',
+      mapZonePhaseToPolicyHubsPhase(
+        selectedZone?.geography_type,
+        selectedZone?.phase
+      )
+    );
+    return `/map/beleidshubs?${params.toString()}`;
+  }, [
+    hasExactlyOneZone,
+    filter.gebied,
+    selectedZoneIds,
+    selectedZone?.geography_type,
+    selectedZone?.phase
+  ]);
 
-  const renderAggregationButton = (name: string, title: string) => (
-    <div
-      key={`agg-level-${name}`}
-      className={
-        'agg-button ' +
-        (filter.ontwikkelingaggregatie === name ? ' agg-button-active' : '')
-      }
-      onClick={() => setAggregationLevel(name)}
-    >
-      {title}
-    </div>
-  );
+  const aggregationButtonsToRender = getAggregationButtonsToRender();
 
   if (!hasSelectedBeleidszone) {
     return (
@@ -232,26 +255,15 @@ function DashboardBeleidszones() {
 
   return (
     <div className="DashboardBeleidszones StatsPage pt-4 pb-24">
-      <div className="agg-button-container mb-8">
-        {aggregationButtonsToRender.map((x) =>
-          renderAggregationButton(x.name, x.title)
-        )}
-        {aggregationButtonsToRender.length > 0 && (
-          <InfoTooltip className="mx-2 inline-block">
-            Toon de data in intervallen van{' '}
-            {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je
-            bekijkt nu{' '}
-            {aggregationButtonsToRender
-              .filter((x) => filter.ontwikkelingaggregatie === x.name)
-              .pop()?.title}
-            -niveau.
-          </InfoTooltip>
-        )}
-      </div>
-
       <PageTitle className="my-2">{getPageTitle}</PageTitle>
 
       <div className="my-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600" style={{marginLeft: '58px'}}>
+        {hasExactlyOneZone && selectedZone?.geography_type && (
+          <span>{readable_geotype(selectedZone.geography_type)}</span>
+        )}
+        {hasExactlyOneZone && selectedZone?.phase === 'concept' && (
+          <span>{readable_phase(selectedZone.phase)}</span>
+        )}
         {hasExactlyOneZone && hasValidEffectiveDate && (
           <span>
             {isArchived
@@ -277,7 +289,26 @@ function DashboardBeleidszones() {
             Huidige versie
           </button>
         )}
+        {hasExactlyOneZone && beleidshubsMapUrl && (
+          <Link
+            to={beleidshubsMapUrl}
+            className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Toon op kaart
+          </Link>
+        )}
       </div>
+
+      {/* Interval control, same design and position as on the Beleidsinfo page */}
+      {aggregationButtonsToRender.length > 0 && (
+        <div className="flex items-center gap-2 my-4" style={{marginLeft: '58px'}}>
+          <AggregationLevelControl
+            levels={aggregationButtonsToRender}
+            activeLevel={filter.ontwikkelingaggregatie}
+            onChange={setAggregationLevel}
+          />
+        </div>
+      )}
 
       <div style={{marginLeft: '58px'}}>
         <ZonePreviewMap className="my-4" />
@@ -288,6 +319,7 @@ function DashboardBeleidszones() {
           filter={filter}
           config={{ showLegend: true }}
           title="Beschikbare voertuigen"
+          capacity={hasExactlyOneZone ? selectedZone?.capacity : undefined}
         />
         <VerhuringenChart title="Verhuringen" />
         <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />

@@ -1,7 +1,7 @@
 import { StateType } from '../types/StateType';
 import {
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_VERHUURDATA_HB,
   DEFAULT_DATA_LAYER_ORDER,
   sanitizeActiveDataLayers,
   sanitizeDataLayerOrder,
@@ -13,7 +13,7 @@ import {
  */
 export const DEFAULT_ACTIVE_DATA_LAYERS = {
   'displaymode-park': [DISPLAYMODE_PARKEERDATA_VOERTUIGEN],
-  'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_VOERTUIGEN]
+  'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_HB]
 };
 
 /**

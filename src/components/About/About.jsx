@@ -11,12 +11,6 @@ const About = () => {
   return (
     <div className="
     ">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Over het Dashboard Deelmobiliteit
-      </h1>
       <div className="mx-auto pb-8">
         <div
           dangerouslySetInnerHTML={{ __html: marked.parse(`

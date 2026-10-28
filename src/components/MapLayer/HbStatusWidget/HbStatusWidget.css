@@ -1,0 +1,104 @@
+/* Status pill shown at the top-centre of the HB-matrix map */
+.hb-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background-color: #fff;
+  border-radius: 10px;
+  border-left: 4px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font: normal normal normal 13px/17px Inter, sans-serif;
+  color: #333;
+  pointer-events: auto;
+  animation: hb-status-fade-in 0.2s ease-out;
+}
+
+@keyframes hb-status-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hb-status__icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+
+.hb-status__text {
+  min-width: 0;
+}
+
+.hb-status__title {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.hb-status__subtitle {
+  color: #666;
+  margin-top: 2px;
+}
+
+.hb-status__elapsed {
+  font-variant-numeric: tabular-nums;
+  color: #333;
+  font-weight: 600;
+}
+
+.hb-status__button {
+  color: #15aeef;
+  font-weight: 600;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.hb-status--loading {
+  border-left-color: #15aeef;
+}
+.hb-status--loading .hb-status__icon {
+  color: #15aeef;
+}
+
+.hb-status--success {
+  border-left-color: #1fa024;
+}
+.hb-status--success .hb-status__icon {
+  color: #1fa024;
+}
+
+.hb-status--info {
+  border-left-color: #15aeef;
+}
+.hb-status--info .hb-status__icon {
+  color: #15aeef;
+}
+
+.hb-status--error {
+  border-left-color: #fd3e48;
+}
+.hb-status--error .hb-status__icon {
+  color: #fd3e48;
+}
+
+/*
+ * While HB data is loading, the map container gets the 'hb-loading' class
+ * (see setH3GridLoadingState). Show a progress cursor on the map canvas,
+ * overriding the inline 'pointer' cursor set by the hover effect.
+ */
+.map.hb-loading canvas.maplibregl-canvas {
+  cursor: progress !important;
+}
+
+@media (max-width: 639px) {
+  .hb-status {
+    padding: 8px 12px;
+  }
+  .hb-status__title {
+    white-space: normal;
+  }
+}

@@ -20,7 +20,6 @@ import SetPassword from './pages/SetPassword.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import { Toaster } from "./components/ui/toaster"
 
-import Admin from './components/Admin/Admin';
 import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
@@ -28,6 +27,7 @@ import Features from './components/Features/Features';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
+import SidebarLayout from './components/SidebarLayout/SidebarLayout';
 import Docs from './components/Docs/Docs';
 import Faq from './components/Faq/Faq';
 import Profile from './components/Profile/Profile';
@@ -45,6 +45,7 @@ import UserList from './components/UserList/UserList';
 import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
+import EmailUsers from './components/EmailUsers/EmailUsers';
 import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -153,7 +154,7 @@ function App() {
       if (pathname === '/over') {
         return `Over - ${baseTitle}`;
       }
-      if (pathname === '/features') {
+      if (pathname === '/functionaliteiten') {
         return `In het kort - ${baseTitle}`;
       }
       if (pathname === '/faq') {
@@ -226,6 +227,9 @@ function App() {
         }
         if (pathname === '/admin/yearly-costs') {
           return `Jaarlijkse kosten - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/email') {
+          return `E-mail gebruikers - Beheer - ${baseTitle}`;
         }
         if (pathname === '/admin/mail-templates') {
           return `E-mail templates - Beheer - ${baseTitle}`;
@@ -583,88 +587,95 @@ function App() {
               <>
                 <Route path="/admin" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Gebruikers" contentWidth="100%">
                       <UserList acl={acl} />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/users" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Gebruikers" contentWidth="100%">
                       <UserList acl={acl} />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/users/new" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Gebruikers" contentWidth="100%">
                       <UserList
                         acl={acl}
                         showAddUserModule={true} />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/users/:username" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Gebruikers" contentWidth="100%">
                       <UserList acl={acl} />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/shared" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Data delen" contentWidth="100%">
                       <SharedDataOverview />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/organisations" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Organisaties" contentWidth="100%">
                       <OrganisationList />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/organisations/new" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Organisaties" contentWidth="100%">
                       <OrganisationList showAddOrganisationModule={true} />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/organisations/:organisationId" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Organisaties" contentWidth="100%">
                       <OrganisationList />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/stats" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Statistieken" contentWidth="100%">
                       <LoginStats />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/yearly-costs" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Exporteer jaarbijdrage" contentWidth="100%">
                       <YearlyCostsExport />
-                    </Admin>
+                    </SidebarLayout>
+                  </Overlay>
+                } />
+                <Route path="/admin/email" element={
+                  <Overlay>
+                    <SidebarLayout title="E-mail gebruikers" contentWidth="100%">
+                      <EmailUsers acl={acl} />
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/mail-templates" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Mail-templates" contentWidth="100%">
                       <MailTemplateList />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
                 <Route path="/admin/mail-templates/new" element={
                   <Overlay>
-                    <Admin>
+                    <SidebarLayout title="Mail-templates" contentWidth="100%">
                       <MailTemplateList showAddMailTemplateModule={true}  />
-                    </Admin>
+                    </SidebarLayout>
                   </Overlay>
                 } />
               </> : null
@@ -716,37 +727,37 @@ function App() {
             } />
             <Route path="/profile" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Start">
                   <Profile />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/profile/api" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="API keys" contentWidth="800px">
                   <ApiKeys />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/over" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
                   <About />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
-            <Route path="/features" element={
+            <Route path="/functionaliteiten" element={
               <Overlay>
-                <Misc contentWidth="900px">
+                <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
                   <Features />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/export" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Exporteer data">
                   <Export />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/faq" element={
@@ -765,30 +776,30 @@ function App() {
             } />
             <Route path="/docs" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/docs/:category/:doc" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Documentatie" contentWidth="900px">
                   <Docs />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
             <Route path="/active_feeds" element={
               <Overlay>
-                <Misc>
+                <SidebarLayout title="Actieve datafeeds">
                   <ActiveFeeds />
-                </Misc>
+                </SidebarLayout>
               </Overlay>
             } />
           </>
@@ -810,9 +821,9 @@ function App() {
           } />
           <Route path="/profile" element={
             <Overlay>
-              <Misc>
+              <SidebarLayout title="Start">
                 <Profile />
-              </Misc>
+              </SidebarLayout>
             </Overlay>
           } />
           <Route path="/faq" element={
@@ -833,16 +844,16 @@ function App() {
 
         <Route path="/over" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Over het Dashboard Deelmobiliteit" contentWidth="900px">
               <About />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
-        <Route path="/features" element={
+        <Route path="/functionaliteiten" element={
           <Overlay>
-            <Misc contentWidth="900px">
+            <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
               <Features />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/stats/beleidsinfo" element={<>
@@ -868,30 +879,30 @@ function App() {
         } />
         <Route path="/docs" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/docs/:category/:doc" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Documentatie" contentWidth="900px">
               <Docs />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route path="/active_feeds" element={
           <Overlay>
-            <Misc>
+            <SidebarLayout title="Actieve datafeeds">
               <ActiveFeeds />
-            </Misc>
+            </SidebarLayout>
           </Overlay>
         } />
         <Route element={renderFilterbarElements()} />
@@ -908,7 +919,7 @@ function App() {
        */}
       {pathRequiresBackgroundMap(pathName) && <MapPage mapContainer={mapContainer} />}
 
-      <Menu acl={acl} pathName={pathName} />
+      <Menu pathName={pathName} />
       <IntroModal pathName={pathName} />
 
      </div>

@@ -1,6 +1,7 @@
 // import {PureComponent } from 'react';
 
 import './CustomizedTooltip.css';
+import {formatNumber} from './chartFormatting';
 
 const tooltipTextColor = '#333333';
 
@@ -22,8 +23,7 @@ const getLineColor = (x) => {
   return isLightColor(c) ? tooltipTextColor : c;
 };
 
-const displayValue = (v) =>
-  v == null ? '0' : (Number.isInteger(v) ? v.toString() : v.toFixed(2));
+const displayValue = (v) => formatNumber(v);
 
 const CustomizedTooltip = ({
   active, payload, label, contentStyle = {}

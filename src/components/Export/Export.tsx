@@ -102,8 +102,8 @@ function Export() {
   const handleDownloadRawDataClick = async () => {
     setSuccesfullRawDataRequest(false);
     let result = await downloadRawData(token, {
-      startDate: moment(startDate).format('YYYY-MM-DD'),
-      endDate: moment(endDate).format('YYYY-MM-DD 23:59:59')
+      startDate: moment(startDate).format('YYYY-MM-DD') + 'T00:00:00Z',
+      endDate: moment(endDate).format('YYYY-MM-DD') + 'T23:59:59Z'
     });
     if ("email" in result) {
       setSuccesfullRawDataRequest(true);
@@ -120,14 +120,7 @@ function Export() {
 
   return (
     <div className="Export">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Exporteer data
-      </h1>
-
-      <div className="my-5">
+      <div className="mb-5">
 
         <Section title="Download standaardrapportage">
           <div className="lg:w-72">

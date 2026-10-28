@@ -87,10 +87,6 @@ const WidgetRow = ({ children }: { children: ReactNode }) => (
 const Features = () => {
   return (
     <div>
-      <h1 className="text-4xl font-bold">
-        Dashboard Deelmobiliteit functies
-      </h1>
-
       <div className="mx-auto pb-8">
         <Markdown>{introMarkdown}</Markdown>
 

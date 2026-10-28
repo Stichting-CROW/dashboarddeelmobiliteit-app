@@ -96,14 +96,14 @@ const initialState = {
   zones_visible: false,
   displaymode: DISPLAYMODE_PARK,
   view_park: DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-  view_rentals: DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  view_rentals: DISPLAYMODE_VERHUURDATA_HB,
   map_style: 'base', // Default to base map style
   extent: [],
   mapextent: [],
   // New data layer state for multiple active layers
   active_data_layers: {
     'displaymode-park': [DISPLAYMODE_PARKEERDATA_VOERTUIGEN],
-    'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_VOERTUIGEN]
+    'displaymode-rentals': [DISPLAYMODE_VERHUURDATA_HB]
   },
   // Top-first list order; controls map z-order for Andere datalaag items
   data_layer_order: {

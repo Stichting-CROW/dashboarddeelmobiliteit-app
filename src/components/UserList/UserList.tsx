@@ -27,7 +27,6 @@ import {
 // Import components
 import Button from '../Button/Button';
 import EditUser from '../EditUser/EditUser';
-import PageTitle from '../common/PageTitle';
 import H4Title from '../H4Title/H4Title';
 
 const DELIMITER  = ';';
@@ -229,7 +228,6 @@ const UserList = ({
   return (
     <div className="" style={{maxWidth: '800px'}}>
       <div className="flex justify-between flex-wrap items-center">
-        <PageTitle style={{marginTop: 0}}>Gebruikers</PageTitle>
         {isAdmin() && organisationOptionList.length > 1 &&
           <div>
             <Select

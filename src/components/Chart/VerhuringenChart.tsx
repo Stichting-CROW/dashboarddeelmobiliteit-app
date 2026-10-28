@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React from 'react';
 
 import { getOperatorStatsForChart, transformZerosToNullForChart } from './chartTools.js';
 
@@ -46,13 +46,36 @@ import {CustomizedXAxisTick, CustomizedYAxisTick} from '../Chart/CustomizedAxisT
 import {CustomizedTooltip} from '../Chart/CustomizedTooltip.jsx';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import ChartSkeleton from './ChartSkeleton';
+import {ChartEmptyState, ChartErrorState, ChartRefreshingOverlay} from './ChartStates';
+import {useAggregatedChartData} from './useAggregatedChartData';
+import {useLegendToggle} from './useLegendToggle';
+import {
+  CHART_SYNC_ID,
+  TOTAAL_KEY,
+  TOTAAL_STROKE,
+  TOTAAL_DASH,
+  PREVIOUS_TOTAAL_KEY,
+  PREVIOUS_TOTAAL_STROKE,
+  PREVIOUS_TOTAAL_DASH
+} from './chartConstants';
+import {mergePreviousPeriodTotals} from './previousPeriod';
+import {getWeekendRanges, renderWeekendShading} from './WeekendShading';
+import {getPreviousPeriodFilter} from '../../helpers/stats/kpi';
 
-const TOTAAL_KEY = 'Totaal';
+/** Fetches the same data for the previous period of equal length */
+const getPreviousPeriodRentalsData = (token, filter, zones, metadata) =>
+  getAggregatedRentalsData(token, getPreviousPeriodFilter(filter), zones, metadata);
 
-function VerhuringenChart(props) {
+interface VerhuringenChartProps {
+  title?: string;
+  /** Show the total of the previous period as a ghost line */
+  compareWithPreviousPeriod?: boolean;
+}
+
+function VerhuringenChart(props: VerhuringenChartProps) {
+  const {compareWithPreviousPeriod = false} = props;
   const dispatch = useDispatch()
 
-  const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
   const filter = useSelector((state: StateType) => state.filter)
   const metadata = useSelector((state: StateType) => state.metadata)
 
@@ -65,69 +88,44 @@ function VerhuringenChart(props) {
     return (state.metadata && state.metadata.zones) ? state.metadata.zones : [];
   });
 
-  const [rentalsData, setRentalsData] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  // See BeschikbareVoertuigenChart for the rationale behind the
-  // metadata sub-reference deps (avoids duplicate refetches when metadata
-  // gets a new top-level reference but the relevant slices did not change).
-  useEffect(() => {
-    // Do not reload chart until you have 'zones'
-    if(! metadata || ! metadata.zones || metadata.zones.length <= 0) {
-      setRentalsData([]);
-      setIsLoading(false);
-      return;
-    }
-    // If a plaats is selected but metadata.zones still belongs to a previous
-    // plaats, skip the fetch (see BeschikbareVoertuigenChart for rationale).
-    if(filter.gebied && !metadata.zones.some((z: any) => z.municipality === filter.gebied)) {
-      setRentalsData([]);
-      setIsLoading(false);
-      return;
-    }
-    async function fetchData() {
-      try {
-        // Get aggregated vehicle data
-        const aggregatedData = await getAggregatedRentalsData(token, filter, zones, metadata);
-        if(! aggregatedData) return;
-
-        // Set state
-        setRentalsData(aggregatedData);
-
-        // Sum amount of vehicles per operator, used in FilteritemAanbieders component
-        let operators;
-        if(aggregatedData && aggregatedData.rentals_aggregated_stats) {
-          operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
-        }
-        else {
-          operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
-        }
-        dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
-      } finally {
-        setIsLoading(false);
+  // Load the aggregated rentals data for the current filter. The hook handles
+  // waiting for zones, stale responses, and loading/error state.
+  const {
+    data: rentalsData,
+    isLoading,
+    isRefreshing,
+    error,
+    refetch
+  } = useAggregatedChartData<any>(
+    getAggregatedRentalsData,
+    (aggregatedData) => {
+      // Sum amount of rentals per operator, used in FilteritemAanbieders component
+      let operators;
+      if(aggregatedData.rentals_aggregated_stats) {
+        operators = getOperatorStatsForChart(aggregatedData.rentals_aggregated_stats.values, metadata.aanbieders);
       }
+      else {
+        operators = getOperatorStatsForChart(aggregatedData.rental_stats.values, metadata.aanbieders);
+      }
+      dispatch({type: 'SET_OPERATORSTATS_VERHURINGENCHART', payload: operators });
     }
-    setIsLoading(true);
-    fetchData();
-  }, [
-    filter.ontwikkelingvan,
-    filter.ontwikkelingtot,
-    filter.ontwikkelingaggregatie,
-    filter.ontwikkelingaggregatie_function,
-    filter.gebied,
-    filter.zones,
-    filter.aanbiedersexclude,
-    metadata.aanbieders,
-    metadata.aclOperators,
-    metadata.zones,
-    metadata.gebieden,
-    metadata.vehicle_types,
-    token,
-    dispatch
-  ]);
-  
+  );
+
+  // Optional: the previous period, only fetched when comparing
+  const {data: previousRentalsData} = useAggregatedChartData<any>(
+    getPreviousPeriodRentalsData,
+    undefined,
+    {enabled: compareWithPreviousPeriod}
+  );
+
+  // Clickable legend: hide/show individual providers
+  const legend = useLegendToggle();
+
   // Populate chart data
-  const chartData = getAggregatedRentalsChartData(rentalsData, filter, zones, aanbieders);
+  const chartData = getAggregatedRentalsChartData(rentalsData || [], filter, zones, aanbieders);
+  const previousChartData = compareWithPreviousPeriod && previousRentalsData
+    ? getAggregatedRentalsChartData(previousRentalsData, getPreviousPeriodFilter(filter), zones, aanbieders)
+    : null;
 
   const getChartDataWithNiceDates = (data) => {
     if (!data?.length) return [];
@@ -145,11 +143,17 @@ function VerhuringenChart(props) {
       return row;
     });
   };
-  const chartDataWithNiceDatesRaw = getChartDataWithNiceDates(chartData);
+  const chartDataWithNiceDatesRaw = mergePreviousPeriodTotals(
+    getChartDataWithNiceDates(chartData),
+    previousChartData
+  );
   const valueKeys = chartDataWithNiceDatesRaw?.[0]
     ? Object.keys(chartDataWithNiceDatesRaw[0]).filter((k) => k !== 'time' && k !== 'name')
     : [];
   const chartDataWithNiceDates = transformZerosToNullForChart(chartDataWithNiceDatesRaw, valueKeys);
+
+  // Weekend bands, based on the original timestamps (before date formatting)
+  const weekendRanges = getWeekendRanges(chartData, filter.ontwikkelingaggregatie);
 
   const setAggregationFunction = (value) => {
     dispatch({
@@ -168,14 +172,15 @@ function VerhuringenChart(props) {
 
   const getSeriesKeys = () => {
     const allKeys = getUniqueProviderNames(chartDataWithNiceDates);
-    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name');
+    const providerKeys = allKeys.filter(k => k !== 'time' && k !== 'name' && k !== PREVIOUS_TOTAAL_KEY);
     const providersOnly = providerKeys.filter(k => k !== TOTAAL_KEY);
     const hasTotaal = providerKeys.indexOf(TOTAAL_KEY) >= 0;
-    return { providersOnly, hasTotaal };
+    const hasPrevious = allKeys.indexOf(PREVIOUS_TOTAAL_KEY) >= 0;
+    return { providersOnly, hasTotaal, hasPrevious };
   };
 
   const renderLineSeries = () => {
-    const { providersOnly, hasTotaal } = getSeriesKeys();
+    const { providersOnly, hasTotaal, hasPrevious } = getSeriesKeys();
     const series: React.ReactNode[] = [];
     providersOnly.forEach(x => {
       series.push(
@@ -191,6 +196,7 @@ function VerhuringenChart(props) {
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(x)}
         />
       );
     });
@@ -201,13 +207,35 @@ function VerhuringenChart(props) {
           type="monotone"
           dataKey={TOTAAL_KEY}
           name={TOTAAL_KEY}
-          stroke="#1a1a1a"
-          strokeWidth={3}
+          stroke={TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={TOTAAL_DASH}
           strokeLinejoin="round"
           strokeLinecap="round"
           dot={false}
           isAnimationActive={false}
           connectNulls
+          hide={legend.isHidden(TOTAAL_KEY)}
+        />
+      );
+    }
+    // Ghost line of the previous period, last so it is last in the legend too
+    if (hasPrevious) {
+      series.push(
+        <Line
+          key={PREVIOUS_TOTAAL_KEY}
+          type="monotone"
+          dataKey={PREVIOUS_TOTAAL_KEY}
+          name={PREVIOUS_TOTAAL_KEY}
+          stroke={PREVIOUS_TOTAAL_STROKE}
+          strokeWidth={2}
+          strokeDasharray={PREVIOUS_TOTAAL_DASH}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          dot={false}
+          isAnimationActive={false}
+          connectNulls
+          hide={legend.isHidden(PREVIOUS_TOTAAL_KEY)}
         />
       );
     }
@@ -217,6 +245,7 @@ function VerhuringenChart(props) {
   const renderChart = () => (
     <LineChart
       data={chartDataWithNiceDates}
+      syncId={CHART_SYNC_ID}
       margin={{
         top: 10,
         right: 30,
@@ -224,11 +253,12 @@ function VerhuringenChart(props) {
         bottom: 0,
       }}
     >
+      {renderWeekendShading(weekendRanges)}
       <CartesianGrid strokeDasharray="3 0" vertical={false} />
       <XAxis dataKey="time" tick={<CustomizedXAxisTick />} />
       <YAxis tick={<CustomizedYAxisTick />} />
       <Tooltip content={<CustomizedTooltip />} contentStyle={{ color: '#333333' }} />
-      <Legend />
+      <Legend {...legend.legendProps} />
       {renderLineSeries()}
     </LineChart>
   );
@@ -246,10 +276,10 @@ function VerhuringenChart(props) {
           {chartData && chartData.length > 0 && <div className="flex justify-center flex-col ml-2">
             <button onClick={() => {
               const preparedData = prepareDataForCsv(chartData);
-              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}`;
+              const filename = `${moment(filter.ontwikkelingvan).format('YYYY-MM-DD')}_to_${moment(filter.ontwikkelingtot).format('YYYY-MM-DD')}_verhuringen`;
               downloadCsv(preparedData, filename);
             }} className="opacity-50 cursor-pointer">
-              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30`" alt="Download to CSV" title="Download to CSV" />
+              <img src="/components/StatsPage/icon-download-to-csv.svg" width="30" alt="Download to CSV" title="Download to CSV" />
             </button>
           </div>}
 
@@ -268,12 +298,19 @@ function VerhuringenChart(props) {
       </div>
 
       <div className="relative" style={{ width: '100%', height: '400px' }}>
-        {isLoading && (!chartData || chartData.length === 0) ? (
+        {isLoading ? (
           <ChartSkeleton height="100%" />
+        ) : error ? (
+          <ChartErrorState onRetry={refetch} />
+        ) : !chartData || chartData.length === 0 ? (
+          <ChartEmptyState />
         ) : (
-          <ResponsiveContainer>
-            {renderChart()}
-          </ResponsiveContainer>
+          <>
+            {isRefreshing && <ChartRefreshingOverlay />}
+            <ResponsiveContainer>
+              {renderChart()}
+            </ResponsiveContainer>
+          </>
         )}
       </div>
     </div>
