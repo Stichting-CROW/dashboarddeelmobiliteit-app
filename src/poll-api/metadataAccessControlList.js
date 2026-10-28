@@ -170,6 +170,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
             const treatAsNlWide = organisationType === 'ADMIN'
               || metadata.is_admin === true
               || isAdmin(store_accesscontrollist.getState());
+            // Expose admin status on metadata for request builders that only
+            // receive `metadata` (see createFilterparameters).
+            store_accesscontrollist.dispatch({ type: 'SET_METADATA_IS_ADMIN', payload: treatAsNlWide });
             if(municipalities.length===1) {
               store_accesscontrollist.dispatch({ type: 'SET_FILTER_GEBIED', payload: municipalities[0].gm_code});
             } else if(municipalities.length === 0){
