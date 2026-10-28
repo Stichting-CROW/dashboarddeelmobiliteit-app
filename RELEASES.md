@@ -1,5 +1,19 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-10-28
+
+**Aanbod**
+
+- 🪄 Op de Aanbod-kaart kun je met de lasso een gebied tekenen; naast de knop staat hoeveel voertuigen daarin staan. Het aantal volgt de gekozen tijd en filters. Klik de knop nogmaals of druk op Escape om de selectie te verwijderen
+
+**Servicegebieden**
+
+- 🐛 Opgelost: bij het wisselen van aanbieder kregen servicegebieden soms de kleur van een andere aanbieder. Elke polygoon houdt nu de kleur van de eigen aanbieder
+
+**Statistiek: Beleidsinfo**
+
+- 🐛 Opgelost: beheerders zagen bij 'Alle plaatsen' vier keer te hoge aantallen, doordat overlappende zonelagen (land, gemeente, stadsdeel en wijk) bij elkaar werden opgeteld
+
 ## Release 2026-10-22
 
 **Zones en documentatie**
