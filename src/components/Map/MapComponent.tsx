@@ -17,6 +17,7 @@ import U from 'mapbox-gl-utils';
 import {getMapStyles, applyMapStyle} from './MapUtils/map';
 import {createSafeGeolocateControl} from './MapUtils/mapControls';
 import MapAttribution from './MapControls/MapAttribution';
+import LassoTool from './MapControls/LassoTool';
 import { whenMapStyleReady } from './MapUtils/mapGuards';
 import { applyDataLayerOrderWhenReady } from './MapUtils/dataLayerOrder';
 import {initPopupLogic} from './MapUtils/popups.js';
@@ -826,6 +827,8 @@ const MapComponent = (props): JSX.Element => {
     {isLoggedIn ? <IsochroneTools map={map.current} /> : null}
     {/* Attribution (bottom-right control stack) */}
     <MapAttribution map={map.current} />
+    {/* Lasso to select vehicles (bottom-right control stack) */}
+    {stateLayers.displaymode === 'displaymode-park' && <LassoTool map={map.current} />}
     {/* Service areas layer */}
     {stateLayers.displaymode === 'displaymode-park' && <DdParkEventsLayer map={map.current} />}
     
