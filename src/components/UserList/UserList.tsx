@@ -44,6 +44,17 @@ const readablePrivilege = (privilegeKey) => {
   }
 }
 
+const readableOrganisationType = (type_of_organisation: string) => {
+  const conversionTable: Record<string, string> = {
+    MUNICIPALITY: 'Gemeente',
+    OTHER_GOVERNMENT: 'Andere overheid',
+    OPERATOR: 'Aanbieder',
+    OTHER_COMPANY: 'Ander bedrijf',
+    ADMIN: 'Admin',
+  };
+  return conversionTable[type_of_organisation] || type_of_organisation || '';
+}
+
 const TableRow = ({
   isAdmin,
   acl,
@@ -103,6 +114,9 @@ const UserList = ({
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [organisationOptionList, setOrganisationOptionList] = useState([]);
+  const [organisationTypesById, setOrganisationTypesById] = useState<
+    Record<number, string>
+  >({});
   const [selectedOrganisation, setSelectedOrganisation] = useState(null);
 
   const navigate = useNavigate();
@@ -124,14 +138,19 @@ const UserList = ({
     const organisations = await getOrganisationList(token);
     if(! organisations || ! organisations.forEach) return;
     const optionsList = [];
+    const typesById: Record<number, string> = {};
     organisations.forEach(x => {
       optionsList.push({
         value: x.organisation_id,
         label: x.name
       });
+      if (x.organisation_id != null && x.type_of_organisation) {
+        typesById[x.organisation_id] = x.type_of_organisation;
+      }
     });
     optionsList.sort((a, b) => a.label.localeCompare(b.label));
     setOrganisationOptionList(optionsList);
+    setOrganisationTypesById(typesById);
   }
 
   const fetchUserList = async () => {
@@ -185,10 +204,18 @@ const UserList = ({
             || x.organisation_name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1;
   });
 
+  const getOrganisationTypeForUser = (user: any) => {
+    if (user.organisation_id != null && organisationTypesById[user.organisation_id]) {
+      return organisationTypesById[user.organisation_id];
+    }
+    // Organisation admins only see their own users and may not have the full
+    // organisation list; fall back to the ACL organisation type.
+    return acl?.organisation_type || acl?.type_of_organisation || '';
+  }
+
   const prepareDataForCsv = (data: any) => {
     if(! data || data.length <= 0) return;
     if(  typeof data !== 'object') return;
-    console.log('data', data);
 
     let csvRows = [];
 
@@ -200,7 +227,7 @@ const UserList = ({
     ];
 
     // Get headers
-    const headers = ['E-mail', 'Organisatie', 'Super-admin'];
+    const headers = ['E-mail', 'Organisatie', 'Type organisatie', 'Super-admin'];
     privileges.forEach((key) => {
       headers.push(readablePrivilege(key));
     });
@@ -209,7 +236,12 @@ const UserList = ({
     // Loop over the rows
     for (const x of data) {
       // Add standard columns
-      const values = [x.user_id, x.organisation_name, (x.is_admin ? 'Ja' : '')];
+      const values = [
+        x.user_id,
+        x.organisation_name,
+        readableOrganisationType(getOrganisationTypeForUser(x)),
+        (x.is_admin ? 'Ja' : '')
+      ];
       // Add privilege columns
       privileges.forEach((key) => {
         if(x.privileges && x.privileges.indexOf(key) > -1) {
