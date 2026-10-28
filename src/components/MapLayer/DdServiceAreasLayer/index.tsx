@@ -23,7 +23,12 @@ import { setBackgroundLayer } from '../../Map/MapUtils/map';
 import { setMapStyle } from '../../../actions/layers';
 import { ServiceAreaDelta } from '../../../types/ServiceAreaDelta';
 import moment from 'moment';
-import { loadServiceAreas, loadServiceAreasHistory, loadServiceAreaDeltas } from '../../../helpers/service-areas';
+import {
+  loadServiceAreas,
+  loadServiceAreasHistory,
+  loadServiceAreaDeltas,
+  doesServiceAreaMatchOperator,
+} from '../../../helpers/service-areas';
 import { useBackgroundLayer } from '../../Map/MapUtils/useBackgroundLayer';
 import { whenMapLayersMutable } from '../../Map/MapUtils/mapGuards';
 import { selectOverlayLayers, isOverlayLayerEnabled, selectDataLayerOrder } from '../../../helpers/layerSelectors';
@@ -85,7 +90,17 @@ const DdServiceAreasLayer = ({
 
   // If municipality or visible_operators change, remove version from search params
   useEffect(() => {
-    if (!map || !filter?.gebied || !visible_operators || visible_operators.length === 0) return;
+    if (!map || !filter?.gebied || !visible_operators || visible_operators.length === 0) {
+      // Clear stale polygons so a previous operator is never left on the map
+      setServiceAreas([]);
+      setServiceAreasHistory([]);
+      setServiceAreaDelta(null);
+      if (map) {
+        removeServiceAreasFromMap(map);
+        removeServiceAreaDeltaFromMap(map);
+      }
+      return;
+    }
 
     // Remove version from search params
     if (searchParams.get('version')) {
@@ -93,6 +108,13 @@ const DdServiceAreasLayer = ({
       newParams.delete('version');
       setSearchParams(newParams);
     }
+
+    // Drop previous operator's data immediately. Without this, the render
+    // effect briefly paints the old polygons in the newly selected
+    // operator's color while the new fetch is still in flight.
+    setServiceAreas([]);
+    setServiceAreasHistory([]);
+    setServiceAreaDelta(null);
 
     // Remove old service areas and deltas
     removeServiceAreasFromMap(map);
@@ -215,11 +237,18 @@ const DdServiceAreasLayer = ({
     searchParams
   ]);
 
-  // Memoize the service area for the current municipality to avoid unnecessary filtering
+  // Memoize the service area for the current municipality + selected operator.
+  // Matching on operator prevents briefly painting another operator's polygons
+  // in the newly selected operator's color while a fetch is in flight.
   const serviceAreaForMunicipality = useMemo(() => {
     if (!serviceAreas || serviceAreas.length === 0 || !filter?.gebied) return null;
-    return serviceAreas.find(x => x.municipality === filter.gebied) || null;
-  }, [serviceAreas, filter?.gebied]);
+    const selectedOperator = visible_operators?.[0];
+    if (!selectedOperator) return null;
+    return serviceAreas.find((x) => (
+      x.municipality === filter.gebied
+      && doesServiceAreaMatchOperator(x, selectedOperator)
+    )) || null;
+  }, [serviceAreas, filter?.gebied, visible_operators]);
 
   // Do things if 'serviceAreas' change
   useEffect(() => {
@@ -232,8 +261,10 @@ const DdServiceAreasLayer = ({
       return;
     }
 
-    // Return if no service areas were found or map is not ready
+    // No matching area for the selected operator: clear the map so polygons
+    // from a previous selection cannot linger under the new operator's color.
     if (!serviceAreaForMunicipality || !visible_operators || visible_operators.length === 0) {
+      removeServiceAreasFromMap(map);
       return;
     }
 
