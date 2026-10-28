@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 import Modal from '../Modal/Modal.jsx';
 import { Button } from '../ui/button';
+import { DekkingSter, DekkingToelichting } from '../Dekking/Dekking';
 
 const STORAGE_KEY = 'introModalDismissedAt';
 const DISMISS_DAYS = 7;
@@ -49,6 +50,7 @@ const IntroModal = ({ pathName }: IntroModalProps) => {
   });
 
   const [isVisible, setIsVisible] = useState(false);
+  const [showDekking, setShowDekking] = useState(false);
   const isLanding = isAanbodLandingPath(pathName);
 
   useEffect(() => {
@@ -94,11 +96,17 @@ const IntroModal = ({ pathName }: IntroModalProps) => {
       }}
     >
       <p className="text-gray-700 leading-relaxed mb-6">
-        Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de
-        ontwikkelingen rond deelmobiliteit op de voeten willen volgen. Met de
-        informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid
-        ontwikkelen, evalueren en bijsturen.
+        Het Dashboard Deelmobiliteit toont vrijwel alle deelvoertuigen in
+        Nederland<DekkingSter isOpen={showDekking} onToggle={() => setShowDekking(! showDekking)} />.
+        Het is open source software van en voor overheden: zij zien hiermee hoe
+        deelmobiliteit zich ontwikkelt, en kunnen zo hun beleid ontwikkelen,
+        evalueren en bijsturen.
       </p>
+      {showDekking && (
+        <div className="-mt-4 mb-6">
+          <DekkingToelichting />
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:justify-end">
         <Button
           type="button"

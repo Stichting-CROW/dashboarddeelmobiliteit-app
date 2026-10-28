@@ -1,5 +1,7 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { marked } from 'marked';
+
+import { DekkingSter, DekkingToelichting } from '../Dekking/Dekking';
 
 import DemoVehiclesMap from './demo/DemoVehiclesMap';
 import DemoDefectVehiclesMap from './demo/DemoDefectVehiclesMap';
@@ -13,7 +15,9 @@ import DemoHubsMap from './demo/DemoHubsMap';
 import DemoPrestatiesOverview from './demo/DemoPrestatiesOverview';
 
 const introMarkdown = `
-Het Dashboard Deelmobiliteit is een webtool van en voor overheden die de ontwikkelingen rond deelmobiliteit op de voeten willen volgen. Met de informatie uit het Dashboard Deelmobiliteit kunnen overheden hun beleid ontwikkelen, evalueren en bijsturen. &raquo; [Over het Dashboard Deelmobiliteit](/over)
+Denk aan: Waar staan voertuigen? Hoe lang en waar staan deelvoertuigen ongebruikt in de openbare ruimte? Hoe vaak worden de deelvoertuigen verhuurd? In welke wijken en op welke tijdstippen zijn deelvoertuigen populair?
+
+Niet-ingelogde gebruikers kunnen zien waar deelvoertuigen staan. Voor ingelogde gebruikers is meer functionaliteit beschikbaar. Zie hieronder een aantal voorbeelden.
 `;
 
 const aanbodMarkdown = `
@@ -61,9 +65,9 @@ const prestatiesMarkdown = `
 `;
 
 const outroMarkdown = `
-Ben je geinteresseerd geworden en ben je werkzaam bij een aanbieder of overheid? Lees dan bij [Over](/over) hoe je toegang krijgt.
+Ben je geinteresseerd geworden en ben je werkzaam bij een aanbieder of overheid? Lees dan bij [Veelgestelde vragen](/veelgestelde-vragen) hoe je toegang krijgt.
 
-Wil je meer informatie? Bekijk dan de [gebruikersdocumentatie](/docs) en <a href="https://docs.dashboarddeelmobiliteit.nl/" target="_blank">technische documentatie</a>.
+Wil je meer informatie? Bekijk dan de [(gebruikers)documentatie](/docs) en <a href="https://docs.dashboarddeelmobiliteit.nl/" target="_blank">technische documentatie</a>.
 `;
 
 const Markdown = ({ children }: { children: string }) => (
@@ -85,9 +89,15 @@ const WidgetRow = ({ children }: { children: ReactNode }) => (
 );
 
 const Features = () => {
+  const [showDekking, setShowDekking] = useState(false);
+
   return (
     <div>
       <div className="mx-auto pb-8">
+        <p>
+          Het Dashboard Deelmobiliteit toont vrijwel alle deelvoertuigen in Nederland<DekkingSter isOpen={showDekking} onToggle={() => setShowDekking(! showDekking)} />. Het is open source software van en voor overheden: zij zien hiermee hoe deelmobiliteit zich ontwikkelt, en kunnen zo hun beleid ontwikkelen, evalueren en bijsturen.
+        </p>
+        {showDekking && <DekkingToelichting />}
         <Markdown>{introMarkdown}</Markdown>
 
         <Markdown>{aanbodMarkdown}</Markdown>
