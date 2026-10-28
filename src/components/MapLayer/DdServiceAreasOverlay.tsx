@@ -7,7 +7,7 @@ import {
 } from '../Map/MapUtils/map.service_areas';
 import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
 import { whenMapLayersMutable } from '../Map/MapUtils/mapGuards';
-import { loadServiceAreas } from '../../helpers/service-areas';
+import { doesServiceAreaMatchOperator, loadServiceAreas } from '../../helpers/service-areas';
 import { useAvailableServiceAreaOperators } from '../../helpers/service-areas/useAvailableServiceAreaOperators';
 import { selectDataLayerOrder } from '../../helpers/layerSelectors';
 import { showServiceAreaForOperator } from '../../actions/service-areas';
@@ -52,6 +52,10 @@ const DdServiceAreasOverlay = ({
       return;
     }
 
+    // Clear immediately so a previous operator's polygons are never painted
+    // in the newly selected operator's color while the fetch is in flight.
+    setServiceAreas([]);
+
     let isStale = false;
 
     loadServiceAreas(filter.gebied, visible_operators)
@@ -75,16 +79,20 @@ const DdServiceAreasOverlay = ({
   useEffect(() => {
     if (!map) return;
 
-    const serviceAreaForMunicipality = serviceAreas && filter?.gebied
-      ? serviceAreas.find(x => x.municipality === filter.gebied)
+    const selectedOperator = visible_operators?.[0];
+    const serviceAreaForMunicipality = serviceAreas && filter?.gebied && selectedOperator
+      ? serviceAreas.find((x) => (
+        x.municipality === filter.gebied
+        && doesServiceAreaMatchOperator(x, selectedOperator)
+      ))
       : null;
 
-    if (!serviceAreaForMunicipality || !visible_operators || visible_operators.length === 0) {
+    if (!serviceAreaForMunicipality || !selectedOperator) {
       removeServiceAreasFromMap(map);
       return;
     }
 
-    renderServiceAreas(map, visible_operators[0], serviceAreaForMunicipality.geometries);
+    renderServiceAreas(map, selectedOperator, serviceAreaForMunicipality.geometries);
 
     // Re-apply the user-defined z-order now that the layers exist
     applyDataLayerOrderWhenReady(map, dataLayerOrder[displayMode], displayMode);
