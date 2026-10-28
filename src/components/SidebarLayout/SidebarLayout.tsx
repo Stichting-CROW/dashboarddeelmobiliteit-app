@@ -14,6 +14,8 @@ import {
   Building2,
   Receipt,
   Mail,
+  HelpCircle,
+  Presentation,
   LucideIcon
 } from 'lucide-react';
 
@@ -57,7 +59,9 @@ const loggedInSections: SidebarMenuSection[] = [
     title: 'Help',
     items: [
       { title: 'Over', link: '/over', icon: Info },
-      { title: 'Functionaliteiten', link: '/functionaliteiten', icon: Sparkles },
+      { title: 'Wat kun je ermee?', link: '/functionaliteiten', icon: Sparkles },
+      { title: 'Rondleiding', link: '/rondleiding', icon: Presentation },
+      { title: 'Veelgestelde vragen', link: '/veelgestelde-vragen', icon: HelpCircle },
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
     ],
   },
@@ -84,7 +88,9 @@ const guestSections: SidebarMenuSection[] = [
   {
     title: 'Menu',
     items: [
-      { title: 'Functionaliteiten', link: '/functionaliteiten', icon: Sparkles },
+      { title: 'Wat kun je ermee?', link: '/functionaliteiten', icon: Sparkles },
+      { title: 'Rondleiding', link: '/rondleiding', icon: Presentation },
+      { title: 'Veelgestelde vragen', link: '/veelgestelde-vragen', icon: HelpCircle },
       { title: 'Over', link: '/over', icon: Info },
       { title: 'Documentatie', link: '/docs', icon: BookOpen },
       { title: 'Datafeeds', link: '/active_feeds', icon: Rss },
@@ -118,7 +124,7 @@ const getAdminSection = (acl: any): SidebarMenuSection | null => {
 };
 
 /**
- * Page layout with a dark sidebar menu on the left and a header bar with the
+ * Page layout with a light grey sidebar menu on the left and a header bar with the
  * page title above the content. Used for the profile, data and admin pages.
  */
 export default function SidebarLayout({
@@ -143,19 +149,23 @@ export default function SidebarLayout({
     <div className="SidebarLayout flex flex-col md:flex-row min-h-full">
 
       {/* Sidebar */}
-      <aside className="SidebarLayout-sidebar md:w-56 md:flex-shrink-0 text-white">
+      {/* Same width as the filter bar on the map (FilterbarDesktop) */}
+      <aside className="SidebarLayout-sidebar md:w-[324px] md:flex-shrink-0">
         <div className="px-5 pt-6 pb-2">
           <Link to="/" className="SidebarLayout-logo">
-            <LogoDashboardDeelmobiliteit color="#FFFFFF" />
+            <LogoDashboardDeelmobiliteit />
           </Link>
         </div>
 
         <nav className="px-3 pb-3 md:pb-6 flex md:block overflow-x-auto" aria-label="Hoofdmenu">
           {sections.map((section) => (
             <div key={section.title} className="md:mt-5 flex md:block flex-shrink-0">
-              <div className="hidden md:block px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-white/50">
-                {section.title}
-              </div>
+              {/* A single section (guests) needs no heading */}
+              {sections.length > 1 && (
+                <div className="hidden md:block px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  {section.title}
+                </div>
+              )}
               <ul className="flex md:block">
                 {section.items.map((item) => {
                   const Icon = item.icon;
