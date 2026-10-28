@@ -5,6 +5,20 @@ import moment from 'moment';
 import { fetchJson } from '../../api/fetchJson';
 import { getMdsPublicUrl } from '../mdsUrl';
 
+/** Normalize operator names for comparison (e.g. 'GO Sharing' <-> 'gosharing'). */
+export const normalizeOperatorName = (operator: string | null | undefined): string => {
+  if (!operator) return '';
+  return operator.toLowerCase().replace(/\s+/g, '');
+};
+
+export const doesServiceAreaMatchOperator = (
+  serviceArea: Pick<ServiceArea, 'operator'> | null | undefined,
+  operator: string | null | undefined
+): boolean => {
+  if (!serviceArea || !operator) return false;
+  return normalizeOperatorName(serviceArea.operator) === normalizeOperatorName(operator);
+};
+
 export const loadServiceAreas = async (
   gebied: string,
   visible_operators: string[]
@@ -35,7 +49,7 @@ const operatorsQueryParam = (visible_operators: string[] | null | undefined): st
   if (!visible_operators || visible_operators.length === 0) {
     return null;
   }
-  return visible_operators.map((x) => x.toLowerCase().replace(' ', '')).join(',');
+  return visible_operators.map((x) => normalizeOperatorName(x)).join(',');
 };
 
 const fetchServiceAreas = async (
