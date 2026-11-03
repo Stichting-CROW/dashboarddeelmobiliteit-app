@@ -400,14 +400,11 @@ function Menu({
         path={'/map/servicegebieden'}
         icon={'/images/components/Menu/ontwikkeling.svg'}
       />
-      <Link className="text-menu" to="/login">
-        Log in
-      </Link>
       <Link className="text-menu" to="/functionaliteiten">
         Over
       </Link>
-      <Link className="text-menu" to="/rondleiding">
-        Rondleiding
+      <Link className="text-menu" to="/login">
+        Log in
       </Link>
     </>
   }
