@@ -137,9 +137,14 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // No zone_ids: the auth token (+ operators=) scopes the data server-side.
   }
   // Guests with access to multiple (public) municipalities: scope to those zones
+  // when zone metadata is available. When zones have not loaded yet (typical for
+  // guests with gebied === ""), omit zone_ids so the request stays NL-wide
+  // instead of sending an ambiguous empty `zone_ids=` param (issue #259).
   else if (hasAccessToMultipleGebieden && !options.show_global) {
     const zoneIds = getMunicipalityZoneIds(metadata.zones, municipalityCodesAsArray);
-    filterparams.push(`zone_ids=${zoneIds.join(',')}`);
+    if (zoneIds.length > 0) {
+      filterparams.push(`zone_ids=${zoneIds.join(',')}`);
+    }
   }
   // If no place is set: Get NL data (NL 'zone')
   // Only providers and admins are allowed to see this info

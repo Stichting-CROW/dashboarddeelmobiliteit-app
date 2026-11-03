@@ -7,6 +7,7 @@ import {
 import { isLoggedIn, isAdmin } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
 import {shouldFetchVehicles} from './pollTools.js';
+import { isInNetherlands } from '../helpers/netherlands';
 
 var store_parkingdata;
 var timerid_parkingdata;
@@ -190,7 +191,10 @@ const doApiCall = (
       if(isLoggedIn(state)) {
         vehicles = vehicles.park_events
       } else {
-        vehicles = vehicles.vehicles_in_public_space
+        // The public map only covers the Netherlands
+        vehicles = (vehicles.vehicles_in_public_space || []).filter(v => {
+          return v.location && isInNetherlands(v.location.longitude, v.location.latitude);
+        });
       }
       // Process with the *current* store state (not the state at request
       // time), so client-side filters that changed while the request was in
