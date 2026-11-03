@@ -199,17 +199,29 @@ can be deleted.
 
 ### Step 6. Release: from `develop` to `main`
 
-Every few weeks, or when an important change is ready, a maintainer prepares a release:
+Every few weeks, or when an important change is ready, a maintainer prepares a release.
+Do **not** open a Pull Request directly from `develop` to `main`. Use a dedicated
+release branch so the version date and release notes can be updated in the same change:
 
 1. The collected changes in `develop` are tested together on the
    [test site](https://test.dashboarddeelmobiliteit.nl).
-2. [RELEASES.md](RELEASES.md) gets a new section with the date and a list of changes,
-   written for users (in Dutch, like the existing notes).
-3. A Pull Request from `develop` to `main` is opened and merged.
-4. **Merging into `main` automatically publishes the new version** on
+2. Create a branch from `main` named `release/YYYY-MM-DD-short-description`, for example
+   `release/2026-11-03-gastweergave-en-over`.
+3. Merge `develop` into that release branch (this also brings along any hotfixes that
+   already landed on `main`).
+4. Add a new section at the top of [RELEASES.md](RELEASES.md) with today's date and the
+   user-facing changes since the previous release (in Dutch, like the existing notes).
+5. Update the version date in `src/components/Filterbar/Filterbar.tsx` to the same
+   `YYYY-MM-DD` date (the link that points to `RELEASES.md`).
+6. Open a Pull Request from the release branch **to `main`** and merge it after review.
+7. **Merging into `main` automatically publishes the new version** on
    dashboarddeelmobiliteit.nl within a few minutes. You can follow this under the
    [Actions](https://github.com/Stichting-CROW/dashboarddeelmobiliteit-app/actions) tab.
-5. The maintainer checks the live website and closes the related issues.
+8. Merge `main` back into `develop` (or open a follow-up PR), so `develop` also has the
+   new release notes and version date. Then check the live website and close related issues.
+
+Cursor can help with steps 2–6 via the `update-release-notes` rule and a request like
+"create a new release".
 
 ## Urgent fixes (hotfixes)
 
@@ -252,6 +264,7 @@ Technical setup is described in the [README](README.md) and [DEVELOP.md](DEVELOP
 | `feat/` | New features and improvements | `feat/hub-chart-with-capacity-line` |
 | `fix/` | Bug fixes | `fix/kpi-limits` |
 | `hotfix/` | Urgent fixes for the live website, branched from `main` | `hotfix/broken-images` |
+| `release/` | Preparing a release to `main` (notes + version date) | `release/2026-11-03-gastweergave-en-over` |
 | `docs/` | Documentation only | `docs/how-to-collaborate` |
 
 ### Commit messages

@@ -4,11 +4,13 @@
 This workflow automates the creation and update of release notes in RELEASES.md based on git commits since the last release date. When a new release section is written, the version date in the filter bar is updated to match.
 
 ## How to Use
-Run the command: `update-release-notes` or ask Cursor to "update release notes"
+Run the command: `update-release-notes` or ask Cursor to "update release notes".
+For a full release (branch + notes + PR to `main`), ask Cursor to "create a new release"
+and follow the steps in CONTRIBUTING.md → Step 6.
 
 ## Workflow Steps
 
-1. **Read RELEASES.md** to find the date of the most recent release (look for the latest "## Release YYYY-MM-DD" heading)
+1. **Read RELEASES.md** (on `main` / the release branch) to find the date of the most recent release (look for the latest "## Release YYYY-MM-DD" heading)
 
 2. **Get git commits** since that date:
    ```bash
