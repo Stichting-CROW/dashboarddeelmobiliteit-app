@@ -24,6 +24,7 @@ import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
 import Features from './components/Features/Features';
+import VeelgesteldeVragen from './components/VeelgesteldeVragen/VeelgesteldeVragen';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
@@ -155,9 +156,9 @@ function App() {
         return `Over - ${baseTitle}`;
       }
       if (pathname === '/functionaliteiten') {
-        return `In het kort - ${baseTitle}`;
+        return `Wat kun je ermee? - ${baseTitle}`;
       }
-      if (pathname === '/faq') {
+      if (pathname === '/faq' || pathname === '/veelgestelde-vragen') {
         return `Veelgestelde vragen - ${baseTitle}`;
       }
       if (pathname === '/docs') {
@@ -748,8 +749,15 @@ function App() {
             } />
             <Route path="/functionaliteiten" element={
               <Overlay>
-                <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
+                <SidebarLayout title="Wat je met het Dashboard kunt" contentWidth="100%">
                   <Features />
+                </SidebarLayout>
+              </Overlay>
+            } />
+            <Route path="/veelgestelde-vragen" element={
+              <Overlay>
+                <SidebarLayout title="Veelgestelde vragen" contentWidth="100%">
+                  <VeelgesteldeVragen />
                 </SidebarLayout>
               </Overlay>
             } />
@@ -851,8 +859,15 @@ function App() {
         } />
         <Route path="/functionaliteiten" element={
           <Overlay>
-            <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
+            <SidebarLayout title="Wat je met het Dashboard kunt" contentWidth="100%">
               <Features />
+            </SidebarLayout>
+          </Overlay>
+        } />
+        <Route path="/veelgestelde-vragen" element={
+          <Overlay>
+            <SidebarLayout title="Veelgestelde vragen" contentWidth="100%">
+              <VeelgesteldeVragen />
             </SidebarLayout>
           </Overlay>
         } />
