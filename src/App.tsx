@@ -81,7 +81,9 @@ import {
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
   DISPLAYMODE_DASHBOARD,
+  DISPLAYMODE_PARKEERDATA_CLUSTERS,
 } from './reducers/layers.js';
+import { setSingleDataLayer } from './actions/layers';
 
 import './App.css';
 
@@ -374,6 +376,16 @@ function App() {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
+
+  // Guests start on the cluster view so NL-wide vehicle data stays readable
+  // and fast (issue #259). Runs on initial guest load and after logout
+  // (LOGOUT resets layers to points). Dependency is only isLoggedIn, so a
+  // guest can still switch to points or heatmap afterwards.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      dispatch(setSingleDataLayer(DISPLAYMODE_PARK, DISPLAYMODE_PARKEERDATA_CLUSTERS));
+    }
+  }, [isLoggedIn, dispatch]);
   
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;

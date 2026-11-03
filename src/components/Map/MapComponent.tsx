@@ -127,9 +127,10 @@ const MapComponent = (props): JSX.Element => {
   const [publicZones, setPublicZones] = useState(null);
   const [didMapLoad, setDidMapLoad] = useState(false);
   const [didMapDrawLoad, setDidMapDrawLoad] = useState(false);
-  const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 4.4671854);
-  const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 51.9250836);
-  const [zoom] = useState(stateLayers.zoom || 15);
+  // Fallback: NL overview when there is no persisted map extent (issue #259).
+  const [lng] = useState((stateLayers.mapextent && stateLayers.mapextent[0]) ? (stateLayers.mapextent[0] + stateLayers.mapextent[2]) / 2 : 5.29);
+  const [lat] = useState((stateLayers.mapextent && stateLayers.mapextent[1]) ? (stateLayers.mapextent[1] + stateLayers.mapextent[3]) / 2 : 52.13);
+  const [zoom] = useState(stateLayers.zoom || 7);
   const [didInitSourcesAndLayers, setDidInitSourcesAndLayers] = useState(false);
   const [didAddPublicZones, setDidAddPublicZones] = useState(false);
   const [didAddAdminZones, setDidAddAdminZones] = useState(false);
