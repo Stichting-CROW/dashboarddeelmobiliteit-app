@@ -1,5 +1,23 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-03
+
+**Aanbod**
+
+- 🐛 Opgelost: gastgebruikers zien nu alle voertuigen in Nederland als clusterview, zonder een willekeurige startplaats; voertuigen buiten Nederland worden niet meer getoond
+
+**Gebruikersinterface**
+
+- 🪄 Nieuwe teksten voor niet-ingelogde bezoekers op Over, Functies, de introductiemodal en Veelgestelde vragen
+- ✨ In het menu is 'Rondleiding' verwijderd; 'Over' blijft beschikbaar
+- ✨ Zijbalk op pagina's zoals Over en Functies heeft nu dezelfde lichtgrijze achtergrond als bij de kaart
+- ✨ Eerste dia van de rondleiding geactualiseerd
+- ✨ Standaardtaal van de site is Nederlands (`nl`)
+
+**Documentatie**
+
+- ✨ Documentatie over het dashboard opgeschoond: 'Data in het dashboard' staat nu als eigen categorie; verouderde Over-pagina's zijn verwijderd
+
 ## Release 2026-10-28
 
 **Aanbod**

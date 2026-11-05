@@ -24,6 +24,7 @@ import FilterbarDesktop from './components/Filterbar/FilterbarDesktop.jsx';
 import FilterbarMobile from './components/Filterbar/FilterbarMobile.jsx';
 import About from './components/About/About.jsx';
 import Features from './components/Features/Features';
+import VeelgesteldeVragen from './components/VeelgesteldeVragen/VeelgesteldeVragen';
 import Tour from './components/Tour/Tour.jsx';
 import Overlay from './components/Overlay/Overlay.jsx';
 import Misc from './components/Misc/Misc.jsx';
@@ -80,7 +81,9 @@ import {
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
   DISPLAYMODE_DASHBOARD,
+  DISPLAYMODE_PARKEERDATA_CLUSTERS,
 } from './reducers/layers.js';
+import { setSingleDataLayer } from './actions/layers';
 
 import './App.css';
 
@@ -155,9 +158,9 @@ function App() {
         return `Over - ${baseTitle}`;
       }
       if (pathname === '/functionaliteiten') {
-        return `In het kort - ${baseTitle}`;
+        return `Wat kun je ermee? - ${baseTitle}`;
       }
-      if (pathname === '/faq') {
+      if (pathname === '/faq' || pathname === '/veelgestelde-vragen') {
         return `Veelgestelde vragen - ${baseTitle}`;
       }
       if (pathname === '/docs') {
@@ -373,6 +376,16 @@ function App() {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
+
+  // Guests start on the cluster view so NL-wide vehicle data stays readable
+  // and fast (issue #259). Runs on initial guest load and after logout
+  // (LOGOUT resets layers to points). Dependency is only isLoggedIn, so a
+  // guest can still switch to points or heatmap afterwards.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      dispatch(setSingleDataLayer(DISPLAYMODE_PARK, DISPLAYMODE_PARKEERDATA_CLUSTERS));
+    }
+  }, [isLoggedIn, dispatch]);
   
   const filterDate = useSelector((state: StateType) => {
     return state.filter ? state.filter.datum : false;
@@ -748,8 +761,15 @@ function App() {
             } />
             <Route path="/functionaliteiten" element={
               <Overlay>
-                <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
+                <SidebarLayout title="Wat je met het Dashboard kunt" contentWidth="100%">
                   <Features />
+                </SidebarLayout>
+              </Overlay>
+            } />
+            <Route path="/veelgestelde-vragen" element={
+              <Overlay>
+                <SidebarLayout title="Veelgestelde vragen" contentWidth="100%">
+                  <VeelgesteldeVragen />
                 </SidebarLayout>
               </Overlay>
             } />
@@ -851,8 +871,15 @@ function App() {
         } />
         <Route path="/functionaliteiten" element={
           <Overlay>
-            <SidebarLayout title="Dashboard Deelmobiliteit functionaliteiten" contentWidth="900px">
+            <SidebarLayout title="Wat je met het Dashboard kunt" contentWidth="100%">
               <Features />
+            </SidebarLayout>
+          </Overlay>
+        } />
+        <Route path="/veelgestelde-vragen" element={
+          <Overlay>
+            <SidebarLayout title="Veelgestelde vragen" contentWidth="100%">
+              <VeelgesteldeVragen />
             </SidebarLayout>
           </Overlay>
         } />
