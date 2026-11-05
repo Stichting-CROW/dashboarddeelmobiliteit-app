@@ -151,7 +151,10 @@ const DdPolicyHubsLayer = ({
 
   const queryParams = new URLSearchParams(window.location.search);
 
-  const uniqueComponentId = Math.random()*9000000;
+  // Stable abort key so consecutive fetches cancel each other (a new Math.random()
+  // every render left in-flight concept/active requests racing and overwriting state).
+  const uniqueComponentId = useRef(`policy-hubs-${Math.round(Math.random() * 9000000)}`);
+  const fetchGenerationRef = useRef(0);
 
   // On component load: apply `selected` from the URL (overrides persisted Redux)
   useEffect(() => {
@@ -385,6 +388,8 @@ const DdPolicyHubsLayer = ({
     selected_policy_hubs?.length,
     hubs_in_drawing_mode,
     active_phase,
+    visible_layers,
+    visible_layers?.length,
     mapStyle,
     map?.isStyleLoaded()
   ]);
@@ -477,6 +482,7 @@ const DdPolicyHubsLayer = ({
   const fetchHubs = async () => {
     // Add a small delay to prevent multiple fetches
     if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
+    const generation = ++fetchGenerationRef.current;
     TO_fetch_delay = setTimeout(async () => {
       try {
         const res: any = await fetch_hubs({
@@ -485,7 +491,10 @@ const DdPolicyHubsLayer = ({
           phase: active_phase,
           visible_layers: visible_layers,
           affected_modalities: affectedModalities
-        }, uniqueComponentId);
+        }, uniqueComponentId.current);
+        // Ignore responses from superseded fetches (e.g. concept refetch after
+        // switching to Definitief actief).
+        if (generation !== fetchGenerationRef.current) return;
         setPolicyHubs(res);
       }
       catch(err) {

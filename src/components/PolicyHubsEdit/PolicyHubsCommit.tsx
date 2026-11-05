@@ -13,7 +13,7 @@ import FormLabel from '../FormLabel/FormLabel';
 import moment from 'moment';
 import { commit_to_concept } from '../../helpers/policy-hubs/commit-to-concept';
 import { notify } from '../../helpers/notify';
-import { setSelectedPolicyHubs, setShowCommitForm, setShowEditForm } from '../../actions/policy-hubs';
+import { setSelectedPolicyHubs, setShowCommitForm, setShowEditForm, setHubRefetchCounter } from '../../actions/policy-hubs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@radix-ui/react-tooltip';
 import { InfoCircledIcon } from "@radix-ui/react-icons"
 import { effect } from 'zod';
@@ -129,11 +129,19 @@ const PolicyHubsCommit = ({
         if(foundHub) setGeographyIds(foundHub);
     }
 
-    const postCommitCallback = (zone_id?: number) => {
+    const postCommitCallback = (options?: { refetchAfterMs?: number }) => {
         // Deselect hub (close action modal)
         dispatch(setSelectedPolicyHubs([]));
         // Refetch hubs (for removing the changed hub from the map)
         fetchHubs();
+
+        // "Nu"/"Meteen" publish uses effective_on = now + 5s. Refetch after that
+        // window so the zone shows under Definitief actief without a full reload.
+        if (options?.refetchAfterMs) {
+            setTimeout(() => {
+                dispatch(setHubRefetchCounter(Date.now()));
+            }, options.refetchAfterMs);
+        }
     }
 
     const commitToConcept = async () => {
@@ -152,14 +160,17 @@ const PolicyHubsCommit = ({
         }
         let update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} vastgesteld en omgezet naar fase: Vastgesteld concept`;
 
+        const isImmediatePublish = formData.publish_on_relative == "now";
+        const isImmediateEffective = isImmediatePublish && formData.effective_on_relative == "now";
+
         let publish_on = publicationTimes.publish_on_iso;
-        if (formData.publish_on_relative == "now") {
+        if (isImmediatePublish) {
             publish_on = moment().add(5, 'seconds').format();
             update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} gepubliceerd en omgezet naar fase: Definitief gepubliceerd`
         }
 
         let effective_on = publicationTimes.effective_on_iso;
-        if (formData.publish_on_relative == "now" && formData.effective_on_relative == "now") {
+        if (isImmediateEffective) {
             effective_on = publish_on;
             update_text = `De hub${geographyIds.length > 1 ? 's': ''} ${geographyIds.length > 1 ? 'zijn' : 'is'} actief gemaakt en omgezet naar fase: Definitief actief`
         }
@@ -188,7 +199,9 @@ const PolicyHubsCommit = ({
 
         dispatch(setShowCommitForm(false));
 
-        postCommitCallback();
+        postCommitCallback(
+            isImmediatePublish ? { refetchAfterMs: 6000 } : undefined
+        );
     }
 
     const onChange = (e) => {
