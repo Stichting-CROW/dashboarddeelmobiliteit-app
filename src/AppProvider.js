@@ -21,7 +21,24 @@ import {
 } from './reducers/layers';
 import App from './App';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const stateSanitizer = (state) => {
+  if (!state || !state.vehicles) return state;
+  const featureCount = state.vehicles.data?.features?.length;
+  return {
+    ...state,
+    vehicles: {
+      ...state.vehicles,
+      data: featureCount !== undefined
+        ? { type: 'FeatureCollection', features: `[${featureCount} features]` }
+        : state.vehicles.data
+    }
+  };
+};
+
+const composeEnhancers = process.env.NODE_ENV === 'development'
+  && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+  ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ stateSanitizer })
+  : compose;
 
 const md5 = require('md5');
 
@@ -136,9 +153,10 @@ store.subscribe(() => {
   if(newFilterHash!==oldFilterHash) {
     // console.log("filter changed - invalidate data and zones here!");
     localStorage.setItem('CROWDD_filterhash', newFilterHash)
-    
-    // store.dispatch({ type: 'CLEAR_ZONES', payload: null});
-    store.dispatch({ type: 'CLEAR_VEHICLES', payload: null});
+
+    // Vehicles are no longer cleared here: the Aanbod map keeps the previous
+    // markers (faded) while a refetch is in flight. Rentals still clear so
+    // outdated trips don't linger while the new request loads.
     store.dispatch({ type: 'CLEAR_RENTALS_ORIGINS', payload: null});
     store.dispatch({ type: 'CLEAR_RENTALS_DESTINATIONS', payload: null});
   }

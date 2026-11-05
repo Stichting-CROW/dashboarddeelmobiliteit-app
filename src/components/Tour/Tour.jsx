@@ -55,7 +55,7 @@ const Tour = () => {
       w-full
     ">
       <IconButtonClose
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/functionaliteiten')}
         style={{position: 'absolute', right: '30px', top: '18px'}}
       />
       <div className="mx-auto py-8 w-full justify-between flex-col flex">

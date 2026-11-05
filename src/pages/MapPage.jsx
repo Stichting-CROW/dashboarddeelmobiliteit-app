@@ -8,7 +8,6 @@ import {
   DISPLAYMODE_PARK,
   DISPLAYMODE_RENTALS,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
-  DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_CLUSTERS,
@@ -79,16 +78,12 @@ function Map({mapContainer}) {
           layers.push('vehicles-heatmap');
           activeSources.push('vehicles');
           break;
-        case DISPLAYMODE_PARKEERDATA_CLUSTERS:
+        case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
+          // Clusters below zoom 12, individual markers from zoom 12
           layers.push('vehicles-clusters');
           layers.push('vehicles-clusters-count');
           layers.push('vehicles-clusters-point');
-          activeSources.push('vehicles');
           activeSources.push('vehicles-clusters');
-          break;
-        case DISPLAYMODE_PARKEERDATA_VOERTUIGEN:
-          layers.push('vehicles-point');
-          activeSources.push('vehicles');
           break;
         default:
       }

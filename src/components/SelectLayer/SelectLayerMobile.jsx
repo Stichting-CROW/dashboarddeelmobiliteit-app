@@ -11,7 +11,6 @@ import {
   DISPLAYMODE_RENTALS,
   // DISPLAYMODE_OTHER,
   DISPLAYMODE_PARKEERDATA_HEATMAP,
-  DISPLAYMODE_PARKEERDATA_CLUSTERS,
   DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
   DISPLAYMODE_VERHUURDATA_HEATMAP,
   DISPLAYMODE_VERHUURDATA_HB,
@@ -92,8 +91,8 @@ function SelectLayerMobile(props) {
   //       </div> : null }
 
   //     { displayMode===DISPLAYMODE_PARK ?
-  //       <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_CLUSTERS ? ' layer-inactive':''}`}
-  //         onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_CLUSTERS }) }}>
+  //       <div data-type="pointers" className={`layer${viewPark!==DISPLAYMODE_PARKEERDATA_VOERTUIGEN ? ' layer-inactive':''}`}
+  //         onClick={() => { dispatch({ type: 'LAYER_SET_VIEW_PARK', payload: DISPLAYMODE_PARKEERDATA_VOERTUIGEN }) }}>
   //         <span className="layer-title">
   //           Clusters
   //         </span>

@@ -12,6 +12,9 @@ const initialState = {
   aanbiedersexclude: "",
   parkeerduurexclude: "",
   non_operational_only: false,
+  // Aanbod map, logged-in users: also show (public, less detailed) vehicles
+  // outside the user's own data area
+  show_all_nl_vehicles: true,
   voertuigtypesexclude: "",
   afstandexclude: "",
   herkomstbestemming: "herkomstbestemming",
@@ -86,6 +89,12 @@ export default function filter(state = initialState, action) {
       return {
         ...state,
         non_operational_only: action.payload === true
+      };
+    }
+    case 'SET_FILTER_SHOW_ALL_NL_VEHICLES': {
+      return {
+        ...state,
+        show_all_nl_vehicles: action.payload === true
       };
     }
     case 'SET_FILTER_H3NIVEAU': {

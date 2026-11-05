@@ -151,7 +151,10 @@ const DdPolicyHubsLayer = ({
 
   const queryParams = new URLSearchParams(window.location.search);
 
-  const uniqueComponentId = Math.random()*9000000;
+  // Stable abort key so consecutive fetches cancel each other (a new Math.random()
+  // every render left in-flight concept/active requests racing and overwriting state).
+  const uniqueComponentId = useRef(`policy-hubs-${Math.round(Math.random() * 9000000)}`);
+  const fetchGenerationRef = useRef(0);
 
   // On component load: apply `selected` from the URL (overrides persisted Redux)
   useEffect(() => {
@@ -385,6 +388,8 @@ const DdPolicyHubsLayer = ({
     selected_policy_hubs?.length,
     hubs_in_drawing_mode,
     active_phase,
+    visible_layers,
+    visible_layers?.length,
     mapStyle,
     map?.isStyleLoaded()
   ]);
@@ -394,7 +399,9 @@ const DdPolicyHubsLayer = ({
     if(hubs_in_drawing_mode && hubs_in_drawing_mode.length > 0) {
       drawEditablePolygon();
     }
-    else {
+    // A new zone starts with a fresh draw control; removing here would switch it
+    // back to simple_select and race with entering draw_polygon mode.
+    else if (is_drawing_enabled !== 'new') {
       removeDrawedPolygons(draw);
     }
   }, [
@@ -477,6 +484,7 @@ const DdPolicyHubsLayer = ({
   const fetchHubs = async () => {
     // Add a small delay to prevent multiple fetches
     if(TO_fetch_delay) clearTimeout(TO_fetch_delay);
+    const generation = ++fetchGenerationRef.current;
     TO_fetch_delay = setTimeout(async () => {
       try {
         const res: any = await fetch_hubs({
@@ -485,7 +493,10 @@ const DdPolicyHubsLayer = ({
           phase: active_phase,
           visible_layers: visible_layers,
           affected_modalities: affectedModalities
-        }, uniqueComponentId);
+        }, uniqueComponentId.current);
+        // Ignore responses from superseded fetches (e.g. concept refetch after
+        // switching to Definitief actief).
+        if (generation !== fetchGenerationRef.current) return;
         setPolicyHubs(res);
       }
       catch(err) {
@@ -706,9 +717,12 @@ const DdPolicyHubsLayer = ({
         const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
         // Get polygon type of drawed area
         const polygonType = drawedArea?.features?.[0]?.geometry?.type;
-        // Create new coordinates array having all existing coordinates
-        drawedCoordinates = drawedArea?.features?.map(drawedFeature => {
-          return drawedFeature.geometry.coordinates; 
+        // Create new coordinates array having all existing polygons.
+        // A MultiPolygon feature (e.g. an existing hub) already holds a list of polygons.
+        drawedCoordinates = (drawedArea?.features || []).flatMap(drawedFeature => {
+          return drawedFeature.geometry.type === 'MultiPolygon'
+            ? drawedFeature.geometry.coordinates
+            : [drawedFeature.geometry.coordinates];
         });
 
         // Add the new polygon
