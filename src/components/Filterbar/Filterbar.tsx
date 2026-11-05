@@ -14,11 +14,13 @@ import {
   FilteritemMarkersParkeerduur
 } from './FilteritemMarkers.jsx';
 import FilteritemNonOperationalVehicles from './FilteritemNonOperationalVehicles';
+import FilteritemShowAllNlVehicles from './FilteritemShowAllNlVehicles';
 import FilteritemHerkomstBestemming from './FilteritemHerkomstBestemming';
 import FilteritemVoertuigTypes from './FilteritemVoertuigTypes';
 import LogoDashboardDeelmobiliteit from '../Logo/LogoDashboardDeelmobiliteit';
 import Fieldset from '../Fieldset/Fieldset';
 import { isRentalsLayerActive, selectActiveDataLayers } from '../../helpers/layerSelectors';
+import { isAdmin } from '../../helpers/authentication.js';
 
 import { StateType } from '../../types/StateType';
 
@@ -64,6 +66,11 @@ function Filterbar({
 
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
+  });
+
+  // NL-wide accounts already see all vehicles with full details
+  const isNlWideAccount = useSelector((state: StateType) => {
+    return isAdmin(state) || state.metadata?.is_admin === true;
   });
 
   const filter = useSelector((state: StateType) => {
@@ -244,7 +251,12 @@ function Filterbar({
             </Fieldset>
           )}
 
-          <Fieldset title="Plaats">
+          <Fieldset
+            title="Plaats"
+            titleAddon={isLoggedIn && ispark && !isNlWideAccount
+              ? <FilteritemShowAllNlVehicles />
+              : undefined}
+          >
             <FilteritemGebieden />
           </Fieldset>
 

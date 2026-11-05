@@ -269,6 +269,19 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   return filterparams;
 }
 
+const NEAR_REALTIME_MARGIN_MS = 10 * 60 * 1000;
+
+/**
+ * Whether the selected date/time (filter.datum) is (near) realtime: within 10
+ * minutes of now. An unset datum means "now".
+ */
+export const isNearRealtime = (datum, now = Date.now()) => {
+  if (!datum) return true;
+  const datumMs = Date.parse(datum);
+  if (isNaN(datumMs)) return false;
+  return Math.abs(now - datumMs) <= NEAR_REALTIME_MARGIN_MS;
+};
+
 export const convertDurationToBin = (duration) => {
   if (duration < 60 * 24 * 2) {
     return 0;
@@ -326,6 +339,7 @@ export const shouldFetchVehicles = (newFilter, existingFilter) => {
     'ontwikkelingaggregatie',
     'ontwikkelingtot',
     'ontwikkelingvan',
+    'show_all_nl_vehicles',
     'voertuigtypesexclude',
     'zones',
   ];

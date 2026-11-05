@@ -6,7 +6,7 @@ import {
 } from './pollTools.js';
 import { isLoggedIn, isAdmin } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
-import {shouldFetchVehicles} from './pollTools.js';
+import {shouldFetchVehicles, isNearRealtime} from './pollTools.js';
 import { isInNetherlands } from '../helpers/netherlands';
 
 var store_parkingdata;
@@ -26,6 +26,55 @@ let activeVehicles;
 // Variable to keep track of filter changes
 // Only do a new fetch() if needed
 let existingFilter;
+
+/**
+ * Logged-in users (except NL-wide/admin accounts, whose park_events already
+ * cover the whole country) can also see the public vehicles outside their own
+ * data area, but only for a (near) realtime date/time: the public vehicles
+ * are not available historically.
+ */
+export const shouldIncludePublicVehicles = (state) => {
+  if(! isLoggedIn(state)) return false;
+  if(isAdmin(state) || state.metadata?.is_admin === true) return false;
+  if(! isNearRealtime(state.filter?.datum)) return false;
+  return state.filter?.show_all_nl_vehicles !== false;
+};
+
+// ~11m (latitude) grid cells used to match public vehicles to park_events
+const DEDUPE_GRID_SIZE = 0.0001;
+
+const toGridCell = (v) => [
+  Math.floor(v.location.longitude / DEDUPE_GRID_SIZE),
+  Math.floor(v.location.latitude / DEDUPE_GRID_SIZE)
+];
+
+/**
+ * Combines the user's own (detailed) park_events with the public vehicles.
+ * The public list also contains the vehicles in the user's own area, so drop
+ * every public vehicle that has a park_event of the same operator in the same
+ * or a neighbouring grid cell.
+ */
+export const mergeOwnAndPublicVehicles = (ownVehicles, publicVehicles) => {
+  const ownCells = new Set();
+  ownVehicles.forEach(v => {
+    if(! v.location) return;
+    const [x, y] = toGridCell(v);
+    ownCells.add(`${v.system_id}:${x}:${y}`);
+  });
+
+  const publicOutsideOwnArea = publicVehicles.filter(v => {
+    const systemId = v.system_id || v.value;
+    const [x, y] = toGridCell(v);
+    for(let dx = -1; dx <= 1; dx++) {
+      for(let dy = -1; dy <= 1; dy++) {
+        if(ownCells.has(`${systemId}:${x + dx}:${y + dy}`)) return false;
+      }
+    }
+    return true;
+  });
+
+  return ownVehicles.concat(publicOutsideOwnArea);
+};
 
 const processVehiclesResult = (state, vehicles) => {
   activeVehicles = vehicles;
@@ -53,7 +102,10 @@ const processVehiclesResult = (state, vehicles) => {
   const loggedIn = isLoggedIn(state);
 
   vehicles.forEach(v => {
-    let in_public_space_since = loggedIn ? v.start_time : v.in_public_space_since;
+    // park_events (own data area) have start_time, public vehicles have
+    // in_public_space_since
+    const isOwnData = v.is_own_data === true;
+    let in_public_space_since = isOwnData ? v.start_time : v.in_public_space_since;
 
     // Plain Date math instead of constructing a moment per vehicle (~10x
     // faster over 25k+ vehicles); fall back to moment for exotic date formats
@@ -74,6 +126,7 @@ const processVehiclesResult = (state, vehicles) => {
           "in_public_space_since": in_public_space_since,
           "duration_bin": duration_bin,
           "is_non_operational": v.is_non_operational === true,
+          "is_own_data": isOwnData,
        },
        "geometry":{
           "type":"Point",
@@ -88,7 +141,10 @@ const processVehiclesResult = (state, vehicles) => {
     operatorstats[v.system_id || v.value]+=1;
 
     // Filter markers
-    let markerVisible = ! loggedIn || !parkeerduurexclude.includes(duration_bin.toString());
+    // The parkeerduur filter only applies to vehicles with a known parked-since time
+    const canFilterOnDuration = loggedIn && Boolean(in_public_space_since);
+    let markerVisible = ! canFilterOnDuration
+      || ! parkeerduurexclude.includes(duration_bin.toString());
     markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
     if (showOnlyNonOperational) {
       markerVisible = markerVisible && v.is_non_operational === true;
@@ -120,36 +176,45 @@ const doApiCall = (
   const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
   const is_admin = isAdmin(state);
 
-  // Set API URL
-  let url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`;
+  const withParams = (baseUrl, params) => (
+    params.length > 0 ? `${baseUrl}?${params.join('&')}` : baseUrl
+  );
 
-  let options = {};
-  let filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
+  const filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
     show_global: is_admin,
     is_logged_in: isLoggedIn(state)
   });
 
-  // Set query params for guests
+  // Logged in: the user's own data area, with details like parkeerduur
+  const ownUrl = canfetchdata
+    ? withParams(`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`, filterparams)
+    : null;
+
+  // Guests, or logged-in users who want to see all of NL: the public vehicles.
+  // For logged-in users these are always NL-wide, regardless of the selected
+  // plaats/zones (those only scope the user's own data).
+  let publicUrl = null;
   if(! canfetchdata) {
-    if(filterparams.length>0) {
-      url += "?" + filterparams.join("&");
-    }
+    publicUrl = withParams(
+      `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`,
+      filterparams
+    );
+  } else if(shouldIncludePublicVehicles(state)) {
+    const nlWideParams = createFilterparameters(
+      DISPLAYMODE_PARK,
+      { ...state.filter, gebied: '', zones: '' },
+      state.metadata,
+      { show_global: true, is_logged_in: false }
+    );
+    publicUrl = withParams(
+      `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`,
+      nlWideParams
+    );
   }
 
-  // Set query params for logged in users
-  else {
-    if (canfetchdata) {
-      url = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`;
-      if (filterparams.length > 0) {
-        url += "?" + filterparams.join("&");
-      }
-      options = {
-        headers: { authorization: "Bearer " + state.authentication.user_data.token }
-      };
-    }
-  }
-  
-  // If a request for this exact URL is already in flight, let it finish
+  const url = [ownUrl, publicUrl].filter(Boolean).join(' + ');
+
+  // If a request for these exact URLs is already in flight, let it finish
   // instead of aborting and re-issuing it: the response is processed with the
   // then-current store state, so the result is the same either way.
   if(theFetch && theFetchUrl === url) {
@@ -167,7 +232,16 @@ const doApiCall = (
     theFetch.abort();
   }
   // Now do a new fetch
-  const thisFetch = abortableFetch(url, options);
+  const ownFetch = ownUrl ? abortableFetch(ownUrl, {
+    headers: { authorization: "Bearer " + state.authentication.user_data.token }
+  }) : null;
+  const publicFetch = publicUrl ? abortableFetch(publicUrl, {}) : null;
+  const thisFetch = {
+    abort: () => {
+      if(ownFetch) ownFetch.abort();
+      if(publicFetch) publicFetch.abort();
+    }
+  };
   theFetch = thisFetch;
   theFetchUrl = url;
 
@@ -180,41 +254,55 @@ const doApiCall = (
     }
   };
 
-  thisFetch.ready.then(function(response) {
+  const readJson = (theAbortableFetch, theUrl) => theAbortableFetch.ready.then(response => {
     if(! response.ok) {
-      clearFetchTracking();
-      console.error("unable to fetch: %o", response);
-      return false
+      throw new Error(`unable to fetch ${theUrl} (HTTP ${response.status})`);
+    }
+    return response.json();
+  });
+
+  const ownPromise = ownFetch ? readJson(ownFetch, ownUrl) : Promise.resolve(null);
+  // For logged-in users the public vehicles are extra context: if they fail
+  // to load, still show the user's own data
+  const publicPromise = publicFetch
+    ? readJson(publicFetch, publicUrl).catch(ex => {
+      if(! ownFetch || theFetch !== thisFetch) throw ex;
+      console.error("unable to load public vehicles outside own data area", ex);
+      return null;
+    })
+    : Promise.resolve(null);
+
+  Promise.all([ownPromise, publicPromise]).then(([ownJson, publicJson]) => {
+    // Superseded by a newer request: let that one update the map
+    if(theFetch !== thisFetch) return;
+
+    // The public map only covers the Netherlands
+    const publicVehicles = ((publicJson && publicJson.vehicles_in_public_space) || [])
+      .filter(v => {
+        return v.location && isInNetherlands(v.location.longitude, v.location.latitude);
+      });
+
+    let vehicles = publicVehicles;
+    if(ownFetch) {
+      const ownVehicles = ((ownJson && ownJson.park_events) || []);
+      ownVehicles.forEach(v => { v.is_own_data = true; });
+      vehicles = mergeOwnAndPublicVehicles(ownVehicles, publicVehicles);
     }
 
-    response.json().then(function(vehicles) {
-      if(isLoggedIn(state)) {
-        vehicles = vehicles.park_events
-      } else {
-        // The public map only covers the Netherlands
-        vehicles = (vehicles.vehicles_in_public_space || []).filter(v => {
-          return v.location && isInNetherlands(v.location.longitude, v.location.latitude);
-        });
-      }
-      // Process with the *current* store state (not the state at request
-      // time), so client-side filters that changed while the request was in
-      // flight are applied to the result.
-      callback(store_parkingdata.getState(), vehicles);
-    }).catch(ex=>{
-      console.error("unable to decode JSON");
-    }).finally(()=>{
-      clearFetchTracking();
-      // Stop loading
-      store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
-    })
-  }).catch(ex=>{
+    // Process with the *current* store state (not the state at request
+    // time), so client-side filters that changed while the request was in
+    // flight are applied to the result.
+    callback(store_parkingdata.getState(), vehicles);
+  }).catch(ex => {
     // If this request was aborted because a newer one replaced it, leave the
     // loading state to the newer request
+    if(theFetch !== thisFetch) return;
+    console.error("fetch error - unable to fetch vehicles from %s", url, ex);
+  }).finally(() => {
     if(theFetch !== thisFetch) return;
     clearFetchTracking();
     // Stop loading
     store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
-    console.error("fetch error - unable to fetch JSON from %s", url);
   });
 
 }
