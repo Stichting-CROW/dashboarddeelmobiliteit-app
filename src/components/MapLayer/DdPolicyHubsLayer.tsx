@@ -399,7 +399,9 @@ const DdPolicyHubsLayer = ({
     if(hubs_in_drawing_mode && hubs_in_drawing_mode.length > 0) {
       drawEditablePolygon();
     }
-    else {
+    // A new zone starts with a fresh draw control; removing here would switch it
+    // back to simple_select and race with entering draw_polygon mode.
+    else if (is_drawing_enabled !== 'new') {
       removeDrawedPolygons(draw);
     }
   }, [
@@ -715,9 +717,12 @@ const DdPolicyHubsLayer = ({
         const newPolygonCoordinates = e.features[0].geometry.coordinates[0];
         // Get polygon type of drawed area
         const polygonType = drawedArea?.features?.[0]?.geometry?.type;
-        // Create new coordinates array having all existing coordinates
-        drawedCoordinates = drawedArea?.features?.map(drawedFeature => {
-          return drawedFeature.geometry.coordinates; 
+        // Create new coordinates array having all existing polygons.
+        // A MultiPolygon feature (e.g. an existing hub) already holds a list of polygons.
+        drawedCoordinates = (drawedArea?.features || []).flatMap(drawedFeature => {
+          return drawedFeature.geometry.type === 'MultiPolygon'
+            ? drawedFeature.geometry.coordinates
+            : [drawedFeature.geometry.coordinates];
         });
 
         // Add the new polygon

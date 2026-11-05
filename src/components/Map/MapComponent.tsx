@@ -161,6 +161,13 @@ const MapComponent = (props): JSX.Element => {
     return state.ui && state.ui.FILTERBAR || false;
   });
 
+  // MapLibre and mapbox-gl-draw add their own classes (e.g. `maplibregl-map`,
+  // `mode-draw_polygon`, `mouse-add`) to the map container. A dynamic React
+  // `className` would wipe those on re-render, so toggle this class manually.
+  useEffect(() => {
+    mapContainer.current?.classList.toggle('filter-open', !!filterbarOpen);
+  }, [filterbarOpen]);
+
   // Store window location in a local variable
   let location = useLocation();
   useEffect(() => {
@@ -325,6 +332,13 @@ const MapComponent = (props): JSX.Element => {
           // Ignore: MapLibre sometimes throws during teardown if a request
           // was already aborted; the goal is to not leak, not to be perfectly
           // clean.
+        }
+        // `remove()` strips `maplibregl-map` from the container. If a new map
+        // was already created in the same element (e.g. StrictMode remount),
+        // restore it; mapbox-gl-draw's cursor CSS depends on these classes.
+        const container = toRemove.getContainer();
+        if (map.current && map.current.getContainer() === container) {
+          container.classList.add('maplibregl-map', 'mapboxgl-map');
         }
       });
     };
@@ -823,7 +837,7 @@ const MapComponent = (props): JSX.Element => {
 
   return <>
     {/* The map container (HTML element) */}
-    <div ref={mapContainer} className={`map flex-1 ${filterbarOpen ? 'filter-open' : ''}`} />
+    <div ref={mapContainer} className="map flex-1" />
     {/* Isochrone layer */}
     {isLoggedIn ? <IsochroneTools map={map.current} /> : null}
     {/* Attribution (bottom-right control stack) */}
