@@ -21,7 +21,7 @@ const layer = {
     // 'text-halo-color': '#fff',
     // 'text-halo-width': 2
   },
-  'maxzoom': 18
+  'maxzoom': 12
 }
 
 export default layer;

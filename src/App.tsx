@@ -81,7 +81,7 @@ import {
   DISPLAYMODE_POLICY_HUBS,
   DISPLAYMODE_START,
   DISPLAYMODE_DASHBOARD,
-  DISPLAYMODE_PARKEERDATA_CLUSTERS,
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
 } from './reducers/layers.js';
 import { setSingleDataLayer } from './actions/layers';
 
@@ -383,7 +383,7 @@ function App() {
   // guest can still switch to points or heatmap afterwards.
   useEffect(() => {
     if (!isLoggedIn) {
-      dispatch(setSingleDataLayer(DISPLAYMODE_PARK, DISPLAYMODE_PARKEERDATA_CLUSTERS));
+      dispatch(setSingleDataLayer(DISPLAYMODE_PARK, DISPLAYMODE_PARKEERDATA_VOERTUIGEN));
     }
   }, [isLoggedIn, dispatch]);
   

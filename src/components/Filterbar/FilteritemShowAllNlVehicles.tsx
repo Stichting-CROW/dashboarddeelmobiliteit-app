@@ -30,15 +30,12 @@ function FilteritemShowAllNlVehicles() {
 
   const optionClassName = (isActive: boolean) => (isActive
     ? 'underline text-gray-800'
-    : 'text-gray-500 hover:text-gray-800 disabled:text-gray-300 disabled:cursor-not-allowed');
+    : 'text-gray-500 hover:text-gray-800');
 
+  // aria-disabled instead of disabled: browsers often suppress the tooltip
+  // on natively disabled buttons, and the tooltip explains why it's disabled
   return (
-    <span
-      className="text-xs text-gray-500 whitespace-nowrap"
-      title={isRealtime
-        ? undefined
-        : 'Voertuigen buiten je eigen datagebied zijn alleen beschikbaar voor de huidige datum/tijd.'}
-    >
+    <span className="text-xs text-gray-500 whitespace-nowrap">
       <button
         type="button"
         className={optionClassName(!showAllNlVehicles)}
@@ -51,13 +48,19 @@ function FilteritemShowAllNlVehicles() {
       {' | '}
       <button
         type="button"
-        className={optionClassName(showAllNlVehicles)}
+        className={isRealtime
+          ? optionClassName(showAllNlVehicles)
+          : 'text-gray-300 cursor-not-allowed'}
         aria-pressed={showAllNlVehicles}
-        onClick={() => setShowAllNlVehicles(true)}
-        disabled={!isRealtime}
+        aria-disabled={!isRealtime}
+        onClick={() => {
+          if (isRealtime) setShowAllNlVehicles(true);
+        }}
         title={isRealtime
           ? 'Toon alle voertuigen in Nederland. Details zoals parkeerduur zijn er alleen voor je eigen datagebied.'
-          : undefined}
+          : 'Niet beschikbaar: voertuigen buiten je eigen datagebied zijn er alleen voor de actuele situatie. '
+            + 'De ingestelde datum/tijd ligt meer dan 10 minuten van nu af. '
+            + 'Klik bij Datum/tijd op de klok om naar nu te gaan.'}
       >
         Heel NL
       </button>

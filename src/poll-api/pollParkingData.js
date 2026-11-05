@@ -2,30 +2,42 @@ import moment from 'moment';
 import {
   createFilterparameters,
   convertDurationToBin,
-  abortableFetch
+  abortableFetch,
+  shouldFetchVehicles,
+  isNearRealtime
 } from './pollTools.js';
 import { isLoggedIn, isAdmin } from '../helpers/authentication.js';
 import { DISPLAYMODE_PARK } from '../reducers/layers.js';
-import {shouldFetchVehicles, isNearRealtime} from './pollTools.js';
 import { isInNetherlands } from '../helpers/netherlands';
+import { UNKNOWN_DURATION_BIN } from '../components/Map/vehicle_marker.js';
 
 var store_parkingdata;
 var timerid_parkingdata;
 
-// theFetch: Variabele used for managing fetch calls
+// In-flight request tracking (combined key of own + public URLs)
 let theFetch = null;
-
-// URL of the request currently in flight, so an identical request can reuse
-// it instead of aborting and starting over (see doApiCall)
 let theFetchUrl = null;
 
-// Variable to keep track of vehicles response
-// Only do a new fetch() if needed
-let activeVehicles;
+// Built features from the last successful fetch (before client-side filters)
+let cachedFeatures = null;
 
-// Variable to keep track of filter changes
-// Only do a new fetch() if needed
+// Client-side filter fields applied to cachedFeatures last
+let existingClientFilter = null;
+
+// Filter snapshot used by shouldFetchVehicles
 let existingFilter;
+
+// Separate short-lived cache for the public NL vehicles (after NL check)
+const PUBLIC_CACHE_TTL_MS = 60 * 1000;
+let publicVehiclesCache = {
+  url: null,
+  vehicles: null,
+  fetchedAt: 0
+};
+
+// Last own / public raw vehicles used for own-first + merge
+let lastOwnVehicles = null;
+let lastPublicVehicles = null;
 
 /**
  * Logged-in users (except NL-wide/admin accounts, whose park_events already
@@ -76,130 +88,236 @@ export const mergeOwnAndPublicVehicles = (ownVehicles, publicVehicles) => {
   return ownVehicles.concat(publicOutsideOwnArea);
 };
 
-const processVehiclesResult = (state, vehicles) => {
-  activeVehicles = vehicles;
+const CLIENT_FILTER_FIELDS = [
+  'aanbiedersexclude',
+  'parkeerduurexclude',
+  'non_operational_only'
+];
 
-  let geoJson = {
-   "type":"FeatureCollection",
-   "features":[]
-  }
-  
-  let operatorcolors = {};
-  let operatorstats = {}
-  state.metadata.aanbieders.forEach(o => {
-    operatorcolors[o.system_id || o.value]=o.color;
-    operatorstats[o.system_id || o.value]=0;
+export const didClientFilterChange = (newFilter, oldFilter) => {
+  if (!oldFilter) return true;
+  return CLIENT_FILTER_FIELDS.some((field) => newFilter?.[field] !== oldFilter?.[field]);
+};
+
+/**
+ * Build GeoJSON features once from raw API vehicles. Date parsing and
+ * duration_bin happen here so client-side filter changes stay cheap.
+ */
+export const buildVehicleFeatures = (state, vehicles) => {
+  const start_time_ms = moment(state.filter.datum).valueOf();
+  const features = [];
+
+  vehicles.forEach(v => {
+    if (!v.location) return;
+
+    const isOwnData = v.is_own_data === true;
+    // Public vehicles merged for Heel NL are context (muted clusters)
+    const isContext = v.is_context === true;
+    const in_public_space_since = isOwnData ? v.start_time : v.in_public_space_since;
+
+    let since_ms = in_public_space_since ? Date.parse(in_public_space_since) : Date.now();
+    if (isNaN(since_ms) && in_public_space_since) {
+      since_ms = moment(in_public_space_since).valueOf();
+    }
+    const minutes = Math.floor((start_time_ms - since_ms) / 60000);
+    // The public dataset has no parked-since time: show context vehicles grey
+    // instead of as "parked less than 2 days"
+    const duration_bin = (isContext && !in_public_space_since)
+      ? UNKNOWN_DURATION_BIN
+      : convertDurationToBin(minutes);
+
+    features.push({
+      type: 'Feature',
+      properties: {
+        id: v.location.latitude + ',' + v.location.longitude,
+        vehicle_id: v.bike_id,
+        system_id: v.system_id || v.value,
+        form_factor: v.form_factor || null,
+        in_public_space_since: in_public_space_since,
+        duration_bin: duration_bin,
+        is_non_operational: v.is_non_operational === true,
+        is_own_data: isOwnData,
+        is_context: isContext,
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          v.location.longitude,
+          v.location.latitude,
+          0.0
+        ]
+      }
+    });
   });
 
-  var start_time = moment(state.filter.datum);
-  const start_time_ms = start_time.valueOf();
+  return features;
+};
 
-  // Get list of providers to exclude
-  const aanbiedersexclude = state.filter.aanbiedersexclude.split(",") || [];
-  // Get parkeerduur length to exclude
-  const parkeerduurexclude = state.filter.parkeerduurexclude.split(",") || [];
+/**
+ * Cheap client-side filter over already-built features.
+ */
+export const filterVehicleFeatures = (state, features) => {
+  const aanbiedersexclude = (state.filter.aanbiedersexclude || '').split(',').filter(Boolean);
+  const parkeerduurexclude = (state.filter.parkeerduurexclude || '').split(',').filter(Boolean);
   const showOnlyNonOperational = state.filter.non_operational_only === true;
   const loggedIn = isLoggedIn(state);
 
-  vehicles.forEach(v => {
-    // park_events (own data area) have start_time, public vehicles have
-    // in_public_space_since
-    const isOwnData = v.is_own_data === true;
-    let in_public_space_since = isOwnData ? v.start_time : v.in_public_space_since;
+  const operatorstats = {};
+  (state.metadata.aanbieders || []).forEach(o => {
+    operatorstats[o.system_id || o.value] = 0;
+  });
 
-    // Plain Date math instead of constructing a moment per vehicle (~10x
-    // faster over 25k+ vehicles); fall back to moment for exotic date formats
-    let since_ms = in_public_space_since ? Date.parse(in_public_space_since) : Date.now();
-    if(isNaN(since_ms) && in_public_space_since) {
-      since_ms = moment(in_public_space_since).valueOf();
-    }
-    var minutes = Math.floor((start_time_ms - since_ms) / 60000);
-    const duration_bin = convertDurationToBin(minutes);
+  const visible = [];
+  features.forEach(feature => {
+    const props = feature.properties;
+    const systemId = props.system_id;
 
-    let feature = {
-       "type":"Feature",
-       "properties":{
-          "id":v.location.latitude+","+v.location.longitude,
-          "vehicle_id":v.bike_id,
-          "system_id": v.system_id || v.value,// v.value is used in the public map
-          "form_factor": v.form_factor || null,
-          "in_public_space_since": in_public_space_since,
-          "duration_bin": duration_bin,
-          "is_non_operational": v.is_non_operational === true,
-          "is_own_data": isOwnData,
-       },
-       "geometry":{
-          "type":"Point",
-          "coordinates":[
-             v.location.longitude,
-             v.location.latitude,
-             0.0
-          ]
-       }
-    }
+    operatorstats[systemId] = (operatorstats[systemId] || 0) + 1;
 
-    operatorstats[v.system_id || v.value]+=1;
-
-    // Filter markers
-    // The parkeerduur filter only applies to vehicles with a known parked-since time
-    const canFilterOnDuration = loggedIn && Boolean(in_public_space_since);
-    let markerVisible = ! canFilterOnDuration
-      || ! parkeerduurexclude.includes(duration_bin.toString());
-    markerVisible = markerVisible && (aanbiedersexclude.includes(v.system_id || v.value) === false)
+    const canFilterOnDuration = loggedIn && Boolean(props.in_public_space_since);
+    let markerVisible = !canFilterOnDuration
+      || !parkeerduurexclude.includes(String(props.duration_bin));
+    markerVisible = markerVisible && !aanbiedersexclude.includes(systemId);
     if (showOnlyNonOperational) {
-      markerVisible = markerVisible && v.is_non_operational === true;
+      markerVisible = markerVisible && props.is_non_operational === true;
     }
-    if(markerVisible) {
-      geoJson.features.push(feature);
+    if (markerVisible) {
+      visible.push(feature);
     }
-  })
-  if(process && process.env.DEBUG) console.log('geoJson in pollParkingData', geoJson)
+  });
 
-  // Save vehicles in store
+  return {
+    geoJson: {
+      type: 'FeatureCollection',
+      features: visible
+    },
+    operatorstats
+  };
+};
+
+const publishFilteredFeatures = (state, features) => {
+  const { geoJson, operatorstats } = filterVehicleFeatures(state, features);
+  if (process && process.env.DEBUG) console.log('geoJson in pollParkingData', geoJson);
+
   store_parkingdata.dispatch({
     type: 'SET_VEHICLES',
     payload: geoJson
-  })
-
-  // Update operator stats (= number of vehicles per operator) in store
+  });
   store_parkingdata.dispatch({
     type: 'SET_VEHICLES_OPERATORSTATS',
     payload: operatorstats
-  })
-}
+  });
+};
 
-const doApiCall = (
-  state,
-  callback
-) => {
+const processVehiclesResult = (state, vehicles) => {
+  cachedFeatures = buildVehicleFeatures(state, vehicles);
+  existingClientFilter = {
+    aanbiedersexclude: state.filter.aanbiedersexclude,
+    parkeerduurexclude: state.filter.parkeerduurexclude,
+    non_operational_only: state.filter.non_operational_only
+  };
+  publishFilteredFeatures(state, cachedFeatures);
+};
 
-  const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
+const withParams = (baseUrl, params) => (
+  params.length > 0 ? `${baseUrl}?${params.join('&')}` : baseUrl
+);
+
+const filterPublicVehiclesInNl = (vehicles) => (
+  (vehicles || []).filter(v => (
+    v.location && isInNetherlands(v.location.longitude, v.location.latitude)
+  ))
+);
+
+const getCachedPublicVehicles = (url) => {
+  if (
+    publicVehiclesCache.url === url
+    && publicVehiclesCache.vehicles
+    && (Date.now() - publicVehiclesCache.fetchedAt) < PUBLIC_CACHE_TTL_MS
+  ) {
+    return publicVehiclesCache.vehicles;
+  }
+  return null;
+};
+
+const setCachedPublicVehicles = (url, vehicles) => {
+  publicVehiclesCache = {
+    url,
+    vehicles,
+    fetchedAt: Date.now()
+  };
+};
+
+const withFlags = (vehicles, { isOwn, isContext }) => (
+  (vehicles || []).map(v => ({
+    ...v,
+    is_own_data: isOwn,
+    is_context: isContext
+  }))
+);
+
+const setVehiclesLoading = (isLoading) => {
+  store_parkingdata.dispatch({ type: 'SET_VEHICLES_LOADING', payload: isLoading });
+  store_parkingdata.dispatch({ type: 'SHOW_LOADING', payload: isLoading });
+};
+
+const clearVehiclesOnFailure = () => {
+  cachedFeatures = null;
+  lastOwnVehicles = null;
+  lastPublicVehicles = null;
+  store_parkingdata.dispatch({ type: 'CLEAR_VEHICLES' });
+};
+
+/**
+ * Publish the current own + public mix to the store. Used for own-first
+ * updates and for the final combined result.
+ *
+ * `is_context` is only set on public vehicles when a logged-in user has
+ * Heel NL on (own + public). Guests and "Mijn gebied" stay unmarked so
+ * all their clusters keep the normal green colour.
+ */
+const publishMergedVehicles = (ownVehicles, publicVehicles) => {
+  const own = withFlags(ownVehicles, { isOwn: true, isContext: false });
+  const publicList = publicVehicles || [];
+  const hasOwnAndPublic = own.length > 0 && publicList.length > 0;
+  // Only mark public vehicles as context when they sit next to the user's
+  // own data (Heel NL). Guests and "Mijn gebied" stay unmarked.
+  const publicCtx = withFlags(publicList, {
+    isOwn: false,
+    isContext: hasOwnAndPublic
+  });
+
+  let vehicles;
+  if (hasOwnAndPublic) {
+    vehicles = mergeOwnAndPublicVehicles(own, publicCtx);
+  } else if (own.length > 0) {
+    vehicles = own;
+  } else {
+    vehicles = publicCtx;
+  }
+  processVehiclesResult(store_parkingdata.getState(), vehicles);
+};
+
+const doApiCall = (state) => {
+  const canfetchdata = state && isLoggedIn(state) && state.filter && state.authentication.user_data.token;
   const is_admin = isAdmin(state);
-
-  const withParams = (baseUrl, params) => (
-    params.length > 0 ? `${baseUrl}?${params.join('&')}` : baseUrl
-  );
 
   const filterparams = createFilterparameters(DISPLAYMODE_PARK, state.filter, state.metadata, {
     show_global: is_admin,
     is_logged_in: isLoggedIn(state)
   });
 
-  // Logged in: the user's own data area, with details like parkeerduur
   const ownUrl = canfetchdata
     ? withParams(`${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/park_events`, filterparams)
     : null;
 
-  // Guests, or logged-in users who want to see all of NL: the public vehicles.
-  // For logged-in users these are always NL-wide, regardless of the selected
-  // plaats/zones (those only scope the user's own data).
   let publicUrl = null;
-  if(! canfetchdata) {
+  if (!canfetchdata) {
     publicUrl = withParams(
       `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/public/vehicles_in_public_space`,
       filterparams
     );
-  } else if(shouldIncludePublicVehicles(state)) {
+  } else if (shouldIncludePublicVehicles(state)) {
     const nlWideParams = createFilterparameters(
       DISPLAYMODE_PARK,
       { ...state.filter, gebied: '', zones: '' },
@@ -212,139 +330,196 @@ const doApiCall = (
     );
   }
 
-  const url = [ownUrl, publicUrl].filter(Boolean).join(' + ');
+  const cachedPublic = publicUrl ? getCachedPublicVehicles(publicUrl) : null;
+  const needsPublicFetch = Boolean(publicUrl) && !cachedPublic;
 
-  // If a request for these exact URLs is already in flight, let it finish
-  // instead of aborting and re-issuing it: the response is processed with the
-  // then-current store state, so the result is the same either way.
-  if(theFetch && theFetchUrl === url) {
+  // Key only the URLs that will actually be fetched, so a plaats change
+  // with a still-valid public cache doesn't look like a brand-new request.
+  const url = [
+    ownUrl || '',
+    needsPublicFetch ? publicUrl : (publicUrl ? `cached:${publicUrl}` : '')
+  ].join(' + ');
+
+  if (theFetch && theFetchUrl === url) {
     return;
   }
 
-  // Start loading
-  store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: true});
+  setVehiclesLoading(true);
 
-  // Abort previous fetch
-  // Info:
-  // - https://stackoverflow.com/q/63412985
-  // - https://davidwalsh.name/cancel-fetch
-  if(theFetch) {
+  if (theFetch) {
     theFetch.abort();
   }
-  // Now do a new fetch
+
   const ownFetch = ownUrl ? abortableFetch(ownUrl, {
-    headers: { authorization: "Bearer " + state.authentication.user_data.token }
+    headers: { authorization: 'Bearer ' + state.authentication.user_data.token }
   }) : null;
-  const publicFetch = publicUrl ? abortableFetch(publicUrl, {}) : null;
+  const publicFetch = needsPublicFetch ? abortableFetch(publicUrl, {}) : null;
+
   const thisFetch = {
     abort: () => {
-      if(ownFetch) ownFetch.abort();
-      if(publicFetch) publicFetch.abort();
+      if (ownFetch) ownFetch.abort();
+      if (publicFetch) publicFetch.abort();
     }
   };
   theFetch = thisFetch;
   theFetchUrl = url;
 
-  // Only clear the in-flight tracking if it still points at this request
-  // (a newer request may have replaced it in the meantime)
   const clearFetchTracking = () => {
-    if(theFetch === thisFetch) {
+    if (theFetch === thisFetch) {
       theFetch = null;
       theFetchUrl = null;
     }
   };
 
   const readJson = (theAbortableFetch, theUrl) => theAbortableFetch.ready.then(response => {
-    if(! response.ok) {
+    if (!response.ok) {
       throw new Error(`unable to fetch ${theUrl} (HTTP ${response.status})`);
     }
     return response.json();
   });
 
-  const ownPromise = ownFetch ? readJson(ownFetch, ownUrl) : Promise.resolve(null);
-  // For logged-in users the public vehicles are extra context: if they fail
-  // to load, still show the user's own data
-  const publicPromise = publicFetch
-    ? readJson(publicFetch, publicUrl).catch(ex => {
-      if(! ownFetch || theFetch !== thisFetch) throw ex;
-      console.error("unable to load public vehicles outside own data area", ex);
-      return null;
-    })
-    : Promise.resolve(null);
+  let ownDone = !ownFetch;
+  let publicDone = !publicFetch;
+  let ownVehicles = null;
+  let publicVehicles = cachedPublic;
 
-  Promise.all([ownPromise, publicPromise]).then(([ownJson, publicJson]) => {
-    // Superseded by a newer request: let that one update the map
-    if(theFetch !== thisFetch) return;
+  const tryFinish = () => {
+    if (theFetch !== thisFetch) return;
+    if (!ownDone || !publicDone) return;
 
-    // The public map only covers the Netherlands
-    const publicVehicles = ((publicJson && publicJson.vehicles_in_public_space) || [])
-      .filter(v => {
-        return v.location && isInNetherlands(v.location.longitude, v.location.latitude);
-      });
+    lastOwnVehicles = ownVehicles;
+    lastPublicVehicles = publicVehicles;
 
-    let vehicles = publicVehicles;
-    if(ownFetch) {
-      const ownVehicles = ((ownJson && ownJson.park_events) || []);
-      ownVehicles.forEach(v => { v.is_own_data = true; });
-      vehicles = mergeOwnAndPublicVehicles(ownVehicles, publicVehicles);
+    if (ownVehicles === null && publicVehicles === null) {
+      clearVehiclesOnFailure();
+    } else if (ownVehicles !== null && publicVehicles !== null) {
+      publishMergedVehicles(ownVehicles, publicVehicles);
+    } else if (ownVehicles !== null) {
+      publishMergedVehicles(ownVehicles, []);
+    } else {
+      // Guest / public-only
+      publishMergedVehicles([], publicVehicles);
     }
 
-    // Process with the *current* store state (not the state at request
-    // time), so client-side filters that changed while the request was in
-    // flight are applied to the result.
-    callback(store_parkingdata.getState(), vehicles);
-  }).catch(ex => {
-    // If this request was aborted because a newer one replaced it, leave the
-    // loading state to the newer request
-    if(theFetch !== thisFetch) return;
-    console.error("fetch error - unable to fetch vehicles from %s", url, ex);
-  }).finally(() => {
-    if(theFetch !== thisFetch) return;
     clearFetchTracking();
-    // Stop loading
-    store_parkingdata.dispatch({type: 'SHOW_LOADING', payload: false});
-  });
+    setVehiclesLoading(false);
+  };
 
-}
+  const onOwnReady = (json) => {
+    if (theFetch !== thisFetch) return;
+    ownVehicles = (json && json.park_events) || [];
+    ownDone = true;
+
+    // Own-first: show own vehicles immediately, keeping previous public
+    // context until the new public data arrives (or using the cache).
+    if (canfetchdata) {
+      const publicForNow = publicDone
+        ? (publicVehicles || [])
+        : (lastPublicVehicles || cachedPublic || []);
+      publishMergedVehicles(ownVehicles, publicForNow);
+    }
+
+    tryFinish();
+  };
+
+  const onPublicReady = (json) => {
+    if (theFetch !== thisFetch) return;
+    const filtered = filterPublicVehiclesInNl(
+      (json && json.vehicles_in_public_space) || []
+    );
+    setCachedPublicVehicles(publicUrl, filtered);
+    publicVehicles = filtered;
+    publicDone = true;
+
+    if (ownDone) {
+      tryFinish();
+    }
+  };
+
+  if (ownFetch) {
+    readJson(ownFetch, ownUrl).then(onOwnReady).catch(ex => {
+      if (theFetch !== thisFetch) return;
+      console.error('unable to load own park_events', ex);
+      // Own data is required for logged-in users; clear so outdated markers
+      // are not left looking current.
+      ownVehicles = null;
+      ownDone = true;
+      if (publicFetch && !publicDone) {
+        thisFetch.abort();
+      }
+      clearVehiclesOnFailure();
+      clearFetchTracking();
+      setVehiclesLoading(false);
+    });
+  }
+
+  if (publicFetch) {
+    readJson(publicFetch, publicUrl).then(onPublicReady).catch(ex => {
+      if (theFetch !== thisFetch) return;
+      // For logged-in users public is optional context
+      if (!ownFetch) {
+        console.error('unable to load public vehicles', ex);
+        publicVehicles = null;
+        publicDone = true;
+        clearVehiclesOnFailure();
+        clearFetchTracking();
+        setVehiclesLoading(false);
+        return;
+      }
+      console.error('unable to load public vehicles outside own data area', ex);
+      publicVehicles = [];
+      publicDone = true;
+      tryFinish();
+    });
+  } else if (cachedPublic) {
+    publicVehicles = cachedPublic;
+    publicDone = true;
+  } else if (!publicUrl) {
+    // Heel NL off / no public request: treat as empty public set
+    publicVehicles = [];
+    publicDone = true;
+  }
+
+  // Everything already available (e.g. guest with a warm public cache)
+  if (ownDone && publicDone) {
+    tryFinish();
+  }
+};
 
 const updateParkingData = async () => {
   try {
-    if(undefined===store_parkingdata) {
-      if(process && process.env.DEBUG) console.error("no redux state available yet - skipping zones update");
+    if (undefined === store_parkingdata) {
+      if (process && process.env.DEBUG) console.error('no redux state available yet - skipping zones update');
       return false;
     }
-    
-    // Wait for zone data
+
     const state = store_parkingdata.getState();
-    if(! state) return;
+    if (!state) return;
 
-    // const canfetchdata = state && isLoggedIn(state)  && state.filter && state.authentication.user_data.token;
-
-    // Should we (re)fetch vehicles?
     const doFetchVehicles = shouldFetchVehicles(state.filter, existingFilter);
+    const clientFilterChanged = didClientFilterChange(state.filter, existingClientFilter);
 
-    // Update active filter
     existingFilter = state.filter;
 
-    if(doFetchVehicles || (! activeVehicles && ! theFetch)) {
-      doApiCall(state, processVehiclesResult);
-    } else if(activeVehicles) {
-      // Regenerate geoJson without querying API
-      processVehiclesResult(state, activeVehicles);
+    if (doFetchVehicles || (!cachedFeatures && !theFetch)) {
+      doApiCall(state);
+    } else if (cachedFeatures && clientFilterChanged) {
+      existingClientFilter = {
+        aanbiedersexclude: state.filter.aanbiedersexclude,
+        parkeerduurexclude: state.filter.parkeerduurexclude,
+        non_operational_only: state.filter.non_operational_only
+      };
+      publishFilteredFeatures(state, cachedFeatures);
     }
-    // else: no vehicles yet but a fetch is in flight; its callback processes
-    // the response with the store state at completion time
-
-  } catch(ex) {
-    console.error("Unable to update zones", ex)
-  } finally {
-    //:)
+    // else: nothing relevant changed, or a fetch is already in flight
+  } catch (ex) {
+    console.error('Unable to update zones', ex);
   }
-}
+};
 
 export const initUpdateParkingData = (_store) => {
   store_parkingdata = _store;
-  if(! store_parkingdata) { console.log('No store yet.'); return; }
-  if(timerid_parkingdata) { clearTimeout(timerid_parkingdata); }
+  if (!store_parkingdata) { console.log('No store yet.'); return; }
+  if (timerid_parkingdata) { clearTimeout(timerid_parkingdata); }
   updateParkingData();
-}
+};

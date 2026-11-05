@@ -14,14 +14,10 @@ const DATA_LAYERS = {
       layerIds: ['vehicles-heatmap'],
       displayMode: 'displaymode-park'
     },
-    'parkeerdata-clusters': {
-      name: 'Clusters',
-      layerIds: ['vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point'],
-      displayMode: 'displaymode-park'
-    },
     'parkeerdata-voertuigen': {
       name: 'Voertuigen',
-      layerIds: ['vehicles-point'],
+      // Clusters below zoom 12, individual markers from zoom 12
+      layerIds: ['vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point'],
       displayMode: 'displaymode-park'
     }
   },

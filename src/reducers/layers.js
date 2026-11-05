@@ -8,6 +8,7 @@ export const DISPLAYMODE_POLICY_HUBS = 'displaymode-policy-hubs';
 export const DISPLAYMODE_OTHER = 'displaymode-other';
 
 export const DISPLAYMODE_PARKEERDATA_HEATMAP = 'parkeerdata-heatmap';
+/** @deprecated Removed from the UI; sanitizeActiveDataLayers maps this to VOERTUIGEN */
 export const DISPLAYMODE_PARKEERDATA_CLUSTERS = 'parkeerdata-clusters';
 export const DISPLAYMODE_PARKEERDATA_VOERTUIGEN = 'parkeerdata-voertuigen';
 
@@ -128,7 +129,6 @@ const md5 = require('md5');
 const VALID_DATA_LAYERS = {
   'displaymode-park': [
     DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
-    DISPLAYMODE_PARKEERDATA_CLUSTERS,
     DISPLAYMODE_PARKEERDATA_HEATMAP
   ],
   'displaymode-rentals': [
@@ -137,6 +137,17 @@ const VALID_DATA_LAYERS = {
     DISPLAYMODE_VERHUURDATA_HEATMAP,
     DISPLAYMODE_VERHUURDATA_HB
   ]
+};
+
+/**
+ * Map removed park layers (e.g. the old Clusters option) to their replacement
+ * before validating, so saved settings and shared links keep working.
+ */
+const migrateParkLayer = (layerName) => {
+  if (layerName === DISPLAYMODE_PARKEERDATA_CLUSTERS) {
+    return DISPLAYMODE_PARKEERDATA_VOERTUIGEN;
+  }
+  return layerName;
 };
 
 /**
@@ -162,14 +173,22 @@ export const sanitizeActiveDataLayers = (activeDataLayers) => {
       return;
     }
 
+    const migratedLayers = displayMode === DISPLAYMODE_PARK
+      ? currentLayers.map(migrateParkLayer)
+      : currentLayers;
+
     // Keep only the first valid active layer
-    const firstValid = currentLayers.find(layer => validLayers.includes(layer));
+    const firstValid = migratedLayers.find(layer => validLayers.includes(layer));
     const normalized = firstValid
       ? [firstValid]
       : [initialState.active_data_layers[displayMode][0]];
     sanitized[displayMode] = normalized;
 
-    if (currentLayers.length > 1 || !currentLayers.includes(normalized[0])) {
+    if (
+      currentLayers.length > 1
+      || !currentLayers.includes(normalized[0])
+      || migratedLayers[0] !== currentLayers[0]
+    ) {
       didNormalize = true;
     }
   });

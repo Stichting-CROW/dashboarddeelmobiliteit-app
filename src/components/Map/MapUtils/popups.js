@@ -54,7 +54,6 @@ export const initPopupLogic = (
   const providerLabelOptions = hidePopupProviderTitle ? { showTitle: false } : undefined;
   // Docs: https://maplibre.org/maplibre-gl-js-docs/example/popup-on-click/
   const layerNamesToApplyPopupLogicTo = [
-    'vehicles-point',
     'vehicles-clusters-point',
     'rentals-origins-point',
     'rentals-origins-clusters-point',
@@ -197,7 +196,7 @@ export const initPopupLogic = (
       };
 
       const isVehicleMarkerLayer = (
-        layerName === 'vehicles-point' || layerName === 'vehicles-clusters-point'
+        layerName === 'vehicles-clusters-point'
       );
 
       const primaryFeatureIsVehicle = (

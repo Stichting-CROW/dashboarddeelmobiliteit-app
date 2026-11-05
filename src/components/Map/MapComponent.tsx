@@ -41,6 +41,8 @@ import {
   DISPLAYMODE_OTHER,
   DISPLAYMODE_SERVICE_AREAS,
   DISPLAYMODE_POLICY_HUBS,
+  DISPLAYMODE_PARKEERDATA_VOERTUIGEN,
+  DISPLAYMODE_PARKEERDATA_HEATMAP,
   DATA_LAYER_ORDER_SERVICE_AREAS,
   DATA_LAYER_ORDER_HUBS,
   DATA_LAYER_ORDER_VERBODSGEBIEDEN,
@@ -68,10 +70,23 @@ import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerMa
 import { getProviderColorForProvider } from '../../helpers/providers';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
 import {
+  selectActiveDataLayers,
   selectDataLayerOrder,
   selectOverlayLayers,
-  isOverlayLayerEnabled
+  isOverlayLayerEnabled,
+  isParkLayerActive
 } from '../../helpers/layerSelectors';
+
+const VEHICLE_HEATMAP_OPACITY = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  7, 1,
+  9, 0.8
+];
+
+const VEHICLE_LOADING_OPACITY = 0.4;
+const EMPTY_VEHICLE_COLLECTION = { type: 'FeatureCollection', features: [] };
 
 // Set language for momentJS
 moment.locale('nl');
@@ -94,12 +109,16 @@ const MapComponent = (props): JSX.Element => {
 
   const dataLayerOrder = useSelector(selectDataLayerOrder);
   const overlayLayers = useSelector(selectOverlayLayers);
+  const activeDataLayers = useSelector(selectActiveDataLayers);
 
   // Connect to redux store
   const dispatch = useDispatch()
 
   // Get data from store
   const vehicles = useSelector((state: StateType) => state.vehicles || null);
+  const vehiclesLoading = useSelector((state: StateType) => (
+    state.vehicles ? state.vehicles.loading === true : false
+  ));
   const filter = useSelector((state: StateType) => state.filter || null);
   const rentals = useSelector((state: StateType) => state.rentals || null);
   const stateLayers = useSelector((state: StateType) => state.layers || null);
@@ -577,35 +596,71 @@ const MapComponent = (props): JSX.Element => {
     }
   }, [displayMode, didMapLoad, overlayLayers]);
 
-  // Set vehicles sources
-  useEffect(() => {
-    if(! didInitSourcesAndLayers) return;
-    if(! vehicles.data || !vehicles.data.features) return;
-    if(! map.current) return;
-    if(! map.current.U) return;
+  // Track which vehicle data object we last uploaded per source, so filter
+  // changes that don't produce a new object don't re-upload to the map worker.
+  const lastVehicleDataBySource = useRef<{ [sourceId: string]: unknown }>({});
 
-    console.log('Setting vehicles data:', vehicles.data.features.length, 'features');
-    
+  // Upload vehicle data only to the source of the active park view
+  useEffect(() => {
+    if (!didInitSourcesAndLayers) return;
+    if (!map.current || !map.current.U) return;
+    if (displayMode !== DISPLAYMODE_PARK) return;
+
+    const isVoertuigen = isParkLayerActive(activeDataLayers, DISPLAYMODE_PARKEERDATA_VOERTUIGEN);
+    const isHeatmap = isParkLayerActive(activeDataLayers, DISPLAYMODE_PARKEERDATA_HEATMAP);
+    const sourceId = isHeatmap
+      ? 'vehicles'
+      : (isVoertuigen ? 'vehicles-clusters' : null);
+    if (!sourceId) return;
+
+    const nextData = (vehicles?.data && vehicles.data.features)
+      ? vehicles.data
+      : EMPTY_VEHICLE_COLLECTION;
+
+    if (lastVehicleDataBySource.current[sourceId] === nextData) return;
+
     try {
-      if(map.current.getSource('vehicles')) {
-        map.current.U.setData('vehicles', vehicles.data);
-        console.log('Successfully set vehicles data');
-      } else {
-        console.warn('vehicles source not found');
-      }
-      if(map.current.getSource('vehicles-clusters')) {
-        map.current.U.setData('vehicles-clusters', vehicles.data);
-        console.log('Successfully set vehicles-clusters data');
-      } else {
-        console.warn('vehicles-clusters source not found');
+      if (map.current.getSource(sourceId)) {
+        map.current.U.setData(sourceId, nextData);
+        lastVehicleDataBySource.current[sourceId] = nextData;
       }
     } catch (error) {
       console.warn('Failed to set vehicles data:', error);
     }
   }, [
     didInitSourcesAndLayers,
-    vehicles.data
+    vehicles.data,
+    displayMode,
+    activeDataLayers
   ]);
+
+  // Fade vehicle layers while a refetch is in flight (keep old markers visible)
+  useEffect(() => {
+    if (!didInitSourcesAndLayers) return;
+    if (!map.current) return;
+
+    const setOpacity = (layerId: string, paintProp: string, value: unknown) => {
+      try {
+        if (map.current.getLayer(layerId)) {
+          map.current.setPaintProperty(layerId, paintProp, value);
+        }
+      } catch (error) {
+        // Layer may not exist yet during style changes
+      }
+    };
+
+    if (vehiclesLoading) {
+      setOpacity('vehicles-clusters', 'circle-opacity', VEHICLE_LOADING_OPACITY);
+      setOpacity('vehicles-clusters-count', 'text-opacity', VEHICLE_LOADING_OPACITY);
+      setOpacity('vehicles-clusters-point', 'icon-opacity', VEHICLE_LOADING_OPACITY);
+      setOpacity('vehicles-heatmap', 'heatmap-opacity', VEHICLE_LOADING_OPACITY);
+    } else {
+      setOpacity('vehicles-clusters', 'circle-opacity', 1);
+      setOpacity('vehicles-clusters-count', 'text-opacity', 1);
+      setOpacity('vehicles-clusters-point', 'icon-opacity', 1);
+      setOpacity('vehicles-heatmap', 'heatmap-opacity', VEHICLE_HEATMAP_OPACITY);
+    }
+  }, [didInitSourcesAndLayers, vehiclesLoading]);
 
   // Set zones source
   useEffect(()   => {

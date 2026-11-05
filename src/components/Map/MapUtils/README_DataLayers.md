@@ -32,20 +32,13 @@ const DATA_LAYERS = {
   'displaymode-park': {
     'parkeerdata-heatmap': {
       name: 'Heat Map',
-      layerId: 'vehicles-heatmap',
-      sourceId: 'vehicles',
-      displayMode: 'displaymode-park'
-    },
-    'parkeerdata-clusters': {
-      name: 'Clusters',
-      layerId: 'vehicles-clusters',
-      sourceId: 'vehicles',
+      layerIds: ['vehicles-heatmap'],
       displayMode: 'displaymode-park'
     },
     'parkeerdata-voertuigen': {
       name: 'Voertuigen',
-      layerId: 'vehicles-point',
-      sourceId: 'vehicles',
+      // Clusters below zoom 12, individual markers from zoom 12
+      layerIds: ['vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point'],
       displayMode: 'displaymode-park'
     }
   },
@@ -69,14 +62,14 @@ const MyComponent = ({ map }) => {
     toggleLayer('parkeerdata-heatmap', 'displaymode-park', isActive);
   };
 
-  const handleSetClusters = () => {
-    setLayer('parkeerdata-clusters', 'displaymode-park');
+  const handleSetVoertuigen = () => {
+    setLayer('parkeerdata-voertuigen', 'displaymode-park');
   };
 
   return (
     <div>
       <button onClick={handleToggleHeatMap}>Toggle Heat Map</button>
-      <button onClick={handleSetClusters}>Show Clusters</button>
+      <button onClick={handleSetVoertuigen}>Show Voertuigen</button>
     </div>
   );
 };
@@ -107,7 +100,7 @@ The new system uses a new Redux state structure:
 {
   // ... existing state
   active_data_layers: {
-    'displaymode-park': ['parkeerdata-voertuigen', 'parkeerdata-clusters'],
+    'displaymode-park': ['parkeerdata-voertuigen'],
     'displaymode-rentals': ['verhuurdata-hb']
   }
 }
