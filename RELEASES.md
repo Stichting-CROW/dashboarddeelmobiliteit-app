@@ -1,5 +1,25 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-05
+
+**Aanbod**
+
+- 🪄 Ingelogde gebruikers kunnen op de Aanbod-kaart wisselen tussen 'Mijn gebied' en 'Heel NL'. Met 'Heel NL' zie je ook de voertuigen buiten je eigen datagebied: clusters met jouw voertuigen blijven groen, andere clusters zijn lichter en losse voertuigen buiten je gebied hebben een grijze rand
+- ✨ De lagen 'Aanbod als clusters' en 'Aanbod als losse voertuigen' zijn samengevoegd: uitgezoomd zie je clusters, vanaf zoomniveau 12 losse voertuigen. Opgeslagen instellingen en gedeelde links met de oude clusterlaag openen automatisch de nieuwe laag
+- ✨ De kaart is sneller, vooral met 'Heel NL': filters op aanbieder, parkeerduur en defecten werken direct zonder opnieuw te laden, en bij het wisselen van plaats of zones worden de landelijke voertuigen niet opnieuw opgehaald
+- ✨ Tijdens het laden blijven de vorige voertuigen zichtbaar (vervaagd) in plaats van dat de kaart leeg wordt; je eigen voertuigen verschijnen als eerste
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: bij het tekenen van een zone was de cursor een handje in plaats van een kruisje
+- 🐛 Opgelost: fout bij het toevoegen van een extra vlak aan een bestaande zone die uit meerdere vlakken bestaat
+- 🐛 Opgelost: bij het wisselen tussen capaciteit 'totaal' en 'per modaliteit' werden ingevulde waarden op 0 gezet; ook wordt de standaardcapaciteit van 50 nu echt opgeslagen
+- 🐛 Opgelost: een gepubliceerde zone verscheen pas na herladen onder 'Definitief actief' en op de kaart
+
+**Gebruikersinterface**
+
+- ✨ Na het sluiten van de rondleiding ga je terug naar de pagina Functies in plaats van naar de startpagina
+
 ## Release 2026-11-03
 
 **Aanbod**
