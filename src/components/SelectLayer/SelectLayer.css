@@ -237,3 +237,7 @@
   color: #333333;
   cursor: pointer;
 }
+
+.DataLayerList-phaseSelect + .DataLayerList-phaseSelect {
+  margin-left: 6px;
+}

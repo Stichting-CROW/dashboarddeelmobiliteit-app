@@ -8,7 +8,7 @@ import {
 import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
 import { whenMapLayersMutable } from '../Map/MapUtils/mapGuards';
 import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs';
-import { deDuplicateHubs, isHubInPhase } from '../../helpers/policy-hubs/common';
+import { deDuplicateHubs, isHubInPhase, isHubOfType } from '../../helpers/policy-hubs/common';
 import { selectDataLayerOrder, selectOverlayLayers, isOverlayLayerEnabled } from '../../helpers/layerSelectors';
 import {
   DATA_LAYER_ORDER_HUBS,
@@ -52,6 +52,7 @@ const DdPolicyHubsOverlay = ({
   const verbodsgebiedenEnabled = isOverlayLayerEnabled(overlayLayers, displayMode, DATA_LAYER_ORDER_VERBODSGEBIEDEN);
   const hubsPhase = overlayLayers.phases[DATA_LAYER_ORDER_HUBS];
   const verbodsgebiedenPhase = overlayLayers.phases[DATA_LAYER_ORDER_VERBODSGEBIEDEN];
+  const hubType = overlayLayers.hub_type;
 
   // Synthetic visible_layers, in the same format policy_hubs state uses
   const visibleLayers = [
@@ -118,7 +119,7 @@ const DdPolicyHubsOverlay = ({
       const layerFilter = [`hub-${hubsPhase}`];
       const filtered = deDuplicateHubs(
         hubs.filter((x: any) => x.geography_type === 'stop' && isHubInPhase(x, hubsPhase, layerFilter))
-      );
+      ).filter((x: any) => isHubOfType(x, hubType));
       renderHubs(map, filtered, [], [], HUBS_SOURCE_KEY);
     } else {
       removeHubsFromMap(map, HUBS_SOURCE_KEY);
@@ -143,6 +144,7 @@ const DdPolicyHubsOverlay = ({
     verbodsgebiedenEnabled,
     hubsPhase,
     verbodsgebiedenPhase,
+    hubType,
     mapStyle,
     displayMode,
     JSON.stringify(dataLayerOrder)
