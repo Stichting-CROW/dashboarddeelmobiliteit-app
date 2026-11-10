@@ -303,6 +303,31 @@ const enrichPermitRecordsWithOperators = async (
  */
 const inFlightKpiRawFetches = new Map<string, Promise<OperatorPerformanceIndicatorsResponse | null>>();
 
+/**
+ * Keep one value per date for every KPI. The backend sometimes returns the same
+ * date twice within a single KPI (seen for Lime bicycles: available vehicles and
+ * usage ratio), which renders as twice the number of indicator blocks.
+ */
+export const dedupeKpiValuesByDate = (
+    data: OperatorPerformanceIndicatorsResponse
+): OperatorPerformanceIndicatorsResponse => ({
+    ...data,
+    municipality_modality_operators: (data.municipality_modality_operators || []).map((operator) => ({
+        ...operator,
+        kpis: (operator.kpis || []).map((kpi) => {
+            const seenDates = new Set<string>();
+            return {
+                ...kpi,
+                values: (kpi.values || []).filter((value) => {
+                    if (seenDates.has(value.date)) return false;
+                    seenDates.add(value.date);
+                    return true;
+                }),
+            };
+        }),
+    })),
+});
+
 export const fetchKpiOverviewRaw = (
     token: string,
     searchParams: URLSearchParams,
@@ -338,7 +363,9 @@ export const fetchKpiOverviewRaw = (
                 return null;
             }
 
-            return (await response.json()) as OperatorPerformanceIndicatorsResponse;
+            return dedupeKpiValuesByDate(
+                (await response.json()) as OperatorPerformanceIndicatorsResponse
+            );
         } catch (error) {
             console.error('Error fetching kpi_overview_operators', error);
             return null;
