@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useLocation, Navigate } from 'react-router-dom';
 import DashboardPrestatiesAanbieders from './DashboardPrestatiesAanbieders';
 import DashboardBeleidszones from './DashboardBeleidszones';
+import DashboardDatakwaliteit from './DashboardDatakwaliteit';
 import StatsPage from '../StatsPage';
 
 interface DashboardPageProps {}
@@ -20,6 +21,10 @@ function DashboardPage(props: DashboardPageProps) {
 
   if (dashboard === 'beleidszones') {
     return <DashboardBeleidszones />;
+  }
+
+  if (dashboard === 'datakwaliteit') {
+    return <DashboardDatakwaliteit />;
   }
 
   /* Redirect prestaties-aanbieders-details to prestaties-aanbieders with same query params (unified view) */

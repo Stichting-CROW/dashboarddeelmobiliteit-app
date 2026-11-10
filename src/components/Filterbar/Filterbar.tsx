@@ -31,6 +31,7 @@ import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
 import FilterbarPermits from './FilterbarPermits';
 import FilterbarBeleidszones from './FilterbarBeleidszones';
+import FilterbarDatakwaliteit from './FilterbarDatakwaliteit';
 import FilterbarStart from './FilterbarStart';
 import FilterbarStatistiek from './FilterbarStatistiek';
 
@@ -99,6 +100,8 @@ function Filterbar({
   const isPrestatiesAanbieders =
     displayMode === DISPLAYMODE_DASHBOARD && pathname === '/stats/prestaties-aanbieders';
   const isBeleidszones = pathname === '/stats/beleidszones';
+  const isDatakwaliteit =
+    displayMode === DISPLAYMODE_DASHBOARD && pathname === '/stats/datakwaliteit';
   const isontwikkeling = displayMode === DISPLAYMODE_OTHER;
 
   const showdatum = isrentals || ispark || !isLoggedIn;
@@ -181,6 +184,11 @@ function Filterbar({
         <FilterbarBeleidszones hideLogo={hideLogo ?? false} />
       )}
 
+      {/* Datakwaliteit */}
+      {isDatakwaliteit && (
+        <FilterbarDatakwaliteit hideLogo={hideLogo ?? false} />
+      )}
+
       {/* Default */}
       {!(
         iszonespublic ||
@@ -190,6 +198,7 @@ function Filterbar({
         isrentals ||
         isPrestatiesAanbieders ||
         isBeleidszones ||
+        isDatakwaliteit ||
         isStart
       ) && (
         <div className="filter-bar-inner">

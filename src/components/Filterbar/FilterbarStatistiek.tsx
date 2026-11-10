@@ -17,6 +17,7 @@ function FilterbarStatistiek() {
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
   const isBeleidszones = pathname === '/stats/beleidszones';
+  const isDatakwaliteit = pathname === '/stats/datakwaliteit';
 
   const filterGebied = useSelector((state: StateType) =>
     state.filter ? state.filter.gebied : null
@@ -39,9 +40,10 @@ function FilterbarStatistiek() {
     if (filterGebied) {
       searchParams.set('gm_code', filterGebied);
     }
-    // Prestaties aanbieders applies its own default period (last 7 days, excluding today).
-    const isPrestatiesAanbiedersPath = path === '/stats/prestaties-aanbieders';
-    if (!isPrestatiesAanbiedersPath) {
+    // Prestaties aanbieders and Datakwaliteit apply their own default period.
+    const hasOwnDefaultPeriod =
+      path === '/stats/prestaties-aanbieders' || path === '/stats/datakwaliteit';
+    if (!hasOwnDefaultPeriod) {
       if (filterOntwikkelingVan) {
         searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
       }
@@ -58,6 +60,7 @@ function FilterbarStatistiek() {
     if (isBeleidsinfo) return 'Beleidsinfo';
     if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
     if (isBeleidszones) return 'Hubs en verbodsgebieden';
+    if (isDatakwaliteit) return 'Datakwaliteit';
     return 'Prestaties aanbieders';
   };
 
@@ -91,6 +94,13 @@ function FilterbarStatistiek() {
           >
             Hubs en verbodsgebieden
           </div>
+          <div
+            key="item-datakwaliteit"
+            className={`form-item ${isDatakwaliteit ? 'form-item-selected' : ''}`}
+            onClick={() => handleSelectDashboardType('/stats/datakwaliteit')}
+          >
+            Datakwaliteit
+          </div>
         </div>
       </div>
     </FilterbarExtended>
@@ -101,7 +111,7 @@ function FilterbarStatistiek() {
       <div className="filter-plaats-container">
         <div className="filter-plaats-box-row">
           <div
-            className={`filter-plaats-value ${isBeleidsinfo || isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
+            className={`filter-plaats-value ${isBeleidsinfo || isPrestatiesAanbieders || isBeleidszones || isDatakwaliteit ? '' : 'text-black'}`}
             onClick={() => openView('dashboard-type')}
           >
             {getCurrentSelection()}
