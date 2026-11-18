@@ -69,6 +69,7 @@ import { useBackgroundLayer } from './MapUtils/useBackgroundLayer';
 import { updateStreetVisibilityForSatellite } from './MapUtils/backgroundLayerManager';
 import { getProviderColorForProvider } from '../../helpers/providers';
 import { isOperatorPrestatiesView } from '../../helpers/prestatiesAanbiedersViewMode';
+import { isAdmin } from '../../helpers/authentication';
 import {
   selectActiveDataLayers,
   selectDataLayerOrder,
@@ -165,9 +166,8 @@ const MapComponent = (props): JSX.Element => {
   // Use the background layer hook
   const { setLayer } = useBackgroundLayer(map.current);
 
-  const userData = useSelector((state: StateType) => {
-    return state.authentication.user_data;
-  });
+  // Vehicle IDs are restricted to NL-wide super admins
+  const canSeeVehicleIds = useSelector((state: StateType) => isAdmin(state));
 
   const token = useSelector((state: StateType) => {
     if(state.authentication && state.authentication.user_data) {
@@ -762,16 +762,6 @@ const MapComponent = (props): JSX.Element => {
     if(! didInitSourcesAndLayers) return;
     if(! providers) return;
 
-    // Only S&B and providers can see vehicle ID
-    const canSeeVehicleId = () => {
-      // If user isn't logged in, it's no analyst
-      if(! userData || ! userData.user) {
-        return false;
-      }
-      // Return true if user is logged in
-      return true;
-    }
-
     const hidePopupProviderTitle =
       location.pathname === '/stats/prestaties-aanbieders' &&
       isOperatorPrestatiesView(aclOperators);
@@ -779,7 +769,7 @@ const MapComponent = (props): JSX.Element => {
     initPopupLogic(
       map.current,
       providers,
-      canSeeVehicleId(),
+      canSeeVehicleIds,
       filter.datum,
       hidePopupProviderTitle
     );
@@ -787,6 +777,7 @@ const MapComponent = (props): JSX.Element => {
     didInitSourcesAndLayers,
     providers,
     aclOperators,
+    canSeeVehicleIds,
     filter.datum,
     location.pathname,
   ])

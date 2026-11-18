@@ -136,7 +136,7 @@ export const initPopupLogic = (
             </div>` : ''}
 
             ${(canSeeVehicleId && theVehicleProperties.vehicle_id) ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
-              ${theVehicleProperties.vehicle_id}
+              ${escapeHtml(theVehicleProperties.vehicle_id)}
             </div>` : ''}
 
             ${providerWebsiteUrl ? `<div class="mt-2">
@@ -149,10 +149,11 @@ export const initPopupLogic = (
       };
 
       const buildOverlappingVehiclesTableHtml = () => {
-        const shouldShowVehicleId = canSeeVehicleId ? true : false;
         const rowsHtml = features.map((feature, idx) => {
           const props = feature.properties || {};
-          const vehicleId = shouldShowVehicleId && props.vehicle_id ? props.vehicle_id : '-';
+          const vehicleIdHtml = canSeeVehicleId && props.vehicle_id
+            ? `<span style="white-space: nowrap;">${escapeHtml(props.vehicle_id)}</span>`
+            : '';
           const vehicleTypeIconHtml = getVehicleTypeHeaderImgHtml(
             props.form_factor,
             undefined,
@@ -169,7 +170,7 @@ export const initPopupLogic = (
             >
               <td style="padding: 4px">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="white-space: nowrap;">${escapeHtml(vehicleId)}</span>
+                  ${vehicleIdHtml}
                   ${vehicleTypeIconHtml}
                 </div>
               </td>
@@ -183,7 +184,7 @@ export const initPopupLogic = (
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr>
-                  <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px;">voertuig-id</th>
+                  <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px;">${canSeeVehicleId ? 'voertuig-id' : 'voertuig'}</th>
                   <th style="text-align: left; font-weight: 600; padding: 0 4px 6px 4px; font-size: 12px;">sinds</th>
                 </tr>
               </thead>
@@ -263,12 +264,19 @@ export const initPopupLogic = (
         }
       }
     }
+    // Handlers capture permissions (canSeeVehicleId), so the previous handler
+    // must be removed by reference; a new function instance would not match.
+    if(! theMap.__ddPopupClickHandlers) theMap.__ddPopupClickHandlers = {};
+    const previousClickHandler = theMap.__ddPopupClickHandlers[layerName];
+    if(previousClickHandler) {
+      theMap.off('touchend', layerName, previousClickHandler);
+      theMap.off('click', layerName, previousClickHandler);
+    }
+    theMap.__ddPopupClickHandlers[layerName] = clickHandler;
     // Touch event
     // https://github.com/mapbox/mapbox-gl-draw/issues/1019#issuecomment-850229493=
-    theMap.off('touchend', layerName, clickHandler);
     theMap.on('touchend', layerName, clickHandler);
     // Click event
-    theMap.off('click', layerName, clickHandler);
     theMap.on('click', layerName, clickHandler);
     // Change the cursor to a pointer when the mouse is over the places layer.
     theMap.on('mouseenter', layerName, function () {
