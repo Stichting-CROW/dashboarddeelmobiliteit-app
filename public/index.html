@@ -2,6 +2,15 @@
 <html lang="nl">
   <head>
     <meta charset="utf-8" />
+    <!--
+      GitHub Pages can't send security headers. A full CSP (script-src,
+      frame-ancestors) requires hosting that supports response headers.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -66,9 +75,6 @@
     <meta property="twitter:title" content="Dashboard Deelmobiliteit | Een project van en voor overheden">
     <meta property="twitter:description" content="Een webtool voor het volgen van ontwikkelingen rond deelmobiliteit. Van en voor overheden.">
     <meta property="twitter:image" content="https://dashboarddeelmobiliteit.nl/og-image.jpg">
-
-    <!-- Material icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">

@@ -80,7 +80,7 @@ const EditLimitsDialog: React.FC<EditLimitsDialogProps> = ({
   const provider = getProvider(provider_system_id);
   const realProviderName = provider?.name || provider_system_id;
   const providerName = isDemoMode() ? getDemoOperatorName(provider_system_id) : realProviderName;
-  const providerLogo = provider ? provider.logo : createSvgPlaceholder({
+  const providerLogo = provider?.logo || createSvgPlaceholder({
     width: 48,
     height: 48,
     text: providerName.slice(0, 2),

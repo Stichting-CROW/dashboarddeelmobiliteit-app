@@ -10,6 +10,7 @@ import {
   loginWithOneTimePassword
 } from '../api/auth';
 import { notifyInfo } from '../helpers/notify';
+import { markActivity } from '../helpers/session';
 
 const SetPassword = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const SetPassword = () => {
         changeResult.oneTimePassword
       );
       if (loginResponse) {
+        markActivity();
         dispatch({ type: 'LOGIN', payload: null });
         dispatch({ type: 'RESET_FILTER', payload: null });
         dispatch(setUser(loginResponse));

@@ -296,7 +296,7 @@ const MapComponent = (props): JSX.Element => {
         setDidInitSourcesAndLayers(true);
 
         // Add cross image to use for retirement hubs
-        map.current.loadImage('https://cdn0.iconfinder.com/data/icons/blueberry/32/delete.png', (err, image) => {
+        map.current.loadImage('/images/components/MapComponent/retirement-cross.png', (err, image) => {
           // The map may have been unmounted (e.g. page switch) while this
           // request was in flight, in which case map.current is null.
           if(err || !map.current || map.current.hasImage('pattern')) return;

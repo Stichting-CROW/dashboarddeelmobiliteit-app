@@ -56,6 +56,29 @@ export const changePassword = async (
 };
 
 /**
+ * Ends the session at FusionAuth and revokes the refresh token, if any.
+ * The JWT itself stays valid until its `exp`, so the client must also drop it.
+ */
+export const logoutFromFusionAuth = async (
+  token: string,
+  refreshToken?: string
+): Promise<void> => {
+  try {
+    await fetch(`${fusionauth_url}/api/logout`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ global: false, refreshToken })
+    });
+  } catch (err) {
+    console.error('Could not end FusionAuth session', err);
+  }
+};
+
+/**
  * Logs in with the oneTimePassword returned by changePassword, matching the
  * shape Login.jsx stores via setUser (token, user, etc.).
  */

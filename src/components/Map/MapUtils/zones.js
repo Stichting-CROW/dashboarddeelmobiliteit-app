@@ -6,6 +6,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode'
 import {themes} from '../../../themes';
 import {getVehicleIconUrl} from '../../../helpers/vehicleTypes';
+import {escapeHtml} from '../../../helpers/escapeHtml';
 import {useLocation, useRouteMatch} from "react-router-dom";
 import center from '@turf/center'
 
@@ -81,7 +82,7 @@ const generatePopupHtml = (feature) => {
   if(! stop) return `
     <div class="font-inter" style="min-width:180px">
       <div class="text-lg font-bold">
-        ${feature.name}
+        ${escapeHtml(feature.name)}
       </div>
     </div>
   `;
@@ -147,19 +148,19 @@ const generatePopupHtml = (feature) => {
         <div class="mr-2 flex justify-center flex-col">
           <div
             class="rounded-full w-3 h-3" style="background: ${getDotColor()}"
-            title="${availableForModality > 0 ? `Open voor` : `Gesloten voor`} ${modalityNameToModalityTitle(modalityName)}"
+            title="${availableForModality > 0 ? `Open voor` : `Gesloten voor`} ${escapeHtml(modalityNameToModalityTitle(modalityName))}"
           ></div>
         </div>
         <div class="mr-4 w-5">
-          <img class="inline-block w-5" src="${getVehicleIconUrl(modalityName)}" alt="${modalityName}" style="max-width:none;" />
+          <img class="inline-block w-5" src="${escapeHtml(getVehicleIconUrl(modalityName))}" alt="${escapeHtml(modalityName)}" style="max-width:none;" />
         </div>
         <div class="mr-2 flex justify-center flex-col">
           ${parkedVehiclesForModality
-              ? parkedVehiclesForModality
+              ? escapeHtml(parkedVehiclesForModality)
               : '0'
             }${stop.capacity && stop.capacity.combined
             ? ''
-            : capacityForModality ? `/${capacityForModality}` : ''
+            : capacityForModality ? `/${escapeHtml(capacityForModality)}` : ''
           }
         </div>
       </div>`
@@ -201,7 +202,7 @@ const generatePopupHtml = (feature) => {
   return `
     <div class="font-inter">
       <div class="text-lg font-bold">
-        ${feature.name}
+        ${escapeHtml(feature.name)}
       </div>
       <div class="mt-2 text-sm font-bold" ${isControlledAutomatically ? 'hidden' : ''} style="color:#15aeef;">
         Instelling actief: <b>altijd ${isManuallySetToOpen ? 'open' : 'gesloten'}</b>

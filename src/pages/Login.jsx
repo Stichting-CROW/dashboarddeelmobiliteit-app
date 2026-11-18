@@ -7,6 +7,25 @@ import LogoCrow from '../components/LogoCrow.jsx';
 import { IconButtonClose } from '../components/IconButtons.jsx';
 import LogoDashboardDeelmobiliteit from '../components/Logo/LogoDashboardDeelmobiliteit';
 import { sendForgotPasswordEmail } from '../api/auth';
+import { markActivity } from '../helpers/session';
+
+const DEFAULT_LOGIN_ERROR = 'Login mislukt. Heb je het juiste e-mailadres en wachtwoord ingevuld?';
+
+// See https://fusionauth.io/docs/apis/login#authenticate-a-user
+const getLoginErrorMessage = (status) => {
+  switch (status) {
+    case 212:
+      return 'Je e-mailadres is nog niet bevestigd. Bevestig eerst je e-mailadres.';
+    case 242:
+      return 'Voor je account is tweestapsverificatie ingeschakeld. Dit wordt nog niet ondersteund; neem contact op met info@dashboarddeelmobiliteit.nl.';
+    case 409:
+      return 'Je account is tijdelijk geblokkeerd na te veel inlogpogingen. Probeer het later opnieuw.';
+    case 410:
+      return 'Je account is verlopen. Neem contact op met info@dashboarddeelmobiliteit.nl.';
+    default:
+      return DEFAULT_LOGIN_ERROR;
+  }
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,8 +70,22 @@ const Login = () => {
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then(res => res.json())
-      .then(response => {
+    }).then(async res => {
+        const response = await res.json().catch(() => null);
+
+        if (res.status === 203 && response && response.changePasswordId) {
+          navigate(`/reset-password/${response.changePasswordId}`);
+          return;
+        }
+
+        const isAuthenticated = res.status === 200 || res.status === 202;
+        if (! isAuthenticated || ! response || ! response.token) {
+          setErrorMessage(getLoginErrorMessage(res.status));
+          setLoggedIn(false);
+          return;
+        }
+
+        markActivity();
         dispatch( { type: 'LOGIN', payload: null } );
         dispatch( { type: 'RESET_FILTER', payload: null } );
         dispatch( setUser(response) );
@@ -60,7 +93,7 @@ const Login = () => {
         document.location = '/map/park';
       }).catch(error => {
         console.error("Login failed! (%s)", error.message);
-        setErrorMessage('Login mislukt. Heb je het juiste e-mailadres en wachtwoord ingevuld?');
+        setErrorMessage(DEFAULT_LOGIN_ERROR);
         setLoggedIn(false);
     });
   };

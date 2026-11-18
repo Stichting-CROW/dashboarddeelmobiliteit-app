@@ -13,6 +13,7 @@ import st from 'geojson-bounds';
 import { Link } from "react-router-dom";
 import * as R from 'ramda';
 import center from '@turf/center'
+import { Download, Upload } from 'lucide-react';
 import FilteritemGebieden from './FilteritemGebieden.jsx';
 import { useNavigate } from "react-router-dom";
 import {getAcl} from '../../api/acl';
@@ -682,11 +683,7 @@ function FilterbarZones({
               }}
               style={{padding: 0, width: '37px', height: '37px'}}
             >
-              <span className="material-symbols-outlined" style={{
-                // fontSize: '20px'
-              }}>
-                download
-              </span>
+              <Download className="mx-auto" size={20} aria-hidden="true" />
             </Button>
           </div>
           
@@ -738,11 +735,7 @@ function FilterbarZones({
                 }}
                 style={{padding: 0, width: '37px'}}
               >
-                <span className="material-symbols-outlined" style={{
-                  // fontSize: '20px'
-                }}>
-                  upload
-                </span>
+                <Upload className="mx-auto" size={20} aria-hidden="true" />
               </Button>
 
               {doShowImportModal && <ImportZonesModal postImportFunc={() => {

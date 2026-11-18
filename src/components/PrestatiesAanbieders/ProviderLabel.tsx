@@ -1,4 +1,5 @@
 import React from 'react';
+import { escapeHtml } from '../../helpers/escapeHtml';
 
 interface ProviderLabelProps {
   label: string;
@@ -22,9 +23,10 @@ export const buildProviderLabelHtml = (
   options?: BuildProviderLabelHtmlOptions
 ): string => {
   const showTitle = options?.showTitle !== false;
+  const safeColor = escapeHtml(color);
   const titleHtml = showTitle
-    ? `<span class="Map-popup-title ml-2" style="color: ${color};">
-              ${label}
+    ? `<span class="Map-popup-title ml-2" style="color: ${safeColor};">
+              ${escapeHtml(label)}
             </span>`
     : '';
 
@@ -32,7 +34,7 @@ export const buildProviderLabelHtml = (
           <h1 class="mb-2">
             <span
               class="rounded-full inline-block w-4 h-4"
-              style="background-color: ${color};position: relative;"
+              style="background-color: ${safeColor};position: relative;"
               onClick="window.showConfetti()"
               >
             </span>

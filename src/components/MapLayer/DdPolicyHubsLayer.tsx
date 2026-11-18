@@ -37,6 +37,7 @@ import {
 } from '../Map/MapUtils/map.policy_hubs.draw';
 
 import {StateType} from '../../types/StateType.js';
+import { escapeHtml } from '../../helpers/escapeHtml';
 
 import { fetch_hubs } from '../../helpers/policy-hubs/fetch-hubs'
 import PolicyHubsEdit from '../PolicyHubsEdit/PolicyHubsEdit';
@@ -816,26 +817,6 @@ const DdPolicyHubsLayer = ({
     if(! overlapSelectionPopupRef.current) return;
     overlapSelectionPopupRef.current.remove();
     overlapSelectionPopupRef.current = null;
-  }
-
-  const escapeHtml = (value: any) => {
-    const str = String(value ?? '');
-    return str.replace(/[&<>"']/g, (c) => {
-      switch(c) {
-        case '&':
-          return '&amp;';
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '"':
-          return '&quot;';
-        case '\'':
-          return '&#039;';
-        default:
-          return c;
-      }
-    });
   }
 
   const buildOverlappingHubsTableHtml = (features) => {

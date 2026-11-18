@@ -20,6 +20,7 @@ import {
   filterHubsForSearch,
   getSearchableZoneLayers,
 } from '../../helpers/policy-hubs/search-hubs';
+import { escapeHtml } from '../../helpers/escapeHtml';
 
 import './SearchBar.css';
 
@@ -240,7 +241,7 @@ function SearchBar({map}: {map: any}) {
 
     markerRef.current = new maplibregl.Marker()
       .setLngLat([lng, lat])
-      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<div>${hub.name}</div>`))
+      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<div>${escapeHtml(hub.name)}</div>`))
       .addTo(map);
 
     map.fitBounds(st.extent(hub.area), {
@@ -281,7 +282,7 @@ function SearchBar({map}: {map: any}) {
     
     // Add popup to marker
     const popup = new maplibregl.Popup({ offset: 25 })
-      .setHTML(`<div>${label || 'Locatie'}</div>`);
+      .setHTML(`<div>${escapeHtml(label || 'Locatie')}</div>`);
 
     newMarker.setPopup(popup);
     

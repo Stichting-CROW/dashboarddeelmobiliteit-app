@@ -1,3 +1,5 @@
+import { isTokenExpired } from './session';
+
 export const isLoggedIn = (state) => {
   return state.authentication.user_data ? true : false;
 };
@@ -107,17 +109,11 @@ export const isValidAuthState = (state) => {
 
   const userData = state.authentication.user_data;
   
-  // Check if token exists
   if (!userData.token) {
     return false;
   }
 
-  // Optional: Add token expiration check if your API provides expiration info
-  // if (userData.token_expires && new Date(userData.token_expires) < new Date()) {
-  //   return false;
-  // }
-
-  return true;
+  return !isTokenExpired(userData.token);
 };
 
 // Clear invalid authentication state

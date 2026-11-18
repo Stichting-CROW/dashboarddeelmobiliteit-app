@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // import { setUser } from '../../actions/authentication';
-import { clearUser } from '../../actions/authentication.js';
+import { logout } from '../../actions/authentication.js';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,8 +34,7 @@ function Profile() {
 
   const logOut = () => {
     if (user) {
-      dispatch( clearUser() );
-      dispatch( { type: "LOGOUT", payload: null });
+      dispatch(logout());
     }
     navigate('/');
   }

@@ -65,6 +65,7 @@ import {
   notifyError,
 } from './helpers/notify';
 import { pathRequiresBackgroundMap } from './helpers/routes';
+import { useSessionGuard } from './customHooks/useSessionGuard';
 
 import {
   isValidAuthState,
@@ -376,6 +377,8 @@ function App() {
   const isLoggedIn = useSelector((state: StateType) => {
     return state.authentication.user_data ? true : false;
   });
+
+  useSessionGuard(isLoggedIn);
 
   // Guests start on the cluster view so NL-wide vehicle data stays readable
   // and fast (issue #259). Runs on initial guest load and after logout

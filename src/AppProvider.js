@@ -20,6 +20,7 @@ import {
   DISPLAYMODE_RENTALS
 } from './reducers/layers';
 import App from './App';
+import { getSessionEndReason, readLastActivity } from './helpers/session';
 
 const stateSanitizer = (state) => {
   if (!state || !state.vehicles) return state;
@@ -60,23 +61,13 @@ const validatePersistedState = (state) => {
     return {};
   }
 
-  // Check if token exists and is not expired
   const userData = state.authentication.user_data;
-  if (!userData.token) {
-    // Clear authentication if no token
+  if (!userData.token || getSessionEndReason(userData, readLastActivity())) {
     return {
       ...state,
-      authentication: { user_data: null }
+      authentication: { ...state.authentication, user_data: null }
     };
   }
-
-  // Optional: Add token expiration check if your API provides expiration info
-  // if (userData.token_expires && new Date(userData.token_expires) < new Date()) {
-  //   return {
-  //     ...state,
-  //     authentication: { user_data: null }
-  //   };
-  // }
 
   return state;
 };

@@ -1,4 +1,5 @@
 import maplibregl from "maplibre-gl";
+import { escapeHtml } from '../../../helpers/escapeHtml';
 
 const removeExistingPopups = () => {
   // Only remove on mobile
@@ -29,8 +30,8 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
-        <small>(${props.phase})</small>
+        ${escapeHtml(props.name)}
+        <small>(${escapeHtml(props.phase)})</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -53,8 +54,8 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
-        <small>(${props.phase})</small>
+        ${escapeHtml(props.name)}
+        <small>(${escapeHtml(props.phase)})</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -88,8 +89,8 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
-        <small>(${props.phase})</small>
+        ${escapeHtml(props.name)}
+        <small>(${escapeHtml(props.phase)})</small>
       </span>
     </h1>
     <div class="Map-popup-body">
@@ -97,7 +98,7 @@ const createPopupContent = (event, props) => {
       </div>
       <div class="my-4">
         <label class="${labelClasses}"><b>Naam</b></label>
-        <input type="text" value="${props.name}" placeholder="Hub 28 Binnenstad: Korte Voorhout" class="${inputClasses} w-full" />
+        <input type="text" value="${escapeHtml(props.name)}" placeholder="Hub 28 Binnenstad: Korte Voorhout" class="${inputClasses} w-full" />
       </div>
       <div class="my-4">
         <label class="${labelClasses}"><b>Type zone</b></label>
@@ -206,7 +207,7 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
+        ${escapeHtml(props.name)}
         <small>(vastgesteld concept)</small>
       </span>
     </h1>
@@ -245,7 +246,7 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
+        ${escapeHtml(props.name)}
         <small>(definitief gepland)</small>
       </span>
     </h1>
@@ -284,7 +285,7 @@ const createPopupContent = (event, props) => {
         >
       </span>
       <span class="Map-popup-title ml-1" style="color: ${providerColor};">
-        ${props.name}
+        ${escapeHtml(props.name)}
         <small>(definitief actief)</small>
       </span>
     </h1>

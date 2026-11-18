@@ -1,24 +1,5 @@
 import { getPrettyVehicleTypeName, getVehicleIconUrl } from './vehicleTypes';
-
-const escapeHtml = (value: string) => {
-  const str = String(value ?? '');
-  return str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;';
-      case '"':
-        return '&quot;';
-      case '\'':
-        return '&#039;';
-      default:
-        return c;
-    }
-  });
-};
+import { escapeHtml } from './escapeHtml';
 
 export const PERMITS_VEHICLE_TYPE_HEADER_IMG_CLASS = 'permits-vehicle-type-header-img';
 

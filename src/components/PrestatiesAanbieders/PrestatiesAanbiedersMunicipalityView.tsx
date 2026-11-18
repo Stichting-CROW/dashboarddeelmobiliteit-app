@@ -286,7 +286,7 @@ const PrestatiesAanbiedersMunicipalityView = ({activeorganisation = ''}: Prestat
       const provider = getProvider(permit.permit_limit.system_id); // get this from the PermitLimitRecord later?
 
       const providerName = permit.operator ? permit.operator.name : permit.permit_limit.system_id;
-      const providerLogo = provider ? provider.logo : createSvgPlaceholder({
+      const providerLogo = provider?.logo || createSvgPlaceholder({
           width: 48,
           height: 48,
           text: provider?.name.slice(0, 2),

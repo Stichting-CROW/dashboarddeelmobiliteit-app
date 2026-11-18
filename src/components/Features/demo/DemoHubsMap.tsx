@@ -13,6 +13,7 @@ import {
   polygonLineStyle
 } from '../../Map/MapUtils/map.policy_hubs.styles';
 import { themes } from '../../../themes';
+import { escapeHtml } from '../../../helpers/escapeHtml';
 
 const HUB_LOGO_URL =
   'https://dashboarddeelmobiliteit.nl/components/MapComponent/hub-icon-mijksenaar.png';
@@ -92,8 +93,8 @@ function DemoHubsMap() {
           .setLngLat(event.lngLat)
           .setHTML(`
             <div style="font-size: 12px; line-height: 1.5">
-              <strong>${props.name}</strong><br />
-              Plek voor ${props.capacity} voertuigen<br />
+              <strong>${escapeHtml(props.name)}</strong><br />
+              Plek voor ${escapeHtml(props.capacity)} voertuigen<br />
               Fase: Definitief actief
             </div>
           `)

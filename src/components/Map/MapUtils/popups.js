@@ -21,6 +21,8 @@ import {
   getVehicleTypeHeaderImgHtml
 } from '../../../helpers/vehicleTypeIconCommon';
 
+import { escapeHtml } from '../../../helpers/escapeHtml';
+
 // Set language for momentJS
 moment.updateLocale('nl', localization);
 
@@ -96,26 +98,6 @@ export const initPopupLogic = (
       const prettyVehicleTypeName = getPrettyVehicleTypeName(vehicleProperties.form_factor);
       const headerLabel = `${getPrettyProviderName(vehicleProperties.system_id)} ${prettyVehicleTypeName ? prettyVehicleTypeName : ''}`;
 
-      const escapeHtml = (value) => {
-        const str = String(value ?? '');
-        return str.replace(/[&<>"']/g, (c) => {
-          switch (c) {
-            case '&':
-              return '&amp;';
-            case '<':
-              return '&lt;';
-            case '>':
-              return '&gt;';
-            case '"':
-              return '&quot;';
-            case '\'':
-              return '&#039;';
-            default:
-              return c;
-          }
-        });
-      };
-
       const formatSinceDateTime = (props) => {
         if(! props || ! props.in_public_space_since) return '-';
         return moment(props.in_public_space_since).locale('nl').format('DD/MM HH:mm');
@@ -132,15 +114,15 @@ export const initPopupLogic = (
             </div>` : ''}
 
             ${theVehicleProperties.distance_in_meters ? `<div>
-              Dit voertuig is ${theVehicleProperties.distance_in_meters} meter verplaatst<br />
+              Dit voertuig is ${escapeHtml(theVehicleProperties.distance_in_meters)} meter verplaatst<br />
             </div>` : ''}
 
             ${(canSeeVehicleId && theVehicleProperties.vehicle_id) ? `<div class="mt-4 mb-4 text-xs block text-gray-400">
-              ${theVehicleProperties.vehicle_id}
+              ${escapeHtml(theVehicleProperties.vehicle_id)}
             </div>` : ''}
 
             ${providerWebsiteUrl ? `<div class="mt-2">
-              <a href="${providerWebsiteUrl}" rel="external" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${theProviderColor};">
+              <a href="${escapeHtml(providerWebsiteUrl)}" rel="external noopener noreferrer" target="_blank" class="inline-block py-1 px-2 text-white rounded-md hover:opacity-80" style="background-color: ${escapeHtml(theProviderColor)};">
                 website
               </a>
             </div>` : ''}
