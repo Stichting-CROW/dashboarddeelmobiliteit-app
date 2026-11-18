@@ -1,5 +1,5 @@
 /** Users are logged out after this period without any interaction. */
-export const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+export const SESSION_IDLE_TIMEOUT_MS = 60 * 48 * 60 * 1000;// After 48 hours (60 minutes times 48)
 
 export const LAST_ACTIVITY_STORAGE_KEY = 'CROWDD_lastActivity';
 
