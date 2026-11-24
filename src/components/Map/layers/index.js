@@ -1,4 +1,3 @@
-import vehiclesPoint from './vehicles-point.js';
 import vehiclesHeatmap from './vehicles-heatmap.js';
 import vehiclesClusters from './vehicles-clusters.js';
 import vehiclesClustersCount from './vehicles-clusters-count.js';
@@ -40,7 +39,6 @@ export const layers = {
   'zones-geodata': zonesGeodata,
   'zones-geodata-border': zonesGeodataBorder,
 
-  'vehicles-point': vehiclesPoint,
   'vehicles-clusters': vehiclesClusters,
   'vehicles-clusters-count': vehiclesClustersCount,
   'vehicles-clusters-point': vehiclesClustersPoint,

@@ -126,7 +126,9 @@ const fetchAggregated = async (token, baseUrl, options, responseKey) => {
 export const getAggregatedStats = async (token, key, options) => {
   // Define API end point URL
   // Example URL: `https://api.deelfietsdashboard.nl/dashboard-api/aggregated_stats/${key}?start_time=${options.startTime}&end_time=${options.endTime}&operators=${options.operators}&zone_ids=${options.zoneIds}&aggregation_level=${options.aggregationLevel}`;
-  const baseUrl = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}&aggregation_time=${options.aggregationTime}`;
+  // Omit aggregation_time when unset. Sending the string "undefined" makes the API reject the request.
+  let baseUrl = `${process.env.REACT_APP_MAIN_API_URL}/dashboard-api/aggregated_stats/${key}?aggregation_level=${options.aggregationLevel}`;
+  if (options.aggregationTime) baseUrl += `&aggregation_time=${options.aggregationTime}`;
 
   return fetchAggregated(token, baseUrl, options, `${key}_aggregated_stats`);
 }

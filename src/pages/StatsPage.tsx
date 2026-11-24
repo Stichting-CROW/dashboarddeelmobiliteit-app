@@ -1,10 +1,11 @@
-import React, {useEffect, useMemo} from 'react'; // , {useEffect, useState }
+import React, {useCallback, useEffect, useMemo} from 'react'; // , {useEffect, useState }
 import './StatsPage.css'
 
 import {
   useDispatch,
   useSelector
 } from 'react-redux';
+import {useSearchParams} from 'react-router-dom';
 
 import moment from 'moment';
 
@@ -13,7 +14,8 @@ import {StateType} from '../types/StateType';
 import {
   doShowDetailledAggregatedData,
   didSelectAtLeastOneCustomZone,
-  aggregationFunctionButtonsToRender
+  getAllowedAggregationLevels,
+  getValidAggregationLevel
 } from '../helpers/stats/index';
 
 import VerhuringenChart from '../components/Chart/VerhuringenChart';
@@ -21,8 +23,8 @@ import BeschikbareVoertuigenChart from '../components/Chart/BeschikbareVoertuige
 import VerhuringenPerVoertuigChart from '../components/Chart/VerhuringenPerVoertuigChart';
 import FormInput from '../components/FormInput/FormInput';
 import TimeGridVehicleAvailability from '../components/TimeGrid/TimeGrid_VehicleAvailability';
-import InfoTooltip from '../components/InfoTooltip/InfoTooltip';
-import PageTitle from '../components/common/PageTitle';
+import StatsPageHeader from '../components/Stats/StatsPageHeader';
+import StatsKpiRow from '../components/Stats/StatsKpiRow';
 
 function StatsPage(props) {
   const dispatch = useDispatch()
@@ -39,6 +41,17 @@ function StatsPage(props) {
 
   const gebieden = useSelector((state: StateType) => state.metadata?.gebieden)
 
+  // "Vergelijk met vorige periode" lives in the URL (?compare=1) so a shared
+  // link shows the same view
+  const [searchParams, setSearchParams] = useSearchParams();
+  const compareWithPreviousPeriod = searchParams.get('compare') === '1';
+  const setCompareWithPreviousPeriod = useCallback((compare: boolean) => {
+    const next = new URLSearchParams(searchParams);
+    if(compare) next.set('compare', '1');
+    else next.delete('compare');
+    setSearchParams(next, {replace: true});
+  }, [searchParams, setSearchParams]);
+
   const setAggregationLevel = (newlevel) => {
     dispatch({
       type: 'SET_FILTER_ONTWIKKELING_AGGREGATIE',
@@ -52,30 +65,38 @@ function StatsPage(props) {
     let agg = null;
     // Count days
     const daysInSelectedPeriod = moment(filter.ontwikkelingtot).diff(moment(filter.ontwikkelingvan), 'days');
-    // If custom zone:
+    // If custom zone: prefer a fine-grained level for short periods
     if(userDidSelectCustomZone) {
-      if(daysInSelectedPeriod <= 1 && false) agg = '5m';
-      else if(daysInSelectedPeriod <= 2) agg = '15m';
+      if(daysInSelectedPeriod <= 2) agg = '15m';
       else if(daysInSelectedPeriod <= 5) agg = 'hour';
-    }
-    // If no custom zone:
-    else {
-      const availableAggLevels = ['day', 'week', 'month'];
-    // If agg level is specific to detailled agg data: switch to other agg level
-      if(availableAggLevels.indexOf(filter.ontwikkelingaggregatie) <= -1) {
-        // Switch to non-detailled agg level
-        agg = 'day';
-      }
     }
     return agg;
   }
 
-  // Monitor if selected zones change
+  // The aggregation level that is valid for the current filter. If the
+  // (persisted) level in the store is not valid for this selection, e.g.
+  // `15m` while looking at a whole municipality, the charts would request
+  // data the API rejects (HTTP 400) and then refetch once corrected. We
+  // therefore compute the valid level synchronously and only render the
+  // charts once the store matches it.
+  const validAggregationLevel = getValidAggregationLevel(filter, zones);
+  const isAggregationLevelValid = validAggregationLevel === filter.ontwikkelingaggregatie;
+
+  // Monitor if selected zones or period change: pick a preferred level
   useEffect(() => {
-    const userDidSelectCustomZone = didSelectAtLeastOneCustomZone(filter, zones);
-    const agg = decideOnAggregationLevel(userDidSelectCustomZone);
-    if(agg) setAggregationLevel(agg);
+    const showDetailed = doShowDetailledAggregatedData(filter, zones);
+    const preferred = decideOnAggregationLevel(showDetailed);
+    if(preferred && preferred !== filter.ontwikkelingaggregatie) {
+      setAggregationLevel(preferred);
+    }
   }, [filterZones, filter.ontwikkelingvan, filter.ontwikkelingtot])
+
+  // Correct an invalid aggregation level (e.g. persisted from another selection)
+  useEffect(() => {
+    if(! isAggregationLevelValid) {
+      setAggregationLevel(validAggregationLevel);
+    }
+  }, [isAggregationLevelValid, validAggregationLevel])
 
   const setAggregationTime = (newtime) => {
     dispatch({
@@ -106,60 +127,6 @@ function StatsPage(props) {
     )
   }
 
-  const renderAggregationButton = (name, title) => {
-    return (
-      <div
-        key={`agg-level-${name}`}
-        className={"agg-button " + (filter.ontwikkelingaggregatie===name ? " agg-button-active":"")}
-        onClick={() => { setAggregationLevel(name) }}
-      >
-        {title}
-      </div>
-    )
-  }
-
-  const daysInSelectedPeriod = moment(filter.ontwikkelingtot).diff(moment(filter.ontwikkelingvan), 'days');
-
-  const getAggregationButtonsToRender = () => {
-    let ret = [];
-    if(doShowDetailledAggregatedData(filter, zones)) {
-      const doShow5m = daysInSelectedPeriod <= 1;
-      const doShow15m = daysInSelectedPeriod <= 2;
-      const doShowHour = daysInSelectedPeriod <= 10;
-
-      if(doShow5m) {
-        ret.push(
-          {name: '5m', title: '5 min'},
-        );
-      }
-      if(doShow15m) {
-        ret.push(
-          {name: '15m', title: 'kwartier'},
-        );
-      }
-      if(doShowHour) {
-        ret.push(
-          {name: 'hour', title: 'uur'}
-        );
-      }
-    }
-    ret.push(
-      {name: 'day', title: 'dag'},
-    );
-    if(daysInSelectedPeriod >= 6) {
-      ret.push(
-        {name: 'week', title: 'week'},
-      );
-    }
-    if(daysInSelectedPeriod >= 27) {
-      ret.push(
-        {name: 'month', title: 'maand'},
-      );
-    }
-    
-    return ret;
-  }
-
   const getPageTitle = useMemo(() => {
     if(filterZones) {
       const zoneIds = filterZones.split(',').map(id => parseInt(id));
@@ -174,52 +141,62 @@ function StatsPage(props) {
     return 'Ontwikkeling';
   }, [filterZones, filter.gebied, zones, gebieden]);
 
-  const aggregationButtonsToRender = getAggregationButtonsToRender();
+  const aggregationButtonsToRender = getAllowedAggregationLevels(filter, zones);
+  const selectedZoneCount = filterZones ? filterZones.split(',').filter(Boolean).length : 0;
 
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   // {filter.ontwikkelingaggregatie === 'day' ? renderTimeControl() : ''}
   return (
     <div className="StatsPage pt-4 pb-24">
 
-      <div className={"agg-button-container mb-8"}>
+      {/* Title is the area currently selected (gebied or zones), with the
+          period as subtitle and the aggregation level control on the right */}
+      <StatsPageHeader
+        title={getPageTitle}
+        startDate={filter.ontwikkelingvan}
+        endDate={filter.ontwikkelingtot}
+        zoneCount={selectedZoneCount}
+        aggregationLevels={aggregationButtonsToRender}
+        activeAggregationLevel={filter.ontwikkelingaggregatie}
+        onChangeAggregationLevel={setAggregationLevel}
+        compareWithPreviousPeriod={compareWithPreviousPeriod}
+        onChangeCompareWithPreviousPeriod={setCompareWithPreviousPeriod}
+      />
 
-        {aggregationButtonsToRender.map(x => renderAggregationButton(x.name, x.title))} 
+      {/* Only mount the charts once the aggregation level is valid for this
+          selection, so they never fetch with a level the API rejects */}
+      {isAggregationLevelValid && (<>
+        {/* Headline numbers for the period, compared with the previous period */}
+        <StatsKpiRow />
 
-        {aggregationButtonsToRender && aggregationButtonsToRender.length > 0 && (<InfoTooltip className="mx-2 inline-block">
-          Toon de data in intervallen van {aggregationButtonsToRender.map((x) => x.title).join(' / ')}. Je bekijkt nu {aggregationButtonsToRender.filter(x => filter.ontwikkelingaggregatie == x.name).pop()?.title}-niveau.
-        </InfoTooltip>)}
-      </div>
+        <div className="StatsPage-chart-grid">
+          <BeschikbareVoertuigenChart
+            filter={filter}
+            config={{
+              showLegend: true
+            }}
+            title="Beschikbare voertuigen"
+            compareWithPreviousPeriod={compareWithPreviousPeriod}
+          />
+          <VerhuringenChart
+            title="Verhuringen"
+            compareWithPreviousPeriod={compareWithPreviousPeriod}
+          />
+          <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
+        </div>
 
-      {/* Show a title for the chart, that is the area currently selected (gebied or zones) */}
-      <PageTitle className="my-2">
-        {getPageTitle}
-      </PageTitle>
-
-      <div className="StatsPage-chart-grid">
-        <BeschikbareVoertuigenChart
-          filter={filter}
-          config={{
-            showLegend: true
-          }}
-          title="Beschikbare voertuigen"
-        />
-        <VerhuringenChart
-          title="Verhuringen"
-        />
-        <VerhuringenPerVoertuigChart title="Verhuringen per voertuig" />
-      </div>
-
-      <div className="xl:flex">
-        {doShowDetailledAggregatedData(filter, zones) && (<div className="my-16 xl:flex-1">
-          <h2 className="text-4xl my-2">
-            Gemiddelde bezetting
-          </h2>
-          <div className="my-8 mr-8 ml-16 max-w-3xl">
-            <TimeGridVehicleAvailability />
-          </div>
-        </div>)}
-        <div className="flex-1" />
-      </div>
+        <div className="xl:flex">
+          {doShowDetailledAggregatedData(filter, zones) && (<div className="my-16 xl:flex-1">
+            <h2 className="text-4xl my-2">
+              Gemiddelde bezetting
+            </h2>
+            <div className="my-8 mr-8 ml-16 max-w-3xl">
+              <TimeGridVehicleAvailability />
+            </div>
+          </div>)}
+          <div className="flex-1" />
+        </div>
+      </>)}
 
     </div>
   )

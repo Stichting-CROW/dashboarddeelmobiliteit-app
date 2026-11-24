@@ -5,12 +5,14 @@ const layer = {
   'source': 'vehicles-clusters',
   filter: ['has', 'point_count'],
   paint: {
-    // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
-    // with three steps to implement three types of circles:
-    //   * Blue, 20px circles when point count is less than 100
-    //   * Yellow, 30px circles when point count is between 100 and 750
-    //   * Pink, 40px circles when point count is greater than or equal to 750
-    'circle-color': '#1FA024',
+    // Clusters that contain at least one own-area vehicle stay green.
+    // Clusters with only public-context vehicles (Heel NL) are muted.
+    'circle-color': [
+      'case',
+      ['<', ['get', 'context_count'], ['get', 'point_count']],
+      '#1FA024',
+      '#A8C9AA'
+    ],
     'circle-radius': [
       'step',
       ['get', 'point_count'],
@@ -19,7 +21,7 @@ const layer = {
       40
     ]
   },
-  'maxzoom': 18
+  'maxzoom': 12
 }
 
 export default layer;

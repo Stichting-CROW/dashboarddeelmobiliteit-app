@@ -1,32 +1,10 @@
 import moment from 'moment';
 
-// Always start with an initial municipality
-// This prevents a slow website on initial load
-const randomInitialMunicipality = () => {
-  const municipalitiesWithLotsOfVehicles = [
-    'GM0080',// Leeuwarden
-    'GM0014',// Groningen
-    // '',// Alkmaar
-    'GM0392',// Haarlem
-    'GM0034',// Almere
-    'GM0193',// Zwolle
-    'GM0402',// Hilversum
-    'GM0307',// Amersfoort
-    'GM0344',// Utrecht
-    'GM0200',// Apeldoorn
-    'GM0518',// Den Haag
-    'GM0599',// Rotterdam
-    'GM0758',// Breda,
-    'GM0855',// Tilburg
-    'GM0772'// Eindhoven
-  ];
-  const randomMunicipality = municipalitiesWithLotsOfVehicles[Math.floor(Math.random() * municipalitiesWithLotsOfVehicles.length)];
-  return randomMunicipality;
-}
-
+// Start with "Alle plaatsen" so guests and logged-in users see vehicles
+// for the area they are looking at, not a random municipality (issue #259).
 const initialState = {
   visible: true,
-  gebied: randomInitialMunicipality(),
+  gebied: "",
   zones: "",
   datum: (new Date()).toISOString(),
   // intervalstart: (new Date()).toISOString(),
@@ -34,6 +12,9 @@ const initialState = {
   aanbiedersexclude: "",
   parkeerduurexclude: "",
   non_operational_only: false,
+  // Aanbod map, logged-in users: also show (public, less detailed) vehicles
+  // outside the user's own data area
+  show_all_nl_vehicles: true,
   voertuigtypesexclude: "",
   afstandexclude: "",
   herkomstbestemming: "herkomstbestemming",
@@ -108,6 +89,12 @@ export default function filter(state = initialState, action) {
       return {
         ...state,
         non_operational_only: action.payload === true
+      };
+    }
+    case 'SET_FILTER_SHOW_ALL_NL_VEHICLES': {
+      return {
+        ...state,
+        show_all_nl_vehicles: action.payload === true
       };
     }
     case 'SET_FILTER_H3NIVEAU': {

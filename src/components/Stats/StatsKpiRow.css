@@ -1,0 +1,14 @@
+/* Align the KPI row with the page title / chart plot area */
+.StatsPage .StatsKpiRow {
+  margin-left: 58px;
+  margin-top: 1.5rem;
+}
+
+.StatsKpiRow-tile {
+  min-width: 0;
+}
+
+/* Tiles use tabular figures so the numbers line up when they update */
+.StatsKpiRow-tile {
+  font-variant-numeric: tabular-nums;
+}

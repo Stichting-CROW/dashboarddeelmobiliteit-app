@@ -94,7 +94,7 @@ export const activateLayers = (map, allLayers, layersToShow, isRetry) => {
   }
 
   if (process.env.NODE_ENV === 'development') {
-    const parkIds = ['vehicles-point', 'vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
+    const parkIds = ['vehicles-clusters', 'vehicles-clusters-count', 'vehicles-clusters-point', 'vehicles-heatmap'];
     const activeParkIds = layersToShow.filter(id => parkIds.includes(id));
     const hiddenParkIds = Object.keys(allLayers).filter(id => parkIds.includes(id) && layersToShow.indexOf(id) <= -1);
     if (activeParkIds.length > 0 || hiddenParkIds.length > 0) {

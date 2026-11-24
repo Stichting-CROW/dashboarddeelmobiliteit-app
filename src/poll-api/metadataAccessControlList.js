@@ -182,10 +182,9 @@ export const initAccessControlList = (store_accesscontrollist)  => {
                 loadPublicGebieden(store_accesscontrollist);
               }
             } else {
-              // User has access to multiple municipalities. When the persisted /
-              // initial 'Plaats' filter points at a municipality this user cannot
-              // access (e.g. a stale localStorage value or the random initial
-              // municipality after a fresh load), the filter bar already renders
+              // User has access to multiple municipalities. When the persisted
+              // 'Plaats' filter points at a municipality this user cannot access
+              // (e.g. a stale localStorage value), the filter bar already renders
               // it as "Alle plaatsen", but the vehicle query would be scoped to
               // zones of that inaccessible municipality and return nothing. Reset
               // it to "" ("Alle plaatsen") so all accessible municipalities'

@@ -9,8 +9,7 @@ import {
 } from 'react-redux';
 import {StateType} from '../../types/StateType';
 
-import {preprocessKmlFile, importKmlFile} from '../../helpers/import-kml.js';
-import {preprocessGeoPackageFile, importGeoPackageFile} from '../../helpers/import-geopackage.js';
+import {preprocessGeoPackageFile} from '../../helpers/import-geopackage.js';
 
 import {ZonesToImportConfigurator} from './ZonesToImportConfigurator';
 

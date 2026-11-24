@@ -116,3 +116,48 @@
   font-weight: bolder;
   font-size: 14px;
 }
+
+.filter-zones-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  font-weight: normal;
+  opacity: 0.9;
+}
+
+.filter-zones-type-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.form-item:not(.form-item-selected) .filter-zones-type-dot {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.filter-zones-geotype-filter {
+  display: flex;
+  border: 1px solid #CCCCCC;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  background: #fff;
+}
+
+.filter-zones-geotype-option {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 32px;
+  color: #6b7280;
+}
+
+.filter-zones-geotype-option.is-active {
+  color: #fff;
+  font-weight: 600;
+}

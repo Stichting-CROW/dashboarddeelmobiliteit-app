@@ -5,8 +5,12 @@ function markerCacheKey(operatorColor, durationIndicationColor, isNonOperational
   return `${operatorColor || '#666'}|${durationIndicationColor}|${isNonOperational ? 1 : 0}`;
 }
 
+/** Marker index for vehicles without a known parking duration (grey). */
+const UNKNOWN_DURATION_BIN = 5;
+
 async function getVehicleMarkers(operatorColor, isNonOperational = false) {
-  const gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48', '#9158DE'];
+  // Index = duration_bin; the last one (UNKNOWN_DURATION_BIN) is grey
+  const gradients = ['#1FA024', '#48E248', '#FFD837', '#FD3E48', '#9158DE', '#B2B2B2'];
   return Promise.all(
     gradients.map((durationIndicationColor) =>
       styleVehicleMarker(operatorColor, durationIndicationColor, isNonOperational)
@@ -133,6 +137,7 @@ async function rasterizeVehicleMarkerSvg(operatorColor, durationIndicationColor,
 }
 
 export {
+  UNKNOWN_DURATION_BIN,
   getVehicleMarkers,
   getVehicleMarkers_rentals
 };

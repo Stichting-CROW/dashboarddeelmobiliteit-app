@@ -18,15 +18,21 @@ import {StateType} from '../../types/StateType';
 import { selectActiveDataLayers, isRentalsLayerActive, selectDataLayerOrder } from '../../helpers/layerSelectors';
 
 import {
-  removeH3Grid
+  removeH3Grid,
+  setH3GridLoadingState,
+  updateSelectedCells,
+  getSelectedHbCells,
+  HbRenderResult
 } from '../Map/MapUtils/map.hb';
 import {
   renderGeometriesGrid
 } from '../Map/MapUtils/map.hb.geometries';
 import {
-  renderH3Grid
+  renderH3Grid,
+  rerenderH3GridForViewport
 } from '../Map/MapUtils/map.hb.h3';
 import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
+import HbStatusWidget from './HbStatusWidget/HbStatusWidget';
 
 const DdH3HexagonLayer = ({
   map
@@ -61,12 +67,57 @@ const DdH3HexagonLayer = ({
     return null;
   });
 
+  const hbRetryCount = useSelector((state: StateType) => {
+    return state.rentals ? (state.rentals.hb_retry_count || 0) : 0;
+  });
+  // Updated on moveend/zoomend (see MapComponent.registerMapView)
+  const mapExtentKey = useSelector((state: StateType) => {
+    return JSON.stringify(state.layers ? state.layers.mapextent : null);
+  });
+
+  const selectedCells = getSelectedHbCells(filter);
+  const selectedCellsKey = JSON.stringify(selectedCells);
+
   // Cleanup H3 grid on unmount (synchronous; see MapComponent map teardown).
   useEffect(() => {
     return () => {
       removeH3Grid(map);
+      setH3GridLoadingState(map, false);
+      dispatch({ type: 'RESET_HB_STATUS' });
     };
   }, [map]);
+
+  // Give immediate feedback on a click: outline the selected cell(s) on the
+  // grid that is already on the map, before the new HB data has arrived.
+  useEffect(() => {
+    if(! map || ! is_hb_view) return;
+    updateSelectedCells(map, selectedCells);
+  }, [
+    map,
+    is_hb_view,
+    selectedCellsKey
+  ]);
+
+  // Keep the grid in view when the map is moved. Uses the OD data of the last
+  // render, so this never triggers a (slow) fetch.
+  useEffect(() => {
+    if(! map || ! is_hb_view) return;
+    const stats = rerenderH3GridForViewport(map, filter);
+    if (stats) {
+      // Only merged by the reducer when the last load succeeded
+      dispatch({
+        type: 'UPDATE_HB_RESULT',
+        payload: {
+          cell_count: stats.cell_count,
+          cells_with_trips: stats.cells_with_trips
+        }
+      });
+    }
+  }, [
+    map,
+    is_hb_view,
+    mapExtentKey
+  ]);
 
   // If HB view: Show H3 grid, if not: Remove H3 grid
   useEffect(() => {
@@ -76,12 +127,20 @@ const DdH3HexagonLayer = ({
     if(! is_hb_view) {
       // If no HB view: remove remove 'old' H3 grid from map first
       removeH3Grid(map);
+      setH3GridLoadingState(map, false);
+      dispatch({ type: 'RESET_HB_STATUS' });
       return;
     }
     // If HB map is active: render hexagons
     let cancelled = false;
+    const isCancelled = () => cancelled;
+    const startedAt = Date.now();
+
+    // Tell the user we're loading: status widget, dimmed grid, progress cursor
+    dispatch({ type: 'SET_HB_LOADING', payload: startedAt });
+    setH3GridLoadingState(map, true);
+
     const applyOrder = () => {
-      if (cancelled) return;
       applyDataLayerOrderWhenReady(
         map,
         dataLayerOrder[DISPLAYMODE_RENTALS],
@@ -89,16 +148,53 @@ const DdH3HexagonLayer = ({
       );
     };
 
-    const renderPromise = filter.h3niveau === 'wijk'
-      ? renderGeometriesGrid(map, token, filter, metadata)
-      : renderH3Grid(map, token, filter, metadata);
+    const renderPromise: Promise<HbRenderResult> = filter.h3niveau === 'wijk'
+      ? renderGeometriesGrid(map, token, filter, metadata, { isCancelled })
+      : renderH3Grid(map, token, filter, metadata, { isCancelled });
 
-    Promise.resolve(renderPromise).then(applyOrder);
+    renderPromise
+      .then((result) => {
+        // A newer render superseded this one; it manages the loading state
+        if (cancelled || ! result || result.status === 'aborted') return;
+
+        setH3GridLoadingState(map, false);
+
+        if (result.status === 'ok') {
+          dispatch({
+            type: 'SET_HB_SUCCESS',
+            payload: {
+              ...result.stats,
+              selected_count: selectedCells.length,
+              duration_ms: Date.now() - startedAt
+            }
+          });
+          applyOrder();
+        }
+        else {
+          dispatch({
+            type: 'SET_HB_ERROR',
+            payload: {
+              message: result.message,
+              http_status: result.httpStatus
+            }
+          });
+        }
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        console.error('Rendering HB grid failed', e);
+        setH3GridLoadingState(map, false);
+        dispatch({
+          type: 'SET_HB_ERROR',
+          payload: { message: 'Onverwachte fout bij het tonen van de HB-relaties' }
+        });
+      });
 
     return () => {
       cancelled = true;
     };
   }, [
+    hbRetryCount,
     map,
     is_hb_view,
     metadata?.aclOperators,
@@ -167,7 +263,9 @@ const DdH3HexagonLayer = ({
     filter.h3niveau
   ])
 
-  return <></>
+  if (! is_hb_view) return <></>;
+
+  return <HbStatusWidget />
 }
 
 export default DdH3HexagonLayer;

@@ -1,12 +1,22 @@
 export const sources = {
   'vehicles': {
     'type': 'geojson',
+    // Lower maxzoom reduces how much tiling the map worker does at high zooms;
+    // points are still placed exactly.
+    'maxzoom': 14
   },
   'vehicles-clusters': {
     'type': 'geojson',
     'cluster': true,
-    // 'clusterMaxZoom': 18,// Max zoom to cluster points on
-    'clusterRadius': 50 // Radius of each cluster when clustering points (defaults to 50)
+    // Clusters below zoom 12; individual markers from zoom 12 (Voertuigen view).
+    // Keep in sync with maxzoom of the vehicles-clusters(-count) layers.
+    'clusterMaxZoom': 11,
+    'clusterRadius': 50,
+    'maxzoom': 14,
+    // Count public-context vehicles per cluster so own-area clusters stay green
+    'clusterProperties': {
+      'context_count': ['+', ['case', ['==', ['get', 'is_context'], true], 1, 0]]
+    }
   },
   'vehicles-heatmap': {
     'type': 'geojson'

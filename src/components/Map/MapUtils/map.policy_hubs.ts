@@ -38,6 +38,10 @@ const removeHubsFromMap = (map: any, sourceKey: string = 'policy_hubs') => {
 
       // Remove event listeners
       map.off('click', key, clickHubLogo);
+      map.off('mouseenter', key, mouseEnterHubLogo);
+      map.off('mouseleave', key, mouseLeaveHubLogo);
+      // mouseleave won't fire for a removed layer, so reset a hover cursor
+      map.getCanvas().style.cursor = '';
 
       removeHubSources(map, sourceKey);
     } catch {
@@ -45,9 +49,23 @@ const removeHubsFromMap = (map: any, sourceKey: string = 'policy_hubs') => {
     }
 }
 
+const isDrawingPolygon = (map) => {
+  return map.getContainer().classList.contains('mode-draw_polygon');
+}
+
+const mouseEnterHubLogo = (e) => {
+  e.target.getCanvas().style.cursor = 'pointer';
+}
+
+const mouseLeaveHubLogo = (e) => {
+  e.target.getCanvas().style.cursor = '';
+}
+
 const clickHubLogo = (e) => {
   const map = window['ddMap'];
   if (!isMapStyleUsable(map)) return;
+  // Clicks while drawing place a vertex; don't zoom in on top of that
+  if (isDrawingPolygon(map)) return;
 
   const zoom = map.getZoom();
   map.easeTo({
@@ -163,12 +181,8 @@ async function renderPolygons_fill(map, geojson, sourceKey: string = 'policy_hub
       });
 
       map.on('click', layerId, clickHubLogo);
-      map.on('mouseenter', layerId, function () {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', layerId, function () {
-        map.getCanvas().style.cursor = '';
-      });
+      map.on('mouseenter', layerId, mouseEnterHubLogo);
+      map.on('mouseleave', layerId, mouseLeaveHubLogo);
 
     }
     // If source was already present: Update data

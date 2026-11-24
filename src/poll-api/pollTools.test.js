@@ -92,6 +92,13 @@ describe('createFilterparameters zone scoping', () => {
       );
       expect(zoneParam(params)).toBe('zone_ids=1,3,4');
     });
+
+    it('omits zone_ids for guests when zones have not loaded yet', () => {
+      const params = createFilterparameters(
+        DISPLAYMODE_PARK, filterAllePlaatsen, buildMetadata({ zones: [] }), { is_logged_in: false },
+      );
+      expect(zoneParam(params)).toBeUndefined();
+    });
   });
 
   describe('explicit selections take precedence', () => {

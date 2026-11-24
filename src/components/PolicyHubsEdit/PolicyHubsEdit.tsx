@@ -70,6 +70,17 @@ const PolicyHubsEdit = ({
     phase: 'concept'
   });
 
+  // Capacity values per capacity type, so switching between 'totaal' and
+  // 'per modaliteit' doesn't lose the values of the other type
+  const [previousCapacities, setPreviousCapacities] = useState<{
+    combined?: {[key: string]: number},
+    modality?: {[key: string]: number}
+  }>({});
+
+  useEffect(() => {
+    setPreviousCapacities({});
+  }, [hubData.zone_id]);
+
   const token = useSelector((state: StateType) => (state.authentication.user_data && state.authentication.user_data.token)||null)
 
   // If selected policy hubs changes: Load data of hub
@@ -212,6 +223,10 @@ const PolicyHubsEdit = ({
 
     // Remove capacity values that are 0
     if(fiteredHubData.stop?.capacity) {
+      fiteredHubData.stop = {
+        ...fiteredHubData.stop,
+        capacity: {...fiteredHubData.stop.capacity}
+      };
       Object.keys(fiteredHubData.stop.capacity).forEach(key => {
         if(fiteredHubData.stop.capacity[key] === 0) {
           delete fiteredHubData.stop.capacity[key];
@@ -338,31 +353,42 @@ const PolicyHubsEdit = ({
   }
 
   const updateCapacityType = (name: string) => {
+      const currentType = getCapacityType();
+      if(currentType === name) return;
+
       setHasUnsavedChanges(true);
 
+      const currentCapacity = {...(hubData?.stop?.capacity || {})};
+      const updatedPreviousCapacities = currentType
+          ? {...previousCapacities, [currentType]: currentCapacity}
+          : previousCapacities;
+      setPreviousCapacities(updatedPreviousCapacities);
+
       if(name === 'combined') {
+          const previous = updatedPreviousCapacities.combined;
           setHubData({
               ...hubData,
               stop: {
                   ...hubData.stop,
                   capacity: {
-                      combined: hubData?.stop?.capacity?.combined || 0
+                      combined: previous?.combined || 50
                   }
               }
           });
       }
       else if(name === 'modality') {
+          const previous = updatedPreviousCapacities.modality || {};
           setHubData({
               ...hubData,
               stop: {
                   ...hubData.stop,
                   capacity: {
-                      bicycle: hubData?.stop?.capacity?.bicycle || 0,
-                      moped: hubData?.stop?.capacity?.moped || 0,
-                      scooter: hubData?.stop?.capacity?.scooter || 0,
-                      cargo_bicycle: hubData?.stop?.capacity?.cargo_bicycle || 0,
-                      car: hubData?.stop?.capacity?.car || 0,
-                      other: hubData?.stop?.capacity?.other || 0
+                      bicycle: previous.bicycle || 0,
+                      moped: previous.moped || 0,
+                      scooter: previous.scooter || 0,
+                      cargo_bicycle: previous.cargo_bicycle || 0,
+                      car: previous.car || 0,
+                      other: previous.other || 0
                   }
               }
           });
@@ -755,30 +781,30 @@ const PolicyHubsEdit = ({
                     {getCapacityType() === 'combined' && <ModalityRow
                         imageUrl=""
                         name="vehicles-limit.combined"
-                        value={hubData?.stop?.capacity?.combined || 50}
+                        value={hubData?.stop?.capacity?.combined ?? 50}
                         onChange={(e) => updateCapacityValue('combined', Number(e.target.value))}
                     />}
                     {getCapacityType() === 'modality' && <>
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/IF05O8u.png"
+                            imageUrl="/components/PolicyHubsEdit/bike-icon.png"
                             name="vehicles-limit.bicycle"
                             value={hubData?.stop?.capacity?.bicycle || 0}
                             onChange={(e) => updateCapacityValue('bicycle', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/FdVBJaZ.png"
+                            imageUrl="/components/PolicyHubsEdit/cargo-bike-icon.png"
                             name="vehicles-limit.cargo_bicycle"
                             value={hubData?.stop?.capacity?.cargo_bicycle || 0}
                             onChange={(e) => updateCapacityValue('cargo_bicycle', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/h264sb2.png"
+                            imageUrl="/components/PolicyHubsEdit/moped-icon.png"
                             name="vehicles-limit.moped"
                             value={hubData?.stop?.capacity?.moped || 0}
                             onChange={(e) => updateCapacityValue('moped', Number(e.target.value))}
                         />
                         <ModalityRow
-                            imageUrl="https://i.imgur.com/7Y2PYpv.png"
+                            imageUrl="/components/PolicyHubsEdit/car-icon.png"
                             name="vehicles-limit.car"
                             value={hubData?.stop?.capacity?.car || 0}
                             onChange={(e) => updateCapacityValue('car', Number(e.target.value))}

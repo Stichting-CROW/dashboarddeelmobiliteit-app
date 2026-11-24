@@ -28,7 +28,9 @@ Als je klikt op een voertuig zie je:
 
 ![Clusterweergave](https://dashboarddeelmobiliteit.nl/components/Docs/Aanbod/kaart-clusters.png)
 
-Selecteer bij _Lagen_ de laag **Clusters** om voertuigen gegroepeerd te zien in clusters. Dit toont je snel hoeveel voertuigen er in elk gebied staan.
+Selecteer bij _Lagen_ de laag **Aanbod als losse voertuigen**. Als je uitgezoomd bent, zie je de voertuigen gegroepeerd in clusters. Vanaf stadsdeelniveau (zoom 12) worden het losse voertuigen. Dit toont je snel hoeveel voertuigen er in elk gebied staan.
+
+Als je bent ingelogd en **Heel NL** hebt aanstaan, zijn clusters met voertuigen uit je eigen datagebied groen en andere clusters lichter. Losse voertuigen buiten je eigen datagebied hebben een grijze rand, omdat hun parkeerduur niet bekend is.
 
 ### Bekijk een heatmap
 

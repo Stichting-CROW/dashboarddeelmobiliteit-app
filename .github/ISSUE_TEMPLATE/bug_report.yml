@@ -1,0 +1,43 @@
+name: Bug report
+description: Something in the dashboard doesn't work as it should.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Dutch or English are both fine.
+        **Don't share passwords or personal data here: issues are public.**
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do?
+      description: The steps that lead to the problem.
+      placeholder: |
+        1. I went to Statistiek > Beleidsinfo
+        2. I selected Utrecht and the period of last month
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead?
+      description: You can paste a screenshot directly into this field.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Link (URL) of the page
+      placeholder: https://dashboarddeelmobiliteit.nl/...
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device (if you know)
+      placeholder: Chrome on a Windows laptop

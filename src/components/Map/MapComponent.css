@@ -124,6 +124,15 @@
   line-height: 1.2;
 }
 
+/*
+ * mapbox-gl-draw: show a crosshair while drawing. Layer hover handlers set an
+ * inline `cursor: pointer` on the canvas, which would otherwise win.
+ */
+.maplibregl-map.mouse-add .maplibregl-canvas-container.maplibregl-interactive,
+.maplibregl-map.mouse-add .maplibregl-canvas {
+  cursor: crosshair !important;
+}
+
 /* CONTROLS */
 
 /* Controls wrapper */

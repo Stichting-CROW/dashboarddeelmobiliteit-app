@@ -1,0 +1,30 @@
+name: Feature request
+description: An idea for a new feature or an improvement.
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your idea! Dutch or English are both fine.
+        Please check first if a similar idea already exists in the open issues.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem do you want to solve?
+      description: Describe your situation and why the current dashboard isn't enough.
+      placeholder: |
+        As a data analist I want to see which hubs were overloaded last month,
+        so I can decide where to add capacity. Now I have to check every hub one by one.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would help you?
+      description: Your idea for a solution. A sketch or an example is welcome.
+  - type: input
+    id: organisation
+    attributes:
+      label: Your organisation and role (optional)
+      description: Helps us understand who would benefit.
+      placeholder: Municipality of Utrecht, data analist

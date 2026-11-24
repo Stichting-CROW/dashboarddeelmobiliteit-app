@@ -1,7 +1,7 @@
 import moment from 'moment';
 import maplibregl from 'maplibre-gl';
 import center from '@turf/center';
-import { isMapStyleUsable } from './mapGuards';
+import { isMapStyleUsable, canMutateMapLayers } from './mapGuards';
 
 import {
   abortableFetch,
@@ -18,6 +18,62 @@ const config = ({
 
 // Variable that will prevent simultaneous loading of fetch requests
 let theFetch = null;
+
+// CSS class set on the map container while HB data is being loaded
+const HB_LOADING_CLASS = 'hb-loading';
+
+// Opacity of the hexagon fills while the shown data is stale (loading)
+const LOADING_FILL_OPACITY = 0.2;
+
+// Whether the grid is currently shown in its dimmed "loading" state. Kept so a
+// re-render for a viewport change keeps the dimmed look while data is loading.
+let gridIsLoading = false;
+
+// Stats used by the hover popup. Kept outside the listener closure so the
+// listener only has to be registered once per map instance.
+const hoverStats = {
+  maxCount: 0,
+  sumCount: 0
+};
+const mapsWithHoverEffect = new WeakSet<object>();
+
+// Last geojson rendered per source, so the selection outline can be updated
+// instantly (before new HB data arrives).
+const lastGeojsonBySource: Record<string, any> = {};
+
+/** Outcome of an HB fetch. Aborted requests are reported, not swallowed. */
+export type HbFetchResult =
+  | { status: 'ok'; json: any }
+  | { status: 'aborted' }
+  | { status: 'error'; message: string; httpStatus?: number };
+
+/** Aggregated numbers shown to the user after a successful HB render. */
+export interface HbRenderStats {
+  total_trips: number;
+  cells_with_trips: number;
+  cell_count: number;
+  /** True when the grid is the map viewport (zooming/panning changes it) */
+  viewport_based: boolean;
+}
+
+/** Outcome of a full HB render (accessible cells + OD data + map layers). */
+export type HbRenderResult =
+  | { status: 'ok'; stats: HbRenderStats }
+  | { status: 'aborted' }
+  | { status: 'error'; message: string; httpStatus?: number };
+
+export interface HbRenderOptions {
+  /** Returns true when a newer render superseded this one */
+  isCancelled?: () => boolean;
+}
+
+/** Cells selected for the active detail level (H3 index or CBS stats_ref) */
+export const getSelectedHbCells = (filter: any): string[] => {
+  if (!filter) return [];
+  if (filter.h3niveau === 'wijk') return filter.h3hexeswijk || [];
+  if (filter.h3niveau === 7) return filter.h3hexes7 || [];
+  return filter.h3hexes8 || [];
+};
 
 const getColorStops = (maxCount, herkomstbestemming) => {
   if(! maxCount || maxCount <= 0) {
@@ -105,7 +161,11 @@ const findSymbolLayer = (map) => {
 //   '88283082a1fffff': 0.5669828486310873
 // }
 
-const fetchHbData = async (token: string, filter: any, metadata?: any) => {
+const fetchHbData = async (
+  token: string,
+  filter: any,
+  metadata?: any
+): Promise<HbFetchResult> => {
   // Abort previous fetch
   if(theFetch) {
     theFetch.abort();
@@ -140,24 +200,118 @@ const fetchHbData = async (token: string, filter: any, metadata?: any) => {
   url = appendAclOperatorsToUrl(url, metadata);
   const encodedUrl = encodeURI(url);
 
-  let response, responseJson;
+  const thisFetch = abortableFetch(encodedUrl, getFetchOptions());
+  theFetch = thisFetch;
 
   try {
-    // Do a fetch
-    theFetch = abortableFetch(encodedUrl, getFetchOptions());
-    const response = await theFetch.ready;
-    // Set theFetch to null, so next request is not aborted
-    theFetch = null;
-    // Get response JSON
-    responseJson = await response.json();
-  } catch(e) {
+    const response = await thisFetch.ready;
+    if(! response.ok) {
+      return {
+        status: 'error',
+        message: `HB-data ophalen mislukt (HTTP ${response.status})`,
+        httpStatus: response.status
+      };
+    }
+    const json = await response.json();
+    return { status: 'ok', json };
+  } catch(e: any) {
+    if(e && e.name === 'AbortError') {
+      return { status: 'aborted' };
+    }
     console.error(e);
+    return {
+      status: 'error',
+      message: 'HB-data ophalen mislukt (netwerkfout)'
+    };
+  } finally {
+    // Only clear when no newer fetch replaced this one
+    if(theFetch === thisFetch) {
+      theFetch = null;
+    }
+  }
+}
 
-    // Set theFetch to null, so next request is not aborted
-    theFetch = null;
+/**
+ * Visually mark the HB grid as "stale, new data is loading": dim the fills
+ * and labels and switch the map cursor to a progress cursor.
+ */
+const setH3GridLoadingState = (map: any, isLoading: boolean) => {
+  if (!map) return;
+
+  gridIsLoading = isLoading;
+
+  try {
+    const container = map.getContainer && map.getContainer();
+    if (container && container.classList) {
+      container.classList.toggle(HB_LOADING_CLASS, isLoading);
+    }
+  } catch {
+    // Map may be torn down
   }
 
-  return responseJson;
+  if (!canMutateMapLayers(map)) return;
+
+  try {
+    if (map.getLayer('h3-hexes-layer-fill')) {
+      map.setPaintProperty(
+        'h3-hexes-layer-fill',
+        'fill-opacity',
+        isLoading ? LOADING_FILL_OPACITY : config.fillOpacity
+      );
+    }
+    if (map.getLayer('h3-hexes-percentageValues-layer')) {
+      map.setPaintProperty(
+        'h3-hexes-percentageValues-layer',
+        'text-opacity',
+        isLoading ? 0.3 : 1
+      );
+    }
+    if (map.getLayer('h3-hex-areas-layer')) {
+      map.setPaintProperty(
+        'h3-hex-areas-layer',
+        'line-opacity',
+        isLoading ? 0.3 : 1
+      );
+    }
+  } catch {
+    // Map may be torn down
+  }
+}
+
+/**
+ * Instantly outline the selected cells on the already rendered grid, so a
+ * click gets immediate feedback while the new HB data is still loading.
+ * Cells are matched on `properties.cell` (H3 index or CBS stats_ref).
+ */
+const updateSelectedCells = (map: any, selectedCells: string[]) => {
+  if (!canMutateMapLayers(map)) return;
+
+  const selected = new Set((selectedCells || []).map(String));
+
+  ['h3-hexes', 'h3-hex-areas'].forEach((sourceId) => {
+    const geojson = lastGeojsonBySource[sourceId];
+    if (!geojson || !Array.isArray(geojson.features)) return;
+
+    let changed = false;
+    geojson.features.forEach((feature: any) => {
+      if (!feature.properties || feature.properties.cell === undefined) return;
+      const isSelected = selected.has(String(feature.properties.cell)) ? 1 : 0;
+      if (feature.properties.selected !== isSelected) {
+        feature.properties.selected = isSelected;
+        changed = true;
+      }
+    });
+    if (!changed) return;
+
+    try {
+      const source = map.getSource(sourceId);
+      if (source && source.setData) {
+        source.setData(geojson);
+      }
+    } catch {
+      // Map may be torn down
+    }
+  });
 }
 
 const removeH3Sources = (map: any) => {
@@ -224,14 +378,41 @@ const getAggregatedStats = (geojson: any) => {
   };
 } 
 
-async function renderPolygons_fill(map, geojson, filter) {
+/**
+ * Resolve with true once layers/sources can be added to the map, or false
+ * when the render was cancelled or the map was removed.
+ *
+ * There is deliberately no timeout: MapLibre finishes loading its style in a
+ * requestAnimationFrame callback, which browsers pause for background tabs.
+ * A user who opens the page in a background tab should still get the grid
+ * (not an error) once they switch to the tab.
+ */
+const waitUntilMapLayersMutable = (
+  map: any,
+  isCancelled: () => boolean = () => false
+): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const check = () => {
+      if (isCancelled()) return resolve(false);
+      if (!map || map._removed) return resolve(false);
+      if (canMutateMapLayers(map)) return resolve(true);
+      setTimeout(check, 100);
+    };
+    check();
+  });
+}
+
+function renderPolygons_fill(map, geojson, filter) {
   // Get highest hex value
   const {maxCount, sumCount} = getAggregatedStats(geojson);
+  hoverStats.maxCount = maxCount;
+  hoverStats.sumCount = sumCount;
 
   const sourceId = 'h3-hexes';
   let layerId = `${sourceId}-layer-fill`
     , source = map.getSource(sourceId);
-  const layer = map.getLayer(layerId)
+
+  lastGeojsonBySource[sourceId] = geojson;
 
   // Add the source if we haven't created them yet
   if (! source) {
@@ -244,7 +425,11 @@ async function renderPolygons_fill(map, geojson, filter) {
     // Set source variable
     source = map.getSource(sourceId);
   }
-  if (! layer) {
+  // If source was already present: Update data
+  else {
+    source.setData(geojson);
+  }
+  if (! map.getLayer(layerId)) {
     // Add hexes (fill + 1px outline)
     map.addLayer({
       id: layerId,
@@ -253,11 +438,6 @@ async function renderPolygons_fill(map, geojson, filter) {
       // interactive: false,// <- What's this?
     }, findSymbolLayer(map));
   }
-  // If source was already present: Update data
-  else {
-    // Update the geojson data
-    source.setData(geojson);
-  }
   
   // Update the fill layer paint properties, using the current config values
   map.setPaintProperty(layerId, 'fill-color', {
@@ -265,35 +445,45 @@ async function renderPolygons_fill(map, geojson, filter) {
     stops: getColorStops(maxCount, filter.herkomstbestemming)
   });
   
-  // Set opacity
-  map.setPaintProperty(layerId, 'fill-opacity', config.fillOpacity);
+  // Set opacity (keep the dimmed look if new data is still loading)
+  map.setPaintProperty(
+    layerId,
+    'fill-opacity',
+    gridIsLoading ? LOADING_FILL_OPACITY : config.fillOpacity
+  );
 
   // Add line layer for wider outline/borders, on top of fill layer
   // Info here: https://stackoverflow.com/questions/50351902/in-a-mapbox-gl-js-layer-of-type-fill-can-we-control-the-stroke-thickness/50372832#50372832
   layerId = `${sourceId}-layer-border`;
-  map.addLayer({
-    id: layerId,
-    source: sourceId,
-    type: 'line',
-    // interactive: true,// <- What's this?
-    paint: {
-      'line-color': [
-        "case",
-        ["==", ["get", "selected"], 1], '#15aeef',
-        ["boolean", ["feature-state", "hover"], false], '#666',
-        '#DDD'
-      ],
-      'line-width': [
-        "case",
-        ["==", ["get", "selected"], 1], 5,
-        ["boolean", ["feature-state", "hover"], false], 2,
-        1
-      ]
-    }
-  }, findSymbolLayer(map));
+  if (! map.getLayer(layerId)) {
+    map.addLayer({
+      id: layerId,
+      source: sourceId,
+      type: 'line',
+      // interactive: true,// <- What's this?
+      paint: {
+        'line-color': [
+          "case",
+          ["==", ["get", "selected"], 1], '#15aeef',
+          ["boolean", ["feature-state", "hover"], false], '#666',
+          '#DDD'
+        ],
+        'line-width': [
+          "case",
+          ["==", ["get", "selected"], 1], 5,
+          ["boolean", ["feature-state", "hover"], false], 2,
+          1
+        ]
+      }
+    }, findSymbolLayer(map));
+  }
 
-  // Create hover effect (hovering fills)
-  createHoverEffect(map, 'h3-hexes-layer-fill', maxCount, sumCount);
+  // Create hover effect (hovering fills). Listeners live on the map object,
+  // so register them only once per map instance.
+  if (! mapsWithHoverEffect.has(map)) {
+    mapsWithHoverEffect.add(map);
+    createHoverEffect(map, 'h3-hexes-layer-fill');
+  }
 }
 
 function renderPolygons_border(map, geojson, filter) {
@@ -301,6 +491,8 @@ function renderPolygons_border(map, geojson, filter) {
   const sourceId = 'h3-hex-areas';
   const layerId = `${sourceId}-layer`;
   let source = map.getSource(sourceId);
+
+  lastGeojsonBySource[sourceId] = geojson;
 
   // Add the source and layer if we haven't created them yet
   if (!source) {
@@ -343,6 +535,13 @@ function renderPercentageValues(map, geojson, filter) {
   const sourceId = 'h3-hexes';
   const layerId = `${sourceId}-percentageValues-layer`;
 
+  // Data lives in the shared 'h3-hexes' source, so the layer only has to be
+  // added once; setData() on the source updates the labels.
+  if (map.getLayer(layerId)) {
+    map.setPaintProperty(layerId, 'text-opacity', gridIsLoading ? 0.3 : 1);
+    return;
+  }
+
   map.addLayer({
     "id": layerId,
     "type": "symbol",
@@ -371,7 +570,7 @@ const popup = new maplibregl.Popup({
 
 // https://maplibre.org/maplibre-gl-js-docs/example/hover-styles/
 // https://maplibre.org/maplibre-gl-js-docs/example/popup-on-hover/
-const createHoverEffect = (map, layerId, maxCount, sumCount) => {
+const createHoverEffect = (map, layerId) => {
   var hoveredStateId = null;
 
   // When the user moves their mouse over the state-fill layer, we'll update the
@@ -379,6 +578,9 @@ const createHoverEffect = (map, layerId, maxCount, sumCount) => {
   map.on('mousemove', layerId, function (e) {
     // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
+
+    // Read the stats of the most recent render (see renderPolygons_fill)
+    const { maxCount, sumCount } = hoverStats;
 
     const coordinates = e.features[0].geometry.coordinates.slice();
     const percentageColorFill: number = e.features[0].properties.value / maxCount * 100;
@@ -437,11 +639,27 @@ const createHoverEffect = (map, layerId, maxCount, sumCount) => {
   });
 }
 
+/** Sum/max of a rendered feature collection, for the status widget */
+const getHbRenderStats = (geojson: any, viewportBased: boolean): HbRenderStats => {
+  const { sumCount } = getAggregatedStats(geojson);
+  const features = Object.values(geojson.features || {}) as any[];
+  return {
+    total_trips: sumCount,
+    cells_with_trips: features.filter((x) => x.properties.value > 0).length,
+    cell_count: features.length,
+    viewport_based: viewportBased
+  };
+}
+
 export {
   removeH3Sources,
   fetchHbData,
   removeH3Grid,
   renderPolygons_fill,
   renderPolygons_border,
-  renderPercentageValues
+  renderPercentageValues,
+  setH3GridLoadingState,
+  updateSelectedCells,
+  getHbRenderStats,
+  waitUntilMapLayersMutable
 }

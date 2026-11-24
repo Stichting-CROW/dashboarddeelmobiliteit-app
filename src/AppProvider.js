@@ -11,10 +11,34 @@ import moment from 'moment';
 import thunk from 'redux-thunk';
 
 import appReducer from './reducers';
-import { sanitizeActiveDataLayers, sanitizeDataLayerOrder, sanitizeOverlayLayers } from './reducers/layers';
+import {
+  sanitizeActiveDataLayers,
+  sanitizeDataLayerOrder,
+  sanitizeOverlayLayers,
+  DISPLAYMODE_VERHUURDATA_HB,
+  DISPLAYMODE_VERHUURDATA_VOERTUIGEN,
+  DISPLAYMODE_RENTALS
+} from './reducers/layers';
 import App from './App';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const stateSanitizer = (state) => {
+  if (!state || !state.vehicles) return state;
+  const featureCount = state.vehicles.data?.features?.length;
+  return {
+    ...state,
+    vehicles: {
+      ...state.vehicles,
+      data: featureCount !== undefined
+        ? { type: 'FeatureCollection', features: `[${featureCount} features]` }
+        : state.vehicles.data
+    }
+  };
+};
+
+const composeEnhancers = process.env.NODE_ENV === 'development'
+  && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+  ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ stateSanitizer })
+  : compose;
 
 const md5 = require('md5');
 
@@ -58,6 +82,28 @@ const validatePersistedState = (state) => {
 };
 
 persistedState = validatePersistedState(persistedState);
+
+// HB is the standard rentals view. Apply that once to sessions that still
+// have the previous default (individual rental vehicles), then leave later
+// choices alone.
+const RENTALS_DEFAULT_MIGRATION_KEY = 'CROWDD_rentals_default_hb_v1';
+if (!localStorage.getItem(RENTALS_DEFAULT_MIGRATION_KEY)) {
+  const layers = persistedState.layers;
+  if (layers) {
+    if (layers.view_rentals === DISPLAYMODE_VERHUURDATA_VOERTUIGEN) {
+      layers.view_rentals = DISPLAYMODE_VERHUURDATA_HB;
+    }
+    const rentalsLayers = layers.active_data_layers?.[DISPLAYMODE_RENTALS];
+    if (
+      Array.isArray(rentalsLayers)
+      && rentalsLayers.length === 1
+      && rentalsLayers[0] === DISPLAYMODE_VERHUURDATA_VOERTUIGEN
+    ) {
+      layers.active_data_layers[DISPLAYMODE_RENTALS] = [DISPLAYMODE_VERHUURDATA_HB];
+    }
+  }
+  localStorage.setItem(RENTALS_DEFAULT_MIGRATION_KEY, '1');
+}
 
 // The data-layer UI uses radio-button behaviour (one layer per display mode).
 // Older persisted states may contain multiple active layers; sanitize them.
@@ -107,9 +153,10 @@ store.subscribe(() => {
   if(newFilterHash!==oldFilterHash) {
     // console.log("filter changed - invalidate data and zones here!");
     localStorage.setItem('CROWDD_filterhash', newFilterHash)
-    
-    // store.dispatch({ type: 'CLEAR_ZONES', payload: null});
-    store.dispatch({ type: 'CLEAR_VEHICLES', payload: null});
+
+    // Vehicles are no longer cleared here: the Aanbod map keeps the previous
+    // markers (faded) while a refetch is in flight. Rentals still clear so
+    // outdated trips don't linger while the new request loads.
     store.dispatch({ type: 'CLEAR_RENTALS_ORIGINS', payload: null});
     store.dispatch({ type: 'CLEAR_RENTALS_DESTINATIONS', payload: null});
   }

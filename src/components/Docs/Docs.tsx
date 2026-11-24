@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import FoldersList from "./FoldersList";
 import DocsList from "./DocsList";
@@ -52,15 +52,7 @@ function Docs() {
     <div className="
       Docs
     ">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        {view === 'categories' && <>Documentatie</>}
-        {view !== 'categories' && <Link to={`/docs`}>Documentatie</Link>}
-      </h1>
-
-      <div className="my-5">
+      <div className="mb-5">
         {view === 'categories' && <FoldersList docs={docs} />}
         {view === 'docs' && <DocsList docs={docs} />}
         {view === 'doc' && <Doc docs={docs} />}

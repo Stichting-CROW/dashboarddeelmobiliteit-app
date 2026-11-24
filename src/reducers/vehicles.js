@@ -1,14 +1,16 @@
 const initialState = {
   data: [],
   operatorstats: [],
+  loading: false,
 }
 
 export default function vehicles(state = initialState, action) {
   switch(action.type) {
     case 'SET_VEHICLES': {
       return {
+        ...state,
         data: action.payload,
-        operatorstats: []
+        operatorstats: state.operatorstats || []
       }
     }
     case 'SET_VEHICLES_OPERATORSTATS': {
@@ -16,15 +18,21 @@ export default function vehicles(state = initialState, action) {
         operatorstats: action.payload
       })
     }
+    case 'SET_VEHICLES_LOADING': {
+      return {
+        ...state,
+        loading: action.payload === true
+      };
+    }
     case 'CLEAR_VEHICLES': {
       return {
         data: [],
-        operatorstats: []
+        operatorstats: [],
+        loading: false
       }
     }
     case 'LOGIN':
     case 'LOGOUT': {
-      // console.log('login/logout - reset vehicles data')      
       return initialState;
     }
     

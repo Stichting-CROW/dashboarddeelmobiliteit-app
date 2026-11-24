@@ -76,13 +76,7 @@ const ActiveFeeds = () => {
 
   return (
     <div className="ActiveFeeds">
-      <h1 className="
-        text-4xl
-        font-bold
-      ">
-        Actieve datafeeds
-      </h1>
-      <div className="my-5">
+      <div className="mb-5">
         {hasLoaded && datafeeds.length === 0 ? (
           <p>Er zijn nog geen datafeeds van aanbieders geconfigureerd.</p>
         ) : (

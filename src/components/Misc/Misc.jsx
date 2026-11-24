@@ -45,7 +45,7 @@ export default function Misc({children, contentWidth = '600px'}) {
   const guestPillMenuItems = [
     {
       title: 'Functies',
-      link: '/features',
+      link: '/functionaliteiten',
     },
     {
       title: 'Over',

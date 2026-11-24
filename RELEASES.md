@@ -1,5 +1,85 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-05
+
+**Aanbod**
+
+- 🪄 Ingelogde gebruikers kunnen op de Aanbod-kaart wisselen tussen 'Mijn gebied' en 'Heel NL'. Met 'Heel NL' zie je ook de voertuigen buiten je eigen datagebied: clusters met jouw voertuigen blijven groen, andere clusters zijn lichter en losse voertuigen buiten je gebied hebben een grijze rand
+- ✨ De lagen 'Aanbod als clusters' en 'Aanbod als losse voertuigen' zijn samengevoegd: uitgezoomd zie je clusters, vanaf zoomniveau 12 losse voertuigen. Opgeslagen instellingen en gedeelde links met de oude clusterlaag openen automatisch de nieuwe laag
+- ✨ De kaart is sneller, vooral met 'Heel NL': filters op aanbieder, parkeerduur en defecten werken direct zonder opnieuw te laden, en bij het wisselen van plaats of zones worden de landelijke voertuigen niet opnieuw opgehaald
+- ✨ Tijdens het laden blijven de vorige voertuigen zichtbaar (vervaagd) in plaats van dat de kaart leeg wordt; je eigen voertuigen verschijnen als eerste
+
+**Zones/Beleidszones**
+
+- 🐛 Opgelost: bij het tekenen van een zone was de cursor een handje in plaats van een kruisje
+- 🐛 Opgelost: fout bij het toevoegen van een extra vlak aan een bestaande zone die uit meerdere vlakken bestaat
+- 🐛 Opgelost: bij het wisselen tussen capaciteit 'totaal' en 'per modaliteit' werden ingevulde waarden op 0 gezet; ook wordt de standaardcapaciteit van 50 nu echt opgeslagen
+- 🐛 Opgelost: een gepubliceerde zone verscheen pas na herladen onder 'Definitief actief' en op de kaart
+
+**Gebruikersinterface**
+
+- ✨ Na het sluiten van de rondleiding ga je terug naar de pagina Functies in plaats van naar de startpagina
+
+## Release 2026-11-03
+
+**Aanbod**
+
+- 🐛 Opgelost: gastgebruikers zien nu alle voertuigen in Nederland als clusterview, zonder een willekeurige startplaats; voertuigen buiten Nederland worden niet meer getoond
+
+**Gebruikersinterface**
+
+- 🪄 Nieuwe teksten voor niet-ingelogde bezoekers op Over, Functies, de introductiemodal en Veelgestelde vragen
+- ✨ In het menu is 'Rondleiding' verwijderd; 'Over' blijft beschikbaar
+- ✨ Zijbalk op pagina's zoals Over en Functies heeft nu dezelfde lichtgrijze achtergrond als bij de kaart
+- ✨ Eerste dia van de rondleiding geactualiseerd
+- ✨ Standaardtaal van de site is Nederlands (`nl`)
+
+**Documentatie**
+
+- ✨ Documentatie over het dashboard opgeschoond: 'Data in het dashboard' staat nu als eigen categorie; verouderde Over-pagina's zijn verwijderd
+
+## Release 2026-10-28
+
+**Aanbod**
+
+- 🪄 Op de Aanbod-kaart kun je met de lasso een gebied tekenen; naast de knop staat hoeveel voertuigen daarin staan. Het aantal volgt de gekozen tijd en filters. Klik de knop nogmaals of druk op Escape om de selectie te verwijderen
+
+**Servicegebieden**
+
+- 🐛 Opgelost: bij het wisselen van aanbieder kregen servicegebieden soms de kleur van een andere aanbieder. Elke polygoon houdt nu de kleur van de eigen aanbieder
+
+**Statistiek: Beleidsinfo**
+
+- 🐛 Opgelost: beheerders zagen bij 'Alle plaatsen' vier keer te hoge aantallen, doordat overlappende zonelagen (land, gemeente, stadsdeel en wijk) bij elkaar werden opgeteld
+
+## Release 2026-10-22
+
+**Zones en documentatie**
+
+- 🐛 Opgelost: niet-werkende afbeeldingen in zonebeheer (iconen voor fiets, bakfiets, scooter en auto) en in de documentatie 'Zones beheren'; afbeeldingen staan nu in de app zelf
+
+## Release 2026-09-16
+
+**Statistiek: Beleidsinfo**
+
+- 🪄 Kerncijfers bovenaan de pagina: gemiddeld beschikbare voertuigen per dag, totaal aantal verhuringen, verhuringen per voertuig per dag en aantal actieve aanbieders, elk met het verschil ten opzichte van de vorige periode van gelijke lengte
+- 🪄 Nieuwe schakelaar 'Vergelijk met vorige periode': toont het totaal van de vorige periode als grijze stippellijn in de grafieken 'Beschikbare voertuigen' en 'Verhuringen'. De instelling staat in de URL, zodat je de vergelijking kunt delen
+- 🪄 Weekenden zijn in de grafieken gemarkeerd met een lichte achtergrond (bij dag-, uur- en kwartierintervallen)
+- ✨ Nieuwe paginakop met de geselecteerde plaats of zones, de periode, het aantal dagen en een duidelijke keuze voor het tijdsinterval (dag / week / maand)
+- ✨ Grafieken tonen nu een duidelijke melding als er geen data is voor de selectie, en een foutmelding met 'Opnieuw proberen' als het laden mislukt
+- ✨ Beweeg je over een grafiek, dan lichten alle grafieken op hetzelfde moment op; klik op een aanbieder in de legenda om die lijn te verbergen of te tonen
+- ✨ Getallen worden in Nederlandse notatie weergegeven (bijv. 23.986 en 1,13); de 'Totaal'-lijn is gestreept zodat deze beter te onderscheiden is van aanbieders
+- 🐛 Opgelost: bij het openen van de pagina werd soms een ongeldig tijdsinterval opgevraagd, waardoor grafieken eerst leeg bleven en daarna opnieuw laadden
+- 🐛 Opgelost: bij snel wisselen van selectie kon een oudere dataset de nieuwe grafiekdata overschrijven
+- 🐛 Opgelost: CSV-bestandsnamen bevatten de periode niet correct; ze heten nu bijv. `2026-08-17_to_2026-09-16_verhuringen.csv`
+
+**Statistiek: Hubs en verbodsgebieden**
+
+- 🪄 Analysegebieden (monitoringzones) zijn nu beschikbaar in de zonefilter, naast hubs en verbodsgebieden; per zone is het type zichtbaar
+- 🪄 Link 'Toon op kaart' bij een geselecteerde zone opent de zone direct op de kaart
+- 🐛 Opgelost: onjuiste datum bij 'Actief vanaf' (toonde de wijzigingsdatum)
+- 🐛 Opgelost: eindeloze doorverwijzing bij het openen van zonestatistieken via een link
+
 ## Release 2026-09-07
 
 **Kaart**

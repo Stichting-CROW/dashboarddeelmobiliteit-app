@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+  <g id="Lasso" fill="none" stroke="#343e47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse id="Loop" cx="10" cy="7" rx="7" ry="5" stroke-dasharray="2.4 2.2"/>
+    <path id="Rope" d="M5.2 10.6c-1.7 1.1-2.2 2.8-1.1 4 .9 1 .1 2.1-.9 2.6"/>
+  </g>
+</svg>

@@ -18,7 +18,6 @@ const CBS_MAP_LAYER_IDS = [
 ];
 
 const PARK_GROUP_MAP_LAYER_IDS = [
-  'vehicles-point',
   'vehicles-clusters',
   'vehicles-clusters-count',
   'vehicles-clusters-point',

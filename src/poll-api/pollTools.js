@@ -137,9 +137,14 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
     // No zone_ids: the auth token (+ operators=) scopes the data server-side.
   }
   // Guests with access to multiple (public) municipalities: scope to those zones
+  // when zone metadata is available. When zones have not loaded yet (typical for
+  // guests with gebied === ""), omit zone_ids so the request stays NL-wide
+  // instead of sending an ambiguous empty `zone_ids=` param (issue #259).
   else if (hasAccessToMultipleGebieden && !options.show_global) {
     const zoneIds = getMunicipalityZoneIds(metadata.zones, municipalityCodesAsArray);
-    filterparams.push(`zone_ids=${zoneIds.join(',')}`);
+    if (zoneIds.length > 0) {
+      filterparams.push(`zone_ids=${zoneIds.join(',')}`);
+    }
   }
   // If no place is set: Get NL data (NL 'zone')
   // Only providers and admins are allowed to see this info
@@ -264,6 +269,19 @@ export const createFilterparameters = (displayMode, filter, metadata, options) =
   return filterparams;
 }
 
+const NEAR_REALTIME_MARGIN_MS = 10 * 60 * 1000;
+
+/**
+ * Whether the selected date/time (filter.datum) is (near) realtime: within 10
+ * minutes of now. An unset datum means "now".
+ */
+export const isNearRealtime = (datum, now = Date.now()) => {
+  if (!datum) return true;
+  const datumMs = Date.parse(datum);
+  if (isNaN(datumMs)) return false;
+  return Math.abs(now - datumMs) <= NEAR_REALTIME_MARGIN_MS;
+};
+
 export const convertDurationToBin = (duration) => {
   if (duration < 60 * 24 * 2) {
     return 0;
@@ -321,6 +339,7 @@ export const shouldFetchVehicles = (newFilter, existingFilter) => {
     'ontwikkelingaggregatie',
     'ontwikkelingtot',
     'ontwikkelingvan',
+    'show_all_nl_vehicles',
     'voertuigtypesexclude',
     'zones',
   ];
