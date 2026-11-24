@@ -60,7 +60,8 @@ function Filterbar({
 }: FilterbarProps) {
   const location = useLocation();
   const pathname = location.pathname;
-  const isBeleidsinfo = pathname === '/stats/beleidsinfo';
+  const isBeleidsinfo =
+    pathname === '/stats/beleidsinfo' || pathname === '/stats/beleidsinfo-beta';
 
   const activeDataLayers = useSelector(selectActiveDataLayers);
 
@@ -311,7 +312,7 @@ function Filterbar({
           rel="external noreferrer"
           className="underline"
         >
-          2026-11-05
+          2026-11-24
         </a>
       </div>
     </>

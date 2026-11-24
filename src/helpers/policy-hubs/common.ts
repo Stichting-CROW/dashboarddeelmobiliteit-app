@@ -211,6 +211,18 @@ export const isHubInPhase = (hub: any, phase: string, visible_layers: any) => {
   return false;
 }
 
+/**
+ * Check if a zone matches the hub type filter ('all', 'physical' or 'virtual').
+ * Only hubs (geography_type 'stop') are filtered; other zone types always match.
+ * A hub without is_virtual is treated as physical, like in the hubs list.
+ */
+export const isHubOfType = (hub: any, hubType?: string) => {
+  if (hub?.geography_type !== 'stop') return true;
+  if (hubType === 'virtual') return hub.stop?.is_virtual === true;
+  if (hubType === 'physical') return hub.stop?.is_virtual !== true;
+  return true;
+}
+
 export const deDuplicateHubs = (hubs) => {
   return hubs.filter(hub => {
     // Check if any other hub has this hub's zone_id in its prev_geography_ids

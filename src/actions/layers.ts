@@ -2,7 +2,8 @@ import {
   LAYER_SET_MAP_STYLE,
   LAYER_SET_DATA_LAYER_ORDER,
   LAYER_TOGGLE_OVERLAY_LAYER,
-  LAYER_SET_OVERLAY_PHASE
+  LAYER_SET_OVERLAY_PHASE,
+  LAYER_SET_OVERLAY_HUB_TYPE
 } from "./actionTypes";
 
 export const setMapStyle = (name: string) => ({
@@ -50,4 +51,10 @@ export const toggleOverlayLayer = (displayMode: string, layerId: string) => ({
 export const setOverlayPhase = (layerId: string, phase: string) => ({
   type: LAYER_SET_OVERLAY_PHASE,
   payload: { layerId, phase }
+})
+
+// Hub type filter: 'all', 'physical' or 'virtual'
+export const setOverlayHubType = (hubType: string) => ({
+  type: LAYER_SET_OVERLAY_HUB_TYPE,
+  payload: hubType
 })

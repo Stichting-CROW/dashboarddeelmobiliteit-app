@@ -1,0 +1,197 @@
+/* Beleidsinfo (beta) mockup page */
+
+.DashboardBeleidsinfoBeta-banner {
+  margin-left: 58px;
+  margin-right: 2rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #FDBA74;
+  background: #FFF7ED;
+  border-radius: 0.5rem;
+  color: #7C2D12;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.DashboardBeleidsinfoBeta-banner strong {
+  font-weight: 600;
+}
+
+.DashboardBeleidsinfoBeta-section-title {
+  margin-left: 58px;
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.DashboardBeleidsinfoBeta-section-subtitle {
+  margin-left: 58px;
+  margin-bottom: 1rem;
+  color: #6B7280;
+  font-size: 0.875rem;
+}
+
+/* Chart grid: 2 columns when each chart can be at least 640px, otherwise stacked */
+.DashboardBeleidsinfoBeta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(640px, 100%), 1fr));
+  gap: 1.5rem 2rem;
+  margin-top: 1rem;
+  margin-right: 2rem;
+}
+
+.DashboardBeleidsinfoBeta-grid-placeholders {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+/* Wide cards span both columns when the grid has two columns */
+@media (min-width: 1400px) {
+  .DashboardBeleidsinfoBeta-span-2 {
+    grid-column: span 2;
+  }
+}
+
+/* Card */
+
+.BetaChartCard {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem 1rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.BetaChartCard[data-status='later'] {
+  border-style: dashed;
+  background: #FAFAFA;
+}
+
+.BetaChartCard-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.BetaChartCard-title-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Override the generic .StatsPage h2 margin */
+.StatsPage .BetaChartCard-title,
+.BetaChartCard-title {
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #111827;
+}
+
+.BetaChartCard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.BetaChartCard-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.5rem;
+  border-radius: 999px;
+  background: #F3F4F6;
+  color: #4B5563;
+  white-space: nowrap;
+}
+
+.BetaChartCard-badge-voorstel {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.BetaChartCard-badge-later {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.BetaChartCard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #6B7280;
+}
+
+.BetaChartCard-body {
+  position: relative;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.BetaChartCard-footnotes {
+  margin: 0.75rem 0 0;
+  padding-left: 1rem;
+  list-style: disc;
+  font-size: 0.75rem;
+  color: #6B7280;
+}
+
+.BetaChartCard-footnotes li + li {
+  margin-top: 0.125rem;
+}
+
+/* Placeholder ("later") body */
+
+.BetaPlaceholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #9CA3AF;
+  border: 1px dashed #D1D5DB;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.BetaPlaceholder-pm {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #D1D5DB;
+}
+
+.BetaPlaceholder-text {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+/* Segmented control (re-uses .agg-button look) */
+
+.BetaSegmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.BetaSegmented-label {
+  margin-right: 0.25rem;
+  color: #6B7280;
+}
+
+/* Chart Y-axis label text */
+.BetaChart-axis-label {
+  fill: #6B7280;
+  font-size: 0.75rem;
+}
