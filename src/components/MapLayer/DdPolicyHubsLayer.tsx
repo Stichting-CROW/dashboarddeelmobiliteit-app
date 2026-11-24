@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import PolicyHubsPhaseMenu from '../PolicyHubsPhaseMenu/PolicyHubsPhaseMenu';
 import st from 'geojson-bounds';
-import { deDuplicateHubs, isHubInPhase, readable_phase } from '../../helpers/policy-hubs/common';
+import { deDuplicateHubs, isHubInPhase, isHubOfType, readable_phase } from '../../helpers/policy-hubs/common';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { notify } from '../../helpers/notify';
 
@@ -53,7 +53,7 @@ import { patchHub } from "../../helpers/policy-hubs/patch-hub";
 import PolicyHubsProposeDelete from "../PolicyHubsEdit/PolicyHubsProposeDelete";
 import { useBackgroundLayer } from '../Map/MapUtils/useBackgroundLayer';
 import { applyDataLayerOrderWhenReady } from '../Map/MapUtils/dataLayerOrder';
-import { selectDataLayerOrder } from '../../helpers/layerSelectors';
+import { selectDataLayerOrder, selectOverlayLayers } from '../../helpers/layerSelectors';
 import { DISPLAYMODE_POLICY_HUBS } from '../../reducers/layers.js';
 import Button from '../Button/Button';
 
@@ -100,6 +100,7 @@ const DdPolicyHubsLayer = ({
   const filter = useSelector((state: StateType) => state.filter || null);
   const mapStyle = useSelector((state: StateType) => state.layers.map_style || null);
   const dataLayerOrder = useSelector(selectDataLayerOrder);
+  const hub_type = useSelector((state: StateType) => selectOverlayLayers(state).hub_type);
 
   const acl = useSelector((state: StateType) => state.authentication?.user_data?.acl);
   
@@ -390,6 +391,7 @@ const DdPolicyHubsLayer = ({
     active_phase,
     visible_layers,
     visible_layers?.length,
+    hub_type,
     mapStyle,
     map?.isStyleLoaded()
   ]);
@@ -465,8 +467,12 @@ const DdPolicyHubsLayer = ({
       return isInPhase || isInVisibleLayers || isSelected;
     });
 
-    // Remove all zones that have a zone ID of any of the prev_geography_ids
-    const uniqueHubs = deDuplicateHubs(filteredHubs);
+    // Remove all zones that have a zone ID of any of the prev_geography_ids,
+    // then apply the hub type filter (Alle / Fysiek / Virtueel)
+    const uniqueHubs = deDuplicateHubs(filteredHubs).filter((x) => {
+      return isHubOfType(x, hub_type)
+        || (selected_policy_hubs && selected_policy_hubs.indexOf(x.zone_id) > -1);
+    });
 
     // Keep deep-linked / selected hubs visible even if a newer version replaced them
     if (selected_policy_hubs?.length) {
