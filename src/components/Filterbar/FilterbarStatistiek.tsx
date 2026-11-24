@@ -15,8 +15,10 @@ function FilterbarStatistiek() {
   const pathname = location.pathname;
 
   const isBeleidsinfo = pathname === '/stats/beleidsinfo';
+  const isBeleidsinfoBeta = pathname === '/stats/beleidsinfo-beta';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
   const isBeleidszones = pathname === '/stats/beleidszones';
+  const hasSelection = isBeleidsinfo || isBeleidsinfoBeta || isPrestatiesAanbieders || isBeleidszones;
 
   const filterGebied = useSelector((state: StateType) =>
     state.filter ? state.filter.gebied : null
@@ -56,6 +58,7 @@ function FilterbarStatistiek() {
 
   const getCurrentSelection = () => {
     if (isBeleidsinfo) return 'Beleidsinfo';
+    if (isBeleidsinfoBeta) return 'Beleidsinfo (beta)';
     if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
     if (isBeleidszones) return 'Hubs en verbodsgebieden';
     return 'Prestaties aanbieders';
@@ -101,7 +104,7 @@ function FilterbarStatistiek() {
       <div className="filter-plaats-container">
         <div className="filter-plaats-box-row">
           <div
-            className={`filter-plaats-value ${isBeleidsinfo || isPrestatiesAanbieders || isBeleidszones ? '' : 'text-black'}`}
+            className={`filter-plaats-value ${hasSelection ? '' : 'text-black'}`}
             onClick={() => openView('dashboard-type')}
           >
             {getCurrentSelection()}
