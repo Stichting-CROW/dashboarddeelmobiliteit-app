@@ -853,7 +853,8 @@ function App() {
             <Login />
           </Overlay>
           {renderFilterbarElements()}
-        </>} />        <Route path="/rondleiding" element={
+        </>} />
+        <Route path="/rondleiding" element={
           <ContentPage forceFullWidth={true}>
             <Tour />
           </ContentPage>

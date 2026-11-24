@@ -79,13 +79,6 @@ function FilterbarStatistiek() {
             Beleidsinfo
           </div>
           <div
-            key="item-beleidsinfo-beta"
-            className={`form-item ${isBeleidsinfoBeta ? 'form-item-selected' : ''}`}
-            onClick={() => handleSelectDashboardType('/stats/beleidsinfo-beta')}
-          >
-            Beleidsinfo (beta)
-          </div>
-          <div
             key="item-prestaties-aanbieders"
             className={`form-item ${isPrestatiesAanbieders ? 'form-item-selected' : ''}`}
             onClick={() =>
