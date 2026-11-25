@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import { Category } from './mockData';
+import { Category } from './modalities';
 import { AXIS_TICK_STYLE, BetaTooltip, formatPercent, getYAxisLabel } from './BetaChartShared';
 
 export interface Stacked100ColumnChartProps {
@@ -55,7 +55,10 @@ function Stacked100ColumnChart({
           label={getYAxisLabel(yLabel)}
         />
         <Tooltip content={<BetaTooltip formatter={formatPercent} reverse />} />
-        <Legend iconType="square" />
+        <Legend
+          iconType="square"
+          formatter={(value: string) => <span className="BetaChart-legend-label">{value}</span>}
+        />
         {categories.map((c) => (
           <Bar
             key={c.key}

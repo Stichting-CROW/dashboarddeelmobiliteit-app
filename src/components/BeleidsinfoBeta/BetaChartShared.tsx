@@ -36,6 +36,8 @@ export interface BetaTooltipProps {
   payload?: TooltipEntry[];
   label?: string | number;
   formatter?: ValueFormatter;
+  /** Turns the raw label (X value) into the tooltip title. */
+  labelFormatter?: (label: string | number) => string;
   /** Show a "Totaal" line summing all entries (only for additive metrics). */
   showTotal?: boolean;
   /** Reverse the entry order (useful for stacked charts so the visual order matches). */
@@ -51,6 +53,7 @@ export function BetaTooltip({
   payload,
   label,
   formatter = formatNumber,
+  labelFormatter,
   showTotal = false,
   reverse = false
 }: BetaTooltipProps) {
@@ -59,7 +62,9 @@ export function BetaTooltip({
   const total = entries.reduce((s, e) => s + (Number(e.value) || 0), 0);
   return (
     <div className="CustomizedTooltip text-sm">
-      <div className="my-0 font-semibold">{label}</div>
+      <div className="my-0 font-semibold">
+        {labelFormatter && label !== undefined ? labelFormatter(label) : label}
+      </div>
       <ul className="my-0 py-0">
         {entries.map((e, i) => (
           <li

@@ -10,7 +10,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-import { Category } from './mockData';
+import { Category } from './modalities';
 import {
   AXIS_TICK_STYLE,
   BetaTooltip,

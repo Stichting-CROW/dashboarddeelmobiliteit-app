@@ -4,31 +4,35 @@ import InfoTooltip from '../InfoTooltip/InfoTooltip';
 
 import './BeleidsinfoBeta.css';
 
-export type ProposalStatus = 'voorstel' | 'later';
+/** "live" shows real data; "voorstel" and "later" come from the proposal sheet. */
+export type ProposalStatus = 'live' | 'voorstel' | 'later';
 
 export interface BetaChartCardProps {
   title: string;
-  /** Status from the proposal sheet: "voorstel" (mocked up) or "later" (PM). */
   status: ProposalStatus;
   /** Chart type from the proposal sheet, e.g. "lijn", "100% gestapelde kolommen". */
   chartType?: string;
   /** Explanation of the metric (shown in the info tooltip). */
   toelichting?: React.ReactNode;
-  /** Remarks from the proposal sheet, shown as footnotes below the chart. */
+  /** Remarks shown as footnotes below the chart. */
   opmerkingen?: string[];
   /** Optional controls (toggles) rendered at the top-right of the card. */
   controls?: React.ReactNode;
   /** Chart height in px. */
   height?: number;
+  /** Shows a loading indicator over the body. */
+  loading?: boolean;
+  /** Replaces the chart with a message, e.g. for errors or empty data. */
+  message?: string | null;
   /** Extra classes for the wrapper. */
   className?: string;
   children?: React.ReactNode;
 }
 
 /**
- * Card wrapper for one proposed chart on the Beleidsinfo (beta) page.
- * Shows the title, status/chart-type badges, an explanation tooltip,
- * optional controls, the chart itself and footnotes.
+ * Card wrapper for one chart on the Beleidsinfo (beta) page.
+ * Shows the title, badges, an explanation tooltip, optional controls,
+ * the chart itself (or a loading / message state) and footnotes.
  */
 function BetaChartCard({
   title,
@@ -38,6 +42,8 @@ function BetaChartCard({
   opmerkingen,
   controls,
   height = 380,
+  loading = false,
+  message,
   className = '',
   children
 }: BetaChartCardProps) {
@@ -54,16 +60,23 @@ function BetaChartCard({
         </div>
         <div className="BetaChartCard-meta">
           {chartType && <span className="BetaChartCard-badge">{chartType}</span>}
-          <span className={`BetaChartCard-badge BetaChartCard-badge-${status}`}>
-            {status === 'voorstel' ? 'Voorstel' : 'Later'}
-          </span>
+          {status !== 'live' && (
+            <span className={`BetaChartCard-badge BetaChartCard-badge-${status}`}>
+              {status === 'voorstel' ? 'Voorstel' : 'Later'}
+            </span>
+          )}
         </div>
       </header>
 
       {controls && <div className="BetaChartCard-controls">{controls}</div>}
 
-      <div className="BetaChartCard-body" style={{ height }}>
-        {children}
+      <div className="BetaChartCard-body" style={{ height }} aria-busy={loading}>
+        {message ? <div className="BetaChartCard-message">{message}</div> : children}
+        {loading && (
+          <div className="BetaChartCard-loading" role="status">
+            Bezig met laden…
+          </div>
+        )}
       </div>
 
       {opmerkingen && opmerkingen.length > 0 && (
