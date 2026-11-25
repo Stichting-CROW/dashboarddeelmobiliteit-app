@@ -11,10 +11,15 @@ import {
   DATA_TYPE_LABELS,
   STATUS_COLORS,
   TimelineSegment,
+  describeFeedShare,
   describeRejectionDataTypes,
   formatDateTime,
+  getFeedsDownBetween,
+  getIndividualFeeds,
+  hasMultipleFeeds,
   toTimelineSegments,
 } from './dataQualityUtils';
+import FeedNameList from './FeedNameList';
 
 interface DataQualityTimelineProps {
   operator: OperatorDataQuality;
@@ -99,13 +104,26 @@ const DataQualityTimeline = ({ operator, period, now }: DataQualityTimelineProps
             baseColor={hasHistory ? STATUS_COLORS.ok : '#E5E5E5'}
             segmentClassName="data-quality-timeline-segment--outage"
             futurePct={hasHistory ? futurePct : 0}
-            renderTooltip={(segment) => (
-              <>
-                <b>Storing {DATA_TYPE_LABELS[dataType].toLowerCase()}</b>
-                <br />
-                {formatSegment(segment)}
-              </>
-            )}
+            renderTooltip={(segment) => {
+              const feedCount = getIndividualFeeds(feed).length;
+              const feedsDown = hasMultipleFeeds(feed)
+                ? getFeedsDownBetween(feed, segment.start, segment.end, now)
+                : [];
+              return (
+                <>
+                  <b>Storing {DATA_TYPE_LABELS[dataType].toLowerCase()}</b>
+                  <br />
+                  {formatSegment(segment)}
+                  {feedsDown.length > 0 && (
+                    <>
+                      <br />
+                      Offline: {describeFeedShare(feedsDown.length, feedCount)}
+                      <FeedNameList feeds={feedsDown} total={feedCount} />
+                    </>
+                  )}
+                </>
+              );
+            }}
           />
         );
       })}

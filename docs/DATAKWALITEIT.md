@@ -11,8 +11,10 @@ One card per operator that is active in the selected municipality (or in all of 
   - red: offline (unreachable or empty)
   - red "Afgekeurd": at least one manual rejection for this data type overlaps the selected period. This overrides the feed status. A subtitle under the indicator name shows the rejected period (or the number of periods). Clicking the pill opens a popover with the details of each rejection, including edit and delete buttons for admins.
   - grey: "Geen feed verwacht" (the operator doesn't offer this feed) or "Onbekend" (no check yet)
+
+  An operator can have several feeds per data type (for example one aanbod feed per city). Then the pill shows how many are offline, for example "Offline (2/20)". The tooltip lists the feeds that are offline now and, per outage in the period, which feeds were down. When all feeds were down it says "alle 20 feeds" instead of listing them.
 - **Rejection list**: every rejection that overlaps the period, with the period, operator(s), area, vehicle type, data type, issue owner, note, and who created or last changed it.
-- **Timeline**: one lane per feed with outages in red, and one lane with manual-rejection windows (hatched). The part of the period that lies in the future is grey.
+- **Timeline**: one lane per feed with outages in red, and one lane with manual-rejection windows (hatched). The part of the period that lies in the future is grey. The tooltip of an outage names the feeds that were down during it.
 
 Cards with issues are shown first. Operator accounts only see their own card.
 
@@ -21,7 +23,7 @@ Filters (left filter bar):
 - **Periode**: `start_date` / `end_date` URL params (both inclusive). The default is the last 7 days including today.
 - **Plaats**: `filter.gebied` / `gm_code`. Hidden for operator accounts and for accounts with a single municipality.
 
-Admins (`isAdmin(state)`) can add, edit and delete manual rejections. One rejection can cover several operators or all of them, for example when Dashboard Deelmobiliteit itself had an outage. All visible rejections can be exported as CSV.
+Admins (`isAdmin(state)`) can add, edit and delete manual rejections. One rejection covers one operator or all of them, for example when Dashboard Deelmobiliteit itself had an outage. All visible rejections can be exported as CSV.
 
 ## Datakwaliteit on Prestaties aanbieders
 
@@ -31,7 +33,7 @@ Every card on `/stats/prestaties-aanbieders` has a "Datakwaliteit" row below the
 - green: no outages or rejections, and at least one feed has been checked.
 - white: the day is in the future, or none of the operator's feeds has been checked yet.
 
-Feeds with status `not_expected` are ignored. The block tooltip lists the status and outage times per feed, plus any rejections. The bar tooltip shows the number of days with and without issues, the availability per feed and the number of rejections.
+Feeds with status `not_expected` are ignored. The block tooltip lists the status and outage times per feed, which of an operator's feeds were down that day, plus any rejections. The bar tooltip shows the number of days with and without issues, the availability per feed and the number of rejections.
 
 The page fetches data quality once (`useDataQualityData`) and shares it with the cards through `DataQualityProvider`. The municipality view uses the selected municipality. The operator view fetches for all of NL, because its cards cover several municipalities. The row is hidden while loading, after an error, and for operators without data quality data. It does not affect the card's overall compliance or sort order.
 
@@ -44,7 +46,7 @@ The page fetches data quality once (`useDataQualityData`) and shares it with the
 | `src/components/Datakwaliteit/useDataQualityData.ts` | Fetching, demo fallback, create/update/delete |
 | `src/components/Datakwaliteit/dataQualityUtils.ts` | Pure helpers (period math, filtering, timeline, CSV, validation) |
 | `src/components/Datakwaliteit/dataQualityDemoData.ts` | Deterministic demo data |
-| `src/components/Datakwaliteit/DataQualityCard.tsx`, `DataQualityTimeline.tsx`, `ManualRejectionDialog.tsx` | UI |
+| `src/components/Datakwaliteit/DataQualityCard.tsx`, `DataQualityTimeline.tsx`, `ManualRejectionDialog.tsx`, `FeedNameList.tsx` | UI |
 | `src/components/Datakwaliteit/DataQualityContext.tsx`, `DataQualityKpi.tsx` | "Datakwaliteit" row on Prestaties aanbieders cards |
 | `src/api/dataQuality.ts`, `src/types/DataQuality.ts` | API client and types |
 
@@ -69,9 +71,19 @@ Returns `FeedAvailability[]`: one item per operator and data type.
   last_data_received_at: string | null;  // ISO datetime
   availability_pct: number | null;       // 0-100, share of checks in the period that passed
   outages: { start_time: string; end_time: string | null }[]; // overlapping the period; null = ongoing
+  individual_feeds?: {                   // one item per active feed of this operator and data type
+    feed_id: number;
+    name: string;                        // host and path of feeds.feed_url, see below
+    status: 'available' | 'unavailable' | 'unknown';
+    last_data_received_at: string | null;
+    outages: { start_time: string; end_time: string | null }[]; // this feed only
+  }[];
 }
 ```
 
+- `outages` on the item is the merge of the `outages` of its `individual_feeds`.
+- `individual_feeds` is optional: without it the page shows the merged status only. The page only names feeds when there are two or more.
+- `name` must not contain credentials: drop user info and the query string from `feed_url` (the feed management API masks the same parts in `mask_url`). Example: `gbfs.example.com/rotterdam/free_bike_status.json`.
 - With `gm_code`: only operators active in that municipality during the period (they had vehicles or rentals there). Without `gm_code`: all operators in NL.
 - Operator accounts only receive their own `system_id`.
 - `start_date` / `end_date` are `YYYY-MM-DD`, both inclusive.
@@ -83,7 +95,7 @@ Returns `ManualRejection[]` that overlap the period and whose `municipalities` i
 ```ts
 {
   rejection_id: number;
-  system_ids: string[] | 'all';
+  system_id: string | 'all';
   start_time: string;            // ISO datetime
   end_time: string | null;       // null = ongoing
   municipalities: string[] | 'all';  // gm_codes
@@ -98,11 +110,13 @@ Returns `ManualRejection[]` that overlap the period and whose `municipalities` i
 }
 ```
 
-All logged-in users may read rejections, including notes. Operator accounts should only receive rejections that apply to their own `system_id` (directly or via `'all'`).
+All logged-in users may read rejections, including notes. Operator accounts only receive rejections for their own `system_id` or for `'all'`. Users limited to some municipalities get a 403 for a `gm_code` outside them. The period is in Dutch local time: `end_date` includes the whole day.
 
 ### `POST /rejections`, `PUT /rejections/{id}`, `DELETE /rejections/{id}`
 
-Admin only. The body for POST and PUT is a `ManualRejection` without `rejection_id` and the audit fields. The backend sets `created_by`/`created_at` and `updated_by`/`updated_at` from the token. POST and PUT return the saved `ManualRejection`; DELETE returns any 2xx.
+Admin only (403 otherwise). The body for POST and PUT is a `ManualRejection` without `rejection_id` and the audit fields. Datetimes must include a timezone. The backend sets `created_by`/`created_at` and `updated_by`/`updated_at` from the token. POST returns 201 and PUT returns 200, both with the saved `ManualRejection`. DELETE returns 204. PUT and DELETE return 404 for an unknown or already deleted rejection. Invalid input returns 400 with a `message`.
+
+Built in `dashboard-api` (`routers/data_quality.py`, `data_quality/rejections.py`), branch `feature/data-quality-rejections`.
 
 ### Feed checker
 
@@ -144,14 +158,16 @@ The migration runs in two steps, both in `dd-importer-v2/sql/migrations/`:
 
 What reads `data_type` now: the vehicle importer, the trip importer, the service area importer, the feed monitor and `/public/active_feeds` in the dashboard API.
 
-### Manual rejections (both options)
+### Manual rejections (built)
+
+Branch `feature/data-quality-rejections` in `dd-importer-v2`, migration `20261125_add_data_quality_rejection_table.sql`.
 
 ```sql
 CREATE TABLE data_quality_rejection (
     rejection_id   INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     start_time     TIMESTAMPTZ NOT NULL,
     end_time       TIMESTAMPTZ,                       -- NULL = ongoing
-    system_ids     VARCHAR(255)[],                    -- NULL = all operators
+    system_id      VARCHAR(255),                      -- NULL = all operators
     municipalities VARCHAR(255)[],                    -- gm_codes; NULL = all of NL
     modalities     VARCHAR(255)[],                    -- form factors; NULL = all (API: vehicle_types)
     data_types     feed_data_type[] NOT NULL,
@@ -166,13 +182,17 @@ CREATE TABLE data_quality_rejection (
     deleted_at     TIMESTAMPTZ,
     CHECK (end_time IS NULL OR end_time > start_time),
     CHECK (cardinality(data_types) > 0),
-    CHECK (system_ids IS NULL OR cardinality(system_ids) > 0),
     CHECK (municipalities IS NULL OR cardinality(municipalities) > 0),
     CHECK (modalities IS NULL OR cardinality(modalities) > 0)
 );
+
+CREATE INDEX idx_data_quality_rejection_system_id
+    ON data_quality_rejection (system_id)
+    WHERE deleted_at IS NULL;
 ```
 
-- Arrays instead of junction tables: a rejection is read and edited as one unit, and the table stays small. `NULL` means "all" and maps to `'all'` in the API.
+- One operator or all: a rejection for a few specific operators almost never happens, so it is stored as one row per operator. That keeps the operator filter a plain comparison.
+- Arrays instead of junction tables for municipalities and vehicle types: a rejection is read and edited as one unit, and the table stays small. `NULL` means "all" and maps to `'all'` in the API, also for `system_id`.
 - `DELETE` in the API sets `deleted_by` / `deleted_at` (soft delete), so it stays visible who rejected data and who removed the rejection. `GET` only returns rows where `deleted_at IS NULL`.
 
 ### Option A: outage intervals per feed
@@ -216,6 +236,7 @@ How the API fields follow, per operator and data type, over the operator's activ
 | `last_data_received_at` | Oldest `last_time_succesfully_imported` (the worst feed) |
 | `outages` | The feeds' `feed_downtime` intervals that overlap the period, merged where they overlap |
 | `availability_pct` | 100 × (1 − merged outage time / elapsed time in the period) |
+| `individual_feeds` | One item per active feed. `status`: `unavailable` if the feed has an open `feed_downtime` row, `unknown` if no import was attempted yet, else `available`. `outages`: that feed's own `feed_downtime` intervals in the period. |
 
 ### Option B: status per feed per check, combined into one final status
 
@@ -275,7 +296,7 @@ How the API fields follow, per operator and data type, from `operator_feed_check
 | | Option A | Option B |
 |---|----------|----------|
 | What is stored | Outage intervals per feed, plus the latest check | Every check of every feed, plus the final status per operator |
-| Changes still needed | 1 new table (rejections); the feed part is built | 3 new tables |
+| Changes still needed | None for the tables: rejections and the feed part are built | 3 new tables |
 | Rows written | One per outage | Per day: 288 per feed, plus 288 per operator and data type |
 | Several feeds per operator | Combined when the API is called. A changed rule also changes history. | Combined at check time and stored. History keeps the rule that applied then. |
 | "Partly available" | Needs interval arithmetic over all feeds | Stored: `feeds_failing` / `feeds_total` |

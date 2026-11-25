@@ -94,6 +94,11 @@
   padding-left: calc(6rem + 0.5rem);
 }
 
+.data-quality-feed-list {
+  @apply list-disc pl-4 m-0 text-xs;
+  overflow-wrap: anywhere;
+}
+
 .data-quality-rejection {
   @apply bg-white rounded-md p-3 text-sm border border-gray-200;
 }
