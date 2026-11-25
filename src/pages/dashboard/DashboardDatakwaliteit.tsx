@@ -57,9 +57,8 @@ function DashboardDatakwaliteit() {
   }, []);
 
   const handleDeleteRejection = useCallback((rejection: ManualRejection) => {
-    const coversMultiple = rejection.system_ids === 'all' || rejection.system_ids.length > 1;
-    const message = coversMultiple
-      ? 'Deze afkeuring geldt voor meerdere aanbieders en wordt bij allemaal verwijderd. ' +
+    const message = rejection.system_id === 'all'
+      ? 'Deze afkeuring geldt voor alle aanbieders en wordt bij allemaal verwijderd. ' +
         'Weet je zeker dat je deze afkeuring wilt verwijderen?'
       : 'Weet je zeker dat je deze afkeuring wilt verwijderen?';
     if (!window.confirm(message)) return;

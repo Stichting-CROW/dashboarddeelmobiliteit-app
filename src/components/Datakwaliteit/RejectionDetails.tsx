@@ -5,7 +5,7 @@ import {
   ISSUE_OWNER_LABELS,
   describeRejectionDataTypes,
   describeRejectionMunicipalities,
-  describeRejectionOperators,
+  describeRejectionOperator,
   describeRejectionVehicleTypes,
   formatDateTime,
   formatRejectionPeriod,
@@ -27,7 +27,7 @@ const RejectionDetails = ({
   onEdit,
   onDelete,
 }: RejectionDetailsProps) => {
-  const coversOthers = rejection.system_ids === 'all' || rejection.system_ids.length > 1;
+  const coversOthers = rejection.system_id === 'all';
 
   return (
     <div className="data-quality-rejection">
@@ -59,8 +59,8 @@ const RejectionDetails = ({
       <dl className="data-quality-rejection-fields">
         {coversOthers && (
           <>
-            <dt>Aanbieders</dt>
-            <dd>{describeRejectionOperators(rejection, labels)}</dd>
+            <dt>Aanbieder</dt>
+            <dd>{describeRejectionOperator(rejection, labels)}</dd>
           </>
         )}
         <dt>Gebied</dt>

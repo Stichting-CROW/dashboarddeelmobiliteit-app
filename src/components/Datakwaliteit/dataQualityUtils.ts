@@ -5,6 +5,7 @@ import type {
   DataQualityPeriod,
   FeedAvailability,
   FeedStatus,
+  IndividualFeed,
   IssueOwner,
   ManualRejection,
   ManualRejectionInput,
@@ -73,6 +74,62 @@ export const intervalOverlapsPeriod = (
   return start < period.end && end > period.start;
 };
 
+const toMs = (value: string): number => new Date(value).getTime();
+
+/** Merge overlapping or touching intervals. An ongoing interval absorbs everything after it. */
+export const mergeIntervals = (intervals: TimeInterval[]): TimeInterval[] => {
+  const sorted = [...intervals].sort((a, b) => toMs(a.start_time) - toMs(b.start_time));
+  const merged: TimeInterval[] = [];
+  sorted.forEach((interval) => {
+    const last = merged[merged.length - 1];
+    const overlapsLast = last &&
+      (last.end_time === null || toMs(interval.start_time) <= toMs(last.end_time));
+    if (!overlapsLast) {
+      merged.push({ start_time: interval.start_time, end_time: interval.end_time });
+      return;
+    }
+    if (last.end_time === null) return;
+    if (interval.end_time === null || toMs(interval.end_time) > toMs(last.end_time)) {
+      last.end_time = interval.end_time;
+    }
+  });
+  return merged;
+};
+
+export const getIndividualFeeds = (feed: FeedAvailability | undefined): IndividualFeed[] => {
+  return feed?.individual_feeds ?? [];
+};
+
+/** Only worth naming feeds when the operator has more than one for the data type. */
+export const hasMultipleFeeds = (feed: FeedAvailability | undefined): boolean => {
+  return getIndividualFeeds(feed).length > 1;
+};
+
+export const getOfflineFeeds = (feed: FeedAvailability | undefined): IndividualFeed[] => {
+  return getIndividualFeeds(feed).filter((individual) => individual.status === 'unavailable');
+};
+
+/** Individual feeds that were down at some moment in [start, end). */
+export const getFeedsDownBetween = (
+  feed: FeedAvailability | undefined,
+  start: number,
+  end: number,
+  now: number = Date.now()
+): IndividualFeed[] => {
+  return getIndividualFeeds(feed).filter((individual) =>
+    individual.outages.some((outage) => intervalOverlapsPeriod(outage, { start, end }, now))
+  );
+};
+
+/** Start of the outage that is still ongoing for this feed, if any. */
+export const getDownSince = (individual: IndividualFeed): string | null => {
+  return individual.outages.find((outage) => outage.end_time === null)?.start_time ?? null;
+};
+
+export const describeFeedShare = (count: number, total: number): string => {
+  return count >= total ? `alle ${total} feeds` : `${count} van ${total} feeds`;
+};
+
 export const rejectionAppliesToMunicipality = (
   rejection: Pick<ManualRejection, 'municipalities'>,
   gmCode: string | null | undefined
@@ -83,11 +140,10 @@ export const rejectionAppliesToMunicipality = (
 };
 
 export const rejectionAppliesToOperator = (
-  rejection: Pick<ManualRejection, 'system_ids'>,
+  rejection: Pick<ManualRejection, 'system_id'>,
   systemId: string
 ): boolean => {
-  if (rejection.system_ids === 'all') return true;
-  return rejection.system_ids.includes(systemId);
+  return rejection.system_id === 'all' || rejection.system_id === systemId;
 };
 
 export const rejectionAppliesToVehicleType = (
@@ -206,6 +262,10 @@ export interface DailyFeedQuality {
   status: FeedStatus;
   /** Outages clipped to the day */
   outages: TimelineSegment[];
+  /** Individual feeds that were down that day */
+  feedsDown: IndividualFeed[];
+  /** Number of individual feeds for this data type (0 if the API doesn't list them) */
+  feedCount: number;
 }
 
 export interface DailyDataQuality {
@@ -257,7 +317,12 @@ export const buildDailyDataQuality = (
         ? []
         : toTimelineSegments(feed.outages, day, now);
       if (outages.length > 0) hasOutage = true;
-      feeds[dataType] = { status: feed.status, outages };
+      feeds[dataType] = {
+        status: feed.status,
+        outages,
+        feedsDown: outages.length > 0 ? getFeedsDownBetween(feed, day.start, day.end, now) : [],
+        feedCount: getIndividualFeeds(feed).length,
+      };
     });
 
     const dayRejections = rejections.filter((rejection) =>
@@ -303,10 +368,13 @@ const joinOrAll = (
   return values.map(resolve).join(', ');
 };
 
-export const describeRejectionOperators = (
+export const describeRejectionOperator = (
   rejection: ManualRejection,
   resolvers: RejectionLabelResolvers
-): string => joinOrAll(rejection.system_ids, resolvers.getOperatorName, 'Alle aanbieders');
+): string => {
+  if (rejection.system_id === 'all') return 'Alle aanbieders';
+  return resolvers.getOperatorName(rejection.system_id);
+};
 
 export const describeRejectionMunicipalities = (
   rejection: ManualRejection,
@@ -326,7 +394,7 @@ export const buildRejectionCsvColumns = (
   resolvers: RejectionLabelResolvers
 ): CsvColumn<ManualRejection>[] => [
   { header: 'ID', value: (r) => r.rejection_id },
-  { header: 'Aanbieder(s)', value: (r) => describeRejectionOperators(r, resolvers) },
+  { header: 'Aanbieder', value: (r) => describeRejectionOperator(r, resolvers) },
   { header: 'Van', value: (r) => formatDateTime(r.start_time) },
   { header: 'Tot', value: (r) => (r.end_time ? formatDateTime(r.end_time) : 'heden') },
   { header: 'Gebied', value: (r) => describeRejectionMunicipalities(r, resolvers) },
@@ -356,8 +424,8 @@ export const validateRejectionInput = (input: ManualRejectionInput): string[] =>
       errors.push('De einddatum moet na de startdatum liggen.');
     }
   }
-  if (input.system_ids !== 'all' && input.system_ids.length === 0) {
-    errors.push('Kies minimaal één aanbieder.');
+  if (!input.system_id) {
+    errors.push('Kies een aanbieder, of alle aanbieders.');
   }
   if (input.municipalities !== 'all' && input.municipalities.length === 0) {
     errors.push('Kies minimaal één gemeente, of heel Nederland.');

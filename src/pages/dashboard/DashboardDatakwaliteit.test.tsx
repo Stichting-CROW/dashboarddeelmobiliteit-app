@@ -110,10 +110,13 @@ describe('DashboardDatakwaliteit in demo mode', () => {
     fireEvent.click(within(dialog).getByText('Aanbod'));
     fireEvent.click(within(dialog).getByText('Opslaan'));
     expect(within(dialog).getByRole('alert')).toHaveTextContent('Kies minimaal één datatype.');
-    expect(within(dialog).getByRole('alert')).toHaveTextContent('Kies minimaal één aanbieder.');
+    expect(within(dialog).getByRole('alert'))
+      .toHaveTextContent('Kies een aanbieder, of alle aanbieders.');
 
     fireEvent.click(within(dialog).getByText('Aanbod'));
-    fireEvent.click(within(dialog).getByText('Alle aanbieders'));
+    fireEvent.change(within(dialog).getByRole('combobox', { name: 'Aanbieder' }), {
+      target: { value: 'all' },
+    });
     fireEvent.change(within(dialog).getByLabelText('Notitie'), {
       target: { value: 'Nieuwe testafkeuring' },
     });

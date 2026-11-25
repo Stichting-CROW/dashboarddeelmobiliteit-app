@@ -4,6 +4,7 @@ import ProviderLabel from '../PrestatiesAanbieders/ProviderLabel';
 import DataQualityIndicator from './DataQualityIndicator';
 import DataQualityTimeline from './DataQualityTimeline';
 import RejectionDetails from './RejectionDetails';
+import FeedNameList from './FeedNameList';
 import type {
   DataQualityPeriod,
   FeedAvailability,
@@ -15,10 +16,15 @@ import {
   DATA_TYPE_LABELS,
   FEED_STATUS_LABELS,
   STATUS_COLORS,
+  describeFeedShare,
   formatDateTime,
   formatRejectionPeriod,
   getFeedStatusColor,
+  getFeedsDownBetween,
+  getIndividualFeeds,
+  getOfflineFeeds,
   getRejectionsForDataType,
+  hasMultipleFeeds,
 } from './dataQualityUtils';
 import type { DataQualityLabels } from './useDataQualityLabels';
 
@@ -55,25 +61,59 @@ const getRejectionSubtitle = (rejections: ManualRejection[]): string | undefined
   return `Handmatig afgekeurd: ${rejections.length} periodes`;
 };
 
-const renderFeedTooltip = (feed: FeedAvailability | undefined): React.ReactNode => {
+const getStatusLabel = (feed: FeedAvailability | undefined): string => {
+  const label = FEED_STATUS_LABELS[feed?.status ?? 'unknown'];
+  const offlineCount = getOfflineFeeds(feed).length;
+  if (feed?.status !== 'unavailable' || !hasMultipleFeeds(feed) || offlineCount === 0) {
+    return label;
+  }
+  return `${label} (${offlineCount}/${getIndividualFeeds(feed).length})`;
+};
+
+const renderFeedTooltip = (
+  feed: FeedAvailability | undefined,
+  now: number
+): React.ReactNode => {
   if (!feed || feed.status === 'unknown') {
     return 'Er is nog geen controle van deze feed uitgevoerd.';
   }
   if (feed.status === 'not_expected') {
     return 'Deze aanbieder levert deze feed niet aan.';
   }
+  const multipleFeeds = hasMultipleFeeds(feed);
+  const feedCount = getIndividualFeeds(feed).length;
+  const offlineFeeds = getOfflineFeeds(feed);
   return (
     <>
       Laatste controle: {formatDateTime(feed.last_checked_at)}
       <br />
       Laatst data ontvangen: {formatDateTime(feed.last_data_received_at)}
-      {feed.outages.length > 0 && (
+      {multipleFeeds && (
         <>
           <br />
-          <b>Storingen in periode:</b>
-          {feed.outages.slice(0, 5).map((outage) => (
-            <div key={outage.start_time}>{formatRejectionPeriod(outage)}</div>
-          ))}
+          {offlineFeeds.length > 0
+            ? <b>Nu offline: {describeFeedShare(offlineFeeds.length, feedCount)}</b>
+            : `Alle ${feedCount} feeds online`}
+          <FeedNameList feeds={offlineFeeds} total={feedCount} showDownSince />
+        </>
+      )}
+      {feed.outages.length > 0 && (
+        <>
+          <b className="block mt-1">Storingen in periode:</b>
+          {feed.outages.slice(0, 5).map((outage) => {
+            const start = new Date(outage.start_time).getTime();
+            const end = outage.end_time ? new Date(outage.end_time).getTime() : now;
+            const feedsDown = multipleFeeds ? getFeedsDownBetween(feed, start, end, now) : [];
+            return (
+              <div key={outage.start_time}>
+                {formatRejectionPeriod(outage)}
+                {feedsDown.length > 0 && (
+                  <> ({describeFeedShare(feedsDown.length, feedCount)})</>
+                )}
+                <FeedNameList feeds={feedsDown} total={feedCount} max={3} />
+              </div>
+            );
+          })}
           {feed.outages.length > 5 && <div>en {feed.outages.length - 5} meer</div>}
         </>
       )}
@@ -123,12 +163,12 @@ const DataQualityCard = ({
               valueLabel={
                 isRejected
                   ? `Afgekeurd${feedRejections.length > 1 ? ` (${feedRejections.length})` : ''}`
-                  : FEED_STATUS_LABELS[feed?.status ?? 'unknown']
+                  : getStatusLabel(feed)
               }
               color={isRejected ? STATUS_COLORS.issue : getFeedStatusColor(feed?.status)}
               subtitle={getRejectionSubtitle(feedRejections)}
               detail={getFeedDetail(feed)}
-              tooltip={renderFeedTooltip(feed)}
+              tooltip={renderFeedTooltip(feed, now)}
               valuePopoverLabel={isRejected ? 'details afkeuring tonen' : undefined}
               renderValuePopover={isRejected ? (close) => (
                 <div className="flex flex-col gap-2">

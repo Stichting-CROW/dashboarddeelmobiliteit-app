@@ -1,13 +1,20 @@
 import { toCsv } from '../../helpers/csv';
 import type {
   FeedAvailability,
+  IndividualFeed,
   ManualRejection,
   ManualRejectionInput,
+  TimeInterval,
 } from '../../types/DataQuality';
 import {
   buildDailyDataQuality,
   buildRejectionCsvColumns,
   filterRejections,
+  getDownSince,
+  getFeedsDownBetween,
+  getOfflineFeeds,
+  hasMultipleFeeds,
+  mergeIntervals,
   getRejectionsForDataType,
   groupByOperator,
   hasDataQualityIssue,
@@ -34,7 +41,7 @@ const now = period.end + 3 * DAY;
 
 const makeRejection = (overrides: Partial<ManualRejection> = {}): ManualRejection => ({
   rejection_id: 1,
-  system_ids: ['lime'],
+  system_id: 'lime',
   start_time: new Date(period.start + DAY).toISOString(),
   end_time: new Date(period.start + DAY + 5 * HOUR).toISOString(),
   municipalities: 'all',
@@ -58,6 +65,21 @@ const makeFeed = (overrides: Partial<FeedAvailability> = {}): FeedAvailability =
   availability_pct: 100,
   outages: [],
   ...overrides,
+});
+
+const makeIndividualFeed = (overrides: Partial<IndividualFeed> = {}): IndividualFeed => ({
+  feed_id: 1,
+  name: 'api.lime.example/gbfs/free_bike_status.json',
+  status: 'available',
+  last_data_received_at: null,
+  outages: [],
+  ...overrides,
+});
+
+/** Interval relative to the start of the period */
+const at = (startOffset: number, endOffset: number): TimeInterval => ({
+  start_time: new Date(period.start + startOffset).toISOString(),
+  end_time: new Date(period.start + endOffset).toISOString(),
 });
 
 describe('parsePeriod', () => {
@@ -102,10 +124,10 @@ describe('rejection scope', () => {
     expect(rejectionAppliesToMunicipality({ municipalities: ['GM0363'] }, 'GM0599')).toBe(false);
   });
 
-  it('applies to operators that are listed or covered by "all"', () => {
-    expect(rejectionAppliesToOperator({ system_ids: 'all' }, 'dott')).toBe(true);
-    expect(rejectionAppliesToOperator({ system_ids: ['lime'] }, 'lime')).toBe(true);
-    expect(rejectionAppliesToOperator({ system_ids: ['lime'] }, 'dott')).toBe(false);
+  it('applies to its own operator, or to every operator when system_id is "all"', () => {
+    expect(rejectionAppliesToOperator({ system_id: 'all' }, 'dott')).toBe(true);
+    expect(rejectionAppliesToOperator({ system_id: 'lime' }, 'lime')).toBe(true);
+    expect(rejectionAppliesToOperator({ system_id: 'lime' }, 'dott')).toBe(false);
   });
 
   it('filters on municipality and period together', () => {
@@ -145,8 +167,8 @@ describe('groupByOperator', () => {
     makeFeed({ system_id: 'dott', data_type: 'aanbod' }),
   ];
   const rejections = [
-    makeRejection({ rejection_id: 1, system_ids: ['lime'] }),
-    makeRejection({ rejection_id: 2, system_ids: 'all' }),
+    makeRejection({ rejection_id: 1, system_id: 'lime' }),
+    makeRejection({ rejection_id: 2, system_id: 'all' }),
   ];
 
   it('builds one entry per operator with its feeds and matching rejections', () => {
@@ -280,12 +302,75 @@ describe('buildDailyDataQuality', () => {
     const days = buildDailyDataQuality(makeOperator([makeFeed({ status: 'unknown' })]), options);
     expect(complies(days).every((value) => value === undefined)).toBe(true);
   });
+
+  it('lists the individual feeds that were down per day', () => {
+    const outage = at(DAY + HOUR, DAY + 2 * HOUR);
+    const days = buildDailyDataQuality(makeOperator([makeFeed({
+      outages: [outage],
+      individual_feeds: [
+        makeIndividualFeed({ feed_id: 1, outages: [outage] }),
+        makeIndividualFeed({ feed_id: 2 }),
+      ],
+    })]), options);
+    expect(days[0].feeds.aanbod!.feedsDown).toEqual([]);
+    expect(days[1].feeds.aanbod!.feedsDown.map((f) => f.feed_id)).toEqual([1]);
+    expect(days[1].feeds.aanbod!.feedCount).toBe(2);
+  });
+});
+
+describe('individual feeds', () => {
+  const outageA = at(DAY, DAY + 2 * HOUR);
+  const outageB = at(DAY + HOUR, DAY + 3 * HOUR);
+  const ongoing: TimeInterval = {
+    start_time: new Date(period.start + 4 * DAY).toISOString(),
+    end_time: null,
+  };
+  const feed = makeFeed({
+    status: 'unavailable',
+    outages: mergeIntervals([outageA, outageB, ongoing]),
+    individual_feeds: [
+      makeIndividualFeed({ feed_id: 1, outages: [outageA] }),
+      makeIndividualFeed({ feed_id: 2, outages: [outageB] }),
+      makeIndividualFeed({ feed_id: 3, status: 'unavailable', outages: [ongoing] }),
+      makeIndividualFeed({ feed_id: 4 }),
+    ],
+  });
+  const ids = (feeds: IndividualFeed[]) => feeds.map((f) => f.feed_id);
+
+  it('merges overlapping intervals and lets an ongoing one absorb later ones', () => {
+    expect(mergeIntervals([outageB, outageA])).toEqual([at(DAY, DAY + 3 * HOUR)]);
+    expect(mergeIntervals([ongoing, at(5 * DAY, 6 * DAY)])).toEqual([ongoing]);
+    expect(mergeIntervals([at(0, HOUR), at(2 * HOUR, 3 * HOUR)])).toHaveLength(2);
+  });
+
+  it('finds the feeds that were down in a time window', () => {
+    const start = period.start;
+    expect(ids(getFeedsDownBetween(feed, start + DAY, start + DAY + 3 * HOUR, now)))
+      .toEqual([1, 2]);
+    expect(ids(getFeedsDownBetween(feed, start + DAY + 2.5 * HOUR, start + 2 * DAY, now)))
+      .toEqual([2]);
+    expect(ids(getFeedsDownBetween(feed, start + 5 * DAY, start + 6 * DAY, now))).toEqual([3]);
+  });
+
+  it('lists offline feeds with the start of their ongoing outage', () => {
+    const offline = getOfflineFeeds(feed);
+    expect(ids(offline)).toEqual([3]);
+    expect(getDownSince(offline[0])).toBe(ongoing.start_time);
+    expect(getDownSince(feed.individual_feeds![0])).toBeNull();
+  });
+
+  it('only treats more than one listed feed as multiple feeds', () => {
+    expect(hasMultipleFeeds(feed)).toBe(true);
+    expect(hasMultipleFeeds(makeFeed({ individual_feeds: [makeIndividualFeed()] }))).toBe(false);
+    expect(hasMultipleFeeds(makeFeed())).toBe(false);
+    expect(getOfflineFeeds(undefined)).toEqual([]);
+  });
 });
 
 describe('buildRejectionCsvColumns', () => {
   it('exports readable labels including audit fields', () => {
     const csv = toCsv(
-      [makeRejection({ system_ids: 'all', municipalities: ['GM0599'] })],
+      [makeRejection({ system_id: 'all', municipalities: ['GM0599'] })],
       buildRejectionCsvColumns({
         getOperatorName: (id) => id.toUpperCase(),
         getMunicipalityName: (gm) => (gm === 'GM0599' ? 'Rotterdam' : gm),
@@ -304,7 +389,7 @@ describe('buildRejectionCsvColumns', () => {
 
 describe('validateRejectionInput', () => {
   const valid: ManualRejectionInput = {
-    system_ids: ['lime'],
+    system_id: 'lime',
     start_time: '2026-11-01T08:00:00.000Z',
     end_time: '2026-11-01T12:00:00.000Z',
     municipalities: 'all',
@@ -322,7 +407,7 @@ describe('validateRejectionInput', () => {
     const errors = validateRejectionInput({
       ...valid,
       end_time: '2026-11-01T07:00:00.000Z',
-      system_ids: [],
+      system_id: '',
       municipalities: [],
       vehicle_types: [],
       data_types: [],
@@ -350,10 +435,23 @@ describe('demo data', () => {
     });
   });
 
+  it('derives status and outages from the individual feeds', () => {
+    const feeds = buildDemoFeeds(systemIds, period, now)
+      .filter((feed) => feed.status === 'available' || feed.status === 'unavailable');
+    expect(feeds.some((feed) => (feed.individual_feeds?.length ?? 0) > 1)).toBe(true);
+    feeds.forEach((feed) => {
+      const individual = feed.individual_feeds!;
+      expect(individual.length).toBeGreaterThan(0);
+      expect(feed.status === 'unavailable')
+        .toBe(individual.some((f) => f.status === 'unavailable'));
+      expect(mergeIntervals(individual.flatMap((f) => f.outages))).toEqual(feed.outages);
+    });
+  });
+
   it('always includes an all-operator rejection by Dashboard Deelmobiliteit', () => {
     const rejections = buildDemoRejections(systemIds, [], now);
     expect(rejections.some((r) =>
-      r.system_ids === 'all' && r.issue_owner === 'dashboard_deelmobiliteit'
+      r.system_id === 'all' && r.issue_owner === 'dashboard_deelmobiliteit'
     )).toBe(true);
   });
 

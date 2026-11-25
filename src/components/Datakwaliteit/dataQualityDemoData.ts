@@ -2,10 +2,11 @@ import type {
   DataQualityDataType,
   DataQualityPeriod,
   FeedAvailability,
+  IndividualFeed,
   ManualRejection,
   TimeInterval,
 } from '../../types/DataQuality';
-import { DATA_TYPES, intervalOverlapsPeriod } from './dataQualityUtils';
+import { DATA_TYPES, intervalOverlapsPeriod, mergeIntervals } from './dataQualityUtils';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -87,6 +88,58 @@ const availabilityPct = (
   return Math.round((1 - down / observed) * 1000) / 10;
 };
 
+const DEMO_FEED_CITIES = [
+  'amsterdam', 'rotterdam', 'den-haag', 'utrecht', 'eindhoven', 'groningen', 'tilburg',
+  'almere', 'breda', 'nijmegen', 'apeldoorn', 'haarlem', 'arnhem', 'enschede', 'amersfoort',
+  'zaanstad', 'den-bosch', 'zwolle', 'leiden', 'delft',
+];
+
+const DEMO_FEED_PATHS: Record<DataQualityDataType, string> = {
+  aanbod: 'gbfs/free_bike_status.json',
+  verhuringen: 'mds/trips',
+  servicegebieden: 'gbfs/geofencing_zones.json',
+};
+
+const demoFeedCount = (systemId: string, dataType: DataQualityDataType): number => {
+  const random = seededRandom(`${systemId}|${dataType}|feeds`);
+  if (dataType === 'aanbod') return random < 0.4 ? 1 : 2 + Math.floor(random * 19);
+  if (dataType === 'verhuringen') return random < 0.7 ? 1 : 2;
+  return 1;
+};
+
+/** Spread the outages over the feeds: each outage hits a few feeds, sometimes all of them. */
+const buildDemoIndividualFeeds = (
+  systemId: string,
+  dataType: DataQualityDataType,
+  outages: TimeInterval[],
+  lastCheck: number
+): IndividualFeed[] => {
+  const count = demoFeedCount(systemId, dataType);
+  const feedOutages: TimeInterval[][] = Array.from({ length: count }, () => []);
+  outages.forEach((outage, index) => {
+    const key = `${systemId}|${dataType}|${index}|feeds`;
+    const hitsAll = seededRandom(`${key}|all`) < 0.25;
+    const hits = hitsAll ? count : 1 + Math.floor(seededRandom(`${key}|n`) * Math.min(3, count));
+    const offset = Math.floor(seededRandom(`${key}|offset`) * count);
+    for (let i = 0; i < hits; i++) {
+      feedOutages[(offset + i) % count].push(outage);
+    }
+  });
+
+  const idBase = Math.floor(seededRandom(`${systemId}|${dataType}|id`) * 900) * 100;
+  return feedOutages.map((individualOutages, index): IndividualFeed => {
+    const city = count > 1 ? `/${DEMO_FEED_CITIES[index % DEMO_FEED_CITIES.length]}` : '';
+    const ongoing = individualOutages.find((outage) => outage.end_time === null);
+    return {
+      feed_id: idBase + index + 1,
+      name: `api.${systemId}.example${city}/${DEMO_FEED_PATHS[dataType]}`,
+      status: ongoing ? 'unavailable' : 'available',
+      last_data_received_at: ongoing ? ongoing.start_time : iso(lastCheck),
+      outages: individualOutages,
+    };
+  });
+};
+
 export const buildDemoFeeds = (
   systemIds: string[],
   period: DataQualityPeriod,
@@ -113,8 +166,11 @@ export const buildDemoFeeds = (
         };
       }
 
-      const allOutages = buildOutages(systemId, dataType, now);
+      const allOutages = mergeIntervals(buildOutages(systemId, dataType, now));
       const ongoing = allOutages.find((outage) => outage.end_time === null);
+      const inPeriod = (outage: TimeInterval) => intervalOverlapsPeriod(outage, period, now);
+      const individualFeeds = buildDemoIndividualFeeds(systemId, dataType, allOutages, lastCheck)
+        .map((individual) => ({ ...individual, outages: individual.outages.filter(inPeriod) }));
       return {
         system_id: systemId,
         data_type: dataType,
@@ -122,7 +178,8 @@ export const buildDemoFeeds = (
         last_checked_at: iso(lastCheck),
         last_data_received_at: ongoing ? ongoing.start_time : iso(lastCheck),
         availability_pct: availabilityPct(allOutages, period, now),
-        outages: allOutages.filter((outage) => intervalOverlapsPeriod(outage, period, now)),
+        outages: allOutages.filter(inPeriod),
+        individual_feeds: individualFeeds,
       };
     })
   );
@@ -153,7 +210,7 @@ export const buildDemoRejections = (
 
     rejections.push({
       rejection_id: nextId++,
-      system_ids: [systemId],
+      system_id: systemId,
       start_time: iso(start),
       end_time: isOngoing ? null : iso(start + durationHours * HOUR),
       municipalities: useAllMunicipalities
@@ -178,7 +235,7 @@ export const buildDemoRejections = (
     const start = Math.floor((now - 3 * DAY) / DAY) * DAY + 2 * HOUR;
     rejections.push({
       rejection_id: nextId++,
-      system_ids: 'all',
+      system_id: 'all',
       start_time: iso(start),
       end_time: iso(start + 5 * HOUR),
       municipalities: 'all',

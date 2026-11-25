@@ -7,11 +7,13 @@ import type {
 } from '../../api/permitLimits';
 import type { OperatorDataQuality } from '../../types/DataQuality';
 import { useOperatorDataQuality } from './DataQualityContext';
+import FeedNameList from './FeedNameList';
 import {
   DATA_TYPES,
   DATA_TYPE_LABELS,
   ISSUE_OWNER_LABELS,
   buildDailyDataQuality,
+  describeFeedShare,
   describeRejectionDataTypes,
   formatRejectionPeriod,
   type DailyDataQuality,
@@ -62,11 +64,21 @@ const DayTooltip = ({ day }: { day: DailyDataQuality }) => (
   <div className="text-sm leading-tight">
     <div className="font-semibold">{formatDay(day.date)}</div>
     <div className="mb-1">{describeVerdict(day.complies)}</div>
-    {DATA_TYPES.map((dataType) => (
-      <div key={dataType}>
-        {DATA_TYPE_LABELS[dataType]}: {describeDailyFeed(day.feeds[dataType])}
-      </div>
-    ))}
+    {DATA_TYPES.map((dataType) => {
+      const feed = day.feeds[dataType];
+      const showFeeds = feed && feed.feedCount > 1 && feed.feedsDown.length > 0;
+      return (
+        <div key={dataType}>
+          {DATA_TYPE_LABELS[dataType]}: {describeDailyFeed(feed)}
+          {showFeeds && (
+            <>
+              {' '}({describeFeedShare(feed.feedsDown.length, feed.feedCount)})
+              <FeedNameList feeds={feed.feedsDown} total={feed.feedCount} max={3} />
+            </>
+          )}
+        </div>
+      );
+    })}
     {day.rejections.length > 0 && (
       <>
         <div className="font-semibold mt-1">Handmatig afgekeurd</div>

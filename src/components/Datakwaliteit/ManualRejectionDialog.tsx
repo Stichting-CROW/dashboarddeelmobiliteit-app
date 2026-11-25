@@ -31,8 +31,8 @@ interface ManualRejectionDialogProps {
 }
 
 interface FormState {
-  allOperators: boolean;
-  systemIds: string[];
+  /** A system_id, 'all', or '' when nothing is chosen yet */
+  systemId: string;
   start: string;
   end: string;
   allMunicipalities: boolean;
@@ -61,8 +61,7 @@ const buildInitialState = (
 ): FormState => {
   if (!rejection) {
     return {
-      allOperators: false,
-      systemIds: defaultSystemId ? [defaultSystemId] : [],
+      systemId: defaultSystemId || '',
       start: moment().startOf('hour').format(DATETIME_LOCAL_FORMAT),
       end: '',
       allMunicipalities: true,
@@ -75,8 +74,7 @@ const buildInitialState = (
     };
   }
   return {
-    allOperators: rejection.system_ids === 'all',
-    systemIds: rejection.system_ids === 'all' ? [] : rejection.system_ids,
+    systemId: rejection.system_id,
     start: toLocalInput(rejection.start_time),
     end: toLocalInput(rejection.end_time),
     allMunicipalities: rejection.municipalities === 'all',
@@ -90,7 +88,7 @@ const buildInitialState = (
 };
 
 const toInput = (form: FormState): ManualRejectionInput => ({
-  system_ids: form.allOperators ? 'all' : form.systemIds,
+  system_id: form.systemId,
   start_time: toIso(form.start),
   end_time: form.end ? toIso(form.end) : null,
   municipalities: form.allMunicipalities ? 'all' : form.municipalities,
@@ -133,11 +131,11 @@ const ManualRejectionDialog = ({
 
   const operatorOptions: MultiSelectOption[] = useMemo(() => {
     const ids = new Set<string>(aanbieders.map(getAanbiederSystemId).filter(Boolean));
-    form.systemIds.forEach((id) => ids.add(id));
+    if (form.systemId && form.systemId !== 'all') ids.add(form.systemId);
     return Array.from(ids)
       .map((id) => ({ id, label: labels.getOperatorName(id) }))
       .sort((a, b) => a.label.localeCompare(b.label, 'nl', { sensitivity: 'base' }));
-  }, [aanbieders, form.systemIds, labels]);
+  }, [aanbieders, form.systemId, labels]);
 
   const municipalityOptions: MultiSelectOption[] = useMemo(() => {
     return gebieden
@@ -159,9 +157,9 @@ const ManualRejectionDialog = ({
       ...current,
       issueOwner,
       // An outage on our side usually affects every operator.
-      allOperators: issueOwner === 'dashboard_deelmobiliteit' && !rejection
-        ? true
-        : current.allOperators,
+      systemId: issueOwner === 'dashboard_deelmobiliteit' && !rejection
+        ? 'all'
+        : current.systemId,
     }));
   };
 
@@ -206,23 +204,19 @@ const ManualRejectionDialog = ({
         )}
 
         <fieldset>
-          <legend>Aanbieder(s)</legend>
-          <ToggleRow
-            id="dq-all-operators"
-            label="Alle aanbieders"
-            checked={form.allOperators}
-            onChange={(checked) => update('allOperators', checked)}
-          />
-          {!form.allOperators && (
-            <MultiSelectList
-              idPrefix="dq-operator"
-              options={operatorOptions}
-              selected={form.systemIds}
-              onChange={(selected) => update('systemIds', selected)}
-              searchable
-              searchPlaceholder="Zoek aanbieder"
-            />
-          )}
+          <legend>Aanbieder</legend>
+          <select
+            className="data-quality-input"
+            value={form.systemId}
+            onChange={(e) => update('systemId', e.target.value)}
+            aria-label="Aanbieder"
+          >
+            <option value="" disabled>Kies een aanbieder</option>
+            <option value="all">Alle aanbieders</option>
+            {operatorOptions.map((option) => (
+              <option key={option.id} value={option.id}>{option.label}</option>
+            ))}
+          </select>
         </fieldset>
 
         <fieldset>
