@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import ProviderLabel from '../PrestatiesAanbieders/ProviderLabel';
 import DataQualityIndicator from './DataQualityIndicator';
 import DataQualityTimeline from './DataQualityTimeline';
+import RejectionDetails from './RejectionDetails';
 import type {
   DataQualityPeriod,
   FeedAvailability,
@@ -13,15 +14,11 @@ import {
   DATA_TYPES,
   DATA_TYPE_LABELS,
   FEED_STATUS_LABELS,
-  ISSUE_OWNER_LABELS,
   STATUS_COLORS,
-  describeRejectionDataTypes,
-  describeRejectionMunicipalities,
-  describeRejectionOperators,
-  describeRejectionVehicleTypes,
   formatDateTime,
   formatRejectionPeriod,
   getFeedStatusColor,
+  getRejectionsForDataType,
 } from './dataQualityUtils';
 import type { DataQualityLabels } from './useDataQualityLabels';
 
@@ -48,6 +45,14 @@ const getFeedDetail = (feed: FeedAvailability | undefined): string | undefined =
     parts.push(`${feed.outages.length} ${feed.outages.length === 1 ? 'storing' : 'storingen'}`);
   }
   return parts.join(' · ') || undefined;
+};
+
+const getRejectionSubtitle = (rejections: ManualRejection[]): string | undefined => {
+  if (rejections.length === 0) return undefined;
+  if (rejections.length === 1) {
+    return `Handmatig afgekeurd: ${formatRejectionPeriod(rejections[0])}`;
+  }
+  return `Handmatig afgekeurd: ${rejections.length} periodes`;
 };
 
 const renderFeedTooltip = (feed: FeedAvailability | undefined): React.ReactNode => {
@@ -86,8 +91,6 @@ const DataQualityCard = ({
   onEditRejection,
   onDeleteRejection,
 }: DataQualityCardProps) => {
-  const rejectionCount = operator.rejections.length;
-
   return (
     <div className="data-quality-card" id={`data-quality-card-${operator.system_id}`}>
       <div className="flex items-center justify-between gap-2 mb-3">
@@ -109,21 +112,38 @@ const DataQualityCard = ({
       </div>
 
       <div className="flex flex-col gap-1">
-        <DataQualityIndicator
-          label="Handmatig afgekeurd"
-          valueLabel={rejectionCount > 0 ? `Ja (${rejectionCount})` : 'Nee'}
-          color={rejectionCount > 0 ? STATUS_COLORS.issue : STATUS_COLORS.ok}
-        />
         {DATA_TYPES.map((dataType) => {
           const feed = operator.feeds[dataType];
+          const feedRejections = getRejectionsForDataType(operator.rejections, dataType);
+          const isRejected = feedRejections.length > 0;
           return (
             <DataQualityIndicator
               key={dataType}
               label={`${DATA_TYPE_LABELS[dataType]} feed beschikbaar`}
-              valueLabel={FEED_STATUS_LABELS[feed?.status ?? 'unknown']}
-              color={getFeedStatusColor(feed?.status)}
+              valueLabel={
+                isRejected
+                  ? `Afgekeurd${feedRejections.length > 1 ? ` (${feedRejections.length})` : ''}`
+                  : FEED_STATUS_LABELS[feed?.status ?? 'unknown']
+              }
+              color={isRejected ? STATUS_COLORS.issue : getFeedStatusColor(feed?.status)}
+              subtitle={getRejectionSubtitle(feedRejections)}
               detail={getFeedDetail(feed)}
               tooltip={renderFeedTooltip(feed)}
+              valuePopoverLabel={isRejected ? 'details afkeuring tonen' : undefined}
+              renderValuePopover={isRejected ? (close) => (
+                <div className="flex flex-col gap-2">
+                  {feedRejections.map((rejection) => (
+                    <RejectionDetails
+                      key={rejection.rejection_id}
+                      rejection={rejection}
+                      labels={labels}
+                      canEdit={canEdit}
+                      onEdit={(r) => { close(); onEditRejection(r); }}
+                      onDelete={(r) => { close(); onDeleteRejection(r); }}
+                    />
+                  ))}
+                </div>
+              ) : undefined}
             />
           );
         })}
@@ -131,72 +151,18 @@ const DataQualityCard = ({
 
       <DataQualityTimeline operator={operator} period={period} now={now} />
 
-      {rejectionCount > 0 && (
+      {operator.rejections.length > 0 && (
         <div className="flex flex-col gap-2 mt-3">
-          {operator.rejections.map((rejection) => {
-            const coversOthers = rejection.system_ids === 'all' || rejection.system_ids.length > 1;
-            return (
-              <div key={rejection.rejection_id} className="data-quality-rejection">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="font-semibold">{formatRejectionPeriod(rejection)}</div>
-                  {canEdit && (
-                    <div className="flex gap-1 shrink-0">
-                      <button
-                        type="button"
-                        className="data-quality-icon-button"
-                        title="Afkeuring bewerken"
-                        aria-label="Afkeuring bewerken"
-                        onClick={() => onEditRejection(rejection)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="data-quality-icon-button"
-                        title="Afkeuring verwijderen"
-                        aria-label="Afkeuring verwijderen"
-                        onClick={() => onDeleteRejection(rejection)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <dl className="data-quality-rejection-fields">
-                  {coversOthers && (
-                    <>
-                      <dt>Aanbieders</dt>
-                      <dd>{describeRejectionOperators(rejection, labels)}</dd>
-                    </>
-                  )}
-                  <dt>Gebied</dt>
-                  <dd>{describeRejectionMunicipalities(rejection, labels)}</dd>
-                  <dt>Voertuigtype</dt>
-                  <dd>{describeRejectionVehicleTypes(rejection, labels)}</dd>
-                  <dt>Datatype</dt>
-                  <dd>{describeRejectionDataTypes(rejection)}</dd>
-                  <dt>Issue owner</dt>
-                  <dd>{ISSUE_OWNER_LABELS[rejection.issue_owner]}</dd>
-                  {rejection.note && (
-                    <>
-                      <dt>Notitie</dt>
-                      <dd className="whitespace-pre-line">{rejection.note}</dd>
-                    </>
-                  )}
-                </dl>
-                <div className="data-quality-rejection-audit">
-                  Aangemaakt door {rejection.created_by} op {formatDateTime(rejection.created_at)}
-                  {rejection.updated_by && rejection.updated_at && (
-                    <>
-                      <br />
-                      Laatst gewijzigd door {rejection.updated_by} op{' '}
-                      {formatDateTime(rejection.updated_at)}
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {operator.rejections.map((rejection) => (
+            <RejectionDetails
+              key={rejection.rejection_id}
+              rejection={rejection}
+              labels={labels}
+              canEdit={canEdit}
+              onEdit={onEditRejection}
+              onDelete={onDeleteRejection}
+            />
+          ))}
         </div>
       )}
     </div>

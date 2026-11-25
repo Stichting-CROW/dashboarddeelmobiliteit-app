@@ -5,14 +5,17 @@ import type {
   ManualRejectionInput,
 } from '../../types/DataQuality';
 import {
+  buildDailyDataQuality,
   buildRejectionCsvColumns,
   filterRejections,
+  getRejectionsForDataType,
   groupByOperator,
   hasDataQualityIssue,
   intervalOverlapsPeriod,
   parsePeriod,
   rejectionAppliesToMunicipality,
   rejectionAppliesToOperator,
+  rejectionAppliesToVehicleType,
   sortOperators,
   toTimelineSegments,
   validateRejectionInput,
@@ -120,6 +123,21 @@ describe('rejection scope', () => {
   });
 });
 
+describe('getRejectionsForDataType', () => {
+  const rejections = [
+    makeRejection({ rejection_id: 1, data_types: ['aanbod'] }),
+    makeRejection({ rejection_id: 2, data_types: ['aanbod', 'verhuringen'] }),
+  ];
+
+  it('returns only rejections that cover the data type, keeping their order', () => {
+    expect(getRejectionsForDataType(rejections, 'aanbod').map((r) => r.rejection_id))
+      .toEqual([1, 2]);
+    expect(getRejectionsForDataType(rejections, 'verhuringen').map((r) => r.rejection_id))
+      .toEqual([2]);
+    expect(getRejectionsForDataType(rejections, 'servicegebieden')).toEqual([]);
+  });
+});
+
 describe('groupByOperator', () => {
   const feeds = [
     makeFeed({ system_id: 'lime', data_type: 'aanbod' }),
@@ -186,6 +204,81 @@ describe('toTimelineSegments', () => {
         end_time: new Date(period.end + 2 * DAY).toISOString(),
       },
     ], period, now)).toEqual([]);
+  });
+});
+
+describe('rejectionAppliesToVehicleType', () => {
+  it('applies to listed vehicle types, "all", or when no vehicle type is given', () => {
+    expect(rejectionAppliesToVehicleType({ vehicle_types: 'all' }, 'moped')).toBe(true);
+    expect(rejectionAppliesToVehicleType({ vehicle_types: ['moped'] }, 'moped')).toBe(true);
+    expect(rejectionAppliesToVehicleType({ vehicle_types: ['moped'] }, 'bicycle')).toBe(false);
+    expect(rejectionAppliesToVehicleType({ vehicle_types: ['moped'] }, null)).toBe(true);
+  });
+});
+
+describe('buildDailyDataQuality', () => {
+  const makeOperator = (
+    feeds: FeedAvailability[],
+    rejections: ManualRejection[] = []
+  ) => groupByOperator(feeds, rejections)[0];
+  const options = { gmCode: 'GM0599', formFactor: 'moped', period, now };
+  const complies = (days: ReturnType<typeof buildDailyDataQuality>) =>
+    days.map((day) => day.complies);
+
+  it('returns one green day per day when all feeds are up', () => {
+    const days = buildDailyDataQuality(makeOperator([makeFeed()]), options);
+    expect(days).toHaveLength(7);
+    expect(days[0].date).toBe('2026-11-01');
+    expect(complies(days).every((value) => value === true)).toBe(true);
+  });
+
+  it('turns both days red for an outage spanning midnight', () => {
+    const days = buildDailyDataQuality(makeOperator([makeFeed({
+      outages: [{
+        start_time: new Date(period.start + DAY - HOUR).toISOString(),
+        end_time: new Date(period.start + DAY + HOUR).toISOString(),
+      }],
+    })]), options);
+    expect(complies(days)).toEqual([false, false, true, true, true, true, true]);
+    expect(days[0].feeds.aanbod!.outages).toHaveLength(1);
+  });
+
+  it('ignores outages of feeds that are not expected', () => {
+    const days = buildDailyDataQuality(makeOperator([
+      makeFeed(),
+      makeFeed({
+        data_type: 'servicegebieden',
+        status: 'not_expected',
+        outages: [{ start_time: new Date(period.start).toISOString(), end_time: null }],
+      }),
+    ]), options);
+    expect(complies(days).every((value) => value === true)).toBe(true);
+  });
+
+  it('only counts rejections for the card municipality and vehicle type', () => {
+    const operator = makeOperator([makeFeed()], [
+      makeRejection({ rejection_id: 1, municipalities: ['GM0363'] }),
+      makeRejection({ rejection_id: 2, vehicle_types: ['bicycle'] }),
+      makeRejection({ rejection_id: 3, vehicle_types: ['moped'] }),
+    ]);
+    const days = buildDailyDataQuality(operator, options);
+    expect(complies(days)).toEqual([true, false, true, true, true, true, true]);
+    expect(days[1].rejections.map((r) => r.rejection_id)).toEqual([3]);
+  });
+
+  it('keeps an ongoing outage red until now and leaves future days undecided', () => {
+    const midPeriod = period.start + 3 * DAY + 12 * HOUR;
+    const days = buildDailyDataQuality(makeOperator([makeFeed({
+      status: 'unavailable',
+      outages: [{ start_time: new Date(period.start + 2 * DAY).toISOString(), end_time: null }],
+    })]), { ...options, now: midPeriod });
+    expect(complies(days)).toEqual([true, true, false, false, undefined, undefined, undefined]);
+    expect(days[3].feeds.aanbod!.outages[0].ongoing).toBe(true);
+  });
+
+  it('has no verdict when no feed has been checked yet', () => {
+    const days = buildDailyDataQuality(makeOperator([makeFeed({ status: 'unknown' })]), options);
+    expect(complies(days).every((value) => value === undefined)).toBe(true);
   });
 });
 

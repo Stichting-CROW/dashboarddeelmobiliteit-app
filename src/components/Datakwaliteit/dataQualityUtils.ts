@@ -90,6 +90,15 @@ export const rejectionAppliesToOperator = (
   return rejection.system_ids.includes(systemId);
 };
 
+export const rejectionAppliesToVehicleType = (
+  rejection: Pick<ManualRejection, 'vehicle_types'>,
+  formFactor: string | null | undefined
+): boolean => {
+  if (!formFactor) return true;
+  if (rejection.vehicle_types === 'all') return true;
+  return rejection.vehicle_types.includes(formFactor);
+};
+
 export const filterRejections = (
   rejections: ManualRejection[],
   options: { gmCode?: string | null; period: DataQualityPeriod; now?: number }
@@ -128,6 +137,13 @@ export const groupByOperator = (
   });
 
   return Array.from(operators.values());
+};
+
+export const getRejectionsForDataType = (
+  rejections: ManualRejection[],
+  dataType: DataQualityDataType
+): ManualRejection[] => {
+  return rejections.filter((rejection) => rejection.data_types.includes(dataType));
 };
 
 export const hasDataQualityIssue = (operator: OperatorDataQuality): boolean => {
@@ -184,6 +200,82 @@ export const toTimelineSegments = (
       leftPct: ((start - period.start) / duration) * 100,
       widthPct: ((end - start) / duration) * 100,
     }));
+};
+
+export interface DailyFeedQuality {
+  status: FeedStatus;
+  /** Outages clipped to the day */
+  outages: TimelineSegment[];
+}
+
+export interface DailyDataQuality {
+  /** YYYY-MM-DD */
+  date: string;
+  /** false: an expected feed was down or data was rejected; undefined: no verdict possible */
+  complies: boolean | undefined;
+  feeds: Partial<Record<DataQualityDataType, DailyFeedQuality>>;
+  rejections: ManualRejection[];
+}
+
+/**
+ * Combine an operator's feed outages and the manual rejections that apply to one
+ * municipality and vehicle type into a status per day of the period.
+ */
+export const buildDailyDataQuality = (
+  operator: OperatorDataQuality,
+  options: {
+    gmCode?: string | null;
+    formFactor?: string | null;
+    period: DataQualityPeriod;
+    now?: number;
+  }
+): DailyDataQuality[] => {
+  const { gmCode, formFactor, period, now = Date.now() } = options;
+  const rejections = operator.rejections.filter((rejection) =>
+    rejectionAppliesToOperator(rejection, operator.system_id) &&
+    rejectionAppliesToMunicipality(rejection, gmCode) &&
+    rejectionAppliesToVehicleType(rejection, formFactor)
+  );
+  const hasCheckedFeed = DATA_TYPES.some((dataType) => {
+    const status = operator.feeds[dataType]?.status;
+    return status === 'available' || status === 'unavailable';
+  });
+
+  const days: DailyDataQuality[] = [];
+  for (let cursor = moment(period.start); cursor.valueOf() < period.end; cursor.add(1, 'day')) {
+    const day: DataQualityPeriod = {
+      start: cursor.valueOf(),
+      end: cursor.clone().add(1, 'day').valueOf(),
+    };
+
+    let hasOutage = false;
+    const feeds: DailyDataQuality['feeds'] = {};
+    DATA_TYPES.forEach((dataType) => {
+      const feed = operator.feeds[dataType];
+      if (!feed) return;
+      const outages = feed.status === 'not_expected'
+        ? []
+        : toTimelineSegments(feed.outages, day, now);
+      if (outages.length > 0) hasOutage = true;
+      feeds[dataType] = { status: feed.status, outages };
+    });
+
+    const dayRejections = rejections.filter((rejection) =>
+      intervalOverlapsPeriod(rejection, day, now)
+    );
+
+    let complies: boolean | undefined;
+    if (day.start > now) {
+      complies = undefined;
+    } else if (hasOutage || dayRejections.length > 0) {
+      complies = false;
+    } else if (hasCheckedFeed) {
+      complies = true;
+    }
+
+    days.push({ date: cursor.format('YYYY-MM-DD'), complies, feeds, rejections: dayRejections });
+  }
+  return days;
 };
 
 export const formatDateTime = (value: string | number | null | undefined): string => {

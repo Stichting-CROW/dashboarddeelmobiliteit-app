@@ -22,14 +22,32 @@
   color: #343e47;
 }
 
+.data-quality-indicator-subtitle {
+  @apply text-xs font-medium;
+  color: #FD3E48;
+}
+
 .data-quality-indicator-detail {
   @apply text-xs text-gray-500;
 }
 
 .data-quality-indicator-value {
-  @apply text-xs font-semibold rounded px-2 py-0.5 whitespace-nowrap text-center;
+  @apply text-xs font-semibold rounded px-2 py-0.5 whitespace-nowrap text-center shrink-0;
   min-width: 5.5rem;
   color: #fff;
+}
+
+.data-quality-indicator-value--clickable {
+  @apply border-0 cursor-pointer hover:brightness-110;
+}
+
+.data-quality-indicator-value--clickable:focus-visible {
+  outline: 2px solid #343e47;
+  outline-offset: 2px;
+}
+
+.data-quality-popover {
+  @apply w-80 max-h-96 overflow-y-auto p-2 bg-white;
 }
 
 .data-quality-timeline {

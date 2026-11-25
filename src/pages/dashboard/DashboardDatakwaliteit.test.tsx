@@ -66,10 +66,27 @@ describe('DashboardDatakwaliteit in demo mode', () => {
     expect(screen.getByText(/Demomodus/)).toBeInTheDocument();
 
     const card = getCards(container)[0];
-    expect(within(card).getByText('Handmatig afgekeurd')).toBeInTheDocument();
+    expect(within(card).queryByText('Handmatig afgekeurd')).not.toBeInTheDocument();
     expect(within(card).getByText('Aanbod feed beschikbaar')).toBeInTheDocument();
     expect(within(card).getByText('Verhuringen feed beschikbaar')).toBeInTheDocument();
     expect(within(card).getByText('Servicegebieden feed beschikbaar')).toBeInTheDocument();
+  });
+
+  it('marks rejected feeds as afgekeurd and shows the rejection details on click', async () => {
+    const { container } = renderPage();
+    await waitFor(() => expect(getCards(container)).toHaveLength(3));
+
+    const card = getCards(container)[0];
+    expect(within(card).getAllByText(/^Handmatig afgekeurd: /).length).toBeGreaterThan(0);
+
+    const [pill] = within(card).getAllByRole('button', { name: /details afkeuring tonen/ });
+    expect(pill).toHaveTextContent(/^Afgekeurd/);
+    const notesBefore = screen.getAllByText(/Storing in de importer/).length;
+
+    fireEvent.click(pill);
+    await waitFor(() =>
+      expect(screen.getAllByText(/Storing in de importer/).length).toBeGreaterThan(notesBefore)
+    );
   });
 
   it('shows the all-operator rejection on every card', async () => {
