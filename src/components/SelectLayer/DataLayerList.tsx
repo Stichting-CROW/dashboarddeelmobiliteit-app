@@ -19,7 +19,12 @@ import { CSS } from '@dnd-kit/utilities';
 import { Check, GripVertical } from 'lucide-react';
 
 import { useDataLayer } from '../Map/MapUtils/useDataLayer';
-import { setDataLayerOrder, toggleOverlayLayer, setOverlayPhase } from '../../actions/layers';
+import {
+  setDataLayerOrder,
+  toggleOverlayLayer,
+  setOverlayPhase,
+  setOverlayHubType
+} from '../../actions/layers';
 import { toggleVisibleLayer } from '../../actions/policy-hubs';
 import { showServiceAreaForOperator } from '../../actions/service-areas';
 import { get_phases } from '../../helpers/policy-hubs/get-phases';
@@ -53,7 +58,10 @@ import {
   DATA_LAYER_ORDER_HUBS,
   DATA_LAYER_ORDER_VERBODSGEBIEDEN,
   VALID_OVERLAY_PHASES,
-  DEFAULT_DATA_LAYER_ORDER
+  DEFAULT_DATA_LAYER_ORDER,
+  HUB_TYPE_ALL,
+  HUB_TYPE_PHYSICAL,
+  HUB_TYPE_VIRTUAL
 } from '../../reducers/layers.js';
 
 interface DataLayerListProps {
@@ -101,6 +109,12 @@ const PHASE_OPTIONS = VALID_OVERLAY_PHASES.map((phase: string) => ({
   value: phase,
   label: get_phases()[phase]?.title || phase
 }));
+
+const HUB_TYPE_OPTIONS = [
+  { value: HUB_TYPE_ALL, label: 'Alle' },
+  { value: HUB_TYPE_PHYSICAL, label: 'Fysiek' },
+  { value: HUB_TYPE_VIRTUAL, label: 'Virtueel' }
+];
 
 const RENTALS_OPTIONS: VisualizationOption[] = [
   {
@@ -308,6 +322,10 @@ const DataLayerList = ({
     dispatch(setOverlayPhase(id, phase));
   };
 
+  const handleHubTypeChange = (hubType: string) => {
+    dispatch(setOverlayHubType(hubType));
+  };
+
   const handleServiceAreaOperatorChange = (operator: string) => {
     dispatch(showServiceAreaForOperator(operator));
   };
@@ -375,6 +393,7 @@ const DataLayerList = ({
     const checked = isItemChecked(id);
     const showPhaseSelect = !isPolicyHubsPage
       && (id === DATA_LAYER_ORDER_HUBS || id === DATA_LAYER_ORDER_VERBODSGEBIEDEN);
+    const showHubTypeSelect = id === DATA_LAYER_ORDER_HUBS;
     const showOperatorSelect = !isServiceAreasPage
       && id === DATA_LAYER_ORDER_SERVICE_AREAS
       && !!municipality;
@@ -429,6 +448,23 @@ const DataLayerList = ({
             onChange={(e) => handleOverlayPhaseChange(id, e.target.value)}
           >
             {PHASE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+        {showHubTypeSelect && (
+          <select
+            className="DataLayerList-phaseSelect"
+            value={overlayLayers.hub_type}
+            aria-label={`Type ${OVERLAY_LABELS[id]}`}
+            title="Fysieke en/of virtuele hubs"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onChange={(e) => handleHubTypeChange(e.target.value)}
+          >
+            {HUB_TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

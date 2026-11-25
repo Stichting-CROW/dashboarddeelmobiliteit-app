@@ -51,6 +51,16 @@ export const VALID_OVERLAY_PHASES = [
   'active'
 ];
 
+export const HUB_TYPE_ALL = 'all';
+export const HUB_TYPE_PHYSICAL = 'physical';
+export const HUB_TYPE_VIRTUAL = 'virtual';
+
+export const VALID_HUB_TYPES = [
+  HUB_TYPE_ALL,
+  HUB_TYPE_PHYSICAL,
+  HUB_TYPE_VIRTUAL
+];
+
 export const DEFAULT_DATA_LAYER_ORDER = {
   'displaymode-park': [
     DATA_LAYER_ORDER_GROUP,
@@ -90,7 +100,8 @@ export const DEFAULT_OVERLAY_LAYERS = {
   phases: {
     [DATA_LAYER_ORDER_HUBS]: 'active',
     [DATA_LAYER_ORDER_VERBODSGEBIEDEN]: 'active'
-  }
+  },
+  hub_type: HUB_TYPE_ALL
 };
 
 const initialState = {
@@ -120,7 +131,8 @@ const initialState = {
     },
     phases: {
       ...DEFAULT_OVERLAY_LAYERS.phases
-    }
+    },
+    hub_type: DEFAULT_OVERLAY_LAYERS.hub_type
   }
 }
 
@@ -236,12 +248,15 @@ export const sanitizeDataLayerOrder = (dataLayerOrder) => {
 };
 
 /**
- * Ensure the overlay layers state (enabled + phases) is complete and valid.
+ * Ensure the overlay layers state (enabled + phases + hub type) is complete and valid.
  */
 export const sanitizeOverlayLayers = (overlayLayers) => {
   const sanitized = {
     enabled: {},
-    phases: {}
+    phases: {},
+    hub_type: VALID_HUB_TYPES.includes(overlayLayers?.hub_type)
+      ? overlayLayers.hub_type
+      : DEFAULT_OVERLAY_LAYERS.hub_type
   };
 
   Object.keys(DEFAULT_OVERLAY_LAYERS.enabled).forEach((displayMode) => {
@@ -445,6 +460,17 @@ export default function filter(state = initialState, action) {
             ...overlayLayers.phases,
             [layerId]: phase
           }
+        }
+      };
+    }
+    case 'LAYER_SET_OVERLAY_HUB_TYPE': {
+      if (!VALID_HUB_TYPES.includes(action.payload)) return state;
+
+      return {
+        ...state,
+        overlay_layers: {
+          ...sanitizeOverlayLayers(state.overlay_layers),
+          hub_type: action.payload
         }
       };
     }
