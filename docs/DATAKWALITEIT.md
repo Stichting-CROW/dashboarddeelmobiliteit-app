@@ -54,7 +54,7 @@ The page fetches data quality once (`useDataQualityData`) and shares it with the
 
 With `REACT_APP_DEMO_MODE=true`, the page shows dummy data when the API returns no data, fails, or the user is not logged in. Operator names and colors are anonymized like on Prestaties aanbieders. Demo data is anchored to the current time, so changing the period or municipality changes what you see. Changes made in the dialog are kept in memory only.
 
-## API contract (backend to be built)
+## API contract
 
 Base URL: `${REACT_APP_MAIN_API_URL}/dashboard-api/data_quality`. All requests use `authorization: Bearer <token>`.
 
@@ -225,17 +225,17 @@ ALTER TABLE feeds
 - Telegram alerts for trips and service area downtime are off unless `TELEGRAM_ALERT_DATA_TYPES` is set on the feed monitor.
 - The vehicle importer does not write the two new columns.
 
-#### Still to build: the API
+#### The API (built)
 
-How the API fields follow, per operator and data type, over the operator's active feeds:
+`GET /data_quality/feed_status` in `dashboard-api` (`data_quality/feed_status.py`), branch `feature/data-quality-rejections`. How the API fields follow, per operator and data type, over the operator's active feeds:
 
 | API field | Source |
 |-----------|--------|
-| `status` | `unavailable` if any feed has an open `feed_downtime` row, else `available`. `not_expected` if the operator has no active feed for the data type. `unknown` if no import was attempted yet. |
-| `last_checked_at` | Latest `last_time_import_attempted` (vehicles: the time of the request, the importer runs continuously) |
+| `status` | `unavailable` if any feed has an open `feed_downtime` row, else `available`. `not_expected` if the operator has no active feed for the data type. `unknown` if none of the feeds was imported or attempted yet. |
+| `last_checked_at` | Latest `last_time_import_attempted` or `last_time_succesfully_imported` (the vehicle importer only writes the latter) |
 | `last_data_received_at` | Oldest `last_time_succesfully_imported` (the worst feed) |
 | `outages` | The feeds' `feed_downtime` intervals that overlap the period, merged where they overlap |
-| `availability_pct` | 100 × (1 − merged outage time / elapsed time in the period) |
+| `availability_pct` | 100 × (1 − merged outage time / elapsed time in the period); `null` for `unknown` and `not_expected` |
 | `individual_feeds` | One item per active feed. `status`: `unavailable` if the feed has an open `feed_downtime` row, `unknown` if no import was attempted yet, else `available`. `outages`: that feed's own `feed_downtime` intervals in the period. |
 
 ### Option B: status per feed per check, combined into one final status
@@ -312,4 +312,4 @@ How the API fields follow, per operator and data type, from `operator_feed_check
 3. **"Has data" for trips and service areas.** Decided, see [Downtime for all three data types](#downtime-for-all-three-data-types-built): a trips import may be empty, a service area feed needs at least one zone.
 4. **Outages on our side.** Decided for trips and service areas: when our importer is not running, no downtime is recorded. For vehicles every feed still looks down when the importer stops; that is left to a manual rejection with issue owner "Dashboard Deelmobiliteit".
 5. **Municipalities.** `feeds` has no link to municipalities, so in both options an operator's status is the same in every municipality.
-6. **Operators active in a municipality.** No new table: derive it from existing statistics, probably `day_statistics` (`system_id`, `date`, `geometry_ref`). The exact query still has to be worked out.
+6. **Operators active in a municipality.** First version built: an operator counts as active when `day_statistics` has any row with `value > 0` for it in the municipality's `geometry_ref`s during the period (the same lookup as `stats_v3`). Operators active there without an active feed get `not_expected` for all three data types. Still to confirm: whether a stricter choice of indicators (for example only vehicles and rentals) is better.
