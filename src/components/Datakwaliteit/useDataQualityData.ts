@@ -47,14 +47,24 @@ export interface UseDataQualityDataResult {
   reload: () => void;
 }
 
-export const useDataQualityData = (): UseDataQualityDataResult => {
+export interface UseDataQualityDataOptions {
+  /** Overrides the selected municipality; `null` means all of The Netherlands */
+  gmCode?: string | null;
+}
+
+export const useDataQualityData = (
+  options: UseDataQualityDataOptions = {}
+): UseDataQualityDataResult => {
   const token: string | null = useSelector((state: StateType) =>
     state.authentication?.user_data?.token || null
   );
   const userEmail: string = useSelector((state: StateType) =>
     state.authentication?.user_data?.user?.email || DEMO_USER
   );
-  const gmCode: string | null = useSelector((state: StateType) => state.filter?.gebied || null);
+  const filterGmCode: string | null = useSelector((state: StateType) =>
+    state.filter?.gebied || null
+  );
+  const gmCode = options.gmCode === undefined ? filterGmCode : options.gmCode;
   const aanbieders = useSelector((state: StateType) => state.metadata?.aanbieders || EMPTY_LIST);
   const aclOperators = useSelector((state: StateType) =>
     state.metadata?.aclOperators || EMPTY_LIST
