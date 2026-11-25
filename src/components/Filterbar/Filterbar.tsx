@@ -31,6 +31,7 @@ import FilterbarHb from './FilterbarHb';
 import FilterbarPolicyHubs from './FilterbarPolicyHubs';
 import FilterbarPermits from './FilterbarPermits';
 import FilterbarBeleidszones from './FilterbarBeleidszones';
+import FilterbarDatakwaliteit from './FilterbarDatakwaliteit';
 import FilterbarStart from './FilterbarStart';
 import FilterbarStatistiek from './FilterbarStatistiek';
 
@@ -60,8 +61,8 @@ function Filterbar({
 }: FilterbarProps) {
   const location = useLocation();
   const pathname = location.pathname;
-  const isBeleidsinfo =
-    pathname === '/stats/beleidsinfo' || pathname === '/stats/beleidsinfo-beta';
+  const isBeleidsinfoBeta = pathname === '/stats/beleidsinfo-beta';
+  const isBeleidsinfo = pathname === '/stats/beleidsinfo' || isBeleidsinfoBeta;
 
   const activeDataLayers = useSelector(selectActiveDataLayers);
 
@@ -100,6 +101,8 @@ function Filterbar({
   const isPrestatiesAanbieders =
     displayMode === DISPLAYMODE_DASHBOARD && pathname === '/stats/prestaties-aanbieders';
   const isBeleidszones = pathname === '/stats/beleidszones';
+  const isDatakwaliteit =
+    displayMode === DISPLAYMODE_DASHBOARD && pathname === '/stats/datakwaliteit';
   const isontwikkeling = displayMode === DISPLAYMODE_OTHER;
 
   const showdatum = isrentals || ispark || !isLoggedIn;
@@ -182,6 +185,11 @@ function Filterbar({
         <FilterbarBeleidszones hideLogo={hideLogo ?? false} />
       )}
 
+      {/* Datakwaliteit */}
+      {isDatakwaliteit && (
+        <FilterbarDatakwaliteit hideLogo={hideLogo ?? false} />
+      )}
+
       {/* Default */}
       {!(
         iszonespublic ||
@@ -191,6 +199,7 @@ function Filterbar({
         isrentals ||
         isPrestatiesAanbieders ||
         isBeleidszones ||
+        isDatakwaliteit ||
         isStart
       ) && (
         <div className="filter-bar-inner">
@@ -294,7 +303,8 @@ function Filterbar({
             </Fieldset>
           )}
 
-          <FilteritemAanbieders />
+          {/* Beleidsinfo (beta) charts are per modality, without an operator filter */}
+          {!isBeleidsinfoBeta && <FilteritemAanbieders />}
         </div>
       )}
 
@@ -312,7 +322,7 @@ function Filterbar({
           rel="external noreferrer"
           className="underline"
         >
-          2026-11-24
+          2026-11-25
         </a>
       </div>
     </>

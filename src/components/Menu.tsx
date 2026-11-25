@@ -366,6 +366,7 @@ function Menu({
           { text: 'Beleidsinfo', path: '/stats/beleidsinfo' },
           { text: 'Hubs en verbodsgebieden', path: '/stats/beleidszones' },
           { text: 'Prestaties aanbieders', path: '/stats/prestaties-aanbieders' },
+          { text: 'Datakwaliteit', path: '/stats/datakwaliteit' },
           // { text: 'Open data', path: '/docs' },
         ]}
       />

@@ -18,7 +18,13 @@ function FilterbarStatistiek() {
   const isBeleidsinfoBeta = pathname === '/stats/beleidsinfo-beta';
   const isPrestatiesAanbieders = pathname === '/stats/prestaties-aanbieders';
   const isBeleidszones = pathname === '/stats/beleidszones';
-  const hasSelection = isBeleidsinfo || isBeleidsinfoBeta || isPrestatiesAanbieders || isBeleidszones;
+  const isDatakwaliteit = pathname === '/stats/datakwaliteit';
+  const hasSelection =
+    isBeleidsinfo ||
+    isBeleidsinfoBeta ||
+    isPrestatiesAanbieders ||
+    isBeleidszones ||
+    isDatakwaliteit;
 
   const filterGebied = useSelector((state: StateType) =>
     state.filter ? state.filter.gebied : null
@@ -41,9 +47,10 @@ function FilterbarStatistiek() {
     if (filterGebied) {
       searchParams.set('gm_code', filterGebied);
     }
-    // Prestaties aanbieders applies its own default period (last 7 days, excluding today).
-    const isPrestatiesAanbiedersPath = path === '/stats/prestaties-aanbieders';
-    if (!isPrestatiesAanbiedersPath) {
+    // Prestaties aanbieders and Datakwaliteit apply their own default period.
+    const hasOwnDefaultPeriod =
+      path === '/stats/prestaties-aanbieders' || path === '/stats/datakwaliteit';
+    if (!hasOwnDefaultPeriod) {
       if (filterOntwikkelingVan) {
         searchParams.set('start_date', format(filterOntwikkelingVan, 'yyyy-MM-dd'));
       }
@@ -61,6 +68,7 @@ function FilterbarStatistiek() {
     if (isBeleidsinfoBeta) return 'Beleidsinfo (beta)';
     if (isPrestatiesAanbieders) return 'Prestaties aanbieders';
     if (isBeleidszones) return 'Hubs en verbodsgebieden';
+    if (isDatakwaliteit) return 'Datakwaliteit';
     return 'Prestaties aanbieders';
   };
 
@@ -93,6 +101,13 @@ function FilterbarStatistiek() {
             onClick={() => handleSelectDashboardType('/stats/beleidszones')}
           >
             Hubs en verbodsgebieden
+          </div>
+          <div
+            key="item-datakwaliteit"
+            className={`form-item ${isDatakwaliteit ? 'form-item-selected' : ''}`}
+            onClick={() => handleSelectDashboardType('/stats/datakwaliteit')}
+          >
+            Datakwaliteit
           </div>
         </div>
       </div>

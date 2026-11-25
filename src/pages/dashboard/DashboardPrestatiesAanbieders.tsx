@@ -4,6 +4,8 @@ import './DashboardPrestatiesAanbieders.css';
 import PermitsMunicipalityView from '../../components/PrestatiesAanbieders/PrestatiesAanbiedersMunicipalityView';
 import PermitsOperatorView from '../../components/PrestatiesAanbieders/PrestatiesAanbiedersOperatorView';
 import PrestatiesAanbiedersDetailsPanel from '../../components/PrestatiesAanbieders/PrestatiesAanbiedersDetailsPanel';
+import { DataQualityProvider } from '../../components/Datakwaliteit/DataQualityContext';
+import { useDataQualityData } from '../../components/Datakwaliteit/useDataQualityData';
 import { useSelector } from 'react-redux';
 import { StateType } from '../../types/StateType';
 import {
@@ -38,6 +40,9 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
   const viewMode = resolvePrestatiesViewMode(aclOperators, isAdmin, urlView);
   const isMunicipalityView = viewMode === 'municipality';
   const adminCanToggle = canToggleViewMode(isAdmin, aclOperators);
+
+  // Operator view cards span several municipalities, so fetch for all of NL there.
+  const dataQuality = useDataQualityData({ gmCode: isMunicipalityView ? undefined : null });
 
   const urlSystemId = searchParams.get('system_id');
   const urlOperator = searchParams.get('operator');
@@ -155,7 +160,7 @@ function DashboardPrestatiesAanbieders(props: DashboardPrestatiesAanbiedersProps
     <div className={containerClassNames}>
       {!isFullscreen && (
         <div className={showDetailsPanel ? 'DashboardPrestatiesAanbieders__overview pr-4 sm:pr-12' : ''}>
-          {overviewContent}
+          <DataQualityProvider data={dataQuality}>{overviewContent}</DataQualityProvider>
         </div>
       )}
 

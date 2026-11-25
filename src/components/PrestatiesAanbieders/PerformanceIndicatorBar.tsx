@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 interface PerformanceIndicatorBarValue {
   date: string;
@@ -10,6 +10,8 @@ interface PerformanceIndicatorBarValue {
 
 interface PerformanceIndicatorBarProps {
   values: PerformanceIndicatorBarValue[];
+  /** Replaces the default compliance count tooltip */
+  tooltipContent?: ReactNode;
 }
 
 const BAR_WIDTH = 142;
@@ -21,7 +23,7 @@ const COLORS = {
   white: '#fff',    // complies is neither true nor false
 };
 
-const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
+const PerformanceIndicatorBar = ({ values, tooltipContent }: PerformanceIndicatorBarProps) => {
   const [open, setOpen] = useState(false);
   const totalCount = values.length;
 
@@ -44,7 +46,7 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
   const redWidth = Math.round((redPercent / 100) * BAR_WIDTH);
   const whiteWidth = BAR_WIDTH - greenWidth - redWidth; // Ensure exact total
 
-  const tooltipContent =
+  const defaultTooltipContent =
     totalCount > 0
       ? `Voldeed goed: ${greenCount} (${greenPercent.toFixed(0)}%)\nVoldeed niet: ${redCount} (${redPercent.toFixed(0)}%)\nOnbekend: ${whiteCount} (${whitePercent.toFixed(0)}%)`
       : 'Geen data in deze periode';
@@ -94,9 +96,11 @@ const PerformanceIndicatorBar = ({ values }: PerformanceIndicatorBarProps) => {
           <TooltipContent
             side="top"
             align="center"
-            className="max-w-[240px] text-sm whitespace-normal text-left p-2"
+            className={`${tooltipContent ? 'max-w-[320px]' : 'max-w-[240px]'} text-sm whitespace-normal text-left p-2`}
           >
-            <p className="text-sm leading-tight whitespace-pre-line">{tooltipContent}</p>
+            {tooltipContent ?? (
+              <p className="text-sm leading-tight whitespace-pre-line">{defaultTooltipContent}</p>
+            )}
           </TooltipContent>
         )}
       </Tooltip>

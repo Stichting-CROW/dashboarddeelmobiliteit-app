@@ -15,6 +15,7 @@ import { notifyError } from '../../helpers/notify';
 import type { KpiOverviewQueryScope } from '../../api/permitLimits';
 import { PRESTATIES_VIEW_URL_PARAM } from '../../helpers/prestatiesAanbiedersViewMode';
 import PerformanceIndicator from './PerformanceIndicator';
+import DataQualityKpi from '../Datakwaliteit/DataQualityKpi';
 import { StateType } from '../../types/StateType';
 import ProviderLabel from './ProviderLabel';
 import { getProviderColorForProvider } from '../../helpers/providers';
@@ -462,13 +463,20 @@ export default function PrestatiesAanbiederCard({
             {loading && kpis.length === 0 ? (
               <div>Laden...</div>
             ) : (
-              sortedKpis.map((kpi) => (
-                <PerformanceIndicator
-                  key={kpi.kpi_key}
-                  kpi={kpi}
-                  performanceIndicatorDescriptions={performanceIndicatorDescriptions}
+              <>
+                {sortedKpis.map((kpi) => (
+                  <PerformanceIndicator
+                    key={kpi.kpi_key}
+                    kpi={kpi}
+                    performanceIndicatorDescriptions={performanceIndicatorDescriptions}
+                  />
+                ))}
+                <DataQualityKpi
+                  systemId={scopedSystemId || providerSystemId}
+                  gmCode={permit.municipality?.gmcode || permit.permit_limit.municipality}
+                  formFactor={permit.vehicle_type?.id || permit.permit_limit.modality}
                 />
-              ))
+              </>
             )}
           </div>
         </div>

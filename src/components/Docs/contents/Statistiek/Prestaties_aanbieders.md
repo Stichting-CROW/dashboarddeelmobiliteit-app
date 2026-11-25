@@ -25,6 +25,8 @@ Het percentage van voertuigen dat langer dan 7 dagen geparkeerd is.
 - **Parkeerduur > 14 dagen**<br />
 Het percentage van voertuigen dat langer dan 14 dagen geparkeerd is.
 
+Daarnaast toont elk blokje de regel **Datakwaliteit**. Een dag is rood als minstens één feed van de aanbieder (aanbod, verhuringen of servicegebieden) die dag een storing had, of als de data handmatig is afgekeurd voor deze gemeente en dit voertuigtype. Een dag is groen als alle verwachte feeds beschikbaar waren. Beweeg over een dag voor de details per feed. Zie ook de pagina [Datakwaliteit](/stats/datakwaliteit).
+
 ## Hoe stel je een KPI in?
 
 Als gemeente zie je een overzicht van alle aanbieder-/voertuigtype-combinaties binnen je gemeente. Per blokje kun je met het configuratie-icoon rechtsbovenin (het tandwiel-icoon) de KPI-configuratie instellen.

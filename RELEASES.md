@@ -1,5 +1,17 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-25
+
+**Statistiek: Datakwaliteit**
+
+- 🪄 Nieuwe pagina Datakwaliteit (Statistiek → Datakwaliteit). Per aanbieder zie je of de feeds voor aanbod, verhuringen en servicegebieden beschikbaar waren, met het beschikbaarheidspercentage, de storingen in de gekozen periode en een tijdlijn. Aanbieders met problemen staan bovenaan; aanbieders zien alleen hun eigen gegevens. Filter op plaats en periode (standaard de laatste 7 dagen)
+- 🪄 Heeft een aanbieder meerdere feeds voor hetzelfde datatype, dan zie je hoeveel er offline zijn (bijvoorbeeld 'Offline (2/20)'). Beweeg over de indicator of de tijdlijn om te zien welke feeds niet werkten
+- 🪄 Data die handmatig is afgekeurd staat als rood 'Afgekeurd' bij de betreffende feed, met de afgekeurde periode eronder. Klik erop voor de details. Beheerders kunnen afkeuringen toevoegen, wijzigen en verwijderen, ook voor meerdere of alle aanbieders tegelijk, en alle zichtbare afkeuringen exporteren als CSV
+
+**Statistiek: Prestaties aanbieders**
+
+- ✨ Elk blokje heeft een nieuwe regel Datakwaliteit: een dag is rood als een feed van de aanbieder die dag een storing had of als de data handmatig is afgekeurd, en groen als alle verwachte feeds beschikbaar waren. Beweeg over een dag voor de details per feed
+
 ## Release 2026-11-24
 
 **Zones/Beleidszones**

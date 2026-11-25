@@ -1,0 +1,440 @@
+import moment from 'moment';
+import type { CsvColumn } from '../../helpers/csv';
+import type {
+  DataQualityDataType,
+  DataQualityPeriod,
+  FeedAvailability,
+  FeedStatus,
+  IndividualFeed,
+  IssueOwner,
+  ManualRejection,
+  ManualRejectionInput,
+  OperatorDataQuality,
+  TimeInterval,
+} from '../../types/DataQuality';
+
+export const DATA_TYPES: readonly DataQualityDataType[] = [
+  'aanbod',
+  'verhuringen',
+  'servicegebieden',
+] as const;
+
+export const DATA_TYPE_LABELS: Record<DataQualityDataType, string> = {
+  aanbod: 'Aanbod',
+  verhuringen: 'Verhuringen',
+  servicegebieden: 'Servicegebieden',
+};
+
+export const ISSUE_OWNER_LABELS: Record<IssueOwner, string> = {
+  operator: 'Aanbieder',
+  dashboard_deelmobiliteit: 'Dashboard Deelmobiliteit',
+};
+
+export const FEED_STATUS_LABELS: Record<FeedStatus, string> = {
+  available: 'Online',
+  unavailable: 'Offline',
+  not_expected: 'Geen feed verwacht',
+  unknown: 'Onbekend',
+};
+
+export const STATUS_COLORS = {
+  ok: '#48E248',
+  issue: '#FD3E48',
+  neutral: '#B2B2B2',
+} as const;
+
+export const getFeedStatusColor = (status: FeedStatus | undefined): string => {
+  if (status === 'available') return STATUS_COLORS.ok;
+  if (status === 'unavailable') return STATUS_COLORS.issue;
+  return STATUS_COLORS.neutral;
+};
+
+/** Convert URL dates (YYYY-MM-DD, both inclusive) to a [start, end) period in local time. */
+export const parsePeriod = (startDate: string, endDate: string): DataQualityPeriod | null => {
+  const start = moment(startDate, 'YYYY-MM-DD', true);
+  const end = moment(endDate, 'YYYY-MM-DD', true);
+  if (!start.isValid() || !end.isValid()) return null;
+  return {
+    start: start.startOf('day').valueOf(),
+    end: end.startOf('day').add(1, 'day').valueOf(),
+  };
+};
+
+const intervalEndMs = (interval: TimeInterval, now: number): number => {
+  return interval.end_time ? new Date(interval.end_time).getTime() : now;
+};
+
+export const intervalOverlapsPeriod = (
+  interval: TimeInterval,
+  period: DataQualityPeriod,
+  now: number = Date.now()
+): boolean => {
+  const start = new Date(interval.start_time).getTime();
+  const end = intervalEndMs(interval, Math.max(now, period.end));
+  return start < period.end && end > period.start;
+};
+
+const toMs = (value: string): number => new Date(value).getTime();
+
+/** Merge overlapping or touching intervals. An ongoing interval absorbs everything after it. */
+export const mergeIntervals = (intervals: TimeInterval[]): TimeInterval[] => {
+  const sorted = [...intervals].sort((a, b) => toMs(a.start_time) - toMs(b.start_time));
+  const merged: TimeInterval[] = [];
+  sorted.forEach((interval) => {
+    const last = merged[merged.length - 1];
+    const overlapsLast = last &&
+      (last.end_time === null || toMs(interval.start_time) <= toMs(last.end_time));
+    if (!overlapsLast) {
+      merged.push({ start_time: interval.start_time, end_time: interval.end_time });
+      return;
+    }
+    if (last.end_time === null) return;
+    if (interval.end_time === null || toMs(interval.end_time) > toMs(last.end_time)) {
+      last.end_time = interval.end_time;
+    }
+  });
+  return merged;
+};
+
+export const getIndividualFeeds = (feed: FeedAvailability | undefined): IndividualFeed[] => {
+  return feed?.individual_feeds ?? [];
+};
+
+/** Only worth naming feeds when the operator has more than one for the data type. */
+export const hasMultipleFeeds = (feed: FeedAvailability | undefined): boolean => {
+  return getIndividualFeeds(feed).length > 1;
+};
+
+export const getOfflineFeeds = (feed: FeedAvailability | undefined): IndividualFeed[] => {
+  return getIndividualFeeds(feed).filter((individual) => individual.status === 'unavailable');
+};
+
+/** Individual feeds that were down at some moment in [start, end). */
+export const getFeedsDownBetween = (
+  feed: FeedAvailability | undefined,
+  start: number,
+  end: number,
+  now: number = Date.now()
+): IndividualFeed[] => {
+  return getIndividualFeeds(feed).filter((individual) =>
+    individual.outages.some((outage) => intervalOverlapsPeriod(outage, { start, end }, now))
+  );
+};
+
+/** Start of the outage that is still ongoing for this feed, if any. */
+export const getDownSince = (individual: IndividualFeed): string | null => {
+  return individual.outages.find((outage) => outage.end_time === null)?.start_time ?? null;
+};
+
+export const describeFeedShare = (count: number, total: number): string => {
+  return count >= total ? `alle ${total} feeds` : `${count} van ${total} feeds`;
+};
+
+export const rejectionAppliesToMunicipality = (
+  rejection: Pick<ManualRejection, 'municipalities'>,
+  gmCode: string | null | undefined
+): boolean => {
+  if (!gmCode) return true;
+  if (rejection.municipalities === 'all') return true;
+  return rejection.municipalities.includes(gmCode);
+};
+
+export const rejectionAppliesToOperator = (
+  rejection: Pick<ManualRejection, 'system_id'>,
+  systemId: string
+): boolean => {
+  return rejection.system_id === 'all' || rejection.system_id === systemId;
+};
+
+export const rejectionAppliesToVehicleType = (
+  rejection: Pick<ManualRejection, 'vehicle_types'>,
+  formFactor: string | null | undefined
+): boolean => {
+  if (!formFactor) return true;
+  if (rejection.vehicle_types === 'all') return true;
+  return rejection.vehicle_types.includes(formFactor);
+};
+
+export const filterRejections = (
+  rejections: ManualRejection[],
+  options: { gmCode?: string | null; period: DataQualityPeriod; now?: number }
+): ManualRejection[] => {
+  return rejections.filter((rejection) =>
+    rejectionAppliesToMunicipality(rejection, options.gmCode) &&
+    intervalOverlapsPeriod(rejection, options.period, options.now)
+  );
+};
+
+/**
+ * Build one entry per operator that has feed data. Operator accounts pass
+ * `restrictToSystemIds` so they only see their own card.
+ */
+export const groupByOperator = (
+  feeds: FeedAvailability[],
+  rejections: ManualRejection[],
+  restrictToSystemIds?: string[] | null
+): OperatorDataQuality[] => {
+  const operators = new Map<string, OperatorDataQuality>();
+
+  feeds.forEach((feed) => {
+    if (restrictToSystemIds && !restrictToSystemIds.includes(feed.system_id)) return;
+    let entry = operators.get(feed.system_id);
+    if (!entry) {
+      entry = { system_id: feed.system_id, feeds: {}, rejections: [] };
+      operators.set(feed.system_id, entry);
+    }
+    entry.feeds[feed.data_type] = feed;
+  });
+
+  operators.forEach((entry) => {
+    entry.rejections = rejections
+      .filter((rejection) => rejectionAppliesToOperator(rejection, entry.system_id))
+      .sort((a, b) => b.start_time.localeCompare(a.start_time));
+  });
+
+  return Array.from(operators.values());
+};
+
+export const getRejectionsForDataType = (
+  rejections: ManualRejection[],
+  dataType: DataQualityDataType
+): ManualRejection[] => {
+  return rejections.filter((rejection) => rejection.data_types.includes(dataType));
+};
+
+export const hasDataQualityIssue = (operator: OperatorDataQuality): boolean => {
+  if (operator.rejections.length > 0) return true;
+  return DATA_TYPES.some((dataType) => operator.feeds[dataType]?.status === 'unavailable');
+};
+
+/** Operators with issues first, then alphabetically by display name. */
+export const sortOperators = (
+  operators: OperatorDataQuality[],
+  getName: (systemId: string) => string
+): OperatorDataQuality[] => {
+  return [...operators].sort((a, b) => {
+    const issueDiff = Number(hasDataQualityIssue(b)) - Number(hasDataQualityIssue(a));
+    if (issueDiff !== 0) return issueDiff;
+    return getName(a.system_id).localeCompare(getName(b.system_id), 'nl', {
+      sensitivity: 'base',
+    });
+  });
+};
+
+export interface TimelineSegment {
+  leftPct: number;
+  widthPct: number;
+  start: number;
+  end: number;
+  ongoing: boolean;
+}
+
+/** Clamp intervals to the period and express them as percentage offsets for a timeline. */
+export const toTimelineSegments = (
+  intervals: TimeInterval[],
+  period: DataQualityPeriod,
+  now: number = Date.now()
+): TimelineSegment[] => {
+  const visibleEnd = Math.min(period.end, Math.max(now, period.start));
+  const duration = period.end - period.start;
+  if (duration <= 0) return [];
+
+  return intervals
+    .map((interval) => {
+      const rawStart = new Date(interval.start_time).getTime();
+      const rawEnd = interval.end_time ? new Date(interval.end_time).getTime() : visibleEnd;
+      const start = Math.max(rawStart, period.start);
+      const end = Math.min(rawEnd, period.end);
+      return { start, end, ongoing: interval.end_time === null };
+    })
+    .filter(({ start, end }) => end > start)
+    .sort((a, b) => a.start - b.start)
+    .map(({ start, end, ongoing }) => ({
+      start,
+      end,
+      ongoing,
+      leftPct: ((start - period.start) / duration) * 100,
+      widthPct: ((end - start) / duration) * 100,
+    }));
+};
+
+export interface DailyFeedQuality {
+  status: FeedStatus;
+  /** Outages clipped to the day */
+  outages: TimelineSegment[];
+  /** Individual feeds that were down that day */
+  feedsDown: IndividualFeed[];
+  /** Number of individual feeds for this data type (0 if the API doesn't list them) */
+  feedCount: number;
+}
+
+export interface DailyDataQuality {
+  /** YYYY-MM-DD */
+  date: string;
+  /** false: an expected feed was down or data was rejected; undefined: no verdict possible */
+  complies: boolean | undefined;
+  feeds: Partial<Record<DataQualityDataType, DailyFeedQuality>>;
+  rejections: ManualRejection[];
+}
+
+/**
+ * Combine an operator's feed outages and the manual rejections that apply to one
+ * municipality and vehicle type into a status per day of the period.
+ */
+export const buildDailyDataQuality = (
+  operator: OperatorDataQuality,
+  options: {
+    gmCode?: string | null;
+    formFactor?: string | null;
+    period: DataQualityPeriod;
+    now?: number;
+  }
+): DailyDataQuality[] => {
+  const { gmCode, formFactor, period, now = Date.now() } = options;
+  const rejections = operator.rejections.filter((rejection) =>
+    rejectionAppliesToOperator(rejection, operator.system_id) &&
+    rejectionAppliesToMunicipality(rejection, gmCode) &&
+    rejectionAppliesToVehicleType(rejection, formFactor)
+  );
+  const hasCheckedFeed = DATA_TYPES.some((dataType) => {
+    const status = operator.feeds[dataType]?.status;
+    return status === 'available' || status === 'unavailable';
+  });
+
+  const days: DailyDataQuality[] = [];
+  for (let cursor = moment(period.start); cursor.valueOf() < period.end; cursor.add(1, 'day')) {
+    const day: DataQualityPeriod = {
+      start: cursor.valueOf(),
+      end: cursor.clone().add(1, 'day').valueOf(),
+    };
+
+    let hasOutage = false;
+    const feeds: DailyDataQuality['feeds'] = {};
+    DATA_TYPES.forEach((dataType) => {
+      const feed = operator.feeds[dataType];
+      if (!feed) return;
+      const outages = feed.status === 'not_expected'
+        ? []
+        : toTimelineSegments(feed.outages, day, now);
+      if (outages.length > 0) hasOutage = true;
+      feeds[dataType] = {
+        status: feed.status,
+        outages,
+        feedsDown: outages.length > 0 ? getFeedsDownBetween(feed, day.start, day.end, now) : [],
+        feedCount: getIndividualFeeds(feed).length,
+      };
+    });
+
+    const dayRejections = rejections.filter((rejection) =>
+      intervalOverlapsPeriod(rejection, day, now)
+    );
+
+    let complies: boolean | undefined;
+    if (day.start > now) {
+      complies = undefined;
+    } else if (hasOutage || dayRejections.length > 0) {
+      complies = false;
+    } else if (hasCheckedFeed) {
+      complies = true;
+    }
+
+    days.push({ date: cursor.format('YYYY-MM-DD'), complies, feeds, rejections: dayRejections });
+  }
+  return days;
+};
+
+export const formatDateTime = (value: string | number | null | undefined): string => {
+  if (value === null || value === undefined) return '-';
+  return moment(value).format('DD-MM-YYYY HH:mm');
+};
+
+export const formatRejectionPeriod = (rejection: TimeInterval): string => {
+  const end = rejection.end_time ? formatDateTime(rejection.end_time) : 'heden';
+  return `${formatDateTime(rejection.start_time)} – ${end}`;
+};
+
+export interface RejectionLabelResolvers {
+  getOperatorName: (systemId: string) => string;
+  getMunicipalityName: (gmCode: string) => string;
+  getVehicleTypeName: (vehicleTypeId: string) => string;
+}
+
+const joinOrAll = (
+  values: string[] | 'all',
+  resolve: (value: string) => string,
+  allLabel: string
+): string => {
+  if (values === 'all') return allLabel;
+  return values.map(resolve).join(', ');
+};
+
+export const describeRejectionOperator = (
+  rejection: ManualRejection,
+  resolvers: RejectionLabelResolvers
+): string => {
+  if (rejection.system_id === 'all') return 'Alle aanbieders';
+  return resolvers.getOperatorName(rejection.system_id);
+};
+
+export const describeRejectionMunicipalities = (
+  rejection: ManualRejection,
+  resolvers: RejectionLabelResolvers
+): string => joinOrAll(rejection.municipalities, resolvers.getMunicipalityName, 'Alle (heel Nederland)');
+
+export const describeRejectionVehicleTypes = (
+  rejection: ManualRejection,
+  resolvers: RejectionLabelResolvers
+): string => joinOrAll(rejection.vehicle_types, resolvers.getVehicleTypeName, 'Alle');
+
+export const describeRejectionDataTypes = (rejection: ManualRejection): string => {
+  return rejection.data_types.map((dataType) => DATA_TYPE_LABELS[dataType]).join(', ');
+};
+
+export const buildRejectionCsvColumns = (
+  resolvers: RejectionLabelResolvers
+): CsvColumn<ManualRejection>[] => [
+  { header: 'ID', value: (r) => r.rejection_id },
+  { header: 'Aanbieder', value: (r) => describeRejectionOperator(r, resolvers) },
+  { header: 'Van', value: (r) => formatDateTime(r.start_time) },
+  { header: 'Tot', value: (r) => (r.end_time ? formatDateTime(r.end_time) : 'heden') },
+  { header: 'Gebied', value: (r) => describeRejectionMunicipalities(r, resolvers) },
+  { header: 'Voertuigtype', value: (r) => describeRejectionVehicleTypes(r, resolvers) },
+  { header: 'Datatype', value: (r) => describeRejectionDataTypes(r) },
+  { header: 'Issue owner', value: (r) => ISSUE_OWNER_LABELS[r.issue_owner] },
+  { header: 'Notitie', value: (r) => r.note },
+  { header: 'Aangemaakt door', value: (r) => r.created_by },
+  { header: 'Aangemaakt op', value: (r) => formatDateTime(r.created_at) },
+  { header: 'Gewijzigd door', value: (r) => r.updated_by },
+  { header: 'Gewijzigd op', value: (r) => (r.updated_at ? formatDateTime(r.updated_at) : '') },
+];
+
+/** Returns Dutch validation messages; an empty array means the input is valid. */
+export const validateRejectionInput = (input: ManualRejectionInput): string[] => {
+  const errors: string[] = [];
+  const start = new Date(input.start_time).getTime();
+
+  if (!input.start_time || isNaN(start)) {
+    errors.push('Vul een geldige startdatum in.');
+  }
+  if (input.end_time) {
+    const end = new Date(input.end_time).getTime();
+    if (isNaN(end)) {
+      errors.push('Vul een geldige einddatum in.');
+    } else if (!isNaN(start) && end <= start) {
+      errors.push('De einddatum moet na de startdatum liggen.');
+    }
+  }
+  if (!input.system_id) {
+    errors.push('Kies een aanbieder, of alle aanbieders.');
+  }
+  if (input.municipalities !== 'all' && input.municipalities.length === 0) {
+    errors.push('Kies minimaal één gemeente, of heel Nederland.');
+  }
+  if (input.vehicle_types !== 'all' && input.vehicle_types.length === 0) {
+    errors.push('Kies minimaal één voertuigtype, of alle voertuigtypes.');
+  }
+  if (input.data_types.length === 0) {
+    errors.push('Kies minimaal één datatype.');
+  }
+  return errors;
+};
