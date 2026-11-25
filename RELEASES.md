@@ -1,5 +1,15 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-24
+
+**Zones/Beleidszones**
+
+- 🪄 In het lagenmenu kun je hubs nu filteren op 'Alle', 'Fysiek' of 'Virtueel' (op Aanbod, Verhuringen en Beleidshubs). Je keuze wordt onthouden. Op Beleidshubs blijven geselecteerde en via een link geopende hubs altijd zichtbaar, ook als ze niet aan het filter voldoen
+
+**Kaart**
+
+- 🐛 Opgelost: lange voertuig-ID's liepen buiten de tooltip van een voertuigcluster
+
 ## Release 2026-11-05
 
 **Aanbod**
