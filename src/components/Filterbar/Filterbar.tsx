@@ -61,8 +61,8 @@ function Filterbar({
 }: FilterbarProps) {
   const location = useLocation();
   const pathname = location.pathname;
-  const isBeleidsinfo =
-    pathname === '/stats/beleidsinfo' || pathname === '/stats/beleidsinfo-beta';
+  const isBeleidsinfoBeta = pathname === '/stats/beleidsinfo-beta';
+  const isBeleidsinfo = pathname === '/stats/beleidsinfo' || isBeleidsinfoBeta;
 
   const activeDataLayers = useSelector(selectActiveDataLayers);
 
@@ -303,7 +303,8 @@ function Filterbar({
             </Fieldset>
           )}
 
-          <FilteritemAanbieders />
+          {/* Beleidsinfo (beta) charts are per modality, without an operator filter */}
+          {!isBeleidsinfoBeta && <FilteritemAanbieders />}
         </div>
       )}
 
