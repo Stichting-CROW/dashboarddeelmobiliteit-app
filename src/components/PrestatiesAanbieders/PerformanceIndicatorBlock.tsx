@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { applyDemoValueFactor } from "../../helpers/demoMode";
 
 interface PerformanceIndicatorBlockProps {
@@ -11,6 +11,7 @@ interface PerformanceIndicatorBlockProps {
   isFirst?: boolean; // Whether this is the first block in the row
   isLast?: boolean; // Whether this is the last block in the row
   kpiKey?: string; // Used to derive a consistent demo value factor in demo mode
+  tooltipContent?: ReactNode; // Replaces the default measured/threshold tooltip
 }
 
 const getDutchDayAbbreviation = (dateString: string): string => {
@@ -36,7 +37,7 @@ const formatDutchDate = (dateString: string): string => {
   });
 };
 
-const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16, isFirst = false, isLast = false, kpiKey = '' }: PerformanceIndicatorBlockProps) => {
+const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size = 16, isFirst = false, isLast = false, kpiKey = '', tooltipContent }: PerformanceIndicatorBlockProps) => {
   const [open, setOpen] = useState(false);
   const dayAbbreviation = getDutchDayAbbreviation(date);
   const formattedDate = formatDutchDate(date);
@@ -82,13 +83,15 @@ const PerformanceIndicatorBlock = ({ date, measured, threshold, complies, size =
         <TooltipContent 
           side="top"
           align="center"
-          className="max-w-[200px] text-sm whitespace-normal text-left p-2"
+          className={`${tooltipContent ? 'max-w-[320px]' : 'max-w-[200px]'} text-sm whitespace-normal text-left p-2`}
         >
-          <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
-            __html: threshold !== undefined 
-              ? `<b>${displayMeasured}</b> / ${threshold}<br />${dayAbbreviation}. ${formattedDate}`
-              : `<b>${displayMeasured}</b><br />${dayAbbreviation}. ${formattedDate}`
-          }} />
+          {tooltipContent ?? (
+            <p className="text-sm leading-tight" dangerouslySetInnerHTML={{
+              __html: threshold !== undefined 
+                ? `<b>${displayMeasured}</b> / ${threshold}<br />${dayAbbreviation}. ${formattedDate}`
+                : `<b>${displayMeasured}</b><br />${dayAbbreviation}. ${formattedDate}`
+            }} />
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

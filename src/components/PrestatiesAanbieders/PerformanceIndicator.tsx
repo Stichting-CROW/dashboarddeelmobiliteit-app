@@ -2,7 +2,7 @@ import PerformanceIndicatorBlock from "./PerformanceIndicatorBlock";
 import PerformanceIndicatorBar from "./PerformanceIndicatorBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import moment from "moment";
 import type { PerformanceIndicatorKPI, PerformanceIndicatorDescription } from "../../api/permitLimits";
@@ -10,6 +10,10 @@ import type { PerformanceIndicatorKPI, PerformanceIndicatorDescription } from ".
 interface PerformanceIndicatorProps {
   kpi: PerformanceIndicatorKPI;
   performanceIndicatorDescriptions: PerformanceIndicatorDescription[];
+  /** Custom tooltip per day block; defaults to the measured value */
+  renderBlockTooltip?: (date: string) => ReactNode;
+  /** Custom tooltip for the bar shown for periods of 8+ days */
+  barTooltip?: ReactNode;
 }
 
 interface PerformanceIndicatorTooltipProps {
@@ -48,7 +52,12 @@ const PerformanceIndicatorTooltip = ({ description }: PerformanceIndicatorToolti
 
 const toDateKey = (date: string): string => moment(date).format('YYYY-MM-DD');
 
-const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: PerformanceIndicatorProps) => {
+const PerformanceIndicator = ({
+  kpi,
+  performanceIndicatorDescriptions,
+  renderBlockTooltip,
+  barTooltip,
+}: PerformanceIndicatorProps) => {
   const [searchParams] = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(280);
@@ -187,13 +196,14 @@ const PerformanceIndicator = ({ kpi, performanceIndicatorDescriptions }: Perform
                 isFirst={index === 0}
                 isLast={index === displayValues.length - 1}
                 kpiKey={kpi.kpi_key}
+                tooltipContent={renderBlockTooltip?.(value.date)}
               />
             ))}
           </div>
         )}
         {shouldShowBar && (
           <div className="performance-indicator-bar-wrapper flex items-center">
-            <PerformanceIndicatorBar values={displayValues} />
+            <PerformanceIndicatorBar values={displayValues} tooltipContent={barTooltip} />
           </div>
         )}
       </section>

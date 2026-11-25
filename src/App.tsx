@@ -203,6 +203,9 @@ function App() {
         if (dashboard === 'beleidszones') {
           return `Beleidszones - ${baseTitle}`;
         }
+        if (dashboard === 'datakwaliteit') {
+          return `Datakwaliteit - ${baseTitle}`;
+        }
         return `Dashboard - ${baseTitle}`;
       }
       
