@@ -2,30 +2,33 @@
 
 ## Release 2026-11-26
 
-**Statistiek: Datakwaliteit**
-
-- 🪄 Nieuwe pagina Datakwaliteit onder Statistiek: per aanbieder zie je of de feeds voor Aanbod, Verhuringen en Servicegebieden beschikbaar zijn, met een tijdlijn van storingen en handmatige afkeuringen. Filter op plaats en periode
-- 🪄 Beheerders kunnen handmatige afkeuringen toevoegen, wijzigen en verwijderen, ook voor meerdere of alle aanbieders tegelijk. Zichtbare afkeuringen kun je exporteren als CSV
-- ✨ Een afgekeurde feed toont een rood label 'Afgekeurd' met de afgekeurde periode; klik erop voor de details
-- ✨ Heeft een aanbieder meerdere feeds voor één soort data, dan zie je hoeveel er offline zijn (bijvoorbeeld 'Offline (2/20)') en welke dat zijn
-
-**Statistiek: Prestaties aanbieders**
-
-- ✨ Nieuwe rij met de datakwaliteit per aanbieder
-
 **Statistiek: Beleidsinfo (beta)**
 
 - 🪄 Nieuwe beta-pagina met beleidsgrafieken per modaliteit voor de hele gemeente: maximaal beschikbare voertuigen, verhuringen per dag, gebruiksratio, percentage niet beschikbaar, en verdelingen over de dag, naar afstand en naar verhuurduur. De pagina is alleen bereikbaar via een directe link
 - ✨ Bij elke grafiek staat welke aanbieders erin zijn meegenomen
 - ✨ De pagina werkt goed op de telefoon: volle schermbreedte, grafieken met meer ruimte, grotere knoppen en een knop om direct een gemeente te kiezen
 
-**Kaartlagen**
+## Release 2026-11-25
 
-- 🪄 Hubs filteren op 'Alle', 'Fysiek' of 'Virtueel' bij Aanbod, Verhuringen en Beleidshubs
+**Statistiek: Datakwaliteit**
 
-**Aanbod**
+- 🪄 Nieuwe pagina Datakwaliteit (Statistiek → Datakwaliteit). Per aanbieder zie je of de feeds voor aanbod, verhuringen en servicegebieden beschikbaar waren, met het beschikbaarheidspercentage, de storingen in de gekozen periode en een tijdlijn. Aanbieders met problemen staan bovenaan; aanbieders zien alleen hun eigen gegevens. Filter op plaats en periode (standaard de laatste 7 dagen)
+- 🪄 Heeft een aanbieder meerdere feeds voor hetzelfde datatype, dan zie je hoeveel er offline zijn (bijvoorbeeld 'Offline (2/20)'). Beweeg over de indicator of de tijdlijn om te zien welke feeds niet werkten
+- 🪄 Data die handmatig is afgekeurd staat als rood 'Afgekeurd' bij de betreffende feed, met de afgekeurde periode eronder. Klik erop voor de details. Beheerders kunnen afkeuringen toevoegen, wijzigen en verwijderen, ook voor meerdere of alle aanbieders tegelijk, en alle zichtbare afkeuringen exporteren als CSV
 
-- 🐛 Opgelost: lange voertuig-ID's liepen buiten de tooltip van een cluster
+**Statistiek: Prestaties aanbieders**
+
+- ✨ Elk blokje heeft een nieuwe regel Datakwaliteit: een dag is rood als een feed van de aanbieder die dag een storing had of als de data handmatig is afgekeurd, en groen als alle verwachte feeds beschikbaar waren. Beweeg over een dag voor de details per feed
+
+## Release 2026-11-24
+
+**Zones/Beleidszones**
+
+- 🪄 In het lagenmenu kun je hubs nu filteren op 'Alle', 'Fysiek' of 'Virtueel' (op Aanbod, Verhuringen en Beleidshubs). Je keuze wordt onthouden. Op Beleidshubs blijven geselecteerde en via een link geopende hubs altijd zichtbaar, ook als ze niet aan het filter voldoen
+
+**Kaart**
+
+- 🐛 Opgelost: lange voertuig-ID's liepen buiten de tooltip van een voertuigcluster
 
 ## Release 2026-11-05
 
