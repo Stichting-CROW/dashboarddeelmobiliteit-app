@@ -1,9 +1,13 @@
 export { default as BetaChartCard } from './BetaChartCard';
+export { default as ChartOperators } from './ChartOperators';
+export { default as ChartLegend } from './ChartLegend';
 export { default as ModalityLineChart } from './ModalityLineChart';
 export { default as Stacked100ColumnChart } from './Stacked100ColumnChart';
 export { default as GroupedColumnChart } from './GroupedColumnChart';
 export { default as HorizontalBarChart } from './HorizontalBarChart';
 export * from './BetaChartShared';
+export * from './BetaChartCompactContext';
+export * from './chartLayout';
 export * from './modalities';
 export * from './statsV3Transforms';
 export * from './useStatsV3Statistic';

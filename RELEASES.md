@@ -1,5 +1,13 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-26
+
+**Statistiek: Beleidsinfo (beta)**
+
+- 🪄 Nieuwe beta-pagina met beleidsgrafieken per modaliteit voor de hele gemeente: maximaal beschikbare voertuigen, verhuringen per dag, gebruiksratio, percentage niet beschikbaar, en verdelingen over de dag, naar afstand en naar verhuurduur. De pagina is alleen bereikbaar via een directe link
+- ✨ Bij elke grafiek staat welke aanbieders erin zijn meegenomen
+- ✨ De pagina werkt goed op de telefoon: volle schermbreedte, grafieken met meer ruimte, grotere knoppen en een knop om direct een gemeente te kiezen
+
 ## Release 2026-11-25
 
 **Statistiek: Datakwaliteit**

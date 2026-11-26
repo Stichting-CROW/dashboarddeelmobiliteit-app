@@ -13,6 +13,7 @@ import type {
 } from '../../types/StatsV3';
 import PageTitle from '../../components/common/PageTitle';
 import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
+import useUiVisibility from '../../customHooks/useUiVisibility';
 
 import {
   BetaChartCard,
@@ -129,6 +130,7 @@ function TimeSeriesCard({
       toelichting={toelichting}
       controls={controls}
       opmerkingen={opmerkingen}
+      operators={hasData ? chart?.operators : undefined}
       loading={state.loading}
       message={getCardMessage(state, hasData)}
     >
@@ -164,6 +166,7 @@ function DistributionCard({ title, toelichting, state, controls, opmerkingen }: 
       toelichting={toelichting}
       controls={controls}
       opmerkingen={opmerkingen}
+      operators={hasData ? chart?.operators : undefined}
       height={DISTRIBUTION_CARD_HEIGHT}
       loading={state.loading}
       message={getCardMessage(state, hasData)}
@@ -178,7 +181,8 @@ function DistributionCard({ title, toelichting, state, controls, opmerkingen }: 
 /**
  * Beleidsinfo (beta): the proposed new policy charts, filled with data from
  * the stats_v3 API. Charts show modalities for the whole municipality
- * (no operators, no totals, no zones).
+ * (no per-operator split, no totals, no zones); each chart lists the
+ * operators whose data it includes.
  */
 function DashboardBeleidsinfoBeta() {
   const dispatch = useDispatch();
@@ -187,6 +191,8 @@ function DashboardBeleidsinfoBeta() {
   const token = useSelector(
     (state: StateType) => state.authentication?.user_data?.token || null
   );
+
+  const [, setFilterbarVisible] = useUiVisibility('FILTERBAR');
 
   const [rentalsSource, setRentalsSource] = useState<TripSource>('vehicles');
   const [ratioSource, setRatioSource] = useState<TripSource>('vehicles');
@@ -298,7 +304,17 @@ function DashboardBeleidsinfoBeta() {
     if (!gmCode) {
       return (
         <div className="DashboardBeleidsinfoBeta-notice my-4">
-          Kies links bij <strong>Plaats</strong> een gemeente om de grafieken te tonen.
+          <span className="hidden sm:inline">
+            Kies links bij <strong>Plaats</strong> een gemeente om de grafieken te tonen.
+          </span>
+          <span className="sm:hidden">Kies een gemeente om de grafieken te tonen.</span>
+          <button
+            type="button"
+            className="DashboardBeleidsinfoBeta-notice-action sm:hidden"
+            onClick={() => setFilterbarVisible(true)}
+          >
+            Kies gemeente
+          </button>
         </div>
       );
     }
@@ -518,8 +534,7 @@ function DashboardBeleidsinfoBeta() {
         <h2 className="DashboardBeleidsinfoBeta-section-title">Later</h2>
       </div>
       <p className="DashboardBeleidsinfoBeta-section-subtitle">
-        Onderwerpen uit het voorstel waarvoor nog geen data beschikbaar is, of waarvan grafiektype,
-        legenda en assen nog bepaald moeten worden.
+        Onderwerpen uit het voorstel waarvoor nog geen data beschikbaar is.
       </p>
 
       <div className="DashboardBeleidsinfoBeta-grid DashboardBeleidsinfoBeta-grid-placeholders">
