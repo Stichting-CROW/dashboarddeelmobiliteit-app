@@ -1,8 +1,18 @@
 /* Beleidsinfo (beta) page */
 
+/* The 58px left gutter lines text up next to the desktop "Filters" tab, which phones don't have */
+.DashboardBeleidsinfoBeta {
+  --beta-gutter-left: 58px;
+  --beta-gutter-right: 2rem;
+}
+
+.StatsPage.DashboardBeleidsinfoBeta h1 {
+  margin-left: var(--beta-gutter-left);
+}
+
 .DashboardBeleidsinfoBeta-banner {
-  margin-left: 58px;
-  margin-right: 2rem;
+  margin-left: var(--beta-gutter-left);
+  margin-right: var(--beta-gutter-right);
   padding: 0.75rem 1rem;
   border: 1px solid #FDBA74;
   background: #FFF7ED;
@@ -17,8 +27,8 @@
 }
 
 .DashboardBeleidsinfoBeta-notice {
-  margin-left: 58px;
-  margin-right: 2rem;
+  margin-left: var(--beta-gutter-left);
+  margin-right: var(--beta-gutter-right);
   padding: 0.75rem 1rem;
   border: 1px solid #BFDBFE;
   background: #EFF6FF;
@@ -35,8 +45,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem 1.5rem;
-  margin-left: 58px;
-  margin-right: 2rem;
+  margin-left: var(--beta-gutter-left);
+  margin-right: var(--beta-gutter-right);
   margin-top: 3rem;
   margin-bottom: 0.5rem;
 }
@@ -58,7 +68,8 @@
 }
 
 .DashboardBeleidsinfoBeta-section-subtitle {
-  margin-left: 58px;
+  margin-left: var(--beta-gutter-left);
+  margin-right: var(--beta-gutter-right);
   margin-bottom: 1rem;
   color: #6B7280;
   font-size: 0.875rem;
@@ -70,7 +81,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(640px, 100%), 1fr));
   gap: 1.5rem 2rem;
   margin-top: 1rem;
-  margin-right: 2rem;
+  margin-right: var(--beta-gutter-right);
 }
 
 .DashboardBeleidsinfoBeta-grid-placeholders {
@@ -167,6 +178,7 @@
 .BetaChartCard-body {
   position: relative;
   width: 100%;
+  height: var(--beta-card-height, 380px);
   margin-top: 0.75rem;
 }
 
@@ -291,4 +303,228 @@
 .BetaChart-axis-label {
   fill: #6B7280;
   font-size: 0.75rem;
+}
+
+/* HTML legend below compact charts */
+
+.BetaChartLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.875rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.BetaChartLegend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.BetaChartLegend-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.BetaChartLegend-swatch-line {
+  width: 0.875rem;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.BetaChartLegend-swatch-square {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 2px;
+}
+
+/* Y-axis title as a caption above compact charts */
+.BetaChart-caption {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: #6B7280;
+}
+
+/* Compact card: narrow cards (phones, or a tablet with the filter panel open) */
+
+.BetaChartCard[data-compact] {
+  padding: 0.75rem;
+}
+
+.BetaChartCard[data-compact] .BetaChartCard-header {
+  flex-wrap: nowrap;
+}
+
+.BetaChartCard[data-compact] .BetaChartCard-title-row {
+  flex: 1 1 auto;
+}
+
+.StatsPage .BetaChartCard[data-compact] .BetaChartCard-title,
+.BetaChartCard[data-compact] .BetaChartCard-title {
+  font-size: 1.0625rem;
+  line-height: 1.35;
+}
+
+.BetaChartCard[data-compact] .BetaChartCard-controls {
+  margin-top: 0.5rem;
+}
+
+/* The chart sets its own plot height; min-height keeps room for loading and messages */
+.BetaChartCard[data-compact] .BetaChartCard-body {
+  height: auto;
+  min-height: 12rem;
+  margin-top: 0.5rem;
+}
+
+/* "Later" cards collapse to a title with a short line of text */
+.BetaChartCard[data-status='later'][data-compact] {
+  padding: 0.625rem 0.75rem;
+}
+
+.BetaChartCard[data-status='later'][data-compact] .BetaChartCard-body {
+  min-height: 0;
+  margin-top: 0.125rem;
+}
+
+.BetaChartCard[data-compact] .BetaPlaceholder {
+  display: block;
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+
+.BetaChartCard[data-compact] .BetaPlaceholder-pm {
+  display: none;
+}
+
+.BetaChartCard[data-compact] .BetaPlaceholder-text {
+  margin-top: 0;
+  font-size: 0.75rem;
+}
+
+/* Notice action button (phones only) */
+.DashboardBeleidsinfoBeta-notice-action {
+  display: block;
+  margin-top: 0.625rem;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  border-radius: 0.5rem;
+  background: #15AEEF;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Phones: below the app's sm breakpoint the desktop filter panel is gone */
+
+@media (max-width: 639px) {
+  .DashboardBeleidsinfoBeta {
+    --beta-gutter-left: 0px;
+    --beta-gutter-right: 0.75rem;
+  }
+
+  .StatsPage.DashboardBeleidsinfoBeta h1 {
+    font-size: 1.75rem;
+    line-height: 2.125rem;
+  }
+
+  .DashboardBeleidsinfoBeta-section-header {
+    position: relative;
+    margin-top: 2rem;
+  }
+
+  .StatsPage .DashboardBeleidsinfoBeta-section-title,
+  .DashboardBeleidsinfoBeta-section-title {
+    font-size: 1.25rem;
+  }
+
+  .DashboardBeleidsinfoBeta-section-subtitle {
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .DashboardBeleidsinfoBeta-grid {
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .DashboardBeleidsinfoBeta-grid-placeholders {
+    gap: 0.5rem;
+  }
+
+  /* Aggregation control gets its own row under the section title */
+  .DashboardBeleidsinfoBeta .agg-button-container {
+    flex-basis: 100%;
+  }
+
+  /* Touch-sized toggle buttons */
+  .DashboardBeleidsinfoBeta .agg-button {
+    min-width: 56px;
+    height: 40px;
+    margin: 0 3px;
+    padding: 0 10px;
+    font-size: 14px;
+    background-color: #F3F4F6;
+    color: #374151;
+  }
+
+  .DashboardBeleidsinfoBeta .agg-button.agg-button-active {
+    background-color: #15AEEF;
+    color: #FFFFFF;
+  }
+
+  .DashboardBeleidsinfoBeta .agg-button:focus {
+    outline: none;
+  }
+
+  .DashboardBeleidsinfoBeta .agg-button:focus-visible {
+    outline: 2px solid #15AEEF;
+    outline-offset: 2px;
+  }
+
+  .DashboardBeleidsinfoBeta .BetaSegmented-label,
+  .DashboardBeleidsinfoBeta .agg-button-container .BetaSegmented-label {
+    font-size: 0.8125rem;
+  }
+
+  /* Info button: 44px hit area, same visual size */
+  .DashboardBeleidsinfoBeta .infoButton {
+    position: static;
+    padding: 12px;
+    margin: -12px -12px -12px -4px;
+  }
+
+  /* Info popover spans the card or section header instead of floating beside the button */
+  .DashboardBeleidsinfoBeta .BetaChartCard-header {
+    position: relative;
+  }
+
+  .DashboardBeleidsinfoBeta .infoButton-container {
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-right: 0;
+    margin-top: 0.25rem;
+  }
+
+  .DashboardBeleidsinfoBeta .infoButton-container-message {
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #E5E7EB;
+    font-weight: 400;
+    color: #374151;
+  }
+}
+
+/* Touch screens don't un-hover after a tap, so only the active button stays blue */
+@media (max-width: 639px) and (hover: none) {
+  .DashboardBeleidsinfoBeta .agg-button:hover:not(.agg-button-active),
+  .DashboardBeleidsinfoBeta .agg-button:focus:not(.agg-button-active) {
+    background-color: #F3F4F6;
+    color: #374151;
+  }
 }

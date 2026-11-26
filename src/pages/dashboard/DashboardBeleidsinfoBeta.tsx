@@ -13,6 +13,7 @@ import type {
 } from '../../types/StatsV3';
 import PageTitle from '../../components/common/PageTitle';
 import InfoTooltip from '../../components/InfoTooltip/InfoTooltip';
+import useUiVisibility from '../../customHooks/useUiVisibility';
 
 import {
   BetaChartCard,
@@ -191,6 +192,8 @@ function DashboardBeleidsinfoBeta() {
     (state: StateType) => state.authentication?.user_data?.token || null
   );
 
+  const [, setFilterbarVisible] = useUiVisibility('FILTERBAR');
+
   const [rentalsSource, setRentalsSource] = useState<TripSource>('vehicles');
   const [ratioSource, setRatioSource] = useState<TripSource>('vehicles');
   const [usageDistributionSource, setUsageDistributionSource] = useState<TripSource>('vehicles');
@@ -301,7 +304,17 @@ function DashboardBeleidsinfoBeta() {
     if (!gmCode) {
       return (
         <div className="DashboardBeleidsinfoBeta-notice my-4">
-          Kies links bij <strong>Plaats</strong> een gemeente om de grafieken te tonen.
+          <span className="hidden sm:inline">
+            Kies links bij <strong>Plaats</strong> een gemeente om de grafieken te tonen.
+          </span>
+          <span className="sm:hidden">Kies een gemeente om de grafieken te tonen.</span>
+          <button
+            type="button"
+            className="DashboardBeleidsinfoBeta-notice-action sm:hidden"
+            onClick={() => setFilterbarVisible(true)}
+          >
+            Kies gemeente
+          </button>
         </div>
       );
     }
@@ -521,8 +534,7 @@ function DashboardBeleidsinfoBeta() {
         <h2 className="DashboardBeleidsinfoBeta-section-title">Later</h2>
       </div>
       <p className="DashboardBeleidsinfoBeta-section-subtitle">
-        Onderwerpen uit het voorstel waarvoor nog geen data beschikbaar is, of waarvan grafiektype,
-        legenda en assen nog bepaald moeten worden.
+        Onderwerpen uit het voorstel waarvoor nog geen data beschikbaar is.
       </p>
 
       <div className="DashboardBeleidsinfoBeta-grid DashboardBeleidsinfoBeta-grid-placeholders">
