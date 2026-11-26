@@ -187,6 +187,49 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
+.BetaChartOperators {
+  margin-top: 0.75rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid #F3F4F6;
+  font-size: 0.75rem;
+  color: #4B5563;
+}
+
+.BetaChartOperators-title {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.BetaChartOperators-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.BetaChartOperators-item {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 0.25rem;
+  line-height: 1.5;
+}
+
+.BetaChartOperators-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.125rem;
+  border-radius: 999px;
+}
+
+.BetaChartOperators-modality {
+  font-weight: 500;
+  color: #374151;
+}
+
 .BetaChartCard-footnotes {
   margin: 0.75rem 0 0;
   padding-left: 1rem;

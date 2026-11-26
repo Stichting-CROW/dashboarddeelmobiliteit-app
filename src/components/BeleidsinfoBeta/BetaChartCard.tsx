@@ -1,6 +1,8 @@
 import React from 'react';
 
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import ChartOperators from './ChartOperators';
+import type { ModalityOperators } from './modalities';
 
 import './BeleidsinfoBeta.css';
 
@@ -16,6 +18,8 @@ export interface BetaChartCardProps {
   toelichting?: React.ReactNode;
   /** Remarks shown as footnotes below the chart. */
   opmerkingen?: string[];
+  /** Operators included in the chart, per modality; shown below the chart. */
+  operators?: ModalityOperators[];
   /** Optional controls (toggles) rendered at the top-right of the card. */
   controls?: React.ReactNode;
   /** Chart height in px. */
@@ -40,6 +44,7 @@ function BetaChartCard({
   chartType,
   toelichting,
   opmerkingen,
+  operators,
   controls,
   height = 380,
   loading = false,
@@ -78,6 +83,8 @@ function BetaChartCard({
           </div>
         )}
       </div>
+
+      {!message && operators && <ChartOperators items={operators} />}
 
       {opmerkingen && opmerkingen.length > 0 && (
         <ul className="BetaChartCard-footnotes">

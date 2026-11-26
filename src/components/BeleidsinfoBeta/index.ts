@@ -1,4 +1,5 @@
 export { default as BetaChartCard } from './BetaChartCard';
+export { default as ChartOperators } from './ChartOperators';
 export { default as ModalityLineChart } from './ModalityLineChart';
 export { default as Stacked100ColumnChart } from './Stacked100ColumnChart';
 export { default as GroupedColumnChart } from './GroupedColumnChart';

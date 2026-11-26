@@ -129,6 +129,7 @@ function TimeSeriesCard({
       toelichting={toelichting}
       controls={controls}
       opmerkingen={opmerkingen}
+      operators={hasData ? chart?.operators : undefined}
       loading={state.loading}
       message={getCardMessage(state, hasData)}
     >
@@ -164,6 +165,7 @@ function DistributionCard({ title, toelichting, state, controls, opmerkingen }: 
       toelichting={toelichting}
       controls={controls}
       opmerkingen={opmerkingen}
+      operators={hasData ? chart?.operators : undefined}
       height={DISTRIBUTION_CARD_HEIGHT}
       loading={state.loading}
       message={getCardMessage(state, hasData)}
@@ -178,7 +180,8 @@ function DistributionCard({ title, toelichting, state, controls, opmerkingen }: 
 /**
  * Beleidsinfo (beta): the proposed new policy charts, filled with data from
  * the stats_v3 API. Charts show modalities for the whole municipality
- * (no operators, no totals, no zones).
+ * (no per-operator split, no totals, no zones); each chart lists the
+ * operators whose data it includes.
  */
 function DashboardBeleidsinfoBeta() {
   const dispatch = useDispatch();

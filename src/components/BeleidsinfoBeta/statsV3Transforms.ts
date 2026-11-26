@@ -6,7 +6,7 @@ import type {
   DistributionStatistic,
   TimeSeriesResponse,
 } from '../../types/StatsV3';
-import { Category, Modality, resolveModalities } from './modalities';
+import { Category, Modality, ModalityOperators, resolveModalities } from './modalities';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 const NL_MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
@@ -81,6 +81,25 @@ export const getWholeMonthsPeriod = (start: string, end: string): { start: strin
 });
 
 /* ------------------------------------------------------------------ */
+/* Operators                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Operators per modality, in the order of `modalities`. Modalities missing
+ * from `series` are skipped; operator ids are de-duplicated and sorted.
+ */
+export const getOperatorsPerModality = (
+  modalities: readonly Modality[],
+  series: ReadonlyArray<{ modality: string; operators?: string[] }>
+): ModalityOperators[] =>
+  modalities.flatMap((modality) => {
+    const match = series.find((s) => s.modality === modality.key);
+    if (!match) return [];
+    const operators = Array.from(new Set(match.operators ?? [])).sort();
+    return [{ modality, operators }];
+  });
+
+/* ------------------------------------------------------------------ */
 /* Time series                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -99,6 +118,8 @@ export interface TimeSeriesRow {
 export interface TimeSeriesChartData {
   modalities: Modality[];
   rows: TimeSeriesRow[];
+  /** Operators with data per shown modality */
+  operators: ModalityOperators[];
 }
 
 const getTickLabel = (periodStart: string, aggregation: Aggregation): string => {
@@ -162,7 +183,7 @@ export const toTimeSeriesRows = (
   const rows = Array.from(rowsByStart.values()).sort((a, b) =>
     a.periodStart.localeCompare(b.periodStart)
   );
-  return { modalities, rows };
+  return { modalities, rows, operators: getOperatorsPerModality(modalities, response.modalities) };
 };
 
 /* ------------------------------------------------------------------ */
@@ -196,6 +217,8 @@ export interface DistributionChartData {
   categories: Category[];
   /** One row per modality with rentals, with a percentage per category */
   rows: DistributionRow[];
+  /** Operators with data per shown modality (modalities without rentals are left out) */
+  operators: ModalityOperators[];
 }
 
 const getBucketIndex = (bucket: { time_period?: number; category?: number }, fallback: number) =>
@@ -216,6 +239,7 @@ export const toDistributionRows = (response: DistributionResponse): Distribution
 
   const order = resolveModalities(response.modalities.map((m) => m.modality));
   const rows: DistributionRow[] = [];
+  const shown: Modality[] = [];
   order.forEach((modality) => {
     const series = response.modalities.find((m) => m.modality === modality.key);
     if (!series) return;
@@ -226,7 +250,8 @@ export const toDistributionRows = (response: DistributionResponse): Distribution
       row[`b${getBucketIndex(bucket, i)}`] = round((bucket.count / total) * 100, 1);
     });
     rows.push(row);
+    shown.push(modality);
   });
 
-  return { categories, rows };
+  return { categories, rows, operators: getOperatorsPerModality(shown, response.modalities) };
 };

@@ -3,10 +3,12 @@ import {
   countDays,
   formatPeriod,
   getEffectivePeriod,
+  getOperatorsPerModality,
   getWholeMonthsPeriod,
   toDistributionRows,
   toTimeSeriesRows,
 } from './statsV3Transforms';
+import { resolveModalities } from './modalities';
 
 const TODAY = '2026-11-25';
 
@@ -218,15 +220,60 @@ describe('toDistributionRows', () => {
   });
 
   it('leaves out modalities without rentals', () => {
-    const { rows } = toDistributionRows(
+    const { rows, operators } = toDistributionRows(
       distribution([
         {
           modality: 'car',
-          operators: [],
+          operators: ['greenwheels'],
           buckets: [{ category: 0, label: '< 1 min', count: 0 }],
         },
       ])
     );
     expect(rows).toEqual([]);
+    expect(operators).toEqual([]);
+  });
+
+  it('lists operators only for shown modalities', () => {
+    const { operators } = toDistributionRows(
+      distribution([
+        {
+          modality: 'moped',
+          operators: ['felyx', 'check'],
+          buckets: [{ time_period: 0, label: '00:00-07:00', count: 3 }],
+        },
+        {
+          modality: 'car',
+          operators: ['greenwheels'],
+          buckets: [{ time_period: 0, label: '00:00-07:00', count: 0 }],
+        },
+      ])
+    );
+    expect(operators.map((o) => [o.modality.key, o.operators])).toEqual([
+      ['moped', ['check', 'felyx']],
+    ]);
+  });
+});
+
+describe('getOperatorsPerModality', () => {
+  it('follows the modality order and de-duplicates operators', () => {
+    const modalities = resolveModalities(['moped', 'bicycle']);
+    const result = getOperatorsPerModality(modalities, [
+      { modality: 'moped', operators: ['felyx', 'check', 'felyx'] },
+      { modality: 'bicycle', operators: ['lime'] },
+    ]);
+    expect(result.map((o) => [o.modality.key, o.operators])).toEqual([
+      ['bicycle', ['lime']],
+      ['moped', ['check', 'felyx']],
+    ]);
+  });
+
+  it('is returned with time series data', () => {
+    const { operators } = toTimeSeriesRows(
+      timeSeries({
+        modalities: [{ modality: 'bicycle', operators: ['lime', 'bolt'], values: [] }],
+      }),
+      { today: TODAY }
+    );
+    expect(operators.map((o) => o.operators)).toEqual([['bolt', 'lime']]);
   });
 });

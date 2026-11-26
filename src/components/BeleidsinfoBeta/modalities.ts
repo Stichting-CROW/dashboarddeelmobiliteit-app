@@ -11,6 +11,12 @@ export interface Category {
   color: string;
 }
 
+/** Operator (system) ids that contributed data for one modality in a chart. */
+export interface ModalityOperators {
+  modality: Modality;
+  operators: string[];
+}
+
 /** Known modalities, in display order. */
 export const MODALITIES: readonly Modality[] = [
   { key: 'bicycle', label: 'Fiets', color: '#15AEEF' },
