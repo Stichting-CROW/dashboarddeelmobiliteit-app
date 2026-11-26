@@ -1,5 +1,32 @@
 # Dashboard Deelmobiliteit app Releases
 
+## Release 2026-11-26
+
+**Statistiek: Datakwaliteit**
+
+- 🪄 Nieuwe pagina Datakwaliteit onder Statistiek: per aanbieder zie je of de feeds voor Aanbod, Verhuringen en Servicegebieden beschikbaar zijn, met een tijdlijn van storingen en handmatige afkeuringen. Filter op plaats en periode
+- 🪄 Beheerders kunnen handmatige afkeuringen toevoegen, wijzigen en verwijderen, ook voor meerdere of alle aanbieders tegelijk. Zichtbare afkeuringen kun je exporteren als CSV
+- ✨ Een afgekeurde feed toont een rood label 'Afgekeurd' met de afgekeurde periode; klik erop voor de details
+- ✨ Heeft een aanbieder meerdere feeds voor één soort data, dan zie je hoeveel er offline zijn (bijvoorbeeld 'Offline (2/20)') en welke dat zijn
+
+**Statistiek: Prestaties aanbieders**
+
+- ✨ Nieuwe rij met de datakwaliteit per aanbieder
+
+**Statistiek: Beleidsinfo (beta)**
+
+- 🪄 Nieuwe beta-pagina met beleidsgrafieken per modaliteit voor de hele gemeente: maximaal beschikbare voertuigen, verhuringen per dag, gebruiksratio, percentage niet beschikbaar, en verdelingen over de dag, naar afstand en naar verhuurduur. De pagina is alleen bereikbaar via een directe link
+- ✨ Bij elke grafiek staat welke aanbieders erin zijn meegenomen
+- ✨ De pagina werkt goed op de telefoon: volle schermbreedte, grafieken met meer ruimte, grotere knoppen en een knop om direct een gemeente te kiezen
+
+**Kaartlagen**
+
+- 🪄 Hubs filteren op 'Alle', 'Fysiek' of 'Virtueel' bij Aanbod, Verhuringen en Beleidshubs
+
+**Aanbod**
+
+- 🐛 Opgelost: lange voertuig-ID's liepen buiten de tooltip van een cluster
+
 ## Release 2026-11-05
 
 **Aanbod**
