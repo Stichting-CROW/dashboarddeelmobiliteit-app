@@ -47,6 +47,7 @@ import OrganisationList from './components/OrganisationList/OrganisationList';
 import SharedDataOverview from './components/SharedDataOverview/SharedDataOverview';
 import YearlyCostsExport from './components/YearlyCostsExport/YearlyCostsExport';
 import EmailUsers from './components/EmailUsers/EmailUsers';
+import FeedManagement from './components/FeedManagement';
 import ApiKeys from './components/ApiKeys/ApiKeys';
 
 import { initAccessControlList } from './poll-api/metadataAccessControlList.js';
@@ -239,6 +240,15 @@ function App() {
         }
         if (pathname === '/admin/email') {
           return `E-mail gebruikers - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/feeds') {
+          return `Datafeeds - Beheer - ${baseTitle}`;
+        }
+        if (pathname === '/admin/feeds/new') {
+          return `Nieuwe datafeed - Beheer - ${baseTitle}`;
+        }
+        if (pathname.startsWith('/admin/feeds/')) {
+          return `Datafeed - Beheer - ${baseTitle}`;
         }
         if (pathname === '/admin/mail-templates') {
           return `E-mail templates - Beheer - ${baseTitle}`;
@@ -694,6 +704,31 @@ function App() {
                   <Overlay>
                     <SidebarLayout title="Mail-templates" contentWidth="100%">
                       <MailTemplateList showAddMailTemplateModule={true}  />
+                    </SidebarLayout>
+                  </Overlay>
+                } />
+              </> : null
+            }
+            { isAdmin ?
+              <>
+                <Route path="/admin/feeds" element={
+                  <Overlay>
+                    <SidebarLayout title="Datafeeds beheren" contentWidth="100%">
+                      <FeedManagement acl={acl} />
+                    </SidebarLayout>
+                  </Overlay>
+                } />
+                <Route path="/admin/feeds/new" element={
+                  <Overlay>
+                    <SidebarLayout title="Datafeeds beheren" contentWidth="100%">
+                      <FeedManagement acl={acl} />
+                    </SidebarLayout>
+                  </Overlay>
+                } />
+                <Route path="/admin/feeds/:feedId" element={
+                  <Overlay>
+                    <SidebarLayout title="Datafeeds beheren" contentWidth="100%">
+                      <FeedManagement acl={acl} />
                     </SidebarLayout>
                   </Overlay>
                 } />

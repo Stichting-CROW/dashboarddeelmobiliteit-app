@@ -14,6 +14,7 @@ import {
   Building2,
   Receipt,
   Mail,
+  Database,
   HelpCircle,
   Presentation,
   LucideIcon
@@ -118,6 +119,7 @@ const getAdminSection = (acl: any): SidebarMenuSection | null => {
     items.push({ title: 'Organisaties', link: '/admin/organisations', icon: Building2 });
     items.push({ title: 'Jaarbijdrage', link: '/admin/yearly-costs', icon: Receipt });
     items.push({ title: 'E-mail gebruikers', link: '/admin/email', icon: Mail });
+    items.push({ title: 'Datafeeds', link: '/admin/feeds', icon: Database });
   }
 
   return { title: 'Beheer', items };
